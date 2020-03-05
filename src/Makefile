@@ -1,18 +1,31 @@
-CC=gcc
-CFLAGS=-I.
-OBJ = main.o
+C=gcc
+OBJS = main.o
+GSLFLAGS= -lgsl -lgslcblas -lm -O3
+LFLAGS = ${GSLFLAGS}
 
 # Name of executable
 _EXE = covid19ibm.exe
 EXE = $(_EXE)
 
+# For compilation on Rescomp
+ifeq ($(location),rescomp)
+	INC = /apps/well/gsl/2.2.1-gcc4.9.3/include
+	LIB = /apps/well//gsl/2.2.1-gcc4.9.3/lib
+else
+    INC = /usr/local/include
+	LIB = /usr/local/lib
+endif
 
-%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+# Compilation options and libraries to be used
+CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 
-
-all: ${OBJ}
-	${CC} -o ${EXE} ${OBJ}
+# To compile
+all: ${OBJS}
+	${C} -L${LIB} -o ${EXE} ${OBJS} ${LFLAGS}
 
 clean:
-	rm -f $(OBJ) $(EXE)
+	rm -f $(OBJS) $(EXE)
+
+.c.o:
+	${C} ${CFLAGS} -c $< -o $@	
+
