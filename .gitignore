@@ -11,4 +11,4 @@ __pycache__
 # Eclipse-related files
 .project
 .cproject
-
+.settings
