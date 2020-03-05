@@ -8,3 +8,7 @@ src/*.exe
 # Python testing files
 __pycache__
 
+# Eclipse-related files
+.project
+.cproject
+

@@ -4,6 +4,6 @@
 #include <stdlib.h>
 
 int main(int argc, char *argv[]) {
-    printf("main.c\n");
+    printf("main test.c\n");
     return 0;
 }
