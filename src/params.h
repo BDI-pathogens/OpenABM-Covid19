@@ -15,6 +15,7 @@
 typedef struct{
 	long n_total;  					// total number of people
 	int mean_daily_interactions;    // mean number of daily interactions
+	int days_of_interactions;		// the number of days of interactions to keep
 } parameters;
 
 #endif /* PARAMS_H_ */

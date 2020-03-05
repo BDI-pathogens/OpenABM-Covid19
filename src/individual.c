@@ -16,9 +16,11 @@
 ******************************************************************************************/
 void initialize_individual(
 	individual *indiv,
-	parameters *params
+	parameters *params,
+	long idx
 )
 {
+	indiv->idx    = idx;
 	indiv->status = UNINFECTED;
 	indiv->n_interactions = params->mean_daily_interactions;
 }

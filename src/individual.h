@@ -20,6 +20,7 @@
 /************************************************************************/
 
 typedef struct{
+	long idx;
 	int status;
 	int n_interactions;
 } individual;
@@ -28,7 +29,7 @@ typedef struct{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialize_individual( individual*, parameters* );
+void initialize_individual( individual*, parameters*, long );
 
 
 #endif /* INDIVIDUAL_H_ */
