@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Very basic example to show how testing may work
+Very basic example to show how testing may work using pytest
+
+Usage:
+With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be 
+run by calling 'pytest' from project folder.  
 """
 
 import subprocess, shutil, os
@@ -22,7 +26,7 @@ class TestClass(object):
     @classmethod
     def setup_class(self):
         """
-        When the class is instatiated: compile the IBM
+        When the class is instatiated: compile the IBM in a temporary directory
         """
         
         # Make a temporary copy of the code (remove this temporary directory if it already exists)
