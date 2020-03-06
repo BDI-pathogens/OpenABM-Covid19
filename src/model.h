@@ -20,6 +20,8 @@
 /****************************** Structures  *****************************/
 /************************************************************************/
 
+typedef struct event event;
+
 typedef struct{
 	parameters params;
 	individual *population;
@@ -32,7 +34,19 @@ typedef struct{
 	long *possible_interactions;
 	long n_possible_interactions;
 
+	event *events;
+	long event_idx;
+
+	event *infected[MAX_TIME];
+	long n_infected_daily[MAX_TIME];
+	long n_infected;
+
 } model;
+
+struct event{
+	individual *individual;
+	event *next;
+};
 
 gsl_rng * rng;
 
@@ -43,8 +57,15 @@ gsl_rng * rng;
 model* new_model();
 void set_up_population( model* );
 void set_up_interactions( model* );
+void set_up_events( model* );
+void set_up_seed_infection( model* );
 void destroy_model( model* );
 
 int one_time_step( model* );
+void build_daily_newtork( model* );
+void transmit_virus( model* );
+
+event* new_event( model* );
+void new_infection( model*, individual* );
 
 #endif /* MODEL_H_ */

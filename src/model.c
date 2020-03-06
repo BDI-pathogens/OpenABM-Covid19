@@ -14,7 +14,6 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-
 /*****************************************************************************************
 *  Name:		new_model
 *  Description: Builds a new model object from a parameters object and returns a
@@ -31,9 +30,43 @@ model* new_model( parameters *params )
 
 	set_up_population( model );
 	set_up_interactions( model );
+	set_up_events( model );
+	set_up_seed_infection( model );
 
 	return model;
 };
+
+/*****************************************************************************************
+*  Name:		destroy_model
+*  Description: Destroys the model structure and releases its memory
+******************************************************************************************/
+void destroy_model( model *model )
+{
+	parameters *params = &(model->params);
+	long idx;
+
+	for( idx = 0; idx < params->n_total; idx++ )
+		destroy_individual( &(model->population[idx] ) );
+
+	free( model->population );
+    free( model->possible_interactions );
+    free( model->interactions );
+    free( model );
+};
+
+/*****************************************************************************************
+*  Name:		set_up_events
+*  Description: sets up the event tags
+*  Returns:		void
+******************************************************************************************/
+void set_up_events( model *model )
+{
+	parameters *params = &(model->params);
+	int types = 2;
+
+	model->event_idx = 0;
+	model->events    = calloc( types * params->n_total, sizeof( event ) );
+}
 
 /*****************************************************************************************
 *  Name:		set_up_population
@@ -49,7 +82,6 @@ void set_up_population( model *model )
 	for( idx = 0; idx < params->n_total; idx++ )
 		initialize_individual( &(model->population[idx]), params, idx );
 }
-
 
 /*****************************************************************************************
 *  Name:		set_up_interactions
@@ -86,31 +118,101 @@ void set_up_interactions( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		destroy_model
-*  Description: Destroys the model structure and releases its memory
+*  Name:		new_event
+*  Description: gets a new event tag
+*  Returns:		void
 ******************************************************************************************/
-void destroy_model( model *model )
+event* new_event( model *model )
 {
-	parameters *params = &(model->params);
-	long idx;
-
-	for( idx = 0; idx < params->n_total; idx++ )
-		destroy_individual( &(model->population[idx] ) );
-
-	free( model->population );
-    free( model->possible_interactions );
-    free( model->interactions );
-    free( model );
-};
+	return &(model->events[ model->event_idx++ ] );
+}
 
 /*****************************************************************************************
-*  Name:		one_time_step
-*  Description: Move the model through one time step
+*  Name:		transmit_virus
+*  Description: Transmits virus over the interaction network
+*  Returns:		void
 ******************************************************************************************/
-int one_time_step( model *model )
+void transmit_virus( model *model )
 {
-	long idx, all_idx, n_pos;
+	long idx, jdx, n_infected, tot;
+	int day, n_interaction;
+	event *event;
+	interaction *interaction;
+	individual *infector;
+
+	tot = 0;
+	for( day = model->time-1; day >= 0; day-- )
+	{
+		n_infected =  model->n_infected_daily[ day];
+		event = model->infected[ day ];
+		for( idx = 0; idx < n_infected; idx++ )
+		{
+			infector      = event->individual;
+			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
+			tot += n_interaction;
+
+			interaction = infector->interactions[ model->interaction_day_idx ];
+			for( jdx = 0; jdx < n_interaction; jdx++ )
+			{
+				if( interaction->individual->status == UNINFECTED )
+					new_infection( model, interaction->individual );
+				interaction = interaction->next;
+			}
+			event = event->next;
+		}
+	}
+}
+
+/*****************************************************************************************
+*  Name:		new_infection
+*  Description: infects a new individual
+*  Returns:		void
+******************************************************************************************/
+void new_infection( model *model, individual *indiv )
+{
+
+	indiv->status = PRESYMPTOMATIC;
+
+	event *event      = new_event( model );
+	event->individual = indiv;
+	event->next       = model->infected[ model->time ];
+	model->infected[ model->time ] = event;
+
+	model->n_infected_daily[ model->time ]++;
+	model->n_infected++;
+}
+
+/*****************************************************************************************
+*  Name:		set_up_seed_infection
+*  Description: sets up the initial population
+*  Returns:		void
+******************************************************************************************/
+void set_up_seed_infection( model *model )
+{
+	parameters *params = &(model->params);
+	int day, idx;
+	unsigned long int person;
+
+	model->n_infected = 0;
+	for( day = 0; day < params->end_time; day ++ )
+		model->n_infected_daily[day] = 0;
+
+	for( idx = 0; idx < params->n_seed_infection; idx ++ )
+	{
+		person = gsl_rng_uniform_int( rng, params->n_total );
+		new_infection( model, &(model->population[ person ]) );
+	}
+}
+
+/*****************************************************************************************
+*  Name:		build_daily_newtork
+*  Description: Builds a new interaction network
+******************************************************************************************/
+void build_daily_newtork( model *model )
+{
+	long idx, n_pos;
 	long interactions[ model->n_possible_interactions ];
+	long *all_idx = &(model->interaction_idx);
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
 
@@ -124,7 +226,6 @@ int one_time_step( model *model )
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	idx = 0;
-	all_idx = model->interaction_idx;
 	n_pos--;
 	while( idx < n_pos )
 	{
@@ -134,8 +235,8 @@ int one_time_step( model *model )
 			continue;
 		}
 
-		inter1 = &(model->interactions[ all_idx++ ]);
-		inter2 = &(model->interactions[ all_idx++ ]);
+		inter1 = &(model->interactions[ (*all_idx)++ ]);
+		inter2 = &(model->interactions[ (*all_idx)++ ]);
 		indiv1 = &(model->population[ interactions[ idx++ ] ] );
 		indiv2 = &(model->population[ interactions[ idx++ ] ] );
 
@@ -148,9 +249,24 @@ int one_time_step( model *model )
 		inter2->next       = indiv2->interactions[ day ];
 		indiv2->interactions[ day ] = inter2;
 		indiv2->n_interactions[ day ]++;
-	}
 
+		if( *all_idx > model->n_interactions )
+			*all_idx = 0;
+	}
+	fflush(stdout);
+};
+
+/*****************************************************************************************
+*  Name:		one_time_step
+*  Description: Move the model through one time step
+******************************************************************************************/
+int one_time_step( model *model )
+{
 	(model->time)++;
+	build_daily_newtork( model );
+	transmit_virus( model );
+
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
 	return 1;
 };
+
