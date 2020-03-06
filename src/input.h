@@ -10,7 +10,7 @@
 #define INPUT_H_
 
 
-#define FILENAME_PARAM "parameters.csv"
+#define FILENAME_PARAM "../tests/data/test_parameters.csv"
 
 /************************************************************************/
 /******************************* Includes *******************************/
