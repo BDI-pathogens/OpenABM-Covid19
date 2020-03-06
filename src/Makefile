@@ -1,5 +1,5 @@
 C=gcc
-OBJS = model.o individual.o main.o 
+OBJS = utilities.o model.o individual.o main.o 
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = ${GSLFLAGS}
 
