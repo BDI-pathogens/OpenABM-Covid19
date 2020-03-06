@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     printf("Starting simulation\n");
 
     parameters params;	
-	
+
 	printf("Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
 	
@@ -45,23 +45,6 @@ int main(int argc, char *argv[])
 	printf( "Total interactions remembered: %li\n", model->n_interactions );
 	printf( "Total infected:                %li\n", model->n_infected );
 
-	/*
-	printf( "\n");
-	int person = 3643;
-	int day = 4;
-	int i;
-	interaction *inter;
-	printf( "%i: ", model->population[ person ].n_interactions[ day ] );
-	inter = model->population[ person ].interactions[ day ];
-	printf( "%li ", inter->individual->idx);
-	for( i = 1; i < model->population[ person ].n_interactions[ day ]; i++ )
-	{
-		inter = inter->next;
-		printf( "%li ", inter->individual->idx);
-	}
-	printf( "\n");
-
-*/
     destroy_model( model );
  //   gsl_rng_free( rng );
     printf("Ending simulation\n");

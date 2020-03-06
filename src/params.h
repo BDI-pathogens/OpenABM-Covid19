@@ -19,7 +19,10 @@ typedef struct{
 	int mean_daily_interactions;    // mean number of daily interactions
 	int days_of_interactions;		// the number of days of interactions to keep
 	int end_time;				    // maximum end time
-	int n_seed_infection;
+	int n_seed_infection;			// number of people seeded with the infections
+	double mean_infectious_period;  // mean period in days that people are infectious
+	double sd_infectious_period;	// sd of period in days that people are infectious
+	double infectious_rate;         // mean total number of people infected for a mean person
 } parameters;
 
 #endif /* PARAMS_H_ */
