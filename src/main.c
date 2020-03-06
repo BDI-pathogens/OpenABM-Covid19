@@ -9,6 +9,7 @@
 #include "model.h"
 #include "params.h"
 #include "utilities.h"
+#include "input.h"
 
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -18,14 +19,14 @@ int main(int argc, char *argv[])
 {
     printf("Starting simulation\n");
 
-    parameters params;
-    params.n_total = 1e5;
-    params.mean_daily_interactions = 10;
-    params.days_of_interactions = 5;
-    params.end_time = 10;
+    parameters params;	
+	
+	printf("Read input parameter file\n");
+	read_param_file( &params );
+	
     if( params.days_of_interactions > MAX_DAILY_INTERACTIONS )
     	print_exit( "asking for day_of_interaction to be greater than MAX_DAILY_INTERACTIONS " );
-
+	
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
 	model *model = new_model( &params );
