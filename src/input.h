@@ -22,6 +22,7 @@
 /******************************  Functions  *****************************/
 /************************************************************************/
 
+void read_command_line_args(parameters *, int, char **);
 void read_param_file(parameters *);
 
 #endif /* INPUT_H_ */

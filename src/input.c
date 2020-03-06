@@ -14,11 +14,29 @@
 
 
 /*****************************************************************************************
-*  Name:		read_param_file
-*  Description: Read parameter file (csv), attach parameter values to params structure
+*  Name:		read_command_line_args
+*  Description: Read command-line arguments and attach to params struct
 ******************************************************************************************/
 
-void read_param_file( parameters *params ){
+void read_command_line_args( parameters *params, int argc, char **argv ){
+	
+	int param_line_number;
+	
+	if(argc > 1){
+		param_line_number = (int) strtol(argv[1], NULL, 10);
+	}else{
+		param_line_number = 1;
+	}
+	
+	params->param_line_number = param_line_number;
+}
+
+/*****************************************************************************************
+*  Name:		read_param_file
+*  Description: Read line from parameter file (csv), attach parame values to params struct
+******************************************************************************************/
+
+void read_param_file( parameters *params){
 	
 	FILE *parameter_file;
 	int check;
