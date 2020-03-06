@@ -24,6 +24,11 @@ void read_command_line_args( parameters *params, int argc, char **argv ){
 	
 	if(argc > 1){
 		param_line_number = (int) strtol(argv[1], NULL, 10);
+		
+		if(param_line_number <= 0){
+			print_exit("Error Invalid line number, line number starts from 1");
+		}
+		
 	}else{
 		param_line_number = 1;
 	}
@@ -39,15 +44,17 @@ void read_command_line_args( parameters *params, int argc, char **argv ){
 void read_param_file( parameters *params){
 	
 	FILE *parameter_file;
-	int check;
+	int i, check;
 	
 	parameter_file = fopen(FILENAME_PARAM, "r");
 	if(parameter_file == NULL){
 		print_exit("Can't open parameter file");
 	}
 	
-	// Throw away header
-	fscanf(parameter_file, "%*[^\n]\n");
+	// Throw away header (and first `params->param_line_number` lines)
+	for(i = 0; i < params->param_line_number; i++){
+		fscanf(parameter_file, "%*[^\n]\n");
+	}
 	
 	// Read and attach parameter values to parameter structure
 	check = fscanf(parameter_file, " %li ,", &(params->param_id));
