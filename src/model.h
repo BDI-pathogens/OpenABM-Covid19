@@ -21,6 +21,7 @@
 /************************************************************************/
 
 typedef struct{
+	int line_number;
 	parameters params;
 	individual *population;
 	int time;
