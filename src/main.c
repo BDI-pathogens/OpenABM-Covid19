@@ -21,6 +21,9 @@ int main(int argc, char *argv[])
 
     parameters params;	
 	
+	printf("Read command-line args\n");
+	read_command_line_args(&params, argc, argv);
+	
 	printf("Read input parameter file\n");
 	read_param_file( &params );
 	
