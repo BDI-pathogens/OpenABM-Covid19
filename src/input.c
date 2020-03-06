@@ -61,6 +61,8 @@ void read_param_file( parameters *params){
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	check = fscanf(parameter_file, " %i ,", &(params->mean_daily_interactions));
 	check = fscanf(parameter_file, " %i ,", &(params->days_of_interactions));
-	check = fscanf(parameter_file, " %i", &(params->end_time));
+	check = fscanf(parameter_file, " %i ,", &(params->end_time));
+	check = fscanf(parameter_file, " %i", &(params->n_seed_infection));
+	
 	fclose(parameter_file);
 }
