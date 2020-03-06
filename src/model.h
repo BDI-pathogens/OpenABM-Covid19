@@ -13,19 +13,17 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 
-#include <gsl/gsl_rng.h>
 #include "individual.h"
 #include "params.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
-typedef struct interaction interaction;
 
 typedef struct{
-	gsl_rng *rng;
 	parameters params;
 	individual *population;
+	int time;
 
 	interaction *interactions;
 	long interaction_idx;
@@ -36,19 +34,17 @@ typedef struct{
 
 } model;
 
-struct interaction{
-	individual *individual;
-	interaction *next;
-};
+gsl_rng * rng;
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
 model* new_model();
-void set_up_gsl( model* );
 void set_up_population( model* );
 void set_up_interactions( model* );
 void destroy_model( model* );
+
+int one_time_step( model* );
 
 #endif /* MODEL_H_ */

@@ -15,4 +15,7 @@ enum DISEASE_STATUS{
 	RECOVERED
 };
 
+#define MAX_DAILY_INTERACTIONS 5
+
 #endif /* CONSTANT_H_ */
+

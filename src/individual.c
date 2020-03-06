@@ -8,10 +8,12 @@
 #include "individual.h"
 #include "params.h"
 #include "constant.h"
+#include "utilities.h"
 
 /*****************************************************************************************
 *  Name:		initialize_individual
-*  Description: initializes and individual at the start of the simulation
+*  Description: initializes and individual at the start of the simulation, note can
+*  				only be called once per individual
 *  Returns:		void
 ******************************************************************************************/
 void initialize_individual(
@@ -20,8 +22,23 @@ void initialize_individual(
 	long idx
 )
 {
+	int day;
+	if( indiv->idx != 0 )
+		print_exit( "Individuals can only be intitialized once!" );
+
 	indiv->idx    = idx;
 	indiv->status = UNINFECTED;
-	indiv->n_interactions = params->mean_daily_interactions;
+	indiv->n_mean_interactions = params->mean_daily_interactions;
+	for( day = 0; day < params->days_of_interactions; day++ )
+		indiv->n_interactions[ day ] = 0;
 }
+
+/*****************************************************************************************
+*  Name:		destroy_individual
+*  Description: Destroys the model structure and releases its memory
+******************************************************************************************/
+void destroy_individual( individual *indiv )
+{
+    //free( indiv->interactions );
+};
 
