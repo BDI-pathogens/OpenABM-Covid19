@@ -9,6 +9,9 @@
 #include "params.h"
 #include "constant.h"
 #include "utilities.h"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -31,6 +34,7 @@ void initialize_individual(
 	indiv->n_mean_interactions = params->mean_daily_interactions;
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
+	indiv->hazard = gsl_ran_exponential( rng, 1.0 );
 }
 
 /*****************************************************************************************

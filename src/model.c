@@ -31,6 +31,7 @@ model* new_model( parameters *params )
 	set_up_population( model );
 	set_up_interactions( model );
 	set_up_events( model );
+	set_up_distributions( model );
 	set_up_seed_infection( model );
 
 	return model;
@@ -118,6 +119,32 @@ void set_up_interactions( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_distributions
+*  Description: sets up discrete distributions and functions which are used to
+*  				model events
+*  Returns:		void
+******************************************************************************************/
+void set_up_distributions( model *model )
+{
+	int day      = 0;
+	double total = 0;
+	double a, b;
+	parameters *params = &(model->params);
+
+	b = params->sd_infectious_period * params->sd_infectious_period / params->mean_infectious_period;
+	a = params->mean_infectious_period / b;
+
+	total = 0;
+	for( day = 0; day < MAX_INFECTIOUS_PERIOD; day++ )
+	{
+		model->infectious_curve[day] = gsl_cdf_gamma_P( ( day + 1 ) * 1.0, a, b ) - total;
+		total += model->infectious_curve[day];
+	}
+	for( day = 0; day < MAX_INFECTIOUS_PERIOD; day++ )
+		model->infectious_curve[day] *= params->infectious_rate / total / params->mean_daily_interactions;
+}
+
+/*****************************************************************************************
 *  Name:		new_event
 *  Description: gets a new event tag
 *  Returns:		void
@@ -136,13 +163,15 @@ void transmit_virus( model *model )
 {
 	long idx, jdx, n_infected, tot;
 	int day, n_interaction;
+	double hazard_rate;
 	event *event;
 	interaction *interaction;
 	individual *infector;
 
 	tot = 0;
-	for( day = model->time-1; day >= 0; day-- )
+	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
+		hazard_rate = model->infectious_curve[ model->time-1 - day ];
 		n_infected =  model->n_infected_daily[ day];
 		event = model->infected[ day ];
 		for( idx = 0; idx < n_infected; idx++ )
@@ -155,7 +184,11 @@ void transmit_virus( model *model )
 			for( jdx = 0; jdx < n_interaction; jdx++ )
 			{
 				if( interaction->individual->status == UNINFECTED )
-					new_infection( model, interaction->individual );
+				{
+					interaction->individual->hazard -= hazard_rate;
+					if( interaction->individual->hazard < 0 )
+						new_infection( model, interaction->individual );
+				}
 				interaction = interaction->next;
 			}
 			event = event->next;
@@ -211,8 +244,10 @@ void set_up_seed_infection( model *model )
 void build_daily_newtork( model *model )
 {
 	long idx, n_pos;
-	long interactions[ model->n_possible_interactions ];
+	//long interactions[ model->n_possible_interactions ];
+	long *interactions = model->possible_interactions;
 	long *all_idx = &(model->interaction_idx);
+
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
 
@@ -221,8 +256,6 @@ void build_daily_newtork( model *model )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
 	n_pos = model->n_possible_interactions;
-	for( idx = 0; idx < n_pos; idx++ )
-		interactions[ idx ] = model->possible_interactions[ idx ];
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	idx = 0;

@@ -40,6 +40,7 @@ typedef struct{
 	event *infected[MAX_TIME];
 	long n_infected_daily[MAX_TIME];
 	long n_infected;
+	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 
 } model;
 
@@ -47,8 +48,6 @@ struct event{
 	individual *individual;
 	event *next;
 };
-
-gsl_rng * rng;
 
 /************************************************************************/
 /******************************  Functions  *****************************/
@@ -58,6 +57,7 @@ model* new_model();
 void set_up_population( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
+void set_up_distributions( model* );
 void set_up_seed_infection( model* );
 void destroy_model( model* );
 

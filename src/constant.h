@@ -17,6 +17,9 @@ enum DISEASE_STATUS{
 
 #define MAX_DAILY_INTERACTIONS_KEPT 5
 #define MAX_TIME 1000
+#define MAX_INFECTIOUS_PERIOD 40
+
+gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */
 
