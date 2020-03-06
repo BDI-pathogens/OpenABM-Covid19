@@ -13,6 +13,7 @@
 /************************************************************************/
 
 typedef struct{
+	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
 	int mean_daily_interactions;    // mean number of daily interactions
