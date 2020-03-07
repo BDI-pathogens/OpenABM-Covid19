@@ -23,6 +23,8 @@ typedef struct{
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
+	double mean_time_to_symptoms;   // mean time from infection to symptoms
+	double sd_time_to_symptoms;		// sd time from infection to symptoms
 } parameters;
 
 #endif /* PARAMS_H_ */

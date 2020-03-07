@@ -65,7 +65,9 @@ void read_param_file( parameters *params){
 	check = fscanf(parameter_file, " %i ,", &(params->n_seed_infection));
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_infectious_period));
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectious_period));
-	check = fscanf(parameter_file, " %lf", &(params->infectious_rate));
-	
+	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
+	check = fscanf(parameter_file, " %lf", &(params->sd_time_to_symptoms));
+
 	fclose(parameter_file);
 }

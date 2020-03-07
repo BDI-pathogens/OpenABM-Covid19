@@ -48,14 +48,15 @@ typedef struct{
 	event_list infected;
 	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 
+	event_list symptomatic;
+	double symptomatic_curve[MAX_INFECTIOUS_PERIOD];
+
 } model;
 
 struct event{
 	individual *individual;
 	event *next;
 };
-
-
 
 /************************************************************************/
 /******************************  Functions  *****************************/
