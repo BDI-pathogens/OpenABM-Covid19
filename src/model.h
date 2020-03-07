@@ -75,6 +75,9 @@ void build_daily_newtork( model* );
 void transmit_virus( model* );
 
 event* new_event( model* );
+void add_individual_to_event_list( event_list*, individual*, int, model* );
+void update_event_list_counters( event_list*, model* );
+
 void new_infection( model*, individual* );
 
 #endif /* MODEL_H_ */

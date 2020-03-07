@@ -222,8 +222,17 @@ void add_individual_to_event_list(
 	list->events[time ] = event;
 
 	list->n_daily[time]++;
-	list->n_current++;
-	list->n_total++;
+}
+
+/*****************************************************************************************
+*  Name:		update_event_list_counters
+*  Description: updates the event list counters, called at the end of a time step
+*  Returns:		void
+******************************************************************************************/
+void update_event_list_counters( event_list *list, model *model )
+{
+	list->n_current += list->n_daily[ model->time ];
+	list->n_total	+= list->n_daily[ model->time ];
 }
 
 /*****************************************************************************************
@@ -233,9 +242,12 @@ void add_individual_to_event_list(
 ******************************************************************************************/
 void new_infection( model *model, individual *indiv )
 {
-
+	int time_symptoms;
 	indiv->status = PRESYMPTOMATIC;
 	add_individual_to_event_list( &(model->infected), indiv, model->time, model );
+
+	time_symptoms = model->time + sample_draw_list( model->symptomatic_draws );
+	add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );
 }
 
 /*****************************************************************************************
@@ -271,6 +283,7 @@ void set_up_seed_infection( model *model )
 		person = gsl_rng_uniform_int( rng, params->n_total );
 		new_infection( model, &(model->population[ person ]) );
 	}
+	update_event_list_counters( &(model->infected), model );
 }
 
 /*****************************************************************************************
@@ -333,6 +346,9 @@ int one_time_step( model *model )
 	(model->time)++;
 	build_daily_newtork( model );
 	transmit_virus( model );
+
+	update_event_list_counters( &(model->infected), model );
+	update_event_list_counters( &(model->symptomatic), model );
 
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
 	return 1;

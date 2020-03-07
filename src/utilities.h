@@ -16,7 +16,8 @@
 #define min(x,y) ((x) < (y) ? (x) : (y))
 #define ifelse(x,y,z) ((x) ? (y) : (z))
 #define round_random( x ) ( (long int) ( floor( x ) + gsl_ran_bernoulli( rng, x - floor(x) ) ) )
-#define ring_inc( x, n ) ( ( x ) = ifelse( ( x ) == ( ( n ) -1 ), 0 , ( x ) + 1 ) );
+#define ring_inc( x, n ) ( ( x ) = ifelse( ( x ) == ( ( n ) -1 ), 0 , ( x ) + 1 ) )
+#define sample_draw_list( x ) ( ( x[ gsl_rng_uniform_int( rng, N_DRAW_LIST ) ] ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
