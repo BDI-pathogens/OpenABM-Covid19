@@ -28,6 +28,7 @@ struct event_list{
 	long n_daily[MAX_TIME];
 	long n_total;
 	long n_current;
+	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 };
 
 typedef struct{
@@ -46,7 +47,6 @@ typedef struct{
 	long event_idx;
 
 	event_list infected;
-	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 
 	event_list symptomatic;
 	int symptomatic_draws[N_DRAW_LIST];

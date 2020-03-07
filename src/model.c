@@ -126,24 +126,15 @@ void set_up_interactions( model *model )
 ******************************************************************************************/
 void set_up_distributions( model *model )
 {
-	int day      = 0;
-	double total = 0;
-	double a, b;
 	parameters *params = &(model->params);
 
-	b = params->sd_infectious_period * params->sd_infectious_period / params->mean_infectious_period;
-	a = params->mean_infectious_period / b;
-
-	total = 0;
-	for( day = 0; day < MAX_INFECTIOUS_PERIOD; day++ )
-	{
-		model->infectious_curve[day] = gsl_cdf_gamma_P( ( day + 1 ) * 1.0, a, b ) - total;
-		total += model->infectious_curve[day];
-	}
-	for( day = 0; day < MAX_INFECTIOUS_PERIOD; day++ )
-		model->infectious_curve[day] *= params->infectious_rate / total / params->mean_daily_interactions;
-
 	gamma_draw_list( model->symptomatic_draws, N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
+
+	gamma_rate_curve( model->infected.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, params->infectious_rate / params->mean_daily_interactions );
+
+	gamma_rate_curve( model->symptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+				      params->sd_infectious_period, params->infectious_rate/ params->mean_daily_interactions );
 }
 
 /*****************************************************************************************
@@ -157,11 +148,15 @@ event* new_event( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		transmit_virus
-*  Description: Transmits virus over the interaction network
+*  Name:		transmit_virus_by_type
+*  Description: Transmits virus over the interaction network for a type of
+*  				infected people
 *  Returns:		void
 ******************************************************************************************/
-void transmit_virus( model *model )
+void transmit_virus_by_type(
+	model *model,
+	event_list *list
+)
 {
 	long idx, jdx, n_infected, tot;
 	int day, n_interaction;
@@ -173,7 +168,7 @@ void transmit_virus( model *model )
 	tot = 0;
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-		hazard_rate = model->infectious_curve[ model->time-1 - day ];
+		hazard_rate = model->infected.infectious_curve[ model->time-1 - day ];
 		n_infected =  model->infected.n_daily[ day];
 		event = model->infected.events[ day ];
 		for( idx = 0; idx < n_infected; idx++ )
@@ -196,6 +191,16 @@ void transmit_virus( model *model )
 			event = event->next;
 		}
 	}
+}
+
+/*****************************************************************************************
+*  Name:		transmit_virus
+*  Description: Transmits virus over the interaction network
+*  Returns:		void
+******************************************************************************************/
+void transmit_virus( model *model )
+{
+	transmit_virus_by_type( model, &(model->infected) );
 }
 
 /*****************************************************************************************

@@ -50,3 +50,39 @@ void gamma_draw_list(
 		list[idx] = ceil( gsl_cdf_gamma_Pinv( ( idx + 1.0 )/( n + 1.0 ), a, b ));
 }
 
+/*****************************************************************************************
+*  Name:		gamma_rate_curve
+*  Description: generates a rate curve for how infectious people are based
+*  				upon a discrete gamma distribution and a multiplier
+*
+*  Arguments:	list:	pointer to draw list be filled in
+*  				n:		length of draw list
+*  				mean:	mean of gamma distribution
+*  				sd:		sd of gamma distribution
+*  				factor:	multipler of gamma pdf
+******************************************************************************************/
+void gamma_rate_curve(
+	double *list,
+	int n,
+	double mean,
+	double sd,
+	double factor
+)
+{
+	int idx = 0;
+	double a, b, total;
+
+	b = sd * sd / mean;
+	a = mean / b;
+
+	total = 0;
+	for( idx = 0; idx < n; idx++ )
+	{
+		list[idx] = gsl_cdf_gamma_P( ( idx + 1 ) * 1.0, a, b ) - total;
+		total += list[idx];
+	}
+	for( idx = 0; idx < n; idx++ )
+		list[idx] *= factor / total;
+}
+
+
