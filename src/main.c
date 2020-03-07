@@ -27,11 +27,7 @@ int main(int argc, char *argv[])
 	
 	printf("Read input parameter file\n");
 	read_param_file( &params );
-    
-	if( params.days_of_interactions > MAX_DAILY_INTERACTIONS_KEPT )
-    	print_exit( "asking for day_of_interaction to be greater than MAX_DAILY_INTERACTIONS " );
-    if( params.end_time > MAX_TIME )
-     	print_exit( "asking for end_time to be greater than MAX_TIME " );
+	check_params( &params );
 
 	printf("Start model set-up\n");
     gsl_rng_env_setup();

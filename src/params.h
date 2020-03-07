@@ -25,6 +25,13 @@ typedef struct{
 	double infectious_rate;         // mean total number of people infected for a mean person
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
+	double mean_time_to_hospital;   // mean time from symptoms to hospital
 } parameters;
+
+/************************************************************************/
+/******************************  Functions  *****************************/
+/************************************************************************/
+
+void check_params( parameters* );
 
 #endif /* PARAMS_H_ */
