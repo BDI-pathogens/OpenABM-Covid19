@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
 	model *model = new_model( &params );
 
 	while( one_time_step( model ) && model->time < params.end_time )
-		printf( "Time %2i; n_infected %li\n", model->time, model->n_infected );
+		printf( "Time %2i; n_infected %li\n", model->time, model->infected.n_total );
 
 	printf( "End_time:                      %i\n",  model->time );
 	printf( "Total population:              %li\n", params.n_total );
 	printf( "Total daily interactions:      %li\n", model->n_possible_interactions );
 	printf( "Total interactions remembered: %li\n", model->n_interactions );
-	printf( "Total infected:                %li\n", model->n_infected );
+	printf( "Total infected:                %li\n", model->infected.n_total );
 
     destroy_model( model );
  //   gsl_rng_free( rng );

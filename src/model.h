@@ -21,6 +21,14 @@
 /************************************************************************/
 
 typedef struct event event;
+typedef struct event_list event_list;
+
+struct event_list{
+	event *events[MAX_TIME];
+	long n_daily[MAX_TIME];
+	long n_total;
+	long n_current;
+};
 
 typedef struct{
 	parameters params;
@@ -37,9 +45,7 @@ typedef struct{
 	event *events;
 	long event_idx;
 
-	event *infected[MAX_TIME];
-	long n_infected_daily[MAX_TIME];
-	long n_infected;
+	event_list infected;
 	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 
 } model;
@@ -48,6 +54,8 @@ struct event{
 	individual *individual;
 	event *next;
 };
+
+
 
 /************************************************************************/
 /******************************  Functions  *****************************/

@@ -63,7 +63,7 @@ void destroy_model( model *model )
 void set_up_events( model *model )
 {
 	parameters *params = &(model->params);
-	int types = 2;
+	int types = 3;
 
 	model->event_idx = 0;
 	model->events    = calloc( types * params->n_total, sizeof( event ) );
@@ -172,8 +172,8 @@ void transmit_virus( model *model )
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
 		hazard_rate = model->infectious_curve[ model->time-1 - day ];
-		n_infected =  model->n_infected_daily[ day];
-		event = model->infected[ day ];
+		n_infected =  model->infected.n_daily[ day];
+		event = model->infected.events[ day ];
 		for( idx = 0; idx < n_infected; idx++ )
 		{
 			infector      = event->individual;
@@ -197,6 +197,34 @@ void transmit_virus( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		add_indiv_to_event_list
+*  Description: adds an individual to an event list at a particular time
+*
+*  Arguments:	list:	pointer to the event list
+*  				indiv:	pointer to the individual
+*  				time:	time of the event (int)
+*  				model:	pointer to the model
+*
+*  Returns:		void
+******************************************************************************************/
+void add_individual_to_event_list(
+	event_list *list,
+	individual *indiv,
+	int time,
+	model *model
+)
+{
+	event *event        = new_event( model );
+	event->individual   = indiv;
+	event->next         = list->events[ time ];
+	list->events[time ] = event;
+
+	list->n_daily[time]++;
+	list->n_current++;
+	list->n_total++;
+}
+
+/*****************************************************************************************
 *  Name:		new_infection
 *  Description: infects a new individual
 *  Returns:		void
@@ -205,14 +233,22 @@ void new_infection( model *model, individual *indiv )
 {
 
 	indiv->status = PRESYMPTOMATIC;
+	add_individual_to_event_list( &(model->infected), indiv, model->time, model );
+}
 
-	event *event      = new_event( model );
-	event->individual = indiv;
-	event->next       = model->infected[ model->time ];
-	model->infected[ model->time ] = event;
+/*****************************************************************************************
+*  Name:		set_up_event_list
+*  Description: sets up an event_list
+*  Returns:		void
+******************************************************************************************/
+void set_up_event_list( event_list *list, parameters *params )
+{
+	int day;
 
-	model->n_infected_daily[ model->time ]++;
-	model->n_infected++;
+	list->n_current = 0;
+	list->n_total   = 0;
+	for( day = 0; day < params->end_time;day ++ )
+		list->n_daily[day] = 0;
 }
 
 /*****************************************************************************************
@@ -223,12 +259,10 @@ void new_infection( model *model, individual *indiv )
 void set_up_seed_infection( model *model )
 {
 	parameters *params = &(model->params);
-	int day, idx;
+	int idx;
 	unsigned long int person;
 
-	model->n_infected = 0;
-	for( day = 0; day < params->end_time; day ++ )
-		model->n_infected_daily[day] = 0;
+	set_up_event_list( &(model->infected), params );
 
 	for( idx = 0; idx < params->n_seed_infection; idx ++ )
 	{
@@ -244,7 +278,6 @@ void set_up_seed_infection( model *model )
 void build_daily_newtork( model *model )
 {
 	long idx, n_pos;
-	//long interactions[ model->n_possible_interactions ];
 	long *interactions = model->possible_interactions;
 	long *all_idx = &(model->interaction_idx);
 
