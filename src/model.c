@@ -168,9 +168,9 @@ void transmit_virus_by_type(
 	tot = 0;
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-		hazard_rate = model->infected.infectious_curve[ model->time-1 - day ];
-		n_infected =  model->infected.n_daily_current[ day];
-		event = model->infected.events[ day ];
+		hazard_rate = list->infectious_curve[ model->time-1 - day ];
+		n_infected  = list->n_daily_current[ day];
+		event       = list->events[ day ];
 		for( idx = 0; idx < n_infected; idx++ )
 		{
 			infector      = event->individual;
@@ -222,11 +222,37 @@ void transition_infected( model *model )
 	for( idx = 0; idx < n_infected; idx++ )
 	{
 		indiv = event->individual;
+		indiv->status = SYMPTOMATIC;
 		remove_event_from_event_list( &(model->infected), indiv->current_event, indiv->time_infected );
 
 		time_hospital = model->time + 2;
-		indiv->current_event = add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
-		indiv->status = SYMPTOMATIC;
+		indiv->time_hospitalized = time_hospital;
+		indiv->current_event = event;
+		add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
+
+		event = event->next;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		transition_symptomatic
+*  Description: Transitions symptomatic individual to hospital
+*  Returns:		void
+******************************************************************************************/
+void transition_symptomatic( model *model )
+{
+	long idx, n_symptomatic;
+	event *event;
+	individual *indiv;
+
+	n_symptomatic = model->hospitalized.n_daily_current[ model->time ];
+	event         = model->hospitalized.events[ model->time ];
+
+	for( idx = 0; idx < n_symptomatic; idx++ )
+	{
+		indiv = event->individual;
+		indiv->status = HOSPITALIZED;
+		remove_event_from_event_list( &(model->symptomatic), indiv->current_event, indiv->time_symptomatic );
 
 		event = event->next;
 	}
@@ -331,6 +357,7 @@ void new_infection( model *model, individual *indiv )
 	indiv->current_event = add_individual_to_event_list( &(model->infected), indiv, model->time, model );
 
 	time_symptoms = model->time + sample_draw_list( model->symptomatic_draws );
+	indiv->time_symptomatic = time_symptoms;
 	add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );
 }
 
@@ -432,10 +459,13 @@ int one_time_step( model *model )
 {
 	(model->time)++;
 	update_event_list_counters( &(model->symptomatic), model );
+	update_event_list_counters( &(model->hospitalized), model );
 
 	build_daily_newtork( model );
 	transmit_virus( model );
+
 	transition_infected( model );
+	transition_symptomatic( model );
 
 	update_event_list_counters( &(model->infected), model );
 

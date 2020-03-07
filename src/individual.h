@@ -30,6 +30,8 @@ typedef struct{
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 
 	int time_infected;
+	int time_symptomatic;
+	int time_hospitalized;
 	event *current_event;
 } individual;
 

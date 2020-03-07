@@ -75,6 +75,7 @@ int one_time_step( model* );
 void build_daily_newtork( model* );
 void transmit_virus( model* );
 void transition_infected( model* );
+void transition_symptomatic( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
