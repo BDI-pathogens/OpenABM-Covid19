@@ -24,6 +24,15 @@ void print_exit( char *s )
 }
 
 /*****************************************************************************************
+*  Name:		print_now
+******************************************************************************************/
+void print_now( char *s )
+{
+    printf("%s\n", s );
+    fflush(stdout);
+}
+
+/*****************************************************************************************
 *  Name:		gamma_draw_list
 *  Description: generates a draw list so that we can efficiently sample
 *  				from a distribution

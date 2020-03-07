@@ -1,4 +1,4 @@
 param_id, n_total,mean_daily_interactions , days_of_interactions,end_time , n_seed_infection, mean_infectious_period, sd_infectious_period, infectious_rate, mean_time_to_symptoms, sd_time_to_symptoms, mean_time_to_hospital
- 1 , 100000, 10 ,5,50 ,10, 6.0, 2.0, 2.0, 5.5, 2.5, 1.6
+ 1 , 100000, 10 ,5,50 ,10, 6.0, 2.0, 1.5, 5.5, 2.5, 1.6
  2 , 90000,  11 ,3,11  ,6, 6.0, 2.0, 2.0, 5.5, 2.5, 1.6
 99 , 72361,   9 ,4,18  ,9, 6.0, 2.0, 2.5, 5.5, 2.5, 1.6

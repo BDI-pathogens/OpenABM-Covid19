@@ -35,8 +35,8 @@ int main(int argc, char *argv[])
 	model *model = new_model( &params );
 
 	while( one_time_step( model ) && model->time < params.end_time )
-		printf( "Time %2i; n_infected %li; n_sypmtoms %li\n",
-				model->time, model->infected.n_total, model->symptomatic.n_total );
+		printf( "Time %2i; n_infected %li; total_infected %li n_sypmtoms %li\n",
+				model->time, model->infected.n_current, model->infected.n_total, model->symptomatic.n_total );
 
 	printf( "End_time:                      %i\n",  model->time );
 	printf( "Total population:              %li\n", params.n_total );

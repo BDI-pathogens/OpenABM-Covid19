@@ -23,6 +23,7 @@
 /******************************  Functions  *****************************/
 /************************************************************************/
 
+void print_now( char* );
 void print_exit( char* );
 void gamma_draw_list( int*, int, double, double );
 void gamma_rate_curve( double*, int, double, double, double );

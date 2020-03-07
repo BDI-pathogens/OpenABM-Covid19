@@ -13,14 +13,13 @@
 /************************************************************************/
 
 #include <gsl/gsl_rng.h>
+#include "structure.h"
 #include "params.h"
 #include "constant.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
-
-typedef struct interaction interaction;
 
 typedef struct{
 	long idx;
@@ -30,6 +29,8 @@ typedef struct{
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 
+	int time_infected;
+	event *current_event;
 } individual;
 
 struct interaction{

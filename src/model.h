@@ -13,6 +13,7 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 
+#include "structure.h"
 #include "individual.h"
 #include "params.h"
 
@@ -20,12 +21,10 @@
 /****************************** Structures  *****************************/
 /************************************************************************/
 
-typedef struct event event;
-typedef struct event_list event_list;
-
 struct event_list{
 	event *events[MAX_TIME];
 	long n_daily[MAX_TIME];
+	long n_daily_current[MAX_TIME];
 	long n_total;
 	long n_current;
 	double infectious_curve[MAX_INFECTIOUS_PERIOD];
@@ -47,6 +46,7 @@ typedef struct{
 	long event_idx;
 
 	event_list infected;
+	event_list hospitalized;
 
 	event_list symptomatic;
 	int symptomatic_draws[N_DRAW_LIST];
@@ -56,6 +56,7 @@ typedef struct{
 struct event{
 	individual *individual;
 	event *next;
+	event *last;
 };
 
 /************************************************************************/
@@ -73,9 +74,11 @@ void destroy_model( model* );
 int one_time_step( model* );
 void build_daily_newtork( model* );
 void transmit_virus( model* );
+void transition_infected( model* );
 
 event* new_event( model* );
-void add_individual_to_event_list( event_list*, individual*, int, model* );
+event* add_individual_to_event_list( event_list*, individual*, int, model* );
+void remove_event_from_event_list( event_list*, event*, int );
 void update_event_list_counters( event_list*, model* );
 
 void new_infection( model*, individual* );

@@ -169,7 +169,7 @@ void transmit_virus_by_type(
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
 		hazard_rate = model->infected.infectious_curve[ model->time-1 - day ];
-		n_infected =  model->infected.n_daily[ day];
+		n_infected =  model->infected.n_daily_current[ day];
 		event = model->infected.events[ day ];
 		for( idx = 0; idx < n_infected; idx++ )
 		{
@@ -201,6 +201,34 @@ void transmit_virus_by_type(
 void transmit_virus( model *model )
 {
 	transmit_virus_by_type( model, &(model->infected) );
+	transmit_virus_by_type( model, &(model->symptomatic) );
+}
+
+/*****************************************************************************************
+*  Name:		transition_infected
+*  Description: Transitions infected who are due to become symptomatic
+*  Returns:		void
+******************************************************************************************/
+void transition_infected( model *model )
+{
+	long idx, n_infected;
+	int time_hospital;
+	event *event;
+	individual *indiv;
+
+	n_infected = model->symptomatic.n_daily_current[ model->time ];
+	event      = model->symptomatic.events[ model->time ];
+
+	for( idx = 0; idx < n_infected; idx++ )
+	{
+		indiv = event->individual;
+		remove_event_from_event_list( &(model->infected), indiv->current_event, indiv->time_infected );
+
+		time_hospital = model->time + 2;
+		indiv->current_event = add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
+
+		event = event->next;
+	}
 }
 
 /*****************************************************************************************
@@ -212,9 +240,9 @@ void transmit_virus( model *model )
 *  				time:	time of the event (int)
 *  				model:	pointer to the model
 *
-*  Returns:		void
+*  Returns:		a pointer to the newly added event
 ******************************************************************************************/
-void add_individual_to_event_list(
+event* add_individual_to_event_list(
 	event_list *list,
 	individual *indiv,
 	int time,
@@ -223,10 +251,59 @@ void add_individual_to_event_list(
 {
 	event *event        = new_event( model );
 	event->individual   = indiv;
-	event->next         = list->events[ time ];
-	list->events[time ] = event;
 
+	if( list->n_daily_current[time] > 1  )
+	{
+		list->events[ time ]->last = event;
+		event->next  = list->events[ time ];
+	}
+	else
+	{
+		if( list->n_daily_current[time] == 1 )
+		{
+			list->events[ time ]->next = event;
+			list->events[ time ]->last = event;
+			event->next = list->events[ time ];
+			event->last = list->events[ time ];
+		}
+	}
+
+	list->events[time ] = event;
 	list->n_daily[time]++;
+	list->n_daily_current[time]++;
+
+	return event;
+}
+
+/*****************************************************************************************
+*  Name:		remove_event_from_event_list
+*  Description: removes an event from an list at a particular time
+*
+*  Arguments:	list:	pointer to the event list
+*  				event:	pointer to the event
+*  				time:	time of the event (int)
+*
+*  Returns:		a pointer to the newly added event
+******************************************************************************************/
+void remove_event_from_event_list(
+	event_list *list,
+	event *event,
+	int time
+)
+{
+	if( list->n_daily_current[ time ] > 1 )
+	{
+		if( event != list->events[ time ] )
+		{
+			event->last->next = event->next;
+			event->next->last = event->last;
+		}
+		else
+			list->events[ time ] = event->next;
+	}
+
+	list->n_current--;
+	list->n_daily_current[ time ]--;
 }
 
 /*****************************************************************************************
@@ -236,7 +313,7 @@ void add_individual_to_event_list(
 ******************************************************************************************/
 void update_event_list_counters( event_list *list, model *model )
 {
-	list->n_current += list->n_daily[ model->time ];
+	list->n_current += list->n_daily_current[ model->time ];
 	list->n_total	+= list->n_daily[ model->time ];
 }
 
@@ -248,8 +325,9 @@ void update_event_list_counters( event_list *list, model *model )
 void new_infection( model *model, individual *indiv )
 {
 	int time_symptoms;
-	indiv->status = PRESYMPTOMATIC;
-	add_individual_to_event_list( &(model->infected), indiv, model->time, model );
+	indiv->status        = PRESYMPTOMATIC;
+	indiv->time_infected = model->time;
+	indiv->current_event = add_individual_to_event_list( &(model->infected), indiv, model->time, model );
 
 	time_symptoms = model->time + sample_draw_list( model->symptomatic_draws );
 	add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );
@@ -267,7 +345,10 @@ void set_up_event_list( event_list *list, parameters *params )
 	list->n_current = 0;
 	list->n_total   = 0;
 	for( day = 0; day < params->end_time;day ++ )
+	{
 		list->n_daily[day] = 0;
+		list->n_daily_current[day] = 0;
+	}
 }
 
 /*****************************************************************************************
@@ -351,6 +432,7 @@ int one_time_step( model *model )
 	(model->time)++;
 	build_daily_newtork( model );
 	transmit_virus( model );
+	transition_infected( model );
 
 	update_event_list_counters( &(model->infected), model );
 	update_event_list_counters( &(model->symptomatic), model );
