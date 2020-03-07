@@ -226,6 +226,7 @@ void transition_infected( model *model )
 
 		time_hospital = model->time + 2;
 		indiv->current_event = add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
+		indiv->status = SYMPTOMATIC;
 
 		event = event->next;
 	}
@@ -430,12 +431,13 @@ void build_daily_newtork( model *model )
 int one_time_step( model *model )
 {
 	(model->time)++;
+	update_event_list_counters( &(model->symptomatic), model );
+
 	build_daily_newtork( model );
 	transmit_virus( model );
 	transition_infected( model );
 
 	update_event_list_counters( &(model->infected), model );
-	update_event_list_counters( &(model->symptomatic), model );
 
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
 	return 1;
