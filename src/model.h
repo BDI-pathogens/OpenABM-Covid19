@@ -49,7 +49,7 @@ typedef struct{
 	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 
 	event_list symptomatic;
-	double symptomatic_curve[MAX_INFECTIOUS_PERIOD];
+	int symptomatic_draws[N_DRAW_LIST];
 
 } model;
 

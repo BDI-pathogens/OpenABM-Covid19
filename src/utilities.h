@@ -23,6 +23,6 @@
 /************************************************************************/
 
 void print_exit( char* );
-
+void gamma_draw_list( int*, int, double, double );
 
 #endif /* UTILITIES_H_ */

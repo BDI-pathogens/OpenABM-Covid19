@@ -142,6 +142,8 @@ void set_up_distributions( model *model )
 	}
 	for( day = 0; day < MAX_INFECTIOUS_PERIOD; day++ )
 		model->infectious_curve[day] *= params->infectious_rate / total / params->mean_daily_interactions;
+
+	gamma_draw_list( model->symptomatic_draws, N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
 }
 
 /*****************************************************************************************
