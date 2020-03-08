@@ -131,11 +131,11 @@ void set_up_distributions( model *model )
 	parameters *params = &(model->params);
 	double infectious_rate;
 
-	gamma_draw_list( model->asymptomatic_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( model->symptomatic_draws, 		N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
-	gamma_draw_list( model->recovered_draws,   		N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
-	gamma_draw_list( model->death_draws,       		N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
-	bernoulli_draw_list( model->hospitalised_draws, N_DRAW_LIST, params->mean_time_to_hospital );
+	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
+	gamma_draw_list( model->symptomatic_time_draws, 		N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
+	gamma_draw_list( model->recovered_time_draws,   		N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
+	gamma_draw_list( model->death_time_draws,       		N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
+	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
 	infectious_rate = params->infectious_rate / params->mean_daily_interactions;
 	gamma_rate_curve( model->infected.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
@@ -236,7 +236,7 @@ void transition_infected( model *model )
 		indiv->status = SYMPTOMATIC;
 		remove_event_from_event_list( &(model->infected), indiv->current_event, indiv->time_infected );
 
-		time_hospital            = model->time + sample_draw_list( model->hospitalised_draws );
+		time_hospital            = model->time + sample_draw_list( model->hospitalised_time_draws );
 		indiv->time_hospitalised = time_hospital;
 		indiv->next_event_type   = HOSPITALISED;
 		indiv->current_event     = event;
@@ -270,14 +270,14 @@ void transition_symptomatic( model *model )
 		indiv->current_event = event;
 		if( gsl_ran_bernoulli( rng, model->params.cfr ) )
 		{
-			time_event             = model->time + sample_draw_list( model->death_draws );
+			time_event             = model->time + sample_draw_list( model->death_time_draws );
 			indiv->time_death      = time_event;
 			indiv->next_event_type = DEATH;
 			add_individual_to_event_list( &(model->death), indiv, time_event, model );
 		}
 		else
 		{
-			time_event             = model->time + sample_draw_list( model->recovered_draws );
+			time_event             = model->time + sample_draw_list( model->recovered_time_draws );
 			indiv->time_recovered  = time_event;
 			indiv->next_event_type = RECOVERED;
 			add_individual_to_event_list( &(model->recovered), indiv, time_event, model );
@@ -417,7 +417,7 @@ void new_infection( model *model, individual *indiv )
 	indiv->time_infected = model->time;
 	indiv->current_event = add_individual_to_event_list( &(model->infected), indiv, model->time, model );
 
-	time_symptoms = model->time + sample_draw_list( model->symptomatic_draws );
+	time_symptoms = model->time + sample_draw_list( model->symptomatic_time_draws );
 	indiv->time_symptomatic = time_symptoms;
 	indiv->next_event_type  = SYMPTOMATIC;
 	add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );

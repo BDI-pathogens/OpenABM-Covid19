@@ -53,13 +53,12 @@ typedef struct{
 	event_list recovered;
 	event_list death;
 
-	int asymptomatic_draws[N_DRAW_LIST];
-	int symptomatic_draws[N_DRAW_LIST];
-	int hospitalised_draws[N_DRAW_LIST];
-	int recovered_draws[N_DRAW_LIST];
-	int death_draws[N_DRAW_LIST];
+	int asymptomatic_time_draws[N_DRAW_LIST];
+	int symptomatic_time_draws[N_DRAW_LIST];
+	int hospitalised_time_draws[N_DRAW_LIST];
+	int recovered_time_draws[N_DRAW_LIST];
+	int death_time_draws[N_DRAW_LIST];
 
-//	event_list recovered;
 
 } model;
 
