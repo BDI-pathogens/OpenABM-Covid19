@@ -15,7 +15,7 @@
 
 int main(int argc, char *argv[])
 {
-    printf("Starting simulation\n");
+    printf("# Starting simulation\n");
 
     parameters params;	
     struct timespec  tv;
@@ -24,20 +24,21 @@ int main(int argc, char *argv[])
     clock_gettime( CLOCK_REALTIME,&tv);
     tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
-	printf("Read command-line args\n");
+	printf("# Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
 	
-	printf("Read input parameter file\n");
+	printf("# Read input parameter file\n");
 	read_param_file( &params );
 	check_params( &params );
 
-	printf("Start model set-up\n");
+	printf("# Start model set-up\n");
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
 	model *model = new_model( &params );
 
+	printf( "Time,\ttotal_infected,\tn_infected,\tn_asymptom,\tn_symptoms,\tn_hospital,\tn_death,\tn_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
-		printf( "Time %2i; total_infected %li; n_infected %li; n_asymptom %li; n_sypmtoms %li; n_hospital %li; n_death %li; n_recovered %li\n",
+		printf( "%2i,\t%li,\t%li,\t%li,\t%li,\t%li,\t%li,\t%li\n",
 				model->time,
 				model->infected.n_total,
 				model->infected.n_current,
@@ -48,10 +49,10 @@ int main(int argc, char *argv[])
    			    model->recovered.n_current
 		);
 
-	printf( "\nEnd_time:                      %i\n",  model->time );
-	printf( "Total population:              %li\n", params.n_total );
-	printf( "Total total interactions:      %li\n", model->n_total_intereactions );
-	printf( "Total infected:                %li\n", model->infected.n_total );
+	printf( "\n# End_time:                      %i\n",  model->time );
+	printf( "# Total population:              %li\n", params.n_total );
+	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
+	printf( "# Total infected:                %li\n", model->infected.n_total );
 
     destroy_model( model );
  //   gsl_rng_free( rng );
@@ -59,6 +60,6 @@ int main(int argc, char *argv[])
     clock_gettime( CLOCK_REALTIME, &tv );
     tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
-    printf("Ending simulation, run time:   %.2fs\n", tend - tstart );
+    printf("# Ending simulation, run time:   %.2fs\n", tend - tstart );
     return 0;
 }
