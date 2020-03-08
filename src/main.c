@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
@@ -12,15 +13,16 @@
 #include "input.h"
 #include "constant.h"
 
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
-
 int main(int argc, char *argv[])
 {
     printf("Starting simulation\n");
 
     parameters params;	
+    struct timespec  tv;
+    double tstart, tend;
+
+    clock_gettime( CLOCK_REALTIME,&tv);
+    tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
 	printf("Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
@@ -53,6 +55,10 @@ int main(int argc, char *argv[])
 
     destroy_model( model );
  //   gsl_rng_free( rng );
-    printf("Ending simulation\n");
+
+    clock_gettime( CLOCK_REALTIME, &tv );
+    tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
+
+    printf("Ending simulation, run time:   %.2fs\n", tend - tstart );
     return 0;
 }
