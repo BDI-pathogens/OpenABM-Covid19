@@ -26,7 +26,8 @@ typedef struct individual individual;
 struct individual{
 	long idx;
 	int status;
-	int n_mean_interactions;
+	int quarantined;
+	int mean_interactions;
 	double hazard;
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];

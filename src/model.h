@@ -52,6 +52,7 @@ typedef struct{
 	event_list hospitalised;
 	event_list recovered;
 	event_list death;
+	event_list quarantined;
 
 	int asymptomatic_time_draws[N_DRAW_LIST];
 	int symptomatic_time_draws[N_DRAW_LIST];

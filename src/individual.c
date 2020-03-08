@@ -29,11 +29,12 @@ void initialize_individual(
 	if( indiv->idx != 0 )
 		print_exit( "Individuals can only be intitialized once!" );
 
-	indiv->idx    = idx;
-	indiv->status = UNINFECTED;
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 );
+	indiv->idx         = idx;
+	indiv->status      = UNINFECTED;
+	indiv->quarantined = FALSE;
+	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
-	indiv->n_mean_interactions = params->mean_daily_interactions;
+	indiv->mean_interactions = params->mean_daily_interactions;
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
 
@@ -44,6 +45,30 @@ void initialize_individual(
 	indiv->time_death	     = UNKNOWN;
 	indiv->time_recovered    = UNKNOWN;
 	indiv->next_event_type   = UNKNOWN;
+}
+
+/*****************************************************************************************
+*  Name:		set_quarantine_status
+*  Description: sets the quarantine status of an individual and changes the
+*  				number on interactions
+*  Returns:		void
+******************************************************************************************/
+void set_quarantine_status(
+	individual *indiv,
+	parameters *params,
+	int status
+)
+{
+	if( status )
+	{
+		indiv->quarantined         = TRUE;
+		indiv->mean_interactions = params->quarantined_daily_interactions;
+	}
+	else
+	{
+		indiv->quarantined         = FALSE;
+		indiv->mean_interactions = params->mean_daily_interactions;
+	}
 }
 
 /*****************************************************************************************

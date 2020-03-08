@@ -12,6 +12,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
+#define FALSE 0
+#define TRUE 1
 
 enum DISEASE_STATUS{
 	UNINFECTED,

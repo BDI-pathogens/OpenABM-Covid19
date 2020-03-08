@@ -111,7 +111,7 @@ void set_up_interactions( model *model )
 	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
 	{
 		indiv = &(model->population[ indiv_idx ]);
-		for( n_idx = 0; n_idx < indiv->n_mean_interactions; n_idx++ )
+		for( n_idx = 0; n_idx < indiv->mean_interactions; n_idx++ )
 			model->possible_interactions[ idx++ ] = indiv_idx;
 	}
 
