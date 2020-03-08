@@ -54,6 +54,11 @@ struct interaction{
 /************************************************************************/
 
 void initialize_individual( individual*, parameters*, long );
+void set_quarantine_status( individual*, parameters*, int );
+void set_recovered( individual*, parameters* );
+void set_hospitalised( individual*, parameters* );
+void set_dead( individual* );
+
 void destroy_individual( individual* );
 
 

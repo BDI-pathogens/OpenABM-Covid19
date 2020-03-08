@@ -46,7 +46,7 @@ typedef struct{
 	event *events;
 	long event_idx;
 
-	event_list infected;
+	event_list presymptomatic;
 	event_list asymptomatic;
 	event_list symptomatic;
 	event_list hospitalised;

@@ -1,4 +1,4 @@
 param_id, n_total,mean_daily_interactions ,  days_of_interactions,end_time , n_seed_infection, mean_infectious_period, sd_infectious_period, infectious_rate, mean_time_to_symptoms, sd_time_to_symptoms, mean_time_to_hospital, mean_time_to_recover, sd_time_to_recover, mean_time_to_death, sd_time_to_death, cfr, fraction_asymptomatic, asymptomatic_infectious_factor, mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, quarantined_daily_interactions
- 1 , 100000, 10,5,50 ,10, 6.0, 2.0, 3.0, 5.5, 2.5, 1.6, 12.0, 5.0, 12.0, 5.0, 0.015, 0.2, 0.25, 15.0, 5.0, 2
+ 1 , 100000, 10,5,50  ,10, 6.0, 2.0, 3.0, 5.5, 2.5, 1.6, 12.0, 5.0, 12.0, 5.0, 0.015, 0.2, 0.25, 15.0, 5.0, 2
  2 , 90000,  11,3,11  ,6, 6.0, 2.0, 2.0, 5.5, 2.5, 1.6, 12.0, 5.0, 12.0, 5.0, 0.015, 0.2, 0.25, 15.0, 5.0, 2
 99 , 72361,   9,4,18  ,9, 6.0, 2.0, 2.5, 5.5, 2.5, 1.6, 12.0, 5.0, 12.0, 5.0, 0.015, 0.2, 0.25, 15.0, 5.0, 2

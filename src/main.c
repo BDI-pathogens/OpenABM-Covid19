@@ -37,10 +37,10 @@ int main(int argc, char *argv[])
 	model *model = new_model( &params );
 
 	while( model->time < params.end_time && one_time_step( model ) )
-		printf( "Time %2i; total_infected %li; n_infected %li; n_asymptom %li; n_sypmtoms %li; n_hospital %li; n_death %li; n_recovered %li\n",
+		printf( "Time %2i; total_infected %li; n_presymptom %li; n_asymptom %li; n_sypmtoms %li; n_hospital %li; n_death %li; n_recovered %li\n",
 				model->time,
-				model->infected.n_total,
-				model->infected.n_current,
+				model->presymptomatic.n_total + model->asymptomatic.n_total,
+				model->presymptomatic.n_current,
 				model->asymptomatic.n_current,
 				model->symptomatic.n_current,
    			    model->hospitalised.n_current,
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	printf( "\nEnd_time:                      %i\n",  model->time );
 	printf( "Total population:              %li\n", params.n_total );
 	printf( "Total total interactions:      %li\n", model->n_total_intereactions );
-	printf( "Total infected:                %li\n", model->infected.n_total );
+	printf( "Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total);
 
     destroy_model( model );
  //   gsl_rng_free( rng );
