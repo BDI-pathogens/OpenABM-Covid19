@@ -116,6 +116,8 @@ void set_up_interactions( model *model )
 	}
 
 	model->n_possible_interactions = idx;
+	model->n_total_intereactions   = 0;
+
 }
 
 /*****************************************************************************************
@@ -228,9 +230,10 @@ void transition_infected( model *model )
 		remove_event_from_event_list( &(model->infected), indiv->current_event, indiv->time_infected );
 
 		time_hospital = model->time + 1 + gsl_ran_bernoulli( rng, model->params.mean_time_to_hospital - 1 );
-		indiv->time_hospitalized = time_hospital;
+		indiv->time_hospitalised = time_hospital;
+		indiv->next_event_type   = HOSPITALISED;
 		indiv->current_event = event;
-		add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
+		add_individual_to_event_list( &(model->hospitalised), indiv, time_hospital, model );
 
 		event = event->next;
 	}
@@ -244,18 +247,68 @@ void transition_infected( model *model )
 void transition_symptomatic( model *model )
 {
 	long idx, n_symptomatic;
+	double time_event;
 	event *event;
 	individual *indiv;
 
-	n_symptomatic = model->hospitalized.n_daily_current[ model->time ];
-	event         = model->hospitalized.events[ model->time ];
+	n_symptomatic = model->hospitalised.n_daily_current[ model->time ];
+	event         = model->hospitalised.events[ model->time ];
 
 	for( idx = 0; idx < n_symptomatic; idx++ )
 	{
 		indiv = event->individual;
-		indiv->status = HOSPITALIZED;
+		indiv->status = HOSPITALISED;
 		remove_event_from_event_list( &(model->symptomatic), indiv->current_event, indiv->time_symptomatic );
 
+		indiv->current_event = event;
+		if( gsl_ran_bernoulli( rng, model->params.cfr ) )
+		{
+			time_event = model->time + sample_draw_list( model->death_draws );
+			indiv->time_death      = time_event;
+			indiv->next_event_type = DEATH;
+			add_individual_to_event_list( &(model->death), indiv, time_event, model );
+		}
+		else
+		{
+			time_event = model->time + sample_draw_list( model->recovered_draws );
+			indiv->time_recovered  = time_event;
+			indiv->next_event_type = RECOVERED;
+			add_individual_to_event_list( &(model->recovered), indiv, time_event, model );
+		};
+
+		event = event->next;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		transition_hospitalised
+*  Description: Transitions hospitalised to death or recvoer
+*  Returns:		void
+******************************************************************************************/
+void transition_hospitalised( model *model )
+{
+	long idx, n_death, n_recovered;
+	double time_event;
+	event *event;
+	individual *indiv;
+
+	n_death = model->death.n_daily_current[ model->time ];
+	event   = model->death.events[ model->time ];
+	for( idx = 0; idx < n_death; idx++ )
+	{
+		indiv         = event->individual;
+		indiv->status = DEATH;
+		remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
+		event = event->next;
+	}
+
+	n_recovered = model->recovered.n_daily_current[ model->time ];
+	event       = model->recovered.events[ model->time ];
+	for( idx = 0; idx < n_recovered; idx++ )
+	{
+		indiv         = event->individual;
+		indiv->status = RECOVERED;
+		remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
 		event = event->next;
 	}
 }
@@ -360,6 +413,7 @@ void new_infection( model *model, individual *indiv )
 
 	time_symptoms = model->time + sample_draw_list( model->symptomatic_draws );
 	indiv->time_symptomatic = time_symptoms;
+	indiv->next_event_type  = SYMPTOMATIC;
 	add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );
 }
 
@@ -447,6 +501,8 @@ void build_daily_newtork( model *model )
 		indiv2->interactions[ day ] = inter2;
 		indiv2->n_interactions[ day ]++;
 
+		model->n_total_intereactions++;
+
 		if( *all_idx > model->n_interactions )
 			*all_idx = 0;
 	}
@@ -461,13 +517,16 @@ int one_time_step( model *model )
 {
 	(model->time)++;
 	update_event_list_counters( &(model->symptomatic), model );
-	update_event_list_counters( &(model->hospitalized), model );
+	update_event_list_counters( &(model->hospitalised), model );
+	update_event_list_counters( &(model->recovered), model );
+	update_event_list_counters( &(model->death), model );
 
 	build_daily_newtork( model );
 	transmit_virus( model );
 
 	transition_infected( model );
 	transition_symptomatic( model );
+	transition_hospitalised( model );
 
 	update_event_list_counters( &(model->infected), model );
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );

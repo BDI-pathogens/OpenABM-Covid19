@@ -35,18 +35,19 @@ int main(int argc, char *argv[])
 	model *model = new_model( &params );
 
 	while( one_time_step( model ) && model->time < params.end_time )
-		printf( "Time %2i; total_infected %li; n_infected %li;  n_sypmtoms %li; n_hospital %li\n",
+		printf( "Time %2i; total_infected %li; n_infected %li;  n_sypmtoms %li; n_hospital %li; n_death %li; n_recovered %li\n",
 				model->time,
 				model->infected.n_total,
 				model->infected.n_current,
 				model->symptomatic.n_current,
-   			    model->hospitalized.n_current
+   			    model->hospitalised.n_current,
+   			    model->death.n_current,
+   			    model->recovered.n_current
 		);
 
 	printf( "End_time:                      %i\n",  model->time );
 	printf( "Total population:              %li\n", params.n_total );
-	printf( "Total daily interactions:      %li\n", model->n_possible_interactions );
-	printf( "Total interactions remembered: %li\n", model->n_interactions );
+	printf( "Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "Total infected:                %li\n", model->infected.n_total );
 
     destroy_model( model );

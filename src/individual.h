@@ -31,11 +31,12 @@ typedef struct{
 
 	int time_infected;
 	int time_symptomatic;
-	int time_hospitalized;
+	int time_hospitalised;
 	int time_death;
 	int time_recovered;
 
 	event *current_event;
+	int next_event_type;
 } individual;
 
 struct interaction{

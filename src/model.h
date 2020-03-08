@@ -41,13 +41,14 @@ typedef struct{
 	long n_interactions;
 	long *possible_interactions;
 	long n_possible_interactions;
+	long n_total_intereactions;
 
 	event *events;
 	long event_idx;
 
 	event_list infected;
 	event_list symptomatic;
-	event_list hospitalized;
+	event_list hospitalised;
 	event_list recovered;
 	event_list death;
 
@@ -82,6 +83,7 @@ void build_daily_newtork( model* );
 void transmit_virus( model* );
 void transition_infected( model* );
 void transition_symptomatic( model* );
+void transition_hospitalised( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
