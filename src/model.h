@@ -83,15 +83,16 @@ void destroy_model( model* );
 int one_time_step( model* );
 void build_daily_newtork( model* );
 void transmit_virus( model* );
-void transition_infected( model* );
-void transition_symptomatic( model* );
-void transition_hospitalised( model* );
+void transition_to_symptomatic( model* );
+void transition_to_hospitalised( model* );
+void transition_to_recovered( model* );
+void transition_to_death( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
 void remove_event_from_event_list( event_list*, event*, int );
 void update_event_list_counters( event_list*, model* );
 
-void new_infection( model*, individual* );
+void new_infection( model*, individual*, individual* );
 
 #endif /* MODEL_H_ */

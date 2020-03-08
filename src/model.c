@@ -195,7 +195,7 @@ void transmit_virus_by_type(
 				{
 					interaction->individual->hazard -= hazard_rate;
 					if( interaction->individual->hazard < 0 )
-						new_infection( model, interaction->individual );
+						new_infection( model, interaction->individual, infector );
 				}
 				interaction = interaction->next;
 			}
@@ -217,11 +217,11 @@ void transmit_virus( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		transition_infected
+*  Name:		transition_to_symptomatic
 *  Description: Transitions infected who are due to become symptomatic
 *  Returns:		void
 ******************************************************************************************/
-void transition_infected( model *model )
+void transition_to_symptomatic( model *model )
 {
 	long idx, n_infected;
 	int time_hospital;
@@ -248,21 +248,21 @@ void transition_infected( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		transition_symptomatic
+*  Name:		transition_to_hospitalised
 *  Description: Transitions symptomatic individual to hospital
 *  Returns:		void
 ******************************************************************************************/
-void transition_symptomatic( model *model )
+void transition_to_hospitalised( model *model )
 {
-	long idx, n_symptomatic;
+	long idx, n_hospitalised;
 	double time_event;
 	event *event;
 	individual *indiv;
 
-	n_symptomatic = model->hospitalised.n_daily_current[ model->time ];
-	event         = model->hospitalised.events[ model->time ];
+	n_hospitalised = model->hospitalised.n_daily_current[ model->time ];
+	event          = model->hospitalised.events[ model->time ];
 
-	for( idx = 0; idx < n_symptomatic; idx++ )
+	for( idx = 0; idx < n_hospitalised; idx++ )
 	{
 		indiv         = event->individual;
 		indiv->status = HOSPITALISED;
@@ -289,13 +289,38 @@ void transition_symptomatic( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		transition_hospitalised
-*  Description: Transitions hospitalised to death or recvoer
+*  Name:		transition_to_recovered
+*  Description: Transitions hospitalised and asymptomatic to recovered
 *  Returns:		void
 ******************************************************************************************/
-void transition_hospitalised( model *model )
+void transition_to_recovered( model *model )
 {
-	long idx, n_death, n_recovered;
+	long idx, n_recovered;
+	event *event;
+	individual *indiv;
+
+	n_recovered = model->recovered.n_daily_current[ model->time ];
+	event       = model->recovered.events[ model->time ];
+	for( idx = 0; idx < n_recovered; idx++ )
+	{
+		indiv  = event->individual;
+		if( indiv->status == HOSPITALISED )
+			remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
+		else
+			remove_event_from_event_list( &(model->asymptomatic), indiv->current_event, indiv->time_asymptomatic );
+		indiv->status = RECOVERED;
+		event = event->next;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		transition_to_death
+*  Description: Transitions hospitalised to death
+*  Returns:		void
+******************************************************************************************/
+void transition_to_death( model *model )
+{
+	long idx, n_death;
 	event *event;
 	individual *indiv;
 
@@ -306,19 +331,6 @@ void transition_hospitalised( model *model )
 		indiv         = event->individual;
 		indiv->status = DEATH;
 		remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
-		event = event->next;
-	}
-
-	n_recovered = model->recovered.n_daily_current[ model->time ];
-	event       = model->recovered.events[ model->time ];
-	for( idx = 0; idx < n_recovered; idx++ )
-	{
-		indiv         = event->individual;
-		if( indiv->status == HOSPITALISED )
-			remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
-		else
-			remove_event_from_event_list( &(model->asymptomatic), indiv->current_event, indiv->time_asymptomatic );
-		indiv->status = RECOVERED;
 		event = event->next;
 	}
 }
@@ -414,32 +426,37 @@ void update_event_list_counters( event_list *list, model *model )
 *  Description: infects a new individual
 *  Returns:		void
 ******************************************************************************************/
-void new_infection( model *model, individual *indiv )
+void new_infection(
+	model *model,
+	individual *infected,
+	individual *infector
+)
 {
 	int time_symptoms, time_recovery;
+	infected->infector = infector;
 
 	if( gsl_ran_bernoulli( rng, model->params.fraction_asymptomatic ) )
 	{
-		indiv->status            = ASYMPTOMATIC;
-		indiv->time_infected     = model->time;
-		indiv->time_asymptomatic = model->time;
-		indiv->current_event = add_individual_to_event_list( &(model->asymptomatic), indiv, model->time, model );
+		infected->status            = ASYMPTOMATIC;
+		infected->time_infected     = model->time;
+		infected->time_asymptomatic = model->time;
+		infected->current_event = add_individual_to_event_list( &(model->asymptomatic), infected, model->time, model );
 
 		time_recovery = model->time + sample_draw_list( model->asymptomatic_time_draws );
-		indiv->time_recovered = time_recovery;
-		indiv->next_event_type  = RECOVERED;
-		add_individual_to_event_list( &(model->recovered), indiv, time_recovery, model );
+		infected->time_recovered = time_recovery;
+		infected->next_event_type  = RECOVERED;
+		add_individual_to_event_list( &(model->recovered), infected, time_recovery, model );
 	}
 	else
 	{
-		indiv->status        = PRESYMPTOMATIC;
-		indiv->time_infected = model->time;
-		indiv->current_event = add_individual_to_event_list( &(model->infected), indiv, model->time, model );
+		infected->status        = PRESYMPTOMATIC;
+		infected->time_infected = model->time;
+		infected->current_event = add_individual_to_event_list( &(model->infected), infected, model->time, model );
 
 		time_symptoms = model->time + sample_draw_list( model->symptomatic_time_draws );
-		indiv->time_symptomatic = time_symptoms;
-		indiv->next_event_type  = SYMPTOMATIC;
-		add_individual_to_event_list( &(model->symptomatic), indiv, time_symptoms, model );
+		infected->time_symptomatic = time_symptoms;
+		infected->next_event_type  = SYMPTOMATIC;
+		add_individual_to_event_list( &(model->symptomatic), infected, time_symptoms, model );
 	}
 }
 
@@ -477,7 +494,7 @@ void set_up_seed_infection( model *model )
 	for( idx = 0; idx < params->n_seed_infection; idx ++ )
 	{
 		person = gsl_rng_uniform_int( rng, params->n_total );
-		new_infection( model, &(model->population[ person ]) );
+		new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
 	}
 	update_event_list_counters( &(model->infected), model );
 }
@@ -550,9 +567,10 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_infected( model );
-	transition_symptomatic( model );
-	transition_hospitalised( model );
+	transition_to_symptomatic( model );
+	transition_to_hospitalised( model );
+	transition_to_recovered( model );
+	transition_to_death( model );
 
 	update_event_list_counters( &(model->infected), model );
 	update_event_list_counters( &(model->asymptomatic), model );
