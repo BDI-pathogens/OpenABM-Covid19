@@ -505,9 +505,10 @@ void set_up_seed_infection( model *model )
 ******************************************************************************************/
 void build_daily_newtork( model *model )
 {
-	long idx, n_pos;
+	long idx, n_pos, person;
+	int jdx;
 	long *interactions = model->possible_interactions;
-	long *all_idx = &(model->interaction_idx);
+	long *all_idx      = &(model->interaction_idx);
 
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
@@ -516,7 +517,11 @@ void build_daily_newtork( model *model )
 	for( idx = 0; idx < model->params.n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
-	n_pos = model->n_possible_interactions;
+	n_pos = 0;
+	for( person = 0; person < model->params.n_total; person++ )
+		for( jdx = 0; jdx < model->population[jdx].mean_interactions; jdx++ )
+			interactions[n_pos++]=person;
+
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	idx = 0;
@@ -549,7 +554,6 @@ void build_daily_newtork( model *model )
 		if( *all_idx > model->n_interactions )
 			*all_idx = 0;
 	}
-	fflush(stdout);
 };
 
 /*****************************************************************************************
