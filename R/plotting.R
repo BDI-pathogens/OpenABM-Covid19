@@ -30,9 +30,9 @@ df_long[df_long$variable %in% c("n_hospital", "n_death"), "facet_row"] <- 2
 
 # Named vector of variable colours (Using 'Okabe Ito' color palette)
 color_vector <- c(
-	"n_infected" = "#D55E00", # vermillion
-	"n_symptoms" = "#CC79A7", # reddish purple 
-	"n_asymptom" = "#E69F00", # orange
+	"n_symptoms" = "#D55E00", # vermillion
+	"n_presymptom" = "#E69F00", # orange
+	"n_asymptom" = "#CC79A7", # reddish purple 
 	"n_hospital" = "#0072B2", # blue
 	"n_death" = "#000000", # black
 	"n_recovered" = "#009E73", # bluish green
