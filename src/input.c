@@ -68,7 +68,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
-	check = fscanf(parameter_file, " %lf",   &(params->cfr));
+	check = fscanf(parameter_file, " %lf ,", &(params->cfr));
+	check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic));
+	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
 
 	fclose(parameter_file);
 }

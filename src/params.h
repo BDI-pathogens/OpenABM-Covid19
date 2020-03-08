@@ -33,6 +33,11 @@ typedef struct{
 	double sd_time_to_death;		// sd time to death after hospital
 	double cfr;						// case fatality rate
 
+	double fraction_asymptomatic;			// faction who are asymptomatic
+	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
+	double mean_asymptomatic_to_recovery;   // mean time to recovery for asymptomatics
+	double sd_asymptomatic_to_recovery;     // sd of time to recovery for asymptomatics
+
 } parameters;
 
 /************************************************************************/
