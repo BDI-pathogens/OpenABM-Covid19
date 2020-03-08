@@ -53,6 +53,7 @@ typedef struct{
 	event_list death;
 
 	int symptomatic_draws[N_DRAW_LIST];
+	int hospitalised_draws[N_DRAW_LIST];
 	int recovered_draws[N_DRAW_LIST];
 	int death_draws[N_DRAW_LIST];
 

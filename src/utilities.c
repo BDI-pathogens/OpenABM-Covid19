@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "constant.h"
+#include "utilities.h"
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
@@ -57,6 +58,33 @@ void gamma_draw_list(
 
 	for( idx = 0; idx < n; idx++ )
 		list[idx] = ceil( gsl_cdf_gamma_Pinv( ( idx + 1.0 )/( n + 1.0 ), a, b ));
+}
+
+/*****************************************************************************************
+*  Name:		bernoulli_draw_list
+*  Description: generates a draw list so that we can efficiently sample
+*  				from a distribution
+*  				the 2 possible outcomes are floor(mean) and floor(mean)+1
+*
+*  Arguments:	list:	pointer to draw list be filled in
+*  				n:		length of draw list
+*  				mean:	mean of  distribution
+******************************************************************************************/
+void bernoulli_draw_list(
+	int *list,
+	int n,
+	double mean
+)
+{
+	int idx = 0;
+	int a, b, p;
+
+	a = floor( mean );
+	b = a + 1;
+	p = round( ( mean - a ) * n );
+
+	for( idx = 0; idx < n; idx++ )
+		list[idx] = ifelse( idx < p, b, a );
 }
 
 /*****************************************************************************************

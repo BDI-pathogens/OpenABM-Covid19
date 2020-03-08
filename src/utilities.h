@@ -26,6 +26,7 @@
 void print_now( char* );
 void print_exit( char* );
 void gamma_draw_list( int*, int, double, double );
+void bernoulli_draw_list( int*, int, double );
 void gamma_rate_curve( double*, int, double, double, double );
 
 #endif /* UTILITIES_H_ */
