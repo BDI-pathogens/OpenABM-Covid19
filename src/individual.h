@@ -32,6 +32,9 @@ typedef struct{
 	int time_infected;
 	int time_symptomatic;
 	int time_hospitalized;
+	int time_death;
+	int time_recovered;
+
 	event *current_event;
 } individual;
 

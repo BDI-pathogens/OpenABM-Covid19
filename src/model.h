@@ -46,10 +46,16 @@ typedef struct{
 	long event_idx;
 
 	event_list infected;
-	event_list hospitalized;
-
 	event_list symptomatic;
+	event_list hospitalized;
+	event_list recovered;
+	event_list death;
+
 	int symptomatic_draws[N_DRAW_LIST];
+	int recovered_draws[N_DRAW_LIST];
+	int death_draws[N_DRAW_LIST];
+
+//	event_list recovered;
 
 } model;
 

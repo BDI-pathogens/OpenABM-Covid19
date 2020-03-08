@@ -129,6 +129,8 @@ void set_up_distributions( model *model )
 	parameters *params = &(model->params);
 
 	gamma_draw_list( model->symptomatic_draws, N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
+	gamma_draw_list( model->recovered_draws,   N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
+	gamma_draw_list( model->death_draws,       N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 
 	gamma_rate_curve( model->infected.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, params->infectious_rate / params->mean_daily_interactions );
@@ -225,7 +227,7 @@ void transition_infected( model *model )
 		indiv->status = SYMPTOMATIC;
 		remove_event_from_event_list( &(model->infected), indiv->current_event, indiv->time_infected );
 
-		time_hospital = model->time + 2;
+		time_hospital = model->time + 1 + gsl_ran_bernoulli( rng, model->params.mean_time_to_hospital - 1 );
 		indiv->time_hospitalized = time_hospital;
 		indiv->current_event = event;
 		add_individual_to_event_list( &(model->hospitalized), indiv, time_hospital, model );
@@ -468,7 +470,6 @@ int one_time_step( model *model )
 	transition_symptomatic( model );
 
 	update_event_list_counters( &(model->infected), model );
-
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
 	return 1;
 };
