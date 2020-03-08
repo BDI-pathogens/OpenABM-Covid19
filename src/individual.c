@@ -72,6 +72,39 @@ void set_quarantine_status(
 }
 
 /*****************************************************************************************
+*  Name:		set_dead
+*  Description: sets a person as dead
+*  Returns:		void
+******************************************************************************************/
+void set_dead( individual *indiv )
+{
+	indiv->status = DEATH;
+	indiv->mean_interactions = 0;
+}
+
+/*****************************************************************************************
+*  Name:		set_recovered
+*  Description: sets a person to recovered
+*  Returns:		void
+******************************************************************************************/
+void set_recovered( individual *indiv, parameters* params )
+{
+	indiv->status = RECOVERED;
+	indiv->mean_interactions = params->mean_daily_interactions;
+}
+
+/*****************************************************************************************
+*  Name:		set_hospitalised
+*  Description: sets a person to hospitalised
+*  Returns:		void
+******************************************************************************************/
+void set_hospitalised( individual *indiv, parameters* params )
+{
+	indiv->status = HOSPITALISED;
+	indiv->mean_interactions = params->quarantined_daily_interactions;
+}
+
+/*****************************************************************************************
 *  Name:		destroy_individual
 *  Description: Destroys the model structure and releases its memory
 ******************************************************************************************/
