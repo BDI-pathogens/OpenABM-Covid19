@@ -63,7 +63,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_symptoms));
-	check = fscanf(parameter_file, " %lf",   &(params->mean_time_to_hospital));
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
+	check = fscanf(parameter_file, " %lf",   &(params->cfr));
 
 	fclose(parameter_file);
 }

@@ -26,6 +26,13 @@ typedef struct{
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
+
+	double mean_time_to_recover;	// mean time to recover after hospital
+	double sd_time_to_recover;  	// sd time to recover after hospital
+	double mean_time_to_death;		// mean time to death after hospital
+	double sd_time_to_death;		// sd time to death after hospital
+	double cfr;						// case fatality rate
+
 } parameters;
 
 /************************************************************************/
