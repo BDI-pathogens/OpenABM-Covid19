@@ -31,6 +31,7 @@ typedef struct{
 
 	int time_infected;
 	int time_symptomatic;
+	int time_asymptomatic;
 	int time_hospitalised;
 	int time_death;
 	int time_recovered;

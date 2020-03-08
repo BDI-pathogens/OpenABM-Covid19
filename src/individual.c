@@ -31,12 +31,15 @@ void initialize_individual(
 
 	indiv->idx    = idx;
 	indiv->status = UNINFECTED;
+	indiv->hazard = gsl_ran_exponential( rng, 1.0 );
+
 	indiv->n_mean_interactions = params->mean_daily_interactions;
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 );
+
 	indiv->time_infected     = UNKNOWN;
 	indiv->time_symptomatic  = UNKNOWN;
+	indiv->time_asymptomatic = UNKNOWN;
 	indiv->time_hospitalised = UNKNOWN;
 	indiv->time_death	     = UNKNOWN;
 	indiv->time_recovered    = UNKNOWN;

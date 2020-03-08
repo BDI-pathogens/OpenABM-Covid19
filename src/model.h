@@ -47,11 +47,13 @@ typedef struct{
 	long event_idx;
 
 	event_list infected;
+	event_list asymptomatic;
 	event_list symptomatic;
 	event_list hospitalised;
 	event_list recovered;
 	event_list death;
 
+	int asymptomatic_draws[N_DRAW_LIST];
 	int symptomatic_draws[N_DRAW_LIST];
 	int hospitalised_draws[N_DRAW_LIST];
 	int recovered_draws[N_DRAW_LIST];

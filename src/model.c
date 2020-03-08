@@ -129,17 +129,23 @@ void set_up_interactions( model *model )
 void set_up_distributions( model *model )
 {
 	parameters *params = &(model->params);
+	double infectious_rate;
 
+	gamma_draw_list( model->asymptomatic_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
 	gamma_draw_list( model->symptomatic_draws, 		N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
 	gamma_draw_list( model->recovered_draws,   		N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
 	gamma_draw_list( model->death_draws,       		N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
+	infectious_rate = params->infectious_rate / params->mean_daily_interactions;
 	gamma_rate_curve( model->infected.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, params->infectious_rate / params->mean_daily_interactions );
+					  params->sd_infectious_period, infectious_rate );
+
+	gamma_rate_curve( model->asymptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+				      params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
 
 	gamma_rate_curve( model->symptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-				      params->sd_infectious_period, params->infectious_rate/ params->mean_daily_interactions );
+				      params->sd_infectious_period, infectious_rate );
 }
 
 /*****************************************************************************************
