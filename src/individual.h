@@ -39,6 +39,7 @@ struct individual{
 	int time_hospitalised;
 	int time_death;
 	int time_recovered;
+	int time_quarantined;
 
 	event *current_event;
 	int next_event_type;
@@ -54,10 +55,10 @@ struct interaction{
 /************************************************************************/
 
 void initialize_individual( individual*, parameters*, long );
-void set_quarantine_status( individual*, parameters*, int );
-void set_recovered( individual*, parameters* );
-void set_hospitalised( individual*, parameters* );
-void set_dead( individual* );
+void set_quarantine_status( individual*, parameters*, int, int );
+void set_recovered( individual*, parameters*, int );
+void set_hospitalised( individual*, parameters*, int );
+void set_dead( individual*, int );
 
 void destroy_individual( individual* );
 

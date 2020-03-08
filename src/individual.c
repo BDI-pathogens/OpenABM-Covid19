@@ -56,18 +56,22 @@ void initialize_individual(
 void set_quarantine_status(
 	individual *indiv,
 	parameters *params,
+	int time,
 	int status
 )
 {
 	if( status )
 	{
-		indiv->quarantined         = TRUE;
+		indiv->quarantined       = TRUE;
+		indiv->time_quarantined  = time;
 		indiv->mean_interactions = params->quarantined_daily_interactions;
 	}
 	else
 	{
-		indiv->quarantined         = FALSE;
-		indiv->mean_interactions = params->mean_daily_interactions;
+		indiv->quarantined       = FALSE;
+		indiv->time_quarantined  = UNKNOWN;
+		if( indiv->status != DEATH && indiv->status == HOSPITALISED )
+			indiv->mean_interactions = params->mean_daily_interactions;
 	}
 }
 
@@ -76,7 +80,7 @@ void set_quarantine_status(
 *  Description: sets a person as dead
 *  Returns:		void
 ******************************************************************************************/
-void set_dead( individual *indiv )
+void set_dead( individual *indiv, int time )
 {
 	indiv->status = DEATH;
 	indiv->mean_interactions = 0;
@@ -87,7 +91,7 @@ void set_dead( individual *indiv )
 *  Description: sets a person to recovered
 *  Returns:		void
 ******************************************************************************************/
-void set_recovered( individual *indiv, parameters* params )
+void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status = RECOVERED;
 	indiv->mean_interactions = params->mean_daily_interactions;
@@ -98,10 +102,10 @@ void set_recovered( individual *indiv, parameters* params )
 *  Description: sets a person to hospitalised
 *  Returns:		void
 ******************************************************************************************/
-void set_hospitalised( individual *indiv, parameters* params )
+void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	indiv->mean_interactions = params->quarantined_daily_interactions;
+	indiv->mean_interactions = params->hospitalised_daily_interactions;
 }
 
 /*****************************************************************************************

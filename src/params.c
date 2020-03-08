@@ -23,4 +23,7 @@ void check_params( parameters *params )
 
     if( params->mean_time_to_hospital > 2 )
     	print_exit( "maximum time from symptoms to hospital is 2 days" );
+
+    if( params->quarantine_days > params->days_of_interactions )
+    	print_exit( "can only quarantine up to the number of days we store" );
 }

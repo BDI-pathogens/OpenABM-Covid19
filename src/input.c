@@ -73,7 +73,10 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
-	check = fscanf(parameter_file, " %i",    &(params->quarantined_daily_interactions));
+	check = fscanf(parameter_file, " %i ," , &(params->quarantined_daily_interactions));
+	check = fscanf(parameter_file, " %i ," , &(params->quarantine_days));
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_fraction));
+	check = fscanf(parameter_file, " %i",    &(params->hospitalised_daily_interactions));
 
 	fclose(parameter_file);
 }

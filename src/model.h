@@ -88,9 +88,11 @@ void transition_to_symptomatic( model* );
 void transition_to_hospitalised( model* );
 void transition_to_recovered( model* );
 void transition_to_death( model* );
+void release_from_quarantine( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
+void set_up_event_list( event_list*, parameters* );
 void remove_event_from_event_list( event_list*, event*, int );
 void update_event_list_counters( event_list*, model* );
 

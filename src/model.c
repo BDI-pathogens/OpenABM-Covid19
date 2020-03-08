@@ -28,6 +28,12 @@ model* new_model( parameters *params )
 	model->params = *params;
 	model->time   = 0;
 
+	set_up_event_list( &(model->asymptomatic), params );
+	set_up_event_list( &(model->hospitalised), params );
+	set_up_event_list( &(model->death), params );
+	set_up_event_list( &(model->recovered), params );
+	set_up_event_list( &(model->quarantined), params );
+
 	set_up_population( model );
 	set_up_interactions( model );
 	set_up_events( model );
@@ -251,6 +257,46 @@ void transition_to_symptomatic( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		quarantine_contracts
+*  Description: Quarantine contacts
+*  Returns:		void
+******************************************************************************************/
+void quarantine_contacts( model *model, individual *indiv )
+{
+	interaction *inter;
+	individual *contact;
+	int idx, ddx, day, n_contacts;
+	int time_event;
+
+	day = model->interaction_day_idx;
+	for( ddx = 0; ddx < model->params.quarantine_days; ddx++ )
+	{
+		n_contacts = indiv->n_interactions[day];
+
+		if( n_contacts > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 1; idx < n_contacts; idx++ )
+			{
+				contact = inter->individual;
+				if( contact->status != HOSPITALISED && contact->status != DEATH && !contact->quarantined )
+				{
+					if( gsl_ran_bernoulli( rng, model->params.quarantine_fraction ) )
+					{
+						set_quarantine_status( contact, &(model->params), model->time, TRUE );
+						time_event = model->time;
+						add_individual_to_event_list( &(model->quarantined), contact, time_event, model );
+					}
+				}
+				inter = inter->next;
+			}
+		}
+		day = ifelse( day == 0, model->params.days_of_interactions -1, day-1 );
+	}
+
+}
+
+/*****************************************************************************************
 *  Name:		transition_to_hospitalised
 *  Description: Transitions symptomatic individual to hospital
 *  Returns:		void
@@ -268,7 +314,7 @@ void transition_to_hospitalised( model *model )
 	for( idx = 0; idx < n_hospitalised; idx++ )
 	{
 		indiv = event->individual;
-		set_hospitalised( indiv, &(model->params) );
+		set_hospitalised( indiv, &(model->params), model->time );
 		remove_event_from_event_list( &(model->symptomatic), indiv->current_event, indiv->time_symptomatic );
 
 		indiv->current_event = event;
@@ -286,6 +332,8 @@ void transition_to_hospitalised( model *model )
 			indiv->next_event_type = RECOVERED;
 			add_individual_to_event_list( &(model->recovered), indiv, time_event, model );
 		};
+
+		quarantine_contacts( model, indiv );
 
 		event = event->next;
 	}
@@ -311,7 +359,7 @@ void transition_to_recovered( model *model )
 			remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
 		else
 			remove_event_from_event_list( &(model->asymptomatic), indiv->current_event, indiv->time_asymptomatic );
-		set_recovered( indiv, &(model->params) );
+		set_recovered( indiv, &(model->params), model->time );
 		event = event->next;
 	}
 }
@@ -332,8 +380,35 @@ void transition_to_death( model *model )
 	for( idx = 0; idx < n_death; idx++ )
 	{
 		indiv = event->individual;
-		set_dead( indiv );
+		set_dead( indiv, model->time );
 		remove_event_from_event_list( &(model->hospitalised), indiv->current_event, indiv->time_hospitalised );
+		event = event->next;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		release_from_quarantine
+*  Description: Release those held in quarantine
+*  Returns:		void
+******************************************************************************************/
+void release_from_quarantine( model *model )
+{
+	long idx, n_quarantine;
+	int time;
+	event *event;
+	individual *indiv;
+
+	time = model->time - 14;
+	if( time < 0 )
+		return;
+
+	n_quarantine = model->quarantined.n_daily_current[ time ];
+	event   = model->quarantined.events[ time ];
+	for( idx = 0; idx < n_quarantine; idx++ )
+	{
+		indiv = event->individual;
+		set_quarantine_status( indiv, &(model->params), model->time, FALSE );
+		remove_event_from_event_list( &(model->quarantined), event, time);
 		event = event->next;
 	}
 }
@@ -579,10 +654,13 @@ int one_time_step( model *model )
 	transition_to_hospitalised( model );
 	transition_to_recovered( model );
 	transition_to_death( model );
+	release_from_quarantine( model );
 
 	update_event_list_counters( &(model->presymptomatic), model );
 	update_event_list_counters( &(model->asymptomatic), model );
+	update_event_list_counters( &(model->quarantined), model );
 	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
+
 	return 1;
 };
 

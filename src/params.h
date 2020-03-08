@@ -42,6 +42,10 @@ typedef struct{
 	double sd_asymptomatic_to_recovery;     // sd of time to recovery for asymptomatics
 
 	int quarantined_daily_interactions; 	// number of interactions a quarantined person has
+	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
+
+	int quarantine_days;					// number of days of previous contacts to quarantine
+	double quarantine_fraction;				// fraction of people successfully quarantined
 
 } parameters;
 
