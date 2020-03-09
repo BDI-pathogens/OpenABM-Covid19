@@ -69,7 +69,7 @@ void destroy_model( model *model )
 void set_up_events( model *model )
 {
 	parameters *params = &(model->params);
-	int types = 3;
+	int types = 5;
 
 	model->event_idx = 0;
 	model->events    = calloc( types * params->n_total, sizeof( event ) );
@@ -138,9 +138,9 @@ void set_up_distributions( model *model )
 	double infectious_rate;
 
 	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( model->symptomatic_time_draws, 		N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
-	gamma_draw_list( model->recovered_time_draws,   		N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
-	gamma_draw_list( model->death_time_draws,       		N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
+	gamma_draw_list( model->symptomatic_time_draws, 	N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
+	gamma_draw_list( model->recovered_time_draws,   	N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
+	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
 	infectious_rate = params->infectious_rate / params->mean_daily_interactions;
@@ -215,6 +215,12 @@ void transmit_virus_by_type(
 /*****************************************************************************************
 *  Name:		transmit_virus
 *  Description: Transmits virus over the interaction network
+*
+*  				Transmission by groups depending upon disease status.
+*  				Note that quarantine is not a disease status and they will either
+*  				be presymptomatic/symptomatic/asymptomatic and quarantining is
+*  				modelled by reducing the number of interactions in the network.
+*
 *  Returns:		void
 ******************************************************************************************/
 void transmit_virus( model *model )
