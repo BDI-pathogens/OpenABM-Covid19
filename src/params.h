@@ -8,11 +8,14 @@
 #ifndef PARAMS_H_
 #define PARAMS_H_
 
+#include "constant.h"
+
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
 
 typedef struct{
+	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
 	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
