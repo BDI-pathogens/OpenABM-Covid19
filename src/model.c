@@ -28,10 +28,12 @@ model* new_model( parameters *params )
 	model->params = *params;
 	model->time   = 0;
 
+	set_up_event_list( &(model->presymptomatic), params );
 	set_up_event_list( &(model->asymptomatic), params );
+	set_up_event_list( &(model->symptomatic), params );
 	set_up_event_list( &(model->hospitalised), params );
-	set_up_event_list( &(model->death), params );
 	set_up_event_list( &(model->recovered), params );
+	set_up_event_list( &(model->death), params );
 	set_up_event_list( &(model->quarantined), params );
 
 	set_up_population( model );
@@ -160,6 +162,11 @@ void set_up_distributions( model *model )
 /*****************************************************************************************
 *  Name:		new_event
 *  Description: gets a new event tag
+*
+*      			FIXME - events should be re-usable - unused events should be
+*      			a linked list where we can return events to the list in
+*      			remove_event_from_event_list
+*
 *  Returns:		void
 ******************************************************************************************/
 event* new_event( model *model )
@@ -572,8 +579,6 @@ void set_up_seed_infection( model *model )
 	parameters *params = &(model->params);
 	int idx;
 	unsigned long int person;
-
-	set_up_event_list( &(model->presymptomatic), params );
 
 	for( idx = 0; idx < params->n_seed_infection; idx ++ )
 	{
