@@ -43,6 +43,8 @@ struct individual{
 
 	event *current_event;
 	int next_event_type;
+
+	event *quarantine_event;
 };
 
 struct interaction{

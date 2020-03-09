@@ -53,6 +53,9 @@ typedef struct{
 	event_list recovered;
 	event_list death;
 	event_list quarantined;
+	event_list quarantine_release;
+	event_list test_take;
+	event_list test_result;
 
 	int asymptomatic_time_draws[N_DRAW_LIST];
 	int symptomatic_time_draws[N_DRAW_LIST];
@@ -60,7 +63,7 @@ typedef struct{
 	int recovered_time_draws[N_DRAW_LIST];
 	int death_time_draws[N_DRAW_LIST];
 
-
+	long n_quarantine_days;
 } model;
 
 struct event{

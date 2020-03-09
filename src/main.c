@@ -54,7 +54,8 @@ int main(int argc, char *argv[])
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
-	printf( "# Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total);
+	printf( "# Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total );
+	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
     destroy_model( model );
  //   gsl_rng_free( rng );
