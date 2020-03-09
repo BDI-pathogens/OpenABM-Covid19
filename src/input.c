@@ -12,7 +12,7 @@
 #include "input.h"
 #include "params.h"
 #include "utilities.h"
-
+#include "constant.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
