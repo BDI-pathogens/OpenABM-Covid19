@@ -51,7 +51,8 @@ class TestClass(object):
         """
         
         # Call the model
-        completed_run = subprocess.run([command], capture_output = True)
-        
+        completed_run = subprocess.run([command, "./tests/data/test_parameters.csv"], 
+            capture_output = True)
+        print(completed_run)
         np.testing.assert_equal(completed_run.returncode, 0)
 
