@@ -182,8 +182,6 @@ void write_individual_file(model *model, parameters *params)
 	strcat(output_file, param_line_number);
 	strcat(output_file, ".csv");
 	
-	printf("%s", output_file);
-	
 	individual_output_file = fopen(output_file, "w");
 	if(individual_output_file == NULL)
 		print_exit("Can't open individual output file");
