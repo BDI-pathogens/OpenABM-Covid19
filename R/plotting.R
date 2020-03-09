@@ -36,12 +36,13 @@ color_vector <- c(
 	"n_hospital" = "#0072B2", # blue
 	"n_death" = "#000000", # black
 	"n_recovered" = "#009E73", # bluish green
+        "n_quarantine" = "grey",
 	"total_infected" = "#56B4E9"
 	)
 
 
 # Plotting call
-p <- ggplot(df_long, aes(x = Time, y = value, color = variable)) + 
+p <- ggplot(subset(df_long, variable != "total_infected"), aes(x = Time, y = value, color = variable)) + 
 	geom_hline(yintercept = 0) + 
 	geom_line(size = 1.0) + xlab("Time") + ylab("") + 
 	scale_x_continuous(expand = c(0, 0)) + 
