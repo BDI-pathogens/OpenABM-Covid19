@@ -31,6 +31,8 @@ enum DISEASE_STATUS{
 #define MAX_INFECTIOUS_PERIOD 40
 #define N_DRAW_LIST 1000
 
+#define INPUT_CHAR_LEN 100
+
 gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */

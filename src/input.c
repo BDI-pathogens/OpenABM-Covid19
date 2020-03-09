@@ -7,11 +7,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "input.h"
 #include "params.h"
 #include "utilities.h"
-
+#include "constant.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -20,10 +21,18 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number;
+	char input_param_file[ INPUT_CHAR_LEN ];
 	
 	if(argc > 1)
 	{
-		param_line_number = (int) strtol(argv[1], NULL, 10);
+		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN );
+	}else{
+		strncpy(input_param_file, "../tests/data/test_parameters.csv", INPUT_CHAR_LEN );
+	}
+	
+	if(argc > 2)
+	{
+		param_line_number = (int) strtol(argv[2], NULL, 10);
 		
 		if(param_line_number <= 0)
 			print_exit("Error Invalid line number, line number starts from 1");
@@ -31,7 +40,10 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 		param_line_number = 1;
 	}
 	
+	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
+	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
+	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
 }
 
 /*****************************************************************************************
@@ -43,7 +55,7 @@ void read_param_file( parameters *params)
 	FILE *parameter_file;
 	int i, check;
 	
-	parameter_file = fopen(FILENAME_PARAM, "r");
+	parameter_file = fopen(params->input_param_file, "r");
 	if(parameter_file == NULL)
 		print_exit("Can't open parameter file");
 	
