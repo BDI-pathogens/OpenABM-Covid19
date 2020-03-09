@@ -57,8 +57,10 @@ int main(int argc, char *argv[])
 	printf( "# Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
-    destroy_model( model );
- //   gsl_rng_free( rng );
+	
+	write_individual_file( model, &params );
+	destroy_model( model );
+	//   gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );
     tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
