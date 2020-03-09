@@ -5,6 +5,9 @@ Very basic example to show how testing may work using pytest
 Usage:
 With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be 
 run by calling 'pytest' from project folder.  
+
+Created: March 2020
+Author: p-robot
 """
 
 import subprocess, shutil, os
