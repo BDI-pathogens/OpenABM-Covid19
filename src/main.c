@@ -55,7 +55,9 @@ int main(int argc, char *argv[])
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "# Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total);
-
+	
+	write_individual_file( model, &params );
+	
     destroy_model( model );
  //   gsl_rng_free( rng );
 
