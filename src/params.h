@@ -51,6 +51,8 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double quarantine_fraction;				// fraction of people successfully quarantined
 
+	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
+
 } parameters;
 
 /************************************************************************/
