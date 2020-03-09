@@ -5,6 +5,9 @@ Very basic example to show how testing may work using pytest
 Usage:
 With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be 
 run by calling 'pytest' from project folder.  
+
+Created: March 2020
+Author: p-robot
 """
 
 import subprocess, shutil, os
@@ -51,7 +54,8 @@ class TestClass(object):
         """
         
         # Call the model
-        completed_run = subprocess.run([command], capture_output = True)
-        
+        completed_run = subprocess.run([command, "./tests/data/test_parameters.csv"], 
+            capture_output = True)
+        print(completed_run)
         np.testing.assert_equal(completed_run.returncode, 0)
 

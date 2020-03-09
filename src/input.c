@@ -64,6 +64,7 @@ void read_param_file( parameters *params)
 		fscanf(parameter_file, "%*[^\n]\n");
 	
 	// Read and attach parameter values to parameter structure
+	check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
 	check = fscanf(parameter_file, " %li ,", &(params->param_id));
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	check = fscanf(parameter_file, " %i ,",  &(params->mean_daily_interactions));

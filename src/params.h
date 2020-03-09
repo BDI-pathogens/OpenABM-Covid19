@@ -15,6 +15,7 @@
 /************************************************************************/
 
 typedef struct{
+	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
 	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set

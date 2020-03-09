@@ -1,4 +1,10 @@
-C=gcc
+# For use of the icc compiler
+ifeq ($(compiler),icc)
+    C = icc
+else
+    C = gcc
+endif
+
 OBJS = utilities.o params.o model.o individual.o main.o input.o
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = ${GSLFLAGS}

@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
 	printf("# Start model set-up\n");
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
+	
+	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 
 	printf( "Time,\ttotal_infected,\tn_presymptom,\tn_asymptom, \tn_quarantine, \tn_symptoms,\tn_hospital,\tn_death,\tn_recovered\n");
