@@ -70,7 +70,7 @@ void set_quarantine_status(
 	{
 		indiv->quarantined       = FALSE;
 		indiv->time_quarantined  = UNKNOWN;
-		if( indiv->status != DEATH && indiv->status == HOSPITALISED )
+		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
 			indiv->mean_interactions = params->mean_daily_interactions;
 	}
 }
