@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
 	
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
+	
+	//setup_output_files( model, &params );
 
 	printf( "Time,\ttotal_infected,\tn_presymptom,\tn_asymptom, \tn_quarantine, \tn_symptoms,\tn_hospital,\tn_death,\tn_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
@@ -57,8 +59,11 @@ int main(int argc, char *argv[])
 	printf( "# Total infected:                %li\n", model->presymptomatic.n_total + model->asymptomatic.n_total );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
-    destroy_model( model );
- //   gsl_rng_free( rng );
+
+	write_output_files( model, &params );
+	
+	destroy_model( model );
+	//   gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );
     tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;

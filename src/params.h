@@ -17,6 +17,7 @@
 typedef struct{
 	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
+	char output_file_dir[INPUT_CHAR_LEN];	// path to output directory
 	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
@@ -52,6 +53,9 @@ typedef struct{
 	double quarantine_fraction;				// fraction of people successfully quarantined
 
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
+	
+	int sys_write_individual; 		// Should an individual file be written to output?
+	int sys_write_timeseries; 		// Should a time series file be written to output?  
 
 } parameters;
 
