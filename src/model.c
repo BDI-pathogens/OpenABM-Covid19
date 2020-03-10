@@ -83,15 +83,34 @@ model* new_model( parameters *params )
 ******************************************************************************************/
 void destroy_model( model *model )
 {
-	parameters *params = model->params;
 	long idx;
 
-	for( idx = 0; idx < params->n_total; idx++ )
+	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
 
-	free( model->population );
+    free( model->population );
     free( model->possible_interactions );
     free( model->interactions );
+    free( model->params );
+    free( model->events );
+
+    free( model->asymptomatic_time_draws );
+    free( model->symptomatic_time_draws );
+    free( model->hospitalised_time_draws );
+    free( model->recovered_time_draws );
+    free( model->death_time_draws );
+    
+    free( model->presymptomatic );
+    free( model->asymptomatic );
+    free( model->symptomatic );
+    free( model->hospitalised );
+    free( model->recovered );
+    free( model->death );
+    free( model->quarantined );
+    free( model->quarantine_release );
+    free( model->test_take );
+    free( model->test_result );
+
     free( model );
 };
 
