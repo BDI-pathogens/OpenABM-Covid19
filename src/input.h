@@ -22,6 +22,7 @@
 
 void read_command_line_args(parameters *, int, char **);
 void read_param_file(parameters *);
+void write_output_files(model *, parameters *);
 void write_individual_file(model *, parameters *);
 
 #endif /* INPUT_H_ */

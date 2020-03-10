@@ -153,11 +153,31 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 	
-	check = fscanf(parameter_file, " %i ",   &(params->test_insensititve_period));
+	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
+	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
+	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
 
 	fclose(parameter_file);
 }
+
+
+/*****************************************************************************************
+*  Name:		write_output_files
+*  Description: Write (csv) files of simulation output
+******************************************************************************************/
+
+
+void write_output_files(model *model, parameters *params)
+{
+	
+	if(params->sys_write_individual == TRUE)
+		write_individual_file( model, params );
+}	
 
 /*****************************************************************************************
 *  Name:		write_individual_file
