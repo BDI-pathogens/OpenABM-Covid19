@@ -44,7 +44,7 @@ typedef struct{
 	long n_total_intereactions;
 
 	event *events;
-	long event_idx;
+	event *next_event;
 
 	event_list presymptomatic;
 	event_list asymptomatic;
@@ -96,7 +96,7 @@ void release_from_quarantine( model* );
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
 void set_up_event_list( event_list*, parameters* );
-void remove_event_from_event_list( event_list*, event*, int );
+void remove_event_from_event_list( event_list*, event*, model*, int );
 void update_event_list_counters( event_list*, model* );
 
 void new_infection( model*, individual*, individual* );
