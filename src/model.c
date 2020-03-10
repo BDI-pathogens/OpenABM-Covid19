@@ -87,13 +87,11 @@ void destroy_model( model *model )
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
-
+	
     free( model->population );
     free( model->possible_interactions );
     free( model->interactions );
-    free( model->params );
     free( model->events );
-
     free( model->asymptomatic_time_draws );
     free( model->symptomatic_time_draws );
     free( model->hospitalised_time_draws );
