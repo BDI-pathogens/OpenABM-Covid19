@@ -70,6 +70,7 @@ void set_quarantine_status(
 	{
 		indiv->quarantined       = FALSE;
 		indiv->time_quarantined  = UNKNOWN;
+		indiv->quarantine_event  = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
 			indiv->mean_interactions = params->mean_daily_interactions;
 	}
@@ -82,7 +83,8 @@ void set_quarantine_status(
 ******************************************************************************************/
 void set_dead( individual *indiv, int time )
 {
-	indiv->status = DEATH;
+	indiv->status        = DEATH;
+	indiv->current_event = NULL;
 	indiv->mean_interactions = 0;
 }
 
@@ -93,7 +95,8 @@ void set_dead( individual *indiv, int time )
 ******************************************************************************************/
 void set_recovered( individual *indiv, parameters* params, int time )
 {
-	indiv->status = RECOVERED;
+	indiv->status        = RECOVERED;
+	indiv->current_event = NULL;
 	indiv->mean_interactions = params->mean_daily_interactions;
 }
 
