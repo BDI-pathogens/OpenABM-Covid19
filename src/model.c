@@ -27,19 +27,46 @@
 model* new_model( parameters *params )
 {
 	model *model  = calloc( 1, sizeof( model ) );
-	model->params = *params;
+	
+	model->params = calloc(1, sizeof(parameters));
+	model->params = params;
 	model->time   = 0;
 
-	set_up_event_list( &(model->presymptomatic), params );
-	set_up_event_list( &(model->asymptomatic), params );
-	set_up_event_list( &(model->symptomatic), params );
-	set_up_event_list( &(model->hospitalised), params );
-	set_up_event_list( &(model->recovered), params );
-	set_up_event_list( &(model->death), params );
-	set_up_event_list( &(model->quarantined), params );
-	set_up_event_list( &(model->quarantine_release), params );
-	set_up_event_list( &(model->test_take), params );
-	set_up_event_list( &(model->test_result), params );
+        model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->symptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->recovered_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->death_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+
+	model->presymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->presymptomatic, params );
+	
+	model->asymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->asymptomatic, params );
+	
+	model->symptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->symptomatic, params );
+	
+	model->hospitalised = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->hospitalised, params );
+	
+	model->recovered = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->recovered, params );
+	
+	model->death = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->death, params );
+	
+	model->quarantined = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->quarantined, params );
+	
+	model->quarantine_release = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->quarantine_release, params );
+	
+	model->test_take = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->test_take, params );
+	
+	model->test_result = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model->test_result, params );
 
 	set_up_population( model );
 	set_up_interactions( model );
@@ -58,16 +85,31 @@ model* new_model( parameters *params )
 ******************************************************************************************/
 void destroy_model( model *model )
 {
-	parameters *params = &(model->params);
 	long idx;
 
-	for( idx = 0; idx < params->n_total; idx++ )
+	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
-
-	free( model->population );
+    free( model->population );
     free( model->possible_interactions );
     free( model->interactions );
-    free( model );
+    free( model->events );
+    free( model->asymptomatic_time_draws );
+    free( model->symptomatic_time_draws );
+    free( model->hospitalised_time_draws );
+    free( model->recovered_time_draws );
+    free( model->death_time_draws );
+    
+    free( model->presymptomatic );
+    free( model->asymptomatic );
+    free( model->symptomatic );
+    free( model->hospitalised );
+    free( model->recovered );
+    free( model->death );
+    free( model->quarantined );
+    free( model->quarantine_release );
+    free( model->test_take );
+    free( model->test_result );
+
 };
 
 /*****************************************************************************************
@@ -77,9 +119,9 @@ void destroy_model( model *model )
 ******************************************************************************************/
 void set_up_events( model *model )
 {
-	parameters *params = &(model->params);
 	long idx;
 	int types = 6;
+	parameters *params = model->params;
 
 	model->events     = calloc( types * params->n_total, sizeof( event ) );
 	model->next_event = &(model->events[0]);
@@ -99,7 +141,7 @@ void set_up_events( model *model )
 ******************************************************************************************/
 void set_up_population( model *model )
 {
-	parameters *params = &(model->params);
+	parameters *params = model->params;
 	long idx;
 
 	model->population = calloc( params->n_total, sizeof( individual ) );
@@ -115,7 +157,7 @@ void set_up_population( model *model )
 ******************************************************************************************/
 void set_up_interactions( model *model )
 {
-	parameters *params = &(model->params);
+	parameters *params = model->params;
 	individual *indiv;
 	long idx, n_idx, indiv_idx;
 
@@ -150,7 +192,7 @@ void set_up_interactions( model *model )
 ******************************************************************************************/
 void set_up_distributions( model *model )
 {
-	parameters *params = &(model->params);
+	parameters *params = model->params;
 	double infectious_rate;
 
 	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
@@ -160,16 +202,16 @@ void set_up_distributions( model *model )
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
 	infectious_rate = params->infectious_rate / params->mean_daily_interactions;
-	gamma_rate_curve( model->presymptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+	gamma_rate_curve( model->presymptomatic->infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
 
-	gamma_rate_curve( model->asymptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+	gamma_rate_curve( model->asymptomatic->infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 				      params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
 
-	gamma_rate_curve( model->symptomatic.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+	gamma_rate_curve( model->symptomatic->infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 				      params->sd_infectious_period, infectious_rate );
 
-	gamma_rate_curve( model->hospitalised.infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+	gamma_rate_curve( model->hospitalised->infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
 }
 
@@ -249,10 +291,10 @@ void transmit_virus_by_type(
 ******************************************************************************************/
 void transmit_virus( model *model )
 {
-	transmit_virus_by_type( model, &(model->presymptomatic) );
-	transmit_virus_by_type( model, &(model->symptomatic) );
-	transmit_virus_by_type( model, &(model->asymptomatic) );
-	transmit_virus_by_type( model, &(model->hospitalised) );
+	transmit_virus_by_type( model, model->presymptomatic );
+	transmit_virus_by_type( model, model->symptomatic );
+	transmit_virus_by_type( model, model->asymptomatic );
+	transmit_virus_by_type( model, model->hospitalised );
 }
 
 /*****************************************************************************************
@@ -267,8 +309,8 @@ void transition_to_symptomatic( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_infected = model->symptomatic.n_daily_current[ model->time ];
-	next_event = model->symptomatic.events[ model->time ];
+	n_infected = model->symptomatic->n_daily_current[ model->time ];
+	next_event = model->symptomatic->events[ model->time ];
 
 	for( idx = 0; idx < n_infected; idx++ )
 	{
@@ -277,13 +319,15 @@ void transition_to_symptomatic( model *model )
 		indiv      = event->individual;
 
 		indiv->status = SYMPTOMATIC;
-		remove_event_from_event_list( &(model->presymptomatic), indiv->current_event, model, indiv->time_infected );
+		
+		remove_event_from_event_list( model->presymptomatic, indiv->current_event, model, indiv->time_infected );
 
 		time_hospital            = model->time + sample_draw_list( model->hospitalised_time_draws );
 		indiv->time_hospitalised = time_hospital;
 		indiv->next_event_type   = HOSPITALISED;
 		indiv->current_event     = event;
-		add_individual_to_event_list( &(model->hospitalised), indiv, time_hospital, model );
+
+		add_individual_to_event_list( model->hospitalised, indiv, time_hospital, model );
 	}
 }
 
@@ -300,10 +344,10 @@ void quarantine_contacts( model *model, individual *indiv )
 	int time_event;
 
 	day = model->interaction_day_idx;
-	for( ddx = 0; ddx < model->params.quarantine_days; ddx++ )
+	for( ddx = 0; ddx < model->params->quarantine_days; ddx++ )
 	{
 		n_contacts = indiv->n_interactions[day];
-		time_event = model->time + max( model->params.test_insensititve_period - ddx, 1 );
+		time_event = model->time + max( model->params->test_insensititve_period - ddx, 1 );
 
 		if( n_contacts > 0 )
 		{
@@ -313,17 +357,17 @@ void quarantine_contacts( model *model, individual *indiv )
 				contact = inter->individual;
 				if( contact->status != HOSPITALISED && contact->status != DEATH && !contact->quarantined )
 				{
-					if( gsl_ran_bernoulli( rng, model->params.quarantine_fraction ) )
+					if( gsl_ran_bernoulli( rng, model->params->quarantine_fraction ) )
 					{
-						set_quarantine_status( contact, &(model->params), model->time, TRUE );
-						contact->quarantine_event = add_individual_to_event_list( &(model->quarantined), contact, model->time, model );
-						add_individual_to_event_list( &(model->test_take), contact, time_event, model );
+						set_quarantine_status( contact, model->params, model->time, TRUE );
+						contact->quarantine_event = add_individual_to_event_list( model->quarantined, contact, model->time, model );
+						add_individual_to_event_list( model->test_take, contact, time_event, model );
 					}
 				}
 				inter = inter->next;
 			}
 		}
-		day = ifelse( day == 0, model->params.days_of_interactions -1, day-1 );
+		day = ifelse( day == 0, model->params->days_of_interactions -1, day-1 );
 	}
 
 }
@@ -340,8 +384,8 @@ void transition_to_hospitalised( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_hospitalised = model->hospitalised.n_daily_current[ model->time ];
-	next_event     = model->hospitalised.events[ model->time ];
+	n_hospitalised = model->hospitalised->n_daily_current[ model->time ];
+	next_event     = model->hospitalised->events[ model->time ];
 
 	for( idx = 0; idx < n_hospitalised; idx++ )
 	{
@@ -351,27 +395,27 @@ void transition_to_hospitalised( model *model )
 
 		if( indiv->quarantined )
 		{
-			remove_event_from_event_list( &(model->quarantined), indiv->quarantine_event, model, indiv->time_quarantined );
-			set_quarantine_status( indiv, &(model->params), model->time, FALSE );
+			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model, indiv->time_quarantined );
+			set_quarantine_status( indiv, model->params, model->time, FALSE );
 		}
 
-		set_hospitalised( indiv, &(model->params), model->time );
-		remove_event_from_event_list( &(model->symptomatic), indiv->current_event, model, indiv->time_symptomatic );
+		set_hospitalised( indiv, model->params, model->time );
+		remove_event_from_event_list( model->symptomatic, indiv->current_event, model, indiv->time_symptomatic );
 
 		indiv->current_event = event;
-		if( gsl_ran_bernoulli( rng, model->params.cfr ) )
+		if( gsl_ran_bernoulli( rng, model->params->cfr ) )
 		{
 			time_event             = model->time + sample_draw_list( model->death_time_draws );
 			indiv->time_death      = time_event;
 			indiv->next_event_type = DEATH;
-			add_individual_to_event_list( &(model->death), indiv, time_event, model );
+			add_individual_to_event_list( model->death, indiv, time_event, model );
 		}
 		else
 		{
 			time_event             = model->time + sample_draw_list( model->recovered_time_draws );
 			indiv->time_recovered  = time_event;
 			indiv->next_event_type = RECOVERED;
-			add_individual_to_event_list( &(model->recovered), indiv, time_event, model );
+			add_individual_to_event_list( model->recovered, indiv, time_event, model );
 		};
 
 		quarantine_contacts( model, indiv );
@@ -389,8 +433,8 @@ void transition_to_recovered( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_recovered = model->recovered.n_daily_current[ model->time ];
-	next_event  = model->recovered.events[ model->time ];
+	n_recovered = model->recovered->n_daily_current[ model->time ];
+	next_event  = model->recovered->events[ model->time ];
 	for( idx = 0; idx < n_recovered; idx++ )
 	{
 		event      = next_event;
@@ -398,10 +442,11 @@ void transition_to_recovered( model *model )
 		indiv      = event->individual;
 
 		if( indiv->status == HOSPITALISED )
-			remove_event_from_event_list( &(model->hospitalised), indiv->current_event, model, indiv->time_hospitalised );
+			remove_event_from_event_list( model->hospitalised, indiv->current_event, model, indiv->time_hospitalised );
 		else
-			remove_event_from_event_list( &(model->asymptomatic), indiv->current_event, model, indiv->time_asymptomatic );
-		set_recovered( indiv, &(model->params), model->time );
+			remove_event_from_event_list( model->asymptomatic, indiv->current_event, model, indiv->time_asymptomatic );
+
+		set_recovered( indiv, model->params, model->time );
 	}
 }
 
@@ -416,15 +461,15 @@ void transition_to_death( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_death    = model->death.n_daily_current[ model->time ];
-	next_event = model->death.events[ model->time ];
+	n_death    = model->death->n_daily_current[ model->time ];
+	next_event = model->death->events[ model->time ];
 	for( idx = 0; idx < n_death; idx++ )
 	{
 		event      = next_event;
 		next_event = event->next;
 		indiv      = event->individual;
 
-		remove_event_from_event_list( &(model->hospitalised), indiv->current_event, model, indiv->time_hospitalised );
+		remove_event_from_event_list( model->hospitalised, indiv->current_event, model, indiv->time_hospitalised );
 		set_dead( indiv, model->time );
 	}
 }
@@ -440,9 +485,8 @@ void release_from_quarantine( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_quarantined = model->quarantine_release.n_daily_current[ model->time ];
-	next_event    = model->quarantine_release.events[ model->time ];
-
+	n_quarantined = model->quarantine_release->n_daily_current[ model->time ];
+	next_event    = model->quarantine_release->events[ model->time ];
 	for( idx = 0; idx < n_quarantined; idx++ )
 	{
 		event      = next_event;
@@ -451,9 +495,9 @@ void release_from_quarantine( model *model )
 
 		if( indiv->quarantined )
 		{
-			remove_event_from_event_list( &(model->quarantined), indiv->quarantine_event, model, indiv->time_quarantined );
-			remove_event_from_event_list( &(model->quarantine_release), event, model, model->time );
-			set_quarantine_status( indiv, &(model->params), model->time, FALSE );
+			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model, indiv->time_quarantined );
+			remove_event_from_event_list( model->quarantine_release, event, model, model->time );
+			set_quarantine_status( indiv, model->params, model->time, FALSE );
 		}
 	}
 }
@@ -469,8 +513,8 @@ void quarantined_test_take( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_test_take = model->test_take.n_daily_current[ model->time ];
-	next_event  = model->test_take.events[ model->time ];
+	n_test_take = model->test_take->n_daily_current[ model->time ];
+	next_event  = model->test_take->events[ model->time ];
 
 	for( idx = 0; idx < n_test_take; idx++ )
 	{
@@ -484,8 +528,8 @@ void quarantined_test_take( model *model )
 		else
 			indiv->quarantine_test_result = TRUE;
 
-		add_individual_to_event_list( &(model->test_result), indiv, model->time + model->params.test_result_wait, model );
-		remove_event_from_event_list( &(model->test_take), event, model, model->time );
+		add_individual_to_event_list( model->test_result, indiv, model->time + model->params->test_result_wait, model );
+		remove_event_from_event_list( model->test_take, event, model, model->time );
 	}
 }
 
@@ -500,8 +544,8 @@ void quarantined_test_result( model *model )
 	event *event, *next_event;
 	individual *indiv;
 
-	n_test_result = model->test_result.n_daily_current[ model->time ];
-	next_event    = model->test_result.events[ model->time ];
+	n_test_result = model->test_result->n_daily_current[ model->time ];
+	next_event    = model->test_result->events[ model->time ];
 
 	for( idx = 0; idx < n_test_result; idx++ )
 	{
@@ -510,14 +554,14 @@ void quarantined_test_result( model *model )
 		indiv      = event->individual;
 
 		if( indiv->quarantine_test_result == FALSE )
-			add_individual_to_event_list( &(model->quarantine_release), indiv, model->time, model );
+			add_individual_to_event_list( model->quarantine_release, indiv, model->time, model );
 		else
 		{
-			add_individual_to_event_list( &(model->quarantine_release), indiv, model->time + 14, model );
+			add_individual_to_event_list( model->quarantine_release, indiv, model->time + 14, model );
 			quarantine_contacts( model, indiv );
 		}
 
-		remove_event_from_event_list( &(model->test_result), event, model, model->time );
+		remove_event_from_event_list( model->test_result, event, model, model->time );
 	}
 }
 
@@ -629,28 +673,28 @@ void new_infection(
 	int time_symptoms, time_recovery;
 	infected->infector = infector;
 
-	if( gsl_ran_bernoulli( rng, model->params.fraction_asymptomatic ) )
+	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
 	{
 		infected->status            = ASYMPTOMATIC;
 		infected->time_infected     = model->time;
 		infected->time_asymptomatic = model->time;
-		infected->current_event = add_individual_to_event_list( &(model->asymptomatic), infected, model->time, model );
+		infected->current_event = add_individual_to_event_list( model->asymptomatic, infected, model->time, model );
 
 		time_recovery = model->time + sample_draw_list( model->asymptomatic_time_draws );
 		infected->time_recovered = time_recovery;
 		infected->next_event_type  = RECOVERED;
-		add_individual_to_event_list( &(model->recovered), infected, time_recovery, model );
+		add_individual_to_event_list( model->recovered, infected, time_recovery, model );
 	}
 	else
 	{
 		infected->status        = PRESYMPTOMATIC;
 		infected->time_infected = model->time;
-		infected->current_event = add_individual_to_event_list( &(model->presymptomatic), infected, model->time, model );
+		infected->current_event = add_individual_to_event_list( model->presymptomatic, infected, model->time, model );
 
 		time_symptoms = model->time + sample_draw_list( model->symptomatic_time_draws );
 		infected->time_symptomatic = time_symptoms;
 		infected->next_event_type  = SYMPTOMATIC;
-		add_individual_to_event_list( &(model->symptomatic), infected, time_symptoms, model );
+		add_individual_to_event_list( model->symptomatic, infected, time_symptoms, model );
 	}
 }
 
@@ -679,7 +723,7 @@ void set_up_event_list( event_list *list, parameters *params )
 ******************************************************************************************/
 void set_up_seed_infection( model *model )
 {
-	parameters *params = &(model->params);
+	parameters *params = model->params;
 	int idx;
 	unsigned long int person;
 
@@ -688,8 +732,8 @@ void set_up_seed_infection( model *model )
 		person = gsl_rng_uniform_int( rng, params->n_total );
 		new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
 	}
-	update_event_list_counters( &(model->presymptomatic), model );
-	update_event_list_counters( &(model->asymptomatic), model );
+	update_event_list_counters( model->presymptomatic, model );
+	update_event_list_counters( model->asymptomatic, model );
 }
 
 /*****************************************************************************************
@@ -707,11 +751,11 @@ void build_daily_newtork( model *model )
 	individual *indiv1, *indiv2;
 
 	int day = model->interaction_day_idx;
-	for( idx = 0; idx < model->params.n_total; idx++ )
+	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
 	n_pos = 0;
-	for( person = 0; person < model->params.n_total; person++ )
+	for( person = 0; person < model->params->n_total; person++ )
 		for( jdx = 0; jdx < model->population[person].mean_interactions; jdx++ )
 			interactions[n_pos++]=person;
 
@@ -756,13 +800,12 @@ void build_daily_newtork( model *model )
 int one_time_step( model *model )
 {
 	(model->time)++;
-
-	update_event_list_counters( &(model->symptomatic), model );
-	update_event_list_counters( &(model->hospitalised), model );
-	update_event_list_counters( &(model->recovered), model );
-	update_event_list_counters( &(model->death), model );
-	update_event_list_counters( &(model->test_take), model );
-	update_event_list_counters( &(model->test_result), model );
+	update_event_list_counters( model->symptomatic, model );
+	update_event_list_counters( model->hospitalised, model );
+	update_event_list_counters( model->recovered, model );
+	update_event_list_counters( model->death, model );
+	update_event_list_counters( model->test_take, model );
+	update_event_list_counters( model->test_result, model );
 
 	build_daily_newtork( model );
 	transmit_virus( model );
@@ -775,12 +818,12 @@ int one_time_step( model *model )
 	quarantined_test_result( model );
 	release_from_quarantine( model );
 
-	update_event_list_counters( &(model->presymptomatic), model );
-	update_event_list_counters( &(model->asymptomatic), model );
-	update_event_list_counters( &(model->quarantined), model );
-	model->n_quarantine_days += model->quarantined.n_current;
+	update_event_list_counters( model->presymptomatic, model );
+	update_event_list_counters( model->asymptomatic, model );
+	update_event_list_counters( model->quarantined, model );
+	model->n_quarantine_days += model->quarantined->n_current;
 
-	ring_inc( model->interaction_day_idx, model->params.days_of_interactions );
+	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
 
 	return 1;
 };
