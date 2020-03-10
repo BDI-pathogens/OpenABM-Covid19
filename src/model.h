@@ -57,11 +57,11 @@ typedef struct{
 	event_list *test_take;
 	event_list *test_result;
 
-	int asymptomatic_time_draws[N_DRAW_LIST];
-	int symptomatic_time_draws[N_DRAW_LIST];
-	int hospitalised_time_draws[N_DRAW_LIST];
-	int recovered_time_draws[N_DRAW_LIST];
-	int death_time_draws[N_DRAW_LIST];
+	int *asymptomatic_time_draws;
+	int *symptomatic_time_draws;
+	int *hospitalised_time_draws;
+	int *recovered_time_draws;
+	int *death_time_draws;
 
 	long n_quarantine_days;
 } model;

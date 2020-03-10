@@ -30,6 +30,12 @@ model* new_model( parameters *params )
 	model->params = params;
 	model->time   = 0;
 
+        model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->symptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->recovered_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+        model->death_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+
 	model->presymptomatic = calloc( 1, sizeof( event_list ) );
 	set_up_event_list( model->presymptomatic, params );
 	
