@@ -21,8 +21,6 @@
 /****************************** Structures  *****************************/
 /************************************************************************/
 
-typedef struct event event;
-
 struct event_list{
 	event *events[MAX_TIME];
 	long n_daily[MAX_TIME];
@@ -33,7 +31,7 @@ struct event_list{
 };
 
 typedef struct{
-	parameters params;
+	parameters *params;
 	individual *population;
 	int time;
 
