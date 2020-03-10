@@ -162,7 +162,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
 	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
+	check = fscanf(parameter_file, " %i ",   &(params->sys_write_timeseries));
 	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
 
 	fclose(parameter_file);
