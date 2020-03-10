@@ -87,7 +87,6 @@ void destroy_model( model *model )
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
-	
     free( model->population );
     free( model->possible_interactions );
     free( model->interactions );
@@ -109,7 +108,6 @@ void destroy_model( model *model )
     free( model->test_take );
     free( model->test_result );
 
-    free( model );
 };
 
 /*****************************************************************************************
