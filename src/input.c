@@ -156,6 +156,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
 
+	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
+
 	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
 	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
 

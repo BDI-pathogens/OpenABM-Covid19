@@ -53,6 +53,7 @@ typedef struct{
 	double quarantine_fraction;				// fraction of people successfully quarantined
 
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
+	int test_result_wait;					// number of days to wait for a test result
 	
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
