@@ -40,9 +40,9 @@ int main(int argc, char *argv[])
 	
 	//setup_output_files( model, &params );
 
-	printf( "Time,\ttotal_infected,\tn_presymptom,\tn_asymptom, \tn_quarantine, \tn_symptoms,\tn_hospital,\tn_death,\tn_recovered\n");
+	printf( "Time,total_infected,n_presymptom,n_asymptom,n_quarantine,n_symptoms,n_hospital,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
-		printf( "%2i,\t%li,\t%li,\t%li,\t%li,\t%li,\t%li,\t%li,\t%li\n",
+		printf( "%2i,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				model->presymptomatic->n_total + model->asymptomatic->n_total,
 				model->presymptomatic->n_current,
