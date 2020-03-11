@@ -46,17 +46,7 @@ typedef struct{
 
 	event *events;
 	event *next_event;
-
-	event_list *presymptomatic;
-	event_list *asymptomatic;
-	event_list *symptomatic;
-	event_list *hospitalised;
-	event_list *recovered;
-	event_list *death;
-	event_list *quarantined;
-	event_list *quarantine_release;
-	event_list *test_take;
-	event_list *test_result;
+	event_list *event_lists;
 
 	int *asymptomatic_time_draws;
 	int *symptomatic_time_draws;
@@ -79,6 +69,10 @@ struct event{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
+#define n_current( model, type ) ( model->event_lists[type].n_current )
+#define n_total( model, type ) ( model->event_lists[type].n_total )
+
+
 model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_interactions( model* );
@@ -97,10 +91,10 @@ void transition_to_death( model* );
 void release_from_quarantine( model* );
 
 event* new_event( model* );
-event* add_individual_to_event_list( event_list*, individual*, int, model* );
-void set_up_event_list( event_list*, parameters*, int );
-void remove_event_from_event_list( event_list*, event*, model* );
-void update_event_list_counters( event_list*, model* );
+event* add_individual_to_event_list( model*, int, individual*, int );
+void set_up_event_list( model*, parameters*, int );
+void remove_event_from_event_list( model*, event* );
+void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
 

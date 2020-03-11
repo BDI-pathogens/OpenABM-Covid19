@@ -45,19 +45,19 @@ int main(int argc, char *argv[])
 	while( model->time < params.end_time && one_time_step( model ) )
 		printf( "%2i,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
-				model->presymptomatic->n_total + model->asymptomatic->n_total,
-				model->presymptomatic->n_current,
-				model->asymptomatic->n_current,
-				model->quarantined->n_current,
-				model->symptomatic->n_current,
-   			    model->hospitalised->n_current,
-   			    model->death->n_current,
-   			    model->recovered->n_current
+				n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ),
+				n_current( model, PRESYMPTOMATIC ),
+				n_current( model, ASYMPTOMATIC ),
+				n_current( model, QUARANTINED ),
+				n_current( model, SYMPTOMATIC ),
+				n_current( model, HOSPITALISED ),
+				n_current( model, DEATH ),
+				n_current( model, RECOVERED )
 		);
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
-	printf( "# Total infected:                %li\n", model->presymptomatic->n_total + model->asymptomatic->n_total );
+	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 
