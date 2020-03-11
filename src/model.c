@@ -26,57 +26,60 @@
 ******************************************************************************************/
 model* new_model( parameters *params )
 {
-	model *model  = calloc( 1, sizeof( model ) );
+	model *model_ptr = NULL;
+	model_ptr = calloc( 1, sizeof( model_ptr ) );
+	if( model_ptr == NULL )
+	    print_exit("calloc to model failed\n");
 	
-	model->params = calloc(1, sizeof(parameters));
-	model->params = params;
-	model->time   = 0;
+	model_ptr->params = params;
+	model_ptr->time   = 0;
+	
 
-	model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-	model->symptomatic_time_draws  = calloc(N_DRAW_LIST, sizeof(int));
-	model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-	model->recovered_time_draws    = calloc(N_DRAW_LIST, sizeof(int));
-	model->death_time_draws        = calloc(N_DRAW_LIST, sizeof(int));
+	model_ptr->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	model_ptr->symptomatic_time_draws  = calloc(N_DRAW_LIST, sizeof(int));
+	model_ptr->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	model_ptr->recovered_time_draws    = calloc(N_DRAW_LIST, sizeof(int));
+	model_ptr->death_time_draws        = calloc(N_DRAW_LIST, sizeof(int));
 
-	model->presymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->presymptomatic, params, PRESYMPTOMATIC );
+	model_ptr->presymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->presymptomatic, params, PRESYMPTOMATIC );
 	
-	model->asymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->asymptomatic, params, ASYMPTOMATIC);
+	model_ptr->asymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->asymptomatic, params, ASYMPTOMATIC);
 	
-	model->symptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->symptomatic, params, SYMPTOMATIC );
+	model_ptr->symptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->symptomatic, params, SYMPTOMATIC );
 	
-	model->hospitalised = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->hospitalised, params, HOSPITALISED );
+	model_ptr->hospitalised = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->hospitalised, params, HOSPITALISED );
 	
-	model->recovered = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->recovered, params, RECOVERED );
+	model_ptr->recovered = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->recovered, params, RECOVERED );
 	
-	model->death = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->death, params, DEATH );
+	model_ptr->death = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->death, params, DEATH );
 	
-	model->quarantined = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantined, params, QUARANTINED );
+	model_ptr->quarantined = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->quarantined, params, QUARANTINED );
 	
-	model->quarantine_release = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantine_release, params, QUARANTINE_RELEASE );
+	model_ptr->quarantine_release = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->quarantine_release, params, QUARANTINE_RELEASE );
 	
-	model->test_take = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_take, params, TEST_TAKE );
+	model_ptr->test_take = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->test_take, params, TEST_TAKE );
 	
-	model->test_result = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_result, params, TEST_RESULT );
+	model_ptr->test_result = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->test_result, params, TEST_RESULT );
 
-	set_up_population( model );
-	set_up_interactions( model );
-	set_up_events( model );
-	set_up_distributions( model );
-	set_up_seed_infection( model );
+	set_up_population( model_ptr );
+	set_up_interactions( model_ptr );
+	set_up_events( model_ptr );
+	set_up_distributions( model_ptr );
+	set_up_seed_infection( model_ptr );
 
-	model->n_quarantine_days = 0;
+	model_ptr->n_quarantine_days = 0;
 
-	return model;
+	return model_ptr;
 };
 
 /*****************************************************************************************
@@ -746,7 +749,7 @@ void build_daily_newtork( model *model )
 	long idx, n_pos, person;
 	int jdx;
 	long *interactions = model->possible_interactions;
-	long *all_idx      = &(model->interaction_idx);
+	long all_idx      = model->interaction_idx;
 
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
@@ -772,8 +775,8 @@ void build_daily_newtork( model *model )
 			continue;
 		}
 
-		inter1 = &(model->interactions[ (*all_idx)++ ]);
-		inter2 = &(model->interactions[ (*all_idx)++ ]);
+		inter1 = &(model->interactions[ all_idx++ ]);
+		inter2 = &(model->interactions[ all_idx++ ]);
 		indiv1 = &(model->population[ interactions[ idx++ ] ] );
 		indiv2 = &(model->population[ interactions[ idx++ ] ] );
 
@@ -789,8 +792,8 @@ void build_daily_newtork( model *model )
 
 		model->n_total_intereactions++;
 
-		if( *all_idx > model->n_interactions )
-			*all_idx = 0;
+		if( all_idx > model->n_interactions )
+			all_idx = 0;
 	}
 };
 

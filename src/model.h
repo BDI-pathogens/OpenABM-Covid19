@@ -77,7 +77,7 @@ struct event{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-model* new_model();
+model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );

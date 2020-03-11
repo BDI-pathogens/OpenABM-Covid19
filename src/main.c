@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     printf("# Starting simulation\n");
 
     parameters params;	
+	
     struct timespec  tv;
     double tstart, tend;
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 	write_output_files( model, &params );
 	
 	destroy_model( model );
-	//   gsl_rng_free( rng );
+	gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );
     tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
