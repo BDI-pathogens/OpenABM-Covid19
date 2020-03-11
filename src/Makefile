@@ -6,7 +6,7 @@ else
 endif
 
 OBJS = utilities.o params.o model.o individual.o main.o input.o
-GSLFLAGS= -lgsl -lgslcblas -lm -O3
+GSLFLAGS= -lgsl -lgslcblas -lm -O3 -ggdb3
 LFLAGS = ${GSLFLAGS}
 
 # Name of executable
