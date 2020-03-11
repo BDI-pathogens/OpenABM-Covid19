@@ -17,10 +17,11 @@ import numpy as np
 # Directories
 IBM_DIR = "src"
 IBM_DIR_TEST = IBM_DIR + "_test"
-EXE = "covid19ibm.exe"
+EXE = "./covid19ibm.exe"
 
 # Construct the executable command
-command = join(IBM_DIR_TEST, EXE)
+command = EXE
+compile_command = "make clean; make all"
 
 class TestClass(object):
     """
@@ -37,7 +38,6 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
                 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all"
         completed_compilation = subprocess.run([compile_command], 
             shell = True, cwd = IBM_DIR_TEST, capture_output = True)
     
@@ -54,8 +54,7 @@ class TestClass(object):
         """
         
         # Call the model
-        completed_run = subprocess.run([command, "./tests/data/test_parameters.csv"], 
-            capture_output = True)
+        completed_run = subprocess.run([command], cwd = IBM_DIR_TEST, capture_output = True)
         print(completed_run)
         np.testing.assert_equal(completed_run.returncode, 0)
 
