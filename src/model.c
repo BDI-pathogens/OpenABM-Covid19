@@ -33,7 +33,6 @@ model* new_model( parameters *params )
 	
 	model_ptr->params = params;
 	model_ptr->time   = 0;
-	
 
 	model_ptr->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
 	model_ptr->symptomatic_time_draws  = calloc(N_DRAW_LIST, sizeof(int));
@@ -323,7 +322,7 @@ void transition_to_symptomatic( model *model )
 
 		indiv->status = SYMPTOMATIC;
 		
-		remove_event_from_event_list( model->presymptomatic, indiv->current_event, model, indiv->time_infected );
+		remove_event_from_event_list( model->presymptomatic, indiv->current_event, model );
 
 		time_hospital            = model->time + sample_draw_list( model->hospitalised_time_draws );
 		indiv->time_hospitalised = time_hospital;
@@ -398,12 +397,12 @@ void transition_to_hospitalised( model *model )
 
 		if( indiv->quarantined )
 		{
-			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model, indiv->time_quarantined );
+			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model );
 			set_quarantine_status( indiv, model->params, model->time, FALSE );
 		}
 
 		set_hospitalised( indiv, model->params, model->time );
-		remove_event_from_event_list( model->symptomatic, indiv->current_event, model, indiv->time_symptomatic );
+		remove_event_from_event_list( model->symptomatic, indiv->current_event, model );
 
 		indiv->current_event = event;
 		if( gsl_ran_bernoulli( rng, model->params->cfr ) )
@@ -445,9 +444,9 @@ void transition_to_recovered( model *model )
 		indiv      = event->individual;
 
 		if( indiv->status == HOSPITALISED )
-			remove_event_from_event_list( model->hospitalised, indiv->current_event, model, indiv->time_hospitalised );
+			remove_event_from_event_list( model->hospitalised, indiv->current_event, model );
 		else
-			remove_event_from_event_list( model->asymptomatic, indiv->current_event, model, indiv->time_asymptomatic );
+			remove_event_from_event_list( model->asymptomatic, indiv->current_event, model );
 
 		set_recovered( indiv, model->params, model->time );
 	}
@@ -472,7 +471,7 @@ void transition_to_death( model *model )
 		next_event = event->next;
 		indiv      = event->individual;
 
-		remove_event_from_event_list( model->hospitalised, indiv->current_event, model, indiv->time_hospitalised );
+		remove_event_from_event_list( model->hospitalised, indiv->current_event, model );
 		set_dead( indiv, model->time );
 	}
 }
@@ -498,8 +497,8 @@ void release_from_quarantine( model *model )
 
 		if( indiv->quarantined )
 		{
-			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model, indiv->time_quarantined );
-			remove_event_from_event_list( model->quarantine_release, event, model, model->time );
+			remove_event_from_event_list( model->quarantined, indiv->quarantine_event, model );
+			remove_event_from_event_list( model->quarantine_release, event, model );
 			set_quarantine_status( indiv, model->params, model->time, FALSE );
 		}
 	}
@@ -532,7 +531,7 @@ void quarantined_test_take( model *model )
 			indiv->quarantine_test_result = TRUE;
 
 		add_individual_to_event_list( model->test_result, indiv, model->time + model->params->test_result_wait, model );
-		remove_event_from_event_list( model->test_take, event, model, model->time );
+		remove_event_from_event_list( model->test_take, event, model );
 	}
 }
 
@@ -564,7 +563,7 @@ void quarantined_test_result( model *model )
 			quarantine_contacts( model, indiv );
 		}
 
-		remove_event_from_event_list( model->test_result, event, model, model->time );
+		remove_event_from_event_list( model->test_result, event, model );
 	}
 }
 
@@ -588,6 +587,8 @@ event* add_individual_to_event_list(
 {
 	event *event        = new_event( model );
 	event->individual   = indiv;
+	event->type         = list->type;
+	event->time         = time;
 
 	if( list->n_daily_current[time] > 1  )
 	{
@@ -625,10 +626,11 @@ event* add_individual_to_event_list(
 void remove_event_from_event_list(
 	event_list *list,
 	event *event,
-	model *model,
-	int time
+	model *model
 )
 {
+	int time = event->time;
+
 	if( list->n_daily_current[ time ] > 1 )
 	{
 		if( event != list->events[ time ] )

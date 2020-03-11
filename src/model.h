@@ -69,6 +69,8 @@ typedef struct{
 
 struct event{
 	individual *individual;
+	int type;
+	int time;
 	event *next;
 	event *last;
 };
@@ -97,7 +99,7 @@ void release_from_quarantine( model* );
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
 void set_up_event_list( event_list*, parameters*, int );
-void remove_event_from_event_list( event_list*, event*, model*, int );
+void remove_event_from_event_list( event_list*, event*, model* );
 void update_event_list_counters( event_list*, model* );
 
 void new_infection( model*, individual*, individual* );
