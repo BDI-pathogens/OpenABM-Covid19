@@ -4,6 +4,7 @@
 # File associated with compilation/linking
 src/*.o
 src/*.exe
+src/*.csv
 
 # Python testing files
 __pycache__
