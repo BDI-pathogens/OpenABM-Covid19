@@ -22,6 +22,7 @@
 /************************************************************************/
 
 struct event_list{
+	int type;
 	event *events[MAX_TIME];
 	long n_daily[MAX_TIME];
 	long n_daily_current[MAX_TIME];
@@ -95,7 +96,7 @@ void release_from_quarantine( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( event_list*, individual*, int, model* );
-void set_up_event_list( event_list*, parameters* );
+void set_up_event_list( event_list*, parameters*, int );
 void remove_event_from_event_list( event_list*, event*, model*, int );
 void update_event_list_counters( event_list*, model* );
 

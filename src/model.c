@@ -32,41 +32,41 @@ model* new_model( parameters *params )
 	model->params = params;
 	model->time   = 0;
 
-        model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->symptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->recovered_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->death_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	model->symptomatic_time_draws  = calloc(N_DRAW_LIST, sizeof(int));
+	model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	model->recovered_time_draws    = calloc(N_DRAW_LIST, sizeof(int));
+	model->death_time_draws        = calloc(N_DRAW_LIST, sizeof(int));
 
 	model->presymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->presymptomatic, params );
+	set_up_event_list( model->presymptomatic, params, PRESYMPTOMATIC );
 	
 	model->asymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->asymptomatic, params );
+	set_up_event_list( model->asymptomatic, params, ASYMPTOMATIC);
 	
 	model->symptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->symptomatic, params );
+	set_up_event_list( model->symptomatic, params, SYMPTOMATIC );
 	
 	model->hospitalised = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->hospitalised, params );
+	set_up_event_list( model->hospitalised, params, HOSPITALISED );
 	
 	model->recovered = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->recovered, params );
+	set_up_event_list( model->recovered, params, RECOVERED );
 	
 	model->death = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->death, params );
+	set_up_event_list( model->death, params, DEATH );
 	
 	model->quarantined = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantined, params );
+	set_up_event_list( model->quarantined, params, QUARANTINED );
 	
 	model->quarantine_release = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantine_release, params );
+	set_up_event_list( model->quarantine_release, params, QUARANTINE_RELEASE );
 	
 	model->test_take = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_take, params );
+	set_up_event_list( model->test_take, params, TEST_TAKE );
 	
 	model->test_result = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_result, params );
+	set_up_event_list( model->test_result, params, TEST_RESULT );
 
 	set_up_population( model );
 	set_up_interactions( model );
@@ -703,10 +703,11 @@ void new_infection(
 *  Description: sets up an event_list
 *  Returns:		void
 ******************************************************************************************/
-void set_up_event_list( event_list *list, parameters *params )
+void set_up_event_list( event_list *list, parameters *params, int type )
 {
 	int day;
 
+	list->type      = type;
 	list->n_current = 0;
 	list->n_total   = 0;
 	for( day = 0; day < params->end_time;day ++ )
