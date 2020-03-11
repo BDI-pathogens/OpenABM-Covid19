@@ -26,57 +26,59 @@
 ******************************************************************************************/
 model* new_model( parameters *params )
 {
-	model *model  = calloc( 1, sizeof( model ) );
+	model *model_ptr = NULL;
+	model_ptr = calloc( 1, sizeof( model ) );
+	if (model_ptr == NULL)
+	    print_exit("calloc to model failed\n");
 	
-	model->params = calloc(1, sizeof(parameters));
-	model->params = params;
-	model->time   = 0;
+	model_ptr->params = params;
+	model_ptr->time   = 0;
+	
+    model_ptr->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+    model_ptr->symptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+    model_ptr->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+    model_ptr->recovered_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+    model_ptr->death_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	
+	model_ptr->presymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->presymptomatic, params );
+	
+	model_ptr->asymptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->asymptomatic, params );
+	
+	model_ptr->symptomatic = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->symptomatic, params );
+	
+	model_ptr->hospitalised = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->hospitalised, params );
+	
+	model_ptr->recovered = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->recovered, params );
+	
+	model_ptr->death = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->death, params );
+	
+	model_ptr->quarantined = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->quarantined, params );
+	
+	model_ptr->quarantine_release = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->quarantine_release, params );
+	
+	model_ptr->test_take = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->test_take, params );
+	
+	model_ptr->test_result = calloc( 1, sizeof( event_list ) );
+	set_up_event_list( model_ptr->test_result, params );
 
-        model->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->symptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->recovered_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-        model->death_time_draws = calloc(N_DRAW_LIST, sizeof(int));
+	set_up_population( model_ptr );
+	set_up_interactions( model_ptr );
+	set_up_events( model_ptr );
+	set_up_distributions( model_ptr );
+	set_up_seed_infection( model_ptr );
 
-	model->presymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->presymptomatic, params );
-	
-	model->asymptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->asymptomatic, params );
-	
-	model->symptomatic = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->symptomatic, params );
-	
-	model->hospitalised = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->hospitalised, params );
-	
-	model->recovered = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->recovered, params );
-	
-	model->death = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->death, params );
-	
-	model->quarantined = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantined, params );
-	
-	model->quarantine_release = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->quarantine_release, params );
-	
-	model->test_take = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_take, params );
-	
-	model->test_result = calloc( 1, sizeof( event_list ) );
-	set_up_event_list( model->test_result, params );
+	model_ptr->n_quarantine_days = 0;
 
-	set_up_population( model );
-	set_up_interactions( model );
-	set_up_events( model );
-	set_up_distributions( model );
-	set_up_seed_infection( model );
-
-	model->n_quarantine_days = 0;
-
-	return model;
+	return model_ptr;
 };
 
 /*****************************************************************************************
