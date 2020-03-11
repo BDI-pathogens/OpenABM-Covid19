@@ -91,14 +91,16 @@ class TestClass(object):
         params.set_param("infectious_rate", 0.0)
         params.write_params(TEST_DATA_FILE)
 
-
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
 
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-
-        np.testing.assert_equal(np.sum(df_output.total_infected > 0), 0)
+        
+        output = df_output["total_infected"].iloc[-1]
+        expected_output = int(params.get_param("n_seed_infection"))
+        
+        np.testing.assert_equal(output, expected_output)
 
 
     def test_mean_time_to_death_zero(self):
@@ -126,13 +128,11 @@ class TestClass(object):
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
         params.set_param("mean_daily_interactions", 0)
         params.write_params(TEST_DATA_FILE)
-        print(params.params)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
         
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-        print(df_output)
-        np.testing.assert_equal(np.sum(df_output.total_infected > 0), 0)
+        np.testing.assert_equal(np.sum(df_output.total_infected == 0), 0)
 
