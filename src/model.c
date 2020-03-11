@@ -747,7 +747,7 @@ void build_daily_newtork( model *model )
 	long idx, n_pos, person;
 	int jdx;
 	long *interactions = model->possible_interactions;
-	long *all_idx      = &(model->interaction_idx);
+	long all_idx      = model->interaction_idx;
 
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
@@ -773,8 +773,8 @@ void build_daily_newtork( model *model )
 			continue;
 		}
 
-		inter1 = &(model->interactions[ (*all_idx)++ ]);
-		inter2 = &(model->interactions[ (*all_idx)++ ]);
+		inter1 = &(model->interactions[ all_idx++ ]);
+		inter2 = &(model->interactions[ all_idx++ ]);
 		indiv1 = &(model->population[ interactions[ idx++ ] ] );
 		indiv2 = &(model->population[ interactions[ idx++ ] ] );
 
@@ -790,8 +790,8 @@ void build_daily_newtork( model *model )
 
 		model->n_total_intereactions++;
 
-		if( *all_idx > model->n_interactions )
-			*all_idx = 0;
+		if( all_idx > model->n_interactions )
+			all_idx = 0;
 	}
 };
 
