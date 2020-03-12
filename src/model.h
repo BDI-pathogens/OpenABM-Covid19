@@ -100,5 +100,6 @@ void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
+void build_random_network( model *);
 
 #endif /* MODEL_H_ */
