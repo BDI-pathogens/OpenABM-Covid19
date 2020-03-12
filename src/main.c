@@ -40,6 +40,10 @@ int main(int argc, char *argv[])
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 	
+	
+	//network *household_network = new_network( params.n_total );
+	//build_watts_strogatz_network( household_network, &params );
+	
 	//setup_output_files( model, &params );
 
 	printf( "Time,total_infected,n_presymptom,n_asymptom,n_quarantine,n_symptoms,n_hospital,n_death,n_recovered\n");
