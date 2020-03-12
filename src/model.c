@@ -267,8 +267,13 @@ void transmit_virus( model *model )
 /*****************************************************************************************
 *  Name:		transition_to_symptomatic
 *  Description: Transitions infected who are due to become symptomatic. At this point
-*  				we decide which individual will require hospital treatment and which
-*  				will recover directly
+*  				there are 2 choices to be made:
+*
+*  				1. Will the individual require hospital treatment or will
+*  				they recover without needing treatment
+*  				2. Does the individual self-quarantine at this point and
+*  				asks for a test
+*
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_symptomatic( model *model )
@@ -296,7 +301,6 @@ void transition_to_symptomatic( model *model )
 			time_event               = model->time + sample_draw_list( model->hospitalised_time_draws );
 			indiv->time_hospitalised = time_event;
 		}
-
 		else
 		{
 			indiv->next_disease_type = RECOVERED;
@@ -306,6 +310,13 @@ void transition_to_symptomatic( model *model )
 
 		add_individual_to_event_list( model, indiv->next_disease_type, indiv, time_event );
 		indiv->current_disease_event = event;
+
+		if( gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
+		{
+			set_quarantine_status( indiv, model->params, model->time, TRUE );
+			indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+			add_individual_to_event_list( model, TEST_TAKE, indiv, time_event );
+		}
 	}
 }
 
