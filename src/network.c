@@ -13,8 +13,6 @@
 #include <math.h>
 
 #include "network.h"
-#include "utilities.h"
-#include "constant.h"
 
 /*****************************************************************************************
 *  Name:		new_network
@@ -43,17 +41,13 @@ network* new_network(long n_total)
 *  Returns:		pointer to model
 ******************************************************************************************/
 
-void build_watts_strogatz_network( )
+void build_watts_strogatz_network( network *network, parameters *params )
 {
 	long k = 10;
 	long N = 10000;
 	double p_rewire = 0.1;
 	
 	long incr = k/2, neighbour, i, j, l;
-	
-	printf("k : %li\n", k);
-	printf("N : %li\n", N);
-	printf("p_rewire : %f\n", p_rewire);
 	
 	// Allocate memory (needed for large N)
 	long** edge_mat;
@@ -119,26 +113,26 @@ void build_watts_strogatz_network( )
 	for(i = 0; i < N; i++){
 		n_edges += n_edges_arr[i];
 	}
-
-	// // Form array of total edges (i.e. network->edges)
-	edge* edges;
-	edges = calloc(n_edges, sizeof(edge));
+	network->n_edges = n_edges;
+	
+	// Form array of total edges (i.e. network->edges)
+	network->edges = calloc(n_edges, sizeof(edge));
 
 	long idx = 0;
 	for(i = 0; i < N; i++){
 		for(j = 0; j < n_edges_arr[i]; j++){
-			edges[idx].id1 = i;
-			edges[idx].id2 = edge_mat[i][j];
+			network->edges[idx].id1 = i;
+			network->edges[idx].id2 = edge_mat[i][j];
 			idx++;
 		}
 	}
-	free(edges);
+	free(network->edges);
 	
 	for(i = 0; i < N; i++)
 		free(edge_mat[i]);
 	free(edge_mat);
 	free(n_edges_arr);
-}
+};
 
 
 /*****************************************************************************************
@@ -158,7 +152,7 @@ void remove_contact(long *current_contacts_arr, long contact_to_remove, int *len
 	}
 	current_contacts_arr[j] = UNKNOWN;
 	--*length;
-}
+};
 
 /*****************************************************************************************
 *  Name:		add_contact
@@ -169,7 +163,7 @@ void add_contact(long *current_contacts_arr, long contact_to_add, int *length){
 	
 	current_contacts_arr[*length] = contact_to_add;
 	++*length;
-}
+};
 
 
 /*****************************************************************************************
@@ -190,7 +184,7 @@ int check_member_or_self(long x, long self, long *array, int length)
             return 1;
     }
     return 0;
-}
+};
 
 
 
