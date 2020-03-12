@@ -168,6 +168,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_fraction\n"); };
 
+	check = fscanf(parameter_file, " %lf ", &(params->self_quarantine_fraction));
+	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
+
 	fclose(parameter_file);
 }
 
@@ -176,11 +179,9 @@ void read_param_file( parameters *params)
 *  Name:		write_output_files
 *  Description: Write (csv) files of simulation output
 ******************************************************************************************/
-
-
 void write_output_files(model *model, parameters *params)
 {
-	
+
 	if(params->sys_write_individual == TRUE)
 		write_individual_file( model, params );
 }	
@@ -189,8 +190,6 @@ void write_output_files(model *model, parameters *params)
 *  Name:		write_individual_file
 *  Description: Write (csv) file of individuals in simulation
 ******************************************************************************************/
-
-
 void write_individual_file(model *model, parameters *params)
 {
 	
