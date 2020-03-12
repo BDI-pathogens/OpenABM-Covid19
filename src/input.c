@@ -168,8 +168,26 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_fraction\n"); };
 
-	check = fscanf(parameter_file, " %lf ", &(params->self_quarantine_fraction));
+	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->uk_house_1));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_1\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->uk_house_2));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_2\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->uk_house_3));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_3\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->uk_house_4));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_4\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->uk_house_5));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_5\n"); };
+
+	check = fscanf(parameter_file, " %lf", &(params->uk_house_6));
+	if( check < 1){ print_exit("Failed to read parameter uk_house_6\n"); };
 
 	fclose(parameter_file);
 }
