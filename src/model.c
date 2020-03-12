@@ -765,7 +765,6 @@ void build_random_network( model *model )
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
-
 	idx = 0;
 	n_pos--;
 	network->n_edges = 0;
@@ -831,7 +830,6 @@ void build_daily_newtork( model *model )
 {
 	build_random_network( model );
 	add_interactions_from_network( model, model->random_network );
-
 };
 
 /*****************************************************************************************
