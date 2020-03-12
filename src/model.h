@@ -86,7 +86,6 @@ void set_up_networks( model* );
 void destroy_model( model* );
 
 int one_time_step( model* );
-void build_daily_newtork( model* );
 void transmit_virus( model* );
 void transition_to_symptomatic( model* );
 void transition_to_hospitalised( model* );
@@ -101,7 +100,10 @@ void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
-void build_random_network( model *);
-void build_household_network( model *);
+
+void add_interactions_from_network( model*, network*, int );
+void build_daily_newtork( model* );
+void build_random_network( model * );
+void build_household_network( model * );
 
 #endif /* MODEL_H_ */
