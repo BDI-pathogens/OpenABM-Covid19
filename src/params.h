@@ -33,6 +33,7 @@ typedef struct{
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
+	double hospitalised_fraction;   // fraction of symptomatic patients requiring hospitalisation
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 
 	double mean_time_to_recover;	// mean time to recover after hospital
