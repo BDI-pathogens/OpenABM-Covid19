@@ -15,6 +15,7 @@
 
 #include "structure.h"
 #include "individual.h"
+#include "network.h"
 #include "params.h"
 
 /************************************************************************/
@@ -44,6 +45,8 @@ typedef struct{
 	long n_possible_interactions;
 	long n_total_intereactions;
 
+
+
 	event *events;
 	event *next_event;
 	event_list *event_lists;
@@ -71,7 +74,6 @@ struct event{
 
 #define n_current( model, type ) ( model->event_lists[type].n_current )
 #define n_total( model, type ) ( model->event_lists[type].n_total )
-
 
 model* new_model(parameters *);
 void set_up_population( model* );
