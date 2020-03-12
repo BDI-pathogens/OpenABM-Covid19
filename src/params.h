@@ -42,12 +42,7 @@ typedef struct{
 	double sd_time_to_death;		// sd time to death after hospital
 	double cfr;						// case fatality rate
 
-	double uk_house_1;				// ONS UK number of households with 1 person (in thousands)
-	double uk_house_2;				// ONS UK number of households with 2 person (in thousands)
-	double uk_house_3;				// ONS UK number of households with 3 person (in thousands)
-	double uk_house_4;				// ONS UK number of households with 4 person (in thousands)
-	double uk_house_5;				// ONS UK number of households with 5 person (in thousands)
-	double uk_house_6;				// ONS UK number of households with 6 person (in thousands)
+	double uk_house[UK_HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
 
 	double fraction_asymptomatic;			// faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics

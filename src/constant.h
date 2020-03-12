@@ -37,6 +37,7 @@ enum EVENT_TYPES{
 #define N_DRAW_LIST 1000
 
 #define INPUT_CHAR_LEN 100
+#define UK_HOUSEHOLD_N_MAX 6
 
 gsl_rng * rng;
 
