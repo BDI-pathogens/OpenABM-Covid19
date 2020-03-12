@@ -29,7 +29,7 @@ model* new_model( parameters *params )
 	int type;
 
 	model *model_ptr = NULL;
-	model_ptr = calloc( 1, sizeof( model_ptr ) );
+	model_ptr = calloc( 1, sizeof( model ) );
 	if( model_ptr == NULL )
 	    print_exit("calloc to model failed\n");
 	
