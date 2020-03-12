@@ -43,8 +43,8 @@ network* new_network(long n_total)
 
 void build_watts_strogatz_network( network *network, parameters *params )
 {
-	long k = 10;
-	long N = 10000;
+	long k = params->mean_daily_interactions;
+	long N = params->n_total;
 	double p_rewire = 0.1;
 	
 	long incr = k/2, neighbour, i, j, l;
