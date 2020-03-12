@@ -12,5 +12,6 @@
 typedef struct interaction interaction;
 typedef struct event event;
 typedef struct event_list event_list;
+typedef struct edge edge;
 
 #endif /* STRUCTURE_H_ */

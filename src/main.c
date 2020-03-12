@@ -8,6 +8,7 @@
 #include <gsl/gsl_cdf.h>
 
 #include "model.h"
+#include "network.h"
 #include "params.h"
 #include "utilities.h"
 #include "input.h"
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
 	
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
+	network *network = new_network( params.n_total );
 	
 	//setup_output_files( model, &params );
 
@@ -56,14 +58,15 @@ int main(int argc, char *argv[])
 		);
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
+	printf( "# Total edges in network:        %li\n", network->n_edges );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
-
 	write_output_files( model, &params );
 	
 	destroy_model( model );
+	destroy_network( network );
 	gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );
