@@ -459,11 +459,13 @@ void transition_to_hospitalised( model *model )
 {
 	long idx, n_hospitalised;
 	double time_event;
+	double hospital_fatality_rate;
 	event *event, *next_event;
 	individual *indiv;
 
-	n_hospitalised = model->event_lists[HOSPITALISED].n_daily_current[ model->time ];
-	next_event     = model->event_lists[HOSPITALISED].events[ model->time ];
+	n_hospitalised         = model->event_lists[HOSPITALISED].n_daily_current[ model->time ];
+	next_event             = model->event_lists[HOSPITALISED].events[ model->time ];
+	hospital_fatality_rate = model->params->cfr / model->params->hospitalised_fraction;
 
 	for( idx = 0; idx < n_hospitalised; idx++ )
 	{
@@ -481,7 +483,7 @@ void transition_to_hospitalised( model *model )
 		remove_event_from_event_list( model, indiv->current_disease_event );
 
 		indiv->current_disease_event = event;
-		if( gsl_ran_bernoulli( rng, model->params->cfr ) )
+		if( gsl_ran_bernoulli( rng, hospital_fatality_rate ) )
 		{
 			time_event               = model->time + sample_draw_list( model->death_time_draws );
 			indiv->time_death        = time_event;
@@ -865,7 +867,8 @@ void build_random_network( model *model )
 ******************************************************************************************/
 void add_interactions_from_network(
 	model *model,
-	network *network
+	network *network,
+	int skip_hospitalised
 )
 {
 	long idx     = 0;
@@ -879,7 +882,10 @@ void add_interactions_from_network(
 	{
 		indiv1 = &(model->population[ network->edges[idx].id1 ] );
 		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
+
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
+			continue;
+		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2 ->status == HOSPITALISED ) )
 			continue;
 
 		inter1 = &(model->interactions[ all_idx++ ]);
@@ -909,8 +915,8 @@ void add_interactions_from_network(
 void build_daily_newtork( model *model )
 {
 	build_random_network( model );
-	add_interactions_from_network( model, model->random_network );
-	add_interactions_from_network( model, model->household_network );
+	add_interactions_from_network( model, model->random_network, FALSE );
+	add_interactions_from_network( model, model->household_network, TRUE );
 };
 
 /*****************************************************************************************
