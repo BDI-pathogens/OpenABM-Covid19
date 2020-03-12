@@ -12,6 +12,7 @@
 #include "params.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
@@ -47,11 +48,11 @@ model* new_model( parameters *params )
 		set_up_event_list( model_ptr, params, type );
 
 	set_up_population( model_ptr );
+	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_distributions( model_ptr );
 	set_up_seed_infection( model_ptr );
-	set_up_networks( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -86,8 +87,12 @@ void destroy_model( model *model )
 void set_up_networks( model *model )
 {
 	long n_daily_interactions = model->params->n_total * model->params->mean_daily_interactions;
+
 	model->random_network        = calloc( 1, sizeof( network ) );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
+
+	model->household_network        = calloc( 1, sizeof( network ) );
+	build_household_network( model );
 }
 
 /*****************************************************************************************
@@ -137,12 +142,14 @@ void set_up_interactions( model *model )
 {
 	parameters *params = model->params;
 	individual *indiv;
-	long idx, n_idx, indiv_idx;
+	long idx, n_idx, indiv_idx, n_daily_interactions, n_interactions;
 
 	// FIXME - need to a good estimate of the total number of interactions
 	//         easy at the moment since we have a fixed number per individual
-	long n_daily_interactions = params->n_total * params->mean_daily_interactions;
-	long n_interactions       = n_daily_interactions * params->days_of_interactions;
+
+	n_daily_interactions  = params->n_total * params->mean_daily_interactions;
+	n_daily_interactions += model->household_network->n_edges * 2;
+	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
 	model->interactions          = calloc( n_interactions, sizeof( interaction ) );
 	model->n_interactions        = n_interactions;
@@ -172,6 +179,7 @@ void set_up_distributions( model *model )
 {
 	parameters *params = model->params;
 	double infectious_rate;
+	double mean_interactions;
 
 	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
 	gamma_draw_list( model->symptomatic_time_draws, 	N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
@@ -179,7 +187,10 @@ void set_up_distributions( model *model )
 	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
-	infectious_rate = params->infectious_rate / params->mean_daily_interactions;
+	mean_interactions  = params->mean_daily_interactions;
+	mean_interactions += model->household_network->n_edges * 2.0 / model->params->n_total;
+
+	infectious_rate = params->infectious_rate / mean_interactions;
 	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
 
@@ -191,6 +202,72 @@ void set_up_distributions( model *model )
 
 	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
+}
+
+/*****************************************************************************************
+*  Name:		calculate_household_distribution
+*  Description: Calculates the number of households of each size from the UK
+*  				household survey data
+******************************************************************************************/
+void calculate_household_distribution( model *model, long *n_house_tot  )
+{
+	long total;
+	int idx;
+	double survey_tot;
+	double n_person_frac[ UK_HOUSEHOLD_N_MAX ];
+
+	survey_tot = 0;
+	for( idx = 0; idx < UK_HOUSEHOLD_N_MAX; idx++)
+	{
+		n_person_frac[idx] = model->params->uk_house[ idx ] * ( idx + 1 );
+		survey_tot        += n_person_frac[idx];
+	}
+	total = 0;
+	for( idx = 1; idx < UK_HOUSEHOLD_N_MAX; idx++)
+	{
+		n_house_tot[idx] = (long) round( n_person_frac[idx] / survey_tot / ( idx + 1 ) * model->params->n_total );
+		total += n_house_tot[idx] * ( idx + 1 );
+	}
+	n_house_tot[0] = model->params->n_total - total;
+}
+
+/*****************************************************************************************
+*  Name:		build_household_network
+*  Description: Builds a network of household interactions based upon the UK household
+*  				data. Note this can only be done once since it allocates new memory
+*  				to the network structure.
+*
+******************************************************************************************/
+void build_household_network( model *model )
+{
+	long pop_idx, hdx, edge_idx;
+	int ndx, pdx, p2dx;
+	long n_house_tot[ UK_HOUSEHOLD_N_MAX ];
+	network *network   = model->household_network;
+
+	if( network->n_edges != 0 )
+		print_exit( "the household network can only be once" );
+
+	calculate_household_distribution( model, n_house_tot );
+	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+		network->n_edges += n_house_tot[ndx] * ndx * ( ndx + 1 ) / 2;
+	network->edges = calloc( network->n_edges, sizeof( edge ) );
+
+	edge_idx = 0;
+	pop_idx = 0;
+	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+		for( hdx = 0; hdx < n_house_tot[ndx]; hdx++ )
+			for( pdx = 0; pdx < ( ndx + 1 ); pdx++ )
+			{
+				for( p2dx = pdx+1; p2dx < ( ndx + 1 ); p2dx++ )
+				{
+					network->edges[edge_idx].id1 = pop_idx;
+					network->edges[edge_idx].id2 = pop_idx + p2dx - pdx;
+
+					edge_idx++;
+				}
+				pop_idx++;
+			}
 }
 
 /*****************************************************************************************
@@ -743,6 +820,7 @@ void set_up_seed_infection( model *model )
 	update_event_list_counters( model, ASYMPTOMATIC );
 }
 
+
 /*****************************************************************************************
 *  Name:		build_random_newtork
 *  Description: Builds a new random network
@@ -799,10 +877,13 @@ void add_interactions_from_network(
 
 	while( idx < network->n_edges )
 	{
+		indiv1 = &(model->population[ network->edges[idx].id1 ] );
+		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
+		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
+			continue;
+
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
-		indiv1 = &(model->population[ network->edges[idx].id1 ] );
-		indiv2 = &(model->population[ network->edges[idx].id2 ] );
 
 		inter1->individual = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
@@ -815,7 +896,6 @@ void add_interactions_from_network(
 		indiv2->n_interactions[ day ]++;
 
 		model->n_total_intereactions++;
-		idx++;
 
 		if( all_idx > model->n_interactions )
 			all_idx = 0;
@@ -830,6 +910,7 @@ void build_daily_newtork( model *model )
 {
 	build_random_network( model );
 	add_interactions_from_network( model, model->random_network );
+	add_interactions_from_network( model, model->household_network );
 };
 
 /*****************************************************************************************
