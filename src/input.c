@@ -252,7 +252,7 @@ void write_individual_file(model *model, parameters *params)
 			model->population[idx].time_hospitalised,
 			model->population[idx].time_death,
 			model->population[idx].time_recovered,
-			model->population[idx].next_event_type,
+			model->population[idx].next_disease_type,
 			infector_id
 			);
 	}

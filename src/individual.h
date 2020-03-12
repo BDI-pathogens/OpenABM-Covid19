@@ -41,8 +41,8 @@ struct individual{
 	int time_recovered;
 	int time_quarantined;
 
-	event *current_event;
-	int next_event_type;
+	event *current_disease_event;
+	int next_disease_type;
 
 	event *quarantine_event;
 	int quarantine_test_result;

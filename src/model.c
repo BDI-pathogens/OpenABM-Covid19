@@ -288,24 +288,24 @@ void transition_to_symptomatic( model *model )
 		indiv      = event->individual;
 
 		indiv->status = SYMPTOMATIC;
-		remove_event_from_event_list( model, indiv->current_event );
+		remove_event_from_event_list( model, indiv->current_disease_event );
 
 		if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction ) )
 		{
-			indiv->next_event_type   = HOSPITALISED;
+			indiv->next_disease_type = HOSPITALISED;
 			time_event               = model->time + sample_draw_list( model->hospitalised_time_draws );
 			indiv->time_hospitalised = time_event;
 		}
 
 		else
 		{
-			indiv->next_event_type   = RECOVERED;
+			indiv->next_disease_type = RECOVERED;
 			time_event               = model->time + sample_draw_list( model->recovered_time_draws );
 			indiv->time_recovered    = time_event;
 		}
 
-		add_individual_to_event_list( model, indiv->next_event_type, indiv, time_event );
-		indiv->current_event = event;
+		add_individual_to_event_list( model, indiv->next_disease_type, indiv, time_event );
+		indiv->current_disease_event = event;
 	}
 }
 
@@ -378,21 +378,21 @@ void transition_to_hospitalised( model *model )
 		}
 
 		set_hospitalised( indiv, model->params, model->time );
-		remove_event_from_event_list( model, indiv->current_event );
+		remove_event_from_event_list( model, indiv->current_disease_event );
 
-		indiv->current_event = event;
+		indiv->current_disease_event = event;
 		if( gsl_ran_bernoulli( rng, model->params->cfr ) )
 		{
-			time_event             = model->time + sample_draw_list( model->death_time_draws );
-			indiv->time_death      = time_event;
-			indiv->next_event_type = DEATH;
+			time_event               = model->time + sample_draw_list( model->death_time_draws );
+			indiv->time_death        = time_event;
+			indiv->next_disease_type = DEATH;
 			add_individual_to_event_list( model, DEATH, indiv, time_event );
 		}
 		else
 		{
-			time_event             = model->time + sample_draw_list( model->recovered_time_draws );
-			indiv->time_recovered  = time_event;
-			indiv->next_event_type = RECOVERED;
+			time_event               = model->time + sample_draw_list( model->recovered_time_draws );
+			indiv->time_recovered    = time_event;
+			indiv->next_disease_type = RECOVERED;
 			add_individual_to_event_list( model, RECOVERED, indiv, time_event );
 		};
 
@@ -419,7 +419,7 @@ void transition_to_recovered( model *model )
 		next_event = event->next;
 		indiv      = event->individual;
 
-		remove_event_from_event_list( model, indiv->current_event );
+		remove_event_from_event_list( model, indiv->current_disease_event );
 		set_recovered( indiv, model->params, model->time );
 	}
 }
@@ -443,7 +443,7 @@ void transition_to_death( model *model )
 		next_event = event->next;
 		indiv      = event->individual;
 
-		remove_event_from_event_list( model, indiv->current_event );
+		remove_event_from_event_list( model, indiv->current_disease_event );
 		set_dead( indiv, model->time );
 	}
 }
@@ -651,32 +651,31 @@ void new_infection(
 	individual *infector
 )
 {
-	int time_symptoms, time_recovery;
+	int time_event;
 	infected->infector = infector;
+
+	infected->time_infected = model->time;
 
 	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
 	{
 		infected->status            = ASYMPTOMATIC;
-		infected->time_infected     = model->time;
 		infected->time_asymptomatic = model->time;
-		infected->current_event = add_individual_to_event_list( model, ASYMPTOMATIC, infected, model->time );
 
-		time_recovery = model->time + sample_draw_list( model->asymptomatic_time_draws );
-		infected->time_recovered = time_recovery;
-		infected->next_event_type  = RECOVERED;
-		add_individual_to_event_list( model, RECOVERED, infected, time_recovery );
+		infected->next_disease_type = RECOVERED;
+		time_event                  = model->time + sample_draw_list( model->asymptomatic_time_draws );
+		infected->time_recovered    = time_event;
 	}
 	else
 	{
-		infected->status        = PRESYMPTOMATIC;
-		infected->time_infected = model->time;
-		infected->current_event = add_individual_to_event_list( model, PRESYMPTOMATIC, infected, model->time );
+		infected->status = PRESYMPTOMATIC;
 
-		time_symptoms = model->time + sample_draw_list( model->symptomatic_time_draws );
-		infected->time_symptomatic = time_symptoms;
-		infected->next_event_type  = SYMPTOMATIC;
-		add_individual_to_event_list( model, SYMPTOMATIC, infected, time_symptoms );
+		infected->next_disease_type = SYMPTOMATIC;
+		time_event                  = model->time + sample_draw_list( model->symptomatic_time_draws );
+		infected->time_symptomatic  = time_event;
 	}
+
+	infected->current_disease_event = add_individual_to_event_list( model, infected->status, infected, model->time );
+	add_individual_to_event_list( model, infected->next_disease_type, infected, time_event);
 }
 
 /*****************************************************************************************

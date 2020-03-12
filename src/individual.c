@@ -38,13 +38,13 @@ void initialize_individual(
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
 
-	indiv->time_infected     = UNKNOWN;
-	indiv->time_symptomatic  = UNKNOWN;
-	indiv->time_asymptomatic = UNKNOWN;
-	indiv->time_hospitalised = UNKNOWN;
-	indiv->time_death	     = UNKNOWN;
-	indiv->time_recovered    = UNKNOWN;
-	indiv->next_event_type   = UNKNOWN;
+	indiv->time_infected      = UNKNOWN;
+	indiv->time_symptomatic   = UNKNOWN;
+	indiv->time_asymptomatic  = UNKNOWN;
+	indiv->time_hospitalised  = UNKNOWN;
+	indiv->time_death	      = UNKNOWN;
+	indiv->time_recovered     = UNKNOWN;
+	indiv->next_disease_type  = UNKNOWN;
 }
 
 /*****************************************************************************************
@@ -84,7 +84,7 @@ void set_quarantine_status(
 void set_dead( individual *indiv, int time )
 {
 	indiv->status        = DEATH;
-	indiv->current_event = NULL;
+	indiv->current_disease_event = NULL;
 	indiv->mean_interactions = 0;
 }
 
@@ -96,7 +96,7 @@ void set_dead( individual *indiv, int time )
 void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
-	indiv->current_event = NULL;
+	indiv->current_disease_event = NULL;
 	indiv->mean_interactions = params->mean_daily_interactions;
 }
 
