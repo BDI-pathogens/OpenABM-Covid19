@@ -868,7 +868,8 @@ void build_random_network( model *model )
 void add_interactions_from_network(
 	model *model,
 	network *network,
-	int skip_hospitalised
+	int skip_hospitalised,
+	double prob_drop
 )
 {
 	long idx     = 0;
@@ -886,6 +887,8 @@ void add_interactions_from_network(
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
 		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2 ->status == HOSPITALISED ) )
+			continue;
+		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
 		inter1 = &(model->interactions[ all_idx++ ]);
@@ -915,8 +918,8 @@ void add_interactions_from_network(
 void build_daily_newtork( model *model )
 {
 	build_random_network( model );
-	add_interactions_from_network( model, model->random_network, FALSE );
-	add_interactions_from_network( model, model->household_network, TRUE );
+	add_interactions_from_network( model, model->random_network, FALSE, 0 );
+	add_interactions_from_network( model, model->household_network, TRUE, 0 );
 };
 
 /*****************************************************************************************
