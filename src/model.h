@@ -46,6 +46,7 @@ typedef struct{
 	long n_total_intereactions;
 
 	network *random_network;
+	network *household_network;
 
 	event *events;
 	event *next_event;
@@ -101,5 +102,6 @@ void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
 void build_random_network( model *);
+void build_household_network( model *);
 
 #endif /* MODEL_H_ */
