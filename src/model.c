@@ -266,13 +266,15 @@ void transmit_virus( model *model )
 
 /*****************************************************************************************
 *  Name:		transition_to_symptomatic
-*  Description: Transitions infected who are due to become symptomatic
+*  Description: Transitions infected who are due to become symptomatic. At this point
+*  				we decide which individual will require hospital treatment and which
+*  				will recover directly
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_symptomatic( model *model )
 {
 	long idx, n_infected;
-	int time_hospital;
+	int time_event;
 	event *event, *next_event;
 	individual *indiv;
 
@@ -286,15 +288,24 @@ void transition_to_symptomatic( model *model )
 		indiv      = event->individual;
 
 		indiv->status = SYMPTOMATIC;
-		
 		remove_event_from_event_list( model, indiv->current_event );
 
-		time_hospital            = model->time + sample_draw_list( model->hospitalised_time_draws );
-		indiv->time_hospitalised = time_hospital;
-		indiv->next_event_type   = HOSPITALISED;
-		indiv->current_event     = event;
+		if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction ) )
+		{
+			indiv->next_event_type   = HOSPITALISED;
+			time_event               = model->time + sample_draw_list( model->hospitalised_time_draws );
+			indiv->time_hospitalised = time_event;
+		}
 
-		add_individual_to_event_list( model, HOSPITALISED, indiv, time_hospital );
+		else
+		{
+			indiv->next_event_type   = RECOVERED;
+			time_event               = model->time + sample_draw_list( model->recovered_time_draws );
+			indiv->time_recovered    = time_event;
+		}
+
+		add_individual_to_event_list( model, indiv->next_event_type, indiv, time_event );
+		indiv->current_event = event;
 	}
 }
 
@@ -409,7 +420,6 @@ void transition_to_recovered( model *model )
 		indiv      = event->individual;
 
 		remove_event_from_event_list( model, indiv->current_event );
-
 		set_recovered( indiv, model->params, model->time );
 	}
 }
