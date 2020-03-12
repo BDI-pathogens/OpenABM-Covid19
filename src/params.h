@@ -51,7 +51,8 @@ typedef struct{
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
 
 	int quarantine_days;					// number of days of previous contacts to quarantine
-	double quarantine_fraction;				// fraction of people successfully quarantined
+	double quarantine_fraction;				// fraction of people quarantine upon being asked to
+	double self_quarantine_fraction;		// fraction of people who self-quarantine when show sypmtoms
 
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
