@@ -51,6 +51,7 @@ model* new_model( parameters *params )
 	set_up_events( model_ptr );
 	set_up_distributions( model_ptr );
 	set_up_seed_infection( model_ptr );
+	set_up_networks( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -77,6 +78,17 @@ void destroy_model( model *model )
     free( model->recovered_time_draws );
     free( model->death_time_draws );
 };
+/*****************************************************************************************
+*  Name:		set_up_networks
+*  Description: sets up then networks
+*  Returns:		void
+******************************************************************************************/
+void set_up_networks( model *model )
+{
+	long n_daily_interactions = model->params->n_total * model->params->mean_daily_interactions;
+	model->random_network        = calloc( 1, sizeof( network ) );
+	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
+}
 
 /*****************************************************************************************
 *  Name:		set_up_events
@@ -732,18 +744,15 @@ void set_up_seed_infection( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		build_daily_newtork
-*  Description: Builds a new interaction network
+*  Name:		build_random_newtork
+*  Description: Builds a new random network
 ******************************************************************************************/
-void build_daily_newtork( model *model )
+void build_random_network( model *model )
 {
 	long idx, n_pos, person;
 	int jdx;
 	long *interactions = model->possible_interactions;
-	long all_idx      = model->interaction_idx;
-
-	interaction *inter1, *inter2;
-	individual *indiv1, *indiv2;
+	network *network   = model->random_network;
 
 	int day = model->interaction_day_idx;
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -756,8 +765,10 @@ void build_daily_newtork( model *model )
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
+
 	idx = 0;
 	n_pos--;
+	network->n_edges = 0;
 	while( idx < n_pos )
 	{
 		if( interactions[ idx ] == interactions[ idx + 1 ] )
@@ -765,11 +776,34 @@ void build_daily_newtork( model *model )
 			idx++;
 			continue;
 		}
+		network->edges[network->n_edges].id1 = interactions[ idx++ ];
+		network->edges[network->n_edges].id2 = interactions[ idx++ ];
+		network->n_edges++;
+	}
+}
 
+/*****************************************************************************************
+*  Name:		add_interactions_from_network
+*  Description: Adds the daily interactions to all individual from a network
+******************************************************************************************/
+void add_interactions_from_network(
+	model *model,
+	network *network
+)
+{
+	long idx     = 0;
+	long all_idx = model->interaction_idx;
+	int day      = model->interaction_day_idx;
+
+	interaction *inter1, *inter2;
+	individual *indiv1, *indiv2;
+
+	while( idx < network->n_edges )
+	{
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
-		indiv1 = &(model->population[ interactions[ idx++ ] ] );
-		indiv2 = &(model->population[ interactions[ idx++ ] ] );
+		indiv1 = &(model->population[ network->edges[idx].id1 ] );
+		indiv2 = &(model->population[ network->edges[idx].id2 ] );
 
 		inter1->individual = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
@@ -782,10 +816,22 @@ void build_daily_newtork( model *model )
 		indiv2->n_interactions[ day ]++;
 
 		model->n_total_intereactions++;
+		idx++;
 
 		if( all_idx > model->n_interactions )
 			all_idx = 0;
 	}
+}
+
+/*****************************************************************************************
+*  Name:		build_daily_newtork
+*  Description: Builds a new interaction network
+******************************************************************************************/
+void build_daily_newtork( model *model )
+{
+	build_random_network( model );
+	add_interactions_from_network( model, model->random_network );
+
 };
 
 /*****************************************************************************************
@@ -801,7 +847,6 @@ int one_time_step( model *model )
 	update_event_list_counters( model, DEATH );
 	update_event_list_counters( model, TEST_TAKE );
 	update_event_list_counters( model, TEST_RESULT );
-
 
 	build_daily_newtork( model );
 	transmit_virus( model );

@@ -45,7 +45,7 @@ typedef struct{
 	long n_possible_interactions;
 	long n_total_intereactions;
 
-
+	network *random_network;
 
 	event *events;
 	event *next_event;
@@ -81,6 +81,7 @@ void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_distributions( model* );
 void set_up_seed_infection( model* );
+void set_up_networks( model* );
 void destroy_model( model* );
 
 int one_time_step( model* );
