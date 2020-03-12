@@ -44,7 +44,6 @@ network* new_network(long n_total)
 
 void build_watts_strogatz_network( )
 {
-	
 	long k = 10;
 	long N = 1000;
 	double p_rewire = 0.1;
@@ -56,7 +55,8 @@ void build_watts_strogatz_network( )
 	printf("p_rewire : %f\n", p_rewire);
 	
 	// Allocate memory (needed for large N)
-    long** edge_mat = calloc(N,  sizeof(long*));
+    long** edge_mat;
+	edge_mat = calloc(N, sizeof(long *));
     for(i = 0; i < N; i++)
         edge_mat[i] = calloc(k, sizeof(long));
 	
@@ -79,7 +79,6 @@ void build_watts_strogatz_network( )
 			j++;
 		}
 	}
-	
 	
 	double u;
 	long new_contact, old_contact;
@@ -109,31 +108,38 @@ void build_watts_strogatz_network( )
 		}
 	}
 	
+	// Count total edges (i.e. network->n_edges)
+	long n_edges = 0;
+	for(i = 0; i < N; i++){
+		n_edges += n_edges_arr[i];
+	}
 	
-	// // Count total edges (i.e. network->n_edges)
-	// long n_edges = 0;
-	// for(i = 0; i < N; i++){
-	// 	n_edges += n_edges_arr[i];
-	// }
-	//
-	// // Form array of total edges (i.e. network->edges)
-	// edge* edges = calloc(n_edges, sizeof(edge));
-	// long idx = 0;
-	// for(i = 0; i < N; i++){
-	// 	for(j = 0; j < n_edges_arr[i]; j++){
-	// 		edges[idx].id1 = i;
-	// 		edges[idx].id2 = edge_mat[i][j];
-	// 		idx++;
-	// 	}
-	// }
+	// Form array of total edges (i.e. network->edges)
+	edge* edges;
+	edges = calloc(n_edges, sizeof(edge));
+	long idx = 0;
+	for(i = 0; i < N; i++){
+		for(j = 0; j < n_edges_arr[i]; j++){
+			edges[idx].id1 = i;
+			edges[idx].id2 = edge_mat[i][j];
+			idx++;
+		}
+	}
 	
     for(i = 0; i < N; i++)
         free(edge_mat[i]);
-	
-	free(n_edges_arr);
 	free(edge_mat);
+	free(n_edges_arr);
+	
+	free(edges);
+	
 }
 
+
+/*****************************************************************************************
+*  Name:		remove_contact
+*  Description: Remove a contact from a list of edges, tidy list
+******************************************************************************************/
 
 void remove_contact(long *current_contacts, long contact_to_remove, int *n_edges){
 	int i, j = 0;
