@@ -42,11 +42,8 @@ network* new_network(long n_total)
 *  Returns:		pointer to model
 ******************************************************************************************/
 
-void build_watts_strogatz_network()
+void build_watts_strogatz_network( )
 {
-	
-	// Output: network->n_edges
-	// Output: network->edges
 	
 	long k = 10;
 	long N = 1000;
@@ -59,21 +56,24 @@ void build_watts_strogatz_network()
 	printf("p_rewire : %f\n", p_rewire);
 	
 	// Allocate memory (needed for large N)
-    long** edges = calloc(N,  sizeof(long*));
+    long** edge_mat = calloc(N,  sizeof(long*));
     for(i = 0; i < N; i++)
-        edges[i] = calloc(k, sizeof(long));
+        edge_mat[i] = calloc(k, sizeof(long));
+	
+	// Degree for each individual
+	int* n_edges_arr = calloc(N,  sizeof(int));
+	for(i = 0; i < N; i++)
+		n_edges_arr[i] = k;
 	
 	// Step 1: Set up random lattice
-	
 	for(i = 0; i < N; i++){
 		j = 0; l = 0;
-		while(l < k)
-		{
+		while(l < k){
 			// Make sure we loop to the start of the ring
 			neighbour = (i - incr + j + N) % N;
-			
+
 			if(neighbour != i){
-				edges[i][l] = neighbour;
+				edge_mat[i][l] = neighbour;
 				l++;
 			}
 			j++;
@@ -81,16 +81,95 @@ void build_watts_strogatz_network()
 	}
 	
 	
+	double u;
+	long new_contact, old_contact;
+	// Step 2: Randomly rewire connections with probability "p_rewire"
 	for(i = 0; i < N; i++){
-		printf("%li ", i);
-		for(j = 0; j < k; j++){
-				printf("%li ", edges[i][j]);
+		for(j = 0; j < n_edges_arr[i]; j++){
+			
+			u = gsl_rng_uniform(rng);
+			
+			if(u < p_rewire){
+				
+				new_contact = i;
+				
+				// Check if new_connection is already connected (or is self)
+				while(check_member_or_self(new_contact, i, edge_mat[i], n_edges_arr[i])){
+					new_contact = gsl_rng_uniform_int(rng, N);
+				}
+				
+				old_contact = edge_mat[i][j];
+				
+				// if not, rewire to this new contact
+				edge_mat[i][j] = new_contact;
+				
+				// rewire other person too
+				remove_contact(edge_mat[old_contact], i, &(n_edges_arr[old_contact]));
+			}
 		}
-		printf("\n");
 	}
 	
-	// Step 2: Randomly rewire connections
+	
+	// // Count total edges (i.e. network->n_edges)
+	// long n_edges = 0;
+	// for(i = 0; i < N; i++){
+	// 	n_edges += n_edges_arr[i];
+	// }
+	//
+	// // Form array of total edges (i.e. network->edges)
+	// edge* edges = calloc(n_edges, sizeof(edge));
+	// long idx = 0;
+	// for(i = 0; i < N; i++){
+	// 	for(j = 0; j < n_edges_arr[i]; j++){
+	// 		edges[idx].id1 = i;
+	// 		edges[idx].id2 = edge_mat[i][j];
+	// 		idx++;
+	// 	}
+	// }
+	
+    for(i = 0; i < N; i++)
+        free(edge_mat[i]);
+	
+	free(n_edges_arr);
+	free(edge_mat);
 }
+
+
+void remove_contact(long *current_contacts, long contact_to_remove, int *n_edges){
+	int i, j = 0;
+	for(i = 0; i < *n_edges; i++){
+		
+		if(current_contacts[i] != contact_to_remove){
+			current_contacts[j] = current_contacts[i];
+			j++;
+		}
+	}
+	current_contacts[j] = UNKNOWN;
+	--*n_edges;
+}
+
+
+/*****************************************************************************************
+*  Name:		check_member_or_self
+*  Description: Check if x is 'self' or a member of the 'array' (of length 'length')
+******************************************************************************************/
+
+int check_member_or_self(long x, long self, long *array, int length)
+{
+	if(x == self){
+		return 1;
+	}
+	
+    int i;
+    for(i = 0; i < length; i++)
+    {
+        if(array[i] == x)
+            return 1;
+    }
+    return 0;
+}
+
+
 
 /*****************************************************************************************
 *  Name:		destroy_network

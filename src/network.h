@@ -35,6 +35,8 @@ typedef struct{
 
 network* new_network(long n_total);
 void build_watts_strogatz_network( );
+int check_member_or_self(long , long, long *, int );
+void remove_contact(long *, long , int *);
 void destroy_network();
 
 #endif /* NETWORK_H_ */
