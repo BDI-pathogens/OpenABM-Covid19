@@ -180,7 +180,13 @@ void read_param_file( parameters *params)
 	for( i = 0; i < UK_HOUSEHOLD_N_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->uk_house[i]));
-		if( check < 1){ print_exit("Failed to read parameter uk_house_1\n"); };
+		if( check < 1){ print_exit("Failed to read parameter uk_house_*\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->uk_pop[i]));
+		if( check < 1){ print_exit("Failed to read parameter uk_pop_**\n"); };
 	}
 
 	fclose(parameter_file);

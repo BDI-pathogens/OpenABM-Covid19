@@ -30,6 +30,13 @@ enum EVENT_TYPES{
 	N_EVENT_TYPES
 };
 
+enum AGE_GROUPS{
+	AGE_0_17,
+	AGE_18_64,
+	AGE_65,
+	N_AGE_GROUPS
+};
+
 #define UNKNOWN -1
 #define MAX_DAILY_INTERACTIONS_KEPT 5
 #define MAX_TIME 1000
@@ -38,6 +45,7 @@ enum EVENT_TYPES{
 
 #define INPUT_CHAR_LEN 100
 #define UK_HOUSEHOLD_N_MAX 6
+
 
 gsl_rng * rng;
 
