@@ -47,6 +47,7 @@ typedef struct{
 
 	network *random_network;
 	network *household_network;
+	network *work_network;
 
 	event *events;
 	event *next_event;

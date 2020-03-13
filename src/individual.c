@@ -34,7 +34,7 @@ void initialize_individual(
 	indiv->quarantined = FALSE;
 	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
-	indiv->mean_interactions = params->mean_daily_interactions;
+	indiv->mean_interactions = params->mean_random_interactions;
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
 
@@ -72,7 +72,7 @@ void set_quarantine_status(
 		indiv->time_quarantined  = UNKNOWN;
 		indiv->quarantine_event  = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
-			indiv->mean_interactions = params->mean_daily_interactions;
+			indiv->mean_interactions = params->mean_random_interactions;
 	}
 }
 
@@ -97,7 +97,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	indiv->mean_interactions = params->mean_daily_interactions;
+	indiv->mean_interactions = params->mean_random_interactions;
 }
 
 /*****************************************************************************************
