@@ -84,6 +84,7 @@ void set_up_events( model* );
 void set_up_distributions( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
+void set_up_app_users( model* );
 void destroy_model( model* );
 
 int one_time_step( model* );
