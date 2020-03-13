@@ -218,22 +218,54 @@ void set_up_distributions( model *model )
 /*****************************************************************************************
 *  Name:		calculate_household_distribution
 *  Description: Calculates the number of households of each size from the UK
-*  				household survey data
+*  				household survey data. The age split of the households is based
+*  				upon ONS data for each age group. Then:
+*
+*  				 1. All elderly are assumed to live in 1 or 2 person household.
+*  					We fill them up in equal proportion
+*  				 2. The same proportion of household with 3/4/5/6 people in have
+*  				    children and then n-2 of the occupents are assumed to be children.
+*
+*  				 Note there is no age mixing in household between elderly and others.
+*
+* Argument:		model   		 - pointer to the model
+*  				n_house_tot 	 - number of households which this function sets
+*  				elderly_frac_1_2 - fraction of 1/2 person households which are elderly
+*				child_frac_2_6,	 - fraction of 3/4/5/6 person households which have chlildren
 ******************************************************************************************/
-void calculate_household_distribution( model *model, long *n_house_tot  )
+void calculate_household_distribution(
+	model *model,
+	long *n_house_tot,
+	double *elderly_frac_1_2,
+	double *child_frac_3_6
+)
 {
 	long total;
 	int idx;
-	double survey_tot;
+	double survey_tot, max_children, pop_all;
 	double n_person_frac[ UK_HOUSEHOLD_N_MAX ];
+	double *pop = model->params->uk_pop;
 
-	survey_tot = 0;
+	pop_all      = pop[AGE_0_17] + pop[AGE_18_64] + pop[AGE_65];
+	survey_tot   = 0;
+	max_children = 0;
 	for( idx = 0; idx < UK_HOUSEHOLD_N_MAX; idx++)
 	{
 		n_person_frac[idx] = model->params->uk_house[ idx ] * ( idx + 1 );
 		survey_tot        += n_person_frac[idx];
+		max_children      += model->params->uk_house[ idx ] * max( idx -1 , 0 );
 	}
-	total = 0;
+
+	*child_frac_3_6   = pop[AGE_0_17] / pop_all / ( max_children / survey_tot );
+	*elderly_frac_1_2 = pop[AGE_65] / pop_all / ( ( n_person_frac[HH_1] + n_person_frac[HH_2] ) / survey_tot );
+
+	if( *child_frac_3_6 > 1 )
+		print_exit( "not sufficient 3-6 person households for all the children" );
+
+	if( *elderly_frac_1_2 > 1 )
+		print_exit( "not sufficient 1-2 person households for all the elderly" );
+
+ 	total = 0;
 	for( idx = 1; idx < UK_HOUSEHOLD_N_MAX; idx++)
 	{
 		n_house_tot[idx] = (long) round( n_person_frac[idx] / survey_tot / ( idx + 1 ) * model->params->n_total );
@@ -248,18 +280,24 @@ void calculate_household_distribution( model *model, long *n_house_tot  )
 *  				data. Note this can only be done once since it allocates new memory
 *  				to the network structure.
 *
+*  				As part of the household allocation process we also assign people
+*  				to age groups. All elderly are assumed to live in 1-2 person
+*  				households and all children are assumed to live in a house with
+*  				2 adults.
 ******************************************************************************************/
 void build_household_network( model *model )
 {
 	long pop_idx, hdx, edge_idx;
-	int ndx, pdx, p2dx;
+	int ndx, pdx, p2dx, age;
 	long n_house_tot[ UK_HOUSEHOLD_N_MAX ];
+	double elderly_frac_1_2;
+	double child_frac_3_6;
 	network *network   = model->household_network;
 
 	if( network->n_edges != 0 )
 		print_exit( "the household network can only be once" );
 
-	calculate_household_distribution( model, n_house_tot );
+	calculate_household_distribution( model, n_house_tot, &elderly_frac_1_2, &child_frac_3_6 );
 	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
 		network->n_edges += n_house_tot[ndx] * ndx * ( ndx + 1 ) / 2;
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
@@ -270,6 +308,14 @@ void build_household_network( model *model )
 		for( hdx = 0; hdx < n_house_tot[ndx]; hdx++ )
 			for( pdx = 0; pdx < ( ndx + 1 ); pdx++ )
 			{
+				age = AGE_18_64;
+				if( ndx <= HH_2 && ( 1.0 * hdx / n_house_tot[ndx] ) < elderly_frac_1_2 )
+					age = AGE_65;
+				if( ndx >= HH_3 && ( 1.0 * hdx / n_house_tot[ndx] ) < child_frac_3_6 && pdx < ( ndx - 1 ) )
+					age = AGE_0_17;
+
+				set_age_group( &(model->population[pop_idx]), model->params, age );
+
 				for( p2dx = pdx+1; p2dx < ( ndx + 1 ); p2dx++ )
 				{
 					network->edges[edge_idx].id1 = pop_idx;
