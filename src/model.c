@@ -82,6 +82,8 @@ void destroy_model( model *model )
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
+    destroy_network( model->work_network );
+
 };
 /*****************************************************************************************
 *  Name:		set_up_networks
@@ -90,13 +92,17 @@ void destroy_model( model *model )
 ******************************************************************************************/
 void set_up_networks( model *model )
 {
-	long n_daily_interactions = model->params->n_total * model->params->mean_random_interactions;
+	long n_total 			  = model->params->n_total;
+	long n_daily_interactions = n_total * model->params->mean_random_interactions;
 
-	model->random_network        = new_network( model->params->n_total );
+	model->random_network        = new_network( n_total );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
 
-	model->household_network        =  new_network( model->params->n_total );
+	model->household_network  =  new_network( n_total );
 	build_household_network( model );
+
+	model->work_network = new_network( n_total );
+	build_watts_strogatz_network( model->work_network, n_total, model->params->mean_work_interactions, 0.1, TRUE );
 }
 
 /*****************************************************************************************
@@ -153,6 +159,7 @@ void set_up_interactions( model *model )
 
 	n_daily_interactions  = params->n_total * params->mean_random_interactions;
 	n_daily_interactions += model->household_network->n_edges * 2;
+	n_daily_interactions += (long) round( params->n_total * params->mean_work_interactions * (params->daily_fraction_work + 0.1 ) );
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
 	model->interactions          = calloc( n_interactions, sizeof( interaction ) );
@@ -191,7 +198,7 @@ void set_up_distributions( model *model )
 	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
-	mean_interactions  = params->mean_random_interactions;
+	mean_interactions  = params->mean_random_interactions + params->mean_work_interactions * params->daily_fraction_work;
 	mean_interactions += model->household_network->n_edges * 2.0 / model->params->n_total;
 
 	infectious_rate = params->infectious_rate / mean_interactions;
@@ -873,6 +880,7 @@ void add_interactions_from_network(
 	model *model,
 	network *network,
 	int skip_hospitalised,
+	int skip_quarantined,
 	double prob_drop
 )
 {
@@ -890,7 +898,9 @@ void add_interactions_from_network(
 
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
-		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2 ->status == HOSPITALISED ) )
+		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2->status == HOSPITALISED ) )
+			continue;
+		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
 		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
@@ -922,8 +932,9 @@ void add_interactions_from_network(
 void build_daily_newtork( model *model )
 {
 	build_random_network( model );
-	add_interactions_from_network( model, model->random_network, FALSE, 0 );
-	add_interactions_from_network( model, model->household_network, TRUE, 0 );
+	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
+	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
+	add_interactions_from_network( model, model->work_network, TRUE, TRUE, 1.0 - model->params->daily_fraction_work );
 };
 
 /*****************************************************************************************

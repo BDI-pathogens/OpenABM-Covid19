@@ -102,7 +102,7 @@ void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
 
-void add_interactions_from_network( model*, network*, int, double );
+void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
 void build_random_network( model * );
 void build_household_network( model * );
