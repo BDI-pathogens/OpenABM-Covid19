@@ -28,7 +28,7 @@ struct individual{
 	int status;
 
 	int age_group;
-	int work_group;
+	int work_network;
 
 	int quarantined;
 	int base_random_interactions;
