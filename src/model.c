@@ -83,9 +83,12 @@ void destroy_model( model *model )
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
+    for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+    	destroy_network( model->work_network[idx] );
     destroy_network( model->work_network );
 
 };
+
 /*****************************************************************************************
 *  Name:		set_up_networks
 *  Description: sets up then networks
@@ -93,18 +96,44 @@ void destroy_model( model *model )
 ******************************************************************************************/
 void set_up_networks( model *model )
 {
+	long idx;
 	long n_total 			  = model->params->n_total;
 	long n_daily_interactions = n_total * model->params->mean_random_interactions[AGE_18_64];
 
 	model->random_network        = new_network( n_total );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
 
-	model->household_network  =  new_network( n_total );
+	model->household_network = new_network( n_total );
 	build_household_network( model );
 
-	model->work_network = new_network( n_total );
-	build_watts_strogatz_network( model->work_network, n_total, model->params->mean_work_interactions[AGE_18_64], 0.1, TRUE );
+	model->work_network = calloc( N_AGE_GROUPS, sizeof( network* ) );
+	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+		set_up_work_network( model, idx );
 }
+
+/*****************************************************************************************
+*  Name:		set_up_work_network
+*  Description: sets up the work network for a particular age group
+*  Returns:		void
+******************************************************************************************/
+void set_up_work_network( model *model, int age )
+{
+	long idx;
+	long n_people = 0;
+	long *people;
+
+	people = calloc( model->params->n_total, sizeof( long ) );
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		if( model->population[idx].work_network == age )
+			people[n_people++] = idx;
+
+	model->work_network[age] = new_network( n_people );
+	build_watts_strogatz_network( model->work_network[age], n_people, model->params->mean_work_interactions[age], 0.1, TRUE );
+	relabel_network( model->work_network[age], people );
+
+	free( people );
+}
+
 
 /*****************************************************************************************
 *  Name:		set_up_events
@@ -144,6 +173,26 @@ void set_up_population( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		estimate_total_interactions
+*  Description: estimates the total number of interactions from the networks
+*  Returns:		void
+******************************************************************************************/
+double estimate_total_interactions( model *model )
+{
+	long idx;
+	double n_interactions;
+	n_interactions = 0;
+
+	n_interactions += model->household_network->n_edges;
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		n_interactions += model->population[idx].base_random_interactions * 0.5;
+	for( idx = AGE_0_17; idx <= AGE_65 ; idx++ )
+		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
+
+	return n_interactions;
+}
+
+/*****************************************************************************************
 *  Name:		set_up_interactions
 *  Description: sets up the stock of interactions, note that these get recycled once we
 *  				move to a later date
@@ -155,12 +204,7 @@ void set_up_interactions( model *model )
 	individual *indiv;
 	long idx, n_idx, indiv_idx, n_daily_interactions, n_interactions;
 
-	// FIXME - need to a good estimate of the total number of interactions
-	//         easy at the moment since we have a fixed number per individual
-
-	n_daily_interactions  = params->n_total * params->mean_random_interactions[AGE_18_64];
-	n_daily_interactions += model->household_network->n_edges * 2;
-	n_daily_interactions += (long) round( params->n_total * params->mean_work_interactions[AGE_18_64] * (params->daily_fraction_work + 0.1 ) );
+	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
 	model->interactions          = calloc( n_interactions, sizeof( interaction ) );
@@ -199,10 +243,9 @@ void set_up_distributions( model *model )
 	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
-	mean_interactions  = params->mean_random_interactions[AGE_18_64] + params->mean_work_interactions[AGE_18_64] * params->daily_fraction_work;
-	mean_interactions += model->household_network->n_edges * 2.0 / model->params->n_total;
+	mean_interactions = 2 * estimate_total_interactions( model ) / params->n_total;
+	infectious_rate   = params->infectious_rate / mean_interactions;
 
-	infectious_rate = params->infectious_rate / mean_interactions;
 	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
 
@@ -978,10 +1021,14 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_newtork( model *model )
 {
+	int idx;
+
 	build_random_network( model );
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
-	add_interactions_from_network( model, model->work_network, TRUE, TRUE, 1.0 - model->params->daily_fraction_work );
+
+	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work );
 };
 
 /*****************************************************************************************
@@ -1024,7 +1071,6 @@ int one_time_step( model *model )
 *  Name:		set_up_app_users
 *  Description: Set up the proportion of app users in the population (default is FALSE)
 ******************************************************************************************/
-
 void set_up_app_users( model *model )
 {
 	double p_app_users = 0.85;
