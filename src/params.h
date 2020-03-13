@@ -25,9 +25,11 @@ typedef struct{
 	int end_time;				    // maximum end time
 	int n_seed_infection;			// number of people seeded with the infections
 
-	int mean_random_interactions;    // mean number of random interactions each day
-	int mean_work_interactions;		 // mean number of regular work interactions
-	double daily_fraction_work;      // fraction of daily work interactions
+	int mean_random_interactions[N_AGE_GROUPS]; // mean number of random interactions each day
+	int mean_work_interactions[N_AGE_GROUPS];	// mean number of regular work interactions
+	double daily_fraction_work;      			// fraction of daily work interactions
+	double child_network_adults;				// fraction of adults in the child network
+	double elderly_network_adults;				// fraction of adults in the elderly network
 
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
