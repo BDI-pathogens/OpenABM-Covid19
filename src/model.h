@@ -76,6 +76,7 @@ struct event{
 
 #define n_current( model, type ) ( model->event_lists[type].n_current )
 #define n_total( model, type ) ( model->event_lists[type].n_total )
+#define n_daily( model, type, day ) ( model->event_lists[type].n_daily_current[day] )
 
 model* new_model(parameters *);
 void set_up_population( model* );
