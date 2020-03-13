@@ -122,4 +122,22 @@ void gamma_rate_curve(
 		list[idx] *= factor / total;
 }
 
+/*****************************************************************************************
+*  Name:		negative_binomial_draw
+*  Description: Draws from a negative binomial distribution with a given mean
+*  				and sd
+*
+*  Arguments:	mean - mean of distrubution
+*  				sd	 - standard deviation of distribution
+******************************************************************************************/
+int negative_binomial_draw( double mean , double sd )
+{
+	double p, n;
+
+	p = mean / sd / sd;
+	n = mean * mean / ( sd * sd - mean );
+
+	return gsl_ran_negative_binomial( rng, p, n );
+}
+
 
