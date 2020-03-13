@@ -26,6 +26,7 @@ typedef struct individual individual;
 struct individual{
 	long idx;
 	int status;
+	int age_group;
 	int quarantined;
 	int mean_interactions;
 	double hazard;
@@ -58,6 +59,7 @@ struct interaction{
 /************************************************************************/
 
 void initialize_individual( individual*, parameters*, long );
+void set_age_group( individual*, parameters*, int );
 void set_quarantine_status( individual*, parameters*, int, int );
 void set_recovered( individual*, parameters*, int );
 void set_hospitalised( individual*, parameters*, int );

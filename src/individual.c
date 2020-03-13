@@ -77,6 +77,16 @@ void set_quarantine_status(
 }
 
 /*****************************************************************************************
+*  Name:		set_age_group
+*  Description: sets a person's age group
+*  Returns:		void
+******************************************************************************************/
+void set_age_group( individual *indiv, parameters *params, int group )
+{
+	indiv->age_group = group;
+}
+
+/*****************************************************************************************
 *  Name:		set_dead
 *  Description: sets a person as dead
 *  Returns:		void
