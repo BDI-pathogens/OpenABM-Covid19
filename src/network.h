@@ -28,8 +28,9 @@ struct edge{
 };
 
 typedef struct{
-	edge *edges;	// array of edges
-	long n_edges;	// number of edges in the network
+	edge *edges;	  // array of edges
+	long n_edges;	  // number of edges in the network
+	long n_vertices;  // number of vertices
 } network;
 
 /************************************************************************/

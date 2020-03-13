@@ -27,7 +27,8 @@ network* new_network(long n_total)
 	if( network_ptr == NULL )
     	print_exit("calloc to network failed\n");
 
-	network_ptr->n_edges = 0;
+	network_ptr->n_edges    = 0;
+	network_ptr->n_vertices = n_total;
 	
 	return network_ptr;
 }
