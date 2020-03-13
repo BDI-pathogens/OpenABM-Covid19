@@ -45,6 +45,8 @@ void initialize_individual(
 	indiv->time_death	      = UNKNOWN;
 	indiv->time_recovered     = UNKNOWN;
 	indiv->next_disease_type  = UNKNOWN;
+	
+	indiv->app_user			  = FALSE;
 }
 
 /*****************************************************************************************
