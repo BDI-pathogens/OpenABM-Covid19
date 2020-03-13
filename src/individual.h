@@ -31,7 +31,8 @@ struct individual{
 	int work_group;
 
 	int quarantined;
-	int mean_interactions;
+	int base_random_interactions;
+	int random_interactions;
 	double hazard;
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];

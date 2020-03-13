@@ -274,7 +274,7 @@ void write_individual_file(model *model, parameters *params)
 			model->population[idx].status,
 			model->population[idx].quarantined,
 			model->population[idx].hazard,
-			model->population[idx].mean_interactions,
+			model->population[idx].random_interactions,
 			model->population[idx].time_infected,
 			model->population[idx].time_symptomatic,
 			model->population[idx].time_asymptomatic,

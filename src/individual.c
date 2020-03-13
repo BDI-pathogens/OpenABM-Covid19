@@ -34,7 +34,7 @@ void initialize_individual(
 	indiv->quarantined = FALSE;
 	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
-	indiv->mean_interactions = params->mean_random_interactions[AGE_18_64];
+	indiv->random_interactions = params->mean_random_interactions[AGE_18_64];
 	for( day = 0; day < params->days_of_interactions; day++ )
 		indiv->n_interactions[ day ] = 0;
 
@@ -66,7 +66,7 @@ void set_quarantine_status(
 	{
 		indiv->quarantined       = TRUE;
 		indiv->time_quarantined  = time;
-		indiv->mean_interactions = params->quarantined_daily_interactions;
+		indiv->random_interactions = params->quarantined_daily_interactions;
 	}
 	else
 	{
@@ -74,7 +74,7 @@ void set_quarantine_status(
 		indiv->time_quarantined  = UNKNOWN;
 		indiv->quarantine_event  = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
-			indiv->mean_interactions = params->mean_random_interactions[AGE_18_64];
+			indiv->random_interactions = indiv->base_random_interactions;
 	}
 }
 
@@ -85,7 +85,10 @@ void set_quarantine_status(
 ******************************************************************************************/
 void set_age_group( individual *indiv, parameters *params, int group )
 {
-	indiv->age_group = group;
+	indiv->age_group 				= group;
+
+	double mean = params->mean_random_interactions[group];
+	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
 }
 
 /*****************************************************************************************
@@ -97,7 +100,7 @@ void set_dead( individual *indiv, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-	indiv->mean_interactions = 0;
+	indiv->random_interactions = 0;
 }
 
 /*****************************************************************************************
@@ -109,7 +112,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	indiv->mean_interactions = params->mean_random_interactions[AGE_18_64];
+	indiv->random_interactions = indiv->base_random_interactions;
 }
 
 /*****************************************************************************************
@@ -120,7 +123,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	indiv->mean_interactions = params->hospitalised_daily_interactions;
+	indiv->random_interactions = params->hospitalised_daily_interactions;
 }
 
 /*****************************************************************************************
