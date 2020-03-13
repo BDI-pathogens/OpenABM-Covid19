@@ -37,6 +37,16 @@ enum AGE_GROUPS{
 	N_AGE_GROUPS
 };
 
+enum HOUSEHOLD_SIZE{
+	HH_1,
+	HH_2,
+	HH_3,
+	HH_4,
+	HH_5,
+	HH_6,
+	UK_HOUSEHOLD_N_MAX
+};
+
 #define UNKNOWN -1
 #define MAX_DAILY_INTERACTIONS_KEPT 5
 #define MAX_TIME 1000
@@ -44,7 +54,6 @@ enum AGE_GROUPS{
 #define N_DRAW_LIST 1000
 
 #define INPUT_CHAR_LEN 100
-#define UK_HOUSEHOLD_N_MAX 6
 
 
 gsl_rng * rng;
