@@ -49,6 +49,7 @@ model* new_model( parameters *params )
 		set_up_event_list( model_ptr, params, type );
 
 	set_up_population( model_ptr );
+	set_up_app_users( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
@@ -1016,5 +1017,28 @@ int one_time_step( model *model )
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
 
 	return 1;
+};
+
+
+/*****************************************************************************************
+*  Name:		set_up_app_users
+*  Description: Set up the proportion of app users in the population (default is FALSE)
+******************************************************************************************/
+
+void set_up_app_users( model *model )
+{
+	double p_app_users = 0.85;
+	long idx;
+	long* app_users_idx = calloc(model->params->n_total, sizeof(long));
+	
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		app_users_idx[idx] = idx;
+	
+	gsl_ran_shuffle( rng, app_users_idx, model->params->n_total, sizeof(long) );
+	
+	long n_app_users = (long) (p_app_users * model->params->n_total);
+	
+	for( idx = 0; idx < n_app_users; idx++ )
+		model->population[ app_users_idx[idx] ].app_user = TRUE;
 };
 
