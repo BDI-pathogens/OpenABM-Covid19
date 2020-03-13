@@ -26,7 +26,10 @@ typedef struct individual individual;
 struct individual{
 	long idx;
 	int status;
+
 	int age_group;
+	int work_group;
+
 	int quarantined;
 	int mean_interactions;
 	double hazard;
