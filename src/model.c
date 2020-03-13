@@ -173,7 +173,7 @@ void set_up_interactions( model *model )
 	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
 	{
 		indiv = &(model->population[ indiv_idx ]);
-		for( n_idx = 0; n_idx < indiv->mean_interactions; n_idx++ )
+		for( n_idx = 0; n_idx < indiv->random_interactions; n_idx++ )
 			model->possible_interactions[ idx++ ] = indiv_idx;
 	}
 
@@ -898,7 +898,7 @@ void build_random_network( model *model )
 
 	n_pos = 0;
 	for( person = 0; person < model->params->n_total; person++ )
-		for( jdx = 0; jdx < model->population[person].mean_interactions; jdx++ )
+		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
 			interactions[n_pos++]=person;
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
