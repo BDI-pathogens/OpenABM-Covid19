@@ -148,12 +148,10 @@ void build_watts_strogatz_network(
 	free(node_list);
 };
 
-
 /*****************************************************************************************
 *  Name:		remove_contact
 *  Description: Remove a contact from a list of edges, tidy list
 ******************************************************************************************/
-
 void remove_contact(long *current_contacts_arr, long contact_to_remove, int *length){
 	
 	int i, j = 0;
@@ -172,19 +170,16 @@ void remove_contact(long *current_contacts_arr, long contact_to_remove, int *len
 *  Name:		add_contact
 *  Description: Add a contact from a list of edges
 ******************************************************************************************/
-
 void add_contact(long *current_contacts_arr, long contact_to_add, int *length){
 	
 	current_contacts_arr[*length] = contact_to_add;
 	++*length;
 };
 
-
 /*****************************************************************************************
 *  Name:		check_member_or_self
 *  Description: Check if x is 'self' or a member of the 'array' (of length 'length')
 ******************************************************************************************/
-
 int check_member_or_self(long x, long self, long *array, int length)
 {
 	if(x == self){
@@ -200,8 +195,6 @@ int check_member_or_self(long x, long self, long *array, int length)
     return 0;
 };
 
-
-
 /*****************************************************************************************
 *  Name:		destroy_network
 *  Description: Destroys the network structure and releases its memory
@@ -209,5 +202,20 @@ int check_member_or_self(long x, long self, long *array, int length)
 void destroy_network( network *network )
 {
     free( network );
+};
+
+/*****************************************************************************************
+*  Name:		relabel_network
+*  Description: Takes a network with vertices 1..n and relabels them with longs t
+*  				taken from list
+******************************************************************************************/
+void relabel_network( network *network, long *labels )
+{
+	long idx;
+	for( idx = 0; idx < network->n_edges; idx++ )
+	{
+		network->edges[idx].id1 = labels[network->edges[idx].id1];
+		network->edges[idx].id2 = labels[network->edges[idx].id2];
+	}
 };
 
