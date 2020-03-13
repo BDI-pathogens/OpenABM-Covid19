@@ -46,6 +46,7 @@ typedef struct{
 	double cfr;						// case fatality rate
 
 	double uk_house[UK_HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
+	double uk_pop[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 
 	double fraction_asymptomatic;			// faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
