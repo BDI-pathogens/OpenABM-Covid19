@@ -10,6 +10,7 @@
 #include "utilities.h"
 #include "constant.h"
 #include "params.h"
+#include "network.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -78,6 +79,9 @@ void destroy_model( model *model )
     free( model->hospitalised_time_draws );
     free( model->recovered_time_draws );
     free( model->death_time_draws );
+
+    destroy_network( model->random_network);
+    destroy_network( model->household_network );
 };
 /*****************************************************************************************
 *  Name:		set_up_networks
@@ -88,10 +92,10 @@ void set_up_networks( model *model )
 {
 	long n_daily_interactions = model->params->n_total * model->params->mean_daily_interactions;
 
-	model->random_network        = calloc( 1, sizeof( network ) );
+	model->random_network        = new_network( model->params->n_total );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
 
-	model->household_network        = calloc( 1, sizeof( network ) );
+	model->household_network        =  new_network( model->params->n_total );
 	build_household_network( model );
 }
 
