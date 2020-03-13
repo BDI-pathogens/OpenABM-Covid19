@@ -6,6 +6,7 @@ Author: p-robot (W. Probert)
 """
 
 from collections import OrderedDict
+import itertools
 
 class ParameterSet(object):
     """
@@ -25,20 +26,56 @@ class ParameterSet(object):
     -------
     get_param(param)
         List parameter value for 'param'
+    
     set_param(param, value)
         Set parameter value for 'param' to 'value'
+    
     list_params()
         List ordered dictionary that stores parameters
+    
     write_params(param_file)
         Write parameter set to csv file at location 'param_file'
     
+    write_varying_params(params, values_list, param_file, 
+        index_var = "param_id", reset_index = True)
+        
+        params : list, values: list, param_file: str of path
+        
+        Write several parameter sets to a single file at location
+        'param_file' for all combinations of lists of parameter values
+        given in 'values_list' and parameter names given in list 'params'.  
+        The index_var parameter specifies the ID column of the new file.
+        If reset_index = True then a new ID column is produced to index
+        the parameter sets.  
+    
     Example
     -------
+    # Load a parameter set
     params = ParameterSet("./tests/data/test_parameters.csv")
-    params.get_param("mean_daily_interactions")
     
-    params.set_param("mean_daily_interactions", 5)
+    # Get parameter value for parameter called "n_total"
+    params.get_param("n_total")
+    
+    # Set parameter called "n_total" to 500
+    params.set_param("n_total", 500)
+    
+    # Write parameter set to file in a file called "new_parameter_file.csv"
     params.write_params("new_parameter_file.csv")
+    
+    # Write the same parameter set to file for 5 different values of the random seed (rng_seed)
+    params = ParameterSet("./tests/data/test_parameters.csv")
+    params.write_varying_params(["rng_seed"], [range(5)], "new_parameter_file.csv")
+    
+    
+    # Write the same parameter set to file for 5 different values of the random seed (rng_seed) and
+    # for different values of "infectious_rate".  
+    
+    params = ParameterSet("./tests/data/test_parameters.csv")
+    
+    param_names = ["rng_seed", "infectious_rate"]
+    values_list = [range(5), [0.1, 0.2, 0.3]]
+    
+    params.write_varying_params(param_names, values_list, "new_parameter_file.csv")
     
     """
     def __init__(self, param_file, line_number = 1):
@@ -73,4 +110,26 @@ class ParameterSet(object):
         
         with open(param_file, "w+") as f:
             f.write(header + "\n" + line)
-
+    
+    def write_varying_params(self, params, values_list, param_file, 
+            index_var = "param_id", reset_index = True):
+        
+        header = ", ".join(list(self.params.keys()))
+        
+        lines = []; lines.append(header)
+        
+        index = 1
+        for values in list(itertools.product(*values_list)):
+            for (param, v) in zip(params, values):
+                # Adjust the parameter value to v
+                self.set_param(param, v)
+                
+                if reset_index:
+                    self.set_param(index_var, index)
+                
+                # Create a list of parameter values to save
+                lines.append(", ".join(list(self.params.values())))
+                index += 1
+        
+        with open(param_file, "w+") as f:
+            f.write("\n".join(lines))
