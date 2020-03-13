@@ -90,7 +90,7 @@ void destroy_model( model *model )
 ******************************************************************************************/
 void set_up_networks( model *model )
 {
-	long n_daily_interactions = model->params->n_total * model->params->mean_daily_interactions;
+	long n_daily_interactions = model->params->n_total * model->params->mean_random_interactions;
 
 	model->random_network        = new_network( model->params->n_total );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
@@ -151,7 +151,7 @@ void set_up_interactions( model *model )
 	// FIXME - need to a good estimate of the total number of interactions
 	//         easy at the moment since we have a fixed number per individual
 
-	n_daily_interactions  = params->n_total * params->mean_daily_interactions;
+	n_daily_interactions  = params->n_total * params->mean_random_interactions;
 	n_daily_interactions += model->household_network->n_edges * 2;
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
@@ -191,7 +191,7 @@ void set_up_distributions( model *model )
 	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
-	mean_interactions  = params->mean_daily_interactions;
+	mean_interactions  = params->mean_random_interactions;
 	mean_interactions += model->household_network->n_edges * 2.0 / model->params->n_total;
 
 	infectious_rate = params->infectious_rate / mean_interactions;

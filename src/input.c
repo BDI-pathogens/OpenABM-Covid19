@@ -84,9 +84,15 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 	
-	check = fscanf(parameter_file, " %i ,",  &(params->mean_daily_interactions));
+	check = fscanf(parameter_file, " %i ,",  &(params->mean_work_interactions));
+	if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
+
+	check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
+	if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
+
+	check = fscanf(parameter_file, " %i ,",  &(params->mean_random_interactions));
 	if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
-	
+
 	check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
 	if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
 	

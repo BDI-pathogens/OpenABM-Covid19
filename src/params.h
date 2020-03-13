@@ -21,10 +21,13 @@ typedef struct{
 	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
-	int mean_daily_interactions;    // mean number of daily interactions
 	int days_of_interactions;		// the number of days of interactions to keep
 	int end_time;				    // maximum end time
 	int n_seed_infection;			// number of people seeded with the infections
+
+	int mean_random_interactions;    // mean number of random interactions each day
+	int mean_work_interactions;		 // mean number of regular work interactions
+	double daily_fraction_work;      // fraction of daily work interactions
 
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
