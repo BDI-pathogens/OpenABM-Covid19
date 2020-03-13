@@ -80,15 +80,40 @@ void set_quarantine_status(
 
 /*****************************************************************************************
 *  Name:		set_age_group
-*  Description: sets a person's age group
+*  Description: sets a person's age group and draws other properties based up on this
+*
+*  				1. The number of random interactions the person has a day which is
+*  				   drawn from a negative binomial with an age dependent mean
+*				2. Which work network they are a member of - some adults are
+*				   assigned to the child/elderly network (i.e. teacher/carers)
+*
 *  Returns:		void
 ******************************************************************************************/
 void set_age_group( individual *indiv, parameters *params, int group )
 {
-	indiv->age_group 				= group;
+	double mean, child_net_adults, elderly_net_adults, x;
 
-	double mean = params->mean_random_interactions[group];
+	indiv->age_group = group;
+
+	mean = params->mean_random_interactions[group];
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
+
+	if( group == AGE_18_64 )
+	{
+		child_net_adults   = params->child_network_adults * params->uk_pop[AGE_0_17] / params->uk_pop[AGE_18_64];
+		elderly_net_adults = params->elderly_network_adults * params->uk_pop[AGE_65] / params->uk_pop[AGE_18_64];
+
+		x = gsl_rng_uniform( rng );
+		if( x < child_net_adults )
+			indiv->work_network = AGE_0_17;
+		else if(  x < ( elderly_net_adults + child_net_adults ) )
+			indiv->work_network = AGE_65;
+		else
+			indiv->work_network = AGE_18_64;
+	}
+	else
+		indiv->work_network = group;
+
 }
 
 /*****************************************************************************************
