@@ -125,7 +125,7 @@ void build_watts_strogatz_network(
 	network->edges = calloc(n_edges, sizeof(edge));
 
 	// randomise the order nodes are put on the lattice if appropriate
-	long* node_list = calloc(N, sizeof(int));
+	long* node_list = calloc(N, sizeof(long));
 	for( i = 0; i < N; i++ )
 		node_list[i] = i;
 	if( randomise_nodes )
