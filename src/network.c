@@ -20,8 +20,6 @@
 *  				 1. Creates memory for it
 *  Returns:		pointer to model
 ******************************************************************************************/
-
-
 network* new_network(long n_total)
 {	
 	network *network_ptr = NULL;
@@ -36,17 +34,25 @@ network* new_network(long n_total)
 
 
 /*****************************************************************************************
-*  Name:		watts_strogatz_network
+*  Name:		build_watts_strogatz_network
 *  Description: Build a Watts Strogatz network
-*  Returns:		pointer to model
+*
+*  Arguments:	network  		- pointer to network which is constructed
+*				N		 		- total number of nodes (long)
+*				k		 		- mean number of connections (long)
+*				p_rewire 		- probability of a connection being rewired (double)
+*				randomise_nodes - put nodes on circular lattice randomly (int FALSE/TRUE)
+*
+*  Returns:		void
 ******************************************************************************************/
-
-void build_watts_strogatz_network( network *network, parameters *params )
+void build_watts_strogatz_network(
+	network *network,
+	long N,
+	long k,
+	double p_rewire,
+	int randomise_nodes
+)
 {
-	long k = params->mean_daily_interactions;
-	long N = params->n_total;
-	double p_rewire = 0.1;
-	
 	long incr = k/2, neighbour, i, j, l;
 	
 	// Allocate memory (needed for large N)
@@ -118,11 +124,18 @@ void build_watts_strogatz_network( network *network, parameters *params )
 	// Form array of total edges (i.e. network->edges)
 	network->edges = calloc(n_edges, sizeof(edge));
 
+	// randomise the order nodes are put on the lattice if appropriate
+	long* node_list = calloc(N, sizeof(int));
+	for( i = 0; i < N; i++ )
+		node_list[i] = i;
+	if( randomise_nodes )
+		gsl_ran_shuffle( rng, node_list, N, sizeof(long) );
+
 	long idx = 0;
 	for(i = 0; i < N; i++){
 		for(j = 0; j < n_edges_arr[i]; j++){
-			network->edges[idx].id1 = i;
-			network->edges[idx].id2 = edge_mat[i][j];
+			network->edges[idx].id1 = node_list[i];
+			network->edges[idx].id2 = node_list[edge_mat[i][j]];
 			idx++;
 		}
 	}
@@ -132,6 +145,7 @@ void build_watts_strogatz_network( network *network, parameters *params )
 		free(edge_mat[i]);
 	free(edge_mat);
 	free(n_edges_arr);
+	free(node_list);
 };
 
 
