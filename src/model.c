@@ -1122,7 +1122,6 @@ int one_time_step( model *model )
 ******************************************************************************************/
 void set_up_app_users( model *model )
 {
-	double p_app_users = 0.85;
 	long idx;
 	long* app_users_idx = calloc(model->params->n_total, sizeof(long));
 	
@@ -1131,7 +1130,7 @@ void set_up_app_users( model *model )
 	
 	gsl_ran_shuffle( rng, app_users_idx, model->params->n_total, sizeof(long) );
 	
-	long n_app_users = (long) (p_app_users * model->params->n_total);
+	long n_app_users = (long) (model->params->app_users_fraction * model->params->n_total);
 	
 	for( idx = 0; idx < n_app_users; idx++ )
 		model->population[ app_users_idx[idx] ].app_user = TRUE;
