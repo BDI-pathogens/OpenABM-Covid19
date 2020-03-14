@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	printf( "Time,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
-		printf( "%2i,%li,%li,%li,%li,%li,%li,%li,%li,%li %li\n",
+		printf( "%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ),
 				n_total( model, CASE ),
