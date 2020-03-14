@@ -201,6 +201,9 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter uk_pop_**\n"); };
 	}
 
+	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
+	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
+
 	fclose(parameter_file);
 }
 
