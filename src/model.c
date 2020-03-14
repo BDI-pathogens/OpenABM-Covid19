@@ -833,6 +833,7 @@ event* add_individual_to_event_list(
 
 	list->events[time ] = event;
 	list->n_daily[time]++;
+	list->n_daily_by_age[time][indiv->age_group]++;
 	list->n_daily_current[time]++;
 
 	return event;
@@ -888,6 +889,9 @@ void update_event_list_counters( model *model, int type )
 {
 	model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
 	model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
+
+	for( int age = AGE_0_17; age <= AGE_65; age++ )
+		model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
 }
 
 /*****************************************************************************************
