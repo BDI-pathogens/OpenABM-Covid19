@@ -511,6 +511,41 @@ void transition_to_symptomatic( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		flu_infections
+*  Description: Randomly pick people from the population to go down with flu, they
+*  				will then self-quarantine (same fraction of true infected people)
+*  				and request a test.
+*
+*  Returns:		void
+******************************************************************************************/
+void flu_infections( model *model )
+{
+	long idx, pdx, n_infected;
+	individual *indiv;
+
+	n_infected = round( model->params->n_total * model->params->seasonal_flu_rate );
+
+	idx = 0;
+	while( idx < n_infected )
+	{
+		pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
+		indiv = &(model->population[pdx]);
+
+		if( indiv->status != UNINFECTED || indiv->quarantined )
+			continue;
+
+		if( gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
+		{
+			set_quarantine_status( indiv, model->params, model->time, TRUE );
+			indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+			add_individual_to_event_list( model, TEST_TAKE, indiv, model->time+1 );
+		}
+
+		idx++;
+	}
+}
+
+/*****************************************************************************************
 *  Name:		quarantine_contracts
 *  Description: Quarantine contacts
 *  Returns:		void
@@ -1052,6 +1087,7 @@ int one_time_step( model *model )
 	transition_to_hospitalised( model );
 	transition_to_recovered( model );
 	transition_to_death( model );
+	flu_infections( model );
 	quarantined_test_take( model );
 	quarantined_test_result( model );
 	release_from_quarantine( model );
