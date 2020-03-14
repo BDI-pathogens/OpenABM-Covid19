@@ -47,6 +47,10 @@ void initialize_individual(
 	indiv->time_case		  = UNKNOWN;
 	indiv->next_disease_type  = UNKNOWN;
 	
+	indiv->quarantine_event         = NULL;
+	indiv->quarantine_release_event = NULL;
+	indiv->current_disease_event    = NULL;
+
 	indiv->app_user			  = FALSE;
 }
 
@@ -71,9 +75,10 @@ void set_quarantine_status(
 	}
 	else
 	{
-		indiv->quarantined       = FALSE;
-		indiv->time_quarantined  = UNKNOWN;
-		indiv->quarantine_event  = NULL;
+		indiv->quarantined              = FALSE;
+		indiv->time_quarantined         = UNKNOWN;
+		indiv->quarantine_event         = NULL;
+		indiv->quarantine_release_event = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
 			indiv->random_interactions = indiv->base_random_interactions;
 	}
