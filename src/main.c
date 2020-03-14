@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
 	printf( "# Total cases children:          %li\n", n_total_age( model, CASE, AGE_0_17 ) );
 	printf( "# Total cases adult:             %li\n", n_total_age( model, CASE, AGE_18_64 ) );
 	printf( "# Total cases elderly:           %li\n", n_total_age( model, CASE, AGE_65 ) );
+	printf( "# Total deaths:                  %li\n", n_total( model, DEATH ) );
+	printf( "# Total deaths children:         %li\n", n_total_age( model, DEATH, AGE_0_17 ) );
+	printf( "# Total deaths adult:            %li\n", n_total_age( model, DEATH, AGE_18_64 ) );
+	printf( "# Total deaths elderly:          %li\n", n_total_age( model, DEATH, AGE_65 ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );
