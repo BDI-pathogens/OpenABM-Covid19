@@ -140,7 +140,6 @@ void build_watts_strogatz_network(
 			idx++;
 		}
 	}
-	free(network->edges);
 	
 	for(i = 0; i < N; i++)
 		free(edge_mat[i]);
