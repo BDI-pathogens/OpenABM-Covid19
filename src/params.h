@@ -64,9 +64,10 @@ typedef struct{
 
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
-
-	double seasonal_flu_rate;				// number of new cases of seasonal flu again who will ask for test
-
+	
+	double app_users_fraction; 		// Proportion of the population that use the apps
+	double seasonal_flu_rate; 		// Rate of seasonal flu
+		
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
 
