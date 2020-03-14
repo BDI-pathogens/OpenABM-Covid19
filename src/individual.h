@@ -29,6 +29,7 @@ struct individual{
 
 	int age_group;
 	int work_network;
+	int is_case;
 
 	int quarantined;
 	int base_random_interactions;
@@ -45,6 +46,8 @@ struct individual{
 	int time_death;
 	int time_recovered;
 	int time_quarantined;
+	int time_case;
+
 
 	event *current_disease_event;
 	int next_disease_type;
@@ -70,6 +73,7 @@ void set_quarantine_status( individual*, parameters*, int, int );
 void set_recovered( individual*, parameters*, int );
 void set_hospitalised( individual*, parameters*, int );
 void set_dead( individual*, int );
+void set_case( individual*, int );
 
 void destroy_individual( individual* );
 
