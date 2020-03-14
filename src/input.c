@@ -189,6 +189,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction));
+	if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+
 	for( i = 0; i < UK_HOUSEHOLD_N_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->uk_house[i]));
