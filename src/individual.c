@@ -32,6 +32,7 @@ void initialize_individual(
 	indiv->idx         = idx;
 	indiv->status      = UNINFECTED;
 	indiv->quarantined = FALSE;
+	indiv->is_case     = FALSE;
 	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
 	for( day = 0; day < params->days_of_interactions; day++ )
@@ -43,6 +44,7 @@ void initialize_individual(
 	indiv->time_hospitalised  = UNKNOWN;
 	indiv->time_death	      = UNKNOWN;
 	indiv->time_recovered     = UNKNOWN;
+	indiv->time_case		  = UNKNOWN;
 	indiv->next_disease_type  = UNKNOWN;
 	
 	indiv->app_user			  = FALSE;
@@ -151,6 +153,17 @@ void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
 	indiv->random_interactions = params->hospitalised_daily_interactions;
+}
+
+/*****************************************************************************************
+*  Name:		set_case
+*  Description: sets a person to be a case
+*  Returns:		void
+******************************************************************************************/
+void set_case( individual *indiv, int time )
+{
+	indiv->is_case   = TRUE;
+	indiv->time_case = time;
 }
 
 /*****************************************************************************************

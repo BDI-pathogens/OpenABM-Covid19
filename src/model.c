@@ -609,6 +609,12 @@ void transition_to_hospitalised( model *model )
 		next_event = event->next;
 		indiv      = event->individual;
 
+		if( indiv->is_case == FALSE )
+		{
+			set_case( indiv, model->time );
+			add_individual_to_event_list( model, CASE, indiv, model->time );
+		}
+
 		if( indiv->quarantined )
 		{
 			remove_event_from_event_list( model, indiv->quarantine_event );
@@ -769,6 +775,12 @@ void quarantined_test_result( model *model )
 			add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time );
 		else
 		{
+			if( indiv->is_case == FALSE )
+			{
+				set_case( indiv, model->time );
+				add_individual_to_event_list( model, CASE, indiv, model->time );
+			}
+
 			add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time + 14 );
 			quarantine_contacts( model, indiv );
 		}
@@ -1095,6 +1107,7 @@ int one_time_step( model *model )
 	update_event_list_counters( model, PRESYMPTOMATIC );
 	update_event_list_counters( model, ASYMPTOMATIC );
 	update_event_list_counters( model, QUARANTINED );
+	update_event_list_counters( model, CASE );
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
