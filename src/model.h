@@ -95,6 +95,9 @@ void transition_to_symptomatic( model* );
 void transition_to_hospitalised( model* );
 void transition_to_recovered( model* );
 void transition_to_death( model* );
+void flu_infections( model* );
+void quarantined_test_take( model* );
+void quarantined_test_result( model* );
 void release_from_quarantine( model* );
 
 event* new_event( model* );
@@ -104,6 +107,7 @@ void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 
 void new_infection( model*, individual*, individual* );
+void quarantine_contacts( model*, individual* );
 
 void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
