@@ -61,6 +61,10 @@ int main(int argc, char *argv[])
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
+	printf( "# Total cases:                   %li\n", n_total( model, CASE ) );
+	printf( "# Total cases children:          %li\n", n_total_age( model, CASE, AGE_0_17 ) );
+	printf( "# Total cases adult:             %li\n", n_total_age( model, CASE, AGE_18_64 ) );
+	printf( "# Total cases elderly:           %li\n", n_total_age( model, CASE, AGE_65 ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );

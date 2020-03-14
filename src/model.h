@@ -26,8 +26,10 @@ struct event_list{
 	int type;
 	event *events[MAX_TIME];
 	long n_daily[MAX_TIME];
+	long n_daily_by_age[MAX_TIME][N_AGE_GROUPS];
 	long n_daily_current[MAX_TIME];
 	long n_total;
+	long n_total_by_age[N_AGE_GROUPS];
 	long n_current;
 	double infectious_curve[MAX_INFECTIOUS_PERIOD];
 };
@@ -76,6 +78,7 @@ struct event{
 
 #define n_current( model, type ) ( model->event_lists[type].n_current )
 #define n_total( model, type ) ( model->event_lists[type].n_total )
+#define n_total_age( model, type, age ) ( model->event_lists[type].n_total_by_age[age] )
 #define n_daily( model, type, day ) ( model->event_lists[type].n_daily_current[day] )
 
 model* new_model(parameters *);
