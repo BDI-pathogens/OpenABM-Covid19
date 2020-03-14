@@ -53,6 +53,7 @@ struct individual{
 	int next_disease_type;
 
 	event *quarantine_event;
+	event *quarantine_release_event;
 	int quarantine_test_result;
 	
 	int app_user;
