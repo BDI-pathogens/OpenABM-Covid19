@@ -85,8 +85,59 @@ void destroy_model( model *model )
     destroy_network( model->household_network );
     for( idx = 0; idx < N_AGE_GROUPS; idx++ )
     	destroy_network( model->work_network[idx] );
-    destroy_network( model->work_network );
+    for( idx = 0; idx < N_EVENT_TYPES; idx++ )
+    	destroy_event_list( model, idx );
+};
 
+/*****************************************************************************************
+*  Name:		set_up_event_list
+*  Description: sets up an event_list
+*  Returns:		void
+******************************************************************************************/
+void set_up_event_list( model *model, parameters *params, int type )
+{
+
+	int day, age;
+	event_list *list = &(model->event_lists[ type ]);
+	list->type       = type;
+
+	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
+	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
+	list->infectious_curve = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
+	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
+	list->events		   = calloc( MAX_TIME, sizeof(event*));
+
+	list->n_current = 0;
+	list->n_total   = 0;
+	for( day = 0; day < MAX_TIME; day++ )
+	{
+		list->n_daily_by_age[day] = calloc( N_AGE_GROUPS, sizeof(long) );
+		for( age = AGE_0_17; age <= AGE_65; age++ )
+			list->n_daily_by_age[day][age] = 0;
+
+		list->n_daily[day] = 0;
+		list->n_daily_current[day] = 0;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		destroy_event_list
+*  Description: Destroys an event list
+******************************************************************************************/
+void destroy_event_list( model *model, int type )
+{
+	int day;
+	free( model->event_lists[type].n_daily );
+
+	for( day = 0; day < MAX_TIME; day++ )
+		free( model->event_lists[type].n_daily_by_age[day]);
+
+	free( model->event_lists[type].n_daily_current );
+	free( model->event_lists[type].infectious_curve );
+	free( model->event_lists[type].n_total_by_age );
+	free( model->event_lists[type].n_daily_by_age );
+	free( model->event_lists[type].events );
 };
 
 /*****************************************************************************************
@@ -384,6 +435,9 @@ event* new_event( model *model )
 	model->next_event->last = event->last;
 	event->last->next       = model->next_event;
 
+	event->next = NULL;
+	event->last = NULL;
+
 	return event;
 }
 
@@ -501,11 +555,11 @@ void transition_to_symptomatic( model *model )
 		add_individual_to_event_list( model, indiv->next_disease_type, indiv, time_event );
 		indiv->current_disease_event = event;
 
-		if( gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
+		if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
 		{
 			set_quarantine_status( indiv, model->params, model->time, TRUE );
 			indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-			add_individual_to_event_list( model, TEST_TAKE, indiv, time_event );
+			add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
 		}
 	}
 }
@@ -531,7 +585,7 @@ void flu_infections( model *model )
 		pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-		if( indiv->status != UNINFECTED || indiv->quarantined )
+		if( !(indiv->status == UNINFECTED && indiv->quarantined == FALSE ) )
 			continue;
 
 		if( gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
@@ -569,7 +623,7 @@ void quarantine_contacts( model *model, individual *indiv )
 			for( idx = 1; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-				if( contact->status != HOSPITALISED && contact->status != DEATH && !contact->quarantined )
+				if( contact->status != HOSPITALISED && contact->status != DEATH && contact->quarantined == FALSE )
 				{
 					if( gsl_ran_bernoulli( rng, model->params->quarantine_fraction ) )
 					{
@@ -583,7 +637,6 @@ void quarantine_contacts( model *model, individual *indiv )
 		}
 		day = ifelse( day == 0, model->params->days_of_interactions -1, day-1 );
 	}
-
 }
 
 /*****************************************************************************************
@@ -616,10 +669,7 @@ void transition_to_hospitalised( model *model )
 		}
 
 		if( indiv->quarantined )
-		{
-			remove_event_from_event_list( model, indiv->quarantine_event );
-			set_quarantine_status( indiv, model->params, model->time, FALSE );
-		}
+			release_individual_from_quarantine( model, event->individual );
 
 		set_hospitalised( indiv, model->params, model->time );
 		remove_event_from_event_list( model, indiv->current_disease_event );
@@ -693,6 +743,19 @@ void transition_to_death( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		release_individual_from_quarantine
+*  Description: Release an individual held in quarantine
+*  Returns:		void
+******************************************************************************************/
+void release_individual_from_quarantine( model *model, individual* indiv )
+{
+	remove_event_from_event_list( model, indiv->quarantine_event );
+	if( indiv->quarantine_release_event != NULL )
+		remove_event_from_event_list( model, indiv->quarantine_release_event );
+	set_quarantine_status( indiv, model->params, model->time, FALSE );
+}
+
+/*****************************************************************************************
 *  Name:		release_from_quarantine
 *  Description: Release those held in quarantine
 *  Returns:		void
@@ -701,7 +764,6 @@ void release_from_quarantine( model *model )
 {
 	long idx, n_quarantined;
 	event *event, *next_event;
-	individual *indiv;
 
 	n_quarantined = model->event_lists[QUARANTINE_RELEASE].n_daily_current[ model->time ];
 	next_event    = model->event_lists[QUARANTINE_RELEASE].events[ model->time ];
@@ -709,14 +771,7 @@ void release_from_quarantine( model *model )
 	{
 		event      = next_event;
 		next_event = event->next;
-		indiv      = event->individual;
-
-		if( indiv->quarantined )
-		{
-			remove_event_from_event_list( model, indiv->quarantine_event );
-			remove_event_from_event_list( model, event );
-			set_quarantine_status( indiv, model->params, model->time, FALSE );
-		}
+		release_individual_from_quarantine( model, event->individual );
 	}
 }
 
@@ -772,7 +827,7 @@ void quarantined_test_result( model *model )
 		indiv      = event->individual;
 
 		if( indiv->quarantine_test_result == FALSE )
-			add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time );
+			indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time );
 		else
 		{
 			if( indiv->is_case == FALSE )
@@ -781,8 +836,11 @@ void quarantined_test_result( model *model )
 				add_individual_to_event_list( model, CASE, indiv, model->time );
 			}
 
-			add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time + 14 );
-			quarantine_contacts( model, indiv );
+			if( indiv->status != HOSPITALISED )
+			{
+				indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time + 14 );
+				quarantine_contacts( model, indiv );
+			}
 		}
 
 		remove_event_from_event_list( model, event );
@@ -807,28 +865,16 @@ event* add_individual_to_event_list(
 	int time
 )
 {
-
-	event_list *list = &(model->event_lists[ type ]);
-
+	event_list *list    = &(model->event_lists[ type ]);
 	event *event        = new_event( model );
 	event->individual   = indiv;
 	event->type         = type;
 	event->time         = time;
 
-	if( list->n_daily_current[time] > 1  )
+	if( list->n_daily_current[time] >0  )
 	{
 		list->events[ time ]->last = event;
 		event->next  = list->events[ time ];
-	}
-	else
-	{
-		if( list->n_daily_current[time] == 1 )
-		{
-			list->events[ time ]->next = event;
-			list->events[ time ]->last = event;
-			event->next = list->events[ time ];
-			event->last = list->events[ time ];
-		}
 	}
 
 	list->events[time ] = event;
@@ -862,8 +908,13 @@ void remove_event_from_event_list(
 	{
 		if( event != list->events[ time ] )
 		{
-			event->last->next = event->next;
-			event->next->last = event->last;
+			if( event->next == NULL )
+				event->last->next = NULL;
+			else
+			{
+				event->last->next = event->next;
+				event->next->last = event->last;
+			}
 		}
 		else
 			list->events[ time ] = event->next;
@@ -907,7 +958,6 @@ void new_infection(
 {
 	int time_event;
 	infected->infector = infector;
-
 	infected->time_infected = model->time;
 
 	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
@@ -932,26 +982,6 @@ void new_infection(
 	add_individual_to_event_list( model, infected->next_disease_type, infected, time_event);
 }
 
-/*****************************************************************************************
-*  Name:		set_up_event_list
-*  Description: sets up an event_list
-*  Returns:		void
-******************************************************************************************/
-void set_up_event_list( model *model, parameters *params, int type )
-{
-
-	int day;
-	event_list *list = &(model->event_lists[ type ]);
-	list->type       = type;
-
-	list->n_current = 0;
-	list->n_total   = 0;
-	for( day = 0; day < params->end_time;day ++ )
-	{
-		list->n_daily[day] = 0;
-		list->n_daily_current[day] = 0;
-	}
-}
 
 /*****************************************************************************************
 *  Name:		set_up_seed_infection
