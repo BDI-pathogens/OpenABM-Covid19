@@ -300,18 +300,22 @@ void write_individual_file(model *model, parameters *params)
 ******************************************************************************************/
 void print_interactions_averages(model *model, int header)
 {
-	int day_idx, n_int, idx, cqh;
+	int day_idx, n_int, idx, jdx, cqh;
 	long pdx;
 	double int_tot = 0;
 	double per_tot = 0;
 	double  int_by_age[N_AGE_GROUPS],per_by_age[N_AGE_GROUPS];
 	double int_by_cqh[3],per_by_cqh[3];
+	double assort[N_AGE_GROUPS][N_AGE_GROUPS];
 	individual *indiv;
+	interaction *inter;
 
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 	{
 		 int_by_age[idx] = 0;
 		 per_by_age[idx] = 0.00001;
+		 for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
+			 assort[idx][jdx] = 0;
 	}
 
 	for( idx = 0; idx < 3; idx++ )
@@ -330,6 +334,12 @@ void print_interactions_averages(model *model, int header)
 			continue;
 
 		n_int = indiv->n_interactions[day_idx];
+		inter = indiv->interactions[day_idx];
+		for( jdx = 0; jdx < n_int; jdx++ )
+		{
+			assort[ indiv->age_group][inter->individual->age_group]++;
+			inter = inter->next;
+		}
 
 		int_tot += n_int;
 		per_tot++;
@@ -343,9 +353,9 @@ void print_interactions_averages(model *model, int header)
 	}
 
 	if( header )
-		printf( "time,int,int_child,ind_adult,int_elderly,int_community,int_quarantined,int_hospital\n" );
+		printf( "time,int,int_child,ind_adult,int_elderly,int_community,int_quarantined,int_hospital, assort_c_c, assort_c_a, assort_c_e, assort_a_c, assort_a_a, assort_a_e, assort_e_c, assort_e_a, assort_e_e\n" );
 
-	printf( "%i %lf %lf %lf %lf %lf %lf %lf\n",
+	printf( "%i %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf %.3lf\n" ,
 		model->time,
 		1.0 * int_tot / per_tot,
 		1.0 * int_by_age[0] / per_by_age[0],
@@ -353,6 +363,15 @@ void print_interactions_averages(model *model, int header)
 		1.0 * int_by_age[2] / per_by_age[2],
 		1.0 * int_by_cqh[0] / per_by_cqh[0],
 		1.0 * int_by_cqh[1] / per_by_cqh[1],
-		1.0 * int_by_cqh[2] / per_by_cqh[2]
+		1.0 * int_by_cqh[2] / per_by_cqh[2],
+		1.0 * assort[0][0]/ int_by_age[0],
+		1.0 * assort[0][1]/ int_by_age[0],
+		1.0 * assort[0][2]/ int_by_age[0],
+		1.0 * assort[1][0]/ int_by_age[1],
+		1.0 * assort[1][1]/ int_by_age[1],
+		1.0 * assort[1][2]/ int_by_age[1],
+		1.0 * assort[2][0]/ int_by_age[2],
+		1.0 * assort[2][1]/ int_by_age[2],
+		1.0 * assort[2][2]/ int_by_age[2]
 	);
 }
