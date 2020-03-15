@@ -54,6 +54,7 @@ model* new_model( parameters *params )
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_distributions( model_ptr );
+	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
@@ -224,6 +225,20 @@ void set_up_population( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_individual_hazard
+*  Description: sets the initial hazard for each individual
+*  Returns:		void
+******************************************************************************************/
+void set_up_individual_hazard( model *model )
+{
+	parameters *params = model->params;
+	long idx;
+
+	for( idx = 0; idx < params->n_total; idx++ )
+		initialize_hazard( &(model->population[idx]), params );
+}
+
+/*****************************************************************************************
 *  Name:		estimate_total_interactions
 *  Description: estimates the total number of interactions from the networks
 *  Returns:		void
@@ -241,6 +256,43 @@ double estimate_total_interactions( model *model )
 		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
 
 	return n_interactions;
+}
+
+/*****************************************************************************************
+*  Name:		estimate_mean_interactions_by_age
+*  Description: estimates the mean number of interactions by age
+*  Returns:		void
+******************************************************************************************/
+double estimate_mean_interactions_by_age( model *model, int age )
+{
+	long pdx, ndx;
+	long people = 0;
+	double inter  = 0;
+
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		if( model->population[pdx].age_group == age )
+		{
+			people++;
+			inter += model->population[pdx].base_random_interactions;
+		}
+	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
+	{
+		if( model->population[model->household_network->edges[pdx].id1].age_group == age )
+			inter++;
+		if( model->population[model->household_network->edges[pdx].id2].age_group == age )
+			inter++;
+	}
+
+	for( ndx = AGE_0_17; ndx <= AGE_65 ; ndx++ )
+		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
+		{
+			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
+				inter += model->params->daily_fraction_work;
+			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_group == age )
+				inter  += model->params->daily_fraction_work;
+		}
+
+	return 1.0 * inter / people;
 }
 
 /*****************************************************************************************
@@ -279,14 +331,22 @@ void set_up_interactions( model *model )
 /*****************************************************************************************
 *  Name:		set_up_distributions
 *  Description: sets up discrete distributions and functions which are used to
-*  				model events
+*  				model events and calculates infectious rate per interaction.
+*
+*  				The infectious rate per interaction adult is the infectious rate divided
+*  				by the mean number of daily interactions of an adult.
+*
+*  				Adjustments are calculated for children and elderly based upon their
+*  				difference in the number of daily interactions and the relative overall
+*  				suscpetibility.
+*
 *  Returns:		void
 ******************************************************************************************/
 void set_up_distributions( model *model )
 {
 	parameters *params = model->params;
 	double infectious_rate;
-	double mean_interactions;
+	double mean_interactions[N_AGE_GROUPS];
 
 	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
 	gamma_draw_list( model->symptomatic_time_draws, 	N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
@@ -294,8 +354,13 @@ void set_up_distributions( model *model )
 	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
 	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
 
-	mean_interactions = 2 * estimate_total_interactions( model ) / params->n_total;
-	infectious_rate   = params->infectious_rate / mean_interactions;
+	mean_interactions[AGE_0_17]  = estimate_mean_interactions_by_age( model, AGE_0_17 );
+	mean_interactions[AGE_18_64] = estimate_mean_interactions_by_age( model, AGE_18_64 );
+	mean_interactions[AGE_65]    = estimate_mean_interactions_by_age( model, AGE_65 );
+
+	infectious_rate   = params->infectious_rate / mean_interactions[AGE_18_64];
+	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_18_64] / mean_interactions[AGE_0_17];
+	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_18_64] / mean_interactions[AGE_65];
 
 	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
@@ -1016,10 +1081,6 @@ void build_random_network( model *model )
 	long *interactions = model->possible_interactions;
 	network *network   = model->random_network;
 
-	int day = model->interaction_day_idx;
-	for( idx = 0; idx < model->params->n_total; idx++ )
-		model->population[ idx ].n_interactions[ day ] = 0;
-
 	n_pos = 0;
 	for( person = 0; person < model->params->n_total; person++ )
 		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
@@ -1103,7 +1164,11 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_newtork( model *model )
 {
-	int idx;
+	int idx, day;
+
+	day = model->interaction_day_idx;
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		model->population[ idx ].n_interactions[ day ] = 0;
 
 	build_random_network( model );
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );

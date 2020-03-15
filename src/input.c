@@ -207,6 +207,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
 	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_child));
+	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_child\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_elderly));
+	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_elderly\n"); };
+
 	fclose(parameter_file);
 }
 

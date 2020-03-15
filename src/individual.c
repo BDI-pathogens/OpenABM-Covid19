@@ -33,7 +33,6 @@ void initialize_individual(
 	indiv->status      = UNINFECTED;
 	indiv->quarantined = FALSE;
 	indiv->is_case     = FALSE;
-	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
 	for( day = 0; day < params->days_of_interactions; day++ )
 	{
@@ -55,6 +54,27 @@ void initialize_individual(
 	indiv->current_disease_event    = NULL;
 
 	indiv->app_user			  = FALSE;
+}
+
+/*****************************************************************************************
+*  Name:		initialize_hazard
+*  Description: gives each individual an initial amount of hazard which they burn through
+*  				with each interaction. The value is adjusted by their relative susceptibility
+*  				per interaction.
+*  Returns:		void
+******************************************************************************************/
+void initialize_hazard(
+	individual *indiv,
+	parameters *params
+)
+{
+	double rate = 1.0;
+	if( indiv->age_group == AGE_0_17 )
+		rate /= params->adjusted_susceptibility_child;
+	if( indiv->age_group == AGE_65 )
+		rate /= params->adjusted_susceptibility_elderly;
+
+	indiv->hazard = rate * gsl_ran_exponential( rng, 1.0 );
 }
 
 /*****************************************************************************************
@@ -125,7 +145,6 @@ void set_age_group( individual *indiv, parameters *params, int group )
 	}
 	else
 		indiv->work_network = group;
-
 }
 
 /*****************************************************************************************
