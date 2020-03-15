@@ -1140,11 +1140,13 @@ void add_interactions_from_network(
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
 
+		inter1->type       = network->type;
 		inter1->individual = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
 		indiv1->interactions[ day ] = inter1;
 		indiv1->n_interactions[ day ]++;
 
+		inter2->type       = network->type;
 		inter2->individual = indiv1;
 		inter2->next       = indiv2->interactions[ day ];
 		indiv2->interactions[ day ] = inter2;
