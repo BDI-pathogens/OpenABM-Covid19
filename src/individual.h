@@ -60,6 +60,7 @@ struct individual{
 };
 
 struct interaction{
+	int type;
 	individual *individual;
 	interaction *next;
 };
