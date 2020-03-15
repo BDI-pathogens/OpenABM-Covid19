@@ -293,3 +293,66 @@ void write_individual_file(model *model, parameters *params)
 	}
 	fclose(individual_output_file);
 }
+
+/*****************************************************************************************
+*  Name:		print_interactions_averages
+*  Description: average interactions by type
+******************************************************************************************/
+void print_interactions_averages(model *model, int header)
+{
+	int day_idx, n_int, idx, cqh;
+	long pdx;
+	double int_tot = 0;
+	double per_tot = 0;
+	double  int_by_age[N_AGE_GROUPS],per_by_age[N_AGE_GROUPS];
+	double int_by_cqh[3],per_by_cqh[3];
+	individual *indiv;
+
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	{
+		 int_by_age[idx] = 0;
+		 per_by_age[idx] = 0.00001;
+	}
+
+	for( idx = 0; idx < 3; idx++ )
+	{
+		 int_by_cqh[idx] = 0;
+		 per_by_cqh[idx] = 0.00001;
+	}
+
+	day_idx = model->interaction_day_idx;
+	ring_dec( day_idx, model->params->days_of_interactions );
+
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		if( indiv->status == DEATH )
+			continue;
+
+		n_int = indiv->n_interactions[day_idx];
+
+		int_tot += n_int;
+		per_tot++;
+
+		int_by_age[ indiv->age_group] += n_int;
+		per_by_age[ indiv->age_group]++;
+
+		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined, 1, 0 ) );
+		int_by_cqh[cqh] += n_int;
+		per_by_cqh[cqh]++;
+	}
+
+	if( header )
+		printf( "time,int,int_child,ind_adult,int_elderly,int_community,int_quarantined,int_hospital\n" );
+
+	printf( "%i %lf %lf %lf %lf %lf %lf %lf\n",
+		model->time,
+		1.0 * int_tot / per_tot,
+		1.0 * int_by_age[0] / per_by_age[0],
+		1.0 * int_by_age[1] / per_by_age[1],
+		1.0 * int_by_age[2] / per_by_age[2],
+		1.0 * int_by_cqh[0] / per_by_cqh[0],
+		1.0 * int_by_cqh[1] / per_by_cqh[1],
+		1.0 * int_by_cqh[2] / per_by_cqh[2]
+	);
+}
