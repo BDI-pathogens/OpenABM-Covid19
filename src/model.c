@@ -1094,6 +1094,7 @@ void add_interactions_from_network(
 		if( all_idx > model->n_interactions )
 			all_idx = 0;
 	}
+	model->interaction_idx =  all_idx;
 }
 
 /*****************************************************************************************
