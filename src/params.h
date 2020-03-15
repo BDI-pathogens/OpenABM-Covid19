@@ -35,6 +35,11 @@ typedef struct{
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
 
+	double relative_susceptibility_child;	// relative susceptibility of children to adults per day (i.e. after adjust for no. interactions)
+	double relative_susceptibility_elderly; // relative susceptibility of elderly to adults per day (i.e. after adjust for no. interactions)
+	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
+	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
+
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
