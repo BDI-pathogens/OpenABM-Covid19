@@ -36,7 +36,10 @@ void initialize_individual(
 	indiv->hazard      = gsl_ran_exponential( rng, 1.0 );
 
 	for( day = 0; day < params->days_of_interactions; day++ )
+	{
 		indiv->n_interactions[ day ] = 0;
+		indiv->interactions[ day ]   = NULL;
+	}
 
 	indiv->time_infected      = UNKNOWN;
 	indiv->time_symptomatic   = UNKNOWN;
