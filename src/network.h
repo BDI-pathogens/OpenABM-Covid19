@@ -31,13 +31,14 @@ typedef struct{
 	edge *edges;	  // array of edges
 	long n_edges;	  // number of edges in the network
 	long n_vertices;  // number of vertices
+	int type;		  // the type of network
 } network;
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-network* new_network(long n_total);
+network* new_network(long n_total, int type);
 void build_watts_strogatz_network( network *, long, long, double, int );
 int check_member_or_self(long , long, long *, int );
 void remove_contact(long *, long , int *);

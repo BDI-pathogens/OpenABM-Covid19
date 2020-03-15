@@ -152,10 +152,10 @@ void set_up_networks( model *model )
 	long n_total 			  = model->params->n_total;
 	long n_daily_interactions = n_total * model->params->mean_random_interactions[AGE_18_64];
 
-	model->random_network        = new_network( n_total );
+	model->random_network        = new_network( n_total, RANDOM );
 	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
 
-	model->household_network = new_network( n_total );
+	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network( model );
 
 	model->work_network = calloc( N_AGE_GROUPS, sizeof( network* ) );
@@ -179,7 +179,7 @@ void set_up_work_network( model *model, int age )
 		if( model->population[idx].work_network == age )
 			people[n_people++] = idx;
 
-	model->work_network[age] = new_network( n_people );
+	model->work_network[age] = new_network( n_people, WORK );
 	build_watts_strogatz_network( model->work_network[age], n_people, model->params->mean_work_interactions[age], 0.1, TRUE );
 	relabel_network( model->work_network[age], people );
 
