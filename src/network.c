@@ -20,7 +20,7 @@
 *  				 1. Creates memory for it
 *  Returns:		pointer to model
 ******************************************************************************************/
-network* new_network(long n_total)
+network* new_network( long n_total, int type )
 {	
 	network *network_ptr = NULL;
 	network_ptr = calloc( 1, sizeof( network ) );
@@ -29,6 +29,7 @@ network* new_network(long n_total)
 
 	network_ptr->n_edges    = 0;
 	network_ptr->n_vertices = n_total;
+	network_ptr->type       = type;
 	
 	return network_ptr;
 }
