@@ -347,7 +347,7 @@ void print_interactions_averages(model *model, int header)
 		int_by_age[ indiv->age_group] += n_int;
 		per_by_age[ indiv->age_group]++;
 
-		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined, 1, 0 ) );
+		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_quarantined != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
 		per_by_cqh[cqh]++;
 	}
