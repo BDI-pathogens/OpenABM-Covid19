@@ -116,12 +116,13 @@ void build_watts_strogatz_network(
 			}
 		}
 	}
-	// Count total edges (i.e. network->n_edges)
+	// Count total edges (i.e. network->n_edges) in undirected graph
+	// (above code constructs a directed graph)
 	long n_edges = 0;
 	for(i = 0; i < N; i++){
 		n_edges += n_edges_arr[i];
 	}
-	network->n_edges = n_edges;
+	network->n_edges = n_edges/2;
 	
 	// Form array of total edges (i.e. network->edges)
 	network->edges = calloc(n_edges, sizeof(edge));
@@ -139,6 +140,11 @@ void build_watts_strogatz_network(
 			network->edges[idx].id1 = node_list[i];
 			network->edges[idx].id2 = node_list[edge_mat[i][j]];
 			idx++;
+			
+			// Remove connections between id2 -> id1 
+			// (otherwise we count edges twice)
+			remove_contact(edge_mat[node_list[edge_mat[i][j]]],
+				node_list[i], &(n_edges_arr[node_list[edge_mat[i][j]]]));
 		}
 	}
 	
