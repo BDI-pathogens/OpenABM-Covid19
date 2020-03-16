@@ -1,0 +1,57 @@
+\documentclass[11pt, oneside]{amsart}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{subfig}
+
+
+\title{COVID-19 Individual Based Model  with Instantaneous Contract Tracing}
+\author{Rob Hinch, Will Probert, Anel Nurtay}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+The individual based model (IBM) is for simulating the spread of COVID-19 in a city and to analyse the effect of both passive and active intervention strategies.
+The model includes demographic data, which control both the dynamics of the interactions of individuals as well as the the outcome of the disease.
+The disease is spread via interaction between individuals which are remembered to facilitate contact tracing.
+Intervention strategies such as self-quarantining, testing and contact-tracing can then be analysed.
+
+\section{Demographics}
+
+The demographics of the model are based upon UK-wide data for 2018 from the Office of National Statistics. 
+Individuals are put in one of 3 categories: child (0-17 years), adult (18-64 years) and elderly (65+).
+
+\medskip \medskip \medskip
+\begin{tabular}{ |p{4cm}||p{7cm}|p{1cm}|  }
+ \hline
+ \multicolumn{3}{|c|}{Demographic Parameters} \\
+ \hline
+ Name   & Description & Value \\
+ \hline
+ \hline 
+uk_pop_0_17    & UK population 0_17 years old     & 14.05m \\
+uk_pop_18_64  & UK population 18-64 years old   & 40.22m \\
+uk_pop_65        & UK population 65+ years old      & 10.04m \\
+ \hline
+\end{tabular}
+
+
+\section{Interaction Network}
+
+\section{Disease Dynamics}
+
+\section{Passive Interventions}
+
+\section{Active Interventions}
+
+\section{References}
+
+
+\end{document}  
