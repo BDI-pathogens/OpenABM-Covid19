@@ -28,7 +28,7 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	{
 		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN );
 	}else{
-		strncpy(input_param_file, "../tests/data/test_parameters.csv", INPUT_CHAR_LEN );
+		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN );
 	}
 	
 	if(argc > 2)
