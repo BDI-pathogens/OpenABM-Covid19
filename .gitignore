@@ -13,3 +13,12 @@ __pycache__
 .project
 .cproject
 .settings
+
+# temp copies
+*~
+
+# latex unwanted files
+documentation/*copy*
+documentation/*synctex*
+documentation/*.log
+documentation/*.aux
