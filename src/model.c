@@ -589,11 +589,13 @@ void transition_to_symptomatic( model *model )
 {
 	long idx, n_infected;
 	int time_event;
+	double *hospitalised_fraction;
 	event *event, *next_event;
 	individual *indiv;
 
-	n_infected = model->event_lists[SYMPTOMATIC].n_daily_current[ model->time ];
-	next_event = model->event_lists[SYMPTOMATIC].events[ model->time ];
+	n_infected 			  = model->event_lists[SYMPTOMATIC].n_daily_current[ model->time ];
+	next_event 			  = model->event_lists[SYMPTOMATIC].events[ model->time ];
+	hospitalised_fraction = model->params->hospitalised_fraction;
 
 	for( idx = 0; idx < n_infected; idx++ )
 	{
@@ -604,7 +606,7 @@ void transition_to_symptomatic( model *model )
 		indiv->status = SYMPTOMATIC;
 		remove_event_from_event_list( model, indiv->current_disease_event );
 
-		if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction ) )
+		if( gsl_ran_bernoulli( rng, hospitalised_fraction[ indiv->age_group ] ) )
 		{
 			indiv->next_disease_type = HOSPITALISED;
 			time_event               = model->time + sample_draw_list( model->hospitalised_time_draws );
@@ -687,6 +689,9 @@ void quarantine_contacts( model *model, individual *indiv )
 			inter = indiv->interactions[day];
 			for( idx = 1; idx < n_contacts; idx++ )
 			{
+				if( inter->type != HOUSEHOLD )
+					continue;
+
 				contact = inter->individual;
 				if( contact->status != HOSPITALISED && contact->status != DEATH && contact->quarantined == FALSE )
 				{
@@ -713,13 +718,13 @@ void transition_to_hospitalised( model *model )
 {
 	long idx, n_hospitalised;
 	double time_event;
-	double hospital_fatality_rate;
+	double *fatality_rate;
 	event *event, *next_event;
 	individual *indiv;
 
-	n_hospitalised         = model->event_lists[HOSPITALISED].n_daily_current[ model->time ];
-	next_event             = model->event_lists[HOSPITALISED].events[ model->time ];
-	hospital_fatality_rate = model->params->cfr / model->params->hospitalised_fraction;
+	n_hospitalised = model->event_lists[HOSPITALISED].n_daily_current[ model->time ];
+	next_event     = model->event_lists[HOSPITALISED].events[ model->time ];
+	fatality_rate  = model->params->fatality_fraction;
 
 	for( idx = 0; idx < n_hospitalised; idx++ )
 	{
@@ -740,7 +745,7 @@ void transition_to_hospitalised( model *model )
 		remove_event_from_event_list( model, indiv->current_disease_event );
 
 		indiv->current_disease_event = event;
-		if( gsl_ran_bernoulli( rng, hospital_fatality_rate ) )
+		if( gsl_ran_bernoulli( rng, fatality_rate[ indiv->age_group ] ) )
 		{
 			time_event               = model->time + sample_draw_list( model->death_time_draws );
 			indiv->time_death        = time_event;

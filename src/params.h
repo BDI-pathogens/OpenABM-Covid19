@@ -43,14 +43,15 @@ typedef struct{
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
-	double hospitalised_fraction;   // fraction of symptomatic patients requiring hospitalisation
+	double hospitalised_fraction[N_AGE_GROUPS];   // fraction of symptomatic patients requiring hospitalisation
+	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who die
+
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 
 	double mean_time_to_recover;	// mean time to recover after hospital
 	double sd_time_to_recover;  	// sd time to recover after hospital
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
-	double cfr;						// case fatality rate
 
 	double uk_house[UK_HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double uk_pop[N_AGE_GROUPS];		// ONS stratification of population (in millions)
