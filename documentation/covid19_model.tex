@@ -8,6 +8,7 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{subfig}
+\newcommand{\us}{\textunderscore}
 
 
 \title{COVID-19 Individual Based Model  with Instantaneous Contract Tracing}
@@ -29,16 +30,16 @@ The demographics of the model are based upon UK-wide data for 2018 from the Offi
 Individuals are put in one of 3 categories: child (0-17 years), adult (18-64 years) and elderly (65+).
 
 \medskip \medskip \medskip
-\begin{tabular}{ |p{4cm}||p{7cm}|p{1cm}|  }
+\begin{tabular}{ |p{4cm}||p{7cm}|p{1.5cm}|  }
  \hline
  \multicolumn{3}{|c|}{Demographic Parameters} \\
  \hline
  Name   & Description & Value \\
  \hline
  \hline 
-uk_pop_0_17    & UK population 0_17 years old     & 14.05m \\
-uk_pop_18_64  & UK population 18-64 years old   & 40.22m \\
-uk_pop_65        & UK population 65+ years old      & 10.04m \\
+uk\us pop\us 0\us 17    & UK population 0-17 years old     & 14.05m \\
+uk\us pop\us 18\us 64  & UK population 18-64 years old   & 40.22m \\
+uk\us pop\us 65        & UK population 65+ years old      & 10.04m \\
  \hline
 \end{tabular}
 
