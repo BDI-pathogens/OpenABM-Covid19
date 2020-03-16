@@ -173,6 +173,7 @@ void set_up_work_network( model *model, int age )
 	long idx;
 	long n_people = 0;
 	long *people;
+	int n_interactions;
 
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -180,7 +181,8 @@ void set_up_work_network( model *model, int age )
 			people[n_people++] = idx;
 
 	model->work_network[age] = new_network( n_people, WORK );
-	build_watts_strogatz_network( model->work_network[age], n_people, model->params->mean_work_interactions[age], 0.1, TRUE );
+	n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
+	build_watts_strogatz_network( model->work_network[age], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->work_network[age], people );
 
 	free( people );
