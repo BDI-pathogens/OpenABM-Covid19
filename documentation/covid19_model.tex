@@ -32,7 +32,7 @@ Every individual is part of household which forms an important part of each pers
 We use household size data from the ONS.
 
 \medskip \medskip
-\begin{tabular}{ |p{4cm}||p{8.5cm}|p{1.5cm}|  }
+\begin{tabular}{ |p{4cm}|p{8.5cm}|p{1.5cm}|  }
  \hline
  \multicolumn{3}{|c|}{Demographic Parameters} \\
  \hline
@@ -51,11 +51,112 @@ uk\us house\us5 & UK households with 5 person (thousands) & 1,254 \\
 uk\us house\us6 & UK households with 6 person (thousands) & 596 \\
  \hline
 \end{tabular}
-
+\medskip \medskip
 
 \section{Interaction Network}
 
+Interactions between individuals are modelled via membership of numerous networks which represent peoples daily interactions.
+The membership of different networks leads to age-group assortativity in the interactions.
+Previous studies of social contacts for infectious disease modelling has estimated the mean number of interactions that individuals have by age group (Mossong, 2008).
+We estimate mean interactions by age-group by aggregating this data 
+
+\medskip \medskip
+\begin{table}
+\centering
+\begin{tabular}{ |p{5cm}|p{1.5cm}|  }
+ \hline
+ \multicolumn{2}{|c|}{Mean daily interactions} \\
+ \hline
+Age-Group  & Value \\
+ \hline
+ \hline 
+children (0-17 years) & 15 \\
+adults (18-64 years) & 13 \\
+elderly (65 years+) & 7 \\
+ \hline
+\end{tabular}
+\end{table}
+\medskip \medskip
+
+Our model contains 3 types of networks. One to represent households, one work-place (for children this would be school) and one random daily interactions.
+
+\subsection{Household Network}
+Each individual is assigned to live in a household, with the proportion of people in each household taken from the UK household data (see demographics section).
+Each day, each person has an interaction with everybody within their household.
+Elderly people are assumed to live in either 1 or 2 person household with other elderly people, with the ratio of elderly 1 and 2 person households being the same as the general population.
+Children are assumed to live in household with two adults (so they can only live in 3/4/5/6 person households). 
+The proportion of 3/4/5/6 person with children is the same as the those with adults only.
+
+\subsection{Work-place Network}
+Each individual is part of a single work-place network.
+The work-place networks are Watts-Strogatz small-world networks.
+There is one network for each age group, with the child and elderly network containing a small proportion of adults (i.e.\ teachers and carers).
+When constructing the work-place networks we randomly sort the individuals, so there is no link between the household interactions and the local interactions on the small-world network.
+Every day each person interacts with a random subset of their connections on their work-place network.
+
+\medskip \medskip
+\begin{tabular}{ |p{5cm}|p{7.5cm}|p{1.5cm}|  }
+ \hline
+ \multicolumn{3}{|c|}{Work-place Network Parameters} \\
+ \hline
+ Name   & Description & Value \\
+ \hline
+ \hline 
+mean\us work\us interaction\us child    & mean number of connections for children & 10 \\
+mean\us work\us interaction\us adult   & mean number of connections for adults & 7 \\
+mean\us work\us interaction\us elderly & mean number of connections for elderly & 3 \\
+\hline
+child\us network\us adults & fraction of adults in child network & 0.2 \\
+elderly\us network\us adults & fraction of adults in elderly network & 0.2 \\
+\hline
+daily\us fraction\us work & fraction of daily work connections made & 0.5 \\
+prob\us network\us rewire (*) & probability of rewiring a connection in the Watts-Stogatz small-world network & 0.1 \\ 
+ \hline
+\end{tabular}
+\medskip \medskip
+
+The difference in the number of interactions for each age group is due to the overall number of daily interactions that each group have
+
+\subsection{Random Network}
+In addition to the recurring structured networks of households and work-places, we include a number of random interactions as well.
+These interactions are drawn each day and are independent of the previous days connections.
+The number of random connections an individual makes is the same each day (without interventions) and is drawn at the start of the simulation from a negative-binomial distribution.
+This variation in the number of interactions introduces "super-spreaders" in to the network who make much larger numbers of interactions than the average.
+
+\medskip \medskip
+\begin{tabular}{ |p{5.6cm}|p{7cm}|p{1.5cm}|  }
+ \hline
+ \multicolumn{3}{|c|}{Random Network Parameters} \\
+ \hline
+ Name   & Description & Value \\
+ \hline
+ \hline 
+mean\us random\us interaction\us child    & mean number of connections for children & 2 \\
+mean\us random\us interaction\us adult    & mean number of connections for adults & 4 \\
+mean\us random\us interaction\us elderly & mean number of connections for elderly & 3 \\
+\hline
+sd\us random\us interaction\us child   (*)  & s.d.\ number of connections for children & 2 \\
+sd\us random\us interaction\us adult   (*)  & s.d.\ number of connections for adults & 4 \\
+sd\us random\us interaction\us elderly (*) & s.d.\ number of connections for elderly & 3 \\
+ \hline
+\end{tabular}
+\medskip \medskip
+
+The mean numbers of connections were chosen so that the total number of daily interactions matched that from the social interaction studies. 
+The split between work and random interactions was chosen to be lower in children. 
+Each day a list is made which contains all individuals who make random interactions and each person is repeated by the number of interactions they make.
+This list is then randomly shuffled and interactions are made between adjacent pairs on the shuffled list.
+
+\section{Infection Dynamics}
+
+The disease is spread by interactions between infected and susceptible individuals.
+The probability of transmission is determined by the the status of the infector and the age of the susceptible.
+Note that the type of interactions (i.e.\ household, work or random) or the length of the interaction (currently not modelled) is used in deciding the likelihood of transmission.
+From early studies of coronavirus and analyses of other epidemics, we know that immediately after become infected an individual is not infectious.
+The level of infectiousness increase with time and peaks typically 5-7 days after the initial infection before decreasing.
+
 \section{Disease Dynamics}
+
 
 \section{Passive Interventions}
 
