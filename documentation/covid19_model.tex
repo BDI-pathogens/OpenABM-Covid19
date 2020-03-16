@@ -12,7 +12,7 @@
 
 
 \title{COVID-19 Individual Based Model  with Instantaneous Contract Tracing}
-\author{Rob Hinch, Will Probert, Anel Nurtay}
+\author{Rob Hinch, Will Probert, Anel Nurtay, Christophe Fraser}
 %\date{}							% Activate to display a given date or no date
 
 \begin{document}
@@ -26,20 +26,29 @@ Intervention strategies such as self-quarantining, testing and contact-tracing c
 
 \section{Demographics}
 
-The demographics of the model are based upon UK-wide data for 2018 from the Office of National Statistics. 
+The demographics of the model are based upon UK-wide data for 2018 from the Office of National Statistics (ONS). 
 Individuals are put in one of 3 categories: child (0-17 years), adult (18-64 years) and elderly (65+).
+Every individual is part of household which forms an important part of each persons daily interactions.
+We use household size data from the ONS.
 
-\medskip \medskip \medskip
-\begin{tabular}{ |p{4cm}||p{7cm}|p{1.5cm}|  }
+\medskip \medskip
+\begin{tabular}{ |p{4cm}||p{8.5cm}|p{1.5cm}|  }
  \hline
  \multicolumn{3}{|c|}{Demographic Parameters} \\
  \hline
  Name   & Description & Value \\
  \hline
  \hline 
-uk\us pop\us 0\us 17    & UK population 0-17 years old     & 14.05m \\
-uk\us pop\us 18\us 64  & UK population 18-64 years old   & 40.22m \\
-uk\us pop\us 65        & UK population 65+ years old      & 10.04m \\
+uk\us pop\us 0\us 17    & UK population 0-17 years old  (millions)  & 14.05 \\
+uk\us pop\us 18\us 64  & UK population 18-64 years old  (millions)  & 40.22 \\
+uk\us pop\us 65        & UK population 65+ years old (millions)       & 10.04 \\
+ \hline 
+uk\us house\us1 & UK households with 1 person (thousands) & 8,198 \\
+uk\us house\us2 & UK households with 2 person (thousands) & 9,609 \\
+uk\us house\us3 & UK households with 3 person (thousands) & 4,287 \\
+uk\us house\us4 & UK households with 4 person (thousands) & 3,881 \\
+uk\us house\us5 & UK households with 5 person (thousands) & 1,254 \\
+uk\us house\us6 & UK households with 6 person (thousands) & 596 \\
  \hline
 \end{tabular}
 
