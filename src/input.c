@@ -143,10 +143,7 @@ void read_param_file( parameters *params)
 	
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->cfr));
-	if( check < 1){ print_exit("Failed to read parameter cfr\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic));
 	if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
 	
@@ -183,9 +180,6 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
 	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction));
-	if( check < 1){ print_exit("Failed to read parameter hospitalised_fraction\n"); };
-
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
@@ -212,6 +206,18 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_elderly));
 	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_elderly\n"); };
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_**\n"); };
+	}
 
 	fclose(parameter_file);
 }
