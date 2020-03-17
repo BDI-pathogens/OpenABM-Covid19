@@ -150,10 +150,15 @@ void set_up_networks( model *model )
 {
 	long idx;
 	long n_total 			  = model->params->n_total;
-	long n_daily_interactions = n_total * model->params->mean_random_interactions[AGE_18_64];
+	long n_random_interactions;
+	double mean_interactions  = 0;
+
+	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
+	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
 	model->random_network        = new_network( n_total, RANDOM );
-	model->random_network->edges = calloc( n_daily_interactions, sizeof( edge ) );
+	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network( model );
@@ -1088,16 +1093,19 @@ void build_random_network( model *model )
 	long *interactions = model->possible_interactions;
 	network *network   = model->random_network;
 
-	n_pos = 0;
+	network->n_edges = 0;
+	n_pos            = 0;
 	for( person = 0; person < model->params->n_total; person++ )
 		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
 			interactions[n_pos++]=person;
+
+	if( n_pos == 0 )
+		return;
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	idx = 0;
 	n_pos--;
-	network->n_edges = 0;
 	while( idx < n_pos )
 	{
 		if( interactions[ idx ] == interactions[ idx + 1 ] )
@@ -1164,6 +1172,7 @@ void add_interactions_from_network(
 		if( all_idx > model->n_interactions )
 			all_idx = 0;
 	}
+
 	model->interaction_idx =  all_idx;
 }
 
@@ -1185,6 +1194,7 @@ void build_daily_newtork( model *model )
 
 	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work );
+
 };
 
 /*****************************************************************************************
