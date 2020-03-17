@@ -22,3 +22,5 @@ documentation/*copy*
 documentation/*synctex*
 documentation/*.log
 documentation/*.aux
+documentation/*.key
+documentation/*.pdf

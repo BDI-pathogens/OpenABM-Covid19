@@ -22,7 +22,7 @@
 \section{Overview}
 The individual based model (IBM) is for simulating the spread of COVID-19 in a city and to analyse the effect of both passive and active intervention strategies.
 The model includes demographic data, which control both the dynamics of the interactions of individuals as well as the the outcome of the disease.
-The disease is spread via interaction between individuals which are remembered to facilitate contact tracing.
+The disease is spread via interaction between individuals which are remembered to facilitate contact-tracing.
 Intervention strategies such as self-quarantining, testing and contact-tracing can then be analysed.
 
 \section{Demographics}
@@ -34,13 +34,15 @@ We use household size data from the ONS.
 
 \begin{table}
 \centering
-\begin{tabular}{ |p{3cm}|p{7cm}|p{1cm}|  }
+\begin{tabular}{ |p{3cm}|p{7cm}|p{1.2cm}|  }
  \hline
  \multicolumn{3}{|c|}{Demographic Parameters} \\
  \hline
  Name   & Description & Value \\
  \hline
  \hline 
+ \texttt{n\us total}    & Total population simulated  & 100,000  \\
+\hline
 \texttt{uk\us pop\us 0\us 17}    & UK population 0-17 years old  (millions)  & 14.05 \\
 \texttt{uk\us pop\us 18\us 64}  & UK population 18-64 years old  (millions)  & 40.22 \\
 \texttt{uk\us pop\us 65}        & UK population 65+ years old (millions)       & 10.04 \\
@@ -168,11 +170,13 @@ It has been observed that some people who are infected with coronavirus remain c
 Note, there is a difference between somebody who is asymptomatic who will never go on and develop symptoms, as opposed to somebody who is pre-symptomatic who will go on and develop symptoms.
 The second factor that comes into whether the disease is transmitted is how susceptible the uninfected person is. 
 Data from China show that the children are far less susceptible to the disease than adults and that elderly people are more susceptible, which we model by a simple multiplicative factor based upon the age group of the susceptible.
-The final formula for the probability of the virus being transmitted is
+The final formula for the probability of the virus being transmitted in a single interactions as
 \begin{equation}
-\lambda(t,a_s,b) = \frac{R s_{a_s}\phi_b}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
+\lambda(t,a_s,b) = \frac{R s_{a_s}A_b}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
 \end{equation}
 where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infector is asymptomatic; and, the other terms are parameters which are in the Infectious Parameters table.
+
+The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.
 
 \medskip \medskip
 \begin{table}
@@ -185,13 +189,11 @@ where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution w
  \hline
  \hline 
 $R$ & \texttt{infectious\us rate} & mean number of people infected by each infected person & 2.5 \\
-$\phi_{\rm sym}$ &  - & relative infectious rate of symptomatic & 1 \\
-$\phi_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infectious rate of asymptomatic & 1 \\
- \hline
+$A_{\rm sym}$ &  - & relative infectious rate of symptomatic & 1 \\
+$A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infectious rate of asymptomatic & 0.25 \\
  \hline
  $\mu_i$ &  \texttt{mean\us infectious\us period} & time of peak infectiousness (i.e.\ the mean of the gamma p.d.f.) & 6 days\\
- $\sigma_i$ &  \texttt{mean\us infectious\us period} & width of infectiousness curve (i.e.\ the s.d.\ of the gamma p.d.f.) & 2 days\\
- \hline
+ $\sigma_i$ &  \texttt{sd\us infectious\us period} & width of infectiousness curve (i.e.\ the s.d.\ of the gamma p.d.f.) & 2 days\\
  \hline
  $s_{\rm child}$   &  \texttt{relative\us susceptibility\us child} & relative susceptibility of child to adult & 0.1 \\
  $s_{\rm adult}$   &   - &  - & 1\\
@@ -201,14 +203,72 @@ $\phi_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infe
 \end{table}
 \medskip \medskip
 
-
-
 \section{Disease Dynamics}
 
+Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression are dependent upon age of the infected person (figure \ref{diseaseDynamics}).
+The first split is that only a fraction of individual who will develop symptoms, where a fraction ($\phi_{\rm asym}$) remain asymptomatic.
+Those who are asymptomatic are infections (at a lower level, see Infection Dynamics section) and will move to a recovered state after a time ($\tau_{\rm rec}$) drawn from a gamma distribution.
+Once an individual is recovered we assume that they have immunity and cannot be reinfected.
+
+For individual who will develop symptoms, they start by being in the pre-symptomatic state, where whilst they will be able to transmit the disease to others, they will not be showing any symptoms. 
+This is important for modelling interventions because individuals in this state would not be able self-isolate unless they had been contact-traced (or there was a complete shutdown).
+After a time ($\tau_{\rm sym}$) drawn from a gamma distribution, the individual develops symptoms, at which case interventions can be triggered such as self-isolation, testing and contact-tracing.
+Whilst most individuals will only develop mild symptoms, a fraction ($\phi_{\rm hosp}({\rm age})$) will go on to require hospitalisation, where the probability of requiring hospital treatment is age-dependent.
+Those of don't require hospitalisation will recover after a time( $\tau_{\rm rec}$) drawn from a gamma distribution, whilst those who require hospital treatment enter after a time ($\tau_{\rm hosp}$) drawn from a Bernoulli distribution of either 1 or 2 days.
+Once entering hospital, a number of interventions can take place. 
+We assume that a clinical diagnosis can immediately decide whether the patient is a case so that contract-tracing can be commenced straight away.
+Of those who enter a hospital, a fraction ($\phi_{\rm death}({\rm age})$) will die with the rest recovering. 
+The time to death ( $\tau_{\rm death}$) and recovery ($\tau_{\rm death}$) are both drawn from gamma distributions.
+
+The disease state transitions are shown in (figure \ref{diseaseDynamics}) and the model parameters are in the table Disease Dynamics Parameters.
+
+\begin{figure}
+\centering
+\includegraphics[width=.9\textwidth]{diseaseDynamics.png}
+\caption{The disease status of an individual and the probability and time distribution of transitions. The $\phi_{\rm xxx}(\rm age)$ variables are the probability of transition to a particular state when there is a choice, where the probability depends upon the age of the individual.  The $\tau_{\rm xxx}$ are the gamma distributed variables of the time taken to make the transition.}
+\label{diseaseDynamics}
+\end{figure}
+
+\medskip \medskip
+\begin{table}
+\centering
+\begin{tabular}{ |p{2.3cm}|p{6.4cm}|p{4cm}|p{1.4cm}|  }
+ \hline
+ \multicolumn{4}{|c|}{Disease Dynamics Parameters} \\
+ \hline
+ Symbol & Name  & Description & Value \\
+ \hline
+ \hline 
+  $\phi _{\rm asym} $  &  \texttt{fraction\us asymptomatic} & fraction of infected who are asymptomatic & 0.2 \\
+ \hline
+ $\phi_{\rm hosp} ({\rm child } )$     &  \texttt{hospitalised\us fraction\us child}    & fraction of symptomatic children hospitalised & 0.15 \\
+ $\phi_{\rm hosp} ({\rm adult } )$    &  \texttt{hospitalised\us fraction\us adult}    & fraction of symptomatic adults hospitalised & 0.15 \\
+ $\phi_{\rm hosp} ({\rm elderly } )$ &  \texttt{hospitalised\us fraction\us elderly} & fraction of symptomatic elderly hospitalised & 0.25 \\
+ \hline
+ $\phi_{\rm death} ({\rm child } )$    &  \texttt{fatality\us fraction\us child}     & fraction of hospitalised children who die & 0.01 \\
+ $\phi_{\rm death} ({\rm adult } )$    &  \texttt{fatality\us fraction\us adult}    & fraction of hospitalised adults who die & 0.04 \\
+ $\phi_{\rm death} ({\rm elderly } )$ &  \texttt{fatality\us fraction\us elderly} & fraction of hospitalised elderly who die & 0.25 \\
+ \hline
+$\mu_{\rm sym} $       &  \texttt{mean\us time\us to\us symptoms} & mean time to symptoms & 5.5 days \\
+$\sigma_{\rm sym} $  &  \texttt{sd\us time\us to\us symptoms}       & s.d.\ time to symptoms & 2.5 days \\
+ \hline
+$\mu_{\rm sym} $       &  \texttt{mean\us time\us to\us symptoms} & mean time to symptoms & 5.5 days \\
+$\sigma_{\rm sym} $  &  \texttt{sd\us time\us to\us symptoms}       & s.d.\ time to symptoms & 2.5 days \\
+ \hline
+$\mu_{\rm hosp} $       &  \texttt{mean\us time\us to\us hospital}  & mean time to hospital after showing symptoms & 1.6 days \\
+ \hline
+$\mu_{\rm death} $       &  \texttt{mean\us time\us to\us death} & mean time to death once hospitalised & 12 days \\
+$\sigma_{\rm death} $  &  \texttt{sd\us time\us to\us death}       & s.d.\ time to death once hospitalised & 5 days \\
+ \hline
+\end{tabular}
+\end{table}
+\medskip \medskip
 
 \section{Passive Interventions}
 
 \section{Active Interventions}
+
+\section{Implementation Details}
 
 \section{References}
 
