@@ -176,7 +176,8 @@ The final formula for the probability of the virus being transmitted in a single
 \end{equation}
 where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infector is asymptomatic; and, the other terms are parameters which are in the Infectious Parameters table.
 
-The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.
+The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection. 
+The infection was assumed to take place on immediately before the simulation starts.
 
 \medskip \medskip
 \begin{table}
@@ -199,6 +200,9 @@ $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infecti
  $s_{\rm adult}$   &   - &  - & 1\\
  $s_{\rm elderly}$ &  \texttt{relative\us susceptibility\us elderly} & relative susceptibility of elderly to adult & 1.7 \\
  \hline
+  -&  \texttt{n\us seed\us infection} & number of individual randomly infected at start of simulation & 10 \\
+ \hline
+
 \end{tabular}
 \end{table}
 \medskip \medskip
@@ -207,18 +211,18 @@ $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infecti
 
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression are dependent upon age of the infected person (figure \ref{diseaseDynamics}).
 The first split is that only a fraction of individual who will develop symptoms, where a fraction ($\phi_{\rm asym}$) remain asymptomatic.
-Those who are asymptomatic are infections (at a lower level, see Infection Dynamics section) and will move to a recovered state after a time ($\tau_{\rm rec}$) drawn from a gamma distribution.
+Those who are asymptomatic are infections (at a lower level, see Infection Dynamics section) and will move to a recovered state after a time ($\tau_{\rm a,rec}$) drawn from a gamma distribution.
 Once an individual is recovered we assume that they have immunity and cannot be reinfected.
 
 For individual who will develop symptoms, they start by being in the pre-symptomatic state, where whilst they will be able to transmit the disease to others, they will not be showing any symptoms. 
 This is important for modelling interventions because individuals in this state would not be able self-isolate unless they had been contact-traced (or there was a complete shutdown).
 After a time ($\tau_{\rm sym}$) drawn from a gamma distribution, the individual develops symptoms, at which case interventions can be triggered such as self-isolation, testing and contact-tracing.
 Whilst most individuals will only develop mild symptoms, a fraction ($\phi_{\rm hosp}({\rm age})$) will go on to require hospitalisation, where the probability of requiring hospital treatment is age-dependent.
-Those of don't require hospitalisation will recover after a time( $\tau_{\rm rec}$) drawn from a gamma distribution, whilst those who require hospital treatment enter after a time ($\tau_{\rm hosp}$) drawn from a Bernoulli distribution of either 1 or 2 days.
+Those of don't require hospitalisation will recover after a time ($\tau_{\rm rec}$) drawn from a gamma distribution, whilst those who require hospital treatment enter after a time ($\tau_{\rm hosp}$) drawn from a Bernoulli distribution of either 1 or 2 days.
 Once entering hospital, a number of interventions can take place. 
 We assume that a clinical diagnosis can immediately decide whether the patient is a case so that contract-tracing can be commenced straight away.
 Of those who enter a hospital, a fraction ($\phi_{\rm death}({\rm age})$) will die with the rest recovering. 
-The time to death ( $\tau_{\rm death}$) and recovery ($\tau_{\rm death}$) are both drawn from gamma distributions.
+The time to death ($\tau_{\rm death}$) and recovery ($\tau_{\rm death}$) are both drawn from gamma distributions.
 
 The disease state transitions are shown in (figure \ref{diseaseDynamics}) and the model parameters are in the table Disease Dynamics Parameters.
 
@@ -260,6 +264,13 @@ $\mu_{\rm hosp} $       &  \texttt{mean\us time\us to\us hospital}  & mean time 
 $\mu_{\rm death} $       &  \texttt{mean\us time\us to\us death} & mean time to death once hospitalised & 12 days \\
 $\sigma_{\rm death} $  &  \texttt{sd\us time\us to\us death}       & s.d.\ time to death once hospitalised & 5 days \\
  \hline
+$\mu_{\rm rec} $       &  \texttt{mean\us time\us to\us recover} & mean time to recover after symptoms/hospital &  12 days \\
+$\sigma_{\rm rec} $  &  \texttt{sd\us time\us to\us recover}       & s.d.\ time to recover after symptoms/hospital & 5 days \\
+ \hline
+$\mu_{\rm a,rec} $       &  \texttt{mean\us asymptomatic\us to\us recover} & mean time to recover after asymptomatic &  15 days \\
+$\sigma_{\rm a,rec} $  &  \texttt{sd\us asymptomatic\us to\us recover}       & s.d.\ time to recover after asymptomatic & 5 days \\
+ \hline
+
 \end{tabular}
 \end{table}
 \medskip \medskip
