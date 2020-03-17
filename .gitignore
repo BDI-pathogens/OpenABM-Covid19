@@ -22,3 +22,4 @@ documentation/*copy*
 documentation/*synctex*
 documentation/*.log
 documentation/*.aux
+documentation/*.dvi
