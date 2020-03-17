@@ -126,9 +126,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 
 	mean = params->mean_random_interactions[group];
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
-	indiv->base_random_interactions = max( indiv->base_random_interactions, 1);
-
-	indiv->random_interactions = indiv->base_random_interactions;
+	indiv->random_interactions      = indiv->base_random_interactions;
 
 	if( group == AGE_18_64 )
 	{
