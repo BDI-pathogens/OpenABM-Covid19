@@ -24,3 +24,5 @@ documentation/*.log
 documentation/*.aux
 documentation/*.key
 documentation/*.pdf
+documentation/*.dvi
+
