@@ -102,24 +102,24 @@ void new_infection(
 	int time_event;
 
 	infected->infector = infector;
-	infected->time_infected = model->time;
 
 	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
 	{
 		infected->status            = ASYMPTOMATIC;
-		infected->time_asymptomatic = model->time;
+		infected->time_event[ASYMPTOMATIC] = model->time;
 
 		infected->next_disease_type = RECOVERED;
 		time_event                  = model->time + sample_transition_time( model, ASYMPTOMATIC_RECOVERED );
-		infected->time_recovered    = time_event;
+		infected->time_event[RECOVERED] = time_event;
 	}
 	else
 	{
 		infected->status = PRESYMPTOMATIC;
+		infected->time_event[PRESYMPTOMATIC] = model->time;
 
 		infected->next_disease_type = SYMPTOMATIC;
 		time_event                  = model->time + sample_transition_time( model, PRESYMPTOMATIC_SYMPTOMATIC );
-		infected->time_symptomatic  = time_event;
+		infected->time_event[SYMPTOMATIC] = time_event;
 	}
 
 	infected->current_disease_event = add_individual_to_event_list( model, infected->status, infected, model->time );
@@ -163,13 +163,14 @@ void transition_to_symptomatic( model *model )
 		{
 			indiv->next_disease_type = HOSPITALISED;
 			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_HOSPITALISED );
-			indiv->time_hospitalised = time_event;
+			indiv->time_event[HOSPITALISED] = time_event;
 		}
 		else
 		{
 			indiv->next_disease_type = RECOVERED;
 			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_RECOVERED );
-			indiv->time_recovered    = time_event;
+			indiv->time_event[RECOVERED] = time_event;
+
 		}
 
 		add_individual_to_event_list( model, indiv->next_disease_type, indiv, time_event );
@@ -223,14 +224,15 @@ void transition_to_hospitalised( model *model )
 		if( gsl_ran_bernoulli( rng, fatality_rate[ indiv->age_group ] ) )
 		{
 			time_event               = model->time + sample_transition_time( model, HOSPITALISED_DEATH );
-			indiv->time_death        = time_event;
+			indiv->time_event[DEATH] = time_event;
 			indiv->next_disease_type = DEATH;
 			add_individual_to_event_list( model, DEATH, indiv, time_event );
 		}
 		else
 		{
 			time_event               = model->time + sample_transition_time( model, HOSPITALISED_RECOVERED );
-			indiv->time_recovered    = time_event;
+			indiv->time_event[RECOVERED] = time_event;
+
 			indiv->next_disease_type = RECOVERED;
 			add_individual_to_event_list( model, RECOVERED, indiv, time_event );
 		};

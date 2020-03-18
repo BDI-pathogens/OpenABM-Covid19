@@ -39,15 +39,7 @@ struct individual{
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	individual *infector;
 
-	int time_infected;
-	int time_symptomatic;
-	int time_asymptomatic;
-	int time_hospitalised;
-	int time_death;
-	int time_recovered;
-	int time_quarantined;
-	int time_case;
-
+	int *time_event;
 
 	event *current_disease_event;
 	int next_disease_type;

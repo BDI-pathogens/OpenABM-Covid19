@@ -25,7 +25,7 @@ void initialize_individual(
 	long idx
 )
 {
-	int day;
+	int day, jdx;
 	if( indiv->idx != 0 )
 		print_exit( "Individuals can only be intitialized once!" );
 
@@ -40,13 +40,11 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	indiv->time_infected      = UNKNOWN;
-	indiv->time_symptomatic   = UNKNOWN;
-	indiv->time_asymptomatic  = UNKNOWN;
-	indiv->time_hospitalised  = UNKNOWN;
-	indiv->time_death	      = UNKNOWN;
-	indiv->time_recovered     = UNKNOWN;
-	indiv->time_case		  = UNKNOWN;
+	indiv->time_event = calloc( N_EVENT_TYPES, sizeof(int) );
+	for( jdx = 0; jdx <= N_EVENT_TYPES; jdx++ )
+		indiv->time_event[jdx] = UNKNOWN;
+
+
 	indiv->next_disease_type  = UNKNOWN;
 	
 	indiv->quarantine_event         = NULL;
@@ -92,14 +90,14 @@ void set_quarantine_status(
 {
 	if( status )
 	{
-		indiv->quarantined       = TRUE;
-		indiv->time_quarantined  = time;
+		indiv->quarantined             = TRUE;
+		indiv->time_event[QUARANTINED] = time;
 		indiv->random_interactions = params->quarantined_daily_interactions;
 	}
 	else
 	{
 		indiv->quarantined              = FALSE;
-		indiv->time_quarantined         = UNKNOWN;
+		indiv->time_event[QUARANTINED]  = time;
 		indiv->quarantine_event         = NULL;
 		indiv->quarantine_release_event = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
@@ -188,7 +186,7 @@ void set_hospitalised( individual *indiv, parameters* params, int time )
 void set_case( individual *indiv, int time )
 {
 	indiv->is_case   = TRUE;
-	indiv->time_case = time;
+	indiv->time_event[CASE] = time;
 }
 
 /*****************************************************************************************
