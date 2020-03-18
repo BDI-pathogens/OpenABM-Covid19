@@ -541,12 +541,7 @@ void flu_infections( model *model )
 		if( !(indiv->status == UNINFECTED && indiv->quarantined == FALSE ) )
 			continue;
 
-		if( gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
-		{
-			set_quarantine_status( indiv, model->params, model->time, TRUE );
-			indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-			add_individual_to_event_list( model, TEST_TAKE, indiv, model->time+1 );
-		}
+		intervention_on_symptoms( model, indiv );
 
 		idx++;
 	}
