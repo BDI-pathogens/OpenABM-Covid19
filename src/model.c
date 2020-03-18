@@ -39,12 +39,6 @@ model* new_model( parameters *params )
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
-	model_ptr->asymptomatic_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-	model_ptr->symptomatic_time_draws  = calloc(N_DRAW_LIST, sizeof(int));
-	model_ptr->hospitalised_time_draws = calloc(N_DRAW_LIST, sizeof(int));
-	model_ptr->recovered_time_draws    = calloc(N_DRAW_LIST, sizeof(int));
-	model_ptr->death_time_draws        = calloc(N_DRAW_LIST, sizeof(int));
-
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
@@ -77,11 +71,9 @@ void destroy_model( model *model )
     free( model->possible_interactions );
     free( model->interactions );
     free( model->events );
-    free( model->asymptomatic_time_draws );
-    free( model->symptomatic_time_draws );
-    free( model->hospitalised_time_draws );
-    free( model->recovered_time_draws );
-    free( model->death_time_draws );
+	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
+		free( model->transition_time_distributions[ idx ] );
+	free( model->transition_time_distributions );
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
@@ -355,12 +347,21 @@ void set_up_distributions( model *model )
 	parameters *params = model->params;
 	double infectious_rate;
 	double mean_interactions[N_AGE_GROUPS];
+	int idx;
+	int **transitions;
 
-	gamma_draw_list( model->asymptomatic_time_draws, 	N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( model->symptomatic_time_draws, 	N_DRAW_LIST, params->mean_time_to_symptoms, params->sd_time_to_symptoms );
-	gamma_draw_list( model->recovered_time_draws,   	N_DRAW_LIST, params->mean_time_to_recover,  params->sd_time_to_recover );
-	gamma_draw_list( model->death_time_draws,       	N_DRAW_LIST, params->mean_time_to_death,    params->sd_time_to_death );
-	bernoulli_draw_list( model->hospitalised_time_draws, N_DRAW_LIST, params->mean_time_to_hospital );
+	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
+		model->transition_time_distributions[idx] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions = model->transition_time_distributions;
+
+	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
+	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
+	gamma_draw_list( transitions[HOSPITALISED_DEATH],          N_DRAW_LIST, params->mean_time_to_death,    		   params->sd_time_to_death );
+	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
+
+//		HOSPITALISED_RECOVERED,
 
 	mean_interactions[AGE_0_17]  = estimate_mean_interactions_by_age( model, AGE_0_17 );
 	mean_interactions[AGE_18_64] = estimate_mean_interactions_by_age( model, AGE_18_64 );

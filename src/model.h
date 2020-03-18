@@ -55,11 +55,7 @@ typedef struct{
 	event *next_event;
 	event_list *event_lists;
 
-	int *asymptomatic_time_draws;
-	int *symptomatic_time_draws;
-	int *hospitalised_time_draws;
-	int *recovered_time_draws;
-	int *death_time_draws;
+	int **transition_time_distributions;
 
 	long n_quarantine_days;
 } model;
