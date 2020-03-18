@@ -25,6 +25,5 @@ void transition_to_hospitalised( model*, individual* );
 void transition_to_recovered( model*, individual* );
 void transition_to_death( model*, individual* );
 void transition_one_disese_event( model*, individual*, int, int, int );
-void transition_disease_events( model*, int, void( model*, individual* )  );
 
 #endif /* DISEASE_H_ */

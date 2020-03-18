@@ -15,6 +15,7 @@
 #include "network.h"
 #include "disease.h"
 #include "structure.h"
+#include "interventions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -144,33 +145,6 @@ void transition_one_disese_event(
 }
 
 /*****************************************************************************************
-*  Name:		transition_disease_events
-*  Description: Transitions all people from one type of disease events
-*  Returns:		void
-******************************************************************************************/
-void transition_disease_events(
-	model *model_ptr,
-	int type,
-	void (*transition_func)( model*, individual* )
-)
-{
-	long idx, n_events;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
-	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
-
-	for( idx = 0; idx < n_events; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-		transition_func( model_ptr, indiv );
-	}
-}
-
-/*****************************************************************************************
 *  Name:		transition_to_symptomatic
 *  Description: Transitions infected who are due to become symptomatic. At this point
 *  				there are 2 choices to be made:
@@ -218,7 +192,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
 
 	if( indiv->quarantined )
-		release_individual_from_quarantine( model, indiv );
+		intervention_quarantine_release( model, indiv );
 
 	quarantine_contacts( model, indiv );
 }
