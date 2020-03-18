@@ -553,122 +553,6 @@ void flu_infections( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		quarantine_contracts
-*  Description: Quarantine contacts
-*  Returns:		void
-******************************************************************************************/
-void quarantine_contacts( model *model, individual *indiv )
-{
-	interaction *inter;
-	individual *contact;
-	int idx, ddx, day, n_contacts;
-	int time_event;
-
-	day = model->interaction_day_idx;
-	for( ddx = 0; ddx < model->params->quarantine_days; ddx++ )
-	{
-		n_contacts = indiv->n_interactions[day];
-		time_event = model->time + max( model->params->test_insensititve_period - ddx, 1 );
-
-		if( n_contacts > 0 )
-		{
-			inter = indiv->interactions[day];
-			for( idx = 1; idx < n_contacts; idx++ )
-			{
-				if( inter->type != HOUSEHOLD )
-					continue;
-
-				contact = inter->individual;
-				if( contact->status != HOSPITALISED && contact->status != DEATH && contact->quarantined == FALSE )
-				{
-					if( gsl_ran_bernoulli( rng, model->params->quarantine_fraction ) )
-					{
-						set_quarantine_status( contact, model->params, model->time, TRUE );
-						contact->quarantine_event = add_individual_to_event_list( model, QUARANTINED, contact, model->time );
-						add_individual_to_event_list( model, TEST_TAKE, contact, time_event );
-					}
-				}
-				inter = inter->next;
-			}
-		}
-		day = ifelse( day == 0, model->params->days_of_interactions -1, day-1 );
-	}
-}
-
-
-/*****************************************************************************************
-*  Name:		quarantined_test_take
-*  Description: Take a test
-*  Returns:		void
-******************************************************************************************/
-void quarantined_test_take( model *model )
-{
-	long idx, n_test_take;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_test_take = model->event_lists[TEST_TAKE].n_daily_current[ model->time ];
-	next_event  = model->event_lists[TEST_TAKE].events[ model->time ];
-
-	for( idx = 0; idx < n_test_take; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		// add test
-		if( indiv->status == UNINFECTED || indiv->status == RECOVERED )
-			indiv->quarantine_test_result = FALSE;
-		else
-			indiv->quarantine_test_result = TRUE;
-
-		add_individual_to_event_list( model, TEST_RESULT, indiv, model->time + model->params->test_result_wait );
-		remove_event_from_event_list( model, event );
-	}
-}
-
-/*****************************************************************************************
-*  Name:		quarantined_test_result
-*  Description: Receive test result
-*  Returns:		void
-******************************************************************************************/
-void quarantined_test_result( model *model )
-{
-	long idx, n_test_result;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_test_result = model->event_lists[TEST_RESULT].n_daily_current[ model->time ];
-	next_event    = model->event_lists[TEST_RESULT].events[ model->time ];
-
-	for( idx = 0; idx < n_test_result; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		if( indiv->quarantine_test_result == FALSE )
-			indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time );
-		else
-		{
-			if( indiv->is_case == FALSE )
-			{
-				set_case( indiv, model->time );
-				add_individual_to_event_list( model, CASE, indiv, model->time );
-			}
-
-			if( indiv->status != HOSPITALISED )
-			{
-				indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time + 14 );
-				quarantine_contacts( model, indiv );
-			}
-		}
-
-		remove_event_from_event_list( model, event );
-	}
-}
-
-/*****************************************************************************************
 *  Name:		add_indiv_to_event_list
 *  Description: adds an individual to an event list at a particular time
 *
@@ -911,7 +795,8 @@ void build_daily_newtork( model *model )
 void transition_events(
 	model *model_ptr,
 	int type,
-	void (*transition_func)( model*, individual* )
+	void (*transition_func)( model*, individual* ),
+	int remove_event
 )
 {
 	long idx, n_events;
@@ -927,6 +812,9 @@ void transition_events(
 		next_event = event->next;
 		indiv      = event->individual;
 		transition_func( model_ptr, indiv );
+
+		if( remove_event )
+			remove_event_from_event_list( model_ptr, event );
 	}
 }
 
@@ -947,15 +835,15 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_events( model, SYMPTOMATIC, &transition_to_symptomatic );
-	transition_events( model, HOSPITALISED, &transition_to_hospitalised );
-	transition_events( model, RECOVERED, &transition_to_recovered );
-	transition_events( model, DEATH, &transition_to_death );
+	transition_events( model, SYMPTOMATIC, &transition_to_symptomatic, FALSE );
+	transition_events( model, HOSPITALISED, &transition_to_hospitalised, FALSE );
+	transition_events( model, RECOVERED, &transition_to_recovered, FALSE );
+	transition_events( model, DEATH, &transition_to_death, FALSE );
 
 	flu_infections( model );
-	quarantined_test_take( model );
-	quarantined_test_result( model );
-	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release );
+	transition_events( model, TEST_TAKE, &intervention_test_take, TRUE );
+	transition_events( model, TEST_RESULT, &intervention_test_result, TRUE );
+	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 
 	update_event_list_counters( model, PRESYMPTOMATIC );
 	update_event_list_counters( model, ASYMPTOMATIC );
