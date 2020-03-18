@@ -13,6 +13,7 @@ Author: p-robot
 import subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
+import pytest
 
 from parameters import ParameterSet
 
@@ -156,6 +157,7 @@ class TestClass(object):
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
 
 
+    @pytest.mark.slow
     def test_proportion_infected(self):
         """
         Expected proportion infected, from infectious_rate (R) is: 1 - 1/R
