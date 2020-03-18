@@ -24,6 +24,110 @@
 #include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
+*  Name:		set_up_transition_times
+*  Description: sets up discrete distributions for the times it takes to
+*  				transition along edges of the disease model
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_transition_times( model *model )
+{
+	parameters *params = model->params;
+	int idx;
+	int **transitions;
+
+	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
+		model->transition_time_distributions[idx] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions = model->transition_time_distributions;
+
+	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
+	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
+	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
+	gamma_draw_list( transitions[HOSPITALISED_DEATH],          N_DRAW_LIST, params->mean_time_to_death,    		   params->sd_time_to_death );
+	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
+
+}
+
+/*****************************************************************************************
+*  Name:		estimate_mean_interactions_by_age
+*  Description: estimates the mean number of interactions by age
+*  Returns:		void
+******************************************************************************************/
+double estimate_mean_interactions_by_age( model *model, int age )
+{
+	long pdx, ndx;
+	long people = 0;
+	double inter  = 0;
+
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		if( model->population[pdx].age_group == age )
+		{
+			people++;
+			inter += model->population[pdx].base_random_interactions;
+		}
+	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
+	{
+		if( model->population[model->household_network->edges[pdx].id1].age_group == age )
+			inter++;
+		if( model->population[model->household_network->edges[pdx].id2].age_group == age )
+			inter++;
+	}
+
+	for( ndx = AGE_0_17; ndx <= AGE_65 ; ndx++ )
+		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
+		{
+			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
+				inter += model->params->daily_fraction_work;
+			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_group == age )
+				inter  += model->params->daily_fraction_work;
+		}
+
+	return 1.0 * inter / people;
+}
+
+/*****************************************************************************************
+*  Name:		set_up_infectious curves
+*  Description: sets up discrete distributions and functions which are used to
+*  				model events and calculates infectious rate per interaction.
+*
+*  				The infectious rate per interaction adult is the infectious rate divided
+*  				by the mean number of daily interactions of an adult.
+*
+*  				Adjustments are calculated for children and elderly based upon their
+*  				difference in the number of daily interactions and the relative overall
+*  				suscpetibility.
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_infectious_curves( model *model )
+{
+	parameters *params = model->params;
+	double infectious_rate;
+	double mean_interactions[N_AGE_GROUPS];
+
+	mean_interactions[AGE_0_17]  = estimate_mean_interactions_by_age( model, AGE_0_17 );
+	mean_interactions[AGE_18_64] = estimate_mean_interactions_by_age( model, AGE_18_64 );
+	mean_interactions[AGE_65]    = estimate_mean_interactions_by_age( model, AGE_65 );
+
+	infectious_rate   = params->infectious_rate / mean_interactions[AGE_18_64];
+	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_18_64] / mean_interactions[AGE_0_17];
+	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_18_64] / mean_interactions[AGE_65];
+
+	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
+
+	gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+				      params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
+
+	gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+				      params->sd_infectious_period, infectious_rate );
+
+	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
+}
+/*****************************************************************************************
 *  Name:		transmit_virus_by_type
 *  Description: Transmits virus over the interaction network for a type of
 *  				infected people
