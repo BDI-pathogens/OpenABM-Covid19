@@ -116,4 +116,39 @@ void intervention_quarantine_contacts( model *model, individual *indiv )
 	}
 }
 
+/*****************************************************************************************
+*  Name:		intervention_on_symptoms
+*  Description: The interventions performed upon showing symptoms of a flu-like
+*  				illness
+*  Returns:		void
+******************************************************************************************/
+void intervention_on_symptoms( model *model, individual *indiv )
+{
+	if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
+	{
+		set_quarantine_status( indiv, model->params, model->time, TRUE );
+		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+		add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
+	}
+}
+
+/*****************************************************************************************
+*  Name:		intervention_on_hospitalised
+*  Description: The interventions performed upon becoming hopsitalised.
+*  					1. Make clinical diagnosis of case without testing
+*  					2. Quarantine contacts
+*  Returns:		void
+******************************************************************************************/
+void intervention_on_hospitalised( model *model, individual *indiv )
+{
+	if( indiv->is_case == FALSE )
+	{
+		set_case( indiv, model->time );
+		add_individual_to_event_list( model, CASE, indiv, model->time );
+	}
+
+	intervention_quarantine_contacts( model, indiv );
+}
+
+
 

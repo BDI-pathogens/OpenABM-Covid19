@@ -16,5 +16,8 @@ void intervention_test_result( model*, individual*  );
 void intervention_quarantine_release( model*, individual*  );
 void intervention_quarantine_contacts( model*, individual* );
 
+void intervention_on_symptoms( model*, individual*  );
+void intervention_on_hospitalised( model*, individual*  );
+
 
 #endif /* INTERVENTIONS_H_ */

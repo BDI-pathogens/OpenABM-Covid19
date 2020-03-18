@@ -163,12 +163,7 @@ void transition_to_symptomatic( model *model, individual *indiv )
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 
-	if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
-	{
-		set_quarantine_status( indiv, model->params, model->time, TRUE );
-		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-		add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
-	}
+	intervention_on_symptoms( model, indiv );
 }
 
 /*****************************************************************************************
@@ -178,12 +173,6 @@ void transition_to_symptomatic( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_hospitalised( model *model, individual *indiv )
 {
-	if( indiv->is_case == FALSE )
-	{
-		set_case( indiv, model->time );
-		add_individual_to_event_list( model, CASE, indiv, model->time );
-	}
-
 	set_hospitalised( indiv, model->params, model->time );
 
 	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
@@ -194,7 +183,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	if( indiv->quarantined )
 		intervention_quarantine_release( model, indiv );
 
-	intervention_quarantine_contacts( model, indiv );
+	intervention_on_hospitalised( model, indiv );
 }
 
 /*****************************************************************************************
