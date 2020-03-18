@@ -81,7 +81,6 @@ model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
-void set_up_distributions( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
 void set_up_work_network( model*, int );

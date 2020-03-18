@@ -14,6 +14,11 @@
 
 #define sample_transition_time( model, type ) ( sample_draw_list( model->transition_time_distributions[type] ) )
 
+
+// set up distributions and infectious curves
+void set_up_transition_times( model* );
+void set_up_infectious_curves( model* );
+
 // transmission of the virus
 void transmit_virus( model* );
 void transmit_virus_by_type( model*, int );
