@@ -232,7 +232,7 @@ void transition_to_hospitalised( model *model )
 		}
 		else
 		{
-			time_event               = model->time + sample_draw_list( transitions[SYMPTOMATIC_RECOVERED]);
+			time_event               = model->time + sample_draw_list( transitions[HOSPITALISED_RECOVERED]);
 			indiv->time_recovered    = time_event;
 			indiv->next_disease_type = RECOVERED;
 			add_individual_to_event_list( model, RECOVERED, indiv, time_event );
