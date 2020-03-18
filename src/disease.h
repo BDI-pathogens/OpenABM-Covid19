@@ -10,6 +10,10 @@
 #ifndef DISEASE_H_
 #define DISEASE_H_
 
+#include "utilities.h"
+
+#define sample_transition_time( model, type ) ( sample_draw_list( model->transition_time_distributions[type] ) )
+
 // transmission of the virus
 void transmit_virus( model* );
 void transmit_virus_by_type( model*, int );

@@ -100,7 +100,6 @@ void new_infection(
 )
 {
 	int time_event;
-	int **transitions = model->transition_time_distributions;
 
 	infected->infector = infector;
 	infected->time_infected = model->time;
@@ -111,7 +110,7 @@ void new_infection(
 		infected->time_asymptomatic = model->time;
 
 		infected->next_disease_type = RECOVERED;
-		time_event                  = model->time + sample_draw_list( transitions[ASYMPTOMATIC_RECOVERED] );
+		time_event                  = model->time + sample_transition_time( model, ASYMPTOMATIC_RECOVERED );
 		infected->time_recovered    = time_event;
 	}
 	else
@@ -119,7 +118,7 @@ void new_infection(
 		infected->status = PRESYMPTOMATIC;
 
 		infected->next_disease_type = SYMPTOMATIC;
-		time_event                  = model->time + sample_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC] );
+		time_event                  = model->time + sample_transition_time( model, PRESYMPTOMATIC_SYMPTOMATIC );
 		infected->time_symptomatic  = time_event;
 	}
 
@@ -143,7 +142,6 @@ void transition_to_symptomatic( model *model )
 {
 	long idx, n_infected;
 	int time_event;
-	int **transitions = model->transition_time_distributions;
 	double *hospitalised_fraction;
 	event *event, *next_event;
 	individual *indiv;
@@ -164,13 +162,13 @@ void transition_to_symptomatic( model *model )
 		if( gsl_ran_bernoulli( rng, hospitalised_fraction[ indiv->age_group ] ) )
 		{
 			indiv->next_disease_type = HOSPITALISED;
-			time_event               = model->time + sample_draw_list( transitions[SYMPTOMATIC_HOSPITALISED] );
+			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_HOSPITALISED );
 			indiv->time_hospitalised = time_event;
 		}
 		else
 		{
 			indiv->next_disease_type = RECOVERED;
-			time_event               = model->time + sample_draw_list( transitions[SYMPTOMATIC_RECOVERED] );
+			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_RECOVERED );
 			indiv->time_recovered    = time_event;
 		}
 
@@ -194,7 +192,6 @@ void transition_to_symptomatic( model *model )
 void transition_to_hospitalised( model *model )
 {
 	long idx, n_hospitalised;
-	int **transitions = model->transition_time_distributions;
 	double time_event;
 	double *fatality_rate;
 	event *event, *next_event;
@@ -225,14 +222,14 @@ void transition_to_hospitalised( model *model )
 		indiv->current_disease_event = event;
 		if( gsl_ran_bernoulli( rng, fatality_rate[ indiv->age_group ] ) )
 		{
-			time_event               = model->time + sample_draw_list( transitions[HOSPITALISED_DEATH]);
+			time_event               = model->time + sample_transition_time( model, HOSPITALISED_DEATH );
 			indiv->time_death        = time_event;
 			indiv->next_disease_type = DEATH;
 			add_individual_to_event_list( model, DEATH, indiv, time_event );
 		}
 		else
 		{
-			time_event               = model->time + sample_draw_list( transitions[HOSPITALISED_RECOVERED]);
+			time_event               = model->time + sample_transition_time( model, HOSPITALISED_RECOVERED );
 			indiv->time_recovered    = time_event;
 			indiv->next_disease_type = RECOVERED;
 			add_individual_to_event_list( model, RECOVERED, indiv, time_event );
