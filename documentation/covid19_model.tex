@@ -270,12 +270,43 @@ $\sigma_{\rm rec} $  &  \texttt{sd\us time\us to\us recover}       & s.d.\ time 
 $\mu_{\rm a,rec} $       &  \texttt{mean\us asymptomatic\us to\us recover} & mean time to recover after asymptomatic &  15 days \\
 $\sigma_{\rm a,rec} $  &  \texttt{sd\us asymptomatic\us to\us recover}       & s.d.\ time to recover after asymptomatic & 5 days \\
  \hline
-
 \end{tabular}
 \end{table}
 \medskip \medskip
 
 \section{Passive Interventions}
+
+The model has the ability to model both passive and active interventions. 
+Here we define an active intervention to be one involving contact-tracing with all other interventions being classed as passive.
+Interventions are designed to reduce the rate of transmission, however, have the side-effect of potentially quarantining significant numbers of people. 
+We also model the testing process to estimate the number of tests required by different intervention strategies.
+
+\subsection{Hospitalisation} Upon hospitalisation, a patient immediately stops interacting with both their household and work-place networks. We also reduce the number of random interactions that they have. One aspect of the disease transmission that we are missing is that within hospitals and interactions with healthcare professionals. 
+
+\subsection{Self-Isolation upon Symptoms}. The next type of intervention we model is self-isolation upon flu-like symptoms. In addition to those infected by coronavirus, we infect a random a sample of the population each day with non-coronavirus flu-like symptoms. Upon experiencing symptoms, a put a fraction of patients in to self-quarantine immediately. Quarantine is modelled by not interacting with your work-place network and having a much reduced number of connections on your random network. On entering self-quarantine, a coronavirus test is ordered for the following day and a result is delivered the day after. Given the patient is already presenting symptoms, we assume that the test will be 100\%. If the result tests positive then the individual remains in quarantine for 14 days (unless they require hospitalisation), otherwise they are released immediately.
+
+\medskip \medskip
+\begin{table}
+\centering
+\begin{tabular}{ |p{7.2cm}|p{6.8cm}|p{0.9cm}|  }
+ \hline
+ \multicolumn{3}{|c|}{Passive Intervention Parameters} \\
+ \hline
+ Name   & Description & Value \\
+ \hline
+ \hline 
+\texttt{mean\us random\us interaction\us child}    & mean number of connections for children & 2 \\
+\texttt{mean\us random\us interaction\us adult}    & mean number of connections for adults & 4 \\
+\texttt{mean\us random\us interaction\us elderly} & mean number of connections for elderly & 3 \\
+\hline
+\texttt{sd\us random\us interaction\us child}$^*$  & s.d.\ number of connections for children & 2 \\
+\texttt{sd\us random\us interaction\us adult}$^*$ & s.d.\ number of connections for adults & 4 \\
+\texttt{sd\us random\us interaction\us elderly}$^*$ & s.d.\ number of connections for elderly & 3 \\
+ \hline
+\end{tabular}
+\end{table}
+\medskip \medskip
+
 
 \section{Active Interventions}
 
