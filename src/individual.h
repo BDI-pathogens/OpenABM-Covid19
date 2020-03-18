@@ -42,6 +42,7 @@ struct individual{
 	int *time_event;
 
 	event *current_disease_event;
+	event *next_disease_event;
 	int next_disease_type;
 
 	event *quarantine_event;

@@ -34,7 +34,7 @@ struct event_list{
 	double *infectious_curve;
 };
 
-typedef struct{
+struct model{
 	parameters *params;
 	individual *population;
 	int time;
@@ -58,7 +58,7 @@ typedef struct{
 	int **transition_time_distributions;
 
 	long n_quarantine_days;
-} model;
+};
 
 struct event{
 	individual *individual;
