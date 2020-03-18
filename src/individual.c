@@ -50,6 +50,7 @@ void initialize_individual(
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
 	indiv->current_disease_event    = NULL;
+	indiv->next_disease_event       = NULL;
 
 	indiv->app_user			  = FALSE;
 }

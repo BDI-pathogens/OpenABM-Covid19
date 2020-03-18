@@ -20,9 +20,11 @@ void transmit_virus_by_type( model*, int );
 
 // progression of the disease
 void new_infection( model*, individual*, individual* );
-void transition_to_symptomatic( model* );
-void transition_to_hospitalised( model* );
-void transition_to_recovered( model* );
-void transition_to_death( model* );
+void transition_to_symptomatic( model*, individual* );
+void transition_to_hospitalised( model*, individual* );
+void transition_to_recovered( model*, individual* );
+void transition_to_death( model*, individual* );
+void transition_one_disese_event( model*, individual*, int, int, int );
+void transition_disease_events( model*, int, void( model*, individual* )  );
 
 #endif /* DISEASE_H_ */

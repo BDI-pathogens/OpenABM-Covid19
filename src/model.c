@@ -952,10 +952,11 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_to_symptomatic( model );
-	transition_to_hospitalised( model );
-	transition_to_recovered( model );
-	transition_to_death( model );
+	transition_disease_events( model, SYMPTOMATIC, &transition_to_symptomatic );
+	transition_disease_events( model, HOSPITALISED, &transition_to_hospitalised );
+	transition_disease_events( model, RECOVERED, &transition_to_recovered );
+	transition_disease_events( model, DEATH, &transition_to_death );
+
 	flu_infections( model );
 	quarantined_test_take( model );
 	quarantined_test_result( model );

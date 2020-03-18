@@ -14,6 +14,7 @@
 #include "params.h"
 #include "network.h"
 #include "disease.h"
+#include "structure.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -99,31 +100,74 @@ void new_infection(
 	individual *infector
 )
 {
-	int time_event;
-
 	infected->infector = infector;
 
 	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
 	{
-		infected->status            = ASYMPTOMATIC;
-		infected->time_event[ASYMPTOMATIC] = model->time;
-
-		infected->next_disease_type = RECOVERED;
-		time_event                  = model->time + sample_transition_time( model, ASYMPTOMATIC_RECOVERED );
-		infected->time_event[RECOVERED] = time_event;
+		transition_one_disese_event( model, infected, NO_EVENT, ASYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, ASYMPTOMATIC, RECOVERED, ASYMPTOMATIC_RECOVERED );
 	}
 	else
 	{
-		infected->status = PRESYMPTOMATIC;
-		infected->time_event[PRESYMPTOMATIC] = model->time;
-
-		infected->next_disease_type = SYMPTOMATIC;
-		time_event                  = model->time + sample_transition_time( model, PRESYMPTOMATIC_SYMPTOMATIC );
-		infected->time_event[SYMPTOMATIC] = time_event;
+		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
+}
 
-	infected->current_disease_event = add_individual_to_event_list( model, infected->status, infected, model->time );
-	add_individual_to_event_list( model, infected->next_disease_type, infected, time_event);
+/*****************************************************************************************
+*  Name:		transition_one_disease_event
+*  Description: Generic function for updating an individual with their next
+*				event and adding the applicable events
+*  Returns:		void
+******************************************************************************************/
+void transition_one_disese_event(
+	model *model,
+	individual *indiv,
+	int from,
+	int to,
+	int edge
+)
+{
+	indiv->status           = from;
+	indiv->time_event[from] = model->time;
+
+	if( indiv->current_disease_event != NULL )
+		remove_event_from_event_list( model, indiv->current_disease_event );
+	if( indiv->next_disease_event != NULL )
+		indiv->current_disease_event = indiv->next_disease_event;
+
+	if( to != NO_EVENT )
+	{
+		indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
+	}
+}
+
+/*****************************************************************************************
+*  Name:		transition_disease_events
+*  Description: Transitions all people from one type of disease events
+*  Returns:		void
+******************************************************************************************/
+void transition_disease_events(
+	model *model_ptr,
+	int type,
+	void (*transition_func)( model*, individual* )
+)
+{
+	long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
+
+	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
+	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
+
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+		transition_func( model_ptr, indiv );
+	}
 }
 
 /*****************************************************************************************
@@ -138,50 +182,18 @@ void new_infection(
 *
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_symptomatic( model *model )
+void transition_to_symptomatic( model *model, individual *indiv )
 {
-	long idx, n_infected;
-	int time_event;
-	double *hospitalised_fraction;
-	event *event, *next_event;
-	individual *indiv;
+	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
+		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
+	else
+		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 
-	n_infected 			  = model->event_lists[SYMPTOMATIC].n_daily_current[ model->time ];
-	next_event 			  = model->event_lists[SYMPTOMATIC].events[ model->time ];
-	hospitalised_fraction = model->params->hospitalised_fraction;
-
-	for( idx = 0; idx < n_infected; idx++ )
+	if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
 	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		indiv->status = SYMPTOMATIC;
-		remove_event_from_event_list( model, indiv->current_disease_event );
-
-		if( gsl_ran_bernoulli( rng, hospitalised_fraction[ indiv->age_group ] ) )
-		{
-			indiv->next_disease_type = HOSPITALISED;
-			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_HOSPITALISED );
-			indiv->time_event[HOSPITALISED] = time_event;
-		}
-		else
-		{
-			indiv->next_disease_type = RECOVERED;
-			time_event               = model->time + sample_transition_time( model, SYMPTOMATIC_RECOVERED );
-			indiv->time_event[RECOVERED] = time_event;
-
-		}
-
-		add_individual_to_event_list( model, indiv->next_disease_type, indiv, time_event );
-		indiv->current_disease_event = event;
-
-		if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
-		{
-			set_quarantine_status( indiv, model->params, model->time, TRUE );
-			indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-			add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
-		}
+		set_quarantine_status( indiv, model->params, model->time, TRUE );
+		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+		add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
 	}
 }
 
@@ -190,55 +202,25 @@ void transition_to_symptomatic( model *model )
 *  Description: Transitions symptomatic individual to hospital
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_hospitalised( model *model )
+void transition_to_hospitalised( model *model, individual *indiv )
 {
-	long idx, n_hospitalised;
-	double time_event;
-	double *fatality_rate;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_hospitalised = model->event_lists[HOSPITALISED].n_daily_current[ model->time ];
-	next_event     = model->event_lists[HOSPITALISED].events[ model->time ];
-	fatality_rate  = model->params->fatality_fraction;
-
-	for( idx = 0; idx < n_hospitalised; idx++ )
+	if( indiv->is_case == FALSE )
 	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		if( indiv->is_case == FALSE )
-		{
-			set_case( indiv, model->time );
-			add_individual_to_event_list( model, CASE, indiv, model->time );
-		}
-
-		if( indiv->quarantined )
-			release_individual_from_quarantine( model, event->individual );
-
-		set_hospitalised( indiv, model->params, model->time );
-		remove_event_from_event_list( model, indiv->current_disease_event );
-
-		indiv->current_disease_event = event;
-		if( gsl_ran_bernoulli( rng, fatality_rate[ indiv->age_group ] ) )
-		{
-			time_event               = model->time + sample_transition_time( model, HOSPITALISED_DEATH );
-			indiv->time_event[DEATH] = time_event;
-			indiv->next_disease_type = DEATH;
-			add_individual_to_event_list( model, DEATH, indiv, time_event );
-		}
-		else
-		{
-			time_event               = model->time + sample_transition_time( model, HOSPITALISED_RECOVERED );
-			indiv->time_event[RECOVERED] = time_event;
-
-			indiv->next_disease_type = RECOVERED;
-			add_individual_to_event_list( model, RECOVERED, indiv, time_event );
-		};
-
-		quarantine_contacts( model, indiv );
+		set_case( indiv, model->time );
+		add_individual_to_event_list( model, CASE, indiv, model->time );
 	}
+
+	set_hospitalised( indiv, model->params, model->time );
+
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+		transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_DEATH );
+	else
+		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
+
+	if( indiv->quarantined )
+		release_individual_from_quarantine( model, indiv );
+
+	quarantine_contacts( model, indiv );
 }
 
 /*****************************************************************************************
@@ -246,23 +228,10 @@ void transition_to_hospitalised( model *model )
 *  Description: Transitions hospitalised and asymptomatic to recovered
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_recovered( model *model )
+void transition_to_recovered( model *model, individual *indiv )
 {
-	long idx, n_recovered;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_recovered = model->event_lists[RECOVERED].n_daily_current[ model->time ];
-	next_event  = model->event_lists[RECOVERED].events[ model->time ];
-	for( idx = 0; idx < n_recovered; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		remove_event_from_event_list( model, indiv->current_disease_event );
-		set_recovered( indiv, model->params, model->time );
-	}
+	transition_one_disese_event( model, indiv, HOSPITALISED, NO_EVENT, NO_EDGE );
+	set_recovered( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -270,23 +239,10 @@ void transition_to_recovered( model *model )
 *  Description: Transitions hospitalised to death
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_death( model *model )
+void transition_to_death( model *model, individual *indiv )
 {
-	long idx, n_death;
-	event *event, *next_event;
-	individual *indiv;
-
-	n_death    = model->event_lists[DEATH].n_daily_current[ model->time ];
-	next_event = model->event_lists[DEATH].events[ model->time ];
-	for( idx = 0; idx < n_death; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		indiv      = event->individual;
-
-		remove_event_from_event_list( model, indiv->current_disease_event );
-		set_dead( indiv, model->time );
-	}
+	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
+	set_dead( indiv, model->time );
 }
 
 
