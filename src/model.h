@@ -93,7 +93,6 @@ int one_time_step( model* );
 void flu_infections( model* );
 void quarantined_test_take( model* );
 void quarantined_test_result( model* );
-void release_from_quarantine( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( model*, int, individual*, int );
@@ -101,6 +100,7 @@ void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
+void transition_events( model*, int, void( model*, individual* )  );
 
 void quarantine_contacts( model*, individual* );
 void release_individual_from_quarantine( model*m, individual* );

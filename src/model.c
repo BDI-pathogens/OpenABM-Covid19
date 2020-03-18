@@ -12,6 +12,7 @@
 #include "params.h"
 #include "network.h"
 #include "disease.h"
+#include "interventions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -596,39 +597,6 @@ void quarantine_contacts( model *model, individual *indiv )
 
 
 /*****************************************************************************************
-*  Name:		release_individual_from_quarantine
-*  Description: Release an individual held in quarantine
-*  Returns:		void
-******************************************************************************************/
-void release_individual_from_quarantine( model *model, individual* indiv )
-{
-	remove_event_from_event_list( model, indiv->quarantine_event );
-	if( indiv->quarantine_release_event != NULL )
-		remove_event_from_event_list( model, indiv->quarantine_release_event );
-	set_quarantine_status( indiv, model->params, model->time, FALSE );
-}
-
-/*****************************************************************************************
-*  Name:		release_from_quarantine
-*  Description: Release those held in quarantine
-*  Returns:		void
-******************************************************************************************/
-void release_from_quarantine( model *model )
-{
-	long idx, n_quarantined;
-	event *event, *next_event;
-
-	n_quarantined = model->event_lists[QUARANTINE_RELEASE].n_daily_current[ model->time ];
-	next_event    = model->event_lists[QUARANTINE_RELEASE].events[ model->time ];
-	for( idx = 0; idx < n_quarantined; idx++ )
-	{
-		event      = next_event;
-		next_event = event->next;
-		release_individual_from_quarantine( model, event->individual );
-	}
-}
-
-/*****************************************************************************************
 *  Name:		quarantined_test_take
 *  Description: Take a test
 *  Returns:		void
@@ -936,6 +904,33 @@ void build_daily_newtork( model *model )
 };
 
 /*****************************************************************************************
+*  Name:		transition_events
+*  Description: Transitions all people from one type of event
+*  Returns:		void
+******************************************************************************************/
+void transition_events(
+	model *model_ptr,
+	int type,
+	void (*transition_func)( model*, individual* )
+)
+{
+	long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
+
+	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
+	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
+
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+		transition_func( model_ptr, indiv );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		one_time_step
 *  Description: Move the model through one time step
 ******************************************************************************************/
@@ -952,15 +947,15 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_disease_events( model, SYMPTOMATIC, &transition_to_symptomatic );
-	transition_disease_events( model, HOSPITALISED, &transition_to_hospitalised );
-	transition_disease_events( model, RECOVERED, &transition_to_recovered );
-	transition_disease_events( model, DEATH, &transition_to_death );
+	transition_events( model, SYMPTOMATIC, &transition_to_symptomatic );
+	transition_events( model, HOSPITALISED, &transition_to_hospitalised );
+	transition_events( model, RECOVERED, &transition_to_recovered );
+	transition_events( model, DEATH, &transition_to_death );
 
 	flu_infections( model );
 	quarantined_test_take( model );
 	quarantined_test_result( model );
-	release_from_quarantine( model );
+	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release );
 
 	update_event_list_counters( model, PRESYMPTOMATIC );
 	update_event_list_counters( model, ASYMPTOMATIC );
