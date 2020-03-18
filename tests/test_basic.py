@@ -12,16 +12,24 @@ Author: p-robot
 
 import subprocess, shutil, os
 from os.path import join
-import numpy as np
+import numpy as np, pandas as pd
+
+from parameters import ParameterSet
 
 # Directories
 IBM_DIR = "src"
-IBM_DIR_TEST = IBM_DIR + "_test"
-EXE = "./covid19ibm.exe"
+IBM_DIR_TEST = "src_test"
+DATA_DIR_TEST = "data_test"
+
+
+TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
+TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
+TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 
 # Construct the executable command
-command = EXE
-compile_command = "make clean; make all"
+EXE = "covid19ibm.exe"
+command = join(IBM_DIR_TEST, EXE)
+
 
 class TestClass(object):
     """
@@ -38,6 +46,7 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
                 
         # Construct the compilation command and compile
+        compile_command = "make clean; make all"
         completed_compilation = subprocess.run([compile_command], 
             shell = True, cwd = IBM_DIR_TEST, capture_output = True)
     
@@ -48,13 +57,32 @@ class TestClass(object):
         """
         shutil.rmtree(IBM_DIR_TEST, ignore_errors = True)
     
+    def setup_method(self):
+        """
+        
+        """
+        os.mkdir(DATA_DIR_TEST)
+        shutil.copy(TEST_DATA_TEMPLATE, TEST_DATA_FILE)
+        
+    def teardown_method(self):
+        """
+        
+        """
+        shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
+    
+    
     def test_execution(self):
         """
         Test the code returns an exit code of 0 upon running
         """
         
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.write_params(TEST_DATA_FILE)
+        
         # Call the model
-        completed_run = subprocess.run([command], cwd = IBM_DIR_TEST, capture_output = True)
-        print(completed_run)
+        completed_run = subprocess.run([command, TEST_DATA_FILE], capture_output = True)
+        
+        # Call the model
         np.testing.assert_equal(completed_run.returncode, 0)
 
