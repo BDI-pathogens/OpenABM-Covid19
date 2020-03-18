@@ -56,7 +56,6 @@ Data on household size is from the ONS.
  \hline
 \end{tabular}
 \end{table}
-\medskip \medskip
 
 \section{Interaction Network}
 
@@ -99,7 +98,6 @@ A work-place network is modelled for each age group, with the network for childr
 When constructing work-place networks individuals are randomly sorted, to ensure there is no unanticipated relationship between the household interactions and the local interactions on the small-world network.
 Each day every person interacts with a random subset of their connections on their work-place network.
 
-\medskip \medskip
 \begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{6.3cm}|p{6.8cm}|p{1cm}|  }
@@ -121,7 +119,6 @@ Each day every person interacts with a random subset of their connections on the
  \hline
 \end{tabular}
 \end{table}
-\medskip \medskip
 
 The difference in the number of interactions for each age group is due to the overall number of daily interactions that each group have.  
 
@@ -132,7 +129,6 @@ Random interactions are drawn each day and are independent of the previous day's
 The number of random connections an individual makes is the same each day (without interventions) and is drawn at the start of the simulation from a negative-binomial distribution.
 This variation in the number of interactions introduces "super-spreaders" into the network who have a much larger numbers of interactions than the average individual.
 
-\medskip \medskip
 \begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{7.2cm}|p{6.8cm}|p{0.9cm}|  }
@@ -152,7 +148,6 @@ This variation in the number of interactions introduces "super-spreaders" into t
  \hline
 \end{tabular}
 \end{table}
-\medskip \medskip
 
 The mean numbers of random connections were chosen so that the total number of daily interactions matched that from the social interaction studies. 
 The split between work and random interactions was chosen to be lower in children. 
@@ -180,7 +175,6 @@ where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution w
 
 The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.  Seed cases are assumed to have been infected immediately before the simulation starts.
 
-\medskip \medskip
 \begin{table}
 \centering
 \begin{tabular}{ |p{1.2cm}|p{6.8cm}|p{6.5cm}|p{1.2cm}|  }
@@ -203,10 +197,8 @@ $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infecti
  \hline
   -&  \texttt{n\us seed\us infection} & number of individual randomly infected at start of simulation & 10 \\
  \hline
-
 \end{tabular}
 \end{table}
-\medskip \medskip
 
 \section{Disease Dynamics}
 
@@ -234,7 +226,6 @@ The disease state transitions are shown in (figure \ref{diseaseDynamics}) and th
 \label{diseaseDynamics}
 \end{figure}
 
-\medskip \medskip
 \begin{table}
 \centering
 \begin{tabular}{ |p{2.3cm}|p{6.4cm}|p{4cm}|p{1.4cm}|  }
@@ -273,7 +264,6 @@ $\sigma_{\rm a,rec} $  &  \texttt{sd\us asymptomatic\us to\us recover}       & s
  \hline
 \end{tabular}
 \end{table}
-\medskip \medskip
 
 \section{Passive Interventions}
 
@@ -284,25 +274,22 @@ We also model the testing process to estimate the number of tests required by di
 
 \subsection{Hospitalisation} Upon hospitalisation, a patient immediately stops interacting with both their household and work-place networks. We also reduce the number of random interactions that they have. One aspect of the disease transmission that we are missing is that within hospitals and interactions with healthcare professionals. 
 
-\subsection{Self-Isolation upon Symptoms}. The next type of intervention we model is self-isolation upon flu-like symptoms. In addition to those infected by coronavirus, we infect a random a sample of the population each day with non-coronavirus flu-like symptoms. Upon experiencing symptoms, a put a fraction of patients in to self-quarantine immediately. Quarantine is modelled by not interacting with your work-place network and having a much reduced number of connections on your random network. On entering self-quarantine, a coronavirus test is ordered for the following day and a result is delivered the day after. Given the patient is already presenting symptoms, we assume that the test will be 100\%. If the result tests positive then the individual remains in quarantine for 14 days (unless they require hospitalisation), otherwise they are released immediately.
+\subsection{Self-Isolation upon Symptoms} The next type of intervention we model is self-isolation upon flu-like symptoms. In addition to those infected by coronavirus, we infect a random a sample of the population each day with non-coronavirus flu-like symptoms. Upon experiencing symptoms, we put a fraction of patients in to self-quarantine immediately. Quarantine is modelled by not interacting with your work-place network and having a much reduced number of connections on your random network. On entering self-quarantine, a coronavirus test is ordered for the following day and a result is delivered the day after. Given the patient is already presenting symptoms, we assume that the test will be 100\%. If the result tests positive then the individual remains in quarantine for 14 days (unless they require hospitalisation), otherwise they are released immediately.
 
 \medskip \medskip
 \begin{table}
 \centering
-\begin{tabular}{ |p{7.2cm}|p{6.8cm}|p{0.9cm}|  }
+\begin{tabular}{ |p{6.8cm}|p{6.5cm}|p{1cm}|  }
  \hline
  \multicolumn{3}{|c|}{Passive Intervention Parameters} \\
  \hline
  Name   & Description & Value \\
  \hline
- \hline 
-\texttt{mean\us random\us interaction\us child}    & mean number of connections for children & 2 \\
-\texttt{mean\us random\us interaction\us adult}    & mean number of connections for adults & 4 \\
-\texttt{mean\us random\us interaction\us elderly} & mean number of connections for elderly & 3 \\
 \hline
-\texttt{sd\us random\us interaction\us child}$^*$  & s.d.\ number of connections for children & 2 \\
-\texttt{sd\us random\us interaction\us adult}$^*$ & s.d.\ number of connections for adults & 4 \\
-\texttt{sd\us random\us interaction\us elderly}$^*$ & s.d.\ number of connections for elderly & 3 \\
+\texttt{self\us quarantine\us fraction} & proportion of people who self quarantine upon symptoms &  0.9 \\
+\texttt{quarantined\us daily\us interactions} & daily random interactions of a quarantined person &  0 \\
+\texttt{hospitalised\us daily\us interactions} & daily random interactions of a hospitalisedperson &  0 \\
+\texttt{seasonal\us flu\us rate} & daily probability of  seasonal flu &  0.0003  \\
  \hline
 \end{tabular}
 \end{table}
