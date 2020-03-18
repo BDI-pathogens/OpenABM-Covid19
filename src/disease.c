@@ -194,7 +194,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	if( indiv->quarantined )
 		intervention_quarantine_release( model, indiv );
 
-	quarantine_contacts( model, indiv );
+	intervention_quarantine_contacts( model, indiv );
 }
 
 /*****************************************************************************************

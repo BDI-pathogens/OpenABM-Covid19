@@ -11,6 +11,10 @@
 #include "structure.h"
 #include "individual.h"
 
+void intervention_test_take( model*, individual*  );
+void intervention_test_result( model*, individual*  );
 void intervention_quarantine_release( model*, individual*  );
+void intervention_quarantine_contacts( model*, individual* );
+
 
 #endif /* INTERVENTIONS_H_ */
