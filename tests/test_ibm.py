@@ -13,6 +13,7 @@ Author: p-robot
 import subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
+import pytest
 
 from parameters import ParameterSet
 
@@ -21,8 +22,7 @@ IBM_DIR = "src"
 IBM_DIR_TEST = "src_test"
 DATA_DIR_TEST = "data_test"
 
-
-TEST_DATA_TEMPLATE = "./tests/data/test_parameters.csv"
+TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 
@@ -69,70 +69,274 @@ class TestClass(object):
         """
         shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
     
-    def test_total_infected_non_negative(self):
+    
+    def test_columns_non_negative(self):
         """
-        Test tthat he total_infected column should be positive.
+        Test that all columns are non-negative
         """
-        df_params = pd.read_csv(TEST_DATA_FILE)
-
-        # Call the model
+        # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
-
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-        np.testing.assert_equal(np.sum(df_output.total_infected < 0), 0)
-
-
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
+    
+    
     def test_total_infectious_rate_zero(self):
         """
-        Test setting infectious rate to zero
+        Set infectious rate to zero results in only "n_seed_infection" as total_infected
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
         params.set_param("infectious_rate", 0.0)
         params.write_params(TEST_DATA_FILE)
 
-        # Call the model
+        # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
-
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         output = df_output["total_infected"].iloc[-1]
         expected_output = int(params.get_param("n_seed_infection"))
         
         np.testing.assert_equal(output, expected_output)
-
-
-    def test_mean_time_to_death_zero(self):
+    
+    
+    def test_zero_n_seed_infection(self):
         """
-        Test setting mean_time_to_death to zero
+        Set seed cases to zero should result in no total infections
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("mean_time_to_death", 0.0)
-        params.set_param("sd_time_to_death", 0.0)
+        params.set_param("n_total", 20000)
+        params.set_param("n_seed_infection", 0)
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["total_infected"].sum(), 0)
+
+
+    def test_zero_deaths(self):
+        """
+        Set fatality ratio to zero, should have no deaths
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("fatality_fraction_child", 0.0)
+        params.set_param("fatality_fraction_adult", 0.0)
+        params.set_param("fatality_fraction_elderly", 0.0)
+        params.set_param("n_total", 50000)
         params.write_params(TEST_DATA_FILE)
 
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
 
+
+    def test_long_time_to_death(self):
+        """
+        Setting mean_time_to_death beyond end of simulation should result in no recorded deaths
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("mean_time_to_death", 200.0)
+        params.set_param("sd_time_to_death", 2.0)
+        params.set_param("end_time", 100)
+        params.set_param("n_total", 20000)
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
+
+
+    @pytest.mark.slow
+    def test_proportion_infected(self):
+        """
+        Expected proportion infected, from infectious_rate (R) is: 1 - 1/R
+        For R = 2.5, expected proportion infected = 1 - 1/2.5 = 0.6.  
+        
+        Note: this needs to be updated for many stochastic simulations
+        """
+        
+        infectious_rate = 2.5
+        proportion_infected = 1 - 1./infectious_rate
+        n_total = 50000
+        
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("quarantine_fraction", 0.0)
+        params.set_param("self_quarantine_fraction", 0.0)
+        params.set_param("infectious_rate", infectious_rate)
+        
+        params.set_param("n_total", n_total)
+        
+        # VARYING PARAMS.  <------------------------------------------------
+        params.write_params(TEST_DATA_FILE)
+        
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
-
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-        np.testing.assert_equal(np.sum(df_output.total_infected > 0), 0)
-
-
+        
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_almost_equal(
+            df_output.total_infected.iloc[-1]/n_total, 
+            0.62854
+        )
+    
+    
     def test_mean_daily_interactions_zero(self):
         """
-        Test setting mean_daily_interactions to zero
+        Setting interactions to zero should avoid any infections,
+        so number of total infections are simply the number of seed cases.  
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("mean_daily_interactions", 0)
+
+        params.set_param("mean_work_interactions_child", 0)
+        params.set_param("mean_work_interactions_adult", 0)
+        params.set_param("mean_work_interactions_elderly", 0)
+
+        params.set_param("mean_random_interactions_child", 0)
+        params.set_param("mean_random_interactions_adult", 0)
+        params.set_param("mean_random_interactions_elderly", 0)
+
+        params.set_param("quarantined_daily_interactions", 0)
+        params.set_param("hospitalised_daily_interactions", 0)
+
+        params.set_param("n_total", 20000)
+        params.write_params(TEST_DATA_FILE)
+
+        # Call the model
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
+
+        np.testing.assert_equal(
+            df_output["total_infected"].iloc[-1], 
+            int(params.get_param("n_seed_infection"))
+        )
+
+
+
+    def test_hospitalised_zero(self):
+        """
+        Test setting hospitalised fractions to zero (should be no hospitalised)
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("hospitalised_fraction_child", 0.0)
+        params.set_param("hospitalised_fraction_adult", 0.0)
+        params.set_param("hospitalised_fraction_elderly", 0.0)
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(
+            df_output["n_hospital"].sum(), 
+            0
+        )
+    
+
+    def test_fraction_asymptomatic_zero(self):
+        """
+        Setting fraction_asymptomatic to zero (should be no asymptomatics)
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("fraction_asymptomatic", 0.0)
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(
+            df_output["n_asymptom"].sum(), 
+            0
+        )
+
+
+    def test_fraction_asymptomatic_one(self):
+        """
+        Setting fraction_asymptomatic to one (should only be asymptomatics)
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("fraction_asymptomatic", 1.0)
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        df_sub = df_output[["n_symptoms", "n_presymptom"]]
+        
+        np.testing.assert_array_equal(
+            df_sub.to_numpy().sum(), 
+            0
+        )
+
+
+    def test_sum_to_total_infected(self):
+        """
+        Test that total_infected is the sum of the other compartments
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-        np.testing.assert_equal(np.sum(df_output.total_infected == 0), 0)
+        df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
+            "n_hospital", "n_death", "n_recovered"]]
+        
+        np.testing.assert_array_equal(
+            df_sub.sum(axis = 1).values, 
+            df_output["total_infected"]
+        )
 
+
+    def test_mean_time_to_recover(self):
+        """
+        Setting mean_time_to_recover to be very large should avoid seeing recovered
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("end_time", 250)
+        
+        # Make recovery very long
+        params.set_param("mean_time_to_recover", 300.0)
+        params.set_param("mean_asymptomatic_to_recovery", 300.0)
+        
+        # Remove self-quarantining
+        params.set_param("quarantine_fraction", 0.0)
+        params.set_param("self_quarantine_fraction", 0.0)
+        
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", "n_hospital", "n_death"]]
+        
+        np.testing.assert_array_equal(
+            df_sub.sum(axis = 1).values, 
+            df_output["total_infected"].values
+        )
