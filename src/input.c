@@ -293,12 +293,12 @@ void write_individual_file(model *model, parameters *params)
 			model->population[idx].quarantined,
 			model->population[idx].hazard,
 			model->population[idx].random_interactions,
-			model->population[idx].time_infected,
-			model->population[idx].time_symptomatic,
-			model->population[idx].time_asymptomatic,
-			model->population[idx].time_hospitalised,
-			model->population[idx].time_death,
-			model->population[idx].time_recovered,
+			max( model->population[idx].time_event[SYMPTOMATIC], model->population[idx].time_event[ASYMPTOMATIC] ),
+			model->population[idx].time_event[SYMPTOMATIC],
+			model->population[idx].time_event[ASYMPTOMATIC],
+			model->population[idx].time_event[HOSPITALISED],
+			model->population[idx].time_event[DEATH],
+			model->population[idx].time_event[RECOVERED],
 			model->population[idx].next_disease_type,
 			infector_id
 			);
@@ -359,7 +359,7 @@ void print_interactions_averages(model *model, int header)
 		int_by_age[ indiv->age_group] += n_int;
 		per_by_age[ indiv->age_group]++;
 
-		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_quarantined != model->time, 1, 0 ) );
+		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_event[QUARANTINED] != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
 		per_by_cqh[cqh]++;
 	}
