@@ -12,7 +12,7 @@
 \newcommand{\us}{\textunderscore}
 
 
-\title{COVID-19 Individual Based Model  with Instantaneous Contract Tracing}
+\title{COVID-19 Individual-Based Model with Instantaneous Contract Tracing}
 \author{Rob Hinch, Will Probert, Anel Nurtay, Christophe Fraser}
 %\date{}							% Activate to display a given date or no date
 
@@ -20,19 +20,19 @@
 \maketitle
 
 \section{Overview}
-The individual based model (IBM) is for simulating the spread of COVID-19 in a city and to analyse the effect of both passive and active intervention strategies.
-The model includes demographic data, which control both the dynamics of the interactions of individuals as well as the the outcome of the disease.
-The disease is spread via interaction between individuals which are remembered to facilitate contact-tracing.
+COVID19-IBM is an individual-based model (IBM) for simulating an outbreak of COVID-19 in a city and to analyse the effect of both passive and active intervention strategies.
+The model includes demographic data, which control both the dynamics of the interactions of individuals as well as disease outcomes.
+Within the model, the virus (SARS-CoV-2) is spread via interactions between individuals.  Interactions can be remembered in the model to facilitate contact-tracing.
 Intervention strategies such as self-quarantining, testing and contact-tracing can then be analysed.
 
 \section{Demographics}
 
-The demographics of the model are based upon UK-wide data for 2018 from the Office of National Statistics (ONS). 
-Individuals are put in one of 3 categories: child (0-17 years), adult (18-64 years) and elderly (65+).
-Every individual is part of household which forms an important part of each persons daily interactions.
-We use household size data from the ONS.
+Demographics of the modelled population are based upon UK-wide data for 2018 from the Office of National Statistics (ONS). 
+Three age categories are modelled: children (0-17 years), adults (18-64 years) and the elderly (65+).
+Every individual is part of household which forms an important part of each person's daily interactions.
+Data on household size is from the ONS.
 
-\begin{table}
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{3cm}|p{7cm}|p{1.2cm}|  }
  \hline
@@ -60,47 +60,47 @@ We use household size data from the ONS.
 
 \section{Interaction Network}
 
-Interactions between individuals are modelled via membership of numerous networks which represent peoples daily interactions.
-The membership of different networks leads to age-group assortativity in the interactions.
-Previous studies of social contacts for infectious disease modelling has estimated the mean number of interactions that individuals have by age group (Mossong, 2008).
-We estimate mean interactions by age-group by aggregating this data 
+Interactions between individuals are modelled via membership of numerous networks which represent people's daily interactions.
+An individual's membership to different networks leads to age-group assortativity in the interactions.
+Previous studies of social contacts for infectious disease modelling have estimated the mean number of interactions that individual's have, stratified by age group (Mossong et al., 2008).
+Mean interactions by age-group are estimated by aggregating this data.  
 
 \medskip \medskip
-\begin{table}
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{5cm}|p{1.5cm}|  }
  \hline
  \multicolumn{2}{|c|}{Mean daily interactions} \\
  \hline
-Age-Group  & Value \\
+Age group  & Value \\
  \hline
  \hline 
-children (0-17 years) & 15 \\
-adults (18-64 years) & 13 \\
-elderly (65 years+) & 7 \\
+Children (0-17 years) & 15 \\
+Adults (18-64 years) & 13 \\
+Elderly (65 years+) & 7 \\
  \hline
 \end{tabular}
 \end{table}
 \medskip \medskip
 
-Our model contains 3 types of networks. One to represent households, one work-place (for children this would be school) and one random daily interactions.
+The model contains 3 types of networks: households, work-places (for children this would represent school) and random daily interactions.  Each simulated individual is a member of one of each type of network.  
 
 \subsection{Household Network}
-Each individual is assigned to live in a household, with the proportion of people in each household taken from the UK household data (see demographics section).
-Each day, each person has an interaction with everybody within their household.
-Elderly people are assumed to live in either 1 or 2 person household with other elderly people, with the ratio of elderly 1 and 2 person households being the same as the general population.
+Each individual is assigned to live in a single household.  The proportion of people in each household is informed using UK household data (see Demographics section).
+Each day every person has an interaction with everybody within their household.
+Elderly people are assumed to live in either a 1 or 2 person household with other elderly people, with the ratio of elderly 1 and 2 person households being the same as the general population.
 Children are assumed to live in household with two adults (so they can only live in 3/4/5/6 person households). 
-The proportion of 3/4/5/6 person with children is the same as the those with adults only.
+The proportion of 3/4/5/6 person-households with children is the same as the those with adults only.
 
 \subsection{Work-place Network}
 Each individual is part of a single work-place network.
-The work-place networks are Watts-Strogatz small-world networks.
-There is one network for each age group, with the child and elderly network containing a small proportion of adults (i.e.\ teachers and carers).
-When constructing the work-place networks we randomly sort the individuals, so there is no link between the household interactions and the local interactions on the small-world network.
-Every day each person interacts with a random subset of their connections on their work-place network.
+Work-place networks are modelled as Watts-Strogatz small-world networks (Watts and Strogatz, 1998).
+A work-place network is modelled for each age group, with the network for children and elderly  containing a small proportion of adults (i.e.\ teachers and carers).
+When constructing work-place networks individuals are randomly sorted, to ensure there is no unanticipated relationship between the household interactions and the local interactions on the small-world network.
+Each day every person interacts with a random subset of their connections on their work-place network.
 
 \medskip \medskip
-\begin{table}
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{6.3cm}|p{6.8cm}|p{1cm}|  }
  \hline
@@ -109,30 +109,31 @@ Every day each person interacts with a random subset of their connections on the
  Name   & Description & Value \\
  \hline
  \hline 
-\texttt{mean\us work\us interaction\us child}    & mean number of connections for children & 10 \\
-\texttt{mean\us work\us interaction\us adult}  & mean number of connections for adults & 7 \\
-\texttt{mean\us work\us interaction\us elderly} & mean number of connections for elderly & 3 \\
+\texttt{mean\us work\us interaction\us child}    & Mean number of connections for children & 10 \\
+\texttt{mean\us work\us interaction\us adult}  & Mean number of connections for adults & 7 \\
+\texttt{mean\us work\us interaction\us elderly} & Mean number of connections for elderly & 3 \\
 \hline
-\texttt{child\us network\us adults} & fraction of adults in child network & 0.2 \\
-\texttt{elderly\us network\us adults} & fraction of adults in elderly network & 0.2 \\
+\texttt{child\us network\us adults} & Fraction of adults in child network & 0.2 \\
+\texttt{elderly\us network\us adults} & Fraction of adults in elderly network & 0.2 \\
 \hline
-\texttt{daily\us fraction\us work} & fraction of daily work connections made & 0.5 \\
-\texttt{prob\us network\us rewire}$^*$ & probability of rewiring a connection in the Watts-Stogatz small-world network & 0.1 \\ 
+\texttt{daily\us fraction\us work} & Fraction of daily work connections made & 0.5 \\
+\texttt{prob\us network\us rewire}$^*$ & Probability of rewiring a connection in the Watts-Stogatz small-world network & 0.1 \\ 
  \hline
 \end{tabular}
 \end{table}
 \medskip \medskip
 
-The difference in the number of interactions for each age group is due to the overall number of daily interactions that each group have
+The difference in the number of interactions for each age group is due to the overall number of daily interactions that each group have.  
 
 \subsection{Random Network}
-In addition to the recurring structured networks of households and work-places, we include a number of random interactions as well.
-These interactions are drawn each day and are independent of the previous days connections.
+
+In addition to the structured networks of households and work-places, within which recurring daily interactions may occur, a number of random interactions are also included.  
+Random interactions are drawn each day and are independent of the previous day's connections.
 The number of random connections an individual makes is the same each day (without interventions) and is drawn at the start of the simulation from a negative-binomial distribution.
-This variation in the number of interactions introduces "super-spreaders" in to the network who make much larger numbers of interactions than the average.
+This variation in the number of interactions introduces "super-spreaders" into the network who have a much larger numbers of interactions than the average individual.
 
 \medskip \medskip
-\begin{table}
+\begin{table}[!htbp]
 \centering
 \begin{tabular}{ |p{7.2cm}|p{6.8cm}|p{0.9cm}|  }
  \hline
@@ -141,9 +142,9 @@ This variation in the number of interactions introduces "super-spreaders" in to 
  Name   & Description & Value \\
  \hline
  \hline 
-\texttt{mean\us random\us interaction\us child}    & mean number of connections for children & 2 \\
-\texttt{mean\us random\us interaction\us adult}    & mean number of connections for adults & 4 \\
-\texttt{mean\us random\us interaction\us elderly} & mean number of connections for elderly & 3 \\
+\texttt{mean\us random\us interaction\us child}    & Mean number of connections for children & 2 \\
+\texttt{mean\us random\us interaction\us adult}    & Mean number of connections for adults & 4 \\
+\texttt{mean\us random\us interaction\us elderly} & Mean number of connections for elderly & 3 \\
 \hline
 \texttt{sd\us random\us interaction\us child}$^*$  & s.d.\ number of connections for children & 2 \\
 \texttt{sd\us random\us interaction\us adult}$^*$ & s.d.\ number of connections for adults & 4 \\
@@ -153,31 +154,31 @@ This variation in the number of interactions introduces "super-spreaders" in to 
 \end{table}
 \medskip \medskip
 
-The mean numbers of connections were chosen so that the total number of daily interactions matched that from the social interaction studies. 
+The mean numbers of random connections were chosen so that the total number of daily interactions matched that from the social interaction studies. 
 The split between work and random interactions was chosen to be lower in children. 
 Each day a list is made which contains all individuals who make random interactions and each person is repeated by the number of interactions they make.
 This list is then randomly shuffled and interactions are made between adjacent pairs on the shuffled list.
 
 \section{Infection Dynamics}
 
-The disease is spread by interactions between infected and susceptible individuals.
-The probability of transmission is determined by the the status of the infector and the age of the susceptible.
+COVID-19 is spread by interactions between infected and susceptible individuals.
+The probability of transmission is determined by the infection status of the infected individual and the age of the susceptible.
 Note that the type of interactions (i.e.\ household, work or random) or the length of the interaction (currently not modelled) is not used in deciding the likelihood of transmission.
-From early studies of coronavirus and analyses of other epidemics, we know that immediately after become infected an individual is not infectious.
-The level of infectiousness increase with time and peaks typically 5-7 days after the initial infection before decreasing.
-Following (??), we model the infectiousness of the time of infection using a gamma function, and the infectiousness on day $t$ after infection is calculated by integrating the gamma function from $t-1$ to $t$.
-It has been observed that some people who are infected with coronavirus remain completely asymptomatic and assume that these people are less infectious then those who go on to develop symptoms.
-Note, there is a difference between somebody who is asymptomatic who will never go on and develop symptoms, as opposed to somebody who is pre-symptomatic who will go on and develop symptoms.
-The second factor that comes into whether the disease is transmitted is how susceptible the uninfected person is. 
-Data from China show that the children are far less susceptible to the disease than adults and that elderly people are more susceptible, which we model by a simple multiplicative factor based upon the age group of the susceptible.
-The final formula for the probability of the virus being transmitted in a single interactions as
+Following evidence from early studies of the COVID19 outbreak and analyses of other epidemics of similar pathogens, it is assumed that immediately after become infected an individual is not infectious.
+The level of infectiousness increases with time and peaks typically 5-7 days after the initial infection before decreasing.  
+Following Fraser et al., (2004), we model infectiousness since time of infection using a gamma function, and the infectiousness on day $t$ after infection is calculated by integrating the gamma function from $t-1$ to $t$.
+It has been observed that some people who are infected with SARS-CoV-2 remain asymptomatic and it is assumed that these people are less infectious than those who eventually develop symptoms.
+Note that the model distinguishes between asymptomatic individuals who never develop symptoms, and individuals who are pre-symptomatic but who eventually develop symptoms.
+
+Heterogeneity in susceptibility also plays a factor in transmission.  Data from the Chinese CDC suggest that the children are far less susceptible to infection than adults, and that the elderly are more susceptible than adults.  The model accounts for differences in susceptibility by a simple multiplicative factor based upon the age group of the susceptible individual.
+
+The final formula for the probability of the virus being transmitted in a single interaction is
 \begin{equation}
 \lambda(t,a_s,b) = \frac{R s_{a_s}A_b}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
 \end{equation}
-where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infector is asymptomatic; and, the other terms are parameters which are in the Infectious Parameters table.
+where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infected individual is asymptomatic; the other terms listed in the Infectious Parameters table.  
 
-The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection. 
-The infection was assumed to take place on immediately before the simulation starts.
+The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.  Seed cases are assumed to have been infected immediately before the simulation starts.
 
 \medskip \medskip
 \begin{table}
@@ -211,14 +212,14 @@ $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infecti
 
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression are dependent upon age of the infected person (figure \ref{diseaseDynamics}).
 The first split is that only a fraction of individual who will develop symptoms, where a fraction ($\phi_{\rm asym}$) remain asymptomatic.
-Those who are asymptomatic are infections (at a lower level, see Infection Dynamics section) and will move to a recovered state after a time ($\tau_{\rm a,rec}$) drawn from a gamma distribution.
-Once an individual is recovered we assume that they have immunity and cannot be reinfected.
+Those who are asymptomatic are infectious (at a lower level, see Infection Dynamics section) and will move to a recovered state after a time ($\tau_{\rm a,rec}$) drawn from a gamma distribution.
+Once an individual is recovered we assume that they have lifelong immunity and cannot be reinfected.
 
-For individual who will develop symptoms, they start by being in the pre-symptomatic state, where whilst they will be able to transmit the disease to others, they will not be showing any symptoms. 
+For individual who will develop symptoms, they start by being in the pre-symptomatic state, where, whilst they will be able to transmit the disease to others, they will not be showing any symptoms. 
 This is important for modelling interventions because individuals in this state would not be able self-isolate unless they had been contact-traced (or there was a complete shutdown).
 After a time ($\tau_{\rm sym}$) drawn from a gamma distribution, the individual develops symptoms, at which case interventions can be triggered such as self-isolation, testing and contact-tracing.
 Whilst most individuals will only develop mild symptoms, a fraction ($\phi_{\rm hosp}({\rm age})$) will go on to require hospitalisation, where the probability of requiring hospital treatment is age-dependent.
-Those of don't require hospitalisation will recover after a time ($\tau_{\rm rec}$) drawn from a gamma distribution, whilst those who require hospital treatment enter after a time ($\tau_{\rm hosp}$) drawn from a Bernoulli distribution of either 1 or 2 days.
+Those individuals who do not require hospitalisation will recover after a time ($\tau_{\rm rec}$) drawn from a gamma distribution, whilst those who require hospital treatment enter after a time ($\tau_{\rm hosp}$) drawn from a Bernoulli distribution of either 1 or 2 days.
 Once entering hospital, a number of interventions can take place. 
 We assume that a clinical diagnosis can immediately decide whether the patient is a case so that contract-tracing can be commenced straight away.
 Of those who enter a hospital, a fraction ($\phi_{\rm death}({\rm age})$) will die with the rest recovering. 

@@ -26,3 +26,5 @@ documentation/*.key
 documentation/*.pdf
 documentation/*.dvi
 
+# R-related files
+.Rhistory

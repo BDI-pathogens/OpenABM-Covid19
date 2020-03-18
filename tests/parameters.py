@@ -111,25 +111,25 @@ class ParameterSet(object):
         with open(param_file, "w+") as f:
             f.write(header + "\n" + line)
     
-    def write_varying_params(self, params, values_list, param_file, 
+    def write_varying_params(self, params, values_list, param_file,
             index_var = "param_id", reset_index = True):
-        
+
         header = ", ".join(list(self.params.keys()))
-        
+
         lines = []; lines.append(header)
-        
+
         index = 1
         for values in list(itertools.product(*values_list)):
             for (param, v) in zip(params, values):
                 # Adjust the parameter value to v
                 self.set_param(param, v)
-                
+
                 if reset_index:
                     self.set_param(index_var, index)
-                
-                # Create a list of parameter values to save
-                lines.append(", ".join(list(self.params.values())))
-                index += 1
-        
+
+            # Create a list of parameter values to save
+            lines.append(", ".join(list(self.params.values())))
+            index += 1
+
         with open(param_file, "w+") as f:
             f.write("\n".join(lines))
