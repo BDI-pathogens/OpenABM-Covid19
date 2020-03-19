@@ -38,6 +38,28 @@ void set_up_transition_times_intervention( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_app_users
+*  Description: Set up the proportion of app users in the population (default is FALSE)
+******************************************************************************************/
+void set_up_app_users( model *model )
+{
+	long idx;
+	long* app_users_idx = calloc(model->params->n_total, sizeof(long));
+
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		app_users_idx[idx] = idx;
+
+	gsl_ran_shuffle( rng, app_users_idx, model->params->n_total, sizeof(long) );
+
+	long n_app_users = (long) (model->params->app_users_fraction * model->params->n_total);
+
+	for( idx = 0; idx < n_app_users; idx++ )
+		model->population[ app_users_idx[idx] ].app_user = TRUE;
+
+	free( app_users_idx );
+};
+
+/*****************************************************************************************
 *  Name:		intervention_on_quarantine_until
 *  Description: Quarantine an individual until a certain time
 *  				If they are already in quarantine then extend quarantine until that time
