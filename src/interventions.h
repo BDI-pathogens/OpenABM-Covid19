@@ -12,6 +12,7 @@
 #include "individual.h"
 
 void set_up_transition_times_intervention( model* );
+void set_up_app_users( model* );
 
 void intervention_quarantine_until( model*, individual*, int, int );
 void intervention_quarantine_release( model*, individual* );
