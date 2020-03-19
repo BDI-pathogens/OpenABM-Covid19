@@ -491,6 +491,13 @@ event* add_individual_to_event_list(
 	list->n_daily_by_age[time][indiv->age_group]++;
 	list->n_daily_current[time]++;
 
+	if( time <= model->time )
+	{
+		list->n_total++;
+		list->n_current++;
+		list->n_total_by_age[indiv->age_group]++;
+	}
+
 	return event;
 }
 
@@ -536,7 +543,8 @@ void remove_event_from_event_list(
 	event->next = model->next_event;
 	model->next_event->last = event;
 
-	list->n_current--;
+	if( time <= model->time )
+		list->n_current--;
 	list->n_daily_current[ time ]--;
 }
 
@@ -570,11 +578,7 @@ void set_up_seed_infection( model *model )
 		person = gsl_rng_uniform_int( rng, params->n_total );
 		new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
 	}
-
-	update_event_list_counters( model, PRESYMPTOMATIC );
-	update_event_list_counters( model, ASYMPTOMATIC );
 }
-
 
 /*****************************************************************************************
 *  Name:		build_random_newtork
@@ -729,12 +733,10 @@ void transition_events(
 int one_time_step( model *model )
 {
 	(model->time)++;
-	update_event_list_counters( model, SYMPTOMATIC );
-	update_event_list_counters( model, HOSPITALISED );
-	update_event_list_counters( model, RECOVERED );
-	update_event_list_counters( model, DEATH );
-	update_event_list_counters( model, TEST_TAKE );
-	update_event_list_counters( model, TEST_RESULT );
+
+	int idx;
+	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
+		update_event_list_counters( model, idx );
 
 	build_daily_newtork( model );
 	transmit_virus( model );
@@ -749,10 +751,6 @@ int one_time_step( model *model )
 	transition_events( model, TEST_RESULT, &intervention_test_result, TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 
-	update_event_list_counters( model, PRESYMPTOMATIC );
-	update_event_list_counters( model, ASYMPTOMATIC );
-	update_event_list_counters( model, QUARANTINED );
-	update_event_list_counters( model, CASE );
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
