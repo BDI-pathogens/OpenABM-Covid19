@@ -1,20 +1,21 @@
 \documentclass[11pt, oneside]{amsart}   	% use "amsart" instead of "article" for AMSLaTeX format
 \usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
-\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
-%\geometry{landscape}                		% Activate for for rotated page geometry
-%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\geometry{a4paper}                   		% ... or a4paper or a5paper or ... 
 \usepackage{graphicx}				% Use pdf, png, jpg, or eps with pdflatex; use eps in DVI mode
-								% TeX will automatically convert eps --> pdf in pdflatex		
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{subfig}
 \usepackage{courier}
 \newcommand{\us}{\textunderscore}
-
+\usepackage[round]{natbib}
+\usepackage{hyperref}
+\usepackage{fullpage}
+\usepackage{float}
+\floatstyle{plaintop}
+\restylefloat{table}
 
 \title{COVID-19 Individual-Based Model with Instantaneous Contract Tracing}
 \author{Rob Hinch, Will Probert, Anel Nurtay, Christophe Fraser}
-%\date{}							% Activate to display a given date or no date
 
 \begin{document}
 \maketitle
@@ -61,7 +62,8 @@ Data on household size is from the ONS.
 
 Interactions between individuals are modelled via membership of numerous networks which represent people's daily interactions.
 An individual's membership to different networks leads to age-group assortativity in the interactions.
-Previous studies of social contacts for infectious disease modelling have estimated the mean number of interactions that individual's have, stratified by age group (Mossong et al., 2008).
+Previous studies of social contacts for infectious disease modelling have estimated the mean number of interactions that individual's have, stratified by age group~\citep{mossong2008social}.
+
 Mean interactions by age-group are estimated by aggregating this data.  We use the term "interactions" between individuals to mean possible contact that can spread disease.  We use the term "connections" between individuals as a superset of possible "interactions".  The modelled networks represent all the connections between individuals.  
 
 \medskip \medskip
@@ -156,49 +158,63 @@ This list is then randomly shuffled and interactions are made between adjacent p
 
 \section{Infection Dynamics}
 
-COVID-19 is spread by interactions between infected and susceptible individuals.
+The disease is spread by interactions between infected and susceptible individuals.
 The probability of transmission is determined by the infection status of the infected individual and the age of the susceptible.
 Note that the type of interactions (i.e.\ household, work or random) or the length of the interaction (currently not modelled) is not used in deciding the likelihood of transmission.
-Following evidence from early studies of the COVID19 outbreak and analyses of other epidemics of similar pathogens, it is assumed that immediately after become infected an individual is not infectious.
+From early studies of SARS-CoV-2~\citep{lai2020severe,guan2020clinical} and analyses of other epidemics~\citep{chan2003sars,meltzer2004multiple}, we know that immediately after becoming infected an individual is not infectious.
 The level of infectiousness increases with time and peaks typically 5-7 days after the initial infection before decreasing.  
-Following Fraser et al., (2004), we model infectiousness since time of infection using a gamma function, and the infectiousness on day $t$ after infection is calculated by integrating the gamma function from $t-1$ to $t$.
-It has been observed that some people who are infected with SARS-CoV-2 remain asymptomatic and it is assumed that these people are less infectious than those who eventually develop symptoms.
-Note that the model distinguishes between asymptomatic individuals who never develop symptoms, and individuals who are pre-symptomatic but who eventually develop symptoms.
+Following~\citep{ferretti2020quantifying}, we model infectiousness since time of infection using a gamma function, and the infectiousness on day $t$ after infection is calculated by integrating the gamma function from $t-1$ to $t$.
 
-Heterogeneity in susceptibility also plays a factor in transmission.  Data from the Chinese CDC suggest that the children are far less susceptible to infection than adults, and that the elderly are more susceptible than adults.  The model accounts for differences in susceptibility by a simple multiplicative factor based upon the age group of the susceptible individual.
+It has been observed that some people who are infected with SARS-CoV-2 remain completely asymptomatic~\citep{bai2020presumed}, and we assume that these people are less infectious then those who go on to develop symptoms. 
+Note, there is a difference between somebody who is asymptomatic (\emph{i.e.} who will never go on and develop symptoms), as opposed to somebody who is pre-symptomatic (\emph{i.e.} who will go on and develop symptoms at some point). 
+The term ``pre-symptomatic'' is used to describe people who are infectious while not having symptoms. 
+In study conducted on SARS-CoV-2 positive patients from Singapore~\citep{young2020epidemiologic}, infected individuals, whose symptoms had had already faded, had detectable respiratory shedding of the virus. 
+While modelling, we combine the pre- and post-symptomatic infectious individuals under the common category and call them, for simplicity, pre-symptomatic. 
+The pre-symptomatic infected individuals are assumed to have the infectiousness level that is similar to the one of symptomatic infected individuals~\citep{young2020epidemiologic,rothe2020transmission}.
 
-The final formula for the probability of the virus being transmitted in a single interaction is
+Heterogeneity in susceptibility also plays a factor in transmission. 
+Data from the Chinese CDC suggest that the children are far less susceptible to infection than adults, and that the elderly are more susceptible than adults~\citep{chinavital},.  
+The model accounts for differences in susceptibility by a simple multiplicative factor based upon the age group of the susceptible individual.
+
+Combining all effects, we model the rate at which the virus being transmitted in a single interaction by
 \begin{equation}
 \lambda(t,a_s,b) = \frac{R s_{a_s}A_b}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
 \end{equation}
-where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infected individual is asymptomatic; the other terms listed in the Infectious Parameters table.  
-
+where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infected individual is asymptomatic; the other terms listed in the Infectious Parameters table  (see Table~\ref{table_infectious_parameters}).
+The rate of virus transmission is converted to a probability of transmission  ($p(t,a_s,b)$) using the formula
+\begin{equation}
+p(t,a_s,b) = 1 - e^{-\lambda(t,a_s,b)}.
+\end{equation}
 The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.  Seed cases are assumed to have been infected immediately before the simulation starts.
 
+\medskip \medskip
 \begin{table}
 \centering
-\begin{tabular}{ |p{1.2cm}|p{6.8cm}|p{6.5cm}|p{1.2cm}|  }
+\resizebox{\textwidth}{!}{\begin{tabular}{|l|l|l|l|}
  \hline
  \multicolumn{4}{|c|}{Infection Parameters} \\
  \hline
  Symbol & Name   & Description & Value \\
  \hline
  \hline 
-$R$ & \texttt{infectious\us rate} & mean number of people infected by each infected person & 2.5 \\
+$R$ & \texttt{infectious\us rate} & mean number of people infected by each infected person & $2.5^{\times}$ \\
 $A_{\rm sym}$ &  - & relative infectious rate of symptomatic & 1 \\
 $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infectious rate of asymptomatic & 0.25 \\
  \hline
- $\mu_i$ &  \texttt{mean\us infectious\us period} & time of peak infectiousness (i.e.\ the mean of the gamma p.d.f.) & 6 days\\
- $\sigma_i$ &  \texttt{sd\us infectious\us period} & width of infectiousness curve (i.e.\ the s.d.\ of the gamma p.d.f.) & 2 days\\
+ $\mu_i$ &  \texttt{mean\us infectious\us period} & time of peak infectiousness (i.e.\ the mean of the gamma p.d.f.) & $6^{\times}$  days\\
+ $\sigma_i$ &  \texttt{sd\us infectious\us period} & width of infectiousness curve (i.e.\ the s.d.\ of the gamma p.d.f.) & $2^{\times}$ days\\
  \hline
- $s_{\rm child}$   &  \texttt{relative\us susceptibility\us child} & relative susceptibility of child to adult & 0.1 \\
- $s_{\rm adult}$   &   - &  - & 1\\
- $s_{\rm elderly}$ &  \texttt{relative\us susceptibility\us elderly} & relative susceptibility of elderly to adult & 1.7 \\
+ $s_{\rm child}$   &  \texttt{relative\us susceptibility\us child} & relative susceptibility of child to adult & $0.1^*$ \\
+ $s_{\rm adult}$   &   - &  - & $1^*$\\
+ $s_{\rm elderly}$ &  \texttt{relative\us susceptibility\us elderly} & relative susceptibility of elderly to adult & $1.7^*$ \\
  \hline
   -&  \texttt{n\us seed\us infection} & number of individual randomly infected at start of simulation & 10 \\
  \hline
-\end{tabular}
+\end{tabular}}
+\caption{Description of infection parameters and their values. Infectious rate and corresponding infectiousness parameters$^{\times}$ were obtained in Ref.~\citep{ferretti2020quantifying}. Relative values\protect{$^*$} are derived from the study of 44,672 confirmed patients in China~\protect{\citep{chinavital}}.}
+\label{table_infectious_parameters}
 \end{table}
+\medskip \medskip
 
 \section{Disease Dynamics}
 
@@ -288,19 +304,19 @@ We also model the testing process to estimate the number of tests required by di
 \hline
 \texttt{self\us quarantine\us fraction} & proportion of people who self quarantine upon symptoms &  0.9 \\
 \texttt{quarantined\us daily\us interactions} & daily random interactions of a quarantined person &  0 \\
-\texttt{hospitalised\us daily\us interactions} & daily random interactions of a hospitalisedperson &  0 \\
+\texttt{hospitalised\us daily\us interactions} & daily random interactions of a hospitalised person &  0 \\
 \texttt{seasonal\us flu\us rate} & daily probability of  seasonal flu &  0.0003  \\
  \hline
 \end{tabular}
 \end{table}
 \medskip \medskip
 
-
 \section{Active Interventions}
+Active interventions are those whi
 
 \section{Implementation Details}
 
-\section{References}
-
-
+\renewcommand{\bibname}{References}
+\bibliographystyle{abbrvnat}
+\bibliography{lib} 
 \end{document}  

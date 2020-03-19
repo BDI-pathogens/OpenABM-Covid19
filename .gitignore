@@ -25,6 +25,9 @@ documentation/*.aux
 documentation/*.key
 documentation/*.pdf
 documentation/*.dvi
+documentation/*.blg
+documentation/*.bbl
+documentation/*.out
 
 # R-related files
 .Rhistory
