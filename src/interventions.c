@@ -21,6 +21,23 @@
 #include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
+*  Name:		set_up_transition_times
+*  Description: sets up discrete distributions for the times it takes to
+*  				transition along edges of the intervention
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_transition_times_intervention( model *model )
+{
+	parameters *params = model->params;
+	int **transitions  = model->transition_time_distributions;
+
+	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], N_DRAW_LIST, params->quarantine_length_self,     params->quarantine_dropout_self );
+	geometric_max_draw_list( transitions[TRACED_QUARANTINE],      N_DRAW_LIST, params->quarantine_length_traced,   params->quarantine_dropout_traced );
+	geometric_max_draw_list( transitions[TEST_RESULT_QUARANTINE], N_DRAW_LIST, params->quarantine_length_positive, params->quarantine_dropout_positive );
+}
+
+/*****************************************************************************************
 *  Name:		intervention_on_quarantine_release
 *  Description: Release an individual held in quarantine
 *  Returns:		void

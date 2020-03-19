@@ -50,6 +50,7 @@ model* new_model( parameters *params )
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
+	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
