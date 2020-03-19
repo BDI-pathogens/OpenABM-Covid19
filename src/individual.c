@@ -98,7 +98,7 @@ void set_quarantine_status(
 	else
 	{
 		indiv->quarantined              = FALSE;
-		indiv->time_event[QUARANTINED]  = time;
+		indiv->time_event[QUARANTINED]  = UNKNOWN;
 		indiv->quarantine_event         = NULL;
 		indiv->quarantine_release_event = NULL;
 		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
