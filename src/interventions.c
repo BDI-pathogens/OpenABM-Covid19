@@ -32,9 +32,37 @@ void set_up_transition_times_intervention( model *model )
 	parameters *params = model->params;
 	int **transitions  = model->transition_time_distributions;
 
-	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], N_DRAW_LIST, params->quarantine_length_self,     params->quarantine_dropout_self );
-	geometric_max_draw_list( transitions[TRACED_QUARANTINE],      N_DRAW_LIST, params->quarantine_length_traced,   params->quarantine_dropout_traced );
-	geometric_max_draw_list( transitions[TEST_RESULT_QUARANTINE], N_DRAW_LIST, params->quarantine_length_positive, params->quarantine_dropout_positive );
+	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], N_DRAW_LIST, params->quarantine_dropout_self,     params->quarantine_length_self );
+	geometric_max_draw_list( transitions[TRACED_QUARANTINE],      N_DRAW_LIST, params->quarantine_dropout_traced,   params->quarantine_length_traced );
+	geometric_max_draw_list( transitions[TEST_RESULT_QUARANTINE], N_DRAW_LIST, params->quarantine_dropout_positive, params->quarantine_length_positive );
+}
+
+/*****************************************************************************************
+*  Name:		intervention_on_quarantine_until
+*  Description: Quarantine an individual until a certain time
+*  				If they are already in quarantine then extend quarantine until that time
+*  Returns:		void
+******************************************************************************************/
+void intervention_quarantine_until( model *model, individual *indiv, int time, int maxof )
+{
+	if( time == model->time )
+		return;
+
+	if( indiv->quarantine_event == NULL )
+	{
+		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+		set_quarantine_status( indiv, model->params, model->time, TRUE );
+	}
+
+	if( indiv->quarantine_release_event != NULL )
+	{
+		if( maxof && indiv->quarantine_release_event->time > time )
+			return;
+
+		remove_event_from_event_list( model, indiv->quarantine_release_event );
+	}
+
+	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time );
 }
 
 /*****************************************************************************************
@@ -44,10 +72,21 @@ void set_up_transition_times_intervention( model *model )
 ******************************************************************************************/
 void intervention_quarantine_release( model *model, individual *indiv )
 {
-	remove_event_from_event_list( model, indiv->quarantine_event );
+
 	if( indiv->quarantine_release_event != NULL )
 		remove_event_from_event_list( model, indiv->quarantine_release_event );
-	set_quarantine_status( indiv, model->params, model->time, FALSE );
+
+	if( indiv->quarantine_event != NULL )
+	{
+		remove_event_from_event_list( model, indiv->quarantine_event );
+		set_quarantine_status( indiv, model->params, model->time, FALSE );
+	}
+	else
+	{
+
+		printf("%i %li\n", indiv->status, indiv->idx);
+		print_exit( "releasing un-quarantined");
+	}
 }
 
 /*****************************************************************************************
@@ -72,8 +111,8 @@ void intervention_test_take( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_test_result( model *model, individual *indiv )
 {
-	if( indiv->quarantine_test_result == FALSE )
-		indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time );
+	if( indiv->quarantine_test_result == FALSE && indiv->quarantined )
+		intervention_quarantine_release( model, indiv );
 	else
 	{
 		if( indiv->is_case == FALSE )
@@ -82,11 +121,7 @@ void intervention_test_result( model *model, individual *indiv )
 			add_individual_to_event_list( model, CASE, indiv, model->time );
 		}
 
-		if( indiv->status != HOSPITALISED )
-		{
-			indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, model->time + 14 );
-			intervention_quarantine_contacts( model, indiv );
-		}
+		intervention_on_positive_result( model, indiv );
 	}
 }
 
@@ -99,14 +134,13 @@ void intervention_quarantine_contacts( model *model, individual *indiv )
 {
 	interaction *inter;
 	individual *contact;
-	int idx, ddx, day, n_contacts;
-	int time_event;
+	int idx, ddx, day, n_contacts, time_event, time_test;
 
 	day = model->interaction_day_idx;
 	for( ddx = 0; ddx < model->params->quarantine_days; ddx++ )
 	{
 		n_contacts = indiv->n_interactions[day];
-		time_event = model->time + max( model->params->test_insensititve_period - ddx, 1 );
+		time_test  = model->time + max( model->params->test_insensititve_period - ddx, 1 );
 
 		if( n_contacts > 0 )
 		{
@@ -121,9 +155,13 @@ void intervention_quarantine_contacts( model *model, individual *indiv )
 				{
 					if( gsl_ran_bernoulli( rng, model->params->quarantine_fraction ) )
 					{
-						set_quarantine_status( contact, model->params, model->time, TRUE );
-						contact->quarantine_event = add_individual_to_event_list( model, QUARANTINED, contact, model->time );
-						add_individual_to_event_list( model, TEST_TAKE, contact, time_event );
+						time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
+
+						if( model->params->quarantine_on_traced )
+							intervention_quarantine_until( model, contact, time_event, TRUE );
+
+						if( model->params->test_on_traced )
+							add_individual_to_event_list( model, TEST_TAKE, contact, time_test );
 					}
 				}
 				inter = inter->next;
@@ -143,9 +181,11 @@ void intervention_on_symptoms( model *model, individual *indiv )
 {
 	if( indiv->quarantined == FALSE && gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction ) )
 	{
-		set_quarantine_status( indiv, model->params, model->time, TRUE );
-		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-		add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
+		int time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
+		intervention_quarantine_until( model, indiv, time_event, TRUE );
+
+		if( model->params->test_on_symptoms )
+			add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + 1 );
 	}
 }
 
@@ -164,7 +204,26 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 		add_individual_to_event_list( model, CASE, indiv, model->time );
 	}
 
-	intervention_quarantine_contacts( model, indiv );
+	if( model->params->quarantine_on_traced || model->params->test_on_traced )
+		intervention_quarantine_contacts( model, indiv );
+}
+
+/*****************************************************************************************
+*  Name:		intervention_on_positive_result
+*  Description: The interventions performed upon receiving a positive test result
+*  Returns:		void
+******************************************************************************************/
+void intervention_on_positive_result( model *model, individual *indiv )
+{
+
+	if( indiv->status != HOSPITALISED )
+	{
+		int time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
+		intervention_quarantine_until( model, indiv, time_event, TRUE );
+
+		if( model->params->quarantine_on_traced || model->params->test_on_traced )
+			intervention_quarantine_contacts( model, indiv );
+	}
 }
 
 

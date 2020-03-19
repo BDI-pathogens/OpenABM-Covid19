@@ -13,13 +13,14 @@
 
 void set_up_transition_times_intervention( model* );
 
-void intervention_test_take( model*, individual*  );
-void intervention_test_result( model*, individual*  );
-void intervention_quarantine_release( model*, individual*  );
+void intervention_quarantine_until( model*, individual*, int, int );
+void intervention_quarantine_release( model*, individual* );
 void intervention_quarantine_contacts( model*, individual* );
+void intervention_test_take( model*, individual* );
+void intervention_test_result( model*, individual* );
 
-void intervention_on_symptoms( model*, individual*  );
-void intervention_on_hospitalised( model*, individual*  );
-
+void intervention_on_symptoms( model*, individual* );
+void intervention_on_hospitalised( model*, individual* );
+void intervention_on_positive_result( model*, individual* );
 
 #endif /* INTERVENTIONS_H_ */
