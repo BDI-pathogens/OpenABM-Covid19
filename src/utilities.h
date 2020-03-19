@@ -28,6 +28,7 @@ void print_now( char* );
 void print_exit( char* );
 void gamma_draw_list( int*, int, double, double );
 void bernoulli_draw_list( int*, int, double );
+void geometric_max_draw_list( int*, int, double, int );
 void gamma_rate_curve( double*, int, double, double, double );
 int negative_binomial_draw( double, double );
 
