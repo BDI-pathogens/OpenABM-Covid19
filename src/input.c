@@ -219,6 +219,33 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_**\n"); };
 	}
 
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_positive\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_self));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_self\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_positive\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
+
 	fclose(parameter_file);
 }
 

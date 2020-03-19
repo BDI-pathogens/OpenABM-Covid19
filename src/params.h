@@ -68,6 +68,16 @@ typedef struct{
 	double quarantine_fraction;				// fraction of people quarantine upon being asked to
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show sypmtoms
 
+	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
+	int quarantine_length_traced;			// max length of quarantine if contact-traced
+	int quarantine_length_positive;			// max length of quarantine if receive positive test result
+	double quarantine_dropout_self;			// daily dropout rate if self-quarantined
+	double quarantine_dropout_traced;		// daily dropout rate if contact-traced
+	double quarantine_dropout_positive;     // daily dropout rate if receive positive test result
+	int test_on_symptoms;					// carry out a test on those with symptoms
+	int test_on_traced;						// carry out a test on those with positive test results
+	int quarantine_on_traced;				// immediately quarantine those who are contact traced
+
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
 	
