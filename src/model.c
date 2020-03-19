@@ -777,5 +777,7 @@ void set_up_app_users( model *model )
 	
 	for( idx = 0; idx < n_app_users; idx++ )
 		model->population[ app_users_idx[idx] ].app_user = TRUE;
+
+	free( app_users_idx );
 };
 
