@@ -88,6 +88,51 @@ void bernoulli_draw_list(
 }
 
 /*****************************************************************************************
+*  Name:		geometric_max_draw_list
+*  Description: generates a draw list which is geometrically distributed with parameter
+*				p and a maximum. Note, since we allow the possibility of immediate
+*				drop out then the the first event is 0 not 1 (so if no max we have
+*				mean of 1/p-1).
+*				Any draws larger than max are given the value max
+*
+*  Arguments:	list:	pointer to draw list be filled in
+*  				n:		length of draw list
+*  				mean:	mean of  distribution
+******************************************************************************************/
+void geometric_max_draw_list(
+	int *list,
+	int n,
+	double p,
+	int max
+)
+{
+	int idx;
+	int day      = 0;
+	double cprob = 0;
+	double prob  = p;
+	int limit   = round( prob * n );
+
+	for( idx = 0; idx < n; idx++ )
+	{
+		if( idx < limit )
+			list[idx] = day;
+		else
+		{
+			day++;
+			if( day < max )
+			{
+				cprob += prob;
+				prob  *= ( 1 - p );
+				limit = round( ( cprob + prob ) * n );
+			}
+			else
+				limit = n;
+			list[idx] = day;
+		}
+	}
+}
+
+/*****************************************************************************************
 *  Name:		gamma_rate_curve
 *  Description: generates a rate curve for how infectious people are based
 *  				upon a discrete gamma distribution and a multiplier
