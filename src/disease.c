@@ -148,7 +148,6 @@ void transmit_virus_by_type(
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-		hazard_rate = list->infectious_curve[ model->time- 1 - day ];
 		n_infected  = list->n_daily_current[ day];
 		next_event  = list->events[ day ];
 
@@ -160,6 +159,7 @@ void transmit_virus_by_type(
 			infector      = event->individual;
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			interaction   = infector->interactions[ model->interaction_day_idx ];
+			hazard_rate   = list->infectious_curve[ model->time - 1 - time_infected( infector) ];
 
 			for( jdx = 0; jdx < n_interaction; jdx++ )
 			{
@@ -234,8 +234,9 @@ void transition_one_disese_event(
 )
 {
 	indiv->status           = from;
-	indiv->time_event[from] = model->time;
 
+	if( from != NO_EVENT )
+		indiv->time_event[from] = model->time;
 	if( indiv->current_disease_event != NULL )
 		remove_event_from_event_list( model, indiv->current_disease_event );
 	if( indiv->next_disease_event != NULL )
