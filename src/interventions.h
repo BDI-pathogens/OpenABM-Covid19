@@ -16,7 +16,7 @@ void set_up_app_users( model* );
 
 void intervention_quarantine_until( model*, individual*, int, int );
 void intervention_quarantine_release( model*, individual* );
-void intervention_quarantine_contacts( model*, individual* );
+void intervention_quarantine_contacts( model*, individual*, int );
 void intervention_test_take( model*, individual* );
 void intervention_test_result( model*, individual* );
 

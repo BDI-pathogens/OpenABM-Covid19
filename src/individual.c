@@ -33,6 +33,7 @@ void initialize_individual(
 	indiv->status      = UNINFECTED;
 	indiv->quarantined = FALSE;
 	indiv->is_case     = FALSE;
+	indiv->app_user	   = FALSE;
 
 	for( day = 0; day < params->days_of_interactions; day++ )
 	{
@@ -43,16 +44,12 @@ void initialize_individual(
 	indiv->time_event = calloc( N_EVENT_TYPES, sizeof(int) );
 	for( jdx = 0; jdx <= N_EVENT_TYPES; jdx++ )
 		indiv->time_event[jdx] = UNKNOWN;
-
-
-	indiv->next_disease_type  = UNKNOWN;
 	
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
 	indiv->current_disease_event    = NULL;
 	indiv->next_disease_event       = NULL;
-
-	indiv->app_user			  = FALSE;
+	indiv->quarantine_test_result   = NO_TEST;
 }
 
 /*****************************************************************************************
