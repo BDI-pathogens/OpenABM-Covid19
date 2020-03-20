@@ -43,7 +43,6 @@ struct individual{
 
 	event *current_disease_event;
 	event *next_disease_event;
-	int next_disease_type;
 
 	event *quarantine_event;
 	event *quarantine_release_event;
@@ -57,6 +56,12 @@ struct interaction{
 	individual *individual;
 	interaction *next;
 };
+
+/************************************************************************/
+/******************************  Macros**** *****************************/
+/************************************************************************/
+
+#define time_infected( indiv ) ( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/

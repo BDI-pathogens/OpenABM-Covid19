@@ -171,6 +171,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
 
+	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
+
 	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
 
@@ -246,6 +249,15 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->traceable_interaction_fraction));
+	if( check < 1){ print_exit("Failed to read parameter traceable_interaction_fraction\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->tracing_network_depth));
+	if( check < 1){ print_exit("Failed to read parameter tracing_network_depth\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->tracing_on_clinical_diagnosis));
+	if( check < 1){ print_exit("Failed to read parameter tracing_on_clinical_diagnosis\n"); };
+
 	fclose(parameter_file);
 }
 
@@ -297,7 +309,6 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_hospitalised, ");
 	fprintf(individual_output_file,"time_death, ");
 	fprintf(individual_output_file,"time_recovered, ");
-	fprintf(individual_output_file,"next_event_type, ");
 	fprintf(individual_output_file,"ID_infector"); // no trailing comma on last entry
 	fprintf(individual_output_file,"\n");
 	
@@ -314,19 +325,18 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %li\n",
+			"%li, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %li\n",
 			model->population[idx].idx,
 			model->population[idx].status,
 			model->population[idx].quarantined,
 			model->population[idx].hazard,
 			model->population[idx].random_interactions,
-			max( model->population[idx].time_event[SYMPTOMATIC], model->population[idx].time_event[ASYMPTOMATIC] ),
+			max( model->population[idx].time_event[PRESYMPTOMATIC], model->population[idx].time_event[ASYMPTOMATIC] ),
 			model->population[idx].time_event[SYMPTOMATIC],
 			model->population[idx].time_event[ASYMPTOMATIC],
 			model->population[idx].time_event[HOSPITALISED],
 			model->population[idx].time_event[DEATH],
 			model->population[idx].time_event[RECOVERED],
-			model->population[idx].next_disease_type,
 			infector_id
 			);
 	}

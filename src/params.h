@@ -74,12 +74,16 @@ typedef struct{
 	double quarantine_dropout_self;			// daily dropout rate if self-quarantined
 	double quarantine_dropout_traced;		// daily dropout rate if contact-traced
 	double quarantine_dropout_positive;     // daily dropout rate if receive positive test result
+	int quarantine_on_traced;				// immediately quarantine those who are contact traced
+	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
+	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
+	int tracing_on_clinical_diagnosis;		// commence contact tracing on a clinical diagnosis as soon as a case reaches the hospital
+
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results
-	int quarantine_on_traced;				// immediately quarantine those who are contact traced
-
 	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
+	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	
 	double app_users_fraction; 		// Proportion of the population that use the apps
 	double seasonal_flu_rate; 		// Rate of seasonal flu

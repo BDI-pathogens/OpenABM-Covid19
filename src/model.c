@@ -45,7 +45,6 @@ model* new_model( parameters *params )
 		set_up_event_list( model_ptr, params, type );
 
 	set_up_population( model_ptr );
-	set_up_app_users( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
@@ -54,6 +53,7 @@ model* new_model( parameters *params )
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
+	set_up_app_users( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
