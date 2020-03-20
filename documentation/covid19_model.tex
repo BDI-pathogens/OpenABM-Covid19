@@ -187,10 +187,10 @@ p(t,a_s,b) = 1 - e^{-\lambda(t,a_s,b)}.
 \end{equation}
 The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.  Seed cases are assumed to have been infected immediately before the simulation starts.
 
-\medskip \medskip
 \begin{table}
 \centering
-\resizebox{\textwidth}{!}{\begin{tabular}{|l|l|l|l|}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|}
  \hline
  \multicolumn{4}{|c|}{Infection Parameters} \\
  \hline
@@ -214,7 +214,6 @@ $A_{\rm asym}$ & \texttt{asymptomatic\us infectious\us factor}& relative infecti
 \caption{Description of infection parameters and their values. Infectious rate and corresponding infectiousness parameters$^{\times}$ were obtained in Ref.~\citep{ferretti2020quantifying}. Relative values\protect{$^*$} are derived from the study of 44,672 confirmed patients in China~\protect{\citep{chinavital}}.}
 \label{table_infectious_parameters}
 \end{table}
-\medskip \medskip
 
 \section{Disease Dynamics}
 
@@ -284,18 +283,19 @@ $\sigma_{\rm a,rec} $  &  \texttt{sd\us asymptomatic\us to\us recover}       & s
 \section{Passive Interventions}
 
 The model has the ability to model both passive and active interventions. 
-Here we define an active intervention to be one involving contact-tracing with all other interventions being classed as passive.
+Here we define an active intervention to be one involving testing or contact-tracing with all other interventions being classed as passive.
 Interventions are designed to reduce the rate of transmission, however, have the side-effect of potentially quarantining significant numbers of people. 
-We also model the testing process to estimate the number of tests required by different intervention strategies.
 
-\subsection{Hospitalisation} Upon hospitalisation, a patient immediately stops interacting with both their household and work-place networks. We also reduce the number of random interactions that they have. One aspect of the disease transmission that we are missing is that within hospitals and interactions with healthcare professionals. 
+\subsection{Hospitalisation} Upon hospitalisation, a patient immediately stops interacting with both their household and work-place networks. We also reduce the number of random interactions that they have. An aspect of the disease transmission that we are missing in the model are the interactions within hospitals. 
 
-\subsection{Self-Isolation upon Symptoms} The next type of intervention we model is self-isolation upon flu-like symptoms. In addition to those infected by coronavirus, we infect a random a sample of the population each day with non-coronavirus flu-like symptoms. Upon experiencing symptoms, we put a fraction of patients in to self-quarantine immediately. Quarantine is modelled by not interacting with your work-place network and having a much reduced number of connections on your random network. On entering self-quarantine, a coronavirus test is ordered for the following day and a result is delivered the day after. Given the patient is already presenting symptoms, we assume that the test will be 100\%. If the result tests positive then the individual remains in quarantine for 14 days (unless they require hospitalisation), otherwise they are released immediately.
+\subsection{Self-Isolation upon Symptoms} The next type of intervention we model is self-isolation upon flu-like symptoms. In addition to those infected by coronavirus, we infect a random a sample of the population each day with seasonal-flu which has similar symptoms. Upon experiencing symptoms, we put a fraction of patients in to self-quarantine immediately. 
+Quarantine is modelled by not interacting with your work-place network and having a much reduced number of connections on your random network.
+The length of quarantine is set to be 14 days, however, we model the fact that some people will dropout each day before the 14 days is reached.
 
-\medskip \medskip
 \begin{table}
 \centering
-\begin{tabular}{ |p{6.8cm}|p{6.5cm}|p{1cm}|  }
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|}
  \hline
  \multicolumn{3}{|c|}{Passive Intervention Parameters} \\
  \hline
@@ -303,18 +303,75 @@ We also model the testing process to estimate the number of tests required by di
  \hline
 \hline
 \texttt{self\us quarantine\us fraction} & proportion of people who self quarantine upon symptoms &  0.9 \\
+\texttt{quarantine\us length\us self}  & maximum time of self-quarantined  & 14 days \\
+\texttt{quarantine\us dropout\us self} & probability somebody drop out each day from self-quarantine & 0.01 \\
 \texttt{quarantined\us daily\us interactions} & daily random interactions of a quarantined person &  0 \\
 \texttt{hospitalised\us daily\us interactions} & daily random interactions of a hospitalised person &  0 \\
 \texttt{seasonal\us flu\us rate} & daily probability of  seasonal flu &  0.0003  \\
  \hline
-\end{tabular}
+\end{tabular}}
 \end{table}
-\medskip \medskip
 
 \section{Active Interventions}
-Active interventions are those whi
+We define active interventions as those which involve either testing or actively tracing individuals who had contact with an infected person (i.e.\ contact-tracing).
+There are 3 events in the model which can be the initial trigger for an active intervention.
+Note, for contract-tracing to occur, one of these events must be the trigger.
+
+\subsection{On flu-like symptoms} We have already described how some people will self-isolate when they display symptoms. 
+However, there is also an intervention option to order a test for person who has flu-like symptoms. 
+
+\subsection{On positive-test} When an individual has received a positive test, we can then immediately initiate contact-tracing if the person has the app.
+
+\subsection{On hospitalisation} When an individual enters hospital with suspected COVID19 a test is ordered to confirm the diagnosis. In the model we give the intervention option of contact tracing to be commenced immediately upon a clinical diagnosis, without waiting for the test to confirm.
+
+\medskip
+The model has 2 types of active intervention, one is testing for coronavirus and the other is app-based contact-racing. 
+These 2 interventions work together informing each other of the next steps.
+\subsection{Testing} Currently the test for coronavirus is not sensitive immediately upon infection, which we model by only returning a positive test if the patient has been infected for 3 days when the test takes place. For individuals who already displaying symptoms this is not an issue since the symptoms normally only present after the test has become sensitive. However, when ordering tests while carrying out contact tracing, we need to take this in to account. Currently there are also delays in the testing procedure, both in taking a test and in getting the result for it. These test-delays are modelled which will then delay other interventions. Anyone receiving a positive test is quarantined for up to 14 days (with a random daily dropout) and there is the option to trigger app-based contract tracing.
+
+\subsection{App-based Contact-Tracing} The second intervention we model is the app-based contract-tracing, which can initiate the quarantining of infected individuals prior to them ever showing symptoms. For infections with high levels of pre-symptomatic transmission this is vital to prevent epidemics. Contact-tracing can only originate from somebody with the app and can only trace others who have the app as well. Given that the whole population will not have the app, we randomly pick a fraction of the population to not have the app. Secondly, the app is likely to miss some interactions between individuals, even if both individuals have the app, so when contact-tracing we randomly drop a number of interactions. We then go through all the interactions of the individual for a number of days, and if the app recorded the interaction the contact can be asked to quarantine and/or be tested for coronavirus. There is also an option to recursively contact-trace where we automatically trace the contact of contacts who can also be asked to quarantine and/or be tested for coronavirus.
+
+\begin{table}
+\centering
+\resizebox{\textwidth}{!}{\begin{tabular}{|l|l|l|}
+ \hline
+ \multicolumn{3}{|c|}{Active Intervention Parameters} \\
+ \hline
+ Name   & Description & Value \\
+ \hline
+ \hline
+\texttt{app\us users\us fraction} & fraction of population with the app & 0.85 \\
+\texttt{quarantine\us days} & the number of days prior contacts to contact & 5 days \\
+\texttt{traceable\us interaction\us raction} & fraction of interactions that captured if both users have app & 0.8 \\
+\texttt{tracing\us network\us depth} & depth of interaction network to contact (i.e.\ second-order contacts) & 2 \\
+\hline
+\hline
+\texttt{quarantine\us on\us traced} & quarantine individuals who are traced & 1 \\
+\texttt{test\us on\us traced}            & test individuals who have been contact-traced & 1 \\
+\texttt{test\us on\us symptoms}      & test individuals who show symptoms and are quarantined & 1 \\
+\texttt{tracing\us on\us clinical\us}  diagnosis & commence contact-tracing on a clinical diagnosis & 1 \\
+\hline
+\hline
+\texttt{quarantine\us length\us traced}     & maximum time of quarantined if traced  & 14 days \\
+\texttt{quarantine\us dropout\us traced}   & probability somebody drop out each day if traced  & 0.01 \\
+\texttt{quarantine\us length\us positive}   & maximum time of quarantine if test positive & 14 days \\
+\texttt{quarantine\us dropout\us positive} & probability somebody drop out each day if tested positve & 0.01 \\
+\hline
+\hline
+\texttt{test\us insensitive\us period} & number of days following infection the test is insensitive & 3 days\\
+\texttt{test\us order\us wait} & minimum number of days to wait to take a test  & 1 days \\
+\texttt{test\us result\us wait} & number of days to wait for a test result & 1 days \\
+ \hline 
+\end{tabular}}
+\end{table}
 
 \section{Implementation Details}
+For computationally efficiency we use an event-based system, where at each decision point we calculate when the next event will occur.
+Linked-lists are used throughout to use memory efficiently.
+At the start of the simulation all individuals are drawn a quantity of {\it hazard} (from an exponential distribution) and every interaction with an infected person reduces their amount of {\it hazard}. When {\it hazard} drops below 0 the individual becomes infected. This algorithm is efficient as it means that we do not need to draw random variables for every interaction and can be shown to be mathematically equivalent.
+As part of the initialisation we calculate draw-lists for each distribution, so that drawing from any distribution simply becomes drawing a uniform random variable.
+Similarly, all infection transmission rates are pre-computed in the initialisation, which removes the need for any mathematical function evaluation or multiplication during the main part of the simulation.
+
 
 \renewcommand{\bibname}{References}
 \bibliographystyle{abbrvnat}
