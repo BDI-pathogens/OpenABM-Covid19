@@ -25,25 +25,23 @@ typedef struct individual individual;
 
 struct individual{
 	long idx;
-	int status;
-
 	int age_group;
 	int work_network;
-	int is_case;
 
-	int quarantined;
 	int base_random_interactions;
 	int random_interactions;
-	double hazard;
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	individual *infector;
 
-	int *time_event;
-
+	int status;
+	int is_case;
+	double hazard;
 	event *current_disease_event;
 	event *next_disease_event;
+	int *time_event;
 
+	int quarantined;
 	event *quarantine_event;
 	event *quarantine_release_event;
 	int quarantine_test_result;
