@@ -84,12 +84,16 @@ void destroy_model( model *model )
     	destroy_network( model->work_network[idx] );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
+    for( idx = 0; idx < model->household_directory->n_idx; idx++ )
+    	free( model->household_directory->val[idx] );
+    free( model->household_directory->val );
+    free( model->household_directory->n_jdx );
 };
 
 /*****************************************************************************************
 *  Name:		set_up_event_list
 *  Description: sets up an event_list
-*  Returns:		void
+*  Returns:		voidx
 ******************************************************************************************/
 void set_up_event_list( model *model, parameters *params, int type )
 {
@@ -370,7 +374,7 @@ void calculate_household_distribution(
 ******************************************************************************************/
 void build_household_network( model *model )
 {
-	long pop_idx, hdx, edge_idx;
+	long pop_idx, hdx, edge_idx, house_no;
 	int ndx, pdx, p2dx, age;
 	long n_house_tot[ UK_HOUSEHOLD_N_MAX ];
 	double elderly_frac_1_2;
@@ -385,10 +389,21 @@ void build_household_network( model *model )
 		network->n_edges += n_house_tot[ndx] * ndx * ( ndx + 1 ) / 2;
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
 
+	model->household_directory = calloc( 1, sizeof( var_array ) );
+	model->household_directory->n_idx = 0;
+	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+		model->household_directory->n_idx += n_house_tot[ndx];
+	model->household_directory->n_jdx = calloc( model->household_directory->n_idx, sizeof( long ) );
+	model->household_directory->val   = calloc( model->household_directory->n_idx, sizeof( long* ) );
+
 	edge_idx = 0;
-	pop_idx = 0;
+	pop_idx  = 0;
+	house_no = 0;
 	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
 		for( hdx = 0; hdx < n_house_tot[ndx]; hdx++ )
+		{
+			model->household_directory->n_jdx[house_no] = ndx + 1;
+			model->household_directory->val[house_no]   = calloc( ndx + 1, sizeof( long ) );
 			for( pdx = 0; pdx < ( ndx + 1 ); pdx++ )
 			{
 				age = AGE_18_64;
@@ -398,6 +413,8 @@ void build_household_network( model *model )
 					age = AGE_0_17;
 
 				set_age_group( &(model->population[pop_idx]), model->params, age );
+				set_house_no( &(model->population[pop_idx]), house_no );
+				model->household_directory->val[house_no][pdx] = pop_idx;
 
 				for( p2dx = pdx+1; p2dx < ( ndx + 1 ); p2dx++ )
 				{
@@ -408,6 +425,8 @@ void build_household_network( model *model )
 				}
 				pop_idx++;
 			}
+			house_no++;
+		}
 }
 
 /*****************************************************************************************
