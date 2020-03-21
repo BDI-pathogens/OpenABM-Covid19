@@ -54,7 +54,8 @@ void set_up_transition_times( model *model )
 
 /*****************************************************************************************
 *  Name:		estimate_mean_interactions_by_age
-*  Description: estimates the mean number of interactions by age
+*  Description: estimates the weighted mean number of interactions by age
+*  				each interaction is weighted by the type factor
 *  Returns:		void
 ******************************************************************************************/
 double estimate_mean_interactions_by_age( model *model, int age )
@@ -62,28 +63,29 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	long pdx, ndx;
 	long people = 0;
 	double inter  = 0;
+	double *weight = model->params->relative_transmission_by_type;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 		if( model->population[pdx].age_group == age )
 		{
 			people++;
-			inter += model->population[pdx].base_random_interactions;
+			inter += model->population[pdx].base_random_interactions * weight[RANDOM];
 		}
 	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
 	{
 		if( model->population[model->household_network->edges[pdx].id1].age_group == age )
-			inter++;
+			inter += weight[HOUSEHOLD];
 		if( model->population[model->household_network->edges[pdx].id2].age_group == age )
-			inter++;
+			inter += weight[HOUSEHOLD];
 	}
 
 	for( ndx = AGE_0_17; ndx <= AGE_65 ; ndx++ )
 		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
 		{
 			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
-				inter += model->params->daily_fraction_work;
+				inter += model->params->daily_fraction_work * weight[WORK];
 			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_group == age )
-				inter  += model->params->daily_fraction_work;
+				inter  += model->params->daily_fraction_work * weight[WORK];
 		}
 
 	return 1.0 * inter / people;
@@ -121,7 +123,7 @@ void set_up_infectious_curves( model *model )
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
-		type_factor = 1.0;
+		type_factor = params->relative_transmission_by_type[type];
 
 		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );

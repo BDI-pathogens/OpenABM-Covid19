@@ -213,6 +213,14 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_elderly));
 	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_elderly\n"); };
 
+
+	for( i = 0; i < N_INTERACTION_TYPES; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission_by_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
+	}
+
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));

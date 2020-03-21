@@ -52,6 +52,9 @@ uk_pop_65	10.04
 seasonal_flu_rate	0.0003
 relative_susceptibility_child	0.1
 relative_susceptibility_elderly	1.7
+relative_transmission_household	2.0
+relative_transmission_workplace	1.0
+relative_transmission_random	1.0
 hospitalised_fraction_child	0.15
 hospitalised_fraction_adult	0.15
 hospitalised_fraction_elderly	0.25

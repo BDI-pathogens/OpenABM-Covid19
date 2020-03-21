@@ -40,6 +40,8 @@ typedef struct{
 	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
 	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
 
+	double relative_transmission_by_type[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
+
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
