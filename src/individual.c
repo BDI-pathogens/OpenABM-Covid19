@@ -177,6 +177,16 @@ void set_hospitalised( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
+*  Name:		set_critical
+*  Description: sets a person to critical
+*  Returns:		void
+******************************************************************************************/
+void set_critical( individual *indiv, parameters* params, int time )
+{
+	indiv->status = CRITICAL;
+}
+
+/*****************************************************************************************
 *  Name:		set_case
 *  Description: sets a person to be a case
 *  Returns:		void
