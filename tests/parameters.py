@@ -6,7 +6,7 @@ Author: p-robot (W. Probert)
 """
 
 from collections import OrderedDict
-import itertools
+import itertools, json, sys
 
 class ParameterSet(object):
     """
@@ -89,7 +89,7 @@ class ParameterSet(object):
         header = [c.strip() for c in data[0].split(",")]
         param_line = [c.strip() for c in data[line_number].split(",")]
         
-        self.NPARAMS = len(header)
+        self._NPARAMS = len(header)
         
         # Save parameters as an ordered dict
         self.params = OrderedDict([(param, value) for param, value in zip(header, param_line)])
@@ -103,6 +103,43 @@ class ParameterSet(object):
     def list_params(self):
         return(self.params.keys())
     
+    
+    def write_varying_params_from_json(self, json_file, output_param_file):
+        """
+        Read JSON file of parameter values to vary, write parameter set to file
+        """
+        
+        # Read JSON file of parameters
+        with open(json_file) as f:
+            json_string = f.read()
+        json_dict = json.loads(json_string)
+        
+        # Pull out the list of parameters
+        parameter_dict = json_dict["parameters"]
+        
+        # Check that n_replicates and rng_seed aren't both specified
+        if ("n_replicates" in json_dict) & ("rng_seed" in parameter_dict):
+            print("Both n_replicates and rng_seed are specified - only specify one")
+            sys.exit()
+        
+        # Adjust single parameter values
+        for param, value in parameter_dict.items():
+            if not isinstance(value, list):
+                self.set_param(param, value) 
+        
+        # Make a dict of param values that are varying
+        params = [k for k, v in parameter_dict.items() if isinstance(v, list)]
+        values_list = [v for k, v in parameter_dict.items() if isinstance(v, list)]
+        
+        if "n_replicates" in json_dict:
+            n_replicates = json_dict["n_replicates"]
+            params = params + ["rng_seed"]
+            values_list = values_list + [range(n_replicates)]
+        
+        # Write varying parameters to file
+        self.write_varying_params(params, values_list, output_param_file)
+        
+    
     def write_params(self, param_file):
         
         header = ", ".join(list(self.params.keys()))
@@ -111,9 +148,23 @@ class ParameterSet(object):
         with open(param_file, "w+") as f:
             f.write(header + "\n" + line)
     
-    def write_varying_params(self, params, values_list, param_file,
+    def write_varying_params(self, params, values_list, output_param_file,
             index_var = "param_id", reset_index = True):
-
+        """
+        Write parameters to file from lists of parameter values across which to vary
+            
+        Arguments
+        ---------
+        params : list
+            str of parameter names over which to vary
+            
+        values_list : list of lists
+            
+        param_file : str
+            path to output parameter file
+        
+        index_var = "param_id", reset_index = True
+        """
         header = ", ".join(list(self.params.keys()))
 
         lines = []; lines.append(header)
@@ -131,5 +182,47 @@ class ParameterSet(object):
             lines.append(", ".join(list(self.params.values())))
             index += 1
 
-        with open(param_file, "w+") as f:
+        with open(output_param_file, "w+") as f:
             f.write("\n".join(lines))
+    
+    @property
+    def NPARAMS(self):
+        "Number of parameters"
+        return self._NPARAMS
+
+
+if __name__ == "__main__":
+    """
+    Usage:
+    python parameters.py <input_parameter_file> <json_file> <output_parameter_file>
+    
+    Arguments
+    ----------
+    input_parameter_file : str
+        path to input parameter file with "baseline" parameter values
+
+    json_file : str
+        path to JSON file of parameters to adjust (or vary).  JSON file has a key "parameters" 
+        within which there are key/value pairs of parameter names/values.  JSON file has an 
+        optional key of "n_replicates" with int value which will generate 'n_replicates' 
+        replicates for each set of parameter values.  
+        
+    output_parameter_file : str
+        path of where to save output parameter file after adjustments in JSON file are made 
+    
+    
+    Returns
+    -------
+    Writes a new parameter file to disk at location <output_parameter_file>.  
+    
+    """
+    
+    input_parameter_file = sys.argv[1]
+    json_file = sys.argv[2]
+    output_parameter_file = sys.argv[3]
+    
+    # Read input parameter file and instantiate object
+    p = ParameterSet(input_parameter_file)
+    
+    # Write new parameter file 
+    p.write_varying_params_from_json(json_file, output_parameter_file)
