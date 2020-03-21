@@ -71,6 +71,7 @@ void set_age_group( individual*, parameters*, int );
 void set_quarantine_status( individual*, parameters*, int, int );
 void set_recovered( individual*, parameters*, int );
 void set_hospitalised( individual*, parameters*, int );
+void set_critical( individual*, parameters*, int );
 void set_dead( individual*, int );
 void set_case( individual*, int );
 

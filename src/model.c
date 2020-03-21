@@ -741,14 +741,15 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_events( model, SYMPTOMATIC, &transition_to_symptomatic, FALSE );
+	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );
 	transition_events( model, HOSPITALISED, &transition_to_hospitalised, FALSE );
-	transition_events( model, RECOVERED, &transition_to_recovered, FALSE );
-	transition_events( model, DEATH, &transition_to_death, FALSE );
+	transition_events( model, CRITICAL,     &transition_to_critical,     FALSE );
+	transition_events( model, RECOVERED,    &transition_to_recovered,    FALSE );
+	transition_events( model, DEATH,        &transition_to_death,        FALSE );
 
 	flu_infections( model );
-	transition_events( model, TEST_TAKE, &intervention_test_take, TRUE );
-	transition_events( model, TEST_RESULT, &intervention_test_result, TRUE );
+	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
+	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;

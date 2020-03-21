@@ -287,4 +287,12 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	}
 }
 
+/*****************************************************************************************
+*  Name:		intervention_on_critical
+*  Description: The interventions performed upon becoming critical
+*  Returns:		void
+******************************************************************************************/
+void intervention_on_critical( model *model, individual *indiv )
+{
+}
 

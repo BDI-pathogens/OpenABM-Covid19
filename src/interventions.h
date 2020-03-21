@@ -22,6 +22,7 @@ void intervention_test_result( model*, individual* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );
+void intervention_on_critical( model*, individual* );
 void intervention_on_positive_result( model*, individual* );
 
 #endif /* INTERVENTIONS_H_ */
