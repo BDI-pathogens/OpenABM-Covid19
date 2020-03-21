@@ -94,13 +94,13 @@ void destroy_model( model *model )
 void set_up_event_list( model *model, parameters *params, int type )
 {
 
-	int day, age;
+	int day, age, idx;
 	event_list *list = &(model->event_lists[ type ]);
 	list->type       = type;
 
 	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
 	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
-	list->infectious_curve = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	list->infectious_curve = calloc( N_INTERACTION_TYPES, sizeof(double*) );
 	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
 	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
 	list->events		   = calloc( MAX_TIME, sizeof(event*));
@@ -116,6 +116,8 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily[day] = 0;
 		list->n_daily_current[day] = 0;
 	}
+	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
+		list->infectious_curve[idx] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
 
 /*****************************************************************************************
@@ -124,11 +126,13 @@ void set_up_event_list( model *model, parameters *params, int type )
 ******************************************************************************************/
 void destroy_event_list( model *model, int type )
 {
-	int day;
+	int day, idx;
 	free( model->event_lists[type].n_daily );
 
 	for( day = 0; day < MAX_TIME; day++ )
 		free( model->event_lists[type].n_daily_by_age[day]);
+	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
+		free( model->event_lists[type].infectious_curve[idx] );
 
 	free( model->event_lists[type].n_daily_current );
 	free( model->event_lists[type].infectious_curve );
