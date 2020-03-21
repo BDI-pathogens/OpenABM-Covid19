@@ -128,6 +128,9 @@ void set_up_infectious_curves( model *model )
 
 	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 					  params->sd_infectious_period, infectious_rate );
+
+	gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
