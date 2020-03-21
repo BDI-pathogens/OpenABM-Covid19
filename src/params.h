@@ -44,9 +44,11 @@ typedef struct{
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
 	double hospitalised_fraction[N_AGE_GROUPS];   // fraction of symptomatic patients requiring hospitalisation
-	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who die
+	double critical_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who require ICU treatment
+	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of ICU patients who die
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
+	double mean_time_to_critical;   // mean time from hospitalised to critical care
 
 	double mean_time_to_recover;	// mean time to recover after hospital
 	double sd_time_to_recover;  	// sd time to recover after hospital

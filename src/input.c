@@ -132,6 +132,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_hospital\n"); };
 	
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
 	
@@ -214,6 +217,12 @@ void read_param_file( parameters *params)
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
