@@ -106,8 +106,9 @@ double estimate_mean_interactions_by_age( model *model, int age )
 void set_up_infectious_curves( model *model )
 {
 	parameters *params = model->params;
-	double infectious_rate;
+	double infectious_rate, type_factor;
 	double mean_interactions[N_AGE_GROUPS];
+	int type;
 
 	mean_interactions[AGE_0_17]  = estimate_mean_interactions_by_age( model, AGE_0_17 );
 	mean_interactions[AGE_18_64] = estimate_mean_interactions_by_age( model, AGE_18_64 );
@@ -117,20 +118,26 @@ void set_up_infectious_curves( model *model )
 	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_18_64] / mean_interactions[AGE_0_17];
 	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_18_64] / mean_interactions[AGE_65];
 
-	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
 
-	gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-				      params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
+	for( type = 0; type < N_INTERACTION_TYPES; type++ )
+	{
+		type_factor = 1.0;
 
-	gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-				      params->sd_infectious_period, infectious_rate );
+		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor );
 
-	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
+		gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor * params->asymptomatic_infectious_factor);
 
-	gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
+		gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor );
+
+		gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor );
+
+		gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor );
+	};
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
@@ -144,12 +151,15 @@ void transmit_virus_by_type(
 )
 {
 	long idx, jdx, n_infected;
-	int day, n_interaction;
+	int day, n_interaction, status;
 	double hazard_rate;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
 	individual *infector;
+
+
+status = ifelse( model->time == 9 && type == HOSPITALISED, 1, 0 );
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
@@ -163,18 +173,21 @@ void transmit_virus_by_type(
 
 			infector      = event->individual;
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
-			interaction   = infector->interactions[ model->interaction_day_idx ];
-			hazard_rate   = list->infectious_curve[ model->time - 1 - time_infected( infector) ];
-
-			for( jdx = 0; jdx < n_interaction; jdx++ )
+			if( n_interaction > 0 )
 			{
-				if( interaction->individual->status == UNINFECTED )
+				interaction = infector->interactions[ model->interaction_day_idx ];
+				hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
+
+				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
-					interaction->individual->hazard -= hazard_rate;
-					if( interaction->individual->hazard < 0 )
-						new_infection( model, interaction->individual, infector );
+					if( interaction->individual->status == UNINFECTED )
+					{
+						interaction->individual->hazard -= hazard_rate;
+						if( interaction->individual->hazard < 0 )
+							new_infection( model, interaction->individual, infector );
+					}
+					interaction = interaction->next;
 				}
-				interaction = interaction->next;
 			}
 		}
 	}
