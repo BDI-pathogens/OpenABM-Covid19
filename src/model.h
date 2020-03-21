@@ -34,6 +34,12 @@ struct event_list{
 	double **infectious_curve;
 };
 
+struct var_array{
+	long n_idx;
+	long *n_jdx;
+	long **val;
+};
+
 struct model{
 	parameters *params;
 	individual *population;
@@ -50,6 +56,7 @@ struct model{
 	network *random_network;
 	network *household_network;
 	network **work_network;
+	var_array *household_directory;
 
 	event *events;
 	event *next_event;
