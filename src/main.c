@@ -41,10 +41,12 @@ int main(int argc, char *argv[])
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 
-	printf( "Time,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
+	printf( "Time,social_distancing,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
-		printf( "%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+		printf( "%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
+				params.social_distancing_on,
+				params.app_turned_on,
 				n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ),
 				n_total( model, CASE ),
 				n_current( model, PRESYMPTOMATIC ),
