@@ -36,7 +36,7 @@ struct event_list{
 
 struct var_array{
 	long n_idx;
-	long *n_jdx;
+	int *n_jdx;
 	long **val;
 };
 

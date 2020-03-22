@@ -52,6 +52,7 @@ struct individual{
 
 struct interaction{
 	int type;
+	int traceable;
 	individual *individual;
 	interaction *next;
 };
@@ -61,6 +62,7 @@ struct interaction{
 /************************************************************************/
 
 #define time_infected( indiv ) ( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ) )
+#define in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
