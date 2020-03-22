@@ -40,6 +40,8 @@ model* new_model( parameters *params )
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
+	update_intervention_policy( model_ptr->params, model_ptr->time );
+
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
@@ -758,6 +760,7 @@ void transition_events(
 int one_time_step( model *model )
 {
 	(model->time)++;
+	update_intervention_policy( model->params, model->time );
 
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )

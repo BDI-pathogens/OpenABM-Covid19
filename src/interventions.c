@@ -50,6 +50,15 @@ void set_up_app_users( model *model )
 };
 
 /*****************************************************************************************
+*  Name:		update_intervention_policy
+*  Description: Updates the intervention policy by adjusting parmaters
+******************************************************************************************/
+void update_intervention_policy( parameters *params, int time )
+{
+	params->app_turned_on =  ( time >= params->app_turn_on_time );
+};
+
+/*****************************************************************************************
 *  Name:		intervention_on_quarantine_until
 *  Description: Quarantine an individual until a certain time
 *  				If they are already in quarantine then extend quarantine until that time
@@ -175,7 +184,7 @@ void intervention_notify_contacts(
 	int level
 )
 {
-	if( !indiv->app_user || model->time < model->params->app_turn_on_time )
+	if( !indiv->app_user || !model->params->app_turned_on )
 		return;
 
 	interaction *inter;
