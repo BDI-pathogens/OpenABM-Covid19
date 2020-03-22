@@ -185,4 +185,17 @@ int negative_binomial_draw( double mean , double sd )
 	return gsl_ran_negative_binomial( rng, p, n );
 }
 
+/*****************************************************************************************
+*  Name:		discrete_draw
+*  Description: Draws from a discrete set of probabilities
+******************************************************************************************/
+int discrete_draw( int n, double *p )
+{
+	int v;
+	gsl_ran_discrete_t *t = gsl_ran_discrete_preproc( n, p );
+	v = gsl_ran_discrete( rng, t );
+	gsl_ran_discrete_free(t);
+	return(v);
+}
+
 
