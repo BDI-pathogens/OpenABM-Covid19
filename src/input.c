@@ -159,39 +159,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
-	check = fscanf(parameter_file, " %i  ,", &(params->quarantined_daily_interactions));
-	if( check < 1){ print_exit("Failed to read parameter quarantined_daily_interactions\n"); };
 	
-	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
-	if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_fraction));
-	if( check < 1){ print_exit("Failed to read parameter quarantine_fraction\n"); };
-	
-	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
-	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
-	
-	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
-	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
-
-	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
-	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
-
-	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
-	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
-
-	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
-	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
-
-	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
-	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
-
-	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
-	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
-
-	check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction));
-	if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
-
 	for( i = 0; i < UK_HOUSEHOLD_N_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->uk_house[i]));
@@ -219,7 +187,6 @@ void read_param_file( parameters *params)
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission_by_type[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
 	}
-
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
@@ -286,6 +253,39 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
+
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantined_daily_interactions));
+	if( check < 1){ print_exit("Failed to read parameter quarantined_daily_interactions\n"); };
+
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
+
+	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
+	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
+	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
+	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
+	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
+	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction));
+	if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
+	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
 	fclose(parameter_file);
 }
