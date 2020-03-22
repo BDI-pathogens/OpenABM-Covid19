@@ -84,7 +84,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 	
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_WORK_NETWORKS; i++ )
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
@@ -160,16 +160,16 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
 	
-	for( i = 0; i < UK_HOUSEHOLD_N_MAX; i++ )
+	for( i = 0; i < HOUSEHOLD_N_MAX; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->uk_house[i]));
-		if( check < 1){ print_exit("Failed to read parameter uk_house_*\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->household_size[i]));
+		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->uk_pop[i]));
-		if( check < 1){ print_exit("Failed to read parameter uk_pop_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
 	}
 
 	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));

@@ -124,8 +124,8 @@ void set_age_group( individual *indiv, parameters *params, int group )
 
 	if( group == AGE_18_64 )
 	{
-		child_net_adults   = params->child_network_adults * params->uk_pop[AGE_0_17] / params->uk_pop[AGE_18_64];
-		elderly_net_adults = params->elderly_network_adults * params->uk_pop[AGE_65] / params->uk_pop[AGE_18_64];
+		child_net_adults   = params->child_network_adults * params->population[AGE_0_17] / params->population[AGE_18_64];
+		elderly_net_adults = params->elderly_network_adults * params->population[AGE_65] / params->population[AGE_18_64];
 
 		x = gsl_rng_uniform( rng );
 		if( x < child_net_adults )

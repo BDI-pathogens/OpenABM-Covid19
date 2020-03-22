@@ -82,7 +82,7 @@ void destroy_model( model *model )
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
-    for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+    for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
     	destroy_network( model->work_network[idx] );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
@@ -116,7 +116,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 	for( day = 0; day < MAX_TIME; day++ )
 	{
 		list->n_daily_by_age[day] = calloc( N_AGE_GROUPS, sizeof(long) );
-		for( age = AGE_0_17; age <= AGE_65; age++ )
+		for( age = 0; age < N_AGE_GROUPS; age++ )
 			list->n_daily_by_age[day][age] = 0;
 
 		list->n_daily[day] = 0;
@@ -159,7 +159,7 @@ void set_up_networks( model *model )
 	long n_random_interactions;
 	double mean_interactions  = 0;
 
-	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
 	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
@@ -169,8 +169,8 @@ void set_up_networks( model *model )
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network( model );
 
-	model->work_network = calloc( N_AGE_GROUPS, sizeof( network* ) );
-	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
+	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
 }
 
@@ -265,7 +265,7 @@ double estimate_total_interactions( model *model )
 	n_interactions += model->household_network->n_edges;
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
-	for( idx = AGE_0_17; idx <= AGE_65 ; idx++ )
+	for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
 		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
 
 	return n_interactions;
@@ -332,17 +332,17 @@ void calculate_household_distribution(
 	long total;
 	int idx;
 	double survey_tot, max_children, pop_all;
-	double n_person_frac[ UK_HOUSEHOLD_N_MAX ];
-	double *pop = model->params->uk_pop;
+	double n_person_frac[ HOUSEHOLD_N_MAX ];
+	double *pop = model->params->population;
 
 	pop_all      = pop[AGE_0_17] + pop[AGE_18_64] + pop[AGE_65];
 	survey_tot   = 0;
 	max_children = 0;
-	for( idx = 0; idx < UK_HOUSEHOLD_N_MAX; idx++)
+	for( idx = 0; idx < HOUSEHOLD_N_MAX; idx++)
 	{
-		n_person_frac[idx] = model->params->uk_house[ idx ] * ( idx + 1 );
+		n_person_frac[idx] = model->params->household_size[ idx ] * ( idx + 1 );
 		survey_tot        += n_person_frac[idx];
-		max_children      += model->params->uk_house[ idx ] * max( idx -1 , 0 );
+		max_children      += model->params->household_size[ idx ] * max( idx -1 , 0 );
 	}
 
 	*child_frac_3_6   = pop[AGE_0_17] / pop_all / ( max_children / survey_tot );
@@ -355,7 +355,7 @@ void calculate_household_distribution(
 		print_exit( "not sufficient 1-2 person households for all the elderly" );
 
  	total = 0;
-	for( idx = 1; idx < UK_HOUSEHOLD_N_MAX; idx++)
+	for( idx = 1; idx < HOUSEHOLD_N_MAX; idx++)
 	{
 		n_house_tot[idx] = (long) round( n_person_frac[idx] / survey_tot / ( idx + 1 ) * model->params->n_total );
 		total += n_house_tot[idx] * ( idx + 1 );
@@ -378,7 +378,7 @@ void build_household_network( model *model )
 {
 	long pop_idx, hdx, edge_idx, house_no;
 	int ndx, pdx, p2dx, age;
-	long n_house_tot[ UK_HOUSEHOLD_N_MAX ];
+	long n_house_tot[ HOUSEHOLD_N_MAX ];
 	double elderly_frac_1_2;
 	double child_frac_3_6;
 	network *network   = model->household_network;
@@ -387,13 +387,13 @@ void build_household_network( model *model )
 		print_exit( "the household network can only be once" );
 
 	calculate_household_distribution( model, n_house_tot, &elderly_frac_1_2, &child_frac_3_6 );
-	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+	for( ndx = 0; ndx < HOUSEHOLD_N_MAX; ndx++ )
 		network->n_edges += n_house_tot[ndx] * ndx * ( ndx + 1 ) / 2;
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
 
 	model->household_directory = calloc( 1, sizeof( var_array ) );
 	model->household_directory->n_idx = 0;
-	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+	for( ndx = 0; ndx < HOUSEHOLD_N_MAX; ndx++ )
 		model->household_directory->n_idx += n_house_tot[ndx];
 	model->household_directory->n_jdx = calloc( model->household_directory->n_idx, sizeof( int ) );
 	model->household_directory->val   = calloc( model->household_directory->n_idx, sizeof( long* ) );
@@ -401,7 +401,7 @@ void build_household_network( model *model )
 	edge_idx = 0;
 	pop_idx  = 0;
 	house_no = 0;
-	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
+	for( ndx = 0; ndx < HOUSEHOLD_N_MAX; ndx++ )
 		for( hdx = 0; hdx < n_house_tot[ndx]; hdx++ )
 		{
 			model->household_directory->n_jdx[house_no] = ndx + 1;
@@ -583,7 +583,7 @@ void update_event_list_counters( model *model, int type )
 	model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
 	model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
 
-	for( int age = AGE_0_17; age <= AGE_65; age++ )
+	for( int age = 0; age <= N_AGE_GROUPS; age++ )
 		model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
 }
 
@@ -718,7 +718,7 @@ void build_daily_newtork( model *model )
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
-	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
+	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 
 };
