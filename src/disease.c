@@ -153,15 +153,12 @@ void transmit_virus_by_type(
 )
 {
 	long idx, jdx, n_infected;
-	int day, n_interaction, status;
+	int day, n_interaction;
 	double hazard_rate;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
 	individual *infector;
-
-
-status = ifelse( model->time == 9 && type == HOSPITALISED, 1, 0 );
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
