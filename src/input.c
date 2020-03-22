@@ -272,12 +272,23 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->tracing_network_depth));
 	if( check < 1){ print_exit("Failed to read parameter tracing_network_depth\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->tracing_on_clinical_diagnosis));
-	if( check < 1){ print_exit("Failed to read parameter tracing_on_clinical_diagnosis\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->allow_clinical_diagnosis));
+	if( check < 1){ print_exit("Failed to read parameter allow_clinical_diagnosis\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_positive\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_symptoms\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
 
 	fclose(parameter_file);
 }
-
 
 /*****************************************************************************************
 *  Name:		write_output_files

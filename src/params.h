@@ -70,7 +70,7 @@ typedef struct{
 
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double quarantine_fraction;				// fraction of people quarantine upon being asked to
-	double self_quarantine_fraction;		// fraction of people who self-quarantine when show sypmtoms
+	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
 	int quarantine_length_traced;			// max length of quarantine if contact-traced
@@ -81,7 +81,12 @@ typedef struct{
 	int quarantine_on_traced;				// immediately quarantine those who are contact traced
 	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
-	int tracing_on_clinical_diagnosis;		// commence contact tracing on a clinical diagnosis as soon as a case reaches the hospital
+	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
+
+	int quarantine_household_on_symptoms;   // quarantine other household members when someone shows symptoms
+	int quarantine_household_on_positive;   // quarantine other household members when someone tests positive
+	int quarantine_household_on_traced;		// quarantine other household members when someone is contact traced
+	int quarantine_household_contacts_on_positive; // quarantine the contacts of other household members when someone tests positive
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results

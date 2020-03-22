@@ -38,7 +38,7 @@ test_order_wait	1
 test_result_wait	1
 sys_write_individual	0
 sys_write_timeseries	1
-self_quarantine_fraction	0.9
+self_quarantine_fraction	0.8
 app_users_fraction	0.85
 uk_house_1	8197.0
 uk_house_2	9609.0
@@ -74,5 +74,9 @@ test_on_symptoms	1
 test_on_traced	1
 quarantine_on_traced	1
 traceable_interaction_fraction	0.8
-tracing_network_depth	2
-tracing_on_clinical_diagnosis	1
+tracing_network_depth	1
+allow_clinical_diagnosis	1
+quarantine_household_on_positive	1
+quarantine_household_on_symptoms	1
+quarantine_household_on_traced	1
+quarantine_household_contacts_on_positive	1
