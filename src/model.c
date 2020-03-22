@@ -393,7 +393,7 @@ void build_household_network( model *model )
 	model->household_directory->n_idx = 0;
 	for( ndx = 0; ndx < UK_HOUSEHOLD_N_MAX; ndx++ )
 		model->household_directory->n_idx += n_house_tot[ndx];
-	model->household_directory->n_jdx = calloc( model->household_directory->n_idx, sizeof( long ) );
+	model->household_directory->n_jdx = calloc( model->household_directory->n_idx, sizeof( int ) );
 	model->household_directory->val   = calloc( model->household_directory->n_idx, sizeof( long* ) );
 
 	edge_idx = 0;
@@ -677,12 +677,14 @@ void add_interactions_from_network(
 		inter2 = &(model->interactions[ all_idx++ ]);
 
 		inter1->type       = network->type;
+		inter1->traceable  = UNKNOWN;
 		inter1->individual = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
 		indiv1->interactions[ day ] = inter1;
 		indiv1->n_interactions[ day ]++;
 
 		inter2->type       = network->type;
+		inter2->traceable  = UNKNOWN;
 		inter2->individual = indiv1;
 		inter2->next       = indiv2->interactions[ day ];
 		indiv2->interactions[ day ] = inter2;
