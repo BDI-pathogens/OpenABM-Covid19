@@ -27,7 +27,8 @@ typedef struct{
 
 	int mean_random_interactions[N_AGE_GROUPS]; // mean number of random interactions each day
 	int mean_work_interactions[N_AGE_GROUPS];	// mean number of regular work interactions
-	double daily_fraction_work;      			// fraction of daily work interactions
+	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
+	double daily_fraction_work_used;      		// fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
 
@@ -40,7 +41,8 @@ typedef struct{
 	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
 	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
 
-	double relative_transmission_by_type[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
+	double relative_transmission_by_type[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
+	double relative_transmission_by_type_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
 
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
@@ -93,13 +95,21 @@ typedef struct{
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	
-	double app_users_fraction; 		// Proportion of the population that use the apps
-	double seasonal_flu_rate; 		// Rate of seasonal flu
+	double app_users_fraction; 				// Proportion of the population that use the apps
+	int app_turned_on;						// is the app turned on
+	int app_turn_on_time;   				// time after which the app is usable
+	double seasonal_flu_rate; 				// Rate of seasonal flu
+
+	double social_distancing_work_network_multiplier;		// during social distancing this multiplier is applied to the fraction of work network connections made
+	double social_distancing_random_network_multiplier; 	// during social distancing this multiplier is applied to the fraction of random network connections made
+	double social_distancing_house_interaction_multiplier;  // during social distancing this multiplier is applied to the strengin of home connections
+	int social_distancing_time_on;							// social distancing turned on at this time
+	int social_distancing_time_off;							// social distancing turned off at this time
+	int social_distancing_on;								// is social distancing currently on
 		
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
 
-	int app_turn_on_time;   /// time after which the app is usable
 
 } parameters;
 
