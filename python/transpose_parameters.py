@@ -24,7 +24,7 @@ if __name__ == "__main__":
     data = data[1:]
     
     # Split lines
-    parameters = [row.strip().split("\t") for row in data]
+    parameters = [row.strip().split() for row in data]
     
     # Separate parameter names and values
     parameter_names = [row[0].strip() for row in parameters]
