@@ -38,7 +38,7 @@ uk_house_6	597.0
 uk_pop_0_17	14.05
 uk_pop_18_64	40.22
 uk_pop_65	10.04
-seasonal_flu_rate	0.0003
+seasonal_flu_rate	0.005
 relative_susceptibility_child	0.1
 relative_susceptibility_elderly	1.7
 relative_transmission_household	2.0
