@@ -33,5 +33,6 @@ void bernoulli_draw_list( int*, int, double );
 void geometric_max_draw_list( int*, int, double, int );
 void gamma_rate_curve( double*, int, double, double, double );
 int negative_binomial_draw( double, double );
+int discrete_draw( int, double* );
 
 #endif /* UTILITIES_H_ */
