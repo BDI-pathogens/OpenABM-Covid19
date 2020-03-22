@@ -123,7 +123,7 @@ void set_up_infectious_curves( model *model )
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
-		type_factor = params->relative_transmission_by_type[type];
+		type_factor = params->relative_transmission_by_type_used[type];
 
 		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
@@ -345,7 +345,7 @@ void transition_to_recovered( model *model, individual *indiv )
 void transition_to_death( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
-	set_dead( indiv, model->time );
+	set_dead( indiv, model->params, model->time );
 }
 
 

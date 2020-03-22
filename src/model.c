@@ -40,6 +40,8 @@ model* new_model( parameters *params )
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
+	update_intervention_policy( model_ptr, model_ptr->time );
+
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
@@ -645,6 +647,7 @@ void build_random_network( model *model )
 *  Description: Adds the daily interactions to all individual from a network
 ******************************************************************************************/
 void add_interactions_from_network(
+
 	model *model,
 	network *network,
 	int skip_hospitalised,
@@ -694,8 +697,8 @@ void add_interactions_from_network(
 
 		if( all_idx > model->n_interactions )
 			all_idx = 0;
-	}
 
+	}
 	model->interaction_idx =  all_idx;
 }
 
@@ -716,7 +719,7 @@ void build_daily_newtork( model *model )
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = AGE_0_17; idx <= AGE_65; idx++ )
-		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work );
+		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 
 };
 
@@ -758,6 +761,7 @@ void transition_events(
 int one_time_step( model *model )
 {
 	(model->time)++;
+	update_intervention_policy( model, model->time );
 
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )

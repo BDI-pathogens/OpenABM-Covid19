@@ -90,7 +90,6 @@ void set_quarantine_status(
 	{
 		indiv->quarantined             = TRUE;
 		indiv->time_event[QUARANTINED] = time;
-		indiv->random_interactions = params->quarantined_daily_interactions;
 	}
 	else
 	{
@@ -98,9 +97,8 @@ void set_quarantine_status(
 		indiv->time_event[QUARANTINED]  = UNKNOWN;
 		indiv->quarantine_event         = NULL;
 		indiv->quarantine_release_event = NULL;
-		if( indiv->status != DEATH && indiv->status != HOSPITALISED )
-			indiv->random_interactions = indiv->base_random_interactions;
 	}
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -122,7 +120,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 
 	mean = params->mean_random_interactions[group];
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
-	indiv->random_interactions      = indiv->base_random_interactions;
+	update_random_interactions( indiv, params );
 
 	if( group == AGE_18_64 )
 	{
@@ -142,15 +140,42 @@ void set_age_group( individual *indiv, parameters *params, int group )
 }
 
 /*****************************************************************************************
+*  Name:		update_random_interactions
+*  Description: update the number of random interactions for an individual after a
+*  				change in status both at the individual level or national policy
+*  Returns:		void
+******************************************************************************************/
+void update_random_interactions( individual *indiv, parameters* params )
+{
+	double n = indiv->base_random_interactions;
+
+
+	if( !indiv->quarantined )
+	{
+		switch( indiv->status )
+		{
+			case DEATH:			n = 0; 										 break;
+			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
+			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
+			default: 			n = ifelse( params->social_distancing_on, n * params->social_distancing_random_network_multiplier, n );
+		}
+	}
+	else
+		n = params->quarantined_daily_interactions;
+
+	indiv->random_interactions = round_random( n );
+}
+
+/*****************************************************************************************
 *  Name:		set_dead
 *  Description: sets a person as dead
 *  Returns:		void
 ******************************************************************************************/
-void set_dead( individual *indiv, int time )
+void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-	indiv->random_interactions = 0;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -162,7 +187,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	indiv->random_interactions = indiv->base_random_interactions;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -173,7 +198,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	indiv->random_interactions = params->hospitalised_daily_interactions;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -194,6 +219,7 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
+	update_random_interactions( indiv, params );
 }
 
 
