@@ -101,7 +101,7 @@ void intervention_quarantine_release( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_test_order( model *model, individual *indiv, int time )
 {
-	if( indiv->quarantine_test_result == NO_TEST )
+	if( indiv->quarantine_test_result == NO_TEST && !(indiv->is_case) )
 	{
 		add_individual_to_event_list( model, TEST_TAKE, indiv, time );
 		indiv->quarantine_test_result = TEST_ORDERED;
@@ -155,38 +155,41 @@ void intervention_test_result( model *model, individual *indiv )
 			add_individual_to_event_list( model, CASE, indiv, model->time );
 		}
 
-		intervention_on_positive_result( model, indiv );
+		if( !in_hospital( indiv ) || !(model->params->allow_clinical_diagnosis) )
+			intervention_on_positive_result( model, indiv );
 	}
 	indiv->quarantine_test_result = NO_TEST;
 }
 
 /*****************************************************************************************
-*  Name:		intervention_quarantine_contracts
-*  Description: Quarantine contacts
-*
-*  				1. Loops of previous days interactions the person has had and
-*  				   determines whether it is a traceable interactions (requires
-*  				   the contact to have the app AND we randomly drop some contacts)
-*  				2. For traceable contacts optionally quarantines them and/or
-*  				   orders community tests
-*  				3. For recent interactions the test is ordered for a future date
-*  				   so that it will be sensitive
-*  				4. Option to recursive down the interaction network to second or
-*  				   third order contacts
+*  Name:		intervention_notify_contracts
+*  Description: If the individual is an app user then we loop over the stored contacts
+*  				and notifies them.
+*  				Start from the oldest date, so that if we have met a contact
+*  				multiple times we order the test from the first contact
 *  Returns:		void
 ******************************************************************************************/
-void intervention_quarantine_contacts( model *model, individual *indiv, int level )
+void intervention_notify_contacts(
+	model *model,
+	individual *indiv,
+	int level
+)
 {
+	if( !indiv->app_user )
+		return;
+
 	interaction *inter;
 	individual *contact;
 	parameters *params = model->params;
-	int idx, ddx, day, n_contacts, time_event, time_test;
+	int idx, ddx, day, n_contacts;
 
 	day = model->interaction_day_idx;
 	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
+		ring_dec( day, model->params->days_of_interactions );
+
+	for( ddx = params->quarantine_days - 1; ddx >=0; ddx-- )
 	{
 		n_contacts = indiv->n_interactions[day];
-		time_test  = model->time + max( params->test_insensititve_period - ddx, model->params->test_order_wait );
 
 		if( n_contacts > 0 )
 		{
@@ -194,27 +197,49 @@ void intervention_quarantine_contacts( model *model, individual *indiv, int leve
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-				if( contact->status != HOSPITALISED && contact->status != DEATH  )
+				if( contact->app_user )
 				{
-					if( contact->app_user && gsl_ran_bernoulli( rng, params->traceable_interaction_fraction ) )
-					{
-						time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
-
-						if( params->quarantine_on_traced )
-							intervention_quarantine_until( model, contact, time_event, TRUE );
-
-						if( params->test_on_traced )
-							intervention_test_order( model, indiv, time_test );
-
-						if( level < params->tracing_network_depth )
-							intervention_quarantine_contacts( model, indiv, level + 1 );
-					}
+					if( inter->traceable == UNKNOWN )
+						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+					if( inter->traceable )
+						intervention_on_traced( model, contact, model->time - ddx, level + 1 );
 				}
 				inter = inter->next;
 			}
 		}
-		ring_dec( day, model->params->days_of_interactions );
+		ring_inc( day, model->params->days_of_interactions );
 	}
+}
+
+/*****************************************************************************************
+*  Name:		intervention_quarantine_household
+*  Description: Quarantine everyone in a household
+*  Returns:		void
+******************************************************************************************/
+void intervention_quarantine_household(
+	model *model,
+	individual *indiv,
+	int time,
+	int contact_trace
+)
+{
+	individual *contact;
+	int idx, n, time_event;
+	long* members;
+
+	n          = model->household_directory->n_jdx[indiv->house_no];
+	members    = model->household_directory->val[indiv->house_no];
+	time_event = ifelse( time != UNKNOWN, time, model->time + sample_transition_time( model, TRACED_QUARANTINE ) );
+
+	for( idx = 0; idx < n; idx++ )
+		if( members[idx] != indiv->idx )
+		{
+			contact = &(model->population[members[idx]]);
+			intervention_quarantine_until( model, contact, time_event, TRUE );
+
+			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
+				intervention_notify_contacts( model, contact, NOT_RECURSIVE );
+		}
 }
 
 /*****************************************************************************************
@@ -225,6 +250,7 @@ void intervention_quarantine_contacts( model *model, individual *indiv, int leve
 *  				    quarantine for length of time symptomatic people do
 *  				 2. If we have community testing on symptoms and a test has not been
 *  				    ordered already then order one
+*  				 3. Option to quarantine all household members upon symptoms
 *  Returns:		void
 ******************************************************************************************/
 void intervention_on_symptoms( model *model, individual *indiv )
@@ -238,7 +264,10 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
 
-		if( model->params->test_on_symptoms && indiv->quarantine_test_result == NO_TEST )
+		if( model->params->quarantine_household_on_symptoms )
+			intervention_quarantine_household( model, indiv, time_event, FALSE );
+
+		if( model->params->test_on_symptoms )
 			intervention_test_order( model, indiv, model->time + model->params->test_order_wait );
 	}
 }
@@ -256,11 +285,8 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 {
 	intervention_test_take( model, indiv );
 
-	if( model->params->tracing_on_clinical_diagnosis )
-	{
-		if( ( model->params->quarantine_on_traced || model->params->test_on_traced ) && indiv->app_user )
-			intervention_quarantine_contacts( model, indiv, 1 );
-	}
+	if( model->params->allow_clinical_diagnosis )
+		intervention_on_positive_result( model, indiv );
 }
 
 /*****************************************************************************************
@@ -274,17 +300,20 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_positive_result( model *model, individual *indiv )
 {
-	if( indiv->status != HOSPITALISED )
+	int time_event = UNKNOWN;
+	parameters *params = model->params;
+
+	if( !in_hospital( indiv ) )
 	{
-		int time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
+		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
 	}
 
-	if( indiv->status != HOSPITALISED || model->params->tracing_on_clinical_diagnosis == FALSE )
-	{
-		if( ( model->params->quarantine_on_traced || model->params->test_on_traced ) && indiv->app_user )
-			intervention_quarantine_contacts( model, indiv, 1 );
-	}
+	if( params->quarantine_household_on_positive )
+		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive );
+
+	if( params->quarantine_on_traced || params->test_on_traced )
+		intervention_notify_contacts( model, indiv, 1 );
 }
 
 /*****************************************************************************************
@@ -294,5 +323,52 @@ void intervention_on_positive_result( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_critical( model *model, individual *indiv )
 {
+}
+
+/*****************************************************************************************
+*  Name:		intervention_on_traced
+*  Description: Optional interventions performed upon becoming contact-traced
+*
+*   			1. Quarantine the individual
+*   			2. Quarantine the individual and their household
+*  				2. Order a test for the individual
+*  				4. Recursive contact-trace
+*
+*  Arguments:	model 		 	- pointer to model
+*  				indiv 		 	- pointer to person being traced
+*  				contact_time 	- time at which the contact was made
+*				recursion level - layers of the network to reach this connection
+*
+*  Returns:		void
+******************************************************************************************/
+void intervention_on_traced(
+	model *model,
+	individual *indiv,
+	int contact_time,
+	int recursion_level
+)
+{
+	if( in_hospital( indiv ) || indiv->is_case )
+		return;
+
+	parameters *params = model->params;
+
+	if( params->quarantine_on_traced )
+	{
+		int time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
+		intervention_quarantine_until( model, indiv, time_event, TRUE );
+
+		if( params->quarantine_household_on_traced )
+			intervention_quarantine_household( model, indiv, time_event, FALSE );
+	}
+
+	if( params->test_on_traced )
+	{
+		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensititve_period );
+		intervention_test_order( model, indiv, time_test );
+	}
+
+	if( recursion_level < params->tracing_network_depth )
+		intervention_notify_contacts( model, indiv, recursion_level + 1 );
 }
 
