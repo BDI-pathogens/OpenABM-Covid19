@@ -53,9 +53,46 @@ void set_up_app_users( model *model )
 *  Name:		update_intervention_policy
 *  Description: Updates the intervention policy by adjusting parmaters
 ******************************************************************************************/
-void update_intervention_policy( parameters *params, int time )
+void update_intervention_policy( model *model, int time )
 {
+	parameters *params    = model->params;
+	long pdx;
+	int type;
+
 	params->app_turned_on =  ( time >= params->app_turn_on_time );
+
+	if( time == 0 )
+	{
+		params->social_distancing_on	 = FALSE;
+		params->daily_fraction_work_used = params->daily_fraction_work;
+		for( type = 0; type < N_INTERACTION_TYPES; type++ )
+			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
+	}
+	else
+	if( time == params->social_distancing_time_on )
+	{
+		params->social_distancing_on      = TRUE;
+		params->daily_fraction_work_used = params->daily_fraction_work * params->social_distancing_work_network_multiplier;
+
+		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
+		                                           	   	   	    params->social_distancing_house_interaction_multiplier;
+		set_up_infectious_curves( model );
+
+		for( pdx = 0; pdx < params->n_total; pdx++ )
+			update_random_interactions( &(model->population[pdx]), params );
+	}
+	else
+	if( time == params->social_distancing_time_off )
+	{
+		params->social_distancing_on = FALSE;
+		params->daily_fraction_work_used = params->daily_fraction_work;
+
+		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
+		set_up_infectious_curves( model );
+
+		for( pdx = 0; pdx < params->n_total; pdx++ )
+			update_random_interactions( &(model->population[pdx]), params );
+	}
 };
 
 /*****************************************************************************************

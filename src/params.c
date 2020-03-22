@@ -26,4 +26,7 @@ void check_params( parameters *params )
 
     if( params->quarantine_days > params->days_of_interactions )
     	print_exit( "can only quarantine up to the number of days we store" );
+
+    if( params->social_distancing_time_on < 1 )
+      	print_exit( "social distancing can only be turned on at the first time step" );
 }

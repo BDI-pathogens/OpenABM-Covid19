@@ -13,7 +13,7 @@ child_network_adults	0.2
 elderly_network_adults	0.2
 days_of_interactions	10
 end_time	250
-n_seed_infection	10
+n_seed_infection	50
 mean_infectious_period	6.0
 sd_infectious_period	2.0
 infectious_rate	2.5
@@ -79,9 +79,9 @@ sys_write_individual	0
 sys_write_timeseries	1
 self_quarantine_fraction	0.8
 app_users_fraction	0.85
-app_turn_on_time	100
-social_distancing_work_network_multiplier	0.1
-social_distancing_random_network_multiplier	0.1
+app_turn_on_time	75
+social_distancing_work_network_multiplier	0.2
+social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
-social_distancing_time_on	100
-social_distancing_time_off	150
+social_distancing_time_on	50
+social_distancing_time_off	75
