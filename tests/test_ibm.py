@@ -171,7 +171,6 @@ class TestClass(object):
         n_total = 50000
         
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("quarantine_fraction", 0.0)
         params.set_param("self_quarantine_fraction", 0.0)
         params.set_param("infectious_rate", infectious_rate)
         
@@ -246,6 +245,49 @@ class TestClass(object):
             0
         )
     
+    def test_hospitalised_fraction_40_percent(self):
+        """
+        Test setting hospitalised fractions to zero (should be no hospitalised)
+        """
+        
+        HOSPITAL_TIME_DELAY = 1
+        SYMPTOMS_TIME_DELAY = 1
+        
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("hospitalised_fraction_child", 0.4)
+        params.set_param("hospitalised_fraction_adult", 0.4)
+        params.set_param("hospitalised_fraction_elderly", 0.4)
+        
+        params.set_param("fraction_asymptomatic", 0.0)
+        
+        params.set_param("critical_fraction_child", 0.0)
+        params.set_param("critical_fraction_adult", 0.0)
+        params.set_param("critical_fraction_elderly", 0.0)
+        
+        params.set_param("mean_time_to_symptoms", float(SYMPTOMS_TIME_DELAY))
+        params.set_param("sd_time_to_symptoms", 0.05)
+        
+        params.set_param("mean_time_to_hospital", float(HOSPITAL_TIME_DELAY))
+        params.set_param("sd_time_to_hospital", 0.05)
+        
+        params.set_param("seasonal_flu_rate", 0.0)
+        
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        cond = (df_output["n_hospital"] != 0) & (df_output["total_infected"] > 0)
+        
+        df_output["n_hospital"]
+        
+        np.testing.assert_equal(
+            np.mean(df_output["n_hospital"][cond][:1]/np.diff(df_output["total_case"][cond].values)), 
+            0.4
+        )
 
     def test_fraction_asymptomatic_zero(self):
         """
@@ -303,29 +345,25 @@ class TestClass(object):
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
-            "n_hospital", "n_death", "n_recovered"]]
+            "n_hospital", "n_death", "n_recovered", "n_critical"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
             df_output["total_infected"]
         )
 
-
-    def test_mean_time_to_recover(self):
+    
+    def test_zero_recovery(self):
         """
         Setting mean_time_to_recover to be very large should avoid seeing recovered
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
         params.set_param("n_total", 50000)
-        params.set_param("end_time", 250)
+        params.set_param("end_time", 150)
         
         # Make recovery very long
-        params.set_param("mean_time_to_recover", 300.0)
-        params.set_param("mean_asymptomatic_to_recovery", 300.0)
-        
-        # Remove self-quarantining
-        params.set_param("quarantine_fraction", 0.0)
-        params.set_param("self_quarantine_fraction", 0.0)
+        params.set_param("mean_time_to_recover", 200.0)
+        params.set_param("mean_asymptomatic_to_recovery", 200.0)
         
         params.write_params(TEST_DATA_FILE)
         
@@ -334,9 +372,64 @@ class TestClass(object):
         completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
-        df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", "n_hospital", "n_death"]]
+        np.testing.assert_array_equal(
+            df_output[["n_recovered"]].sum(), 
+            0)
+    
+
+    def test_mean_time_to_recover(self):
+        """
+        Setting mean_time_to_recover to be very large should avoid seeing recovered
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("end_time", 150)
+        
+        # Make recovery very long
+        params.set_param("mean_time_to_recover", 200.0)
+        params.set_param("mean_asymptomatic_to_recovery", 200.0)
+        
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", \
+            "n_critical", "n_hospital", "n_death"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
             df_output["total_infected"].values
         )
+
+
+    def test_zero_quarantine(self):
+        """
+        No quarantine
+        """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", 50000)
+        params.set_param("end_time", 250)
+        
+        # Set quarantining to zero
+        params.set_param("self_quarantine_fraction", 0.0)
+        params.set_param("quarantine_household_on_positive", 0.0)
+        params.set_param("quarantine_household_on_symptoms", 0.0)
+        params.set_param("quarantine_household_on_traced", 0.0)
+        params.set_param("quarantine_household_contacts_on_positive", 0.0)
+        params.set_param("quarantine_on_traced", 0.0)
+        params.set_param("seasonal_flu_rate", 0.0)
+        
+        params.write_params(TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        print(completed_run)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
+
+
