@@ -175,7 +175,7 @@ void intervention_notify_contacts(
 	int level
 )
 {
-	if( !indiv->app_user )
+	if( !indiv->app_user || model->time < model->params->app_turn_on_time )
 		return;
 
 	interaction *inter;
@@ -283,7 +283,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_hospitalised( model *model, individual *indiv )
 {
-	intervention_test_take( model, indiv );
+	intervention_test_order( model, indiv, model->time );
 
 	if( model->params->allow_clinical_diagnosis )
 		intervention_on_positive_result( model, indiv );

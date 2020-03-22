@@ -69,7 +69,6 @@ typedef struct{
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
 
 	int quarantine_days;					// number of days of previous contacts to quarantine
-	double quarantine_fraction;				// fraction of people quarantine upon being asked to
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
@@ -100,6 +99,7 @@ typedef struct{
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
 
+	int app_turn_on_time;   /// time after which the app is usable
 
 } parameters;
 

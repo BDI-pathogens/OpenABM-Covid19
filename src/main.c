@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 				n_current( model, PRESYMPTOMATIC ),
 				n_current( model, ASYMPTOMATIC ),
 				n_current( model, QUARANTINED ),
-				n_daily( model, TEST_TAKE, model->time + 1),
+				n_daily( model, TEST_RESULT, model->time + 1),
 				n_current( model, SYMPTOMATIC ),
 				n_current( model, HOSPITALISED ),
 				n_current( model, CRITICAL ),
