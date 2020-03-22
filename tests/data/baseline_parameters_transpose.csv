@@ -80,3 +80,8 @@ sys_write_timeseries	1
 self_quarantine_fraction	0.8
 app_users_fraction	0.85
 app_turn_on_time	100
+social_distancing_work_network_multiplier	0.1
+social_distancing_random_network_multiplier	0.1
+social_distancing_house_interaction_multiplier	3.0
+social_distancing_time_on	100
+social_distancing_time_off	150
