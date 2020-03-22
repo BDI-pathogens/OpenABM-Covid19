@@ -79,7 +79,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 			inter += weight[HOUSEHOLD];
 	}
 
-	for( ndx = AGE_0_17; ndx <= AGE_65 ; ndx++ )
+	for( ndx = 0; ndx < N_WORK_NETWORKS ; ndx++ )
 		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
 		{
 			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
@@ -119,7 +119,6 @@ void set_up_infectious_curves( model *model )
 	infectious_rate   = params->infectious_rate / mean_interactions[AGE_18_64];
 	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_18_64] / mean_interactions[AGE_0_17];
 	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_18_64] / mean_interactions[AGE_65];
-
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
