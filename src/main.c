@@ -41,8 +41,10 @@ int main(int argc, char *argv[])
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 
+
 	printf( "Time,social_distancing,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
+	{
 		printf( "%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				params.social_distancing_on,
@@ -59,6 +61,9 @@ int main(int argc, char *argv[])
 				n_current( model, DEATH ),
 				n_current( model, RECOVERED )
 		);
+	//	print_demographics( model );
+
+	};
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
