@@ -19,8 +19,10 @@
 #define OK       0
 #define NO_INPUT 1
 #define TOO_LONG 2
+//FIXME steps should be configurable
+#define STEPS    2
 
-static int get_line_from_prmpt (char *prmpt, char *buff, size_t sz) {
+static int get_line_from_prmpt(char *prmpt, char *buff, size_t sz) {
     int ch, extra;
 
     // Get line with buffer overrun protection.
@@ -54,6 +56,13 @@ int main(int argc, char *argv[])
     struct timespec  tv;
     double tstart, tend;
 
+    int rc = 1;
+    int steps = STEPS;
+    int last_step = STEPS;
+    int step = 1;
+    int name_size = 0;
+    char input_param_file[INPUT_CHAR_LEN];
+    
     clock_gettime( CLOCK_REALTIME,&tv );
     tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
@@ -71,21 +80,13 @@ int main(int argc, char *argv[])
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 
-	printf("Time,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_death,n_recovered\n");
-    int rc = 1;
-    int steps = 10;
-    int last_step = 8;
-    int step = 1;
-    char input_param_file[INPUT_CHAR_LEN];
-    char output_file_dir[INPUT_CHAR_LEN];
-
-    /* Store output file directory */
-    strncpy(output_file_dir, model->params->output_file_dir, sizeof(output_file_dir) - 1);
-    output_file_dir[sizeof(output_file_dir) - 1] = '\0'; 
-    
-    while( rc && step <= steps ) {
+    while( step <= steps ) {
         printf("Step %d\n", step);
         rc = one_time_step( model );
+        if (!rc) {
+            printf("Error calculating results");
+        }
+	    printf("Time,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_death,n_recovered\n");
         printf( "%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ),
@@ -101,17 +102,28 @@ int main(int argc, char *argv[])
 		);
         /* Send results to Python program to calculate new params */
         if (step+1 <= last_step) {
-            /* Write temporary results to file */
-            char tmp_file_dir[20];
-            snprintf(tmp_file_dir, sizeof(tmp_file_dir)-1, "temp_output_%d", step+1);
-            strncpy(model->params->output_file_dir, tmp_file_dir, sizeof(model->params->output_file_dir) - 1);
-            model->params->output_file_dir[sizeof(model->params->output_file_dir) - 1] = '\0'; 
+            /* 
+             * FIXME: Turn on write individual file flag
+             * This will create a temporary parameters file called:
+             * individual_file_Run<param_line_number>.csv
+             * This should not be configured form the input .csv file
+             */
+            int sys_write_individual = model->params->sys_write_individual;
+            if (!sys_write_individual) 
+                model->params->sys_write_individual = 1;
+
+            /* Write output files */
             write_output_files(model, &params);
 
-            printf("Get new params for step %d\n", step+1);
-            rc = get_line_from_prmpt ("New params file>", input_param_file, sizeof(input_param_file));
-            if (rc == NO_INPUT) {
+            /* FIXME: Turn off write individial file flag */
+            if (!sys_write_individual) 
+                model->params->sys_write_individual = 0;
 
+            printf("Get new params for step %d\n", step+1);
+            rc = get_line_from_prmpt("New params file>",
+                                     input_param_file,
+                                     sizeof(input_param_file));
+            if (rc == NO_INPUT) {
                 /* Extra NL since my system doesn't output that on EOF */
                 printf("No input\n");
                 return 1;
@@ -125,12 +137,16 @@ int main(int argc, char *argv[])
             printf ("OK [%s]\n", input_param_file);
             
             /* Load new params */
-            strncpy(model->params->input_param_file, input_param_file, sizeof(model->params->input_param_file) - 1);
-            model->params->input_param_file[sizeof(model->params->input_param_file) - 1] = '\0'; 
+            strncpy(model->params->input_param_file,
+                    input_param_file,
+                    sizeof(model->params->input_param_file) - 1);
+            name_size = sizeof(model->params->input_param_file);
+            model->params->input_param_file[name_size - 1] = '\0';
         }
         step++;
     }
-	printf( "\n# End_time:                      %i\n",  model->time );
+
+	printf( "\n# End_time:                    %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
@@ -145,10 +161,6 @@ int main(int argc, char *argv[])
 	printf( "# Total deaths elderly:          %li\n", n_total_age( model, DEATH, AGE_65 ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
-    /* Set original output file name */
-    strncpy(model->params->output_file_dir, output_file_dir, sizeof(model->params->output_file_dir) - 1);
-    model->params->output_file_dir[sizeof(model->params->output_file_dir) - 1] = '\0'; 
-    
     write_output_files( model, &params );
 	
 	destroy_model( model );
