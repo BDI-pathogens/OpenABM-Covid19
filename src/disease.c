@@ -117,8 +117,6 @@ void set_up_infectious_curves( model *model )
 	mean_interactions[AGE_TYPE_ELDERLY]    = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
 
 	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
-	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_CHILD];
-	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_ELDERLY];
 
 	for( group = 0; group < N_AGE_GROUPS; group++ )
 		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
@@ -283,7 +281,7 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction_type[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -300,7 +298,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction_type[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 	else
 		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
@@ -320,7 +318,7 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction_type[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
 		transition_one_disese_event( model, indiv, CRITICAL, RECOVERED, CRITICAL_RECOVERED );

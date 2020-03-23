@@ -48,8 +48,6 @@ population_60_69	7069544
 population_70_79	5487167
 population_80	3281955
 seasonal_flu_rate	0.005
-relative_susceptibility_child	0.1
-relative_susceptibility_elderly	1.7
 relative_susceptibility_0_9	0.1
 relative_susceptibility_10_19	0.1
 relative_susceptibility_20_29	0.48
@@ -62,9 +60,6 @@ relative_susceptibility_80	2.24
 relative_transmission_household	2.0
 relative_transmission_workplace	1.0
 relative_transmission_random	1.0
-hospitalised_fraction_child	0.15
-hospitalised_fraction_adult	0.15
-hospitalised_fraction_elderly	0.25
 hospitalised_fraction_0_9	0.001
 hospitalised_fraction_10_19	0.003
 hospitalised_fraction_20_29	0.012
@@ -74,9 +69,6 @@ hospitalised_fraction_50_59	0.102
 hospitalised_fraction_60_69	0.166
 hospitalised_fraction_70_79	0.243
 hospitalised_fraction_80	0.273
-critical_fraction_child	0.02
-critical_fraction_adult	0.08
-critical_fraction_elderly	0.5
 critical_fraction_0_9	0.05
 critical_fraction_10_19	0.05
 critical_fraction_20_29	0.05
@@ -86,9 +78,6 @@ critical_fraction_50_59	0.122
 critical_fraction_60_69	0.274
 critical_fraction_70_79	0.432
 critical_fraction_80	0.709
-fatality_fraction_child	0.5
-fatality_fraction_adult	0.5
-fatality_fraction_elderly	0.5
 fatality_fraction_0_9	0.33
 fatality_fraction_10_19	0.25
 fatality_fraction_20_29	0.5

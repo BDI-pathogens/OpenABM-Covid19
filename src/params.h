@@ -36,11 +36,6 @@ typedef struct{
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
 
-	double relative_susceptibility_child;	// relative susceptibility of children to adults per day (i.e. after adjust for no. interactions)
-	double relative_susceptibility_elderly; // relative susceptibility of elderly to adults per day (i.e. after adjust for no. interactions)
-	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
-	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
-
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
 	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
 
@@ -50,14 +45,9 @@ typedef struct{
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
-	double hospitalised_fraction_type[N_AGE_TYPES];   // fraction of symptomatic patients requiring hospitalisation
-	double critical_fraction_type[N_AGE_TYPES];  	  // fraction of hospitalised patients who require ICU treatment
-	double fatality_fraction_type[N_AGE_TYPES];  	  // fraction of ICU patients who die
-
 	double hospitalised_fraction[N_AGE_GROUPS];   // fraction of symptomatic patients requiring hospitalisation
 	double critical_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who require ICU treatment
 	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of ICU patients who die
-
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care
