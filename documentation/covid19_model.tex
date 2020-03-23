@@ -181,9 +181,9 @@ Combining all effects, we model the rate at which the virus being transmitted in
 \lambda(t,a_s,b) = \frac{R s_{a_s}A_b}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
 \end{equation}
 where $f_{\Gamma}(u; \mu_i,\sigma_i^2)$ is the p.d.f.\ of a gamma distribution with mean $\mu$ and variance $\sigma^2$; $t$ is the number of days since the infector become infected; $a_s$ is the age group of the susceptible; $b$ is an indicator of whether the infected individual is asymptomatic; the other terms listed in the Infectious Parameters table  (see Table~\ref{table_infectious_parameters}).
-The rate of virus transmission is converted to a probability of transmission  ($p(t,a_s,b)$) using the formula
+The rate of virus transmission is converted to a probability of transmission  ($P(t,a_s,b)$) using the formula
 \begin{equation}
-p(t,a_s,b) = 1 - e^{-\lambda(t,a_s,b)}.
+P(t,a_s,b) = 1 - e^{-\lambda(t,a_s,b)}.
 \end{equation}
 The epidemic is seeded by randomly infecting a small number of individuals at the start of the infection.  Seed cases are assumed to have been infected immediately before the simulation starts.
 
@@ -366,12 +366,48 @@ These 2 interventions work together informing each other of the next steps.
 \end{table}
 
 \section{Implementation Details}
-For computationally efficiency we use an event-based system, where at each decision point we calculate when the next event will occur.
-Linked-lists are used throughout to use memory efficiently.
-At the start of the simulation all individuals are drawn a quantity of {\it hazard} (from an exponential distribution) and every interaction with an infected person reduces their amount of {\it hazard}. When {\it hazard} drops below 0 the individual becomes infected. This algorithm is efficient as it means that we do not need to draw random variables for every interaction and can be shown to be mathematically equivalent.
-As part of the initialisation we calculate draw-lists for each distribution, so that drawing from any distribution simply becomes drawing a uniform random variable.
-Similarly, all infection transmission rates are pre-computed in the initialisation, which removes the need for any mathematical function evaluation or multiplication during the main part of the simulation.
+This is a high-level description of how the model is implemented.
+The model is coded in C but using an object-orientated pattern.
+All required memory is pre-allocated at the start of the simulation for efficiency.
 
+\subsection{Events} 
+We use an event-based system to drive disease progression in individuals and interventions, where at each decision point we calculate when the next event will occur and add it to an event-list for that day.
+For each type of event there is an \texttt{eventlist} structure, which contains an array of linked-lists for each day of the simulation.
+We use doubly-linked lists to allow for efficient deletion as well as insertion of events.
+Event-lists also keep track of the current and total number of events (defined as all entries today and in the past). 
+
+\subsection{Individuals} 
+Each person in the population is represented by an \texttt{individual} structure and the population is static.
+The \texttt{individual} structure contains the following information:
+\begin{enumerate}
+\item Demographic - age, network membership
+\item Interaction diary - list of all interactions over a period of days (note this is not just ones tracked by the app)
+\item Disease - current status (i.e.\ symptomatic) and pointers to both current and future disease events
+\item Quarantine - is the person currently quarantined and pointers to that event and the release event
+\end{enumerate}
+
+\subsection{Network Construction}
+Each interaction network has an associated \texttt{network} structure which contains an array of edges.
+Network structures can be static (i.e.\ household), static but down-sampled (i.e.\ work-place) or dynamically generated at each time step (i.e.\ random).
+Network generation is modular and any network can be added to the model as long as it can be represented by an array of edges.
+Once all the networks have been defined, we add each edge to the individuals interaction diary (which are single-linked lists as deletion is not required).
+
+\subsection{Disease transmission}
+The next step is to transmit the disease across today's interaction network, which is done as push from all infected people (by disease status).
+For every infectious status, we pre-calculate the transmission rate for someone who has been infected for that length of time.
+At each time-step, we go through all that interactions the infected person had for that day and calculate whether transmission has occurred.
+Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of {\it hazard} (from an exponential distribution) at the start of the simulation.
+Each interaction with an infected person reduces the persons {\it hazard} and when a person's {\it hazard} drops below 0 they become infected. 
+This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the $N^{\rm th}$ interaction  $P({\rm infected} \  N^{\rm th})$, after exposured to interactions with hazard-rates $\{ \lambda_1,..,\lambda_N \}$
+\begin{align*}
+P({\rm infected} \  N^{\rm th}) 
+&= P_N \prod_{i=1}^{N-1} ( 1 - P_i) \\
+&= \exp\left( -\sum_{i=1}^{N-1} \lambda_i \right) - \exp\left( -\sum_{i=1}^{N} \ \lambda_i\right) \\
+&= P \left(  \sum_{i=1}^{N-1} \lambda_i  < T <  \sum_{i=1}^{N} \lambda_i \right)
+\end{align*}
+where $T$ is distributed exponentially with mean 1. 
+The fact that different age groups have a different susceptibilities ($s_{a_s}$) is then modelled by allocating different amounts of initial {\\it hazard} to each group.
+This improves computational efficiency so that is it not necessary to draw a random variable for each potential transmission event.
 
 \renewcommand{\bibname}{References}
 \bibliographystyle{abbrvnat}
