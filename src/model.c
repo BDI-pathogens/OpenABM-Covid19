@@ -498,7 +498,7 @@ void build_household_network( model *model )
 				if( ndx >= HH_3 && ( 1.0 * hdx / n_house_tot[ndx] ) < child_frac_3_6 && pdx < ( ndx - 1 ) )
 					age = AGE_TYPE_CHILD;
 
-				set_age_group( &(model->population[pop_idx]), model->params, age );
+				set_age_type( &(model->population[pop_idx]), model->params, age );
 				set_house_no( &(model->population[pop_idx]), house_no );
 				model->household_directory->val[house_no][pdx] = pop_idx;
 
