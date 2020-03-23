@@ -186,14 +186,14 @@ void set_up_allocate_work_places( model *model )
 	long pdx, n_adult;
 	long pop_net_raw[N_WORK_NETWORKS];
 	double other;
-	double **prob = calloc( N_AGE_TYPES, sizeof(double*));
+	double **prob = calloc( N_AGE_GROUPS, sizeof(double*));
 	double adult_prop[N_WORK_NETWORK_TYPES] = {0.2, 1, 0.2};
 
 	// get the raw population in each network
 	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_type] ]++;
+		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_group] ]++;
 
 	// given the total adults
 	n_adult = 0;
@@ -202,7 +202,7 @@ void set_up_allocate_work_places( model *model )
 			n_adult += pop_net_raw[ndx];
 
 	// get the probability of each each age-group going to each network	for
-	for( adx = 0; adx < N_AGE_TYPES; adx++ )
+	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
 	{
 		other = 0.0;
 		prob[adx] = calloc( N_WORK_NETWORKS, sizeof(double));
@@ -226,63 +226,40 @@ void set_up_allocate_work_places( model *model )
 
 	// randomly assign a work place networks using the probability map
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_type]);
+		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
 
-/*
-		for( adx = 0; adx < N_AGE_GROUPS; adx++ )
-		{
-			for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
-				printf( "%lf ", prob[adx][ndx]);
-			printf( "\n");
-		}
-*/
-
-
-	/*
-	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
-		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
-			prob[adx][ndx] = 0;
-	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		prob[model->population[pdx].age_group][model->population[pdx].work_network_new]+= 1;
-	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
-	{
-		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
-			printf( "%lf ", prob[adx][ndx]);
-		printf( "\n");
-	exit(1);
-};
-*/
-
-	for( ndx = 0; ndx < N_AGE_TYPES; ndx++ )
+	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
 		free(prob[ndx]);
+
 	free(prob);
 }
 
 /*****************************************************************************************
 *  Name:		set_up_work_network
-*  Description: sets up the work network for a particular age group
+*  Description: sets up the work network
 *  Returns:		void
 ******************************************************************************************/
-void set_up_work_network( model *model, int age )
+void set_up_work_network( model *model, int network )
 {
 	long idx;
 	long n_people = 0;
 	long *people;
 	int n_interactions;
+	int age = NETWORK_TYPE_MAP[network];
 
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[idx].work_network == age )
+		if( model->population[idx].work_network_new == network )
 			people[n_people++] = idx;
 
-	model->work_network[age] = new_network( n_people, WORK );
+
+	model->work_network[network] = new_network( n_people, WORK );
 	n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
-	build_watts_strogatz_network( model->work_network[age], n_people, n_interactions, 0.1, TRUE );
-	relabel_network( model->work_network[age], people );
+	build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
+	relabel_network( model->work_network[network], people );
 
 	free( people );
 }
-
 
 /*****************************************************************************************
 *  Name:		set_up_events

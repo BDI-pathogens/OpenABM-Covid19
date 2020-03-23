@@ -84,7 +84,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 	
-	for( i = 0; i < N_WORK_NETWORKS; i++ )
+	for( i = 0; i < N_WORK_NETWORK_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
@@ -472,3 +472,25 @@ void print_interactions_averages(model *model, int header)
 		1.0 * assort[2][2]/ int_by_age[2]
 	);
 }
+
+/*****************************************************************************************
+*  Name:		print_demographics
+*  Description: print demographic details
+******************************************************************************************/
+void print_demographics( model *model )
+{
+	long pdx;
+	individual *indiv;
+	FILE *output_file;
+	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/indiv.csv", "w");
+
+	fprintf(output_file ,"age_group,age_type,work_network,work_network_new\n");
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		fprintf(output_file ,"%i,%i,%i,%i\n", indiv->age_group, indiv->age_type, indiv->work_network, indiv->work_network_new );
+	}
+	fclose(output_file);
+	print_exit( "Output demographics: end!");
+}
+
