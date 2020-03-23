@@ -484,11 +484,18 @@ void print_demographics( model *model )
 	FILE *output_file;
 	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/indiv.csv", "w");
 
-	fprintf(output_file ,"age_group,age_type,work_network,work_network_new\n");
+	fprintf(output_file ,"age_group,age_type,work_network,work_network_new,house_size,house_no\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 		indiv = &(model->population[pdx]);
-		fprintf(output_file ,"%i,%i,%i,%i\n", indiv->age_group, indiv->age_type, indiv->work_network, indiv->work_network_new );
+		fprintf(output_file ,"%i,%i,%i,%i,%i,%li\n",
+			indiv->age_group,
+			indiv->age_type,
+			indiv->work_network,
+			indiv->work_network_new,
+			model->household_directory->n_jdx[indiv->house_no],
+			indiv->house_no
+		);
 	}
 	fclose(output_file);
 	print_exit( "Output demographics: end!");
