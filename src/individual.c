@@ -64,13 +64,7 @@ void initialize_hazard(
 	parameters *params
 )
 {
-	double rate = 1.0;
-	if( indiv->age_type == AGE_TYPE_CHILD )
-		rate /= params->adjusted_susceptibility_child;
-	if( indiv->age_type == AGE_TYPE_ELDERLY )
-		rate /= params->adjusted_susceptibility_elderly;
-
-	indiv->hazard = rate * gsl_ran_exponential( rng, 1.0 );
+	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
 /*****************************************************************************************
