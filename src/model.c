@@ -187,7 +187,11 @@ void set_up_allocate_work_places( model *model )
 	long pop_net_raw[N_WORK_NETWORKS];
 	double other;
 	double **prob = calloc( N_AGE_GROUPS, sizeof(double*));
-	double adult_prop[N_WORK_NETWORK_TYPES] = {0.2, 1, 0.2};
+	double adult_prop[N_WORK_NETWORK_TYPES] = {
+		model->params->child_network_adults,
+		1.0,
+		model->params->elderly_network_adults
+	};
 
 	// get the raw population in each network
 	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
