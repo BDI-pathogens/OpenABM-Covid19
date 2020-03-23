@@ -66,25 +66,25 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	double *weight = model->params->relative_transmission_by_type;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		if( model->population[pdx].age_group == age )
+		if( model->population[pdx].age_type == age )
 		{
 			people++;
 			inter += model->population[pdx].base_random_interactions * weight[RANDOM];
 		}
 	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
 	{
-		if( model->population[model->household_network->edges[pdx].id1].age_group == age )
+		if( model->population[model->household_network->edges[pdx].id1].age_type == age )
 			inter += weight[HOUSEHOLD];
-		if( model->population[model->household_network->edges[pdx].id2].age_group == age )
+		if( model->population[model->household_network->edges[pdx].id2].age_type == age )
 			inter += weight[HOUSEHOLD];
 	}
 
 	for( ndx = 0; ndx < N_WORK_NETWORKS ; ndx++ )
 		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
 		{
-			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
+			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_type == age )
 				inter += model->params->daily_fraction_work * weight[WORK];
-			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_group == age )
+			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_type == age )
 				inter  += model->params->daily_fraction_work * weight[WORK];
 		}
 
@@ -280,7 +280,7 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -297,7 +297,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 	else
 		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
@@ -317,7 +317,7 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
 		transition_one_disese_event( model, indiv, CRITICAL, RECOVERED, CRITICAL_RECOVERED );

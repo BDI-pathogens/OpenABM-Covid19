@@ -193,7 +193,7 @@ void set_up_allocate_work_places( model *model )
 	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_group] ]++;
+		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_type] ]++;
 
 	// given the total adults
 	n_adult = 0;
@@ -226,7 +226,7 @@ void set_up_allocate_work_places( model *model )
 
 	// randomly assign a work place networks using the probability map
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_type]);
 
 /*
 		for( adx = 0; adx < N_AGE_GROUPS; adx++ )
@@ -417,7 +417,7 @@ void calculate_household_distribution(
 	int idx;
 	double survey_tot, max_children, pop_all;
 	double n_person_frac[ HOUSEHOLD_N_MAX ];
-	double *pop = model->params->population;
+	double *pop = model->params->population_type;
 
 	pop_all      = pop[AGE_TYPE_CHILD] + pop[AGE_TYPE_ADULT] + pop[AGE_TYPE_ELDERLY];
 	survey_tot   = 0;
@@ -597,14 +597,14 @@ event* add_individual_to_event_list(
 
 	list->events[time ] = event;
 	list->n_daily[time]++;
-	list->n_daily_by_age[time][indiv->age_group]++;
+	list->n_daily_by_age[time][indiv->age_type]++;
 	list->n_daily_current[time]++;
 
 	if( time <= model->time )
 	{
 		list->n_total++;
 		list->n_current++;
-		list->n_total_by_age[indiv->age_group]++;
+		list->n_total_by_age[indiv->age_type]++;
 	}
 
 	return event;
