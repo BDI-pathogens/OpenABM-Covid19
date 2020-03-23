@@ -280,7 +280,7 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction_type[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -297,7 +297,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->critical_fraction_type[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 	else
 		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
@@ -317,7 +317,7 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_type ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction_type[ indiv->age_type ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
 		transition_one_disese_event( model, indiv, CRITICAL, RECOVERED, CRITICAL_RECOVERED );

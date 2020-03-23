@@ -41,15 +41,23 @@ typedef struct{
 	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
 	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
 
+	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
+	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
+
 	double relative_transmission_by_type[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
 	double relative_transmission_by_type_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
 
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
-	double hospitalised_fraction[N_AGE_TYPES];   // fraction of symptomatic patients requiring hospitalisation
-	double critical_fraction[N_AGE_TYPES];  	  // fraction of hospitalised patients who require ICU treatment
-	double fatality_fraction[N_AGE_TYPES];  	  // fraction of ICU patients who die
+	double hospitalised_fraction_type[N_AGE_TYPES];   // fraction of symptomatic patients requiring hospitalisation
+	double critical_fraction_type[N_AGE_TYPES];  	  // fraction of hospitalised patients who require ICU treatment
+	double fatality_fraction_type[N_AGE_TYPES];  	  // fraction of ICU patients who die
+
+	double hospitalised_fraction[N_AGE_GROUPS];   // fraction of symptomatic patients requiring hospitalisation
+	double critical_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who require ICU treatment
+	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of ICU patients who die
+
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care

@@ -187,6 +187,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_elderly));
 	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_elderly\n"); };
 
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+		{
+			check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility[i]));
+			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
+		}
 
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
@@ -196,11 +201,24 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
+		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
 		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
 	}
 
+
 	for( i = 0; i < N_AGE_TYPES; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter critical_fraction_yep**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
@@ -208,8 +226,14 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
+		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_type**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
 		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
-		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_**\n"); };
+		if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
 	}
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
