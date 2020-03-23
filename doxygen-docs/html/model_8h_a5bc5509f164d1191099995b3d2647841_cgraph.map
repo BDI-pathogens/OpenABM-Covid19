@@ -1,0 +1,9 @@
+<map id="build_household_network" name="build_household_network">
+<area shape="rect" id="node1" title=" " alt="" coords="5,95,178,120"/>
+<area shape="rect" id="node2" href="$model_8c.html#a4a2925e726866e50f4072239fd9d2239" title=" " alt="" coords="226,5,369,44"/>
+<area shape="rect" id="node3" href="$utilities_8c.html#af287648e7463de58830a667ac86a7b06" title=" " alt="" coords="474,41,550,67"/>
+<area shape="rect" id="node4" href="$individual_8c.html#a11c524d444f30a83d00697a667c9d750" title=" " alt="" coords="242,120,352,145"/>
+<area shape="rect" id="node7" href="$individual_8c.html#ac7fc990da47f96c683dcbd0651e8fa57" title=" " alt="" coords="245,169,350,195"/>
+<area shape="rect" id="node5" href="$utilities_8c.html#af71fb4dedf0bf883ab5b84399814ad56" title=" " alt="" coords="429,95,595,120"/>
+<area shape="rect" id="node6" href="$individual_8c.html#a1a937cf6d3e8231f86f9c53a7809751b" title=" " alt="" coords="417,144,607,169"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="interaction" name="interaction">
+<area shape="rect" id="node1" title=" " alt="" coords="23,5,105,31"/>
+<area shape="rect" id="node2" href="$structindividual.html" title=" " alt="" coords="26,92,102,117"/>
+<area shape="rect" id="node3" href="$structevent.html" title=" " alt="" coords="37,233,91,258"/>
+</map>

@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['n_5fcurrent_483',['n_current',['../structevent__list.html#a909a69f2be8b8440d1f3dcf329db8db6',1,'event_list']]],
+  ['n_5fdaily_484',['n_daily',['../structevent__list.html#abbbfcd5a5c62c84f985da56e15bf4b37',1,'event_list']]],
+  ['n_5fdaily_5fby_5fage_485',['n_daily_by_age',['../structevent__list.html#a1b57c5795e58a974bc5a63887e6960bf',1,'event_list']]],
+  ['n_5fdaily_5fcurrent_486',['n_daily_current',['../structevent__list.html#adcf437e7d71860c6d8e427764dab679d',1,'event_list']]],
+  ['n_5fedges_487',['n_edges',['../structnetwork.html#accd358ed6b47b64c38b56a2a8b86f3f4',1,'network']]],
+  ['n_5fidx_488',['n_idx',['../structvar__array.html#a0f575ac4a1d073236b17340e46f11130',1,'var_array']]],
+  ['n_5finteractions_489',['n_interactions',['../structindividual.html#a93abd5607c717c7cf63dd3ef1f961ea8',1,'individual::n_interactions()'],['../structmodel.html#a1190f8a7566cbb0c927ab1787d442526',1,'model::n_interactions()']]],
+  ['n_5fjdx_490',['n_jdx',['../structvar__array.html#aed5df7c3d24af0400817472ad3987202',1,'var_array']]],
+  ['n_5fpossible_5finteractions_491',['n_possible_interactions',['../structmodel.html#aabe141c3efe8a81ad977e964778be39c',1,'model']]],
+  ['n_5fquarantine_5fdays_492',['n_quarantine_days',['../structmodel.html#af9bd66ce2143c4a2356985b16c2c1853',1,'model']]],
+  ['n_5fseed_5finfection_493',['n_seed_infection',['../structparameters.html#a23ef6fad4129e2c0c3463e4f417d85e5',1,'parameters']]],
+  ['n_5ftotal_494',['n_total',['../structevent__list.html#ac0d791afc31711526e67a6b373fd2653',1,'event_list::n_total()'],['../structparameters.html#ac0d791afc31711526e67a6b373fd2653',1,'parameters::n_total()']]],
+  ['n_5ftotal_5fby_5fage_495',['n_total_by_age',['../structevent__list.html#ae0c0db5325a859126aeb61c632302591',1,'event_list']]],
+  ['n_5ftotal_5fintereactions_496',['n_total_intereactions',['../structmodel.html#a46daa05cb08fdac7b96386fdd382892a',1,'model']]],
+  ['n_5fvertices_497',['n_vertices',['../structnetwork.html#a3b3f6781cdff8f4f6071d5aa650f1f62',1,'network']]],
+  ['next_498',['next',['../structinteraction.html#ac257f63813b6cd734797c139602298c1',1,'interaction::next()'],['../structevent.html#af4273fb312ccae628102eb9304fcd29f',1,'event::next()']]],
+  ['next_5fdisease_5fevent_499',['next_disease_event',['../structindividual.html#ade0caf4261c225a3f2f2347d5c08d8ba',1,'individual']]],
+  ['next_5fevent_500',['next_event',['../structmodel.html#af63cdcfa5a0b12f6279e469a11b0d402',1,'model']]]
+];

@@ -1,0 +1,11 @@
+<map id="model" name="model">
+<area shape="rect" id="node1" title=" " alt="" coords="272,348,330,374"/>
+<area shape="rect" id="node2" href="$structindividual.html" title=" " alt="" coords="96,6,173,31"/>
+<area shape="rect" id="node3" href="$structevent.html" title=" " alt="" coords="83,146,137,172"/>
+<area shape="rect" id="node4" href="$structinteraction.html" title=" " alt="" coords="258,146,341,172"/>
+<area shape="rect" id="node9" href="$structevent__list.html" title=" " alt="" coords="175,234,253,260"/>
+<area shape="rect" id="node5" href="$structnetwork.html" title=" " alt="" coords="396,234,464,260"/>
+<area shape="rect" id="node6" href="$structedge.html" title=" " alt="" coords="417,146,468,172"/>
+<area shape="rect" id="node7" href="$structvar__array.html" title=" " alt="" coords="489,234,566,260"/>
+<area shape="rect" id="node8" href="$structparameters.html" title=" " alt="" coords="630,234,719,260"/>
+</map>
