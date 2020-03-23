@@ -110,7 +110,7 @@ void set_up_infectious_curves( model *model )
 	parameters *params = model->params;
 	double infectious_rate, type_factor;
 	double mean_interactions[N_AGE_TYPES];
-	int type;
+	int type, group;
 
 	mean_interactions[AGE_TYPE_CHILD]  = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
 	mean_interactions[AGE_TYPE_ADULT] = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
@@ -119,6 +119,9 @@ void set_up_infectious_curves( model *model )
 	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
 	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_CHILD];
 	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_ELDERLY];
+
+	for( group = 0; group < N_AGE_GROUPS; group++ )
+		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
