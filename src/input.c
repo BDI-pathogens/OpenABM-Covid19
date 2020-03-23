@@ -168,8 +168,14 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->population_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_type_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->population_group[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_group_**\n"); };
 	}
 
 	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
@@ -429,15 +435,15 @@ void print_interactions_averages(model *model, int header)
 		inter = indiv->interactions[day_idx];
 		for( jdx = 0; jdx < n_int; jdx++ )
 		{
-			assort[ indiv->age_group][inter->individual->age_group]++;
+			assort[ indiv->age_type][inter->individual->age_type]++;
 			inter = inter->next;
 		}
 
 		int_tot += n_int;
 		per_tot++;
 
-		int_by_age[ indiv->age_group] += n_int;
-		per_by_age[ indiv->age_group]++;
+		int_by_age[ indiv->age_type] += n_int;
+		per_by_age[ indiv->age_type]++;
 
 		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_event[QUARANTINED] != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
