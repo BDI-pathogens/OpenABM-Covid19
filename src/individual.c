@@ -65,9 +65,9 @@ void initialize_hazard(
 )
 {
 	double rate = 1.0;
-	if( indiv->age_group == AGE_0_17 )
+	if( indiv->age_group == AGE_TYPE_CHILD )
 		rate /= params->adjusted_susceptibility_child;
-	if( indiv->age_group == AGE_65 )
+	if( indiv->age_group == AGE_TYPE_ELDERLY )
 		rate /= params->adjusted_susceptibility_elderly;
 
 	indiv->hazard = rate * gsl_ran_exponential( rng, 1.0 );
@@ -122,18 +122,18 @@ void set_age_group( individual *indiv, parameters *params, int group )
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
 	update_random_interactions( indiv, params );
 
-	if( group == AGE_18_64 )
+	if( group == AGE_TYPE_ADULT )
 	{
-		child_net_adults   = params->child_network_adults * params->population[AGE_0_17] / params->population[AGE_18_64];
-		elderly_net_adults = params->elderly_network_adults * params->population[AGE_65] / params->population[AGE_18_64];
+		child_net_adults   = params->child_network_adults * params->population[AGE_TYPE_CHILD] / params->population[AGE_TYPE_ADULT];
+		elderly_net_adults = params->elderly_network_adults * params->population[AGE_TYPE_ELDERLY] / params->population[AGE_TYPE_ADULT];
 
 		x = gsl_rng_uniform( rng );
 		if( x < child_net_adults )
-			indiv->work_network = AGE_0_17;
+			indiv->work_network = AGE_TYPE_CHILD;
 		else if(  x < ( elderly_net_adults + child_net_adults ) )
-			indiv->work_network = AGE_65;
+			indiv->work_network = AGE_TYPE_ELDERLY;
 		else
-			indiv->work_network = AGE_18_64;
+			indiv->work_network = AGE_TYPE_ADULT;
 	}
 	else
 		indiv->work_network = group;

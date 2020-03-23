@@ -107,7 +107,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
 	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
 	list->infectious_curve = calloc( N_INTERACTION_TYPES, sizeof(double*) );
-	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
+	list->n_total_by_age   = calloc( N_AGE_TYPES, sizeof(long) );
 	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
 	list->events		   = calloc( MAX_TIME, sizeof(event*));
 
@@ -115,8 +115,8 @@ void set_up_event_list( model *model, parameters *params, int type )
 	list->n_total   = 0;
 	for( day = 0; day < MAX_TIME; day++ )
 	{
-		list->n_daily_by_age[day] = calloc( N_AGE_GROUPS, sizeof(long) );
-		for( age = 0; age < N_AGE_GROUPS; age++ )
+		list->n_daily_by_age[day] = calloc( N_AGE_TYPES, sizeof(long) );
+		for( age = 0; age < N_AGE_TYPES; age++ )
 			list->n_daily_by_age[day][age] = 0;
 
 		list->n_daily[day] = 0;
@@ -159,7 +159,7 @@ void set_up_networks( model *model )
 	long n_random_interactions;
 	double mean_interactions  = 0;
 
-	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
 	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
@@ -169,9 +169,93 @@ void set_up_networks( model *model )
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network( model );
 
+	set_up_allocate_work_places( model );
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
+}
+
+/*****************************************************************************************
+*  Name:		set_up_allocate_work_places
+*  Description: sets up to allocate a work place for each person
+*  Returns:		void
+******************************************************************************************/
+void set_up_allocate_work_places( model *model )
+{
+	int adx, ndx;
+	long pdx, n_adult;
+	long pop_net_raw[N_WORK_NETWORKS];
+	double other;
+	double **prob = calloc( N_AGE_TYPES, sizeof(double*));
+	double adult_prop[N_WORK_NETWORK_TYPES] = {0.2, 1, 0.2};
+
+	// get the raw population in each network
+	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+		pop_net_raw[ndx] = 0;
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_group] ]++;
+
+	// given the total adults
+	n_adult = 0;
+	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+		if( NETWORK_TYPE_MAP[ndx] == NETWORK_TYPE_ADULT )
+			n_adult += pop_net_raw[ndx];
+
+	// get the probability of each each age-group going to each network	for
+	for( adx = 0; adx < N_AGE_TYPES; adx++ )
+	{
+		other = 0.0;
+		prob[adx] = calloc( N_WORK_NETWORKS, sizeof(double));
+		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+		{
+			prob[adx][ndx] = 0;
+			if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] != NETWORK_TYPE_ADULT )
+				prob[adx][ndx] = ( ndx == AGE_WORK_MAP[adx] );
+			else
+			{
+				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
+				{
+					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
+					other         += prob[adx][ndx];
+				}
+			}
+		}
+		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
+			prob[adx][AGE_WORK_MAP[adx]] = 1.0 - other;
+	}
+
+	// randomly assign a work place networks using the probability map
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+
+/*
+		for( adx = 0; adx < N_AGE_GROUPS; adx++ )
+		{
+			for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+				printf( "%lf ", prob[adx][ndx]);
+			printf( "\n");
+		}
+*/
+
+
+	/*
+	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
+		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+			prob[adx][ndx] = 0;
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		prob[model->population[pdx].age_group][model->population[pdx].work_network_new]+= 1;
+	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
+	{
+		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+			printf( "%lf ", prob[adx][ndx]);
+		printf( "\n");
+	exit(1);
+};
+*/
+
+	for( ndx = 0; ndx < N_AGE_TYPES; ndx++ )
+		free(prob[ndx]);
+	free(prob);
 }
 
 /*****************************************************************************************
@@ -335,7 +419,7 @@ void calculate_household_distribution(
 	double n_person_frac[ HOUSEHOLD_N_MAX ];
 	double *pop = model->params->population;
 
-	pop_all      = pop[AGE_0_17] + pop[AGE_18_64] + pop[AGE_65];
+	pop_all      = pop[AGE_TYPE_CHILD] + pop[AGE_TYPE_ADULT] + pop[AGE_TYPE_ELDERLY];
 	survey_tot   = 0;
 	max_children = 0;
 	for( idx = 0; idx < HOUSEHOLD_N_MAX; idx++)
@@ -345,8 +429,8 @@ void calculate_household_distribution(
 		max_children      += model->params->household_size[ idx ] * max( idx -1 , 0 );
 	}
 
-	*child_frac_3_6   = pop[AGE_0_17] / pop_all / ( max_children / survey_tot );
-	*elderly_frac_1_2 = pop[AGE_65] / pop_all / ( ( n_person_frac[HH_1] + n_person_frac[HH_2] ) / survey_tot );
+	*child_frac_3_6   = pop[AGE_TYPE_CHILD] / pop_all / ( max_children / survey_tot );
+	*elderly_frac_1_2 = pop[AGE_TYPE_ELDERLY] / pop_all / ( ( n_person_frac[HH_1] + n_person_frac[HH_2] ) / survey_tot );
 
 	if( *child_frac_3_6 > 1 )
 		print_exit( "not sufficient 3-6 person households for all the children" );
@@ -408,11 +492,11 @@ void build_household_network( model *model )
 			model->household_directory->val[house_no]   = calloc( ndx + 1, sizeof( long ) );
 			for( pdx = 0; pdx < ( ndx + 1 ); pdx++ )
 			{
-				age = AGE_18_64;
+				age = AGE_TYPE_ADULT;
 				if( ndx <= HH_2 && ( 1.0 * hdx / n_house_tot[ndx] ) < elderly_frac_1_2 )
-					age = AGE_65;
+					age = AGE_TYPE_ELDERLY;
 				if( ndx >= HH_3 && ( 1.0 * hdx / n_house_tot[ndx] ) < child_frac_3_6 && pdx < ( ndx - 1 ) )
-					age = AGE_0_17;
+					age = AGE_TYPE_CHILD;
 
 				set_age_group( &(model->population[pop_idx]), model->params, age );
 				set_house_no( &(model->population[pop_idx]), house_no );
@@ -583,7 +667,7 @@ void update_event_list_counters( model *model, int type )
 	model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
 	model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
 
-	for( int age = 0; age <= N_AGE_GROUPS; age++ )
+	for( int age = 0; age <= N_AGE_TYPES; age++ )
 		model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
 }
 

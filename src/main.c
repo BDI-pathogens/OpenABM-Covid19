@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     printf("# Starting simulation\n");
 
     parameters params;	
-	
+
     struct timespec  tv;
     double tstart, tend;
 
@@ -65,13 +65,13 @@ int main(int argc, char *argv[])
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
 	printf( "# Total cases:                   %li\n", n_total( model, CASE ) );
-	printf( "# Total cases children:          %li\n", n_total_age( model, CASE, AGE_0_17 ) );
-	printf( "# Total cases adult:             %li\n", n_total_age( model, CASE, AGE_18_64 ) );
-	printf( "# Total cases elderly:           %li\n", n_total_age( model, CASE, AGE_65 ) );
+	printf( "# Total cases children:          %li\n", n_total_age( model, CASE, AGE_TYPE_CHILD ) );
+	printf( "# Total cases adult:             %li\n", n_total_age( model, CASE, AGE_TYPE_ADULT ) );
+	printf( "# Total cases elderly:           %li\n", n_total_age( model, CASE, AGE_TYPE_ELDERLY ) );
 	printf( "# Total deaths:                  %li\n", n_total( model, DEATH ) );
-	printf( "# Total deaths children:         %li\n", n_total_age( model, DEATH, AGE_0_17 ) );
-	printf( "# Total deaths adult:            %li\n", n_total_age( model, DEATH, AGE_18_64 ) );
-	printf( "# Total deaths elderly:          %li\n", n_total_age( model, DEATH, AGE_65 ) );
+	printf( "# Total deaths children:         %li\n", n_total_age( model, DEATH, AGE_TYPE_CHILD ) );
+	printf( "# Total deaths adult:            %li\n", n_total_age( model, DEATH, AGE_TYPE_ADULT ) );
+	printf( "# Total deaths elderly:          %li\n", n_total_age( model, DEATH, AGE_TYPE_ELDERLY ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );
