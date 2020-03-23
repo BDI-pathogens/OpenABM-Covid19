@@ -35,9 +35,9 @@ household_size_3	4287.0
 household_size_4	3881.0
 household_size_5	1254.0
 household_size_6	597.0
-population_0_17		14.05
-population_18_64	40.22
-population_65		10.04
+population_child	14.05
+population_adult	40.22
+population_elderly	10.04
 seasonal_flu_rate	0.005
 relative_susceptibility_child	0.1
 relative_susceptibility_elderly	1.7

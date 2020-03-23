@@ -25,7 +25,7 @@ typedef struct{
 	int end_time;				    // maximum end time
 	int n_seed_infection;			// number of people seeded with the infections
 
-	int mean_random_interactions[N_AGE_GROUPS]; // mean number of random interactions each day
+	int mean_random_interactions[N_AGE_TYPES]; // mean number of random interactions each day
 	int mean_work_interactions[N_WORK_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
 	double daily_fraction_work_used;      		// fraction of daily work interactions with social-distancing
@@ -47,9 +47,9 @@ typedef struct{
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
 
-	double hospitalised_fraction[N_AGE_GROUPS];   // fraction of symptomatic patients requiring hospitalisation
-	double critical_fraction[N_AGE_GROUPS];  	  // fraction of hospitalised patients who require ICU treatment
-	double fatality_fraction[N_AGE_GROUPS];  	  // fraction of ICU patients who die
+	double hospitalised_fraction[N_AGE_TYPES];   // fraction of symptomatic patients requiring hospitalisation
+	double critical_fraction[N_AGE_TYPES];  	  // fraction of hospitalised patients who require ICU treatment
+	double fatality_fraction[N_AGE_TYPES];  	  // fraction of ICU patients who die
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care
@@ -60,7 +60,7 @@ typedef struct{
 	double sd_time_to_death;		// sd time to death after hospital
 
 	double household_size[HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
-	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
+	double population[N_AGE_TYPES];		// ONS stratification of population (in millions)
 
 	double fraction_asymptomatic;			// faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics

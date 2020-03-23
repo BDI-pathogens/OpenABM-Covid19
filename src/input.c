@@ -93,7 +93,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
 	if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
@@ -166,7 +166,7 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
 		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
@@ -188,19 +188,19 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
 	}
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
 	}
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
 	}
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_**\n"); };
@@ -396,17 +396,17 @@ void print_interactions_averages(model *model, int header)
 	long pdx;
 	double int_tot = 0;
 	double per_tot = 0;
-	double  int_by_age[N_AGE_GROUPS],per_by_age[N_AGE_GROUPS];
+	double  int_by_age[N_AGE_TYPES],per_by_age[N_AGE_TYPES];
 	double int_by_cqh[3],per_by_cqh[3];
-	double assort[N_AGE_GROUPS][N_AGE_GROUPS];
+	double assort[N_AGE_TYPES][N_AGE_TYPES];
 	individual *indiv;
 	interaction *inter;
 
-	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 	{
 		 int_by_age[idx] = 0;
 		 per_by_age[idx] = 0.00001;
-		 for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
+		 for( jdx = 0; jdx < N_AGE_TYPES; jdx++ )
 			 assort[idx][jdx] = 0;
 	}
 
