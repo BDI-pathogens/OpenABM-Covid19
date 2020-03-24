@@ -42,7 +42,7 @@ void initialize_individual(
 	}
 
 	indiv->time_event = calloc( N_EVENT_TYPES, sizeof(int) );
-	for( jdx = 0; jdx <= N_EVENT_TYPES; jdx++ )
+	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->time_event[jdx] = UNKNOWN;
 	
 	indiv->quarantine_event         = NULL;
