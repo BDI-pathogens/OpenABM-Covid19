@@ -119,5 +119,6 @@ typedef struct{
 /************************************************************************/
 
 void check_params( parameters* );
+void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */
