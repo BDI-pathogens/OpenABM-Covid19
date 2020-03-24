@@ -208,7 +208,8 @@ int check_member_or_self(long x, long self, long *array, int length)
 ******************************************************************************************/
 void destroy_network( network *network )
 {
-    free( network );
+	free( network->edges );
+	free( network );
 };
 
 /*****************************************************************************************

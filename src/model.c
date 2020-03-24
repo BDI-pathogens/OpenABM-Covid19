@@ -89,10 +89,12 @@ void destroy_model( model *model )
     	destroy_network( model->work_network[idx] );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
+    free( model->event_lists );
     for( idx = 0; idx < model->household_directory->n_idx; idx++ )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
+
 };
 
 /*****************************************************************************************
