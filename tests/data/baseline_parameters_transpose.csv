@@ -119,3 +119,4 @@ social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
 social_distancing_time_on	50
 social_distancing_time_off	75
+N_REFERENCE_HOUSEHOLDS  125455
