@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 
     struct timespec  tv;
     double tstart, tend;
+    int idx;
 
     clock_gettime( CLOCK_REALTIME,&tv);
     tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
@@ -70,13 +71,10 @@ int main(int argc, char *argv[])
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
 	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
 	printf( "# Total cases:                   %li\n", n_total( model, CASE ) );
-	printf( "# Total cases children:          %li\n", n_total_age( model, CASE, AGE_TYPE_CHILD ) );
-	printf( "# Total cases adult:             %li\n", n_total_age( model, CASE, AGE_TYPE_ADULT ) );
-	printf( "# Total cases elderly:           %li\n", n_total_age( model, CASE, AGE_TYPE_ELDERLY ) );
-	printf( "# Total deaths:                  %li\n", n_total( model, DEATH ) );
-	printf( "# Total deaths children:         %li\n", n_total_age( model, DEATH, AGE_TYPE_CHILD ) );
-	printf( "# Total deaths adult:            %li\n", n_total_age( model, DEATH, AGE_TYPE_ADULT ) );
-	printf( "# Total deaths elderly:          %li\n", n_total_age( model, DEATH, AGE_TYPE_ELDERLY ) );
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		printf( "# Total cases %11s:       %li\n", AGE_TEXT_MAP[idx], n_total_age( model, CASE, idx ) );
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		printf( "# Total deaths %11s:      %li\n", AGE_TEXT_MAP[idx], n_total_age( model, DEATH, idx ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );

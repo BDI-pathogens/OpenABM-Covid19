@@ -87,6 +87,8 @@ enum WORK_NETWORKS_TYPES{
 extern const int AGE_WORK_MAP[N_AGE_GROUPS];
 extern const int NETWORK_TYPE_MAP[N_WORK_NETWORKS];
 extern const int AGE_TYPE_MAP[N_AGE_GROUPS];
+extern const char* AGE_TEXT_MAP[N_AGE_GROUPS];
+
 
 enum HOUSEHOLD_SIZE{
 	HH_1,
