@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
 	write_output_files( model, &params );
 	
 	destroy_model( model );
+	destroy_params( &params );
 	gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );

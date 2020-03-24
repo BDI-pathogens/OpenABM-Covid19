@@ -175,7 +175,10 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
-				hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
+				if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
+					hazard_rate = 0.0;
+				else
+					hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
