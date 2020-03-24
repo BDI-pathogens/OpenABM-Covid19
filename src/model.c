@@ -87,6 +87,8 @@ void destroy_model( model *model )
     destroy_network( model->household_network );
     for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
     	destroy_network( model->work_network[idx] );
+
+    free( model->work_network );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
     free( model->event_lists );
