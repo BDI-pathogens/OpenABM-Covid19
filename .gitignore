@@ -31,3 +31,7 @@ documentation/*.out
 
 # R-related files
 .Rhistory
+
+# performance related
+performance/*.trace
+performance/*.dtps
