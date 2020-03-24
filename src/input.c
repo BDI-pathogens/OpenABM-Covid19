@@ -14,6 +14,7 @@
 #include "model.h"
 #include "utilities.h"
 #include "constant.h"
+#include "demographics.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -306,7 +307,10 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_off));
 	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_off)\n"); };
-
+	
+	check = fscanf(parameter_file, " %i ,", &(params->N_REFERENCE_HOUSEHOLDS));
+	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
+	
 	fclose(parameter_file);
 }
 
@@ -501,3 +505,37 @@ void print_demographics( model *model )
 	print_exit( "Output demographics: end!");
 }
 
+
+/*****************************************************************************************
+*  Name:		read_household_demographics_file
+*  Description: Read household demographics (csv), attach values to params struct
+******************************************************************************************/
+void read_household_demographics_file( parameters *params)
+{
+	FILE *hh_file;
+	int check, value, hdx, adx;
+	
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	
+	hh_file = fopen("../tests/data/baseline_household_demographics.csv", "r");
+	if(hh_file == NULL)
+		print_exit("Can't open parameter file");
+	
+	// Throw away header (and first `params->param_line_number` lines)
+	fscanf(hh_file, "%*[^\n]\n");
+	
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		for(adx = 0; adx < N_AGE_GROUPS; adx++){
+			
+			// Read and attach parameter values to parameter structure
+			check = fscanf(hh_file, " %d ,", &value);
+			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
+			
+			params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
+		}
+	}
+	fclose(hh_file);
+}
