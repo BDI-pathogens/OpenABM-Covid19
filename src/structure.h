@@ -14,6 +14,6 @@ typedef struct event event;
 typedef struct event_list event_list;
 typedef struct edge edge;
 typedef struct model model;
-typedef struct var_array var_array;
+typedef struct directory directory;
 
 #endif /* STRUCTURE_H_ */

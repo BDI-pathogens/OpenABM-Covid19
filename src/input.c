@@ -160,7 +160,7 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
 	
-	for( i = 0; i < HOUSEHOLD_N_MAX; i++ )
+	for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->household_size[i]));
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };

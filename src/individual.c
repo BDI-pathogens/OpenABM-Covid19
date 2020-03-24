@@ -96,7 +96,7 @@ void set_quarantine_status(
 }
 
 /*****************************************************************************************
-*  Name:		set_age_type
+*  Name:		set_age_group
 *  Description: sets a person's age type and draws other properties based up on this
 *
 *  				1. The number of random interactions the person has a day which is
@@ -106,65 +106,16 @@ void set_quarantine_status(
 *
 *  Returns:		void
 ******************************************************************************************/
-void set_age_type( individual *indiv, parameters *params, int type )
+void set_age_group( individual *indiv, parameters *params, int group )
 {
-	double mean, child_net_adults, elderly_net_adults, x;
+	double mean;
 
-	indiv->age_type = type;
+	indiv->age_group = group;
+	indiv->age_type  = AGE_TYPE_MAP[group];
 
-	mean = params->mean_random_interactions[type];
+	mean = params->mean_random_interactions[indiv->age_type];
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
 	update_random_interactions( indiv, params );
-
-	if( type == AGE_TYPE_ADULT )
-	{
-		child_net_adults   = params->child_network_adults * params->population_type[AGE_TYPE_CHILD] / params->population_type[AGE_TYPE_ADULT];
-		elderly_net_adults = params->elderly_network_adults * params->population_type[AGE_TYPE_ELDERLY] / params->population_type[AGE_TYPE_ADULT];
-
-		x = gsl_rng_uniform( rng );
-		if( x < child_net_adults )
-			indiv->work_network = AGE_TYPE_CHILD;
-		else if(  x < ( elderly_net_adults + child_net_adults ) )
-			indiv->work_network = AGE_TYPE_ELDERLY;
-		else
-			indiv->work_network = AGE_TYPE_ADULT;
-	}
-	else
-		indiv->work_network = type;
-
-	if( type == AGE_TYPE_CHILD )
-	{
-		double p_child = params->population_group[AGE_0_9] +  params->population_group[AGE_10_19];
-		double p_0_9   = params->population_group[AGE_0_9] / p_child;
-		double p_10_19 = params->population_group[AGE_10_19] / p_child;
-		double p[2]    = {p_0_9,p_10_19};
-
-		indiv->age_group = discrete_draw( 2, p );
-	}
-	else
-	if( type == AGE_TYPE_ADULT )
-	{
-		double p_adult = params->population_group[AGE_20_29] +  params->population_group[AGE_30_39]+  params->population_group[AGE_40_49]+  params->population_group[AGE_50_59]+  params->population_group[AGE_60_69];
-		double p_20_29 = params->population_group[AGE_20_29] / p_adult;
-		double p_30_39 = params->population_group[AGE_30_39] / p_adult;
-		double p_40_49 = params->population_group[AGE_40_49] / p_adult;
-		double p_50_59 = params->population_group[AGE_50_59] / p_adult;
-		double p_60_69 = params->population_group[AGE_60_69] / p_adult;
-		double p[5]    = {p_20_29,p_30_39,p_40_49,p_50_59,p_60_69};
-
-		indiv->age_group = discrete_draw( 5, p ) +AGE_20_29;
-	}
-	else
-	{
-
-		double p_elderly = params->population_group[AGE_70_79] +  params->population_group[AGE_80];
-		double p_70_79   = params->population_group[AGE_70_79] / p_elderly;
-		double p_80      = params->population_group[AGE_80] / p_elderly;
-		double p[2]    = {p_70_79,p_80};
-
-		indiv->age_group = discrete_draw( 2, p ) + AGE_70_79;
-
-	}
 }
 
 /*****************************************************************************************
@@ -176,7 +127,6 @@ void set_age_type( individual *indiv, parameters *params, int type )
 void update_random_interactions( individual *indiv, parameters* params )
 {
 	double n = indiv->base_random_interactions;
-
 
 	if( !indiv->quarantined )
 	{

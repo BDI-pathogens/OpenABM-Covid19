@@ -48,6 +48,8 @@ model* new_model( parameters *params )
 		set_up_event_list( model_ptr, params, type );
 
 	set_up_population( model_ptr );
+	set_up_household_distribution( model_ptr );
+	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
@@ -168,9 +170,8 @@ void set_up_networks( model *model )
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
-	build_household_network( model );
+	build_household_network_from_directroy( model->household_network, model->household_directory );
 
-	set_up_allocate_work_places( model );
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );

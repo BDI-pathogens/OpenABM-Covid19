@@ -17,6 +17,66 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
+#define REJECTION_MULT 1.0001
+#define ACCEPTANCE_MULT 0.99
+#define INTIAL_ACCEPTANCE_FACTOR 0.00001
+#define SAMPLE_BATCH 4
+#define POPULATION_PREF 2
+#define MAX_ALLOWABLE_ERROR 1e-5
+#define N_REFERENCE_HOUSEHOLDS 50
+const int REFERENCE_HOUSEHOLDS[][9] = {
+	{ 0, 0, 1, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 1, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 1, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 1, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0, 1, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+	{ 0, 0, 2, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 2, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 2, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 2, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0, 2, 0 },
+	{ 0, 0, 0, 0, 0, 0, 0, 0, 2 },
+	{ 0, 0, 3, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 3, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 3, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 3, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 3, 0, 0 },
+	{ 0, 0, 4, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 4, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 4, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 4, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 4, 0, 0 },
+	{ 0, 0, 5, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 5, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 5, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 5, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 5, 0, 0 },
+	{ 0, 0, 6, 0, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 6, 0, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 6, 0, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 6, 0, 0, 0 },
+	{ 0, 0, 0, 0, 0, 0, 6, 0, 0 },
+	{ 1, 0, 2, 0, 0, 0, 0, 0, 0 },
+	{ 1, 0, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 1, 0, 0, 2, 0, 0, 0, 0 },
+	{ 2, 0, 2, 0, 0, 0, 0, 0, 0 },
+	{ 2, 0, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 2, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 2, 0, 0, 2, 0, 0, 0, 0 },
+	{ 3, 0, 2, 0, 0, 0, 0, 0, 0 },
+	{ 3, 0, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 3, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 3, 0, 0, 2, 0, 0, 0, 0 },
+	{ 4, 0, 2, 0, 0, 0, 0, 0, 0 },
+	{ 4, 0, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 4, 0, 2, 0, 0, 0, 0, 0 },
+	{ 0, 4, 0, 0, 2, 0, 0, 0, 0 }
+};
+
 /*****************************************************************************************
 *  Name:		set_up_allocate_work_places
 *  Description: sets up to allocate a work place for each person
@@ -81,74 +141,172 @@ void set_up_allocate_work_places( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		calculate_household_distribution
-*  Description: Calculates the number of households of each size from the UK
-*  				household survey data. The age split of the households is based
-*  				upon ONS data for each age group. Then:
-*
-*  				 1. All elderly are assumed to live in 1 or 2 person household.
-*  					We fill them up in equal proportion
-*  				 2. The same proportion of household with 3/4/5/6 people in have
-*  				    children and then n-2 of the occupents are assumed to be children.
-*
-*  				 Note there is no age mixing in household between elderly and others.
-*
-* Argument:		model   		 - pointer to the model
-*  				n_house_tot 	 - number of households which this function sets
-*  				elderly_frac_1_2 - fraction of 1/2 person households which are elderly
-*				child_frac_2_6,	 - fraction of 3/4/5/6 person households which have chlildren
+*  Name:		add_reference_household
+*  Description: given a set of population totals by age_group
+*  				add a single addition reference household
+*  Returns:		void
 ******************************************************************************************/
-void calculate_household_distribution(
-	model *model,
-	long *n_house_tot,
-	double *elderly_frac_1_2,
-	double *child_frac_3_6
-)
+void add_reference_household( double *array, long hdx )
 {
-	long total;
 	int idx;
-	double survey_tot, max_children, pop_all;
-	double n_person_frac[ HOUSEHOLD_N_MAX ];
-	double *pop = model->params->population_type;
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		array[idx] += (double) REFERENCE_HOUSEHOLDS[hdx][idx];
+}
 
-	pop_all      = pop[AGE_TYPE_CHILD] + pop[AGE_TYPE_ADULT] + pop[AGE_TYPE_ELDERLY];
-	survey_tot   = 0;
-	max_children = 0;
-	for( idx = 0; idx < HOUSEHOLD_N_MAX; idx++)
+/*****************************************************************************************
+*  Name:		set_up_household_distribution
+*  Description: sets up the initial household distribution and allocates people to them
+*  				method matches both population structure and household structure using
+*  				a rejection sampling method.
+*  				1. Have reference panels of sample households
+*  				2. Sample from panel (in batches) and accept if the differences
+*  				  between the desired population structure and household structure
+*  				  is below a threshold
+*  			   3. Alter the acceptance threshold dynamically to get better and better fits
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_household_distribution( model *model )
+{
+	int idx, housesize, age;
+	long hdx, n_households, pdx, sample;
+	double error, last_error, acceptance;
+	individual *indiv;
+	directory *directory;
+	double *population_target      = calloc( N_AGE_GROUPS, sizeof(double));
+	double *population_total       = calloc( N_AGE_GROUPS, sizeof(double));
+	double *population_trial       = calloc( N_AGE_GROUPS, sizeof(double));
+	double *household_target       = calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	double *household_total        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	double *household_trial        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	long *trial_samples		       = calloc( SAMPLE_BATCH, sizeof(long));
+	int *REFERENCE_HOUSEHOLD_SIZE  = calloc( N_REFERENCE_HOUSEHOLDS, sizeof(int));
+	long *households               = calloc( model->params->n_total, sizeof(long));
+
+	// assign targets
+	copy_normalize_array( population_target, model->params->population_group, N_AGE_GROUPS );
+	copy_normalize_array( household_target, model->params->household_size, N_HOUSEHOLD_MAX );
+
+	// get number of people in household for each group
+	for( hdx = 0; hdx < N_REFERENCE_HOUSEHOLDS; hdx++ )
 	{
-		n_person_frac[idx] = model->params->household_size[ idx ] * ( idx + 1 );
-		survey_tot        += n_person_frac[idx];
-		max_children      += model->params->household_size[ idx ] * max( idx -1 , 0 );
+		REFERENCE_HOUSEHOLD_SIZE[hdx] = -1;
+		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+			REFERENCE_HOUSEHOLD_SIZE[hdx] += REFERENCE_HOUSEHOLDS[hdx][idx];
 	}
 
-	*child_frac_3_6   = pop[AGE_TYPE_CHILD] / pop_all / ( max_children / survey_tot );
-	*elderly_frac_1_2 = pop[AGE_TYPE_ELDERLY] / pop_all / ( ( n_person_frac[HH_1] + n_person_frac[HH_2] ) / survey_tot );
-
-	if( *child_frac_3_6 > 1 )
-		print_exit( "not sufficient 3-6 person households for all the children" );
-
-	if( *elderly_frac_1_2 > 1 )
-		print_exit( "not sufficient 1-2 person households for all the elderly" );
-
- 	total = 0;
-	for( idx = 1; idx < HOUSEHOLD_N_MAX; idx++)
+	// always accept the first sample
+	pdx = 0;
+	n_households = 0;
+	for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 	{
-		n_house_tot[idx] = (long) round( n_person_frac[idx] / survey_tot / ( idx + 1 ) * model->params->n_total );
-		total += n_house_tot[idx] * ( idx + 1 );
+		sample       = gsl_rng_uniform_int( rng, N_REFERENCE_HOUSEHOLDS );
+		households[n_households++] = sample;
+		add_reference_household( population_total, sample );
+		household_total[ REFERENCE_HOUSEHOLD_SIZE[sample]]++;
+		pdx += ( REFERENCE_HOUSEHOLD_SIZE[sample] + 1 );
 	}
-	n_house_tot[0] = model->params->n_total - total;
+
+	// calculate the intital error
+	copy_normalize_array( population_trial, population_total, N_AGE_GROUPS    );
+	copy_normalize_array( household_trial,  household_total,  N_HOUSEHOLD_MAX );
+	last_error  = sum_square_diff_array( population_trial, population_target, N_AGE_GROUPS ) * POPULATION_PREF;
+	last_error += sum_square_diff_array( household_trial,  household_target,  N_HOUSEHOLD_MAX );
+	acceptance  = last_error * INTIAL_ACCEPTANCE_FACTOR;
+
+	while( pdx < model->params->n_total )
+	{
+		copy_array( population_trial, population_total, N_AGE_GROUPS    );
+		copy_array( household_trial,  household_total,  N_HOUSEHOLD_MAX );
+
+		for( idx = 0; idx < SAMPLE_BATCH; idx++ )
+		{
+			trial_samples[idx] = gsl_rng_uniform_int( rng, N_REFERENCE_HOUSEHOLDS );
+			add_reference_household( population_trial, trial_samples[idx] );
+			household_trial[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
+		}
+
+		// calculate the error of the total with the proposed sample
+		normalize_array( population_trial, N_AGE_GROUPS    );
+		normalize_array( household_trial,  N_HOUSEHOLD_MAX );
+		error  = sum_square_diff_array( population_trial, population_target, N_AGE_GROUPS ) * POPULATION_PREF;
+		error += sum_square_diff_array( household_trial,  household_target,  N_HOUSEHOLD_MAX );
+
+		// accept better than previous or within the acceptance threshold, then reduce the acceptance threshold
+		// reject if error is worse than the acceptance threshold, then increase the the acceptance threshold
+		if( error < last_error + acceptance )
+		{
+			for( idx = 0; idx < SAMPLE_BATCH; idx++ )
+			{
+				households[n_households++] = trial_samples[idx];
+				add_reference_household( population_total, trial_samples[idx] );
+				household_total[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
+				pdx += REFERENCE_HOUSEHOLD_SIZE[trial_samples[idx]] + 1;
+			}
+			acceptance *= ACCEPTANCE_MULT;
+			last_error  = min( error, last_error );
+		}
+		else
+			acceptance *= REJECTION_MULT;
+	}
+
+	free( population_target );
+	free( population_total );
+	free( population_trial );
+	free( household_target );
+	free( household_total );
+	free( household_trial );
+	free( trial_samples );
+
+	if( error > MAX_ALLOWABLE_ERROR )
+		print_exit( "Household rejection sampling failed to accurately converge" );
+
+	// now allocate people to households and set up the household directory
+	model->household_directory = calloc( 1, sizeof( directory ) );
+	directory        = model->household_directory;
+	model->household_directory->n_idx = n_households;
+	model->household_directory->n_jdx = calloc( n_households, sizeof( int ) );
+	model->household_directory->val   = calloc( n_households, sizeof( long* ) );
+	for( hdx = 0; hdx < n_households; hdx++ )
+		model->household_directory->val[hdx] = calloc( REFERENCE_HOUSEHOLD_SIZE[households[hdx]] + 1, sizeof( long ) );
+
+	pdx = 0;
+	for( hdx = 0; hdx < n_households; hdx++ )
+	{
+		housesize = 0;
+		for( age = N_AGE_GROUPS - 1; age >= 0; age-- )
+		{
+			for( idx = 0; idx < REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )
+			{
+				indiv = &(model->population[pdx]);
+				set_age_group( indiv, model->params, age );
+				set_house_no( indiv, hdx );
+			    directory->val[hdx][housesize++] = pdx++;
+
+				if( pdx == model->params->n_total )
+				{
+					break;
+				};
+			}
+			if( pdx == model->params->n_total )
+				break;
+		}
+		model->household_directory->n_jdx[hdx] = housesize;
+
+	}
+
+	free( households );
+	free( REFERENCE_HOUSEHOLD_SIZE );
 }
 
 /*****************************************************************************************
 *  Name:		build_household_network_from_directory
 *  Description: Builds a network of household i
 ******************************************************************************************/
-void build_household_network_from_directroy( model *model )
+void build_household_network_from_directroy( network *network, directory *directory )
 {
 	long hdx, edge_idx, h_size;
 	int pdx, p2dx;
-	network *network     = model->household_network;
-	var_array *directory = model->household_directory;
 
 	if( network->n_edges != 0 )
 		print_exit( "the household network can only be once" );
@@ -173,61 +331,5 @@ void build_household_network_from_directroy( model *model )
 				edge_idx++;
 			}
 	}
-}
-
-
-
-/*****************************************************************************************
-*  Name:		build_household_network
-*  Description: Builds a network of household interactions based upon the UK household
-*  				data. Note this can only be done once since it allocates new memory
-*  				to the network structure.
-*
-*  				As part of the household allocation process we also assign people
-*  				to age groups. All elderly are assumed to live in 1-2 person
-*  				households and all children are assumed to live in a house with
-*  				2 adults.
-******************************************************************************************/
-void build_household_network( model *model )
-{
-	long pop_idx, hdx, house_no;
-	int ndx, pdx, age;
-	long n_house_tot[ HOUSEHOLD_N_MAX ];
-	double elderly_frac_1_2;
-	double child_frac_3_6;
-
-	calculate_household_distribution( model, n_house_tot, &elderly_frac_1_2, &child_frac_3_6 );
-
-	model->household_directory = calloc( 1, sizeof( var_array ) );
-	model->household_directory->n_idx = 0;
-	for( ndx = 0; ndx < HOUSEHOLD_N_MAX; ndx++ )
-		model->household_directory->n_idx += n_house_tot[ndx];
-	model->household_directory->n_jdx = calloc( model->household_directory->n_idx, sizeof( int ) );
-	model->household_directory->val   = calloc( model->household_directory->n_idx, sizeof( long* ) );
-
-	pop_idx  = 0;
-	house_no = 0;
-	for( ndx = 0; ndx < HOUSEHOLD_N_MAX; ndx++ )
-		for( hdx = 0; hdx < n_house_tot[ndx]; hdx++ )
-		{
-			model->household_directory->n_jdx[house_no] = ndx + 1;
-			model->household_directory->val[house_no]   = calloc( ndx + 1, sizeof( long ) );
-			for( pdx = 0; pdx < ( ndx + 1 ); pdx++ )
-			{
-				age = AGE_TYPE_ADULT;
-				if( ndx <= HH_2 && ( 1.0 * hdx / n_house_tot[ndx] ) < elderly_frac_1_2 )
-					age = AGE_TYPE_ELDERLY;
-				if( ndx >= HH_3 && ( 1.0 * hdx / n_house_tot[ndx] ) < child_frac_3_6 && pdx < ( ndx - 1 ) )
-					age = AGE_TYPE_CHILD;
-
-				set_age_type( &(model->population[pop_idx]), model->params, age );
-				set_house_no( &(model->population[pop_idx]), house_no );
-				model->household_directory->val[house_no][pdx] = pop_idx;
-				pop_idx++;
-			}
-			house_no++;
-		}
-
-	build_household_network_from_directroy( model );
 }
 

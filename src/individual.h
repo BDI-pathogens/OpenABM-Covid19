@@ -72,7 +72,7 @@ struct interaction{
 
 void initialize_individual( individual*, parameters*, long );
 void initialize_hazard( individual*, parameters* );
-void set_age_type( individual*, parameters*, int );
+void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
 void set_quarantine_status( individual*, parameters*, int, int );
 void set_recovered( individual*, parameters*, int );
