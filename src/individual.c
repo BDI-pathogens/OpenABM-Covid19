@@ -218,6 +218,6 @@ void set_case( individual *indiv, int time )
 ******************************************************************************************/
 void destroy_individual( individual *indiv )
 {
-    //free( indiv->interactions );
+	free( indiv->time_event );
 };
 
