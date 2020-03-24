@@ -34,7 +34,10 @@ int main(int argc, char *argv[])
 	printf("# Read input parameter file\n");
 	read_param_file( &params );
 	check_params( &params );
-
+	
+	printf("# Read household demographics file\n");
+	read_household_demographics_file( &params );
+	
 	printf("# Start model set-up\n");
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);

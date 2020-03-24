@@ -23,59 +23,6 @@
 #define SAMPLE_BATCH 4
 #define POPULATION_PREF 2
 #define MAX_ALLOWABLE_ERROR 1e-5
-#define N_REFERENCE_HOUSEHOLDS 50
-const int REFERENCE_HOUSEHOLDS[][9] = {
-	{ 0, 0, 1, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 1, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 1, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 1, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 1 },
-	{ 0, 0, 2, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 2, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 2, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 2, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 2, 0 },
-	{ 0, 0, 0, 0, 0, 0, 0, 0, 2 },
-	{ 0, 0, 3, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 3, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 3, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 3, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 3, 0, 0 },
-	{ 0, 0, 4, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 4, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 4, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 4, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 4, 0, 0 },
-	{ 0, 0, 5, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 5, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 5, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 5, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 5, 0, 0 },
-	{ 0, 0, 6, 0, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 6, 0, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 6, 0, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 6, 0, 0, 0 },
-	{ 0, 0, 0, 0, 0, 0, 6, 0, 0 },
-	{ 1, 0, 2, 0, 0, 0, 0, 0, 0 },
-	{ 1, 0, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 1, 0, 0, 2, 0, 0, 0, 0 },
-	{ 2, 0, 2, 0, 0, 0, 0, 0, 0 },
-	{ 2, 0, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 2, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 2, 0, 0, 2, 0, 0, 0, 0 },
-	{ 3, 0, 2, 0, 0, 0, 0, 0, 0 },
-	{ 3, 0, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 3, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 3, 0, 0, 2, 0, 0, 0, 0 },
-	{ 4, 0, 2, 0, 0, 0, 0, 0, 0 },
-	{ 4, 0, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 4, 0, 2, 0, 0, 0, 0, 0 },
-	{ 0, 4, 0, 0, 2, 0, 0, 0, 0 }
-};
 
 /*****************************************************************************************
 *  Name:		set_up_allocate_work_places
@@ -146,7 +93,7 @@ void set_up_allocate_work_places( model *model )
 *  				add a single addition reference household
 *  Returns:		void
 ******************************************************************************************/
-void add_reference_household( double *array, long hdx )
+void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLDS)
 {
 	int idx;
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
@@ -180,7 +127,7 @@ void set_up_household_distribution( model *model )
 	double *household_total        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
 	double *household_trial        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
 	long *trial_samples		       = calloc( SAMPLE_BATCH, sizeof(long));
-	int *REFERENCE_HOUSEHOLD_SIZE  = calloc( N_REFERENCE_HOUSEHOLDS, sizeof(int));
+	int *REFERENCE_HOUSEHOLD_SIZE  = calloc( model->params->N_REFERENCE_HOUSEHOLDS, sizeof(int));
 	long *households               = calloc( model->params->n_total, sizeof(long));
 
 	// assign targets
@@ -188,11 +135,11 @@ void set_up_household_distribution( model *model )
 	copy_normalize_array( household_target, model->params->household_size, N_HOUSEHOLD_MAX );
 
 	// get number of people in household for each group
-	for( hdx = 0; hdx < N_REFERENCE_HOUSEHOLDS; hdx++ )
+	for( hdx = 0; hdx < model->params->N_REFERENCE_HOUSEHOLDS; hdx++ )
 	{
 		REFERENCE_HOUSEHOLD_SIZE[hdx] = -1;
 		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
-			REFERENCE_HOUSEHOLD_SIZE[hdx] += REFERENCE_HOUSEHOLDS[hdx][idx];
+			REFERENCE_HOUSEHOLD_SIZE[hdx] += model->params->REFERENCE_HOUSEHOLDS[hdx][idx];
 	}
 
 	// always accept the first sample
@@ -200,9 +147,9 @@ void set_up_household_distribution( model *model )
 	n_households = 0;
 	for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 	{
-		sample       = gsl_rng_uniform_int( rng, N_REFERENCE_HOUSEHOLDS );
+		sample       = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
 		households[n_households++] = sample;
-		add_reference_household( population_total, sample );
+		add_reference_household( population_total, sample, model->params->REFERENCE_HOUSEHOLDS);
 		household_total[ REFERENCE_HOUSEHOLD_SIZE[sample]]++;
 		pdx += ( REFERENCE_HOUSEHOLD_SIZE[sample] + 1 );
 	}
@@ -221,8 +168,8 @@ void set_up_household_distribution( model *model )
 
 		for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 		{
-			trial_samples[idx] = gsl_rng_uniform_int( rng, N_REFERENCE_HOUSEHOLDS );
-			add_reference_household( population_trial, trial_samples[idx] );
+			trial_samples[idx] = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
+			add_reference_household( population_trial, trial_samples[idx], model->params->REFERENCE_HOUSEHOLDS );
 			household_trial[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
 		}
 
@@ -239,7 +186,7 @@ void set_up_household_distribution( model *model )
 			for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 			{
 				households[n_households++] = trial_samples[idx];
-				add_reference_household( population_total, trial_samples[idx] );
+				add_reference_household( population_total, trial_samples[idx] , model->params->REFERENCE_HOUSEHOLDS);
 				household_total[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
 				pdx += REFERENCE_HOUSEHOLD_SIZE[trial_samples[idx]] + 1;
 			}
@@ -276,7 +223,7 @@ void set_up_household_distribution( model *model )
 		housesize = 0;
 		for( age = N_AGE_GROUPS - 1; age >= 0; age-- )
 		{
-			for( idx = 0; idx < REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )
+			for( idx = 0; idx < model->params->REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )
 			{
 				indiv = &(model->population[pdx]);
 				set_age_group( indiv, model->params, age );
