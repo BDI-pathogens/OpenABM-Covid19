@@ -96,6 +96,8 @@ void destroy_model( model *model )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
+    free ( model-> household_directory );;
+    free( model );
 
 };
 
