@@ -112,7 +112,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
 	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
 	list->infectious_curve = calloc( N_INTERACTION_TYPES, sizeof(double*) );
-	list->n_total_by_age   = calloc( N_AGE_TYPES, sizeof(long) );
+	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
 	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
 	list->events		   = calloc( MAX_TIME, sizeof(event*));
 
@@ -120,8 +120,8 @@ void set_up_event_list( model *model, parameters *params, int type )
 	list->n_total   = 0;
 	for( day = 0; day < MAX_TIME; day++ )
 	{
-		list->n_daily_by_age[day] = calloc( N_AGE_TYPES, sizeof(long) );
-		for( age = 0; age < N_AGE_TYPES; age++ )
+		list->n_daily_by_age[day] = calloc( N_AGE_GROUPS, sizeof(long) );
+		for( age = 0; age < N_AGE_GROUPS; age++ )
 			list->n_daily_by_age[day][age] = 0;
 
 		list->n_daily[day] = 0;
@@ -394,14 +394,14 @@ event* add_individual_to_event_list(
 
 	list->events[time ] = event;
 	list->n_daily[time]++;
-	list->n_daily_by_age[time][indiv->age_type]++;
+	list->n_daily_by_age[time][indiv->age_group]++;
 	list->n_daily_current[time]++;
 
 	if( time <= model->time )
 	{
 		list->n_total++;
 		list->n_current++;
-		list->n_total_by_age[indiv->age_type]++;
+		list->n_total_by_age[indiv->age_group]++;
 	}
 
 	return event;
@@ -464,7 +464,7 @@ void update_event_list_counters( model *model, int type )
 	model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
 	model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
 
-	for( int age = 0; age < N_AGE_TYPES; age++ )
+	for( int age = 0; age < N_AGE_GROUPS; age++ )
 		model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
 }
 

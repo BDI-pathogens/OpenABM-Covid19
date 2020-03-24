@@ -38,3 +38,16 @@ const int AGE_TYPE_MAP[N_AGE_GROUPS] = {
 	AGE_TYPE_ELDERLY,
 	AGE_TYPE_ELDERLY
 };
+
+const char* AGE_TEXT_MAP[N_AGE_GROUPS] = {
+	"0-9 years",
+	"10-19 years",
+	"20-29 years",
+	"30-39 years",
+	"40-49 years",
+	"50-59 years",
+	"60-69 years",
+	"70-79 years",
+	"80+ years"
+};
+
