@@ -172,7 +172,7 @@ void set_up_household_distribution( model *model )
 	long hdx, n_households, pdx, sample;
 	double error, last_error, acceptance;
 	individual *indiv;
-	directory *directory;
+	directory *dir;
 	double *population_target      = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_total       = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_trial       = calloc( N_AGE_GROUPS, sizeof(double));
@@ -262,13 +262,13 @@ void set_up_household_distribution( model *model )
 		print_exit( "Household rejection sampling failed to accurately converge" );
 
 	// now allocate people to households and set up the household directory
-	model->household_directory = calloc( 1, sizeof( directory ) );
-	directory        = model->household_directory;
-	model->household_directory->n_idx = n_households;
-	model->household_directory->n_jdx = calloc( n_households, sizeof( int ) );
-	model->household_directory->val   = calloc( n_households, sizeof( long* ) );
+	dir = calloc( 1, sizeof( directory ) );
+	dir->n_idx = n_households;
+	dir->n_jdx = calloc( n_households, sizeof( int ) );
+	dir->val   = calloc( n_households, sizeof( long* ) );
 	for( hdx = 0; hdx < n_households; hdx++ )
-		model->household_directory->val[hdx] = calloc( REFERENCE_HOUSEHOLD_SIZE[households[hdx]] + 1, sizeof( long ) );
+		dir->val[hdx] = calloc( REFERENCE_HOUSEHOLD_SIZE[households[hdx]] + 1, sizeof( long ) );
+	model->household_directory = dir;
 
 	pdx = 0;
 	for( hdx = 0; hdx < n_households; hdx++ )
@@ -281,7 +281,7 @@ void set_up_household_distribution( model *model )
 				indiv = &(model->population[pdx]);
 				set_age_group( indiv, model->params, age );
 				set_house_no( indiv, hdx );
-			    directory->val[hdx][housesize++] = pdx++;
+			    dir->val[hdx][housesize++] = pdx++;
 
 				if( pdx == model->params->n_total )
 				{
