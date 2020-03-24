@@ -57,7 +57,7 @@ typedef struct{
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
 
-	double household_size[HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
+	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double population_group[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 	double population_type[N_AGE_TYPES];		// ONS stratification of population (in millions)
 

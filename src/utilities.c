@@ -198,4 +198,52 @@ int discrete_draw( int n, double *p )
 	return(v);
 }
 
+/*****************************************************************************************
+*  Name:		normalize_array
+*  Description: normalizes an array by the the sum of the elements
+******************************************************************************************/
+void normalize_array( double *array, int N )
+{
+	int idx;
+	double total = 0.0;
+	for( idx = 0; idx < N; idx++ )
+		total += array[idx];
+	for( idx = 0; idx < N; idx++ )
+		array[idx] /= total;
+}
+
+/*****************************************************************************************
+*  Name:		copy_array
+*  Description: copies an array of length N
+******************************************************************************************/
+void copy_array( double *to, double *from, int N )
+{
+	int idx;
+	for( idx = 0; idx < N; idx++ )
+		to[idx] = from[idx];
+}
+
+/*****************************************************************************************
+*  Name:		copy_normalize_array
+*  Description: copies an array of length N and then normalizes the copied array
+******************************************************************************************/
+void copy_normalize_array( double *to, double *from, int N )
+{
+	copy_array( to, from, N );
+	normalize_array( to, N );
+}
+
+/*****************************************************************************************
+*  Name:		sum_square_diff_array
+*  Description: sums the squar of the difference of 2 arrays
+******************************************************************************************/
+double sum_square_diff_array( double *array, double *array2, int N )
+{
+	double diff = 0;
+	int idx;
+
+	for( idx = 0; idx < N; idx++ )
+		diff += ( array[idx] - array2[idx] ) * ( array[idx] -  array2[idx]);
+	return diff;
+}
 
