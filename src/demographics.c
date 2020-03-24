@@ -239,6 +239,8 @@ void set_up_household_distribution( model *model )
 				break;
 		}
 		model->household_directory->n_jdx[hdx] = housesize;
+		if( pdx == model->params->n_total )
+			break;
 
 	}
 

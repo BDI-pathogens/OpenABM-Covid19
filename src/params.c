@@ -30,3 +30,11 @@ void check_params( parameters *params )
     if( params->social_distancing_time_on < 1 )
       	print_exit( "social distancing can only be turned on at the first time step" );
 }
+
+void destroy_params( parameters *params)
+{
+	int idx;
+	for(idx=0; idx < params->N_REFERENCE_HOUSEHOLDS; idx++)
+		free( params->REFERENCE_HOUSEHOLDS[idx] );
+	free( params->REFERENCE_HOUSEHOLDS );
+}

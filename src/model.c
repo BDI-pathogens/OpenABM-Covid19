@@ -87,6 +87,8 @@ void destroy_model( model *model )
     destroy_network( model->household_network );
     for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
     	destroy_network( model->work_network[idx] );
+
+    free( model->work_network );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
     free( model->event_lists );
@@ -94,6 +96,8 @@ void destroy_model( model *model )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
+    free ( model-> household_directory );;
+    free( model );
 
 };
 
@@ -576,7 +580,7 @@ void add_interactions_from_network(
 
 		model->n_total_intereactions++;
 
-		if( all_idx > model->n_interactions )
+		if( all_idx >= model->n_interactions )
 			all_idx = 0;
 
 	}
