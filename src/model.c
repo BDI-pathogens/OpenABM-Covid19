@@ -576,7 +576,7 @@ void add_interactions_from_network(
 
 		model->n_total_intereactions++;
 
-		if( all_idx > model->n_interactions )
+		if( all_idx >= model->n_interactions )
 			all_idx = 0;
 
 	}
