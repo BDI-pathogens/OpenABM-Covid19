@@ -15,13 +15,13 @@ Usage
 
 ```bash
 cd COVID19-IBM/src
-./covid19ibm.exe <input_param_file> <param_line_number>
+./covid19ibm.exe <input_param_file> <param_line_number> <household_demographics_file>
 ```
 
 where:
 * `input_param_file` : is a csv file of parameter values (see [params.h](src/params.h) for description of parameters)
 * `param_line_number` : the line number of the parameter file for which to use for the simulation
-
+* `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model
 
 Tests
 -----
