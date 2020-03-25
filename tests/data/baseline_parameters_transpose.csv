@@ -93,7 +93,7 @@ quarantine_length_positive	14
 quarantine_dropout_self	0.01
 quarantine_dropout_traced	0.01
 quarantine_dropout_positive	0.01
-test_on_symptoms	1
+test_on_symptoms	0
 test_on_traced	1
 quarantine_on_traced	1
 traceable_interaction_fraction	0.8
@@ -119,4 +119,6 @@ social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
 social_distancing_time_on	50
 social_distancing_time_off	75
+testing_symptoms_time_on 50
+testing_symptoms_time_off 300
 N_REFERENCE_HOUSEHOLDS  125455
