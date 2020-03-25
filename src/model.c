@@ -198,7 +198,7 @@ void set_up_work_network( model *model, int network )
 
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[idx].work_network_new == network )
+		if( model->population[idx].work_network == network )
 			people[n_people++] = idx;
 
 
