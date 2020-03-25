@@ -23,7 +23,9 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number;
-	char input_param_file[ INPUT_CHAR_LEN ], output_file_dir[ INPUT_CHAR_LEN ];
+	char input_param_file[ INPUT_CHAR_LEN ];
+	char input_household_file [INPUT_CHAR_LEN ];
+	char output_file_dir[ INPUT_CHAR_LEN ];
 	
 	if(argc > 1)
 	{
@@ -44,15 +46,28 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	
 	if(argc > 3)
 	{
-		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
+		strncpy(input_household_file, argv[3], INPUT_CHAR_LEN );
+	}else{
+		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
+			INPUT_CHAR_LEN );
+	}
+	
+	if(argc > 4)
+	{
+		strncpy(output_file_dir, argv[4], INPUT_CHAR_LEN );
 	}else{
 		strncpy(output_file_dir, ".", INPUT_CHAR_LEN );
 	}	
 	
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
+	
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
+	
+	strncpy(params->input_household_file, input_household_file, 
+		sizeof(params->input_household_file) - 1);
+	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
 	
 	strncpy(params->output_file_dir, output_file_dir, sizeof(params->output_file_dir) - 1);
 	params->output_file_dir[sizeof(params->output_file_dir) - 1] = '\0';
@@ -308,7 +323,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_off));
 	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_off)\n"); };
 	
-	check = fscanf(parameter_file, " %i ,", &(params->N_REFERENCE_HOUSEHOLDS));
+	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
 	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
 	fclose(parameter_file);
@@ -513,23 +528,23 @@ void print_demographics( model *model )
 void read_household_demographics_file( parameters *params)
 {
 	FILE *hh_file;
-	int check, value, hdx, adx;
+	int check, value, adx;
+	long hdx;
 	
 	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
 	
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
 		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
 	
-	hh_file = fopen("../tests/data/baseline_household_demographics.csv", "r");
+	hh_file = fopen(params->input_household_file, "r");
 	if(hh_file == NULL)
-		print_exit("Can't open parameter file");
+		print_exit("Can't open household demographics file");
 	
-	// Throw away header (and first `params->param_line_number` lines)
+	// Throw away header
 	fscanf(hh_file, "%*[^\n]\n");
 	
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
 		for(adx = 0; adx < N_AGE_GROUPS; adx++){
-			
 			// Read and attach parameter values to parameter structure
 			check = fscanf(hh_file, " %d ,", &value);
 			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
