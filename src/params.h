@@ -17,6 +17,7 @@
 typedef struct{
 	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
+	char input_household_file[INPUT_CHAR_LEN]; //path to input household demographics file
 	char output_file_dir[INPUT_CHAR_LEN];	// path to output directory
 	int param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
@@ -25,7 +26,7 @@ typedef struct{
 	int end_time;				    // maximum end time
 	int n_seed_infection;			// number of people seeded with the infections
 
-	int mean_random_interactions[N_AGE_GROUPS]; // mean number of random interactions each day
+	int mean_random_interactions[N_AGE_TYPES]; // mean number of random interactions each day
 	int mean_work_interactions[N_WORK_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
 	double daily_fraction_work_used;      		// fraction of daily work interactions with social-distancing
@@ -36,10 +37,8 @@ typedef struct{
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
 
-	double relative_susceptibility_child;	// relative susceptibility of children to adults per day (i.e. after adjust for no. interactions)
-	double relative_susceptibility_elderly; // relative susceptibility of elderly to adults per day (i.e. after adjust for no. interactions)
-	double adjusted_susceptibility_child;	// adjusted susceptibility of a child per interaction (derived from relative value and no. of interactions)
-	double adjusted_susceptibility_elderly; // adjusted susceptibility of an elderly per interaction (derived from relative value and no. of interactions)
+	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
+	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
 
 	double relative_transmission_by_type[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
 	double relative_transmission_by_type_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
@@ -59,8 +58,9 @@ typedef struct{
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
 
-	double household_size[HOUSEHOLD_N_MAX];// ONS UK number of households with 1-6 person (in thousands)
-	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
+	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
+	double population_group[N_AGE_GROUPS];		// ONS stratification of population (in millions)
+	double population_type[N_AGE_TYPES];		// ONS stratification of population (in millions)
 
 	double fraction_asymptomatic;			// faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
@@ -106,10 +106,15 @@ typedef struct{
 	int social_distancing_time_on;							// social distancing turned on at this time
 	int social_distancing_time_off;							// social distancing turned off at this time
 	int social_distancing_on;								// is social distancing currently on
+	
+	int testing_symptoms_time_on;							// testing symptoms turned on at this time
+	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
-
+	
+	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
+	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
 } parameters;
 
@@ -118,5 +123,6 @@ typedef struct{
 /************************************************************************/
 
 void check_params( parameters* );
+void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */

@@ -34,7 +34,7 @@ struct event_list{
 	double **infectious_curve;
 };
 
-struct var_array{
+struct directory{
 	long n_idx;
 	int *n_jdx;
 	long **val;
@@ -56,7 +56,7 @@ struct model{
 	network *random_network;
 	network *household_network;
 	network **work_network;
-	var_array *household_directory;
+	directory *household_directory;
 
 	event *events;
 	event *next_event;
@@ -108,6 +108,5 @@ void transition_events( model*, int, void( model*, individual* ), int );
 void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
 void build_random_network( model * );
-void build_household_network( model * );
 
 #endif /* MODEL_H_ */

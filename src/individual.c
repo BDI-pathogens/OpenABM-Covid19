@@ -42,7 +42,7 @@ void initialize_individual(
 	}
 
 	indiv->time_event = calloc( N_EVENT_TYPES, sizeof(int) );
-	for( jdx = 0; jdx <= N_EVENT_TYPES; jdx++ )
+	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->time_event[jdx] = UNKNOWN;
 	
 	indiv->quarantine_event         = NULL;
@@ -64,13 +64,7 @@ void initialize_hazard(
 	parameters *params
 )
 {
-	double rate = 1.0;
-	if( indiv->age_group == AGE_0_17 )
-		rate /= params->adjusted_susceptibility_child;
-	if( indiv->age_group == AGE_65 )
-		rate /= params->adjusted_susceptibility_elderly;
-
-	indiv->hazard = rate * gsl_ran_exponential( rng, 1.0 );
+	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
 /*****************************************************************************************
@@ -103,7 +97,7 @@ void set_quarantine_status(
 
 /*****************************************************************************************
 *  Name:		set_age_group
-*  Description: sets a person's age group and draws other properties based up on this
+*  Description: sets a person's age type and draws other properties based up on this
 *
 *  				1. The number of random interactions the person has a day which is
 *  				   drawn from a negative binomial with an age dependent mean
@@ -114,29 +108,14 @@ void set_quarantine_status(
 ******************************************************************************************/
 void set_age_group( individual *indiv, parameters *params, int group )
 {
-	double mean, child_net_adults, elderly_net_adults, x;
+	double mean;
 
 	indiv->age_group = group;
+	indiv->age_type  = AGE_TYPE_MAP[group];
 
-	mean = params->mean_random_interactions[group];
+	mean = params->mean_random_interactions[indiv->age_type];
 	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
 	update_random_interactions( indiv, params );
-
-	if( group == AGE_18_64 )
-	{
-		child_net_adults   = params->child_network_adults * params->population[AGE_0_17] / params->population[AGE_18_64];
-		elderly_net_adults = params->elderly_network_adults * params->population[AGE_65] / params->population[AGE_18_64];
-
-		x = gsl_rng_uniform( rng );
-		if( x < child_net_adults )
-			indiv->work_network = AGE_0_17;
-		else if(  x < ( elderly_net_adults + child_net_adults ) )
-			indiv->work_network = AGE_65;
-		else
-			indiv->work_network = AGE_18_64;
-	}
-	else
-		indiv->work_network = group;
 }
 
 /*****************************************************************************************
@@ -148,7 +127,6 @@ void set_age_group( individual *indiv, parameters *params, int group )
 void update_random_interactions( individual *indiv, parameters* params )
 {
 	double n = indiv->base_random_interactions;
-
 
 	if( !indiv->quarantined )
 	{
@@ -240,6 +218,6 @@ void set_case( individual *indiv, int time )
 ******************************************************************************************/
 void destroy_individual( individual *indiv )
 {
-    //free( indiv->interactions );
+	free( indiv->time_event );
 };
 
