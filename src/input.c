@@ -323,6 +323,13 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_off));
 	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_off)\n"); };
 	
+    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
+    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
+
+    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
+    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
+	
+	
 	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
 	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
