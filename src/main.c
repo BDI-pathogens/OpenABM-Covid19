@@ -24,10 +24,15 @@ int main(int argc, char *argv[])
     struct timespec  tv;
     double tstart, tend;
     int idx;
-
+	char date_time[30];
+	
     clock_gettime( CLOCK_REALTIME,&tv);
     tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
+	time_t time_now = time( NULL );
+	strftime(date_time, sizeof(date_time), "# Date: %d-%m-%Y %I:%M:%S", localtime(&time_now)); 
+	puts(date_time);
+	
 	printf("# Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
 	
@@ -44,8 +49,11 @@ int main(int argc, char *argv[])
 	
 	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
-
-
+	
+	printf("# param_id: %li\n", params.param_id);
+	printf("# rng_seed: %li\n", params.rng_seed);
+	printf("# param_line_number: %d\n", params.param_line_number);
+	
 	printf( "Time,social_distancing,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
