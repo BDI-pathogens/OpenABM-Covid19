@@ -93,6 +93,12 @@ void update_intervention_policy( model *model, int time )
 		for( pdx = 0; pdx < params->n_total; pdx++ )
 			update_random_interactions( &(model->population[pdx]), params );
 	}
+	
+	if( time == params->testing_symptoms_time_on )
+		params->test_on_symptoms = TRUE;
+	if( time == params->testing_symptoms_time_off )
+		params->test_on_symptoms = FALSE;
+	
 };
 
 /*****************************************************************************************

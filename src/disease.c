@@ -66,25 +66,25 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	double *weight = model->params->relative_transmission_by_type;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		if( model->population[pdx].age_group == age )
+		if( model->population[pdx].age_type == age )
 		{
 			people++;
 			inter += model->population[pdx].base_random_interactions * weight[RANDOM];
 		}
 	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
 	{
-		if( model->population[model->household_network->edges[pdx].id1].age_group == age )
+		if( model->population[model->household_network->edges[pdx].id1].age_type == age )
 			inter += weight[HOUSEHOLD];
-		if( model->population[model->household_network->edges[pdx].id2].age_group == age )
+		if( model->population[model->household_network->edges[pdx].id2].age_type == age )
 			inter += weight[HOUSEHOLD];
 	}
 
 	for( ndx = 0; ndx < N_WORK_NETWORKS ; ndx++ )
 		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
 		{
-			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_group == age )
+			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_type == age )
 				inter += model->params->daily_fraction_work * weight[WORK];
-			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_group == age )
+			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_type == age )
 				inter  += model->params->daily_fraction_work * weight[WORK];
 		}
 
@@ -109,16 +109,17 @@ void set_up_infectious_curves( model *model )
 {
 	parameters *params = model->params;
 	double infectious_rate, type_factor;
-	double mean_interactions[N_AGE_GROUPS];
-	int type;
+	double mean_interactions[N_AGE_TYPES];
+	int type, group;
 
-	mean_interactions[AGE_0_17]  = estimate_mean_interactions_by_age( model, AGE_0_17 );
-	mean_interactions[AGE_18_64] = estimate_mean_interactions_by_age( model, AGE_18_64 );
-	mean_interactions[AGE_65]    = estimate_mean_interactions_by_age( model, AGE_65 );
+	mean_interactions[AGE_TYPE_CHILD]  = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
+	mean_interactions[AGE_TYPE_ADULT] = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
+	mean_interactions[AGE_TYPE_ELDERLY]    = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
 
-	infectious_rate   = params->infectious_rate / mean_interactions[AGE_18_64];
-	params->adjusted_susceptibility_child   = params->relative_susceptibility_child * mean_interactions[AGE_18_64] / mean_interactions[AGE_0_17];
-	params->adjusted_susceptibility_elderly = params->relative_susceptibility_elderly * mean_interactions[AGE_18_64] / mean_interactions[AGE_65];
+	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
+
+	for( group = 0; group < N_AGE_GROUPS; group++ )
+		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
@@ -174,7 +175,10 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
-				hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
+				if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
+					hazard_rate = 0.0;
+				else
+					hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{

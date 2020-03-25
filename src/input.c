@@ -14,6 +14,7 @@
 #include "model.h"
 #include "utilities.h"
 #include "constant.h"
+#include "demographics.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -22,7 +23,9 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number;
-	char input_param_file[ INPUT_CHAR_LEN ], output_file_dir[ INPUT_CHAR_LEN ];
+	char input_param_file[ INPUT_CHAR_LEN ];
+	char input_household_file [INPUT_CHAR_LEN ];
+	char output_file_dir[ INPUT_CHAR_LEN ];
 	
 	if(argc > 1)
 	{
@@ -43,15 +46,28 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	
 	if(argc > 3)
 	{
-		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
+		strncpy(input_household_file, argv[3], INPUT_CHAR_LEN );
+	}else{
+		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
+			INPUT_CHAR_LEN );
+	}
+	
+	if(argc > 4)
+	{
+		strncpy(output_file_dir, argv[4], INPUT_CHAR_LEN );
 	}else{
 		strncpy(output_file_dir, ".", INPUT_CHAR_LEN );
 	}	
 	
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
+	
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
+	
+	strncpy(params->input_household_file, input_household_file, 
+		sizeof(params->input_household_file) - 1);
+	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
 	
 	strncpy(params->output_file_dir, output_file_dir, sizeof(params->output_file_dir) - 1);
 	params->output_file_dir[sizeof(params->output_file_dir) - 1] = '\0';
@@ -84,7 +100,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 	
-	for( i = 0; i < N_WORK_NETWORKS; i++ )
+	for( i = 0; i < N_WORK_NETWORK_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
@@ -93,7 +109,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
 	if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
+	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
@@ -160,27 +176,32 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
 	
-	for( i = 0; i < HOUSEHOLD_N_MAX; i++ )
+	for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->household_size[i]));
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
+	for( i = 0; i < N_AGE_TYPES; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->population_type[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_type_**\n"); };
+	}
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->population_group[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_group_**\n"); };
 	}
 
 	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
 	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_child));
-	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_child\n"); };
-
-	check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility_elderly));
-	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_elderly\n"); };
-
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+		{
+			check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility[i]));
+			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
+		}
 
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
@@ -203,7 +224,7 @@ void read_param_file( parameters *params)
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
-		if( check < 1){ print_exit("Failed to read parameter fatality_fraction_**\n"); };
+		if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
 	}
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
@@ -301,7 +322,17 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_off));
 	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_off)\n"); };
+	
+    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
+    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
+    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
+    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
+	
+	
+	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
+	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
+	
 	fclose(parameter_file);
 }
 
@@ -396,17 +427,17 @@ void print_interactions_averages(model *model, int header)
 	long pdx;
 	double int_tot = 0;
 	double per_tot = 0;
-	double  int_by_age[N_AGE_GROUPS],per_by_age[N_AGE_GROUPS];
+	double  int_by_age[N_AGE_TYPES],per_by_age[N_AGE_TYPES];
 	double int_by_cqh[3],per_by_cqh[3];
-	double assort[N_AGE_GROUPS][N_AGE_GROUPS];
+	double assort[N_AGE_TYPES][N_AGE_TYPES];
 	individual *indiv;
 	interaction *inter;
 
-	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 	{
 		 int_by_age[idx] = 0;
 		 per_by_age[idx] = 0.00001;
-		 for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
+		 for( jdx = 0; jdx < N_AGE_TYPES; jdx++ )
 			 assort[idx][jdx] = 0;
 	}
 
@@ -429,15 +460,15 @@ void print_interactions_averages(model *model, int header)
 		inter = indiv->interactions[day_idx];
 		for( jdx = 0; jdx < n_int; jdx++ )
 		{
-			assort[ indiv->age_group][inter->individual->age_group]++;
+			assort[ indiv->age_type][inter->individual->age_type]++;
 			inter = inter->next;
 		}
 
 		int_tot += n_int;
 		per_tot++;
 
-		int_by_age[ indiv->age_group] += n_int;
-		per_by_age[ indiv->age_group]++;
+		int_by_age[ indiv->age_type] += n_int;
+		per_by_age[ indiv->age_type]++;
 
 		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_event[QUARANTINED] != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
@@ -466,4 +497,67 @@ void print_interactions_averages(model *model, int header)
 		1.0 * assort[2][1]/ int_by_age[2],
 		1.0 * assort[2][2]/ int_by_age[2]
 	);
+}
+
+/*****************************************************************************************
+*  Name:		print_demographics
+*  Description: print demographic details
+******************************************************************************************/
+void print_demographics( model *model )
+{
+	long pdx;
+	individual *indiv;
+	FILE *output_file;
+	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/indiv.csv", "w");
+
+	fprintf(output_file ,"age_group,age_type,work_network,work_network_new,house_size,house_no\n");
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		fprintf(output_file ,"%i,%i,%i,%i,%i,%li\n",
+			indiv->age_group,
+			indiv->age_type,
+			indiv->work_network,
+			indiv->work_network_new,
+			model->household_directory->n_jdx[indiv->house_no],
+			indiv->house_no
+		);
+	}
+	fclose(output_file);
+	print_exit( "Output demographics: end!");
+}
+
+
+/*****************************************************************************************
+*  Name:		read_household_demographics_file
+*  Description: Read household demographics (csv), attach values to params struct
+******************************************************************************************/
+void read_household_demographics_file( parameters *params)
+{
+	FILE *hh_file;
+	int check, value, adx;
+	long hdx;
+	
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	
+	hh_file = fopen(params->input_household_file, "r");
+	if(hh_file == NULL)
+		print_exit("Can't open household demographics file");
+	
+	// Throw away header
+	fscanf(hh_file, "%*[^\n]\n");
+	
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		for(adx = 0; adx < N_AGE_GROUPS; adx++){
+			// Read and attach parameter values to parameter structure
+			check = fscanf(hh_file, " %d ,", &value);
+			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
+			
+			params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
+		}
+	}
+	fclose(hh_file);
 }
