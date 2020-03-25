@@ -106,6 +106,9 @@ typedef struct{
 	int social_distancing_time_on;							// social distancing turned on at this time
 	int social_distancing_time_off;							// social distancing turned off at this time
 	int social_distancing_on;								// is social distancing currently on
+	
+	int testing_symptoms_time_on;							// testing symptoms turned on at this time
+	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_timeseries; 		// Should a time series file be written to output?  
