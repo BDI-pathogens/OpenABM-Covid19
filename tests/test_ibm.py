@@ -80,7 +80,7 @@ class TestClass(object):
         
     def teardown_method(self):
         """
-        
+        At the end of each method (test), remove the directory of test data
         """
         shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
     
