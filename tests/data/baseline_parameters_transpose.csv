@@ -14,7 +14,7 @@ elderly_network_adults	0.2
 days_of_interactions	10
 end_time	250
 n_seed_infection	50
-mean_infectious_period	6.0
+mean_infectious_period	5.0
 sd_infectious_period	2.0
 infectious_rate	2.5
 mean_time_to_symptoms	5.5
@@ -47,7 +47,7 @@ population_50_59	8968055
 population_60_69	7069544
 population_70_79	5487167
 population_80	3281955
-seasonal_flu_rate	0.005
+seasonal_flu_rate	0.0003
 relative_susceptibility_0_9	0.1
 relative_susceptibility_10_19	0.1
 relative_susceptibility_20_29	0.48
@@ -64,7 +64,7 @@ hospitalised_fraction_0_9	0.001
 hospitalised_fraction_10_19	0.003
 hospitalised_fraction_20_29	0.012
 hospitalised_fraction_30_39	0.032
-hospitalised_fraction_40_49	0.045
+hospitalised_fraction_40_49	0.049
 hospitalised_fraction_50_59	0.102
 hospitalised_fraction_60_69	0.166
 hospitalised_fraction_70_79	0.243
@@ -97,12 +97,12 @@ test_on_symptoms	0
 test_on_traced	1
 quarantine_on_traced	1
 traceable_interaction_fraction	0.8
-tracing_network_depth	1
+tracing_network_depth	0
 allow_clinical_diagnosis	1
-quarantine_household_on_positive	1
-quarantine_household_on_symptoms	1
-quarantine_household_on_traced	1
-quarantine_household_contacts_on_positive	1
+quarantine_household_on_positive	0
+quarantine_household_on_symptoms	0
+quarantine_household_on_traced	0
+quarantine_household_contacts_on_positive	0
 quarantined_daily_interactions	0
 quarantine_days	5
 hospitalised_daily_interactions	0
@@ -111,9 +111,9 @@ test_order_wait	1
 test_result_wait	1
 sys_write_individual	0
 sys_write_timeseries	1
-self_quarantine_fraction	0.8
+self_quarantine_fraction	0.0
 app_users_fraction	0.85
-app_turn_on_time	75
+app_turn_on_time	500
 social_distancing_work_network_multiplier	0.2
 social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
