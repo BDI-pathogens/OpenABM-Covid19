@@ -57,7 +57,7 @@ void gamma_draw_list(
 	a = mean / b;
 
 	for( idx = 0; idx < n; idx++ )
-		list[idx] = ceil( gsl_cdf_gamma_Pinv( ( idx + 1.0 )/( n + 1.0 ), a, b ));
+		list[idx] = max( round( gsl_cdf_gamma_Pinv( ( idx + 1.0 )/( n + 1.0 ), a, b )), 1 );
 }
 
 /*****************************************************************************************
