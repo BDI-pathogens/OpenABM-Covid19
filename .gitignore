@@ -39,3 +39,6 @@ performance/*.trace
 performance/*.dtps
 
 scratch/*
+
+src_test/*
+data_test/*
