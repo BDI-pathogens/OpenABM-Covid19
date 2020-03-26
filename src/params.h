@@ -111,7 +111,6 @@ typedef struct{
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int sys_write_individual; 		// Should an individual file be written to output?
-	int sys_write_timeseries; 		// Should a time series file be written to output?  
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
