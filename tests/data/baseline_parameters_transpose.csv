@@ -109,8 +109,6 @@ hospitalised_daily_interactions	0
 test_insensitive_period	3
 test_order_wait	1
 test_result_wait	1
-sys_write_individual	0
-sys_write_timeseries	1
 self_quarantine_fraction	0.0
 app_users_fraction	0.85
 app_turn_on_time	500
