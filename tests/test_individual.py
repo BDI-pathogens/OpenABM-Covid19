@@ -42,8 +42,58 @@ EXE = "covid19ibm.exe {} {} {} {}".format(TEST_DATA_FILE,
 
 command = join(IBM_DIR_TEST, EXE)
 
+def pytest_generate_tests(metafunc):
+    # called once per each test function
+    funcarglist = metafunc.cls.params[metafunc.function.__name__]
+    argnames = sorted(funcarglist[0])
+    metafunc.parametrize(
+        argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
+    )
+
+
 
 class TestClass(object):
+    params = {
+        "test_file_exists": [dict()],
+        "test_disease_transition_times": [ 
+            dict(
+                mean_time_to_symptoms = 4.0,
+                sd_time_to_symptoms   = 2.0,
+                mean_time_to_hospital = 1.0,
+                mean_time_to_critical = 1.0
+            ), 
+            dict( 
+                mean_time_to_symptoms = 4.5,
+                sd_time_to_symptoms   = 2.0,
+                mean_time_to_hospital = 1.2,
+                mean_time_to_critical = 1.2
+            ),
+            dict(
+                mean_time_to_symptoms = 5.0,
+                sd_time_to_symptoms   = 2.5,
+                mean_time_to_hospital = 1.4,
+                mean_time_to_critical = 1.4
+            ),
+            dict(
+                mean_time_to_symptoms = 5.5,
+                sd_time_to_symptoms   = 2.5,
+                mean_time_to_hospital = 1.6,
+                mean_time_to_critical = 1.6
+            ),
+            dict(
+                mean_time_to_symptoms = 6.0,
+                sd_time_to_symptoms   = 3.0,
+                mean_time_to_hospital = 1.8,
+                mean_time_to_critical = 2.0
+            ),
+            dict(
+                mean_time_to_symptoms = 6.5,
+                sd_time_to_symptoms   = 3.0,
+                mean_time_to_hospital = 1.6,
+                mean_time_to_critical = 2.0
+            )
+        ] 
+        }
     """
     Test class for checking 
     """
@@ -104,3 +154,49 @@ class TestClass(object):
         np.testing.assert_equal(df_individual.shape[0] > 1, True)
 
 
+    def test_disease_transition_times(
+            self,
+            mean_time_to_symptoms,
+            sd_time_to_symptoms,
+            mean_time_to_hospital,
+            mean_time_to_critical
+        ):
+        """
+        Test that the mean and standard deviation of the transition times between 
+        states agrees with the parameters
+        """
+        tolerance_mean = 0.1
+        tolerance_sd   = 0.2
+        
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_total", 10000)
+        params.set_param("n_seed_infection",200)
+        params.set_param("end_time", 70)
+        params.set_param("infectious_rate", 4.0)  
+        params.set_param("mean_time_to_symptoms",mean_time_to_symptoms)
+        params.set_param("sd_time_to_symptoms",sd_time_to_symptoms)
+        params.set_param("mean_time_to_hospital",mean_time_to_hospital)
+        params.set_param("mean_time_to_critical",mean_time_to_critical)
+        params.write_params(TEST_DATA_FILE)
+    
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        
+        # time infected until showing symptoms
+        df_indiv["t_p_s"] =  df_indiv["time_symptomatic"] - df_indiv["time_infected"]  
+        mean = df_indiv[ ( df_indiv['time_infected'] > 0 ) & ( df_indiv['time_asymptomatic'] <0 ) ] [ "t_p_s" ].mean()
+        sd   = df_indiv[ ( df_indiv['time_infected'] > 0 ) & ( df_indiv['time_asymptomatic'] <0 ) ] [ "t_p_s" ].std()
+        np.testing.assert_allclose( mean, mean_time_to_symptoms, atol = tolerance_mean )
+        np.testing.assert_allclose( sd, sd_time_to_symptoms, atol = tolerance_sd )
+                               
+        # time showing symptoms until going to hospital
+        df_indiv["t_s_h"] =  df_indiv["time_hospitalised"] - df_indiv["time_symptomatic"]  
+        mean = df_indiv[ ( df_indiv['time_hospitalised'] > 0 ) ] [ "t_s_h" ].mean()
+        np.testing.assert_allclose( mean, mean_time_to_hospital, atol = tolerance_mean )
+        
+        # time hospitalilsed until moving to the ICU
+        df_indiv["t_h_c"] =  df_indiv["time_critical"] - df_indiv["time_hospitalised"]  
+        mean = df_indiv[ ( df_indiv['time_critical'] > 0 ) ] [ "t_h_c" ].mean()
+        np.testing.assert_allclose( mean, mean_time_to_critical, atol = tolerance_mean )
+        
