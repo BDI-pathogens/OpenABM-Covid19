@@ -1,17 +1,40 @@
 """
-Utilities associated with test the COVID19-IBM
+Utilities to modify parameters objects associated with testing the COVID19-IBM model
+
+Created: March 2020
+Author: p-robot
 """
 
 from parameters import ParameterSet
 
 
-def turn_off_interventions(parameters):
+def turn_off_interventions(parameters, end_time):
     """
     Function to turn off all interventions and return the same object
     """
     
     params.set_param("test_on_traced", 0)
     params.set_param("test_on_symptoms", 0)
+    params.set_param("quarantine_on_traced", 0)
+    params.set_param("traceable_interaction_fraction", 0.0)
+    params.set_param("tracing_network_depth", 0)
+    params.set_param("allow_clinical_diagnosis", 0)
+    params.set_param("self_quarantine_fraction", 0.0)
+    
+    params.set_param("quarantine_household_on_positive", 0)
+    params.set_param("quarantine_household_on_symptoms", 0)
+    params.set_param("quarantine_household_on_traced", 0)
+    params.set_param("quarantine_household_contacts_on_positive", 0)
+    params.set_param("quarantined_daily_interactions", 0)
+    
+    params.set_param("app_users_fraction", 0.0)
+    
+    # Set interventions associated with a time to be beyond the end of the simulation
+    params.set_param("app_turn_on_time", end_time)
+    params.set_param("social_distancing_time_on", end_time + 1)
+    params.set_param("social_distancing_time_off", end_time + 2)
+    params.set_param("testing_symptoms_time_on", end_time + 1)
+    params.set_param("testing_symptoms_time_off", end_time + 2)
     
     return(params)
 
