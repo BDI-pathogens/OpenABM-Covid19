@@ -13,6 +13,7 @@ __pycache__
 .project
 .cproject
 .settings
+.pydevproject
 
 # temp copies
 *~
@@ -28,6 +29,7 @@ documentation/*.dvi
 documentation/*.blg
 documentation/*.bbl
 documentation/*.out
+documentation/*.toc
 
 # R-related files
 .Rhistory
