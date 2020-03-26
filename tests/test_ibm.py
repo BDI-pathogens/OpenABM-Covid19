@@ -140,9 +140,16 @@ class TestClass(object):
         Set fatality ratio to zero, should have no deaths
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("fatality_fraction_child", 0.0)
-        params.set_param("fatality_fraction_adult", 0.0)
-        params.set_param("fatality_fraction_elderly", 0.0)
+        params.set_param("fatality_fraction_0_9", 0.0)
+        params.set_param("fatality_fraction_10_19", 0.0)
+        params.set_param("fatality_fraction_20_29", 0.0)
+        params.set_param("fatality_fraction_30_39", 0.0)
+        params.set_param("fatality_fraction_40_49", 0.0)
+        params.set_param("fatality_fraction_50_59", 0.0)
+        params.set_param("fatality_fraction_60_69", 0.0)
+        params.set_param("fatality_fraction_70_79", 0.0)
+        params.set_param("fatality_fraction_80", 0.0)
+        
         params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
 
@@ -303,7 +310,8 @@ class TestClass(object):
         
         cond = (df_output["n_hospital"] != 0) & (df_output["total_infected"] > 0)
         
-        df_output["n_hospital"]
+        print(df_output["n_hospital"][cond][:1].values)
+        print(df_output["total_case"][cond].values)
         
         np.testing.assert_equal(
             np.mean(df_output["n_hospital"][cond][:1]/np.diff(df_output["total_case"][cond].values)), 
