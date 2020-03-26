@@ -315,8 +315,8 @@ class TestClass(object):
         
         cond = (df_output["n_hospital"] != 0) & (df_output["total_infected"] > 0)
         
-        print(df_output["n_hospital"][cond][:1].values)
-        print(df_output["total_case"][cond].values)
+        #print(df_output["n_hospital"][cond][:1].values)
+        #print(df_output["total_case"][cond].values)
         
         np.testing.assert_equal(
             np.mean(df_output["n_hospital"][cond][:1]/np.diff(df_output["total_case"][cond].values)), 
@@ -462,8 +462,6 @@ class TestClass(object):
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
             stdout = file_output)
-        print(completed_run)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        print(df_output)
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
 
