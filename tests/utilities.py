@@ -8,7 +8,7 @@ Author: p-robot
 from parameters import ParameterSet
 
 
-def turn_off_interventions(parameters, end_time):
+def turn_off_interventions(params, end_time):
     """
     Function to turn off all interventions and return the same object
     """
