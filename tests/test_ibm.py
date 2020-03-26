@@ -26,6 +26,14 @@ TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 
+TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
+TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
+
+NRUNS = 1
+
+# Default parameters for tests
+TEST_N_TOTAL = 10000
+
 # Construct the executable command
 EXE = "covid19ibm.exe"
 command = join(IBM_DIR_TEST, EXE)
@@ -58,10 +66,11 @@ class TestClass(object):
     
     def setup_method(self):
         """
-        
+        Called before each method is run; creates a new data dir, copies test datasets
         """
         os.mkdir(DATA_DIR_TEST)
         shutil.copy(TEST_DATA_TEMPLATE, TEST_DATA_FILE)
+        shutil.copy(TEST_HOUSEHOLD_TEMPLATE, TEST_HOUSEHOLD_FILE)
         
     def teardown_method(self):
         """
@@ -74,9 +83,14 @@ class TestClass(object):
         """
         Test that all columns are non-negative
         """
+        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params.set_param("n_total", TEST_N_TOTAL)
+        params.write_params(TEST_DATA_FILE)
+        
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
@@ -87,13 +101,14 @@ class TestClass(object):
         Set infectious rate to zero results in only "n_seed_infection" as total_infected
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("infectious_rate", 0.0)
         params.write_params(TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         output = df_output["total_infected"].iloc[-1]
@@ -107,13 +122,14 @@ class TestClass(object):
         Set seed cases to zero should result in no total infections
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("n_seed_infection", 0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_output["total_infected"].sum(), 0)
@@ -127,12 +143,13 @@ class TestClass(object):
         params.set_param("fatality_fraction_child", 0.0)
         params.set_param("fatality_fraction_adult", 0.0)
         params.set_param("fatality_fraction_elderly", 0.0)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
@@ -146,12 +163,13 @@ class TestClass(object):
         params.set_param("mean_time_to_death", 200.0)
         params.set_param("sd_time_to_death", 2.0)
         params.set_param("end_time", 100)
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
@@ -168,20 +186,20 @@ class TestClass(object):
         
         infectious_rate = 2.5
         proportion_infected = 1 - 1./infectious_rate
-        n_total = 50000
         
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
         params.set_param("self_quarantine_fraction", 0.0)
         params.set_param("infectious_rate", infectious_rate)
         
-        params.set_param("n_total", n_total)
+        params.set_param("n_total", TEST_N_TOTAL)
         
         # VARYING PARAMS.  <------------------------------------------------
         params.write_params(TEST_DATA_FILE)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
@@ -209,12 +227,13 @@ class TestClass(object):
         params.set_param("quarantined_daily_interactions", 0)
         params.set_param("hospitalised_daily_interactions", 0)
 
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
 
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
 
         np.testing.assert_equal(
@@ -229,7 +248,7 @@ class TestClass(object):
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("hospitalised_fraction_child", 0.0)
         params.set_param("hospitalised_fraction_adult", 0.0)
         params.set_param("hospitalised_fraction_elderly", 0.0)
@@ -237,7 +256,8 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(
@@ -254,7 +274,7 @@ class TestClass(object):
         SYMPTOMS_TIME_DELAY = 1
         
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("hospitalised_fraction_child", 0.4)
         params.set_param("hospitalised_fraction_adult", 0.4)
         params.set_param("hospitalised_fraction_elderly", 0.4)
@@ -277,7 +297,8 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         cond = (df_output["n_hospital"] != 0) & (df_output["total_infected"] > 0)
@@ -294,13 +315,14 @@ class TestClass(object):
         Setting fraction_asymptomatic to zero (should be no asymptomatics)
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("fraction_asymptomatic", 0.0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(
@@ -314,13 +336,14 @@ class TestClass(object):
         Setting fraction_asymptomatic to one (should only be asymptomatics)
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("fraction_asymptomatic", 1.0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom"]]
@@ -336,12 +359,13 @@ class TestClass(object):
         Test that total_infected is the sum of the other compartments
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
@@ -358,7 +382,7 @@ class TestClass(object):
         Setting mean_time_to_recover to be very large should avoid seeing recovered
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("end_time", 150)
         
         # Make recovery very long
@@ -369,7 +393,8 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_array_equal(
@@ -382,7 +407,7 @@ class TestClass(object):
         Setting mean_time_to_recover to be very large should avoid seeing recovered
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("end_time", 150)
         
         # Make recovery very long
@@ -393,7 +418,8 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", \
@@ -410,7 +436,7 @@ class TestClass(object):
         No quarantine
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", 50000)
+        params.set_param("n_total", TEST_N_TOTAL)
         params.set_param("end_time", 250)
         
         # Set quarantining to zero
@@ -426,8 +452,8 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE], stdout = file_output)
-        print(completed_run)
+        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
+            stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
