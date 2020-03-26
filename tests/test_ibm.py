@@ -249,16 +249,21 @@ class TestClass(object):
         )
 
 
-
     def test_hospitalised_zero(self):
         """
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
         params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("hospitalised_fraction_child", 0.0)
-        params.set_param("hospitalised_fraction_adult", 0.0)
-        params.set_param("hospitalised_fraction_elderly", 0.0)
+        params.set_param("hospitalised_fraction_0_9", 0.0)
+        params.set_param("hospitalised_fraction_10_19", 0.0)
+        params.set_param("hospitalised_fraction_20_29", 0.0)
+        params.set_param("hospitalised_fraction_30_39", 0.0)
+        params.set_param("hospitalised_fraction_40_49", 0.0)
+        params.set_param("hospitalised_fraction_50_59", 0.0)
+        params.set_param("hospitalised_fraction_60_69", 0.0)
+        params.set_param("hospitalised_fraction_70_79", 0.0)
+        params.set_param("hospitalised_fraction_80", 0.0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
