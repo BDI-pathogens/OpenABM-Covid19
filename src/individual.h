@@ -34,7 +34,10 @@ struct individual{
 	int random_interactions;
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
+
 	individual *infector;
+	int infector_status;
+	int infector_network;
 
 	int status;
 	int is_case;
@@ -63,7 +66,7 @@ struct interaction{
 /************************************************************************/
 
 #define time_infected( indiv ) ( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ) )
-#define in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL ) )
+#define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/

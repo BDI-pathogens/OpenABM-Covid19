@@ -554,7 +554,7 @@ void add_interactions_from_network(
 
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
-		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2->status == HOSPITALISED ) )
+		if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
