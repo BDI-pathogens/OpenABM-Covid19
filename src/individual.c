@@ -50,6 +50,10 @@ void initialize_individual(
 	indiv->current_disease_event    = NULL;
 	indiv->next_disease_event       = NULL;
 	indiv->quarantine_test_result   = NO_TEST;
+
+	indiv->infector_status  = UNKNOWN;
+	indiv->infector_network = UNKNOWN;
+
 }
 
 /*****************************************************************************************

@@ -79,7 +79,7 @@ void set_up_allocate_work_places( model *model )
 
 	// randomly assign a work place networks using the probability map
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		model->population[pdx].work_network_new = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+		model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
 		free(prob[ndx]);

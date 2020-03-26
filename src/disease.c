@@ -186,7 +186,11 @@ void transmit_virus_by_type(
 					{
 						interaction->individual->hazard -= hazard_rate;
 						if( interaction->individual->hazard < 0 )
+						{
 							new_infection( model, interaction->individual, infector );
+							interaction->individual->infector_network = interaction->type;
+						}
+
 					}
 					interaction = interaction->next;
 				}
@@ -227,6 +231,7 @@ void new_infection(
 )
 {
 	infected->infector = infector;
+	infected->infector_status = infector->status;
 
 	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
 	{
@@ -336,7 +341,7 @@ void transition_to_critical( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-	transition_one_disese_event( model, indiv, HOSPITALISED, NO_EVENT, NO_EDGE );
+	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
 	set_recovered( indiv, model->params, model->time );
 }
 
