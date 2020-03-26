@@ -446,29 +446,24 @@ class TestClass(object):
 
     def test_zero_quarantine(self):
         """
-        No quarantine
+        Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
         params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
         params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("end_time", 250)
-        
-        # Set quarantining to zero
+        params.set_param("quarantine_on_traced", 0)
+        params.set_param("quarantine_household_on_positive", 0)
+        params.set_param("quarantine_household_on_symptoms", 0)
+        params.set_param("quarantine_household_on_traced", 0)
+        params.set_param("quarantine_household_contacts_on_positive", 0)
         params.set_param("self_quarantine_fraction", 0.0)
-        params.set_param("quarantine_household_on_positive", 0.0)
-        params.set_param("quarantine_household_on_symptoms", 0.0)
-        params.set_param("quarantine_household_on_traced", 0.0)
-        params.set_param("quarantine_household_contacts_on_positive", 0.0)
-        params.set_param("quarantine_on_traced", 0.0)
-        params.set_param("seasonal_flu_rate", 0.0)
-        
         params.write_params(TEST_DATA_FILE)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
             stdout = file_output)
+        print(completed_run)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+        print(df_output)
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
-
 
