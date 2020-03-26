@@ -198,7 +198,7 @@ void set_up_work_network( model *model, int network )
 
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[idx].work_network_new == network )
+		if( model->population[idx].work_network == network )
 			people[n_people++] = idx;
 
 
@@ -554,7 +554,7 @@ void add_interactions_from_network(
 
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
-		if( skip_hospitalised && ( indiv1->status == HOSPITALISED || indiv2->status == HOSPITALISED ) )
+		if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;

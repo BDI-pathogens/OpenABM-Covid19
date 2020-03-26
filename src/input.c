@@ -46,19 +46,22 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	
 	if(argc > 3)
 	{
-		strncpy(input_household_file, argv[3], INPUT_CHAR_LEN );
+		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
+		params->sys_write_individual = TRUE;
+
+	}else{
+		strncpy(output_file_dir, ".", INPUT_CHAR_LEN );
+		params->sys_write_individual = FALSE;
+	}
+
+	if(argc > 4)
+	{
+		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN );
 	}else{
 		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
 			INPUT_CHAR_LEN );
 	}
-	
-	if(argc > 4)
-	{
-		strncpy(output_file_dir, argv[4], INPUT_CHAR_LEN );
-	}else{
-		strncpy(output_file_dir, ".", INPUT_CHAR_LEN );
-	}	
-	
+
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
 	
@@ -293,12 +296,6 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_individual));
-	if( check < 1){ print_exit("Failed to read parameter sys_write_individual\n"); };
-
-	check = fscanf(parameter_file, " %i , ",   &(params->sys_write_timeseries));
-	if( check < 1){ print_exit("Failed to read parameter sys_write_timeseries\n"); };
-
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
@@ -356,8 +353,9 @@ void write_individual_file(model *model, parameters *params)
 	
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
-	int idx;
-	long infector_id;
+	individual *indiv;
+	int infector_time_infected, infector_status;
+	long idx, infector_id;
 	
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", params->param_line_number);
@@ -378,40 +376,57 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"hazard, ");
 	fprintf(individual_output_file,"mean_interactions, ");
 	fprintf(individual_output_file,"time_infected, ");
+	fprintf(individual_output_file,"time_presypmtomatic, ");
 	fprintf(individual_output_file,"time_symptomatic, ");
 	fprintf(individual_output_file,"time_asymptomatic, ");
 	fprintf(individual_output_file,"time_hospitalised, ");
+	fprintf(individual_output_file,"time_critical, ");
 	fprintf(individual_output_file,"time_death, ");
 	fprintf(individual_output_file,"time_recovered, ");
-	fprintf(individual_output_file,"ID_infector"); // no trailing comma on last entry
+	fprintf(individual_output_file,"infector_ID, ");
+	fprintf(individual_output_file,"infector_time_infected, ");
+	fprintf(individual_output_file,"infector_status, ");
 	fprintf(individual_output_file,"\n");
 	
 	// Loop through all individuals in the simulation
 	for(idx = 0; idx < params->n_total; idx++)
 	{
+		indiv = &(model->population[idx]);
 		
 		/* Check the individual was infected during the simulation
 		(otherwise the "infector" attribute does not point to another individual) */
-		if(model->population[idx].status != UNINFECTED){
-			infector_id = model->population[idx].infector->idx;
-		}else{
-			infector_id = UNKNOWN;
+		if(model->population[idx].status != UNINFECTED)
+		{
+			infector_id			   = indiv->infector->idx;
+			infector_time_infected = time_infected( indiv->infector );
+			infector_status        = indiv->infector_status;
+
+		}
+		else
+		{
+			infector_id            = UNKNOWN;
+			infector_time_infected = UNKNOWN;
+			infector_status        = UNKNOWN;
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %li\n",
-			model->population[idx].idx,
-			model->population[idx].status,
-			model->population[idx].quarantined,
-			model->population[idx].hazard,
-			model->population[idx].random_interactions,
-			max( model->population[idx].time_event[PRESYMPTOMATIC], model->population[idx].time_event[ASYMPTOMATIC] ),
-			model->population[idx].time_event[SYMPTOMATIC],
-			model->population[idx].time_event[ASYMPTOMATIC],
-			model->population[idx].time_event[HOSPITALISED],
-			model->population[idx].time_event[DEATH],
-			model->population[idx].time_event[RECOVERED],
-			infector_id
+			"%li, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			indiv->idx,
+			indiv->status,
+			indiv->quarantined,
+			indiv->hazard,
+			indiv->random_interactions,
+			time_infected(indiv),
+			indiv->time_event[PRESYMPTOMATIC],
+			indiv->time_event[SYMPTOMATIC],
+			indiv->time_event[ASYMPTOMATIC],
+			indiv->time_event[HOSPITALISED],
+			indiv->time_event[CRITICAL],
+			indiv->time_event[DEATH],
+			indiv->time_event[RECOVERED],
+			infector_id,
+			infector_time_infected,
+			infector_status
 			);
 	}
 	fclose(individual_output_file);
@@ -518,7 +533,7 @@ void print_demographics( model *model )
 			indiv->age_group,
 			indiv->age_type,
 			indiv->work_network,
-			indiv->work_network_new,
+			indiv->work_network,
 			model->household_directory->n_jdx[indiv->house_no],
 			indiv->house_no
 		);
@@ -561,3 +576,110 @@ void read_household_demographics_file( parameters *params)
 	}
 	fclose(hh_file);
 }
+
+/*****************************************************************************************
+*  Name:		write_interactions
+*  Description: write interactions details
+******************************************************************************************/
+void write_interactions( model *model )
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	FILE *output_file;
+	long pdx;
+	int day, idx;
+	individual *indiv;
+	interaction *inter;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/interactions_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+
+	output_file = fopen(output_file_name, "w");
+
+	day = model->interaction_day_idx;
+	ring_dec( day, model->params->days_of_interactions );
+
+	fprintf(output_file ,"pdx,age,house,work,type,pdx2,age2,house2,work2\n");
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+
+		indiv = &(model->population[pdx]);
+
+		if( indiv->n_interactions[day] > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
+			{
+
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%li,%i,%li,%i\n",
+					indiv->idx,
+					indiv->age_group,
+					indiv->house_no,
+					indiv->work_network,
+					inter->type,
+					inter->individual->idx,
+					inter->individual->age_group,
+					inter->individual->house_no,
+					inter->individual->work_network
+				);
+				inter = inter->next;
+			}
+		}
+
+	}
+	fclose(output_file);
+	print_exit( "Output : write interactions end!");
+}
+
+
+/*****************************************************************************************
+*  Name:		write_transmissions
+*  Description: write_transmissions details
+******************************************************************************************/
+void write_transmissions( model *model )
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	FILE *output_file;
+	long pdx;
+	individual *indiv;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/interactions_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+
+	output_file = fopen(output_file_name, "w");
+
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		if( indiv->status == UNINFECTED )
+			continue;
+
+		fprintf(output_file ,"%i,%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i\n",
+			time_infected(indiv),
+			indiv->idx,
+			indiv->age_group,
+			indiv->house_no,
+			indiv->work_network,
+			indiv->infector_network,
+			time_infected( indiv ) -time_infected( indiv->infector ),
+			indiv->infector_status,
+			indiv->infector->idx,
+			indiv->infector->age_group,
+			indiv->infector->house_no,
+			indiv->infector->work_network
+		);
+	}
+	fclose(output_file);
+	print_exit( "Output : write transmissions end!");}
+

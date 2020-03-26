@@ -13,6 +13,7 @@ __pycache__
 .project
 .cproject
 .settings
+.pydevproject
 
 # temp copies
 *~
@@ -28,6 +29,7 @@ documentation/*.dvi
 documentation/*.blg
 documentation/*.bbl
 documentation/*.out
+documentation/*.toc
 
 # R-related files
 .Rhistory
@@ -35,3 +37,8 @@ documentation/*.out
 # performance related
 performance/*.trace
 performance/*.dtps
+
+scratch/*
+
+src_test/*
+data_test/*
