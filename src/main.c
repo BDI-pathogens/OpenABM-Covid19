@@ -74,8 +74,11 @@ int main(int argc, char *argv[])
 				n_current( model, RECOVERED )
 		);
 	//	print_demographics( model );
+	//	write_interactions( model );
 
 	};
+//	write_transmissions( model );
+
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
