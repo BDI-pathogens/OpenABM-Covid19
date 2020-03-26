@@ -37,3 +37,5 @@ documentation/*.toc
 # performance related
 performance/*.trace
 performance/*.dtps
+
+scratch/*
