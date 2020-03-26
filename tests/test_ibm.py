@@ -25,7 +25,9 @@ DATA_DIR_TEST = "data_test"
 
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
+
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
+TEST_OUTPUT_INDIV_FILE = join(DATA_DIR_TEST, "test_output.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -244,15 +246,7 @@ class TestClass(object):
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("hospitalised_fraction_0_9", 0.0)
-        params.set_param("hospitalised_fraction_10_19", 0.0)
-        params.set_param("hospitalised_fraction_20_29", 0.0)
-        params.set_param("hospitalised_fraction_30_39", 0.0)
-        params.set_param("hospitalised_fraction_40_49", 0.0)
-        params.set_param("hospitalised_fraction_50_59", 0.0)
-        params.set_param("hospitalised_fraction_60_69", 0.0)
-        params.set_param("hospitalised_fraction_70_79", 0.0)
-        params.set_param("hospitalised_fraction_80", 0.0)
+        params = utils.set_hospitalisation_fraction_all(params, 0.0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -261,50 +255,9 @@ class TestClass(object):
             stdout = file_output)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
-        np.testing.assert_equal(
-            df_output["n_hospital"].sum(), 
-            0
-        )
+        np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
     
-    def test_hospitalised_fraction_40_percent(self):
-        """
-        Test setting hospitalised fractions to zero (should be no hospitalised)
-        """
-        
-        HOSPITAL_TIME_DELAY = 1
-        SYMPTOMS_TIME_DELAY = 1
-        
-        HOSPITALISED_FRAC = 0.4
-        
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        
-        params = utils.set_hospitalisation_fraction_all(params, HOSPITALISED_FRAC)
-        params = utils.set_critical_fraction_all(params, 0.0)
-        
-        params.set_param("fraction_asymptomatic", 0.0)
-        params.set_param("mean_time_to_symptoms", float(SYMPTOMS_TIME_DELAY))
-        params.set_param("sd_time_to_symptoms", 0.05)
-        params.set_param("mean_time_to_hospital", float(HOSPITAL_TIME_DELAY))
-        params.set_param("sd_time_to_hospital", 0.05)
-        params.set_param("seasonal_flu_rate", 0.0)
-        params.write_params(TEST_DATA_FILE)
-        
-        # Call the model, pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        cond = (df_output["n_hospital"] != 0) & (df_output["total_infected"] > 0)
-        
-        #print(df_output["n_hospital"][cond][:1].values)
-        #print(df_output["total_case"][cond].values)
-        
-        np.testing.assert_equal(
-            np.mean(df_output["n_hospital"][cond][:1]/np.diff(df_output["total_case"][cond].values)), 
-            0.4
-        )
-
+    
     def test_fraction_asymptomatic_zero(self):
         """
         Setting fraction_asymptomatic to zero (should be no asymptomatics)
