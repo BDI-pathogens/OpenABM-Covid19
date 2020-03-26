@@ -25,6 +25,8 @@ void read_param_file(parameters *);
 void read_household_demographics_file(parameters *);
 void write_output_files(model *, parameters *);
 void write_individual_file(model *, parameters *);
+void write_interactions( model* );
+void write_transmissions( model* );
 void print_interactions_averages( model*, int );
 void print_demographics( model* );
 
