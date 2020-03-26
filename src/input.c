@@ -518,7 +518,7 @@ void print_demographics( model *model )
 			indiv->age_group,
 			indiv->age_type,
 			indiv->work_network,
-			indiv->work_network_new,
+			indiv->work_network,
 			model->household_directory->n_jdx[indiv->house_no],
 			indiv->house_no
 		);
@@ -561,3 +561,92 @@ void read_household_demographics_file( parameters *params)
 	}
 	fclose(hh_file);
 }
+
+/*****************************************************************************************
+*  Name:		write_interactions
+*  Description: write interactions details
+******************************************************************************************/
+void write_interactions( model *model )
+{
+	long pdx;
+	int day, idx;
+	individual *indiv;
+	interaction *inter;
+
+	FILE *output_file;
+	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/interactions.csv", "w");
+
+
+	day = model->interaction_day_idx;
+	ring_dec( day, model->params->days_of_interactions );
+
+	fprintf(output_file ,"pdx,age,house,work,type,pdx2,age2,house2,work2\n");
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+
+		indiv = &(model->population[pdx]);
+
+		if( indiv->n_interactions[day] > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
+			{
+
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%li,%i,%li,%i\n",
+					indiv->idx,
+					indiv->age_group,
+					indiv->house_no,
+					indiv->work_network,
+					inter->type,
+					inter->individual->idx,
+					inter->individual->age_group,
+					inter->individual->house_no,
+					inter->individual->work_network
+				);
+				inter = inter->next;
+			}
+		}
+
+	}
+	fclose(output_file);
+	print_exit( "Output : write interactions end!");
+}
+
+
+/*****************************************************************************************
+*  Name:		write_transmissions
+*  Description: write_transmissions details
+******************************************************************************************/
+void write_transmissions( model *model )
+{
+	long pdx;
+	individual *indiv;
+
+	FILE *output_file;
+	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/transmissions.csv", "w");
+
+	fprintf(output_file ,"pdx,age,house,work,type,infectorTime,infectorStatus,pdx2,age2,house2,work2\n");
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		if( indiv->status == UNINFECTED )
+			continue;
+
+		fprintf(output_file ,"%i,%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i\n",
+			time_infected(indiv),
+			indiv->idx,
+			indiv->age_group,
+			indiv->house_no,
+			indiv->work_network,
+			indiv->infector_network,
+			time_infected( indiv ) -time_infected( indiv->infector ),
+			indiv->infector_status,
+			indiv->infector->idx,
+			indiv->infector->age_group,
+			indiv->infector->house_no,
+			indiv->infector->work_network
+		);
+	}
+	fclose(output_file);
+	print_exit( "Output : write transmissions end!");}
+
