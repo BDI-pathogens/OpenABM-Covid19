@@ -201,7 +201,7 @@ void intervention_test_result( model *model, individual *indiv )
 			add_individual_to_event_list( model, CASE, indiv, model->time );
 		}
 
-		if( !in_hospital( indiv ) || !(model->params->allow_clinical_diagnosis) )
+		if( !is_in_hospital( indiv ) || !(model->params->allow_clinical_diagnosis) )
 			intervention_on_positive_result( model, indiv );
 	}
 	indiv->quarantine_test_result = NO_TEST;
@@ -349,7 +349,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	int time_event = UNKNOWN;
 	parameters *params = model->params;
 
-	if( !in_hospital( indiv ) )
+	if( !is_in_hospital( indiv ) )
 	{
 		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
@@ -394,7 +394,7 @@ void intervention_on_traced(
 	int recursion_level
 )
 {
-	if( in_hospital( indiv ) || indiv->is_case )
+	if( !is_in_hospital( indiv ) || indiv->is_case )
 		return;
 
 	parameters *params = model->params;
