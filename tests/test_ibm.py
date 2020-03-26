@@ -32,11 +32,15 @@ TEST_OUTPUT_INDIV_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
-NRUNS = 1
+PARAM_LINE_NUMBER = 1
 
 # Construct the executable command
-EXE = "covid19ibm.exe"
+EXE = "covid19ibm.exe {} {} {} {}".format(TEST_DATA_FILE,
+                                       PARAM_LINE_NUMBER,
+                                       DATA_DIR_TEST, 
+                                       TEST_HOUSEHOLD_FILE)
 command = join(IBM_DIR_TEST, EXE)
+
 
 class TestClass(object):
     """
@@ -92,8 +96,7 @@ class TestClass(object):
         
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
@@ -109,8 +112,8 @@ class TestClass(object):
 
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
+        
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         output = df_output["total_infected"].iloc[-1]
@@ -129,8 +132,7 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_output["total_infected"].sum(), 0)
@@ -141,21 +143,12 @@ class TestClass(object):
         Set fatality ratio to zero, should have no deaths
         """
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("fatality_fraction_0_9", 0.0)
-        params.set_param("fatality_fraction_10_19", 0.0)
-        params.set_param("fatality_fraction_20_29", 0.0)
-        params.set_param("fatality_fraction_30_39", 0.0)
-        params.set_param("fatality_fraction_40_49", 0.0)
-        params.set_param("fatality_fraction_50_59", 0.0)
-        params.set_param("fatality_fraction_60_69", 0.0)
-        params.set_param("fatality_fraction_70_79", 0.0)
-        params.set_param("fatality_fraction_80", 0.0)
+        params = utils.set_fatality_fraction_all(params, 0.0)
         params.write_params(TEST_DATA_FILE)
-
+        
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
@@ -172,8 +165,7 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
@@ -202,9 +194,7 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
-        
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_almost_equal(
@@ -231,8 +221,7 @@ class TestClass(object):
 
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
 
         np.testing.assert_equal(
@@ -251,8 +240,7 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
@@ -268,8 +256,7 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(
@@ -288,8 +275,7 @@ class TestClass(object):
         
         # Call the model, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom"]]
@@ -307,8 +293,7 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
@@ -334,8 +319,7 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_array_equal(
@@ -357,8 +341,7 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", \
@@ -380,8 +363,7 @@ class TestClass(object):
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command, TEST_DATA_FILE, str(NRUNS), TEST_HOUSEHOLD_FILE],
-            stdout = file_output)
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
 
