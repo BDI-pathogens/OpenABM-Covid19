@@ -61,6 +61,20 @@ def turn_off_quarantine(params):
     return(params)
 
 
+def set_fatality_fraction_all(params, fraction):
+    """
+    Set critical fraction to `fraction` for all ages
+    """
+    param_names = ["fatality_fraction_0_9", "fatality_fraction_10_19", "fatality_fraction_20_29",
+        "fatality_fraction_30_39", "fatality_fraction_40_49", "fatality_fraction_50_59",
+        "fatality_fraction_60_69", "fatality_fraction_70_79", "fatality_fraction_80"]
+    
+    for p in param_names:
+        params.set_param(p, fraction)
+    
+    return(params)
+
+
 def set_critical_fraction_all(params, fraction):
     """
     Set critical fraction to `fraction` for all ages
