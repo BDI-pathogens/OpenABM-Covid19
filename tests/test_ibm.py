@@ -16,6 +16,7 @@ import numpy as np, pandas as pd
 import pytest
 
 from parameters import ParameterSet
+import utilities as utils
 
 # Directories
 IBM_DIR = "src"
@@ -31,9 +32,6 @@ TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
 NRUNS = 1
 
-# Default parameters for tests
-TEST_N_TOTAL = 10000
-
 # Construct the executable command
 EXE = "covid19ibm.exe"
 command = join(IBM_DIR_TEST, EXE)
@@ -45,7 +43,7 @@ class TestClass(object):
     @classmethod
     def setup_class(self):
         """
-        When the class is instatiated: compile the IBM in a temporary directory
+        When the class is instantiated: compile the IBM in a temporary directory
         """
         
         # Make a temporary copy of the code (remove this temporary directory if it already exists)
@@ -72,6 +70,12 @@ class TestClass(object):
         shutil.copy(TEST_DATA_TEMPLATE, TEST_DATA_FILE)
         shutil.copy(TEST_HOUSEHOLD_TEMPLATE, TEST_HOUSEHOLD_FILE)
         
+        # Adjust any parameters that need adjusting for all tests
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_total", 10000)
+        params.set_param("end_time", 100)
+        params.write_params(TEST_DATA_FILE)
+        
     def teardown_method(self):
         """
         
@@ -83,9 +87,6 @@ class TestClass(object):
         """
         Test that all columns are non-negative
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.write_params(TEST_DATA_FILE)
         
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
@@ -100,8 +101,7 @@ class TestClass(object):
         """
         Set infectious rate to zero results in only "n_seed_infection" as total_infected
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("infectious_rate", 0.0)
         params.write_params(TEST_DATA_FILE)
 
@@ -121,8 +121,7 @@ class TestClass(object):
         """
         Set seed cases to zero should result in no total infections
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_seed_infection", 0)
         params.write_params(TEST_DATA_FILE)
         
@@ -139,7 +138,7 @@ class TestClass(object):
         """
         Set fatality ratio to zero, should have no deaths
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("fatality_fraction_0_9", 0.0)
         params.set_param("fatality_fraction_10_19", 0.0)
         params.set_param("fatality_fraction_20_29", 0.0)
@@ -149,8 +148,6 @@ class TestClass(object):
         params.set_param("fatality_fraction_60_69", 0.0)
         params.set_param("fatality_fraction_70_79", 0.0)
         params.set_param("fatality_fraction_80", 0.0)
-        
-        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
@@ -166,11 +163,9 @@ class TestClass(object):
         """
         Setting mean_time_to_death beyond end of simulation should result in no recorded deaths
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("mean_time_to_death", 200.0)
         params.set_param("sd_time_to_death", 2.0)
-        params.set_param("end_time", 100)
-        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -194,14 +189,14 @@ class TestClass(object):
         infectious_rate = 2.5
         proportion_infected = 1 - 1./infectious_rate
         
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("self_quarantine_fraction", 0.0)
         params.set_param("infectious_rate", infectious_rate)
         
-        params.set_param("n_total", TEST_N_TOTAL)
-        
         # VARYING PARAMS.  <------------------------------------------------
         params.write_params(TEST_DATA_FILE)
+        
+        n_total = params.get_param("n_total")
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
@@ -221,20 +216,15 @@ class TestClass(object):
         Setting interactions to zero should avoid any infections,
         so number of total infections are simply the number of seed cases.  
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("mean_work_interactions_child", 0)
         params.set_param("mean_work_interactions_adult", 0)
         params.set_param("mean_work_interactions_elderly", 0)
-
         params.set_param("mean_random_interactions_child", 0)
         params.set_param("mean_random_interactions_adult", 0)
         params.set_param("mean_random_interactions_elderly", 0)
-
         params.set_param("quarantined_daily_interactions", 0)
         params.set_param("hospitalised_daily_interactions", 0)
-
-        params.set_param("n_total", TEST_N_TOTAL)
         params.write_params(TEST_DATA_FILE)
 
         # Call the model
@@ -253,8 +243,7 @@ class TestClass(object):
         """
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("hospitalised_fraction_0_9", 0.0)
         params.set_param("hospitalised_fraction_10_19", 0.0)
         params.set_param("hospitalised_fraction_20_29", 0.0)
@@ -285,26 +274,19 @@ class TestClass(object):
         HOSPITAL_TIME_DELAY = 1
         SYMPTOMS_TIME_DELAY = 1
         
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("hospitalised_fraction_child", 0.4)
-        params.set_param("hospitalised_fraction_adult", 0.4)
-        params.set_param("hospitalised_fraction_elderly", 0.4)
+        HOSPITALISED_FRAC = 0.4
+        
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        
+        params = utils.set_hospitalisation_fraction_all(params, HOSPITALISED_FRAC)
+        params = utils.set_critical_fraction_all(params, 0.0)
         
         params.set_param("fraction_asymptomatic", 0.0)
-        
-        params.set_param("critical_fraction_child", 0.0)
-        params.set_param("critical_fraction_adult", 0.0)
-        params.set_param("critical_fraction_elderly", 0.0)
-        
         params.set_param("mean_time_to_symptoms", float(SYMPTOMS_TIME_DELAY))
         params.set_param("sd_time_to_symptoms", 0.05)
-        
         params.set_param("mean_time_to_hospital", float(HOSPITAL_TIME_DELAY))
         params.set_param("sd_time_to_hospital", 0.05)
-        
         params.set_param("seasonal_flu_rate", 0.0)
-        
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -327,8 +309,7 @@ class TestClass(object):
         """
         Setting fraction_asymptomatic to zero (should be no asymptomatics)
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("fraction_asymptomatic", 0.0)
         params.write_params(TEST_DATA_FILE)
         
@@ -348,8 +329,7 @@ class TestClass(object):
         """
         Setting fraction_asymptomatic to one (should only be asymptomatics)
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("fraction_asymptomatic", 1.0)
         params.write_params(TEST_DATA_FILE)
         
@@ -371,9 +351,6 @@ class TestClass(object):
         """
         Test that total_infected is the sum of the other compartments
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.write_params(TEST_DATA_FILE)
         
         # Call the model
         file_output = open(TEST_OUTPUT_FILE, "w")
@@ -394,9 +371,7 @@ class TestClass(object):
         """
         Setting mean_time_to_recover to be very large should avoid seeing recovered
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("end_time", 150)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
@@ -419,9 +394,7 @@ class TestClass(object):
         """
         Setting mean_time_to_recover to be very large should avoid seeing recovered
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("end_time", 150)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
@@ -448,14 +421,8 @@ class TestClass(object):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
-        params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
-        params.set_param("n_total", TEST_N_TOTAL)
-        params.set_param("quarantine_on_traced", 0)
-        params.set_param("quarantine_household_on_positive", 0)
-        params.set_param("quarantine_household_on_symptoms", 0)
-        params.set_param("quarantine_household_on_traced", 0)
-        params.set_param("quarantine_household_contacts_on_positive", 0)
-        params.set_param("self_quarantine_fraction", 0.0)
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_quarantine(params)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model
