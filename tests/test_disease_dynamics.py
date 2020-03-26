@@ -210,8 +210,6 @@ class TestClass(object):
         states agrees with the parameters
         """
         std_error_limit = 3
-        tolerance_mean = 0.05
-        tolerance_sd = 0.1
         
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", 20000)
