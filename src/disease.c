@@ -341,7 +341,7 @@ void transition_to_critical( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-	transition_one_disese_event( model, indiv, HOSPITALISED, NO_EVENT, NO_EDGE );
+	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
 	set_recovered( indiv, model->params, model->time );
 }
 
