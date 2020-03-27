@@ -12,11 +12,13 @@ Author: p-robot
 
 import subprocess, shutil, os
 from os.path import join
+from string import Template
 import numpy as np, pandas as pd
 import pytest
 
 from parameters import ParameterSet
 import utilities as utils
+
 
 # Directories
 IBM_DIR = "src"
@@ -27,7 +29,8 @@ TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
 
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
-TEST_OUTPUT_INDIV_FILE = join(DATA_DIR_TEST, "test_output.csv")
+TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
+output_file = Template(join(DATA_DIR_TEST, "test_output_$Run.csv"))
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -122,12 +125,17 @@ class TestClass(object):
         np.testing.assert_equal(output, expected_output)
     
     
-    def test_zero_n_seed_infection(self):
+    @pytest.mark.parametrize(
+        'parameter, output_column', [
+            ('n_seed_infection', 'total_infected'), 
+            ('fraction_asymptomatic', 'n_asymptom')]
+        )
+    def test_zero_output(self, parameter, output_column):
         """
-        Set seed cases to zero should result in no total infections
+        Set parameter value to zero should result in zero sum of output column
         """
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("n_seed_infection", 0)
+        params.set_param(parameter, 0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -135,8 +143,8 @@ class TestClass(object):
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
-        np.testing.assert_equal(df_output["total_infected"].sum(), 0)
-
+        np.testing.assert_equal(df_output[output_column].sum(), 0)
+    
 
     def test_zero_deaths(self):
         """
@@ -151,7 +159,7 @@ class TestClass(object):
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
-        np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
+        np.testing.assert_equal(df_output["n_death"].sum(), 0)
 
 
     def test_long_time_to_death(self):
@@ -169,38 +177,6 @@ class TestClass(object):
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
-
-
-    @pytest.mark.slow
-    def test_proportion_infected(self):
-        """
-        Expected proportion infected, from infectious_rate (R) is: 1 - 1/R
-        For R = 2.5, expected proportion infected = 1 - 1/2.5 = 0.6.  
-        
-        Note: this needs to be updated for many stochastic simulations
-        """
-        
-        infectious_rate = 2.5
-        proportion_infected = 1 - 1./infectious_rate
-        
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("self_quarantine_fraction", 0.0)
-        params.set_param("infectious_rate", infectious_rate)
-        
-        # VARYING PARAMS.  <------------------------------------------------
-        params.write_params(TEST_DATA_FILE)
-        
-        n_total = params.get_param("n_total")
-        
-        # Call the model
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        np.testing.assert_almost_equal(
-            df_output.total_infected.iloc[-1]/n_total, 
-            0.62854
-        )
     
     
     def test_mean_daily_interactions_zero(self):
@@ -245,25 +221,6 @@ class TestClass(object):
         
         np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
     
-    
-    def test_fraction_asymptomatic_zero(self):
-        """
-        Setting fraction_asymptomatic to zero (should be no asymptomatics)
-        """
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("fraction_asymptomatic", 0.0)
-        params.write_params(TEST_DATA_FILE)
-        
-        # Call the model, pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        np.testing.assert_equal(
-            df_output["n_asymptom"].sum(), 
-            0
-        )
-
 
     def test_fraction_asymptomatic_one(self):
         """
@@ -352,8 +309,7 @@ class TestClass(object):
             df_output["total_infected"].values
         )
 
-
-    def test_zero_quarantine(self):
+    def test_zero_quarantine(self, input, expected):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
@@ -366,4 +322,3 @@ class TestClass(object):
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
-
