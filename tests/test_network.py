@@ -22,18 +22,19 @@ from math import sqrt
 #from CoreGraphics._CoreGraphics import CGRect_getMidX
 
 # Directories
-IBM_DIR = "src"
-IBM_DIR_TEST = "src_test"
+IBM_DIR       = "src"
+IBM_DIR_TEST  = "src_test"
 DATA_DIR_TEST = "data_test"
 
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
-TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
+TEST_DATA_FILE     = join(DATA_DIR_TEST, "test_parameters.csv")
 
-TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
+TEST_OUTPUT_FILE      = join(DATA_DIR_TEST, "test_output.csv")
+TEST_INDIVIDUAL_FILE  = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
-TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
+TEST_HOUSEHOLD_FILE     = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
 # Age groups
 AGE_0     = 0
@@ -47,6 +48,10 @@ AGE_70_79 = 7
 AGE_80    = 8
 AGES = [ AGE_0, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
 
+# network type
+HOUSEHOLD = 0
+WORK      = 1
+RANDOM    = 2
 
 PARAM_LINE_NUMBER = 1
 
@@ -77,8 +82,15 @@ class TestClass(object):
             dict( n_total = 50000 ),
             dict( n_total = 100000 ),
             dict( n_total = 250000 )
+        ], 
+        "test_household_network": [ 
+            dict( n_total = 10000 ),
+            dict( n_total = 20000 ),
+            dict( n_total = 30000 ),
+            dict( n_total = 50000 ),
+            dict( n_total = 100000 )
         ] 
-        }
+    }
     """
     Test class for checking 
     """
@@ -149,20 +161,64 @@ class TestClass(object):
         utils.turn_off_interventions(params,1)
         
         params.write_params(TEST_DATA_FILE)        
-        file_output = open(TEST_OUTPUT_FILE, "w")
+        file_output   = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int        = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         
         left  = df_int.loc[ :, ['pdx', 'pdx2'] ]        
-        left.drop_duplicates(keep="first",inplace=True)
-        N_base = len( left )
         right = df_int.loc[ :, ['pdx', 'pdx2'] ]
         right.rename( columns =  {"pdx":"pdx2","pdx2":"pdx"},inplace=True)
+
+        left.drop_duplicates(keep="first",inplace=True)
         right.drop_duplicates(keep="first",inplace=True)
+        join = pd.merge(left,right,on=["pdx","pdx2"], how="inner")
         
-        join   = pd.merge(left,right,on=["pdx","pdx2"], how="inner")
-        N_join =  len( join )
+        N_base = len( left )        
+        N_join = len( join )
         
         np.testing.assert_equal( N_base, N_join )
+    
+    def test_household_network(self,n_total):
+        """
+        Test to check that all interactions within a household are made
+        """    
+        
+        # note when counting connections we count each end
+        expectedConnections = pd.DataFrame(data={'size': [1,2,3,4,5,6], 'expected': [0,2,6,12,20,30]})
+            
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_total",n_total)
+        utils.turn_off_interventions(params,1)
+        
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
+       
+        # get the number of people in each house hold
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
+        df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
+     
+        # get the number of interactions per person on the housegold n
+        df_int  = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+
+        df_int  = df_int[ df_int["type"] == HOUSEHOLD]
+        df_int  = pd.merge( df_int,df_indiv.loc[:,["pdx","house_no"]], on = ["pdx"], how = "left")
+        df_int  = df_int.groupby(["house_no"]).size().reset_index(name="connections")
+        
+        # see whether that is the expected number
+        df_house = pd.merge( df_house,expectedConnections,on =["size"], how = "left")
+        df_house = pd.merge( df_house,df_int, on =["house_no"], how = "outer" )
+
+        # check single person household without connections
+        N_nocon        = df_house.loc[:,["connections"]].isnull().sum().sum()
+        N_nocon_single = df_house[ df_house["size"] == 1].loc[ :,["connections"]].isnull().sum().sum()
+        np.testing.assert_equal(  N_nocon, N_nocon_single )
+        
+        # check the rest are the same 
+        df_house = df_house[ df_house["size"] > 1 ]
+        print( df_house.head())
+        
+        np.testing.assert_array_equal( df_house.loc[:,"connections"], df_house.loc[:,"expected"] )
+    
     
   

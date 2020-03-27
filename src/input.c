@@ -660,7 +660,7 @@ void write_transmissions( model *model )
 
 	// Concatenate file name
 	strcpy(output_file_name, model->params->output_file_dir);
-	strcat(output_file_name, "/interactions_Run");
+	strcat(output_file_name, "/transmission_Run");
 	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 
