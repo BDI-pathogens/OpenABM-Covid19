@@ -341,7 +341,10 @@ void write_output_files(model *model, parameters *params)
 {
 
 	if(params->sys_write_individual == TRUE)
+	{
 		write_individual_file( model, params );
+		write_interactions( model );
+	}
 }	
 
 /*****************************************************************************************
