@@ -52,6 +52,8 @@ struct individual{
 	int quarantine_test_result;
 	
 	int app_user;
+
+    int worker_type; //TODO: kelvin change
 };
 
 struct interaction{
