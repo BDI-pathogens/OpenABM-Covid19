@@ -381,6 +381,7 @@ class TestClass(object):
         params.set_param("sd_time_to_death",sd_time_to_death)   
         params.set_param("mean_asymptomatic_to_recovery",mean_asymptomatic_to_recovery)   
         params.set_param("sd_asymptomatic_to_recovery",sd_asymptomatic_to_recovery)   
+        utils.turn_off_interventions(params,50)
         
         params.write_params(TEST_DATA_FILE)        
         file_output = open(TEST_OUTPUT_FILE, "w")
@@ -518,7 +519,9 @@ class TestClass(object):
         params.set_param("fatality_fraction_50_59", fatality_fraction_50_59)  
         params.set_param("fatality_fraction_60_69", fatality_fraction_60_69)  
         params.set_param("fatality_fraction_70_79", fatality_fraction_70_79)  
-        params.set_param("fatality_fraction_80",    fatality_fraction_80)  
+        params.set_param("fatality_fraction_80",    fatality_fraction_80) 
+        utils.turn_off_interventions(params,50)
+ 
         
         hospitalised_fraction = [ hospitalised_fraction_0_9,   hospitalised_fraction_10_19, hospitalised_fraction_20_29,
                                   hospitalised_fraction_30_39, hospitalised_fraction_40_49, hospitalised_fraction_50_59,
