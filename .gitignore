@@ -42,3 +42,5 @@ scratch/*
 
 src_test/*
 data_test/*
+
+venv/*
