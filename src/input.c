@@ -546,7 +546,7 @@ void print_demographics( model *model )
 		);
 	}
 	fclose(output_file);
-	print_exit( "Output demographics: end!");
+	print_exit( "# Output demographics: end!");
 }
 
 
@@ -640,7 +640,7 @@ void write_interactions( model *model )
 
 	}
 	fclose(output_file);
-	print_exit( "Output : write interactions end!");
+	print_exit( "# Output : write interactions end!");
 }
 
 
@@ -688,5 +688,6 @@ void write_transmissions( model *model )
 		);
 	}
 	fclose(output_file);
-	print_exit( "Output : write transmissions end!");}
+	print_exit( "# Output : write transmissions end!");}
+
 
