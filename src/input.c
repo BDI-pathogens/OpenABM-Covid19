@@ -373,6 +373,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"ID, ");
 	fprintf(individual_output_file,"current_status, ");
 	fprintf(individual_output_file,"age_group, ");
+	fprintf(individual_output_file,"house_no, ");
 	fprintf(individual_output_file,"quarantined, ");
 	fprintf(individual_output_file,"hazard, ");
 	fprintf(individual_output_file,"mean_interactions, ");
@@ -411,10 +412,11 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			"%li, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
+			indiv->house_no,
 			indiv->quarantined,
 			indiv->hazard,
 			indiv->random_interactions,
