@@ -17,8 +17,7 @@ import subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
 from random import randrange
-
-sys.path.append("src/COVID19")
+sys.path.append("python/")
 from model import Model
 
 
@@ -54,19 +53,15 @@ class TestClass(object):
 
         # Construct the compilation command and compile
         compile_command = "make clean; make swig-all"
-        completed_compilation = subprocess.run(
-            [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
-        )
-
-        # Copy covid19.py to current dir
-        shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
+        completed_compilation = subprocess.run([compile_command],
+            shell = True, cwd = IBM_DIR_TEST, capture_output = True)
 
     @classmethod
     def teardown_class(self):
         """
         Remove the temporary code directory (when this class is removed)
         """
-        shutil.rmtree(IBM_DIR_TEST, ignore_errors=True)
+        shutil.rmtree(IBM_DIR_TEST, ignore_errors = True)
 
     def setup_method(self):
         """
@@ -79,19 +74,18 @@ class TestClass(object):
         """
 
         """
-        shutil.rmtree(DATA_DIR_TEST, ignore_errors=True)
+        shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
+
 
     def test_basic_step_calculation(self):
         """
         Test the a parameter can be changed in between step runs
         """
         # Create model object
-        model = Model(
-            TEST_DATA_TEMPLATE,
-            PARAM_LINE_NUMBER,
-            DATA_DIR_TEST,
-            TEST_DATA_HOUSEHOLD_DEMOGRAPHICS,
-        )
+        model = Model(TEST_DATA_TEMPLATE,
+                      PARAM_LINE_NUMBER,
+                      DATA_DIR_TEST,
+                      TEST_DATA_HOUSEHOLD_DEMOGRAPHICS)
         step_model = model.create()
 
         # Run steps
@@ -103,3 +97,6 @@ class TestClass(object):
             np.testing.assert_equal(model.get_param("test_on_symptoms"), step)
 
         model.write_output_files()
+        
+        # Destroy the model
+        model.destroy(step_model)
