@@ -51,3 +51,4 @@ const char* AGE_TEXT_MAP[N_AGE_GROUPS] = {
 	"80+ years"
 };
 
+gsl_rng * rng;
