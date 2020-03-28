@@ -112,13 +112,14 @@ void set_quarantine_status(
 ******************************************************************************************/
 void set_age_group( individual *indiv, parameters *params, int group )
 {
-	double mean;
+	double mean, sd;
 
 	indiv->age_group = group;
 	indiv->age_type  = AGE_TYPE_MAP[group];
 
 	mean = params->mean_random_interactions[indiv->age_type];
-	indiv->base_random_interactions = negative_binomial_draw( mean, mean );
+	sd   = params->sd_random_interactions[indiv->age_type];
+	indiv->base_random_interactions = negative_binomial_draw( mean, sd );
 	update_random_interactions( indiv, params );
 }
 
