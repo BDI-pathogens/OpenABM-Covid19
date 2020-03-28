@@ -141,6 +141,13 @@ class TestClass(object):
                 n_total                          = 10000
 
             ),
+        ],
+        "test_work_network": [ 
+            dict( 
+                n_total = 10000,
+                mean_work_interactions_child  = 10
+
+            )
         ]
     }
     """
@@ -217,13 +224,13 @@ class TestClass(object):
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_int        = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         
-        left  = df_int.loc[ :, ['pdx', 'pdx2'] ]        
-        right = df_int.loc[ :, ['pdx', 'pdx2'] ]
-        right.rename( columns =  {"pdx":"pdx2","pdx2":"pdx"},inplace=True)
+        left  = df_int.loc[ :, ['ID', 'ID_2'] ]        
+        right = df_int.loc[ :, ['ID', 'ID_2'] ]
+        right.rename( columns =  {"ID":"ID_2","ID_2":"ID"},inplace=True)
 
         left.drop_duplicates(keep="first",inplace=True)
         right.drop_duplicates(keep="first",inplace=True)
-        join = pd.merge(left,right,on=["pdx","pdx2"], how="inner")
+        join = pd.merge(left,right,on=["ID","ID_2"], how="inner")
         
         N_base = len( left )        
         N_join = len( join )
@@ -248,15 +255,13 @@ class TestClass(object):
        
         # get the number of people in each house hold
         df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
         df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
      
         # get the number of interactions per person on the housegold n
         df_int  = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == HOUSEHOLD]
-        np.testing.assert_array_equal( df_int.loc[:,"house"], df_int.loc[:,"house2"] )
+        np.testing.assert_array_equal( df_int.loc[:,"house_no"], df_int.loc[:,"house_no_2"] )
 
-        df_int.rename( columns =  {"house":"house_no"},inplace=True)
         df_int  = df_int.groupby(["house_no"]).size().reset_index(name="connections")
         
         # see whether that is the expected number
@@ -289,7 +294,7 @@ class TestClass(object):
         individual on the random network
         """  
       
-        # absolutae tolerance
+        # absoluta tolerance
         tolerance = 0.03
         
         # note when counting connections we count each end
@@ -311,19 +316,19 @@ class TestClass(object):
        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
-        df_indiv = df_indiv.loc[:,["pdx","age_group"]] 
+        df_indiv = df_indiv.loc[:,["ID","age_group"]] 
         df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
 
         # get all the random connections
         df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int = df_int[ df_int["type"] == RANDOM ]
         
-        df_int = df_int.loc[:,["pdx"]] 
-        df_int = df_int.groupby(["pdx"]).size().reset_index(name="connections")
-        df_int = pd.merge( df_indiv, df_int, on = "pdx", how = "left" )
+        df_int = df_int.loc[:,["ID"]] 
+        df_int = df_int.groupby(["ID"]).size().reset_index(name="connections")
+        df_int = pd.merge( df_indiv, df_int, on = "ID", how = "left" )
         df_int.fillna(0,inplace=True)
         
+        # check mean and 
         mean = df_int[df_int["age_type"] == CHILD].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == CHILD].loc[:,"connections"].std()        
         np.testing.assert_allclose( mean,   mean_random_interactions_child, rtol = tolerance )
@@ -342,4 +347,52 @@ class TestClass(object):
         if mean_random_interactions_elderly > 0:
             np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
   
+    def test_work_network( 
+            self,
+            n_total,
+            mean_work_interactions_child
+        ):
+
+        """
+        Test to check that peoples work connections are on the correct network and
+        that they have correct number on average
+        """  
+      
+        # absolute tolerance
+        tolerance = 0.03
+        
+        # note when counting connections we count each end
+        ageTypeMap = pd.DataFrame( data={ "age_group": AGES, "age_type": AGE_TYPES } );
+                
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_total",n_total)
+
+        params.set_param("mean_work_interactions_child",  mean_work_interactions_child )
+  #      params.set_param("mean_random_interactions_adult",  mean_random_interactions_adult )
+   #    params.set_param("mean_random_interactions_elderly",mean_random_interactions_elderly )
+        params.set_param("n_total",n_total)
+        utils.turn_off_interventions(params,1)
+        params.write_params(TEST_DATA_FILE)        
+
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
+       
+        # get all the random connections
+        df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int = df_int[ df_int["type"] == WORK ]
+       
+        # 
+       
+
+        # get all the people, need to hand case if people having zero connections
+        #df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
+        #df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        #df_indiv = df_indiv.loc[:,["pdx","age_group"]] 
+        #df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
+        
+        
+
+        
+    
+        #np.testing.assert_equal(0, 1)
   
