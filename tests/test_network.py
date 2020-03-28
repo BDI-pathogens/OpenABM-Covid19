@@ -160,33 +160,36 @@ class TestClass(object):
                 n_total = 10000,
                 mean_work_interactions_child   = 10,
                 mean_work_interactions_adult   = 7,
-                mean_work_interactions_elderly = 3
-
+                mean_work_interactions_elderly = 3,
+                daily_fraction_work            = 0.5
             ),
             dict( 
                 n_total = 20000,
                 mean_work_interactions_child   = 6,
                 mean_work_interactions_adult   = 10,
-                mean_work_interactions_elderly = 5
-
+                mean_work_interactions_elderly = 5,
+                daily_fraction_work            = 0.43
             ),
             dict( 
                 n_total = 20000,
                 mean_work_interactions_child   = 4.63,
                 mean_work_interactions_adult   = 3.25,
-                mean_work_interactions_elderly = 5.85
+                mean_work_interactions_elderly = 5.85,
+                daily_fraction_work            = 0.83
             ),
             dict( 
                 n_total = 20000,
                 mean_work_interactions_child   = 0,
                 mean_work_interactions_adult   = 0,
-                mean_work_interactions_elderly = 0
+                mean_work_interactions_elderly = 0,
+                daily_fraction_work            = 0.5
             ),
             dict( 
                 n_total = 20000,
                 mean_work_interactions_child   = 2,
                 mean_work_interactions_adult   = 6,
-                mean_work_interactions_elderly = 10
+                mean_work_interactions_elderly = 10,
+                daily_fraction_work            = 1.0
             )
         ]
     }
@@ -392,7 +395,8 @@ class TestClass(object):
             n_total,
             mean_work_interactions_child,
             mean_work_interactions_adult,
-            mean_work_interactions_elderly
+            mean_work_interactions_elderly,
+            daily_fraction_work
         ):
 
         """
@@ -414,6 +418,7 @@ class TestClass(object):
         params.set_param( "mean_work_interactions_child",   mean_work_interactions_child )
         params.set_param( "mean_work_interactions_adult",   mean_work_interactions_adult )
         params.set_param( "mean_work_interactions_elderly", mean_work_interactions_elderly )
+        params.set_param( "daily_fraction_work",            daily_fraction_work )
         params.set_param( "n_total",n_total)
         utils.turn_off_interventions(params,1)
         params.write_params(TEST_DATA_FILE)        
