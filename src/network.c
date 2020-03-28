@@ -60,13 +60,13 @@ void build_watts_strogatz_network(
 
 	// handle non-integer k, have different number of connections to the right
 	k_right = floor( k / 2 );
-	p_right = ( k - k_right ) / 2;
+	p_right = k / 2 -  k_right;
 
 	// Allocate memory (needed for large N)
 	long** edge_mat;
 	edge_mat = calloc( N, sizeof(long *) );
 	for(i = 0; i < N; i++)
-		edge_mat[i] = calloc( k*10, sizeof(long) );
+		edge_mat[i] = calloc( ceil( k*10 ), sizeof(long) );
 	
 	// Degree for each individual (need to store a copy during the first step
 	long* n_edges_arr      = calloc( N, sizeof(long) );
@@ -143,8 +143,9 @@ void build_watts_strogatz_network(
 		gsl_ran_shuffle( rng, node_list, N, sizeof(long) );
 
 	long idx = 0;
-	for(i = 0; i < N; i++){
-		for(j = 0; j < n_edges_arr[i]; j++){
+	for(i = 0; i < N; i++)
+		for(j = 0; j < n_edges_arr[i]; j++)
+		{
 			network->edges[idx].id1 = node_list[i];
 			network->edges[idx].id2 = node_list[edge_mat[i][j]];
 			idx++;
@@ -154,7 +155,6 @@ void build_watts_strogatz_network(
 			remove_contact(edge_mat[node_list[edge_mat[i][j]]],
 				node_list[i], &(n_edges_arr[node_list[edge_mat[i][j]]]));
 		}
-	}
 	
 	for(i = 0; i < N; i++)
 		free(edge_mat[i]);
