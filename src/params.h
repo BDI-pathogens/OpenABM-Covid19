@@ -27,6 +27,7 @@ typedef struct{
 	int n_seed_infection;			// number of people seeded with the infections
 
 	int mean_random_interactions[N_AGE_TYPES]; // mean number of random interactions each day
+	int sd_random_interactions[N_AGE_TYPES];   // sd number of random interactions each day
 	int mean_work_interactions[N_WORK_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
 	double daily_fraction_work_used;      		// fraction of daily work interactions with social-distancing
