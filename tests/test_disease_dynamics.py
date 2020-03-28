@@ -36,7 +36,7 @@ TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
 # Age groups
-AGE_0     = 0
+AGE_0_9   = 0
 AGE_10_19 = 1
 AGE_20_29 = 2
 AGE_30_39 = 3
@@ -45,7 +45,7 @@ AGE_50_59 = 5
 AGE_60_69 = 6
 AGE_70_79 = 7
 AGE_80    = 8
-AGES = [ AGE_0, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
+AGES = [ AGE_0_9, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
 
 
 PARAM_LINE_NUMBER = 1

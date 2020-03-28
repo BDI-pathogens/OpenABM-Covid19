@@ -116,6 +116,9 @@ void read_param_file( parameters *params)
 	{
 		check = fscanf(parameter_file, " %i ,",  &(params->mean_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
+
+		check = fscanf(parameter_file, " %i ,",  &(params->sd_random_interactions[i]));
+		if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
 	}
 
 	check = fscanf(parameter_file, " %lf ,",  &(params->child_network_adults));
@@ -376,6 +379,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"ID, ");
 	fprintf(individual_output_file,"current_status, ");
 	fprintf(individual_output_file,"age_group, ");
+	fprintf(individual_output_file,"work_network, ");
 	fprintf(individual_output_file,"house_no, ");
 	fprintf(individual_output_file,"quarantined, ");
 	fprintf(individual_output_file,"hazard, ");
@@ -415,10 +419,11 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
+			indiv->work_network,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->hazard,
@@ -522,35 +527,6 @@ void print_interactions_averages(model *model, int header)
 }
 
 /*****************************************************************************************
-*  Name:		print_demographics
-*  Description: print demographic details
-******************************************************************************************/
-void print_demographics( model *model )
-{
-	long pdx;
-	individual *indiv;
-	FILE *output_file;
-	output_file = fopen("/Users/hinchr/Dropbox/Rob/R/Scratch/indiv.csv", "w");
-
-	fprintf(output_file ,"age_group,age_type,work_network,work_network_new,house_size,house_no\n");
-	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-	{
-		indiv = &(model->population[pdx]);
-		fprintf(output_file ,"%i,%i,%i,%i,%i,%li\n",
-			indiv->age_group,
-			indiv->age_type,
-			indiv->work_network,
-			indiv->work_network,
-			model->household_directory->n_jdx[indiv->house_no],
-			indiv->house_no
-		);
-	}
-	fclose(output_file);
-	print_exit( "Output demographics: end!");
-}
-
-
-/*****************************************************************************************
 *  Name:		read_household_demographics_file
 *  Description: Read household demographics (csv), attach values to params struct
 ******************************************************************************************/
@@ -611,7 +587,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"pdx,age,house,work,type,pdx2,age2,house2,work2\n");
+	fprintf(output_file ,"ID,age_group,house_no,work_network,type,ID_2,age_group_2,house_no_2,work_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -640,7 +616,7 @@ void write_interactions( model *model )
 
 	}
 	fclose(output_file);
-	print_exit( "Output : write interactions end!");
+	print_exit( "# Output : write interactions end!");
 }
 
 
@@ -660,7 +636,7 @@ void write_transmissions( model *model )
 
 	// Concatenate file name
 	strcpy(output_file_name, model->params->output_file_dir);
-	strcat(output_file_name, "/interactions_Run");
+	strcat(output_file_name, "/transmission_Run");
 	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 
@@ -688,5 +664,6 @@ void write_transmissions( model *model )
 		);
 	}
 	fclose(output_file);
-	print_exit( "Output : write transmissions end!");}
+	print_exit( "# Output : write transmissions end!");}
+
 
