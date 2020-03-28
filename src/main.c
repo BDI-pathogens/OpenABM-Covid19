@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 #include "model.h"
 #include "network.h"
@@ -44,10 +41,6 @@ int main(int argc, char *argv[])
 	read_household_demographics_file( &params );
 	
 	printf("# Start model set-up\n");
-    gsl_rng_env_setup();
-    rng = gsl_rng_alloc ( gsl_rng_default);
-	
-	gsl_rng_set( rng, params.rng_seed );
 	model *model = new_model( &params );
 	
 	printf("# param_id: %li\n", params.param_id);
@@ -93,7 +86,6 @@ int main(int argc, char *argv[])
 	
 	destroy_model( model );
 	destroy_params( &params );
-	gsl_rng_free( rng );
 
     clock_gettime( CLOCK_REALTIME, &tv );
     tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
