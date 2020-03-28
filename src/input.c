@@ -105,7 +105,7 @@ void read_param_file( parameters *params)
 	
 	for( i = 0; i < N_WORK_NETWORK_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %i ,",  &(params->mean_work_interactions[i]));
+		check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
 	}
 
@@ -114,10 +114,10 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %i ,",  &(params->mean_random_interactions[i]));
+		check = fscanf(parameter_file, " %lf ,",  &(params->mean_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
 
-		check = fscanf(parameter_file, " %i ,",  &(params->sd_random_interactions[i]));
+		check = fscanf(parameter_file, " %lf ,",  &(params->sd_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
 	}
 
