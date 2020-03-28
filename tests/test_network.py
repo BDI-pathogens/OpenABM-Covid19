@@ -47,6 +47,10 @@ AGE_60_69 = 6
 AGE_70_79 = 7
 AGE_80    = 8
 AGES = [ AGE_0, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
+CHILD   = 0
+ADULT   = 1
+ELDERLY = 2
+AGE_TYPES = [ CHILD, CHILD, ADULT, ADULT, ADULT, ADULT, ADULT, ELDERLY, ELDERLY ]
 
 # network type
 HOUSEHOLD = 0
@@ -89,7 +93,55 @@ class TestClass(object):
             dict( n_total = 30000 ),
             dict( n_total = 50000 ),
             dict( n_total = 100000 )
-        ] 
+        ],
+        "test_random_network": [ 
+            dict( 
+                mean_random_interactions_child   = 2,
+                sd_random_interactions_child     = 2,
+                mean_random_interactions_adult   = 4,
+                sd_random_interactions_adult     = 4,
+                mean_random_interactions_elderly = 3,
+                sd_random_interactions_elderly   = 3,
+                n_total                          = 10000
+            ),
+            dict( 
+                mean_random_interactions_child   = 1,
+                sd_random_interactions_child     = 2,
+                mean_random_interactions_adult   = 1,
+                sd_random_interactions_adult     = 2,
+                mean_random_interactions_elderly = 1,
+                sd_random_interactions_elderly   = 2,
+                n_total                          = 50000
+            ),
+               dict( 
+                mean_random_interactions_child   = 0,
+                sd_random_interactions_child     = 2,
+                mean_random_interactions_adult   = 0,
+                sd_random_interactions_adult     = 2,
+                mean_random_interactions_elderly = 0,
+                sd_random_interactions_elderly   = 2,
+                n_total                          = 40000
+            ),
+            dict( 
+                mean_random_interactions_child   = 4,
+                sd_random_interactions_child     = 4,
+                mean_random_interactions_adult   = 3,
+                sd_random_interactions_adult     = 3,
+                mean_random_interactions_elderly = 2,
+                sd_random_interactions_elderly   = 2,
+                n_total                          = 40000
+            ),
+            dict( 
+                mean_random_interactions_child   = 8,
+                sd_random_interactions_child     = 8,
+                mean_random_interactions_adult   = 7,
+                sd_random_interactions_adult     = 7,
+                mean_random_interactions_elderly = 6,
+                sd_random_interactions_elderly   = 6,
+                n_total                          = 10000
+
+            ),
+        ]
     }
     """
     Test class for checking 
@@ -158,9 +210,9 @@ class TestClass(object):
         """        
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total",n_total)
-        utils.turn_off_interventions(params,1)
-        
+        utils.turn_off_interventions(params,1)  
         params.write_params(TEST_DATA_FILE)        
+      
         file_output   = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
         df_int        = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
@@ -189,7 +241,8 @@ class TestClass(object):
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total",n_total)
         utils.turn_off_interventions(params,1)
-        
+        params.write_params(TEST_DATA_FILE)        
+
         file_output   = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
        
@@ -200,14 +253,15 @@ class TestClass(object):
      
         # get the number of interactions per person on the housegold n
         df_int  = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
-
         df_int  = df_int[ df_int["type"] == HOUSEHOLD]
-        df_int  = pd.merge( df_int,df_indiv.loc[:,["pdx","house_no"]], on = ["pdx"], how = "left")
+        np.testing.assert_array_equal( df_int.loc[:,"house"], df_int.loc[:,"house2"] )
+
+        df_int.rename( columns =  {"house":"house_no"},inplace=True)
         df_int  = df_int.groupby(["house_no"]).size().reset_index(name="connections")
         
         # see whether that is the expected number
-        df_house = pd.merge( df_house,expectedConnections,on =["size"], how = "left")
-        df_house = pd.merge( df_house,df_int, on =["house_no"], how = "outer" )
+        df_house = pd.merge( df_house,expectedConnections,on =[ "size" ], how = "left")
+        df_house = pd.merge( df_house,df_int, on =[ "house_no" ], how = "outer" )
 
         # check single person household without connections
         N_nocon        = df_house.loc[:,["connections"]].isnull().sum().sum()
@@ -217,8 +271,75 @@ class TestClass(object):
         # check the rest are the same 
         df_house = df_house[ df_house["size"] > 1 ]
         print( df_house.head())
-        
         np.testing.assert_array_equal( df_house.loc[:,"connections"], df_house.loc[:,"expected"] )
     
-    
+       
+    def test_random_network( 
+            self,
+            mean_random_interactions_child,
+            sd_random_interactions_child,
+            mean_random_interactions_adult,
+            sd_random_interactions_adult,
+            mean_random_interactions_elderly,
+            sd_random_interactions_elderly,
+            n_total
+        ):
+        """
+        Test to check that there are the correct number of interactions per
+        individual on the random network
+        """  
+      
+        # absolutae tolerance
+        tolerance = 0.03
+        
+        # note when counting connections we count each end
+        ageTypeMap = pd.DataFrame( data={ "age_group": AGES, "age_type": AGE_TYPES } );
+                
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param("mean_random_interactions_child",  mean_random_interactions_child )
+        params.set_param("sd_random_interactions_child",    sd_random_interactions_child )
+        params.set_param("mean_random_interactions_adult",  mean_random_interactions_adult )
+        params.set_param("sd_random_interactions_adult",    sd_random_interactions_adult )
+        params.set_param("mean_random_interactions_elderly",mean_random_interactions_elderly )
+        params.set_param("sd_random_interactions_elderly",  sd_random_interactions_elderly )
+        params.set_param("n_total",n_total)
+        utils.turn_off_interventions(params,1)
+        params.write_params(TEST_DATA_FILE)        
+
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)
+       
+        # get all the people, need to hand case if people having zero connections
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
+        df_indiv = df_indiv.loc[:,["pdx","age_group"]] 
+        df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
+
+        # get all the random connections
+        df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int = df_int[ df_int["type"] == RANDOM ]
+        
+        df_int = df_int.loc[:,["pdx"]] 
+        df_int = df_int.groupby(["pdx"]).size().reset_index(name="connections")
+        df_int = pd.merge( df_indiv, df_int, on = "pdx", how = "left" )
+        df_int.fillna(0,inplace=True)
+        
+        mean = df_int[df_int["age_type"] == CHILD].loc[:,"connections"].mean()
+        sd   = df_int[df_int["age_type"] == CHILD].loc[:,"connections"].std()        
+        np.testing.assert_allclose( mean,   mean_random_interactions_child, rtol = tolerance )
+        if mean_random_interactions_child > 0:
+            np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = tolerance )
+        
+        mean = df_int[df_int["age_type"] == ADULT].loc[:,"connections"].mean()
+        sd   = df_int[df_int["age_type"] == ADULT].loc[:,"connections"].std()        
+        np.testing.assert_allclose( mean, mean_random_interactions_adult, rtol = tolerance )
+        if mean_random_interactions_adult > 0:
+            np.testing.assert_allclose( sd,   sd_random_interactions_adult, rtol = tolerance )
+        
+        mean = df_int[df_int["age_type"] == ELDERLY].loc[:,"connections"].mean()
+        sd   = df_int[df_int["age_type"] == ELDERLY].loc[:,"connections"].std()        
+        np.testing.assert_allclose( mean, mean_random_interactions_elderly, rtol = tolerance )
+        if mean_random_interactions_elderly > 0:
+            np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
+  
   

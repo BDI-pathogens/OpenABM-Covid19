@@ -7,8 +7,11 @@ mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
 daily_fraction_work	0.5
 mean_random_interactions_child	2
+sd_random_interactions_child	2
 mean_random_interactions_adult	4
+sd_random_interactions_adult	4
 mean_random_interactions_elderly	3
+sd_random_interactions_elderly	3
 child_network_adults	0.2
 elderly_network_adults	0.2
 days_of_interactions	10
