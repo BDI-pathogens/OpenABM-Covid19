@@ -217,6 +217,8 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, ASYMPTOMATIC );
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
+
+    //kelvin could add hospital transmission here
 }
 
 /*****************************************************************************************
