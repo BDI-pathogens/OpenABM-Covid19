@@ -585,7 +585,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"pdx,age,house,work,type,pdx2,age2,house2,work2\n");
+	fprintf(output_file ,"ID,age_group,house_no,work_network,type,ID_2,age_group_2,house_no_2,work_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
