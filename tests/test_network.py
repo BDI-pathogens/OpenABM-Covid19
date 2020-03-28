@@ -37,7 +37,7 @@ TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE     = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
 # Age groups
-AGE_0     = 0
+AGE_0_9   = 0
 AGE_10_19 = 1
 AGE_20_29 = 2
 AGE_30_39 = 3
@@ -46,7 +46,8 @@ AGE_50_59 = 5
 AGE_60_69 = 6
 AGE_70_79 = 7
 AGE_80    = 8
-AGES = [ AGE_0, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
+AGES = [ AGE_0_9, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
+
 CHILD   = 0
 ADULT   = 1
 ELDERLY = 2
@@ -56,6 +57,20 @@ AGE_TYPES = [ CHILD, CHILD, ADULT, ADULT, ADULT, ADULT, ADULT, ELDERLY, ELDERLY 
 HOUSEHOLD = 0
 WORK      = 1
 RANDOM    = 2
+
+# work networks
+NETWORK_0_9   = 0
+NETWORK_10_19 = 1
+NETWORK_20_69 = 2
+NETWORK_70_79 = 3
+NETWORK_80    = 4
+NETWORKS      = [ NETWORK_0_9, NETWORK_10_19, NETWORK_20_69, NETWORK_70_79, NETWORK_80 ]
+
+# work type networks
+NETWORK_CHILD   = 0
+NETWORK_ADULT   = 1
+NETWORK_ELDERLY = 2
+NETWORK_TYPES    = [ NETWORK_CHILD,  NETWORK_ADULT,  NETWORK_ELDERLY]
 
 PARAM_LINE_NUMBER = 1
 
@@ -74,8 +89,6 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize(
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
-
-
 
 class TestClass(object):
     params = {
@@ -145,8 +158,35 @@ class TestClass(object):
         "test_work_network": [ 
             dict( 
                 n_total = 10000,
-                mean_work_interactions_child  = 10
+                mean_work_interactions_child   = 10,
+                mean_work_interactions_adult   = 7,
+                mean_work_interactions_elderly = 3
 
+            ),
+            dict( 
+                n_total = 20000,
+                mean_work_interactions_child   = 6,
+                mean_work_interactions_adult   = 10,
+                mean_work_interactions_elderly = 5
+
+            ),
+            dict( 
+                n_total = 20000,
+                mean_work_interactions_child   = 0,
+                mean_work_interactions_adult   = 3,
+                mean_work_interactions_elderly = 0
+            ),
+            dict( 
+                n_total = 20000,
+                mean_work_interactions_child   = 0,
+                mean_work_interactions_adult   = 0,
+                mean_work_interactions_elderly = 0
+            ),
+            dict( 
+                n_total = 20000,
+                mean_work_interactions_child   = 2,
+                mean_work_interactions_adult   = 6,
+                mean_work_interactions_elderly = 10
             )
         ]
     }
@@ -350,7 +390,9 @@ class TestClass(object):
     def test_work_network( 
             self,
             n_total,
-            mean_work_interactions_child
+            mean_work_interactions_child,
+            mean_work_interactions_adult,
+            mean_work_interactions_elderly
         ):
 
         """
@@ -362,37 +404,66 @@ class TestClass(object):
         tolerance = 0.03
         
         # note when counting connections we count each end
-        ageTypeMap = pd.DataFrame( data={ "age_group": AGES, "age_type": AGE_TYPES } );
+        ageTypeMap         = pd.DataFrame( data={ "age_group": AGES, "age_type": AGE_TYPES } );
+        ageTypeMap2        = pd.DataFrame( data={ "age_group_2": AGES, "age_type_2": AGE_TYPES } );
+        paramByNetworkType = [ mean_work_interactions_child, mean_work_interactions_adult, mean_work_interactions_elderly ]      
                 
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total",n_total)
 
-        params.set_param("mean_work_interactions_child",  mean_work_interactions_child )
-  #      params.set_param("mean_random_interactions_adult",  mean_random_interactions_adult )
-   #    params.set_param("mean_random_interactions_elderly",mean_random_interactions_elderly )
-        params.set_param("n_total",n_total)
+        params.set_param( "mean_work_interactions_child",   mean_work_interactions_child )
+        params.set_param( "mean_work_interactions_adult",   mean_work_interactions_adult )
+        params.set_param( "mean_work_interactions_elderly", mean_work_interactions_elderly )
+        params.set_param( "n_total",n_total)
         utils.turn_off_interventions(params,1)
         params.write_params(TEST_DATA_FILE)        
 
         file_output   = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command], stdout = file_output, shell = True)
        
-        # get all the random connections
-        df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        df_int = df_int[ df_int["type"] == WORK ]
-       
-        # 
-       
-
         # get all the people, need to hand case if people having zero connections
-        #df_indiv.rename( columns = {"ID":"pdx"}, inplace = True)
-        #df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        #df_indiv = df_indiv.loc[:,["pdx","age_group"]] 
-        #df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
-        
-        
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
 
+        # get all the random connections
+        df_int  = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int  = df_int[ df_int["type"] == WORK ]
+        df_int = pd.merge( df_int, ageTypeMap,  on = "age_group", how = "left" )
+        df_int = pd.merge( df_int, ageTypeMap2, on = "age_group_2", how = "left" )
+
+        # get the number of connections for each person
+        df_n_int = df_int.groupby( [ "ID" ] ).size().reset_index( name = "connections" )
+        df_n_int = pd.merge( df_indiv, df_n_int, on = "ID", how = "left" )
+        df_n_int.fillna( 0, inplace=True )
+
+        # check there are connections for each age group
+        for age in AGES:
+            if ( paramByNetworkType[ NETWORK_TYPES[ AGE_TYPES[ age ] ] ]  > 0 ) :
+                n = sum( df_int[ "age_group" ] == age )
+                np.testing.assert_equal( n > 0, True, "there are no work connections for age_group " + str( age ) )
+           
+        # check the correct people are on each network 
+        n = sum( ( df_int[ "age_group" ] == AGE_0_9 ) & ( df_int[ "age_group_2" ] != AGE_0_9 ) & ( df_int[ "age_type_2" ] != ADULT ) )
+        np.testing.assert_equal( n, 0, "only 0_9 and adults on the 0_9 network" )
+        n = sum( ( df_int[ "age_group" ] == AGE_10_19 ) & ( df_int[ "age_group_2" ] != AGE_10_19 ) & ( df_int[ "age_type_2" ] != ADULT ) )
+        np.testing.assert_equal( n, 0, "only 10_19 and adults on the 10_19 network" )
+        n = sum( ( df_int[ "age_group" ] == AGE_70_79 ) & ( df_int[ "age_group_2" ] != AGE_70_79 ) & ( df_int[ "age_type_2" ] != ADULT ) )
+        np.testing.assert_equal( n, 0, "only 70_79 and adults on the 70_79 network" )
+        n = sum( ( df_int[ "age_group" ] == AGE_80 ) & ( df_int[ "age_group_2" ] != AGE_80 ) & ( df_int[ "age_type_2" ] != ADULT ) )
+        np.testing.assert_equal( n, 0, "only 80  adults on the 80 network" )
         
-    
-        #np.testing.assert_equal(0, 1)
+        # check the mean number of networks connections by network
+        for network in [ NETWORK_0_9, NETWORK_10_19 ]:
+            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+            np.testing.assert_allclose( mean, mean_work_interactions_child, rtol = tolerance )
+            
+        mean = df_n_int[ df_n_int[ "work_network" ] == NETWORK_20_69 ].loc[:,"connections"].mean()
+        np.testing.assert_allclose( mean, mean_work_interactions_adult, rtol = tolerance )
+        
+        for network in [ NETWORK_70_79, NETWORK_80 ]:
+            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+            np.testing.assert_allclose( mean, mean_work_interactions_elderly, rtol = tolerance )
+      
+            
   
