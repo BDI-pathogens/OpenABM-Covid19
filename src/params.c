@@ -15,20 +15,25 @@
 ******************************************************************************************/
 void check_params( parameters *params )
 {
+	int idx;
+
 	if( params->days_of_interactions > MAX_DAILY_INTERACTIONS_KEPT )
-    	print_exit( "asking for day_of_interaction to be greater than MAX_DAILY_INTERACTIONS " );
+    	print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
 
     if( params->end_time > MAX_TIME )
-     	print_exit( "asking for end_time to be greater than MAX_TIME " );
-
-    if( params->mean_time_to_hospital > 2 )
-    	print_exit( "maximum time from symptoms to hospital is 2 days" );
+     	print_exit( "BAD PARAM end_time - can't be greater than MAX_TIME " );
 
     if( params->quarantine_days > params->days_of_interactions )
-    	print_exit( "can only quarantine up to the number of days we store" );
+    	print_exit( "BAD PARAM quarantine_days - can't be greater than days_of_interactions" );
 
     if( params->social_distancing_time_on < 1 )
-      	print_exit( "social distancing can only be turned on at the first time step" );
+      	print_exit( "BAD PARAM social_distancing_time_on - can only be turned on at the first time step" );
+
+    for( idx = 0; idx < N_AGE_TYPES; idx++ )
+    {
+    	if( params->mean_random_interactions[idx] >= params->sd_random_interactions[idx] * params->sd_random_interactions[idx] )
+    		print_exit( "BAD_PARAM - sd_random_interations_xxxx - variance must be greater than the mean for (negative binomial distribution");
+    }
 }
 
 void destroy_params( parameters *params)
