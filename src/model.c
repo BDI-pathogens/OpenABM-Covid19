@@ -17,9 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
 *  Name:		new_model
@@ -40,6 +37,10 @@ model* new_model( parameters *params )
 	
 	model_ptr->params = params;
 	model_ptr->time   = 0;
+
+    gsl_rng_env_setup();
+    rng = gsl_rng_alloc ( gsl_rng_default);
+    gsl_rng_set( rng, params->rng_seed );
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
@@ -99,6 +100,7 @@ void destroy_model( model *model )
     free ( model-> household_directory );;
     free( model );
 
+    gsl_rng_free( rng );
 };
 
 /*****************************************************************************************
