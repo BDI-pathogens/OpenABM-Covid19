@@ -89,7 +89,7 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize(
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
-
+    
 class TestClass(object):
     params = {
         "test_file_exists": [dict()],
@@ -366,6 +366,12 @@ class TestClass(object):
         df_int = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int = df_int[ df_int["type"] == RANDOM ]
         
+        # check the correlation is below a threshold
+        corr = df_int['house_no'].corr(df_int['house_no_2'])
+        if ( len( df_int ) > 1 ) :
+            np.testing.assert_allclose( corr, 0, atol = tolerance )
+      
+        
         df_int = df_int.loc[:,["ID"]] 
         df_int = df_int.groupby(["ID"]).size().reset_index(name="connections")
         df_int = pd.merge( df_indiv, df_int, on = "ID", how = "left" )
@@ -470,5 +476,10 @@ class TestClass(object):
             mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
             np.testing.assert_allclose( mean, mean_work_interactions_elderly, rtol = tolerance )
       
-            
+        # check the correlation is below a threshold
+        corr = df_int['house_no'].corr(df_int['house_no_2'])
+        if ( len( df_int ) > 1 ) :
+            np.testing.assert_allclose( corr, 0, atol = tolerance )
+        
+        
   
