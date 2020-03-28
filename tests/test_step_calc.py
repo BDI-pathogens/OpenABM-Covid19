@@ -58,6 +58,12 @@ class TestClass(object):
             [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
         )
 
+<<<<<<< HEAD
+=======
+        # Copy covid19.py to current dir
+        shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
+
+>>>>>>> Add Python-C interface using Swig
     @classmethod
     def teardown_class(self):
         """
