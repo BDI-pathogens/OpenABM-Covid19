@@ -172,9 +172,9 @@ class TestClass(object):
             ),
             dict( 
                 n_total = 20000,
-                mean_work_interactions_child   = 0,
-                mean_work_interactions_adult   = 3,
-                mean_work_interactions_elderly = 0
+                mean_work_interactions_child   = 4.63,
+                mean_work_interactions_adult   = 3.25,
+                mean_work_interactions_elderly = 5.85
             ),
             dict( 
                 n_total = 20000,

@@ -50,40 +50,48 @@ network* new_network( long n_total, int type )
 void build_watts_strogatz_network(
 	network *network,
 	long N,
-	long k,
+	double k,
 	double p_rewire,
 	int randomise_nodes
 )
 {
-	long incr = k/2, neighbour, i, j, l;
-	
+	long k_used, k_right, i, j, ii;
+	double p_right;
+
+	// handle non-integer k, have different number of connections to the right
+	k_right = floor( k / 2 );
+	p_right = ( k - k_right ) / 2;
+
 	// Allocate memory (needed for large N)
 	long** edge_mat;
-	edge_mat = calloc(N, sizeof(long *));
+	edge_mat = calloc( N, sizeof(long *) );
 	for(i = 0; i < N; i++)
-		edge_mat[i] = calloc(k*10, sizeof(long));
+		edge_mat[i] = calloc( k*10, sizeof(long) );
 	
-	// Degree for each individual
-	int* n_edges_arr = calloc(N, sizeof(int));
-	for(i = 0; i < N; i++){
-		n_edges_arr[i] = k;
-	}
+	// Degree for each individual (need to store a copy during the first step
+	long* n_edges_arr      = calloc( N, sizeof(long) );
+	long* n_edges_arr_init = calloc( N, sizeof(long) );
 
 	// Step 1: Set up random lattice
-	for(i = 0; i < N; i++){
-		j = 0; l = 0;
-		while(l < k){
-			// Make sure we loop to the start of the ring
-			neighbour = (i - incr + j + N) % N;
+	// start by getting the correct number interactions but only mark only the connections to the right
+	for(i = 0; i < N; i++)
+	{
+		k_used = k_right + gsl_ran_bernoulli( rng, p_right );
+		n_edges_arr[i]      = k_used;
+		n_edges_arr_init[i] = k_used;
 
-			if(neighbour != i){
-				edge_mat[i][l] = neighbour;
-				l++;
-			}
-			j++;
-		}
+		for( j = 0; j < k_used; j++ )
+			edge_mat[i][j] = ( i + j + 1 + N) % N;
 	}
-	
+	// now mark all the connections to the left and get the total interactions per node
+	for(i = 0; i < N; i++)
+		for( j = 0; j < n_edges_arr_init[i]; j++ )
+		{
+			ii = edge_mat[i][j];
+			edge_mat[ii][n_edges_arr[ii]++] = i;
+		}
+	free( n_edges_arr_init );
+
 	double u;
 	long new_contact, old_contact;
 	
@@ -96,7 +104,7 @@ void build_watts_strogatz_network(
 			if(u < p_rewire){
 				
 				// Draw a new contact (long between 0 and N-1)
-				new_contact = (long) floor(gsl_rng_uniform(rng) * N);
+				new_contact =  gsl_rng_uniform_int(rng, N);
 				
 				// Check if new_connection is already connected (or is self)
 				while(check_member_or_self(new_contact, i, edge_mat[i], n_edges_arr[i])){
@@ -159,9 +167,9 @@ void build_watts_strogatz_network(
 *  Name:		remove_contact
 *  Description: Remove a contact from a list of edges, tidy list
 ******************************************************************************************/
-void remove_contact(long *current_contacts_arr, long contact_to_remove, int *length){
-	
-	int i, j = 0;
+void remove_contact(long *current_contacts_arr, long contact_to_remove, long *length)
+{
+	long i, j = 0;
 	
 	for(i = 0; i < *length; i++){
 		if(current_contacts_arr[i] != contact_to_remove){
@@ -177,8 +185,8 @@ void remove_contact(long *current_contacts_arr, long contact_to_remove, int *len
 *  Name:		add_contact
 *  Description: Add a contact from a list of edges
 ******************************************************************************************/
-void add_contact(long *current_contacts_arr, long contact_to_add, int *length){
-	
+void add_contact(long *current_contacts_arr, long contact_to_add, long *length)
+{
 	current_contacts_arr[*length] = contact_to_add;
 	++*length;
 };
@@ -187,13 +195,13 @@ void add_contact(long *current_contacts_arr, long contact_to_add, int *length){
 *  Name:		check_member_or_self
 *  Description: Check if x is 'self' or a member of the 'array' (of length 'length')
 ******************************************************************************************/
-int check_member_or_self(long x, long self, long *array, int length)
+int check_member_or_self(long x, long self, long *array, long length)
 {
 	if(x == self){
 		return 1;
 	}
 	
-    int i;
+    long i;
     for(i = 0; i < length; i++)
     {
         if(array[i] == x)
