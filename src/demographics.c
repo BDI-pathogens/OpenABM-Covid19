@@ -63,7 +63,10 @@ void set_up_allocate_work_places( model *model )
 		{
 			prob[adx][ndx] = 0;
 			if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] != NETWORK_TYPE_ADULT )
+            {
 				prob[adx][ndx] = ( ndx == AGE_WORK_MAP[adx] );
+                double t = prob[adx][ndx];
+            }
 			else
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
@@ -78,8 +81,20 @@ void set_up_allocate_work_places( model *model )
 	}
 
 	// randomly assign a work place networks using the probability map
-	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+
+    //old way w/o healthcare workers
+//	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+//		model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+
+    //kelvin change, make sure no healthcare workers assigned to a work network
+    for (pdx = 0; pdx < model->params->n_total; pdx++)
+    {
+        if( model->population[pdx].worker_type == OTHER )
+            model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+        else
+            model->population[pdx].work_network = -1; //TODO: set work network to hospital. How does this affect the rest of the project if addign hospital to WORK_NETWORKS?
+
+    }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
 		free(prob[ndx]);
