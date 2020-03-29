@@ -112,9 +112,9 @@ void set_up_infectious_curves( model *model )
 	double mean_interactions[N_AGE_TYPES];
 	int type, group;
 
-	mean_interactions[AGE_TYPE_CHILD]  = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
-	mean_interactions[AGE_TYPE_ADULT] = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
-	mean_interactions[AGE_TYPE_ELDERLY]    = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
+	mean_interactions[AGE_TYPE_CHILD]   = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
+	mean_interactions[AGE_TYPE_ADULT]   = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
+	mean_interactions[AGE_TYPE_ELDERLY] = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
 
 	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
 
@@ -153,7 +153,7 @@ void transmit_virus_by_type(
 )
 {
 	long idx, jdx, n_infected;
-	int day, n_interaction;
+	int day, n_interaction, t_infect;
 	double hazard_rate;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
@@ -169,28 +169,29 @@ void transmit_virus_by_type(
 		{
 			event      = next_event;
 			next_event = event->next;
+			infector   = event->individual;
 
-			infector      = event->individual;
+			t_infect = model->time - 1 - time_infected( infector );
+			if( t_infect >= MAX_INFECTIOUS_PERIOD )
+				continue;
+
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			if( n_interaction > 0 )
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
-				if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
-					hazard_rate = 0.0;
-				else
-					hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == UNINFECTED )
 					{
+						hazard_rate = list->infectious_curve[interaction->type][ t_infect ];
 						interaction->individual->hazard -= hazard_rate;
+
 						if( interaction->individual->hazard < 0 )
 						{
 							new_infection( model, interaction->individual, infector );
 							interaction->individual->infector_network = interaction->type;
 						}
-
 					}
 					interaction = interaction->next;
 				}
