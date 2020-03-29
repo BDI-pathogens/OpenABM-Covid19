@@ -364,7 +364,7 @@ class TestClass(object):
         Test that the mean and standard deviation of the transition times between 
         states agrees with the parameters
         """
-        std_error_limit = 3
+        std_error_limit = 4
         
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", 20000)
@@ -485,7 +485,7 @@ class TestClass(object):
         Test that the fraction of infected people following each path for 
         the progression of the disease agrees with the parameters
         """
-        std_error_limit = 3
+        std_error_limit = 4
         
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", 20000)

@@ -370,7 +370,6 @@ class TestClass(object):
         corr = df_int['house_no'].corr(df_int['house_no_2'])
         if ( len( df_int ) > 1 ) :
             np.testing.assert_allclose( corr, 0, atol = tolerance )
-      
         
         df_int = df_int.loc[:,["ID"]] 
         df_int = df_int.groupby(["ID"]).size().reset_index(name="connections")
@@ -437,7 +436,7 @@ class TestClass(object):
         df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
         df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
 
-        # get all the random connections
+        # get all the work connections
         df_int  = pd.read_csv(TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == WORK ]
         df_int = pd.merge( df_int, ageTypeMap,  on = "age_group", how = "left" )
