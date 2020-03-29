@@ -54,6 +54,8 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
+    //TODO: kelvin change
+    indiv->worker_type = OTHER;
 }
 
 /*****************************************************************************************
