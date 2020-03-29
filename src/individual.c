@@ -119,7 +119,14 @@ void set_age_group( individual *indiv, parameters *params, int group )
 
 	mean = params->mean_random_interactions[indiv->age_type];
 	sd   = params->sd_random_interactions[indiv->age_type];
-	indiv->base_random_interactions = negative_binomial_draw( mean, sd );
+
+	switch( params->random_interaction_distribution )
+	{
+		case FIXED:				indiv->base_random_interactions = mean; break;
+		case NEGATIVE_BINOMIAL: indiv->base_random_interactions = negative_binomial_draw( mean, sd ); break;
+		print_exit( "random_interaction_distribution not supported" );
+	}
+
 	update_random_interactions( indiv, params );
 }
 

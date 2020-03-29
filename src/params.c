@@ -29,11 +29,13 @@ void check_params( parameters *params )
     if( params->social_distancing_time_on < 1 )
       	print_exit( "BAD PARAM social_distancing_time_on - can only be turned on at the first time step" );
 
-    for( idx = 0; idx < N_AGE_TYPES; idx++ )
-    {
-    	if( params->mean_random_interactions[idx] >= params->sd_random_interactions[idx] * params->sd_random_interactions[idx] )
-    		print_exit( "BAD_PARAM - sd_random_interations_xxxx - variance must be greater than the mean for (negative binomial distribution");
-    }
+    if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
+ 	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );
+
+    if( params->random_interaction_distribution == NEGATIVE_BINOMIAL )
+		for( idx = 0; idx < N_AGE_TYPES; idx++ )
+			if( params->mean_random_interactions[idx] >= params->sd_random_interactions[idx] * params->sd_random_interactions[idx] )
+				print_exit( "BAD_PARAM - sd_random_interations_xxxx - variance must be greater than the mean for (negative binomial distribution");
 }
 
 void destroy_params( parameters *params)

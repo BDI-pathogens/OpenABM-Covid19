@@ -121,6 +121,9 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
 	}
 
+	check = fscanf(parameter_file, " %i ,",  &(params->random_interaction_distribution));
+	if( check < 1){ print_exit("Failed to read parameter random_interaction_distribution\n"); };
+
 	check = fscanf(parameter_file, " %lf ,",  &(params->child_network_adults));
 	if( check < 1){ print_exit("Failed to read parameter child_network_adults\n"); };
 
