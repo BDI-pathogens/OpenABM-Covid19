@@ -259,8 +259,8 @@ class TestClass(object):
         there is a corresponding connection in the other person's diary 
         """        
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params,1)  
         params.set_param("n_total",n_total)
-        utils.turn_off_interventions(params,1)  
         params.write_params(TEST_DATA_FILE)        
       
         file_output   = open(TEST_OUTPUT_FILE, "w")
@@ -289,8 +289,8 @@ class TestClass(object):
         expectedConnections = pd.DataFrame(data={'size': [1,2,3,4,5,6], 'expected': [0,2,6,12,20,30]})
             
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params,1)
         params.set_param("n_total",n_total)
-        utils.turn_off_interventions(params,1)
         params.write_params(TEST_DATA_FILE)        
 
         file_output   = open(TEST_OUTPUT_FILE, "w")
@@ -344,6 +344,7 @@ class TestClass(object):
         ageTypeMap = pd.DataFrame( data={ "age_group": AGES, "age_type": AGE_TYPES } );
                 
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params,1)
         params.set_param("mean_random_interactions_child",  mean_random_interactions_child )
         params.set_param("sd_random_interactions_child",    sd_random_interactions_child )
         params.set_param("mean_random_interactions_adult",  mean_random_interactions_adult )
@@ -351,7 +352,6 @@ class TestClass(object):
         params.set_param("mean_random_interactions_elderly",mean_random_interactions_elderly )
         params.set_param("sd_random_interactions_elderly",  sd_random_interactions_elderly )
         params.set_param("n_total",n_total)
-        utils.turn_off_interventions(params,1)
         params.write_params(TEST_DATA_FILE)        
 
         file_output   = open(TEST_OUTPUT_FILE, "w")
@@ -418,14 +418,13 @@ class TestClass(object):
         paramByNetworkType = [ mean_work_interactions_child, mean_work_interactions_adult, mean_work_interactions_elderly ]      
                 
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params,1)
         params.set_param("n_total",n_total)
-
         params.set_param( "mean_work_interactions_child",   mean_work_interactions_child )
         params.set_param( "mean_work_interactions_adult",   mean_work_interactions_adult )
         params.set_param( "mean_work_interactions_elderly", mean_work_interactions_elderly )
         params.set_param( "daily_fraction_work",            daily_fraction_work )
         params.set_param( "n_total",n_total)
-        utils.turn_off_interventions(params,1)
         params.write_params(TEST_DATA_FILE)        
 
         file_output   = open(TEST_OUTPUT_FILE, "w")
