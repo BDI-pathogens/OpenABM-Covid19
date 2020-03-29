@@ -12,6 +12,7 @@ mean_random_interactions_adult	4
 sd_random_interactions_adult	4
 mean_random_interactions_elderly	3
 sd_random_interactions_elderly	3
+random_interaction_distribution 1
 child_network_adults	0.2
 elderly_network_adults	0.2
 days_of_interactions	10
