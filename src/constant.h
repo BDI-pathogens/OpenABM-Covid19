@@ -69,9 +69,9 @@ enum AGE_TYPES{
 };
 
 enum WORK_NETWORKS{
-	NETWORK_0_9,
-	NETWORK_10_19,
-	NETWORK_20_69,
+    NETWORK_0_9, // healthcare workers children still in school (intervention where only key workers can have kids at school)
+    NETWORK_10_19,
+    NETWORK_20_69, // pick certain number from this network to be healthcare worker
 	NETWORK_70_79,
 	NETWORK_80,
     //NETWORK_HOSPITAL, //TODO: kelvin change
