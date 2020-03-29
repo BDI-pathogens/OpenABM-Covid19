@@ -255,7 +255,6 @@ void set_up_healthcare_workers( model *model)
     int idx;
     individual *indiv;
 
-
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be doctors
     while( idx < model->params->n_total_doctors )
@@ -521,11 +520,17 @@ void set_up_seed_infection( model *model )
 	int idx;
 	unsigned long int person;
 
-	for( idx = 0; idx < params->n_seed_infection; idx ++ )
-	{
-		person = gsl_rng_uniform_int( rng, params->n_total );
-		new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
-	}
+    //kelvin change, only seed random infection if not a healthcare worker
+    idx = 0;
+    while( idx < params->n_seed_infection )
+    {
+        person = gsl_rng_uniform_int( rng, params->n_total );
+        if( model->population[person].worker_type == OTHER )
+        {
+            new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
+            idx++;
+        }
+    }
 }
 
 /*****************************************************************************************
