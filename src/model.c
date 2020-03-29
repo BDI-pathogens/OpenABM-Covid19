@@ -49,6 +49,7 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+    set_up_healthcare_workers( model_ptr ); //kelvin change
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
@@ -245,6 +246,43 @@ void set_up_population( model *model )
 	model->population = calloc( params->n_total, sizeof( individual ) );
 	for( idx = 0; idx < params->n_total; idx++ )
 		initialize_individual( &(model->population[idx]), params, idx );
+}
+
+//kelvin change
+void set_up_healthcare_workers( model *model)
+{
+    long pdx;
+    int idx;
+    individual *indiv;
+
+
+    idx = 0;
+    //randomly pick individuals from population between ages 20 - 69 to be doctors
+    while( idx < model->params->n_total_doctors )
+    {
+        pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+        indiv = &(model->population[pdx]);
+
+        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_60_69) )
+                continue;
+
+        indiv->worker_type = DOCTOR;
+        idx++;
+    }
+
+    idx = 0;
+    //randomly pick individuals from population between ages 20 - 69 to be nurses
+    while( idx < model->params->n_total_nurses )
+    {
+        pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+        indiv = &(model->population[pdx]);
+
+        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_60_69) )
+                continue;
+
+        indiv->worker_type = NURSE;
+        idx++;
+    }
 }
 
 /*****************************************************************************************
