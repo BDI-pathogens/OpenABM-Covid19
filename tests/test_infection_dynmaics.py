@@ -33,6 +33,7 @@ TEST_DATA_FILE     = join(DATA_DIR_TEST, "test_parameters.csv")
 TEST_OUTPUT_FILE      = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE  = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
+TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE     = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -72,6 +73,14 @@ NETWORK_CHILD   = 0
 NETWORK_ADULT   = 1
 NETWORK_ELDERLY = 2
 NETWORK_TYPES    = [ NETWORK_CHILD,  NETWORK_ADULT,  NETWORK_ELDERLY]
+
+# infection status
+UNINFECTED      = 0
+PRESYMPTOMATIC  = 1
+ASYMPTOMATIC    = 2
+SYMPTOMATIC     = 3
+HOSPITALISED    = 4
+CRITICAL        = 5
 
 PARAM_LINE_NUMBER = 1
 
@@ -140,6 +149,14 @@ class TestClass(object):
                 n_total                = 100000
             ),
         ],
+        "test_transmission_pairs": [ 
+            dict( 
+                n_total         = 50000,
+                infectious_rate = 4.0,
+                end_time        = 50,
+                hospitalised_daily_interactions = 5
+            ) ]
+
     }   
     """
     Test class for checking 
@@ -178,13 +195,67 @@ class TestClass(object):
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", 10000)
         params.set_param("end_time", 1)
-        params.write_params(TEST_DATA_FILE)
+        params.write_params(TEST_DATA_FILE) 
         
     def teardown_method(self):
         """
         At the end of each method (test), remove the directory of test input/output data
         """
         shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
+        
+        
+    def test_transmission_pairs(
+        self, 
+        n_total,
+        end_time,
+        infectious_rate,
+        hospitalised_daily_interactions
+    ):
+        
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions( params, end_time)
+        params.set_param( "infectious_rate", infectious_rate )
+        params.set_param( "n_total", n_total )
+        params.set_param( "end_time", end_time )
+        params.set_param( "hospitalised_daily_interactions", hospitalised_daily_interactions )
+        params.write_params(TEST_DATA_FILE)     
+
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_trans      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+ 
+        # check to see that the number of entries in the transmission file is that in the time-series
+        np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
+
+        # check to see whether there are transmission from all infected states
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == PRESYMPTOMATIC ) > 0, True, "no transmission from presymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == SYMPTOMATIC )    > 0, True, "no transmission from symptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == ASYMPTOMATIC )   > 0, True, "no transmission from asymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == HOSPITALISED )   > 0, True, "no transmission from hospitalised people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == CRITICAL )       > 0, True, "no transmission from critical people" )
+ 
+        # check the only people who were infected by someone after 0 time are the seed infections
+        np.testing.assert_equal( min( df_trans[ "infector_infected_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_infected_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
+        
+        # check that some people can get infected after one time step
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_infected_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )
+
+        # check the maximum time people are stil infections
+        max_sd   = 7;
+        max_time = float( params.get_param( "mean_infectious_period" ) ) + max_sd * float(  params.get_param( "sd_infectious_period" ) )
+        np.testing.assert_equal( max( df_trans[ "infector_infected_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
+
+        # check that some people are infected across all networks
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == WORK )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == RANDOM )    > 0, True, "no transmission on the random network" )
+
+        # check hospitalised people are not transmitting on the work and household networks
+        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == HOUSEHOLD ) & ( df_trans[ "infector_status" ] == HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == WORK ) &      ( df_trans[ "infector_status" ] == HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+
         
     def test_exponential_growth_homogeneous_random(
             self,
@@ -238,6 +309,16 @@ class TestClass(object):
         slope_an  = optimize.brentq( char_func, - 0.99 / theta, 1  )
         
         np.testing.assert_allclose( slope, slope_an, rtol = tolerance, err_msg = "exponential growth deviates too far from analytic approximation")
+
+
+        
+
+
+
+
+
+
+
 
 
    
