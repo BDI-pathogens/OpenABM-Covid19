@@ -97,8 +97,13 @@ class ParameterSet(object):
     def get_param(self, param):
         return(self.params[param])
 
-    def set_param(self, param, value):
-        self.params[param] = str(value)
+    def set_param(self, param, value = None):
+        
+        if isinstance(param, dict):
+            for p, v in param.items():
+                self.set_param(p, v)
+        else:
+            self.params[param] = str(value)
 
     def list_params(self):
         return(self.params.keys())
