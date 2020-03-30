@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	printf("# param_line_number: %d\n", params.param_line_number);
 	
 	printf( "Time,social_distancing,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
-	while( model->time < params.end_time && one_time_step( model ) )
+	while( model->time < params.end_time && one_time_step( model ) ) //Tom: Model updating occurs here.
 	{
 		printf( "%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
