@@ -396,6 +396,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_critical, ");
 	fprintf(individual_output_file,"time_death, ");
 	fprintf(individual_output_file,"time_recovered, ");
+	fprintf(individual_output_file,"time_quarantined, ");
 	fprintf(individual_output_file,"infector_ID, ");
 	fprintf(individual_output_file,"infector_time_infected, ");
 	fprintf(individual_output_file,"infector_status, ");
@@ -423,7 +424,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -440,6 +441,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->time_event[CRITICAL],
 			indiv->time_event[DEATH],
 			indiv->time_event[RECOVERED],
+			indiv->time_event[QUARANTINED],
 			infector_id,
 			infector_time_infected,
 			infector_status
