@@ -11,7 +11,11 @@
 /************************************************************************/
 /******************************* Includes *******************************/
 /************************************************************************/
+#include "structure.h"
+#include "utilities.h"
+#include "constant.h"
 #include "params.h"
+#include "network.h"
 #include "individual.h"
 
 /************************************************************************/
@@ -20,8 +24,10 @@
 
 typedef struct hospital hospital;
 
-struct hospital{
+struct hospital {
     int hospital_idx;
+
+    network *hospital_network;
 
     int available_beds;
     int available_icus;
@@ -34,7 +40,7 @@ struct hospital{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_hospital( hospital*, parameters*, int );
+void initialise_hospital( hospital*, parameters*, /*network*,*/ int );
 void add_healthcare_worker_to_hospital(hospital *hospital, int idx, long pdx, int type);
 void destroy_hospital( hospital* );
 #endif /* HOSPITAL_H_ */
