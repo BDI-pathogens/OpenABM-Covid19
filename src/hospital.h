@@ -32,8 +32,11 @@ struct hospital {
     int available_beds;
     int available_icus;
 
-    long *doctor_pdxs;
-    long *nurse_pdxs;
+    long *doctor_pdxs;      //stores the population ids of all doctors at the hospital
+    long *nurse_pdxs;       //stores the population ids of all nurses at the hospital
+
+    int n_total_doctors;    //total number of doctors at the hospital
+    int n_total_nurses;     //total number of nurses at the hospital
 };
 
 /************************************************************************/
@@ -41,6 +44,7 @@ struct hospital {
 /************************************************************************/
 
 void initialise_hospital( hospital*, parameters*, /*network*,*/ int );
-void add_healthcare_worker_to_hospital(hospital *hospital, int idx, long pdx, int type);
+void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 void destroy_hospital( hospital* );
+
 #endif /* HOSPITAL_H_ */

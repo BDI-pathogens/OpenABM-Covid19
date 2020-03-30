@@ -57,6 +57,7 @@ struct model{
 	network *random_network;
 	network *household_network;
 	network **work_network;
+    network **hospital_network;// kelvin change
 	directory *household_directory;
 
 	//Tom: Added.

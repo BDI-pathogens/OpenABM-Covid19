@@ -51,9 +51,9 @@ model* new_model( parameters *params )
 	set_up_household_distribution( model_ptr );
     set_up_healthcare_workers_and_hospitals( model_ptr ); //kelvin change
     //TODO: Finish adding in separate hospital network set up here - Tom.
-    //set_up_hospital_network( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
+    set_up_hospital_network( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
@@ -211,7 +211,7 @@ void set_up_work_network( model *model, int network )
 
 	model->work_network[network] = new_network( n_people, WORK );
 	n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
-	build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
+    build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->work_network[network], people );
 
 	free( people );
@@ -288,7 +288,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
                 continue;
 
         indiv->worker_type = DOCTOR;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), idx, indiv->idx, DOCTOR );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
         idx++;
     }
 
@@ -303,11 +303,48 @@ void set_up_healthcare_workers_and_hospitals( model *model)
                 continue;
 
         indiv->worker_type = NURSE;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), idx, indiv->idx, NURSE );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
         idx++;
     }
 }
 
+/*****************************************************************************************
+*  Name:		set_up_hospital_network
+*  Description: creates a hospital network and adds healthcare workers to them.
+*  Returns:		void
+*  Author:      meadt
+******************************************************************************************/
+
+void set_up_hospital_network_kelvin( model *model ) {
+    //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
+    int hospital_idx;
+    long n_healthcare_workers;
+    long *healthcare_workers;
+    int n_interactions;
+
+    //loop through list of hospitals
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    {
+        n_healthcare_workers = 0;
+        healthcare_workers   = calloc( model->hospitals[hospital_idx].n_total_nurses + model->hospitals[hospital_idx].n_total_doctors, sizeof( long ) );
+
+        //get population id of all doctors at hospital
+        for ( int ddx = 0; ddx < model->hospitals[hospital_idx].n_total_doctors; ddx++ )
+            healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].doctor_pdxs[ddx];
+
+        //get population id of all nurses at the hospital
+        for ( int ndx = 0; ndx < model->hospitals[hospital_idx].n_total_nurses; ndx++ )
+            healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].nurse_pdxs[ndx];
+
+        model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
+        //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
+        n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
+        build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
+        relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
+
+        free( healthcare_workers );
+    }
+};
 /*****************************************************************************************
 *  Name:		set_up_hospital_network
 *  Description: creates a hospital network and adds healthcare workers to them.

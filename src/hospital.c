@@ -26,7 +26,7 @@ void initialise_hospital(
     if( hospital->hospital_idx != 0 )
         print_exit( "a hospital can only be initialised once!");
 
-    hospital->hospital_idx = hdx;
+    hospital->hospital_idx   = hdx;
 //    hospital->hospital_network = hospital_network;
 
     hospital->available_beds = params->hospital_n_beds;
@@ -34,20 +34,23 @@ void initialise_hospital(
 
     //TODO: Change this to store the actual list of workers.
     hospital->doctor_pdxs = calloc(params->n_total_doctors, sizeof(long) );
-    hospital->nurse_pdxs = calloc(params->n_total_nurses, sizeof(long) );
+    hospital->nurse_pdxs  = calloc(params->n_total_nurses, sizeof(long) );
+
+    hospital->n_total_doctors = 0;
+    hospital->n_total_nurses  = 0;
 }
 
 /*****************************************************************************************
 *  Name:		add_nurse
-*  Description: adds population id of a doctor to the list of
-*               doctor population ids at the hospital
+*  Description: adds population id of a doctor / nurse to hospital's
+*               doctor / nurse population id list
 ******************************************************************************************/
-void add_healthcare_worker_to_hospital(hospital *hospital, int idx, long pdx, int type)
+void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
 {
     if( type == DOCTOR )
-        hospital->doctor_pdxs[idx] = pdx;
+        hospital->doctor_pdxs[hospital->n_total_doctors++] = pdx;
     else if( type == NURSE )
-        hospital->nurse_pdxs[idx] = pdx;
+        hospital->nurse_pdxs[hospital->n_total_nurses++] = pdx;
 }
 
 /*****************************************************************************************
