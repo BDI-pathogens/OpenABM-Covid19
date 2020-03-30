@@ -63,10 +63,7 @@ void set_up_allocate_work_places( model *model )
 		{
 			prob[adx][ndx] = 0;
 			if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] != NETWORK_TYPE_ADULT )
-            {
 				prob[adx][ndx] = ( ndx == AGE_WORK_MAP[adx] );
-                double t = prob[adx][ndx];
-            }
 			else
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
@@ -74,6 +71,8 @@ void set_up_allocate_work_places( model *model )
 					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
 					other         += prob[adx][ndx];
 				}
+
+                //TODO: kelvin have probability func for adults being in the hospital network??
 			}
 		}
 		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
@@ -279,7 +278,7 @@ void build_household_network_from_directory(network *network, directory *directo
 	for( hdx = 0; hdx < directory->n_idx; hdx++ )
 	{
 		h_size   = directory->n_jdx[hdx];
-		network->n_edges += h_size  * ( h_size - 1 ) / 2;
+        network->n_edges += h_size  * ( h_size - 1 ) / 2; //TODO: why this func to determine edges?
 	}
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
 
