@@ -34,6 +34,6 @@ void initialise_hospital(
     hospital->available_icus = params->hospital_n_icus;
 
     //TODO: Change this to store the actual list of workers.
-    hospital->doctor_pdxs = calloc( params->n_total_doctors, sizeof(long) );
-    hospital->nurse_pdxs = calloc( params->n_total_nurses, sizeof(long) );
+    hospital->doctor_pdxs = calloc(params->n_doctors, sizeof(long) );
+    hospital->nurse_pdxs = calloc(params->n_nurses, sizeof(long) );
 }

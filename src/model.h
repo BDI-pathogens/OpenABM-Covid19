@@ -58,6 +58,9 @@ struct model{
 	network **work_network;
 	directory *household_directory;
 
+	//Tom: Added.
+	network *hospital_network;
+
 	event *events;
 	event *next_event;
 	event_list *event_lists;
@@ -88,6 +91,7 @@ struct event{
 model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_healthcare_workers( model* ); //kelvin change
+void set_up_hospital_network( model* ); //Tom: Added.
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
