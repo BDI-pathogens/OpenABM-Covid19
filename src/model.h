@@ -17,6 +17,7 @@
 #include "individual.h"
 #include "network.h"
 #include "params.h"
+#include "hospital.h" //kelvin change
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -67,6 +68,7 @@ struct model{
 	long n_quarantine_days;
 
     //kelvin change
+    hospital *hospitals;
     long *doctor_pdxs;
     long *nurse_pdxs;
 
@@ -91,7 +93,7 @@ struct event{
 
 model* new_model(parameters *);
 void set_up_population( model* );
-void set_up_healthcare_workers( model* ); //kelvin change
+void set_up_healthcare_workers_and_hospitals( model* ); //kelvin change
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );

@@ -49,7 +49,7 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
-    set_up_healthcare_workers( model_ptr ); //kelvin change
+    set_up_healthcare_workers_and_hospitals( model_ptr ); //kelvin change
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
@@ -98,6 +98,11 @@ void destroy_model( model *model )
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
     free ( model-> household_directory );;
+    //kelvin change
+    for( idx = 0; idx < model->params->n_hospitals; idx++)
+        destroy_hospital( &(model->hospitals[idx]) );
+    free( model->hospitals );
+
     free( model );
 
 };
@@ -249,14 +254,21 @@ void set_up_population( model *model )
 }
 
 //kelvin change
-void set_up_healthcare_workers( model *model)
+void set_up_healthcare_workers_and_hospitals( model *model)
 {
     long pdx;
     int idx;
     individual *indiv;
 
+    //initialise hospitals
+    model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+    {
+        initialise_hospital( &(model->hospitals[idx]), model->params, idx );
+    }
+
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be doctors
+    //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
     while( idx < model->params->n_total_doctors )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
@@ -266,11 +278,12 @@ void set_up_healthcare_workers( model *model)
                 continue;
 
         indiv->worker_type = DOCTOR;
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), idx, indiv->idx, DOCTOR );
         idx++;
     }
 
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be nurses
+    //randomly pick individuals from population between ages 20 - 69 to be nurses and assign to a hospital
     while( idx < model->params->n_total_nurses )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
@@ -280,6 +293,7 @@ void set_up_healthcare_workers( model *model)
                 continue;
 
         indiv->worker_type = NURSE;
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), idx, indiv->idx, NURSE );
         idx++;
     }
 }
