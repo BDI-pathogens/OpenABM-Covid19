@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #!/usr/bin/env python3
 """
+Based on
 Tests of the individual-based model, COVID19-IBM, using the individual file
 
 Created: March 2020
@@ -78,7 +79,7 @@ class TestClass(object):
     params = {
         "test_file_exists": [dict()],
         "test_demographic_proportions" : [
-            dict(
+            dict( # UK
                 n_total     = 10000,
                 population_0_9  = 10000 * 0.12,
                 population_10_19= 10000 * 0.11,
@@ -90,53 +91,67 @@ class TestClass(object):
                 population_70_79= 10000 * 0.08,
                 population_80= 10000 * 0.05
             ),
-            dict(
-                n_total     = 20000,
-                population_0_9  = 20000 * 0.12,
-                population_10_19= 20000 * 0.11,
-                population_20_29= 20000 * 0.13,
-                population_30_39= 20000 * 0.13,
-                population_40_49= 20000 * 0.13,
-                population_50_59= 20000 * 0.13,
-                population_60_69= 20000 * 0.11,
-                population_70_79= 20000 * 0.08,
-                population_80= 20000 * 0.05
-            ),
-            dict(
+            dict( # even
                 n_total     = 50000,
-                population_0_9  = 50000 * 0.12,
-                population_10_19= 50000 * 0.11,
-                population_20_29= 50000 * 0.13,
-                population_30_39= 50000 * 0.13,
-                population_40_49= 50000 * 0.13,
-                population_50_59= 50000 * 0.13,
-                population_60_69= 50000 * 0.11,
-                population_70_79= 50000 * 0.08,
-                population_80= 50000 * 0.05
+                population_0_9  = 50000 * 0.111,
+                population_10_19= 50000 * 0.111,
+                population_20_29= 50000 * 0.111,
+                population_30_39= 50000 * 0.111,
+                population_40_49= 50000 * 0.111,
+                population_50_59= 50000 * 0.111,
+                population_60_69= 50000 * 0.111,
+                population_70_79= 50000 * 0.111,
+                population_80= 50000 * 0.111
             ),
-            dict(
+            dict( # Japan 2019
                 n_total     = 100000,
-                population_0_9  = 100000 * 0.12,
-                population_10_19= 100000 * 0.11,
-                population_20_29= 100000 * 0.13,
-                population_30_39= 100000 * 0.13,
-                population_40_49= 100000 * 0.13,
+                population_0_9  = 100000 * 0.08,
+                population_10_19= 100000 * 0.09,
+                population_20_29= 100000 * 0.10,
+                population_30_39= 100000 * 0.12,
+                population_40_49= 100000 * 0.15,
                 population_50_59= 100000 * 0.13,
-                population_60_69= 100000 * 0.11,
-                population_70_79= 100000 * 0.08,
-                population_80= 100000 * 0.05
+                population_60_69= 100000 * 0.13,
+                population_70_79= 100000 * 0.13,
+                population_80= 100000 * 0.09
             ),
-            dict(
+#            dict(  # Nigeria 2019  FAILS 
+#                   # "because the reference household panel does not include 
+#                   # sufficient households with large numbers of children"
+#                n_total     = 250000,
+#                population_0_9  = 250000 * 0.312,
+#                population_10_19= 250000 * 0.230,
+#                population_20_29= 250000 * 0.160,
+#                population_30_39= 250000 * 0.119,
+#                population_40_49= 250000 * 0.082,
+#                population_50_59= 250000 * 0.052,
+#                population_60_69= 250000 * 0.030,
+#                population_70_79= 250000 * 0.013,
+#                population_80= 250000 * 0.002
+#            ),
+            dict( # Kazakhstan 2019  
                 n_total     = 250000,
-                population_0_9  = 250000 * 0.12,
-                population_10_19= 250000 * 0.11,
-                population_20_29= 250000 * 0.13,
-                population_30_39= 250000 * 0.13,
-                population_40_49= 250000 * 0.13,
-                population_50_59= 250000 * 0.13,
-                population_60_69= 250000 * 0.11,
-                population_70_79= 250000 * 0.08,
-                population_80= 250000 * 0.05
+                population_0_9  = 250000 * 0.21,
+                population_10_19= 250000 * 0.14,
+                population_20_29= 250000 * 0.15,
+                population_30_39= 250000 * 0.16,
+                population_40_49= 250000 * 0.12,
+                population_50_59= 250000 * 0.11,
+                population_60_69= 250000 * 0.07,
+                population_70_79= 250000 * 0.03,
+                population_80= 250000 * 0.02
+            ),
+            dict( # UK
+                n_total     = 500000,
+                population_0_9  = 500000 * 0.12,
+                population_10_19= 500000 * 0.11,
+                population_20_29= 500000 * 0.13,
+                population_30_39= 500000 * 0.13,
+                population_40_49= 500000 * 0.13,
+                population_50_59= 500000 * 0.13,
+                population_60_69= 500000 * 0.11,
+                population_70_79= 500000 * 0.08,
+                population_80= 500000 * 0.05
             )
         ]
         }
@@ -175,7 +190,6 @@ class TestClass(object):
         
         # Adjust any parameters that need adjusting for all tests
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("n_total", 10000)
         params.set_param("end_time", 1)
         params.write_params(TEST_DATA_FILE)
         
@@ -217,11 +231,20 @@ class TestClass(object):
         the population
         """
         
+        error_tolerance = 0.01
+        
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", n_total)
-        params.set_param("n_seed_infection",200)
         params.set_param("end_time", 1)
-        params.set_param("infectious_rate", 4.0)  
+        params.set_param("population_0_9",population_0_9)
+        params.set_param("population_10_19",population_10_19)
+        params.set_param("population_20_29",population_20_29)
+        params.set_param("population_30_39",population_30_39)
+        params.set_param("population_40_49",population_40_49)   
+        params.set_param("population_50_59",population_50_59)   
+        params.set_param("population_60_69",population_60_69)
+        params.set_param("population_70_79",population_70_79)
+        params.set_param("population_80",population_80)
        
         population_fraction = [ population_0_9,   population_10_19, population_20_29,
                                   population_30_39, population_40_49, population_50_59,
@@ -237,4 +260,4 @@ class TestClass(object):
         for idx in range( len( AGES ) ):
             
             N = len( df_indiv[ ( df_indiv['age_group'] == AGES[idx] ) ] )
-            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * 0.01)            
+            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * error_tolerance )            
