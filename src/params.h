@@ -120,6 +120,10 @@ typedef struct{
     int n_total_doctors;       // Total number of doctors
     int n_total_nurses;        // Total number of nurses
 
+    //Tom: Added parameters on the number of beds a hospital has. NOTE: CONSIDERING ONLY 1 HOSPITAL FOR NOW.
+    int hospital_n_beds;
+    int hospital_n_icus;
+
 } parameters;
 
 /************************************************************************/
