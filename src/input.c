@@ -350,6 +350,8 @@ void write_output_files(model *model, parameters *params)
 	{
 		write_individual_file( model, params );
 		write_interactions( model );
+		write_transmissions( model );
+
 	}
 }	
 
