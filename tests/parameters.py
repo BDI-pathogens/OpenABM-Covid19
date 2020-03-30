@@ -95,14 +95,44 @@ class ParameterSet(object):
         self.params = OrderedDict([(param, value) for param, value in zip(header, param_line)])
     
     def get_param(self, param):
+        """Get parameter value
+        
+        Arguments
+        ---------
+        param : str
+            Parameter name
+        
+        Returns
+        -------
+        parameter value as a str
+        """
+        # Check the parameter exists in the parameter set dictionary
+        assert param in self.params, "Parameter {} does not exist.".format(param)
+        
         return(self.params[param])
+        
 
     def set_param(self, param, value = None):
+        """Set parameter value
         
+        Arguments
+        ---------
+        param : str or dict
+            Parameter name (or a dict of parameter name-value key-value pairs)
+        value : int, float, str
+            Parameter value to set as value for parameter `param` (None if 'param' is a dict)
+        
+        Returns
+        -------
+        Nothing.
+        """
+
         if isinstance(param, dict):
             for p, v in param.items():
                 self.set_param(p, v)
         else:
+            # Check the parameter exists in the parameter set dictionary
+            assert param in self.params, "Parameter {} does not exist.".format(param)
             self.params[param] = str(value)
 
     def list_params(self):
@@ -146,6 +176,13 @@ class ParameterSet(object):
         
     
     def write_params(self, param_file):
+        """Write parameters to CSV file
+        
+        Arguements
+        ----------
+        param_file: str
+            Path to CSV file where parameter file should be written
+        """
         
         header = ", ".join(list(self.params.keys()))
         line = ", ".join(list(self.params.values()))
