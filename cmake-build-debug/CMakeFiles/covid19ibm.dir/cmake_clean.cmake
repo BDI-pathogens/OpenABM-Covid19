@@ -2,6 +2,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/covid19ibm.dir/src/constant.c.obj"
   "CMakeFiles/covid19ibm.dir/src/demographics.c.obj"
   "CMakeFiles/covid19ibm.dir/src/disease.c.obj"
+  "CMakeFiles/covid19ibm.dir/src/hospital.c.obj"
   "CMakeFiles/covid19ibm.dir/src/individual.c.obj"
   "CMakeFiles/covid19ibm.dir/src/input.c.obj"
   "CMakeFiles/covid19ibm.dir/src/interventions.c.obj"

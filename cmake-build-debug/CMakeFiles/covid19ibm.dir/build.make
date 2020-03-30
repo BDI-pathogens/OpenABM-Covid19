@@ -115,10 +115,24 @@ CMakeFiles/covid19ibm.dir/src/disease.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/covid19ibm.dir/src/disease.c.s"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\meadt\CLionProjects\COVID19-IBM\src\disease.c -o CMakeFiles\covid19ibm.dir\src\disease.c.s
 
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: CMakeFiles/covid19ibm.dir/flags.make
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/hospital.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/covid19ibm.dir/src/hospital.c.obj"
+	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\hospital.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\hospital.c
+
+CMakeFiles/covid19ibm.dir/src/hospital.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/covid19ibm.dir/src/hospital.c.i"
+	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E C:\Users\meadt\CLionProjects\COVID19-IBM\src\hospital.c > CMakeFiles\covid19ibm.dir\src\hospital.c.i
+
+CMakeFiles/covid19ibm.dir/src/hospital.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/covid19ibm.dir/src/hospital.c.s"
+	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S C:\Users\meadt\CLionProjects\COVID19-IBM\src\hospital.c -o CMakeFiles\covid19ibm.dir\src\hospital.c.s
+
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: ../src/individual.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/covid19ibm.dir/src/individual.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/covid19ibm.dir/src/individual.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\individual.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\individual.c
 
 CMakeFiles/covid19ibm.dir/src/individual.c.i: cmake_force
@@ -132,7 +146,7 @@ CMakeFiles/covid19ibm.dir/src/individual.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/input.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/input.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/input.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/covid19ibm.dir/src/input.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/covid19ibm.dir/src/input.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\input.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\input.c
 
 CMakeFiles/covid19ibm.dir/src/input.c.i: cmake_force
@@ -146,7 +160,7 @@ CMakeFiles/covid19ibm.dir/src/input.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/interventions.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/covid19ibm.dir/src/interventions.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/covid19ibm.dir/src/interventions.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\interventions.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\interventions.c
 
 CMakeFiles/covid19ibm.dir/src/interventions.c.i: cmake_force
@@ -160,7 +174,7 @@ CMakeFiles/covid19ibm.dir/src/interventions.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/main.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/main.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/main.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/covid19ibm.dir/src/main.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/covid19ibm.dir/src/main.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\main.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\main.c
 
 CMakeFiles/covid19ibm.dir/src/main.c.i: cmake_force
@@ -174,7 +188,7 @@ CMakeFiles/covid19ibm.dir/src/main.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/model.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/model.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/model.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building C object CMakeFiles/covid19ibm.dir/src/model.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/covid19ibm.dir/src/model.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\model.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\model.c
 
 CMakeFiles/covid19ibm.dir/src/model.c.i: cmake_force
@@ -188,7 +202,7 @@ CMakeFiles/covid19ibm.dir/src/model.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/network.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/network.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/network.c.obj: ../src/network.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building C object CMakeFiles/covid19ibm.dir/src/network.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/covid19ibm.dir/src/network.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\network.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\network.c
 
 CMakeFiles/covid19ibm.dir/src/network.c.i: cmake_force
@@ -202,7 +216,7 @@ CMakeFiles/covid19ibm.dir/src/network.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/params.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/params.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/params.c.obj: ../src/params.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building C object CMakeFiles/covid19ibm.dir/src/params.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/covid19ibm.dir/src/params.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\params.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\params.c
 
 CMakeFiles/covid19ibm.dir/src/params.c.i: cmake_force
@@ -216,7 +230,7 @@ CMakeFiles/covid19ibm.dir/src/params.c.s: cmake_force
 CMakeFiles/covid19ibm.dir/src/utilities.c.obj: CMakeFiles/covid19ibm.dir/flags.make
 CMakeFiles/covid19ibm.dir/src/utilities.c.obj: CMakeFiles/covid19ibm.dir/includes_C.rsp
 CMakeFiles/covid19ibm.dir/src/utilities.c.obj: ../src/utilities.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building C object CMakeFiles/covid19ibm.dir/src/utilities.c.obj"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building C object CMakeFiles/covid19ibm.dir/src/utilities.c.obj"
 	C:\msys64\mingw64\bin\gcc.exe $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles\covid19ibm.dir\src\utilities.c.obj   -c C:\Users\meadt\CLionProjects\COVID19-IBM\src\utilities.c
 
 CMakeFiles/covid19ibm.dir/src/utilities.c.i: cmake_force
@@ -232,6 +246,7 @@ covid19ibm_OBJECTS = \
 "CMakeFiles/covid19ibm.dir/src/constant.c.obj" \
 "CMakeFiles/covid19ibm.dir/src/demographics.c.obj" \
 "CMakeFiles/covid19ibm.dir/src/disease.c.obj" \
+"CMakeFiles/covid19ibm.dir/src/hospital.c.obj" \
 "CMakeFiles/covid19ibm.dir/src/individual.c.obj" \
 "CMakeFiles/covid19ibm.dir/src/input.c.obj" \
 "CMakeFiles/covid19ibm.dir/src/interventions.c.obj" \
@@ -247,6 +262,7 @@ covid19ibm_EXTERNAL_OBJECTS =
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/constant.c.obj
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/demographics.c.obj
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/disease.c.obj
+covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/hospital.c.obj
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/individual.c.obj
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/input.c.obj
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/src/interventions.c.obj
@@ -261,7 +277,7 @@ covid19ibm.exe: C:/msys64/mingw64/lib/libgslcblas.dll.a
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/linklibs.rsp
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/objects1.rsp
 covid19ibm.exe: CMakeFiles/covid19ibm.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking C executable covid19ibm.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\meadt\CLionProjects\COVID19-IBM\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking C executable covid19ibm.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\covid19ibm.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -220,6 +220,33 @@ src/disease.c.s:
 	$(MAKE) -f CMakeFiles\covid19ibm.dir\build.make CMakeFiles/covid19ibm.dir/src/disease.c.s
 .PHONY : src/disease.c.s
 
+src/hospital.obj: src/hospital.c.obj
+
+.PHONY : src/hospital.obj
+
+# target to build an object file
+src/hospital.c.obj:
+	$(MAKE) -f CMakeFiles\covid19ibm.dir\build.make CMakeFiles/covid19ibm.dir/src/hospital.c.obj
+.PHONY : src/hospital.c.obj
+
+src/hospital.i: src/hospital.c.i
+
+.PHONY : src/hospital.i
+
+# target to preprocess a source file
+src/hospital.c.i:
+	$(MAKE) -f CMakeFiles\covid19ibm.dir\build.make CMakeFiles/covid19ibm.dir/src/hospital.c.i
+.PHONY : src/hospital.c.i
+
+src/hospital.s: src/hospital.c.s
+
+.PHONY : src/hospital.s
+
+# target to generate assembly for a file
+src/hospital.c.s:
+	$(MAKE) -f CMakeFiles\covid19ibm.dir\build.make CMakeFiles/covid19ibm.dir/src/hospital.c.s
+.PHONY : src/hospital.c.s
+
 src/individual.obj: src/individual.c.obj
 
 .PHONY : src/individual.obj
@@ -454,6 +481,9 @@ help:
 	@echo ... src/disease.obj
 	@echo ... src/disease.i
 	@echo ... src/disease.s
+	@echo ... src/hospital.obj
+	@echo ... src/hospital.i
+	@echo ... src/hospital.s
 	@echo ... src/individual.obj
 	@echo ... src/individual.i
 	@echo ... src/individual.s

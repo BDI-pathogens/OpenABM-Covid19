@@ -14,6 +14,8 @@ add_executable(covid19ibm
         src/demographics.h
         src/disease.c
         src/disease.h
+        src/hospital.c
+        src/hospital.h
         src/individual.c
         src/individual.h
         src/input.c
