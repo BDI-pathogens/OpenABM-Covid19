@@ -51,6 +51,7 @@ model* new_model( parameters *params )
 	set_up_household_distribution( model_ptr );
     set_up_healthcare_workers( model_ptr ); //kelvin change
 	set_up_allocate_work_places( model_ptr );
+	//TODO: have set_up_networks and set_up_interactions set up the hospital network.
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
@@ -177,7 +178,7 @@ void set_up_networks( model *model )
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
-	build_household_network_from_directroy( model->household_network, model->household_directory );
+    build_household_network_from_directory(model->household_network, model->household_directory);
 
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
@@ -201,7 +202,6 @@ void set_up_work_network( model *model, int network )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		if( model->population[idx].work_network == network )
 			people[n_people++] = idx;
-
 
 	model->work_network[network] = new_network( n_people, WORK );
 	n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
@@ -249,6 +249,7 @@ void set_up_population( model *model )
 }
 
 //kelvin change
+//TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
 void set_up_healthcare_workers( model *model)
 {
     long pdx;
@@ -350,8 +351,6 @@ void set_up_interactions( model *model )
 	model->n_possible_interactions = idx;
 	model->n_total_intereactions   = 0;
 }
-
-
 
 /*****************************************************************************************
 *  Name:		new_event
@@ -633,10 +632,10 @@ void add_interactions_from_network(
 }
 
 /*****************************************************************************************
-*  Name:		build_daily_newtork
+*  Name:		build_daily_network
 *  Description: Builds a new interaction network
 ******************************************************************************************/
-void build_daily_newtork( model *model )
+void build_daily_network( model *model )
 {
 	int idx, day;
 
@@ -644,6 +643,8 @@ void build_daily_newtork( model *model )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
+	// Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
+	// with the same patients? In either case, I should probably define a new hospital function.
 	build_random_network( model );
     //kelvin change: would add rebuilding of a hospital network here
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
@@ -651,7 +652,29 @@ void build_daily_newtork( model *model )
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
+};
 
+/*****************************************************************************************
+*  Name:		build_hospital_network
+*  Description: Builds a new interaction network specific to hospitals
+*  Returns:		void
+******************************************************************************************/
+void build_hospital_network( model *model )
+{
+    int idx, day;
+
+    day = model->interaction_day_idx;
+    for( idx = 0; idx < model->params->n_total; idx++ )
+        model->population[ idx ].n_interactions[ day ] = 0;
+
+    // Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
+    // with the same patients? In either case, I should probably define a new hospital function.
+    build_random_network( model );
+    add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
+    add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
+
+    for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
+        add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 };
 
 /*****************************************************************************************
@@ -698,7 +721,9 @@ int one_time_step( model *model )
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
 
-	build_daily_newtork( model );
+	//Tom: Could replicate build_daily_network, but only for hospital workers?
+    build_daily_network(model);
+    //build_hospital_network(model);
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );

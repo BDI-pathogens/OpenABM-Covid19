@@ -66,10 +66,6 @@ struct model{
 
 	long n_quarantine_days;
 
-    //kelvin change
-    long *doctor_pdxs;
-    long *nurse_pdxs;
-
 };
 
 struct event{
@@ -112,7 +108,7 @@ void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
 
 void add_interactions_from_network( model*, network*, int, int, double );
-void build_daily_newtork( model* );
+void build_daily_network(model *model);
 void build_random_network( model * );
 
 #endif /* MODEL_H_ */
