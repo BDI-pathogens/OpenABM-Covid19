@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     rng = gsl_rng_alloc ( gsl_rng_default);
 	
 	gsl_rng_set( rng, params.rng_seed );
-	model *model = new_model( &params );
+    model *model = new_model( &params );
 	
 	printf("# param_id: %li\n", params.param_id);
 	printf("# rng_seed: %li\n", params.rng_seed);

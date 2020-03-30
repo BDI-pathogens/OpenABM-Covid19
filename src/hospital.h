@@ -5,13 +5,14 @@
  *      Author: vuurenk
  */
 
-#ifndef INDIVIDUAL_H_
-#define INDIVIDUAL_H_
+#ifndef HOSPITAL_H_
+#define HOSPITAL_H_
 
 /************************************************************************/
 /******************************* Includes *******************************/
 /************************************************************************/
-
+#include "params.h"
+#include "individual.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -29,4 +30,11 @@ struct hospital{
     long *nurse_pdxs;
 };
 
-#endif /* INDIVIDUAL_H_ */
+/************************************************************************/
+/******************************  Functions  *****************************/
+/************************************************************************/
+
+void initialise_hospital( hospital*, parameters*, int );
+void add_healthcare_worker_to_hospital(hospital *hospital, int idx, long pdx, int type);
+void destroy_hospital( hospital* );
+#endif /* HOSPITAL_H_ */

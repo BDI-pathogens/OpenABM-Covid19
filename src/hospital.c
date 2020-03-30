@@ -6,7 +6,6 @@
  */
 
 #include "hospital.h"
-#include "params.h"
 #include "constant.h"
 #include "utilities.h"
 /*****************************************************************************************
@@ -31,3 +30,28 @@ void initialise_hospital(
     hospital->doctor_pdxs = calloc( params->n_total_doctors, sizeof(long) );
     hospital->nurse_pdxs = calloc( params->n_total_nurses, sizeof(long) );
 }
+
+/*****************************************************************************************
+*  Name:		add_nurse
+*  Description: adds population id of a doctor to the list of
+*               doctor population ids at the hospital
+******************************************************************************************/
+void add_healthcare_worker_to_hospital(hospital *hospital, int idx, long pdx, int type)
+{
+    if( type == DOCTOR )
+        hospital->doctor_pdxs[idx] = pdx;
+    else if( type == NURSE )
+        hospital->nurse_pdxs[idx] = pdx;
+}
+
+/*****************************************************************************************
+*  Name:		destroy_hospital
+*  Description: Destroys the model structure and releases its memory
+******************************************************************************************/
+void destroy_hospital( hospital *hospital)
+{
+    free( hospital->doctor_pdxs );
+    free( hospital->nurse_pdxs );
+};
+
+
