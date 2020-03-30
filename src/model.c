@@ -604,6 +604,8 @@ void add_interactions_from_network(
 		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
+        //TODO: kelvin check no healthcare workers in these networks
+
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
 
@@ -643,6 +645,7 @@ void build_daily_newtork( model *model )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
 	build_random_network( model );
+    //kelvin change: would add rebuilding of a hospital network here
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
