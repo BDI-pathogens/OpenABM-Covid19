@@ -49,9 +49,11 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+	//Define health care workers and add them to their network
     set_up_healthcare_workers( model_ptr ); //kelvin change
+    //TODO: Finish adding in separate hospital network set up here - Tom.
+    set_up_hospital_network( model_ptr );
 	set_up_allocate_work_places( model_ptr );
-	//TODO: have set_up_networks and set_up_interactions set up the hospital network.
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
@@ -65,7 +67,7 @@ model* new_model( parameters *params )
 	model_ptr->n_quarantine_days = 0;
 
 	return model_ptr;
-};
+}
 
 /*****************************************************************************************
 *  Name:		destroy_model
@@ -106,7 +108,7 @@ void destroy_model( model *model )
 /*****************************************************************************************
 *  Name:		set_up_event_list
 *  Description: sets up an event_list
-*  Returns:		voidx
+*  Returns:		void
 ******************************************************************************************/
 void set_up_event_list( model *model, parameters *params, int type )
 {
@@ -248,17 +250,23 @@ void set_up_population( model *model )
 		initialize_individual( &(model->population[idx]), params, idx );
 }
 
-//kelvin change
-//TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
-void set_up_healthcare_workers( model *model)
+/*****************************************************************************************
+*  Name:		set_up_healthcare_workers
+*  Description: randomly pick individuals from population between ages 20 - 69 to be doctors
+*               and nurses
+*  Returns:		void
+*  Author:      vuurenk
+******************************************************************************************/
+
+void set_up_healthcare_workers( model *model )
 {
+    //TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
     long pdx;
     int idx;
     individual *indiv;
 
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be doctors
-    while( idx < model->params->n_total_doctors )
+    while( idx < model->params->n_doctors )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
@@ -271,8 +279,7 @@ void set_up_healthcare_workers( model *model)
     }
 
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be nurses
-    while( idx < model->params->n_total_nurses )
+    while( idx < model->params->n_nurses )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
@@ -284,6 +291,39 @@ void set_up_healthcare_workers( model *model)
         idx++;
     }
 }
+
+/*****************************************************************************************
+*  Name:		set_up_hospital_network
+*  Description: creates a hospital network and adds healthcare workers to them.
+*  Returns:		void
+*  Author:      meadt
+******************************************************************************************/
+
+void set_up_hospital_network( model *model ) {
+    //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
+
+    long idx;
+    long n_workers = 0;
+    long n_healthcare_workers;
+    long *healthcare_workers;
+    int n_interactions;
+
+    n_healthcare_workers = model->params->n_nurses + model->params->n_doctors;
+    healthcare_workers = calloc( n_healthcare_workers, sizeof( long ) );
+    
+    for( idx = 0; idx < model->params->n_total; idx++ )
+        if( model->population[idx].worker_type == NURSE || model->population[idx].worker_type == DOCTOR )
+            healthcare_workers[n_workers++] = idx;
+
+    model->hospital_network = new_network( model->params->n_hospitals , HOSPITAL_WORK);
+    //TODO: WHAT ARE THE MEAN HOSPITAL INTERWORKER INTERACTIONS? - Tom
+    n_interactions           = 10;
+    build_watts_strogatz_network( model->hospital_network, n_workers, n_interactions, 0.1, TRUE );
+    relabel_network( model->hospital_network, healthcare_workers );
+
+    free( healthcare_workers );
+
+};
 
 /*****************************************************************************************
 *  Name:		set_up_individual_hazard
@@ -655,29 +695,6 @@ void build_daily_network( model *model )
 };
 
 /*****************************************************************************************
-*  Name:		build_hospital_network
-*  Description: Builds a new interaction network specific to hospitals
-*  Returns:		void
-******************************************************************************************/
-void build_hospital_network( model *model )
-{
-    int idx, day;
-
-    day = model->interaction_day_idx;
-    for( idx = 0; idx < model->params->n_total; idx++ )
-        model->population[ idx ].n_interactions[ day ] = 0;
-
-    // Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
-    // with the same patients? In either case, I should probably define a new hospital function.
-    build_random_network( model );
-    add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
-    add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
-
-    for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-        add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
-};
-
-/*****************************************************************************************
 *  Name:		transition_events
 *  Description: Transitions all people from one type of event
 *  Returns:		void
@@ -721,9 +738,7 @@ int one_time_step( model *model )
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
 
-	//Tom: Could replicate build_daily_network, but only for hospital workers?
     build_daily_network(model);
-    //build_hospital_network(model);
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );
@@ -743,5 +758,6 @@ int one_time_step( model *model )
 
 	return 1;
 };
+
 
 
