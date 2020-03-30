@@ -66,10 +66,6 @@ struct model{
 
 	long n_quarantine_days;
 
-    //kelvin change
-    long *doctor_pdxs;
-    long *nurse_pdxs;
-
 };
 
 struct event{

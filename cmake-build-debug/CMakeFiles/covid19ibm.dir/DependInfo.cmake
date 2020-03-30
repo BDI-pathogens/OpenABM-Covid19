@@ -7,6 +7,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/constant.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/constant.c.obj"
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/demographics.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/demographics.c.obj"
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/disease.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/disease.c.obj"
+  "C:/Users/meadt/CLionProjects/COVID19-IBM/src/hospital.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/hospital.c.obj"
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/individual.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/individual.c.obj"
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/input.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/input.c.obj"
   "C:/Users/meadt/CLionProjects/COVID19-IBM/src/interventions.c" "C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir/src/interventions.c.obj"

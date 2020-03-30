@@ -24,6 +24,15 @@ CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/params.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/structure.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/utilities.h
 
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/constant.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/hospital.c
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/hospital.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/individual.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/network.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/params.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/structure.h
+CMakeFiles/covid19ibm.dir/src/hospital.c.obj: ../src/utilities.h
+
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: ../src/individual.c
 CMakeFiles/covid19ibm.dir/src/individual.c.obj: ../src/individual.h

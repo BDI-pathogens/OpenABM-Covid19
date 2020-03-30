@@ -96,6 +96,12 @@
 		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/disease.h">
 			<Option target="covid19ibm"/>
 		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/hospital.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/hospital.h">
+			<Option target="covid19ibm"/>
+		</Unit>
 		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/individual.c">
 			<Option target="covid19ibm"/>
 		</Unit>

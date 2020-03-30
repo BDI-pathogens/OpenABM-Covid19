@@ -249,6 +249,7 @@ void set_up_population( model *model )
 }
 
 //kelvin change
+//TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
 void set_up_healthcare_workers( model *model)
 {
     long pdx;
