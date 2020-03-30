@@ -141,6 +141,7 @@ void set_up_infectious_curves( model *model )
 						  params->sd_infectious_period, infectious_rate * type_factor );
 	};
 }
+
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
 *  Description: Transmits virus over the interaction network for a type of

@@ -602,6 +602,8 @@ void add_interactions_from_network(
 		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
+        //TODO: kelvin check no healthcare workers in these networks
+
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
 
@@ -643,6 +645,7 @@ void build_daily_network( model *model )
 	// Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
 	// with the same patients? In either case, I should probably define a new hospital function.
 	build_random_network( model );
+    //kelvin change: would add rebuilding of a hospital network here
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
