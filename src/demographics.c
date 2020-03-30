@@ -267,7 +267,7 @@ void set_up_household_distribution( model *model )
 *  Name:		build_household_network_from_directory
 *  Description: Builds a network of household i
 ******************************************************************************************/
-void build_household_network_from_directroy( network *network, directory *directory )
+void build_household_network_from_directory(network *network, directory *directory )
 {
 	long hdx, edge_idx, h_size;
 	int pdx, p2dx;

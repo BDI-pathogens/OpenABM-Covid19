@@ -109,10 +109,12 @@ enum HOUSEHOLD_SIZE{
 	N_HOUSEHOLD_MAX
 };
 
+//DONE: Add hospital interaction type.
 enum INTERACTION_TYPE{
 	HOUSEHOLD,
 	WORK,
 	RANDOM,
+	HOSPITAL,
 	N_INTERACTION_TYPES
 };
 
