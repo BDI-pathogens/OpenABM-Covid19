@@ -59,6 +59,9 @@ struct model{
 	network **work_network;
 	directory *household_directory;
 
+	//Tom: Added.
+	network *hospital_network;
+
 	event *events;
 	event *next_event;
 	event_list *event_lists;
@@ -69,9 +72,6 @@ struct model{
 
     //kelvin change
     hospital *hospitals;
-    long *doctor_pdxs;
-    long *nurse_pdxs;
-
 };
 
 struct event{
@@ -94,6 +94,7 @@ struct event{
 model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_healthcare_workers_and_hospitals( model* ); //kelvin change
+void set_up_hospital_network( model* ); //Tom: Added.
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
@@ -114,7 +115,7 @@ void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
 
 void add_interactions_from_network( model*, network*, int, int, double );
-void build_daily_newtork( model* );
+void build_daily_network(model *model);
 void build_random_network( model * );
 
 #endif /* MODEL_H_ */

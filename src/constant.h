@@ -74,7 +74,6 @@ enum WORK_NETWORKS{
     NETWORK_20_69, // pick certain number from this network to be healthcare worker
 	NETWORK_70_79,
 	NETWORK_80,
-    //NETWORK_HOSPITAL, //TODO: kelvin change
 	N_WORK_NETWORKS
 };
 
@@ -109,10 +108,14 @@ enum HOUSEHOLD_SIZE{
 	N_HOUSEHOLD_MAX
 };
 
+//DONE: Add hospital interaction type for workers and patients.
+//TODO: ALTER INFECTIVITY OF HOSPITAL INTERACTION TYPES.
 enum INTERACTION_TYPE{
 	HOUSEHOLD,
 	WORK,
 	RANDOM,
+//	HOSPITAL_WORK,
+//	HOSPITAL_PATIENT,
 	N_INTERACTION_TYPES
 };
 
