@@ -177,33 +177,6 @@ class TestClass(object):
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.sum(df_output.n_death > 0), 0)
-    
-    
-    def test_mean_daily_interactions_zero(self):
-        """
-        Setting interactions to zero should avoid any infections,
-        so number of total infections are simply the number of seed cases.  
-        """
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("mean_work_interactions_child", 0)
-        params.set_param("mean_work_interactions_adult", 0)
-        params.set_param("mean_work_interactions_elderly", 0)
-        params.set_param("mean_random_interactions_child", 0)
-        params.set_param("mean_random_interactions_adult", 0)
-        params.set_param("mean_random_interactions_elderly", 0)
-        params.set_param("quarantined_daily_interactions", 0)
-        params.set_param("hospitalised_daily_interactions", 0)
-        params.write_params(TEST_DATA_FILE)
-
-        # Call the model
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",", nrows = 50)
-
-        np.testing.assert_equal(
-            df_output["total_infected"].iloc[-1], 
-            int(params.get_param("n_seed_infection"))
-        )
 
 
     def test_hospitalised_zero(self):
