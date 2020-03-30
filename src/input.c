@@ -351,7 +351,6 @@ void write_output_files(model *model, parameters *params)
 		write_individual_file( model, params );
 		write_interactions( model );
 		write_transmissions( model );
-
 	}
 }	
 
@@ -618,10 +617,8 @@ void write_interactions( model *model )
 				inter = inter->next;
 			}
 		}
-
 	}
 	fclose(output_file);
-	print_exit( "# Output : write interactions end!");
 }
 
 
@@ -646,6 +643,7 @@ void write_transmissions( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
+	fprintf(output_file ,"ID,age_group,house_no,work_network,infector_network,infector_infected_time,infector_status,ID_2,age_group_2,house_no_2,work_2\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -669,6 +667,5 @@ void write_transmissions( model *model )
 		);
 	}
 	fclose(output_file);
-	print_exit( "# Output : write transmissions end!");}
-
+}
 
