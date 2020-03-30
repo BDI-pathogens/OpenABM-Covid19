@@ -282,7 +282,7 @@ class TestClass(object):
             df_output["total_infected"].values
         )
 
-    def test_zero_quarantine(self, input, expected):
+    def test_zero_quarantine(self):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
