@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #!/usr/bin/env python3
 """
+Based on
 Tests of the individual-based model, COVID19-IBM, using the individual file
 
 Created: March 2020
@@ -91,18 +92,6 @@ class TestClass(object):
                 population_80= 10000 * 0.05
             ),
             dict(
-                n_total     = 20000,
-                population_0_9  = 20000 * 0.12,
-                population_10_19= 20000 * 0.11,
-                population_20_29= 20000 * 0.13,
-                population_30_39= 20000 * 0.13,
-                population_40_49= 20000 * 0.13,
-                population_50_59= 20000 * 0.13,
-                population_60_69= 20000 * 0.11,
-                population_70_79= 20000 * 0.08,
-                population_80= 20000 * 0.05
-            ),
-            dict(
                 n_total     = 50000,
                 population_0_9  = 50000 * 0.12,
                 population_10_19= 50000 * 0.11,
@@ -137,6 +126,18 @@ class TestClass(object):
                 population_60_69= 250000 * 0.11,
                 population_70_79= 250000 * 0.08,
                 population_80= 250000 * 0.05
+            ),
+            dict(
+                n_total     = 500000,
+                population_0_9  = 500000 * 0.12,
+                population_10_19= 500000 * 0.11,
+                population_20_29= 500000 * 0.13,
+                population_30_39= 500000 * 0.13,
+                population_40_49= 500000 * 0.13,
+                population_50_59= 500000 * 0.13,
+                population_60_69= 500000 * 0.11,
+                population_70_79= 500000 * 0.08,
+                population_80= 500000 * 0.05
             )
         ]
         }
@@ -175,7 +176,6 @@ class TestClass(object):
         
         # Adjust any parameters that need adjusting for all tests
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("n_total", 10000)
         params.set_param("end_time", 1)
         params.write_params(TEST_DATA_FILE)
         
@@ -217,11 +217,11 @@ class TestClass(object):
         the population
         """
         
+        error_tolerance = 0.01
+        
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", n_total)
-        params.set_param("n_seed_infection",200)
-        params.set_param("end_time", 1)
-        params.set_param("infectious_rate", 4.0)  
+
        
         population_fraction = [ population_0_9,   population_10_19, population_20_29,
                                   population_30_39, population_40_49, population_50_59,
@@ -237,4 +237,4 @@ class TestClass(object):
         for idx in range( len( AGES ) ):
             
             N = len( df_indiv[ ( df_indiv['age_group'] == AGES[idx] ) ] )
-            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * 0.01)            
+            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * error_tolerance)            
