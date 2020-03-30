@@ -121,6 +121,6 @@ social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
 social_distancing_time_on	50
 social_distancing_time_off	75
-testing_symptoms_time_on 50
-testing_symptoms_time_off 300
-N_REFERENCE_HOUSEHOLDS  125455
+testing_symptoms_time_on	50
+testing_symptoms_time_off	300
+N_REFERENCE_HOUSEHOLDS	125455
