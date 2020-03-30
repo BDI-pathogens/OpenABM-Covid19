@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="covid19ibm"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="covid19ibm">
+				<Option output="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/covid19ibm.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="C:/Users/meadt/CLionProjects/COVID19-IBM/src"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include-fixed"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 covid19ibm"/>
+					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="covid19ibm/fast">
+				<Option output="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/covid19ibm.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="C:/Users/meadt/CLionProjects/COVID19-IBM/src"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../include"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/include-fixed"/>
+					<Add directory="C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/9.3.0/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 covid19ibm/fast"/>
+					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/msys64/mingw64/bin/mingw32-make.exe -f &quot;C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/constant.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/constant.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/demographics.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/demographics.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/disease.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/disease.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/hospital.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/hospital.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/individual.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/individual.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/input.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/input.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/interventions.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/interventions.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/main.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/model.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/model.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/network.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/network.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/params.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/params.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/structure.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/utilities.c">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/src/utilities.h">
+			<Option target="covid19ibm"/>
+		</Unit>
+		<Unit filename="C:/Users/meadt/CLionProjects/COVID19-IBM/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

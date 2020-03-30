@@ -1,0 +1,4 @@
+C:\msys64\mingw64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - MinGW Makefiles" C:\Users\meadt\CLionProjects\COVID19-IBM
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug
