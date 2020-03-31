@@ -36,64 +36,74 @@ class TestClass(object):
         "test_file_exists": [dict()],
         "test_disease_transition_times": [
             dict(
-                mean_time_to_symptoms=4.0,
-                sd_time_to_symptoms=2.0,
-                mean_time_to_hospital=1.0,
-                mean_time_to_critical=1.0,
-                mean_time_to_recover=20.0,
-                sd_time_to_recover=8.0,
-                mean_time_to_death=12.0,
-                sd_time_to_death=5.0,
-                mean_asymptomatic_to_recovery=15.0,
-                sd_asymptomatic_to_recovery=5.0,
+                test_params = dict( 
+                    mean_time_to_symptoms=4.0,
+                    sd_time_to_symptoms=2.0,
+                    mean_time_to_hospital=1.0,
+                    mean_time_to_critical=1.0,
+                    mean_time_to_recover=20.0,
+                    sd_time_to_recover=8.0,
+                    mean_time_to_death=12.0,
+                    sd_time_to_death=5.0,
+                    mean_asymptomatic_to_recovery=15.0,
+                    sd_asymptomatic_to_recovery=5.0,
+                )
             ),
             dict(
-                mean_time_to_symptoms=4.5,
-                sd_time_to_symptoms=2.0,
-                mean_time_to_hospital=1.2,
-                mean_time_to_critical=1.2,
-                mean_time_to_recover=18.0,
-                sd_time_to_recover=7.0,
-                mean_time_to_death=14.0,
-                sd_time_to_death=5.5,
-                mean_asymptomatic_to_recovery=17.0,
-                sd_asymptomatic_to_recovery=5.0,
+                test_params = dict( 
+                    mean_time_to_symptoms=4.5,
+                    sd_time_to_symptoms=2.0,
+                    mean_time_to_hospital=1.2,
+                    mean_time_to_critical=1.2,
+                    mean_time_to_recover=18.0,
+                    sd_time_to_recover=7.0,
+                    mean_time_to_death=14.0,
+                    sd_time_to_death=5.5,
+                    mean_asymptomatic_to_recovery=17.0,
+                    sd_asymptomatic_to_recovery=5.0,
+                )
             ),
             dict(
-                mean_time_to_symptoms=5.0,
-                sd_time_to_symptoms=2.5,
-                mean_time_to_hospital=1.4,
-                mean_time_to_critical=1.4,
-                mean_time_to_recover=16.0,
-                sd_time_to_recover=7.0,
-                mean_time_to_death=16.0,
-                sd_time_to_death=6,
-                mean_asymptomatic_to_recovery=18.0,
-                sd_asymptomatic_to_recovery=7.0,
+                test_params = dict( 
+                    mean_time_to_symptoms=5.0,
+                    sd_time_to_symptoms=2.5,
+                    mean_time_to_hospital=1.4,
+                    mean_time_to_critical=1.4,
+                    mean_time_to_recover=16.0,
+                    sd_time_to_recover=7.0,
+                    mean_time_to_death=16.0,
+                    sd_time_to_death=6,
+                    mean_asymptomatic_to_recovery=18.0,
+                    sd_asymptomatic_to_recovery=7.0,
+                )
             ),
             dict(
-                mean_time_to_symptoms=5.5,
-                sd_time_to_symptoms=2.5,
-                mean_time_to_hospital=1.6,
-                mean_time_to_critical=1.6,
-                mean_time_to_recover=14.0,
-                sd_time_to_recover=6.0,
-                mean_time_to_death=17.0,
-                sd_time_to_death=5,
-                mean_asymptomatic_to_recovery=12.0,
-                sd_asymptomatic_to_recovery=4.0,
+                test_params = dict( 
+                    mean_time_to_symptoms=5.5,
+                    sd_time_to_symptoms=2.5,
+                    mean_time_to_hospital=1.6,
+                    mean_time_to_critical=1.6,
+                    mean_time_to_recover=14.0,
+                    sd_time_to_recover=6.0,
+                    mean_time_to_death=17.0,
+                    sd_time_to_death=5,
+                    mean_asymptomatic_to_recovery=12.0,
+                    sd_asymptomatic_to_recovery=4.0,
+                )
             ),
             dict(
-                mean_time_to_symptoms=6.0,
-                sd_time_to_symptoms=3.0,
-                mean_time_to_hospital=1.8,
-                mean_time_to_critical=2.0,
-                mean_time_to_recover=12.0,
-                sd_time_to_recover=6.0,
-                mean_time_to_death=18.0,
-                sd_time_to_death=6,
-                mean_asymptomatic_to_recovery=14.0,
-                sd_asymptomatic_to_recovery=5.0,
+                test_params = dict( 
+                    mean_time_to_symptoms=6.0,
+                    sd_time_to_symptoms=3.0,
+                    mean_time_to_hospital=1.8,
+                    mean_time_to_critical=2.0,
+                    mean_time_to_recover=12.0,
+                    sd_time_to_recover=6.0,
+                    mean_time_to_death=18.0,
+                    sd_time_to_death=6,
+                    mean_asymptomatic_to_recovery=14.0,
+                    sd_asymptomatic_to_recovery=5.0,
+                )
             ),
         ],
         "test_disease_outcome_proportions": [
@@ -108,7 +118,7 @@ class TestClass(object):
                     fraction_asymptomatic_60_69 = 0.05,
                     fraction_asymptomatic_70_79 = 0.05,
                     fraction_asymptomatic_80    = 0.05,
-                    hospitalised_fraction_0_9=0.05,
+                    hospitalised_fraction_0_9  =0.05,
                     hospitalised_fraction_10_19=0.10,
                     hospitalised_fraction_20_29=0.10,
                     hospitalised_fraction_30_39=0.20,
@@ -116,8 +126,8 @@ class TestClass(object):
                     hospitalised_fraction_50_59=0.20,
                     hospitalised_fraction_60_69=0.30,
                     hospitalised_fraction_70_79=0.30,
-                    hospitalised_fraction_80=0.50,
-                    critical_fraction_0_9=0.05,
+                    hospitalised_fraction_80   =0.50,
+                    critical_fraction_0_9  =0.05,
                     critical_fraction_10_19=0.10,
                     critical_fraction_20_29=0.10,
                     critical_fraction_30_39=0.20,
@@ -125,8 +135,8 @@ class TestClass(object):
                     critical_fraction_50_59=0.20,
                     critical_fraction_60_69=0.30,
                     critical_fraction_70_79=0.30,
-                    critical_fraction_80=0.50,
-                    fatality_fraction_0_9=0.05,
+                    critical_fraction_80   =0.50,
+                    fatality_fraction_0_9  =0.05,
                     fatality_fraction_10_19=0.10,
                     fatality_fraction_20_29=0.10,
                     fatality_fraction_30_39=0.20,
@@ -134,7 +144,7 @@ class TestClass(object):
                     fatality_fraction_50_59=0.20,
                     fatality_fraction_60_69=0.30,
                     fatality_fraction_70_79=0.30,
-                    fatality_fraction_80=0.50,
+                    fatality_fraction_80   =0.50,
                 )
             ),
             dict(
@@ -148,7 +158,7 @@ class TestClass(object):
                     fraction_asymptomatic_60_69 = 0.15,
                     fraction_asymptomatic_70_79 = 0.15,
                     fraction_asymptomatic_80    = 0.15,
-                    hospitalised_fraction_0_9=0.50,
+                    hospitalised_fraction_0_9  =0.50,
                     hospitalised_fraction_10_19=0.40,
                     hospitalised_fraction_20_29=0.30,
                     hospitalised_fraction_30_39=0.20,
@@ -156,8 +166,8 @@ class TestClass(object):
                     hospitalised_fraction_50_59=0.20,
                     hospitalised_fraction_60_69=0.30,
                     hospitalised_fraction_70_79=0.30,
-                    hospitalised_fraction_80=0.20,
-                    critical_fraction_0_9=0.50,
+                    hospitalised_fraction_80   =0.20,
+                    critical_fraction_0_9 =0.50,
                     critical_fraction_10_19=0.40,
                     critical_fraction_20_29=0.30,
                     critical_fraction_30_39=0.20,
@@ -165,8 +175,8 @@ class TestClass(object):
                     critical_fraction_50_59=0.20,
                     critical_fraction_60_69=0.30,
                     critical_fraction_70_79=0.30,
-                    critical_fraction_80=0.20,
-                    fatality_fraction_0_9=0.50,
+                    critical_fraction_80   =0.20,
+                    fatality_fraction_0_9  =0.50,
                     fatality_fraction_10_19=0.40,
                     fatality_fraction_20_29=0.30,
                     fatality_fraction_30_39=0.20,
@@ -174,7 +184,7 @@ class TestClass(object):
                     fatality_fraction_50_59=0.20,
                     fatality_fraction_60_69=0.30,
                     fatality_fraction_70_79=0.30,
-                    fatality_fraction_80=0.20,
+                    fatality_fraction_80   =0.20,
                 )
             ),
             dict(
@@ -184,11 +194,11 @@ class TestClass(object):
                     fraction_asymptomatic_20_29 = 0.35,
                     fraction_asymptomatic_30_39 = 0.35,
                     fraction_asymptomatic_40_49 = 0.35,
-                    fraction_asymptomatic_50_59 = 0.35,
-                    fraction_asymptomatic_60_69 = 0.35,
-                    fraction_asymptomatic_70_79 = 0.35,
-                    fraction_asymptomatic_80    = 0.35,
-                    hospitalised_fraction_0_9=0.05,
+                    fraction_asymptomatic_50_59 = 0.15,
+                    fraction_asymptomatic_60_69 = 0.15,
+                    fraction_asymptomatic_70_79 = 0.15,
+                    fraction_asymptomatic_80    = 0.15,
+                    hospitalised_fraction_0_9  =0.05,
                     hospitalised_fraction_10_19=0.05,
                     hospitalised_fraction_20_29=0.05,
                     hospitalised_fraction_30_39=0.20,
@@ -196,8 +206,8 @@ class TestClass(object):
                     hospitalised_fraction_50_59=0.20,
                     hospitalised_fraction_60_69=0.30,
                     hospitalised_fraction_70_79=0.80,
-                    hospitalised_fraction_80=0.90,
-                    critical_fraction_0_9=0.05,
+                    hospitalised_fraction_80   =0.90,
+                    critical_fraction_0_9  =0.05,
                     critical_fraction_10_19=0.05,
                     critical_fraction_20_29=0.05,
                     critical_fraction_30_39=0.20,
@@ -205,8 +215,8 @@ class TestClass(object):
                     critical_fraction_50_59=0.20,
                     critical_fraction_60_69=0.30,
                     critical_fraction_70_79=0.80,
-                    critical_fraction_80=0.90,
-                    fatality_fraction_0_9=0.05,
+                    critical_fraction_80   =0.90,
+                    fatality_fraction_0_9  =0.05,
                     fatality_fraction_10_19=0.05,
                     fatality_fraction_20_29=0.05,
                     fatality_fraction_30_39=0.20,
@@ -214,20 +224,20 @@ class TestClass(object):
                     fatality_fraction_50_59=0.20,
                     fatality_fraction_60_69=0.30,
                     fatality_fraction_70_79=0.80,
-                    fatality_fraction_80=0.90,
+                    fatality_fraction_80   =0.90,
                 )
             ),
             dict(
                 test_params = dict(
-                    fraction_asymptomatic_0_9   = 0.45,
-                    fraction_asymptomatic_10_19 = 0.45,
-                    fraction_asymptomatic_20_29 = 0.45,
-                    fraction_asymptomatic_30_39 = 0.45,
-                    fraction_asymptomatic_40_49 = 0.45,
-                    fraction_asymptomatic_50_59 = 0.45,
-                    fraction_asymptomatic_60_69 = 0.45,
-                    fraction_asymptomatic_70_79 = 0.45,
-                    fraction_asymptomatic_80    = 0.45,
+                    fraction_asymptomatic_0_9   = 0.70,
+                    fraction_asymptomatic_10_19 = 0.70,
+                    fraction_asymptomatic_20_29 = 0.60,
+                    fraction_asymptomatic_30_39 = 0.50,
+                    fraction_asymptomatic_40_49 = 0.40,
+                    fraction_asymptomatic_50_59 = 0.30,
+                    fraction_asymptomatic_60_69 = 0.20,
+                    fraction_asymptomatic_70_79 = 0.10,
+                    fraction_asymptomatic_80    = 0.10,
                     hospitalised_fraction_0_9=0.02,
                     hospitalised_fraction_10_19=0.02,
                     hospitalised_fraction_20_29=0.02,
@@ -236,8 +246,8 @@ class TestClass(object):
                     hospitalised_fraction_50_59=0.20,
                     hospitalised_fraction_60_69=0.25,
                     hospitalised_fraction_70_79=0.30,
-                    hospitalised_fraction_80=0.50,
-                    critical_fraction_0_9=0.02,
+                    hospitalised_fraction_80  =0.50,
+                    critical_fraction_0_9  =0.02,
                     critical_fraction_10_19=0.02,
                     critical_fraction_20_29=0.02,
                     critical_fraction_30_39=0.10,
@@ -245,8 +255,8 @@ class TestClass(object):
                     critical_fraction_50_59=0.20,
                     critical_fraction_60_69=0.25,
                     critical_fraction_70_79=0.30,
-                    critical_fraction_80=0.50,
-                    fatality_fraction_0_9=0.02,
+                    critical_fraction_80  =0.50,
+                    fatality_fraction_0_9 =0.02,
                     fatality_fraction_10_19=0.02,
                     fatality_fraction_20_29=0.02,
                     fatality_fraction_30_39=0.10,
@@ -254,21 +264,21 @@ class TestClass(object):
                     fatality_fraction_50_59=0.20,
                     fatality_fraction_60_69=0.25,
                     fatality_fraction_70_79=0.30,
-                    fatality_fraction_80=0.50,
+                    fatality_fraction_80   =0.50,
                 )
             ),
             dict(
                 test_params = dict( 
-                    fraction_asymptomatic_0_9   = 0.55,
-                    fraction_asymptomatic_10_19 = 0.55,
-                    fraction_asymptomatic_20_29 = 0.55,
-                    fraction_asymptomatic_30_39 = 0.55,
-                    fraction_asymptomatic_40_49 = 0.55,
-                    fraction_asymptomatic_50_59 = 0.55,
-                    fraction_asymptomatic_60_69 = 0.55,
-                    fraction_asymptomatic_70_79 = 0.55,
-                    fraction_asymptomatic_80    = 0.55,
-                    hospitalised_fraction_0_9=0.20,
+                    fraction_asymptomatic_0_9   = 0.70,
+                    fraction_asymptomatic_10_19 = 0.70,
+                    fraction_asymptomatic_20_29 = 0.40,
+                    fraction_asymptomatic_30_39 = 0.40,
+                    fraction_asymptomatic_40_49 = 0.40,
+                    fraction_asymptomatic_50_59 = 0.40,
+                    fraction_asymptomatic_60_69 = 0.30,
+                    fraction_asymptomatic_70_79 = 0.20,
+                    fraction_asymptomatic_80    = 0.20,
+                    hospitalised_fraction_0_9  =0.20,
                     hospitalised_fraction_10_19=0.20,
                     hospitalised_fraction_20_29=0.20,
                     hospitalised_fraction_30_39=0.20,
@@ -276,8 +286,8 @@ class TestClass(object):
                     hospitalised_fraction_50_59=0.20,
                     hospitalised_fraction_60_69=0.20,
                     hospitalised_fraction_70_79=0.20,
-                    hospitalised_fraction_80=0.20,
-                    critical_fraction_0_9=0.20,
+                    hospitalised_fraction_80   =0.20,
+                    critical_fraction_0_9  =0.20,
                     critical_fraction_10_19=0.20,
                     critical_fraction_20_29=0.20,
                     critical_fraction_30_39=0.20,
@@ -285,8 +295,8 @@ class TestClass(object):
                     critical_fraction_50_59=0.20,
                     critical_fraction_60_69=0.20,
                     critical_fraction_70_79=0.20,
-                    critical_fraction_80=0.20,
-                    fatality_fraction_0_9=0.20,
+                    critical_fraction_80   =0.20,
+                    fatality_fraction_0_9  =0.20,
                     fatality_fraction_10_19=0.20,
                     fatality_fraction_20_29=0.20,
                     fatality_fraction_30_39=0.20,
@@ -294,7 +304,7 @@ class TestClass(object):
                     fatality_fraction_50_59=0.20,
                     fatality_fraction_60_69=0.20,
                     fatality_fraction_70_79=0.20,
-                    fatality_fraction_80=0.20,
+                    fatality_fraction_80   =0.20,
                 )
             ),
         ],
@@ -360,19 +370,7 @@ class TestClass(object):
 
         np.testing.assert_equal(df_individual.shape[0] > 1, True)
 
-    def test_disease_transition_times(
-        self,
-        mean_time_to_symptoms,
-        sd_time_to_symptoms,
-        mean_time_to_hospital,
-        mean_time_to_critical,
-        mean_time_to_recover,
-        sd_time_to_recover,
-        mean_time_to_death,
-        sd_time_to_death,
-        mean_asymptomatic_to_recovery,
-        sd_asymptomatic_to_recovery,
-    ):
+    def test_disease_transition_times( self, test_params ):
         """
         Test that the mean and standard deviation of the transition times between 
         states agrees with the parameters
@@ -385,17 +383,8 @@ class TestClass(object):
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 50)
         params.set_param("infectious_rate", 4.0)
-        params.set_param("mean_time_to_symptoms", mean_time_to_symptoms)
-        params.set_param("sd_time_to_symptoms", sd_time_to_symptoms)
-        params.set_param("mean_time_to_hospital", mean_time_to_hospital)
-        params.set_param("mean_time_to_critical", mean_time_to_critical)
-        params.set_param("mean_time_to_recover", mean_time_to_recover)
-        params.set_param("sd_time_to_recover", sd_time_to_recover)
-        params.set_param("mean_time_to_death", mean_time_to_death)
-        params.set_param("sd_time_to_death", sd_time_to_death)
-        params.set_param("mean_asymptomatic_to_recovery", mean_asymptomatic_to_recovery)
-        params.set_param("sd_asymptomatic_to_recovery", sd_asymptomatic_to_recovery)
-
+        params.set_param( test_params )
+      
         params.write_params(TEST_DATA_FILE)
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([command], stdout=file_output, shell=True)
@@ -417,10 +406,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, mean_time_to_symptoms, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_symptoms" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_time_to_symptoms, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_symptoms" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time showing symptoms until going to hospital
@@ -429,7 +418,7 @@ class TestClass(object):
         sd = df_indiv[(df_indiv["time_hospitalised"] > 0)]["t_s_h"].std()
         N = len(df_indiv[(df_indiv["time_hospitalised"] > 0)])
         np.testing.assert_allclose(
-            mean, mean_time_to_hospital, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_hospital" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time hospitalised until moving to the ICU
@@ -438,7 +427,7 @@ class TestClass(object):
         sd = df_indiv[(df_indiv["time_critical"] > 0)]["t_h_c"].std()
         N = len(df_indiv[(df_indiv["time_critical"] > 0)])
         np.testing.assert_allclose(
-            mean, mean_time_to_critical, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_critical" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from symptoms to recover if not hospitalised
@@ -461,10 +450,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, mean_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from hospitalised to recover if don't got to ICU
@@ -487,10 +476,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, mean_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from ICU to recover if don't die
@@ -505,10 +494,10 @@ class TestClass(object):
             df_indiv[(df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)]
         )
         np.testing.assert_allclose(
-            mean, mean_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_time_to_recover, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from ICU to death
@@ -517,10 +506,10 @@ class TestClass(object):
         sd = df_indiv[(df_indiv["time_death"] > 0)]["t_c_d"].std()
         N = len(df_indiv[(df_indiv["time_death"] > 0)])
         np.testing.assert_allclose(
-            mean, mean_time_to_death, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_time_to_death, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from asymptomatic to recover
@@ -537,10 +526,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, mean_asymptomatic_to_recovery, atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_asymptomatic_to_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, sd_asymptomatic_to_recovery, atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_asymptomatic_to_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
 
     def test_disease_outcome_proportions( self, test_params ):
@@ -548,7 +537,7 @@ class TestClass(object):
         Test that the fraction of infected people following each path for 
         the progression of the disease agrees with the parameters
         """
-        std_error_limit = 4
+        std_error_limit = 5
 
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, 50)
