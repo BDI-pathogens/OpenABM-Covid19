@@ -78,82 +78,114 @@ def pytest_generate_tests(metafunc):
 class TestClass(object):
     params = {
         "test_file_exists": [dict()],
-        "test_demographic_proportions" : [
-            dict( # UK
-                n_total     = 10000,
-                population_0_9  = 10000 * 0.12,
-                population_10_19= 10000 * 0.11,
-                population_20_29= 10000 * 0.13,
-                population_30_39= 10000 * 0.13,
-                population_40_49= 10000 * 0.13,
-                population_50_59= 10000 * 0.13,
-                population_60_69= 10000 * 0.11,
-                population_70_79= 10000 * 0.08,
-                population_80= 10000 * 0.05
+        "test_demographic_proportions": [
+            dict(  # UK
+                n_total=10000,
+                population_0_9=10000 * 0.12,
+                population_10_19=10000 * 0.11,
+                population_20_29=10000 * 0.13,
+                population_30_39=10000 * 0.13,
+                population_40_49=10000 * 0.13,
+                population_50_59=10000 * 0.13,
+                population_60_69=10000 * 0.11,
+                population_70_79=10000 * 0.08,
+                population_80=10000 * 0.05
             ),
-            dict( # even
-                n_total     = 50000,
-                population_0_9  = 50000 * 0.111,
-                population_10_19= 50000 * 0.111,
-                population_20_29= 50000 * 0.111,
-                population_30_39= 50000 * 0.111,
-                population_40_49= 50000 * 0.111,
-                population_50_59= 50000 * 0.111,
-                population_60_69= 50000 * 0.111,
-                population_70_79= 50000 * 0.111,
-                population_80= 50000 * 0.111
+            dict(  # even
+                n_total=50000,
+                population_0_9=50000 * 0.111,
+                population_10_19=50000 * 0.111,
+                population_20_29=50000 * 0.111,
+                population_30_39=50000 * 0.111,
+                population_40_49=50000 * 0.111,
+                population_50_59=50000 * 0.111,
+                population_60_69=50000 * 0.111,
+                population_70_79=50000 * 0.111,
+                population_80=50000 * 0.111
             ),
-            dict( # Japan 2019
-                n_total     = 100000,
-                population_0_9  = 100000 * 0.08,
-                population_10_19= 100000 * 0.09,
-                population_20_29= 100000 * 0.10,
-                population_30_39= 100000 * 0.12,
-                population_40_49= 100000 * 0.15,
-                population_50_59= 100000 * 0.13,
-                population_60_69= 100000 * 0.13,
-                population_70_79= 100000 * 0.13,
-                population_80= 100000 * 0.09
+            dict(  # Japan 2019
+                n_total=100000,
+                population_0_9=100000 * 0.08,
+                population_10_19=100000 * 0.09,
+                population_20_29=100000 * 0.10,
+                population_30_39=100000 * 0.12,
+                population_40_49=100000 * 0.15,
+                population_50_59=100000 * 0.13,
+                population_60_69=100000 * 0.13,
+                population_70_79=100000 * 0.13,
+                population_80=100000 * 0.09
             ),
-#            dict(  # Nigeria 2019  FAILS 
-#                   # "because the reference household panel does not include 
-#                   # sufficient households with large numbers of children"
-#                n_total     = 250000,
-#                population_0_9  = 250000 * 0.312,
-#                population_10_19= 250000 * 0.230,
-#                population_20_29= 250000 * 0.160,
-#                population_30_39= 250000 * 0.119,
-#                population_40_49= 250000 * 0.082,
-#                population_50_59= 250000 * 0.052,
-#                population_60_69= 250000 * 0.030,
-#                population_70_79= 250000 * 0.013,
-#                population_80= 250000 * 0.002
-#            ),
-            dict( # Kazakhstan 2019  
-                n_total     = 250000,
-                population_0_9  = 250000 * 0.21,
-                population_10_19= 250000 * 0.14,
-                population_20_29= 250000 * 0.15,
-                population_30_39= 250000 * 0.16,
-                population_40_49= 250000 * 0.12,
-                population_50_59= 250000 * 0.11,
-                population_60_69= 250000 * 0.07,
-                population_70_79= 250000 * 0.03,
-                population_80= 250000 * 0.02
+            #            dict(  # Nigeria 2019  FAILS
+            #                   # "because the reference household panel does not include
+            #                   # sufficient households with large numbers of children"
+            #                n_total     = 250000,
+            #                population_0_9  = 250000 * 0.312,
+            #                population_10_19= 250000 * 0.230,
+            #                population_20_29= 250000 * 0.160,
+            #                population_30_39= 250000 * 0.119,
+            #                population_40_49= 250000 * 0.082,
+            #                population_50_59= 250000 * 0.052,
+            #                population_60_69= 250000 * 0.030,
+            #                population_70_79= 250000 * 0.013,
+            #                population_80= 250000 * 0.002
+            #            ),
+            dict(  # Kazakhstan 2019
+                n_total=250000,
+                population_0_9=250000 * 0.21,
+                population_10_19=250000 * 0.14,
+                population_20_29=250000 * 0.15,
+                population_30_39=250000 * 0.16,
+                population_40_49=250000 * 0.12,
+                population_50_59=250000 * 0.11,
+                population_60_69=250000 * 0.07,
+                population_70_79=250000 * 0.03,
+                population_80=250000 * 0.02
             ),
-            dict( # UK
-                n_total     = 500000,
-                population_0_9  = 500000 * 0.12,
-                population_10_19= 500000 * 0.11,
-                population_20_29= 500000 * 0.13,
-                population_30_39= 500000 * 0.13,
-                population_40_49= 500000 * 0.13,
-                population_50_59= 500000 * 0.13,
-                population_60_69= 500000 * 0.11,
-                population_70_79= 500000 * 0.08,
-                population_80= 500000 * 0.05
-            )
-        ]
+            dict(  # UK
+                n_total=500000,
+                population_0_9=500000 * 0.12,
+                population_10_19=500000 * 0.11,
+                population_20_29=500000 * 0.13,
+                population_30_39=500000 * 0.13,
+                population_40_49=500000 * 0.13,
+                population_50_59=500000 * 0.13,
+                population_60_69=500000 * 0.11,
+                population_70_79=500000 * 0.08,
+                population_80=500000 * 0.05
+            )],
+            "test_household_size" : [dict(n_total = 10000, # default sizes
+                                      household_size_1 = 8197,
+                                      household_size_2 = 9609,
+                                      household_size_3 = 4287,
+                                      household_size_4 = 3881,
+                                      household_size_5 = 1254,
+                                      household_size_6 = 597
+                                      ),
+                                 dict(n_total=10000, # shift from small to large
+                                      household_size_1=750,
+                                      household_size_2=800,
+                                      household_size_3=428,
+                                      household_size_4=388,
+                                      household_size_5=300,
+                                      household_size_6=150
+                                      ),
+                                 dict(n_total=10000, # shift from large to small
+                                      household_size_1=1000,
+                                      household_size_2=1000,
+                                      household_size_3=428,
+                                      household_size_4=388,
+                                      household_size_5=50,
+                                      household_size_6=30
+                                      ),
+                                 dict(n_total=10000,# shift from medium
+                                      household_size_1=1000,
+                                      household_size_2=1000,
+                                      household_size_3=350,
+                                      household_size_4=300,
+                                      household_size_5=300,
+                                      household_size_6=200
+                                      )
+                                 ]
         }
     """
     Test class for checking 
@@ -212,7 +244,7 @@ class TestClass(object):
         df_individual = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_individual.shape[0] > 1, True)
-    
+
     def test_demographic_proportions(
             self,
             n_total,
@@ -225,39 +257,86 @@ class TestClass(object):
             population_60_69,
             population_70_79,
             population_80
-        ):
+    ):
         """
         Test that the proportion of people in different age groups agrees with 
         the population
         """
-        
+
         error_tolerance = 0.01
-        
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", n_total)
         params.set_param("end_time", 1)
-        params.set_param("population_0_9",population_0_9)
-        params.set_param("population_10_19",population_10_19)
-        params.set_param("population_20_29",population_20_29)
-        params.set_param("population_30_39",population_30_39)
-        params.set_param("population_40_49",population_40_49)   
-        params.set_param("population_50_59",population_50_59)   
-        params.set_param("population_60_69",population_60_69)
-        params.set_param("population_70_79",population_70_79)
-        params.set_param("population_80",population_80)
-       
-        population_fraction = [ population_0_9,   population_10_19, population_20_29,
-                                  population_30_39, population_40_49, population_50_59,
-                                  population_60_69, population_70_79, population_80 ]
-       
-        params.write_params(TEST_DATA_FILE)        
+        params.set_param("population_0_9", population_0_9)
+        params.set_param("population_10_19", population_10_19)
+        params.set_param("population_20_29", population_20_29)
+        params.set_param("population_30_39", population_30_39)
+        params.set_param("population_40_49", population_40_49)
+        params.set_param("population_50_59", population_50_59)
+        params.set_param("population_60_69", population_60_69)
+        params.set_param("population_70_79", population_70_79)
+        params.set_param("population_80", population_80)
+
+        population_fraction = [population_0_9, population_10_19, population_20_29,
+                               population_30_39, population_40_49, population_50_59,
+                               population_60_69, population_70_79, population_80]
+
+        params.write_params(TEST_DATA_FILE)
         file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True)
 
         # population proportion by age
-        N_tot = len( df_indiv )
-        for idx in range( len( AGES ) ):
-            
-            N = len( df_indiv[ ( df_indiv['age_group'] == AGES[idx] ) ] )
-            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * error_tolerance )            
+        N_tot = len(df_indiv)
+        for idx in range(len(AGES)):
+            N = len(df_indiv[(df_indiv['age_group'] == AGES[idx])])
+            np.testing.assert_allclose(N, population_fraction[idx], atol=N_tot * error_tolerance)
+
+    def test_household_size(self, n_total, household_size_1, household_size_2,
+    household_size_3, household_size_4, household_size_5, household_size_6):
+        """
+        Test to check the household size distribution
+        """
+
+        # Set the parameters we want for the simulation.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("end_time", 1)
+        params.set_param("n_total", n_total)
+        params.set_param("household_size_1", household_size_1)
+        params.set_param("household_size_2", household_size_2)
+        params.set_param("household_size_3", household_size_3)
+        params.set_param("household_size_4", household_size_4)
+        params.set_param("household_size_5", household_size_5)
+        params.set_param("household_size_6", household_size_6)
+        params.write_params(TEST_DATA_FILE)
+
+        # Calculate the number of people expected to be living in households of
+        # each different size, based on the parameter definitions.
+        household_size_counts = [household_size_1, household_size_2,
+        household_size_3, household_size_4, household_size_5, household_size_6]
+        household_size_counts_weighted = np.array(
+        [count * (i + 1) for i, count in enumerate(household_size_counts)],
+        dtype=float)
+        household_size_counts_weighted *= float(n_total) / \
+        sum(household_size_counts_weighted)
+
+        # Run the simulation.
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout=file_output,
+        stderr=file_output, shell=True)
+        np.testing.assert_equal(completed_run.returncode, 0)
+
+        # Find the number of people living in households of each different size
+        # in the simulation output.
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment="#", sep=",",
+                               skipinitialspace=True)
+        df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
+        df_house = df_house.groupby(["size"]).size().reset_index(
+        name="house_count")
+        df_house["people_count"] = df_house["size"] * df_house["house_count"]
+        df_house["people_count_expected"] = household_size_counts_weighted
+
+        # Test!
+        np.testing.assert_allclose(df_house["people_count"],
+                                   df_house["people_count_expected"], rtol=0.02)
