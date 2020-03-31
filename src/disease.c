@@ -234,7 +234,7 @@ void new_infection(
 	infected->infector = infector;
 	infected->infector_status = infector->status;
 
-	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic ) )
+	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic[infected->age_group] ) )
 	{
 		transition_one_disese_event( model, infected, NO_EVENT, ASYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, ASYMPTOMATIC, RECOVERED, ASYMPTOMATIC_RECOVERED );
