@@ -1,4 +1,4 @@
-import covid19
+import covid19 
 
 class Model:
     def __init__(self,

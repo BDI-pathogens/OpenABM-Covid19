@@ -24,15 +24,17 @@ SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darw
 
 # To compile
 swig-all:
-	swig -outdir COVID19 -python covid19.i
+	# swig -outdir COVID19 -python covid19.i
+	swig -python covid19.i
 	python3 setup.py build_ext --inplace
-	python3 setup.py install
+	pip3 install --user --upgrade .
 
 all: ${OBJS}
 	${C} -L${LIB} -o ${EXE} ${OBJS} ${LFLAGS}
 
 clean:
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
+	pip3 uninstall -y covid19
 
 .c.o:
 	${C} ${CFLAGS} -c $< -o $@
