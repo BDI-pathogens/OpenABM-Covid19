@@ -119,8 +119,8 @@ class TestClass(object):
                     quarantined_daily_interactions = 1,
                     end_time = 25,
                     infectious_rate = 4,
-                    self_quarantine_fraction = 1.0,
-                    seasonal_flu_rate = 0.0    
+                    self_quarantine_fraction = 0.75,
+                    seasonal_flu_rate = 0.0005  
                 )
             ),
             dict( 
@@ -129,8 +129,8 @@ class TestClass(object):
                     quarantined_daily_interactions = 2,
                     end_time = 25,
                     infectious_rate = 4,
-                    self_quarantine_fraction = 1.0,
-                    seasonal_flu_rate = 0.0    
+                    self_quarantine_fraction = 0.50,
+                    seasonal_flu_rate = 0.001 
                 )
             ),
             dict( 
@@ -139,8 +139,8 @@ class TestClass(object):
                     quarantined_daily_interactions = 3,
                     end_time = 25,
                     infectious_rate = 4,
-                    self_quarantine_fraction = 1.0,
-                    seasonal_flu_rate = 0.0    
+                    self_quarantine_fraction = 0.25,
+                    seasonal_flu_rate = 0.005   
                 )      
             ) 
         ]
