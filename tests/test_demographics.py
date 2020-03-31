@@ -154,36 +154,36 @@ class TestClass(object):
                 population_80=500000 * 0.05
             )],
             "test_household_size" : [dict(n_total = 10000, # default sizes
-                                      household_size_1 = 8197,
-                                      household_size_2 = 9609,
-                                      household_size_3 = 4287,
-                                      household_size_4 = 3881,
-                                      household_size_5 = 1254,
-                                      household_size_6 = 597
+                                      household_size_1 = 0.29,
+                                      household_size_2 = 0.34,
+                                      household_size_3 = 0.15,
+                                      household_size_4 = 0.13,
+                                      household_size_5 = 0.04,
+                                      household_size_6 = 0.02
                                       ),
                                  dict(n_total=10000, # shift from small to large
-                                      household_size_1=750,
-                                      household_size_2=800,
-                                      household_size_3=428,
-                                      household_size_4=388,
-                                      household_size_5=300,
-                                      household_size_6=150
+                                      household_size_1 = 0.24,
+                                      household_size_2 = 0.29,
+                                      household_size_3 = 0.10,
+                                      household_size_4 = 0.18,
+                                      household_size_5 = 0.09,
+                                      household_size_6 = 0.07
                                       ),
                                  dict(n_total=10000, # shift from large to small
-                                      household_size_1=1000,
-                                      household_size_2=1000,
-                                      household_size_3=428,
-                                      household_size_4=388,
-                                      household_size_5=50,
-                                      household_size_6=30
+                                      household_size_1 = 0.33,
+                                      household_size_2 = 0.37,
+                                      household_size_3 = 0.18,
+                                      household_size_4 = 0.10,
+                                      household_size_5 = 0.02,
+                                      household_size_6 = 0.01
                                       ),
                                  dict(n_total=10000,# shift from medium
-                                      household_size_1=1000,
-                                      household_size_2=1000,
-                                      household_size_3=350,
-                                      household_size_4=300,
-                                      household_size_5=300,
-                                      household_size_6=200
+                                      household_size_1 = 0.32,
+                                      household_size_2 = 0.37,
+                                      household_size_3 = 0.08,
+                                      household_size_4 = 0.05,
+                                      household_size_5 = 0.08,
+                                      household_size_6 = 0.06
                                       )
                                  ]
         }
