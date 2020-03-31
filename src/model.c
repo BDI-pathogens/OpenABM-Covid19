@@ -53,7 +53,6 @@ model* new_model( parameters *params )
     //TODO: Finish adding in separate hospital network set up here - Tom.
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
-    set_up_hospital_network( model_ptr ); //TODO: replace with set_up_hospital_network_kelvin
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );

@@ -60,9 +60,6 @@ struct model{
     network **hospital_network;// kelvin change
 	directory *household_directory;
 
-	//Tom: Added.
-	network *hospital_network;
-
 	event *events;
 	event *next_event;
 	event_list *event_lists;
