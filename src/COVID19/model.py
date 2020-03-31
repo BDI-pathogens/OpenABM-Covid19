@@ -1,4 +1,4 @@
-import .covid19
+import covid19
 
 class Model:
     def __init__(self,
@@ -13,9 +13,9 @@ class Model:
         self.c_params.output_file_dir = output_file_dir
         self.c_params.sys_write_individual = True
         self.c_params.input_household_file = input_household_file
-        
+
         # Get params from file and check them
-        covid19.read_param_file(self.c_params) 
+        covid19.read_param_file(self.c_params)
         covid19.check_params(self.c_params)
         covid19.read_household_demographics_file(self.c_params)
 
@@ -40,7 +40,7 @@ class Model:
                 setattr(self.c_params, name, float(value))
         except AttributeError:
             print("Parameter not found")
-            return None 
+            return None
 
     def create(self):
         """
@@ -64,7 +64,7 @@ class Model:
         """
         if not c_model:
             c_model = self.c_model
-                results = {}
+        results = {}
         results["time"] = c_model.time
         results["social_distancing"] = self.c_params.social_distancing_on
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
@@ -88,7 +88,7 @@ class Model:
         results["n_recovered"] = covid19.util_n_current(c_model, covid19.RECOVERED)
 
         return results
-        
+
 
     def write_output_files(self):
         """
