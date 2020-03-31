@@ -64,24 +64,31 @@ class Model:
         """
         if not c_model:
             c_model = self.c_model
-        results = {}
-        results['time'] = c_model.time
-        results['social_distancing'] = self.c_params.social_distancing_on
-        results['test_on_symptoms'] = self.c_params.test_on_symptoms
-        results['app_turned_on'] = self.c_params.app_turned_on
-        results['total_infected'] = int(covid19.util_n_total(c_model, covid19.PRESYMPTOMATIC)) + int(covid19.util_n_total(c_model, covid19.ASYMPTOMATIC))
-        results['total_case'] = covid19.util_n_total(c_model, covid19.CASE)
-        results['n_presymptom'] = covid19.util_n_current(c_model, covid19.PRESYMPTOMATIC)
-        results['n_asymptom'] = covid19.util_n_current(c_model, covid19.ASYMPTOMATIC)
-        results['n_quarantine'] = covid19.util_n_current(c_model, covid19.QUARANTINED)
-        results['n_tests'] = covid19.util_n_daily(c_model, covid19.TEST_RESULT, int(c_model.time) + 1)
-        results['n_sysmptoms'] = covid19.util_n_current(c_model, covid19.SYMPTOMATIC)
-        results['n_hospital'] = covid19.util_n_current(c_model, covid19.HOSPITALISED)
-        results['n_critical'] = covid19.util_n_current(c_model, covid19.CRITICAL)
-        results['n_death'] = covid19.util_n_current(c_model, covid19.DEATH)
-        results['n_recovered'] = covid19.util_n_current(c_model, covid19.RECOVERED)
+                results = {}
+        results["time"] = c_model.time
+        results["social_distancing"] = self.c_params.social_distancing_on
+        results["test_on_symptoms"] = self.c_params.test_on_symptoms
+        results["app_turned_on"] = self.c_params.app_turned_on
+        results["total_infected"] = int(
+            covid19.util_n_total(c_model, covid19.PRESYMPTOMATIC)
+        ) + int(covid19.util_n_total(c_model, covid19.ASYMPTOMATIC))
+        results["total_case"] = covid19.util_n_total(c_model, covid19.CASE)
+        results["n_presymptom"] = covid19.util_n_current(
+            c_model, covid19.PRESYMPTOMATIC
+        )
+        results["n_asymptom"] = covid19.util_n_current(c_model, covid19.ASYMPTOMATIC)
+        results["n_quarantine"] = covid19.util_n_current(c_model, covid19.QUARANTINED)
+        results["n_tests"] = covid19.util_n_daily(
+            c_model, covid19.TEST_RESULT, int(c_model.time) + 1
+        )
+        results["n_sysmptoms"] = covid19.util_n_current(c_model, covid19.SYMPTOMATIC)
+        results["n_hospital"] = covid19.util_n_current(c_model, covid19.HOSPITALISED)
+        results["n_critical"] = covid19.util_n_current(c_model, covid19.CRITICAL)
+        results["n_death"] = covid19.util_n_current(c_model, covid19.DEATH)
+        results["n_recovered"] = covid19.util_n_current(c_model, covid19.RECOVERED)
 
         return results
+        
 
     def write_output_files(self):
         """
