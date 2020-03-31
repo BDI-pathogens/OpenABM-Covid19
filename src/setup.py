@@ -30,5 +30,5 @@ setup (name = 'covid19',
        author      = "SWIG Docs",
        description = """Simple swig example from docs""",
        ext_modules = [covid19_module],
-       py_modules = ["covid19"],
+       py_modules = ["covid19", "COVID19/covid19_model", "COVID19/parameters", "COVID19/model"],
       )
