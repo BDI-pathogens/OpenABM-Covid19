@@ -24,7 +24,7 @@ SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darw
 
 # To compile
 swig-all:
-	swig -python covid19.i
+	swig -outdir COVID19 -python covid19.i
 	python3 setup.py build_ext --inplace
 	python3 setup.py install
 
