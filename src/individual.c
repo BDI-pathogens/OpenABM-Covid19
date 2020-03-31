@@ -131,7 +131,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 *  				change in status both at the individual level or national policy
 *  Returns:		void
 ******************************************************************************************/
-void update_random_interactions( individual *indiv, parameters* params )
+void update_random_interactions( individual *indiv, parameters* params ) //TODO: kelvin - probably need a update healthcare workers interactions func?
 {
 	double n = indiv->base_random_interactions;
 
