@@ -6,7 +6,7 @@ from parameters import ParameterSet
 from numpy.random import randint
 import time
 
-rand_seed = randint(0,4000,1)
+rand_seed = randint(0, 4000, 1)
 rand_seed = set(rand_seed)
 # Directories
 IBM_DIR = "src"
@@ -28,13 +28,13 @@ for seed in rand_seed:
     command = join(IBM_DIR_TEST, EXE)
 
     # Make a temporary copy of the code (remove this temporary directory if it already exists)
-    shutil.rmtree(IBM_DIR_TEST, ignore_errors = True)
+    shutil.rmtree(IBM_DIR_TEST, ignore_errors=True)
     shutil.copytree(IBM_DIR, IBM_DIR_TEST)
 
     file_output = open(TEST_OUTPUT_FILE, "w")
     completed_run = subprocess.run([command, TEST_DATA_FILE], stdout=file_output)
 
-    params = ParameterSet(TEST_DATA_TEMPLATE, line_number = 1)
+    params = ParameterSet(TEST_DATA_TEMPLATE, line_number=1)
     params.set_param("rng_seed", seed)
     params.write_params(TEST_DATA_FILE)
 
