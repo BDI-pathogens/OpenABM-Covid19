@@ -53,7 +53,7 @@ model* new_model( parameters *params )
     //TODO: Finish adding in separate hospital network set up here - Tom.
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
-    set_up_hospital_network( model_ptr );
+    set_up_hospital_network( model_ptr ); //TODO: replace with set_up_hospital_network_kelvin
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
@@ -189,6 +189,10 @@ void set_up_networks( model *model )
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
+
+    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
+    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+        set_up_hospital_network( model, idx );
 }
 
 /*****************************************************************************************
@@ -315,67 +319,30 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 *  Author:      meadt
 ******************************************************************************************/
 
-void set_up_hospital_network_kelvin( model *model ) {
+void set_up_hospital_network( model *model, int hospital_idx ) {
     //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
-    int hospital_idx;
     long n_healthcare_workers;
     long *healthcare_workers;
     int n_interactions;
 
-    //loop through list of hospitals
-    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
-    {
-        n_healthcare_workers = 0;
-        healthcare_workers   = calloc( model->hospitals[hospital_idx].n_total_nurses + model->hospitals[hospital_idx].n_total_doctors, sizeof( long ) );
+    n_healthcare_workers = 0;
+    healthcare_workers   = calloc( model->hospitals[hospital_idx].n_total_nurses + model->hospitals[hospital_idx].n_total_doctors, sizeof( long ) );
 
-        //get population id of all doctors at hospital
-        for ( int ddx = 0; ddx < model->hospitals[hospital_idx].n_total_doctors; ddx++ )
-            healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].doctor_pdxs[ddx];
+    //get population id of all doctors at hospital
+    for ( int ddx = 0; ddx < model->hospitals[hospital_idx].n_total_doctors; ddx++ )
+        healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].doctor_pdxs[ddx];
 
-        //get population id of all nurses at the hospital
-        for ( int ndx = 0; ndx < model->hospitals[hospital_idx].n_total_nurses; ndx++ )
-            healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].nurse_pdxs[ndx];
+    //get population id of all nurses at the hospital
+    for ( int ndx = 0; ndx < model->hospitals[hospital_idx].n_total_nurses; ndx++ )
+        healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].nurse_pdxs[ndx];
 
-        model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
-        //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
-        n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
-        build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
-        relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
-
-        free( healthcare_workers );
-    }
-};
-/*****************************************************************************************
-*  Name:		set_up_hospital_network
-*  Description: creates a hospital network and adds healthcare workers to them.
-*  Returns:		void
-*  Author:      meadt
-******************************************************************************************/
-
-void set_up_hospital_network( model *model ) {
-    //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
-
-    long idx;
-    long n_workers = 0;
-    long n_healthcare_workers;
-    long *healthcare_workers;
-    int n_interactions;
-
-    n_healthcare_workers = model->params->n_total_nurses + model->params->n_total_doctors;
-    healthcare_workers = calloc( n_healthcare_workers, sizeof( long ) );
-    
-    for( idx = 0; idx < model->params->n_total; idx++ )
-        if( model->population[idx].worker_type == NURSE || model->population[idx].worker_type == DOCTOR )
-            healthcare_workers[n_workers++] = idx;
-
-   // model->hospital_network = new_network( model->params->n_hospitals , HOSPITAL_WORK);
-    //TODO: WHAT ARE THE MEAN HOSPITAL INTERWORKER INTERACTIONS? - Tom
-    n_interactions           = 10;
-    build_watts_strogatz_network( model->hospital_network, n_workers, n_interactions, 0.1, TRUE );
-    relabel_network( model->hospital_network, healthcare_workers );
+    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
+    //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
+    n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
+    build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
+    relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
 
     free( healthcare_workers );
-
 };
 
 /*****************************************************************************************
@@ -408,7 +375,7 @@ double estimate_total_interactions( model *model )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
 	for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
 		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
-
+    //TODO:kelvin - should add something similar to the random network here for the hospital networks
 	return n_interactions;
 }
 
