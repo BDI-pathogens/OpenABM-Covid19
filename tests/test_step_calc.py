@@ -18,7 +18,7 @@ from os.path import join
 import numpy as np, pandas as pd
 from random import randrange
 
-sys.path.append("python/")
+sys.path.append("src/COVID19")
 from model import Model
 
 
@@ -58,12 +58,9 @@ class TestClass(object):
             [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
         )
 
-<<<<<<< HEAD
-=======
         # Copy covid19.py to current dir
         shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
 
->>>>>>> Add Python-C interface using Swig
     @classmethod
     def teardown_class(self):
         """
@@ -106,5 +103,3 @@ class TestClass(object):
             np.testing.assert_equal(model.get_param("test_on_symptoms"), step)
 
         model.write_output_files()
-        # Destroy the model
-        model.destroy(step_model)
