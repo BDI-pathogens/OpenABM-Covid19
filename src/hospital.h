@@ -27,24 +27,28 @@ typedef struct hospital hospital;
 struct hospital {
     int hospital_idx;
 
-    network *hospital_network;
-
     int available_beds;
     int available_icus;
 
     long *doctor_pdxs;      //stores the population ids of all doctors at the hospital
     long *nurse_pdxs;       //stores the population ids of all nurses at the hospital
+    long *patient_pdxs;     //stores the population ids of all patients at the hospital
 
     int n_total_doctors;    //total number of doctors at the hospital
     int n_total_nurses;     //total number of nurses at the hospital
+    int n_total_patients;   //total number of nurses at the hospital
+
+    network *doctor_patient_network;
+    network *nurse_patient_network;
 };
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_hospital( hospital*, parameters*, /*network*,*/ int );
+void initialise_hospital( hospital*, parameters*, int );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
+void add_patient_to_hospital(hospital *hospital, long pdx, int type);
 void destroy_hospital( hospital* );
 
 #endif /* HOSPITAL_H_ */
