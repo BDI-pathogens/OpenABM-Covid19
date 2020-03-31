@@ -155,8 +155,100 @@ class TestClass(object):
                 infectious_rate = 4.0,
                 end_time        = 50,
                 hospitalised_daily_interactions = 5
-            ) ]
-
+            ) 
+        ],
+        "test_relative_transmission": [
+            dict(
+                end_time = 250,
+                transmission_within = HOUSEHOLD,
+                relative_transmission = "relative_transmission_household",
+                relative_transmission_value = 0
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = HOUSEHOLD,
+                relative_transmission = "relative_transmission_household",
+                relative_transmission_value = 0.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = HOUSEHOLD,
+                relative_transmission = "relative_transmission_household",
+                relative_transmission_value = 1.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = HOUSEHOLD,
+                relative_transmission = "relative_transmission_household",
+                relative_transmission_value = 2
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = HOUSEHOLD,
+                relative_transmission = "relative_transmission_household",
+                relative_transmission_value = 5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = WORK,
+                relative_transmission = "relative_transmission_workplace",
+                relative_transmission_value = 0
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = WORK,
+                relative_transmission = "relative_transmission_workplace",
+                relative_transmission_value = 0.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = WORK,
+                relative_transmission = "relative_transmission_workplace",
+                relative_transmission_value = 1.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = WORK,
+                relative_transmission = "relative_transmission_workplace",
+                relative_transmission_value = 25
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = WORK,
+                relative_transmission = "relative_transmission_workplace",
+                relative_transmission_value = 5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = RANDOM,
+                relative_transmission = "relative_transmission_random",
+                relative_transmission_value = 0
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = RANDOM,
+                relative_transmission = "relative_transmission_random",
+                relative_transmission_value = 0.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = RANDOM,
+                relative_transmission = "relative_transmission_random",
+                relative_transmission_value = 1.5
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = RANDOM,
+                relative_transmission = "relative_transmission_random",
+                relative_transmission_value = 2
+            ),
+            dict(
+                end_time = 250,
+                transmission_within = RANDOM,
+                relative_transmission = "relative_transmission_random",
+                relative_transmission_value = 5
+            )
+        ]
     }   
     """
     Test class for checking 
@@ -312,13 +404,57 @@ class TestClass(object):
 
 
         
+    def test_relative_transmission(
+            self,
+            end_time,
+            transmission_within,
+            relative_transmission,
+            relative_transmission_value
+        ):
+        """
+        Test that monotonic change in relative_transmission_NETWORK
+        leads to corresponding change in counts of the within network transmissions.
+        
+        The relative_transmission rates r0, r1, r2 produce n0, n1, n2 transmissions, 
+        whereas rates k*r0, r1, r2 produce m0, m1, m2 transmissions.
+        This test checks that (k * n0 / (k * n0 + n1 + n2) ) is close enough to ( m0 / (m0 + m1 + m2)) 
+        for k = 0, 0.5, 1.5, 2, 5 for i = 0, 1, 2 (i = 0 shown in the example).
+        """
+        tolerance = 0.1
 
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+#       Run for even relative transmissions
+        params.set_param( "end_time", end_time )
+        params.set_param( "relative_transmission_household", 1 )
+        params.set_param( "relative_transmission_workplace", 1 )
+        params.set_param( "relative_transmission_random", 1 )
+        params.write_params(TEST_DATA_FILE)     
 
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_trans_even      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        
+        # calculating the weighted ratio
+        len_household = len( df_trans_even[ df_trans_even[ "infector_network" ] == HOUSEHOLD ] )
+        len_work = len( df_trans_even[ df_trans_even[ "infector_network" ] == WORK ] ) 
+        len_random = len( df_trans_even[ df_trans_even[ "infector_network" ] == RANDOM ] )
+        lengths = [int(len_household), int(len_work), int(len_random)]
+        lengths[transmission_within] = lengths[transmission_within] * relative_transmission_value
+        all_trans_even = sum(lengths)
+        ratio_even = float( df_trans_even[ df_trans_even[ "infector_network" ] == transmission_within ].shape[0] ) * relative_transmission_value / float(all_trans_even) 
+        
+#       Run for the scaled relative transmission
+        params.set_param(relative_transmission , relative_transmission_value )
+        params.write_params(TEST_DATA_FILE)     
 
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_trans      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        
+        all_trans = len( df_trans[ df_trans[ "infector_network" ] == HOUSEHOLD ] ) + \
+                    len( df_trans[ df_trans[ "infector_network" ] == WORK ] ) + \
+                    len( df_trans[ df_trans[ "infector_network" ] == RANDOM ] )
+        ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_within ].shape[0] ) / float(all_trans)
 
-
-
-
-
-
-   
+        # check the proportion of the infections
+        np.testing.assert_allclose( ratio_new , ratio_even, atol = tolerance)
