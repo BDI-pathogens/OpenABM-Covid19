@@ -1,11 +1,19 @@
 import covid19
 
+<<<<<<< HEAD
 class Model:
     def __init__(self,
                  input_param_file,
                  param_line_number,
                  output_file_dir,
                  input_household_file):
+=======
+
+class Model:
+    def __init__(
+        self, input_param_file, param_line_number, output_file_dir, input_household_file
+    ):
+>>>>>>> 70d00d9e207042dc96c08e141e1f4de571626cd4
         # Create C parameters object
         self.c_params = covid19.parameters()
         self.c_params.input_param_file = input_param_file
@@ -13,9 +21,15 @@ class Model:
         self.c_params.output_file_dir = output_file_dir
         self.c_params.sys_write_individual = True
         self.c_params.input_household_file = input_household_file
+<<<<<<< HEAD
         
         # Get params from file and check them
         covid19.read_param_file(self.c_params) 
+=======
+
+        # Get params from file and check them
+        covid19.read_param_file(self.c_params)
+>>>>>>> 70d00d9e207042dc96c08e141e1f4de571626cd4
         covid19.check_params(self.c_params)
         covid19.read_household_demographics_file(self.c_params)
 
@@ -61,6 +75,7 @@ class Model:
         Get results from one time step
         """
         results = {}
+<<<<<<< HEAD
         results['time'] = c_model.time
         results['social_distancing'] = self.c_params.social_distancing_on
         results['test_on_symptoms'] = self.c_params.test_on_symptoms
@@ -76,6 +91,29 @@ class Model:
         results['n_critical'] = covid19.util_n_current(c_model, covid19.CRITICAL)
         results['n_death'] = covid19.util_n_current(c_model, covid19.DEATH)
         results['n_recovered'] = covid19.util_n_current(c_model, covid19.RECOVERED)
+=======
+        results["time"] = c_model.time
+        results["social_distancing"] = self.c_params.social_distancing_on
+        results["test_on_symptoms"] = self.c_params.test_on_symptoms
+        results["app_turned_on"] = self.c_params.app_turned_on
+        results["total_infected"] = int(
+            covid19.util_n_total(c_model, covid19.PRESYMPTOMATIC)
+        ) + int(covid19.util_n_total(c_model, covid19.ASYMPTOMATIC))
+        results["total_case"] = covid19.util_n_total(c_model, covid19.CASE)
+        results["n_presymptom"] = covid19.util_n_current(
+            c_model, covid19.PRESYMPTOMATIC
+        )
+        results["n_asymptom"] = covid19.util_n_current(c_model, covid19.ASYMPTOMATIC)
+        results["n_quarantine"] = covid19.util_n_current(c_model, covid19.QUARANTINED)
+        results["n_tests"] = covid19.util_n_daily(
+            c_model, covid19.TEST_RESULT, int(c_model.time) + 1
+        )
+        results["n_sysmptoms"] = covid19.util_n_current(c_model, covid19.SYMPTOMATIC)
+        results["n_hospital"] = covid19.util_n_current(c_model, covid19.HOSPITALISED)
+        results["n_critical"] = covid19.util_n_current(c_model, covid19.CRITICAL)
+        results["n_death"] = covid19.util_n_current(c_model, covid19.DEATH)
+        results["n_recovered"] = covid19.util_n_current(c_model, covid19.RECOVERED)
+>>>>>>> 70d00d9e207042dc96c08e141e1f4de571626cd4
 
         return results
 
@@ -91,4 +129,7 @@ class Model:
         """
         covid19.destroy_model(c_model)
         covid19.destroy_params(self.c_params)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 70d00d9e207042dc96c08e141e1f4de571626cd4
