@@ -1,10 +1,11 @@
-import covid19
-
+import .covid19
 
 class Model:
-    def __init__(
-        self, input_param_file, param_line_number, output_file_dir, input_household_file
-    ):
+    def __init__(self,
+                 input_param_file,
+                 param_line_number,
+                 output_file_dir,
+                 input_household_file):
         # Create C parameters object
         self.c_params = covid19.parameters()
         self.c_params.input_param_file = input_param_file
@@ -12,9 +13,9 @@ class Model:
         self.c_params.output_file_dir = output_file_dir
         self.c_params.sys_write_individual = True
         self.c_params.input_household_file = input_household_file
-
+        
         # Get params from file and check them
-        covid19.read_param_file(self.c_params)
+        covid19.read_param_file(self.c_params) 
         covid19.check_params(self.c_params)
         covid19.read_household_demographics_file(self.c_params)
 
@@ -39,7 +40,7 @@ class Model:
                 setattr(self.c_params, name, float(value))
         except AttributeError:
             print("Parameter not found")
-            return None
+            return None 
 
     def create(self):
         """
@@ -49,17 +50,21 @@ class Model:
 
         return self.c_model
 
-    def one_time_step(self, c_model):
+    def one_time_step(self, c_model=None):
         """
         Call C function on_time_step
         """
+        if not c_model:
+            c_model = self.c_model
         covid19.one_time_step(c_model)
 
-    def one_time_step_results(self, c_model):
+    def one_time_step_results(self, c_model=None):
         """
         Get results from one time step
         """
-        results = {}
+        if not c_model:
+            c_model = self.c_model
+                results = {}
         results["time"] = c_model.time
         results["social_distancing"] = self.c_params.social_distancing_on
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
@@ -83,6 +88,7 @@ class Model:
         results["n_recovered"] = covid19.util_n_current(c_model, covid19.RECOVERED)
 
         return results
+        
 
     def write_output_files(self):
         """
@@ -95,4 +101,8 @@ class Model:
         Call C functions destroy_model and destroy_params
         """
         covid19.destroy_model(c_model)
+        covid19.destroy_params(self.c_params)
+
+    def __del__(self):
+        covid19.destroy_model(self.c_model)
         covid19.destroy_params(self.c_params)
