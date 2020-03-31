@@ -36,7 +36,7 @@ struct hospital {
 
     int n_total_doctors;    //total number of doctors at the hospital
     int n_total_nurses;     //total number of nurses at the hospital
-    int n_total_patients;   //total number of nurses at the hospital
+    int n_total_patients;   //total number of patients at the hospital
 
     network *doctor_patient_network;
     network *nurse_patient_network;
