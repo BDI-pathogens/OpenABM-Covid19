@@ -95,7 +95,7 @@ struct event{
 model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_healthcare_workers_and_hospitals( model* ); //kelvin change
-void set_up_hospital_network( model* ); //Tom: Added.
+void set_up_hospital_network( model*, int idx ); //Tom: Added.
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
