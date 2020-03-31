@@ -183,7 +183,7 @@ void set_up_networks( model *model )
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
-    build_household_network_from_directory(model->household_network, model->household_directory);
+    build_household_network_from_directory( model->household_network, model->household_directory );
 
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
@@ -338,6 +338,7 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
     //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
     n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
+    //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
     build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
     relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
 
@@ -629,6 +630,58 @@ void build_random_network( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		build_hospital_network
+*  Description: Builds a new random network
+******************************************************************************************/
+
+void build_hospital_network( model *model, int hospital_idx )
+{
+    long idx, n_pos, doctor, nurse;
+    long *interactions = model->possible_interactions;
+    network *network   = model->hospital_network[hospital_idx];
+    hospital *hospital = &(model->hospitals[hospital_idx]);
+
+    network->n_edges = 0;
+    n_pos            = 0;
+
+    //TODO: func to work out daily interactions for nurses / doctors based on hospital stats
+    int doctor_base_interactions = 10; // should this be the work interactions var every individual has?
+    int nurse_base_interactions =  20; // and just have it set differently when assigned to healthcare worker? if quarantined / hospital set it to zero?
+
+    for( doctor = 0; doctor < hospital->n_total_doctors; doctor++ )
+        for( idx = 0; idx < doctor_base_interactions; idx++ )
+            interactions[n_pos++] = hospital->doctor_pdxs[doctor];
+
+    for( nurse = 0; nurse < hospital->n_total_nurses; nurse++ )
+        for( idx = 0; idx < nurse_base_interactions; idx++ )
+            interactions[n_pos++] = hospital->nurse_pdxs[nurse];
+
+    if( n_pos == 0 )
+        return;
+
+    free( hospital->doctor_patient_network );
+    free( hospital->nurse_patient_network );
+
+
+
+    gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
+
+    idx = 0;
+    n_pos--;
+    while( idx < n_pos )
+    {
+        if( interactions[ idx ] == interactions[ idx + 1 ] )
+        {
+            idx++;
+            continue;
+        }
+        network->edges[network->n_edges].id1 = interactions[ idx++ ];
+        network->edges[network->n_edges].id2 = interactions[ idx++ ];
+        network->n_edges++;
+    }
+}
+
+/*****************************************************************************************
 *  Name:		add_interactions_from_network
 *  Description: Adds the daily interactions to all individual from a network
 ******************************************************************************************/
@@ -711,6 +764,10 @@ void build_daily_network( model *model )
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
+
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_network( model, idx );
+
 };
 
 /*****************************************************************************************
