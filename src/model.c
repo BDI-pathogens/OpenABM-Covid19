@@ -630,39 +630,57 @@ void build_random_network( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		build_hospital_network
-*  Description: Builds a new random network
+*  Name:		build_patient_network
+*  Description: Builds a new random network for interactions a patient has with doctors and
+ *              nurses, for a given hospital.
+ * Author:      meadt
 ******************************************************************************************/
 
-void build_hospital_network( model *model, int hospital_idx )
+void build_patient_networks( model *model, int hospital_idx )
 {
-    long idx, n_pos, doctor, nurse;
+    long idx, n_pos, doctor_idx, nurse_idx, patient;
     long *interactions = model->possible_interactions;
-    network *network   = model->hospital_network[hospital_idx];
+
     hospital *hospital = &(model->hospitals[hospital_idx]);
+    network *doctor_network = hospital->doctor_patient_network;
+    network *nurse_network = hospital->nurse_patient_network;
 
-    network->n_edges = 0;
-    n_pos            = 0;
+    n_pos  = 0;
+    doctor_idx = 0;
+    nurse_idx  = 0;
 
-    //TODO: func to work out daily interactions for nurses / doctors based on hospital stats
-    int doctor_base_interactions = 10; // should this be the work interactions var every individual has?
-    int nurse_base_interactions =  20; // and just have it set differently when assigned to healthcare worker? if quarantined / hospital set it to zero?
+    int doctor_base_interactions = 1;
+    int nurse_base_interactions =  2;
 
-    for( doctor = 0; doctor < hospital->n_total_doctors; doctor++ )
-        for( idx = 0; idx < doctor_base_interactions; idx++ )
-            interactions[n_pos++] = hospital->doctor_pdxs[doctor];
+    //Tom: Free the edges currently stored in the network and reassign memory based on the new amount of patients.
+    free( doctor_network->edges );
+    free( nurse_network->edges );
 
-    for( nurse = 0; nurse < hospital->n_total_nurses; nurse++ )
-        for( idx = 0; idx < nurse_base_interactions; idx++ )
-            interactions[n_pos++] = hospital->nurse_pdxs[nurse];
+    doctor_network->edges = calloc( hospital->n_total_patients * doctor_base_interactions, sizeof( edge ) );
+    nurse_network->edges = calloc( hospital->n_total_patients * nurse_base_interactions, sizeof( edge ) );
+
+    //TODO: Tom: Adding in patient interactions for both doctors and nurses
+    //Base interactions a patient has for both doctors and nurses - this could potentially be set in the parameter file.
+
+
+    for( patient = 0; patient < hospital->n_total_patients; patient++ ) {
+        for (idx = 0; idx < doctor_base_interactions; idx++) {
+            interactions[n_pos++] = hospital->doctor_pdxs[doctor_idx++];
+            if (doctor_idx == hospital->n_total_doctors)
+                doctor_idx = 0;
+        }
+    }
+
+    for( patient = 0; patient < hospital->n_total_patients; patient++ ) {
+        for (idx = 0; idx < nurse_base_interactions; idx++) {
+            interactions[n_pos++] = hospital->nurse_pdxs[nurse_idx++];
+            if (nurse_idx == hospital->n_total_nurses)
+                nurse_idx = 0;
+        }
+    }
 
     if( n_pos == 0 )
         return;
-
-    free( hospital->doctor_patient_network );
-    free( hospital->nurse_patient_network );
-
-
 
     gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
@@ -680,6 +698,8 @@ void build_hospital_network( model *model, int hospital_idx )
         network->n_edges++;
     }
 }
+
+
 
 /*****************************************************************************************
 *  Name:		add_interactions_from_network
@@ -755,10 +775,8 @@ void build_daily_network( model *model )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
-	// Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
-	// with the same patients? In either case, I should probably define a new hospital function.
 	build_random_network( model );
-    //kelvin change: would add rebuilding of a hospital network here
+
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
@@ -766,7 +784,7 @@ void build_daily_network( model *model )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_network( model, idx );
+        build_patient_networks( model, idx );
 
 };
 
