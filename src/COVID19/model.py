@@ -23,35 +23,9 @@ class Model:
         """
         Get parameter from the C structure
         """
-        if name == "test_on_symptoms":
-            return self.c_params.test_on_symptoms
-        elif name == "test_on_traced":
-            return self.c_params.test_on_traced
-        elif name == "quarantine_on_traced":
-            return self.c_params.quarantine_on_traced
-        elif name == "traceable_interaction_fraction":
-            return self.c_params.traceable_interaction_fraction
-        elif name == "tracing_network_depth":
-            return self.c_params.tracing_network_depth
-        elif name == "allow_clinical_diagnosis":
-            return self.c_params.allow_clinical_diagnosis
-        elif name == "quarantine_household_on_symptoms":
-            return self.c_params.quarantine_household_on_symptoms
-        elif name == "quarantine_household_on_positive":
-            return self.c_params.quarantine_household_on_positive
-        elif name == "quarantine_household_on_traced":
-            return self.c_params.quarantine_household_on_traced
-        elif name == "quarantine_household_contacts_on_positive":
-            return self.c_params.quarantine_household_contacts_on_positive
-        elif name == "quarantine_days":
-            return self.c_params.quarantine_days
-        elif name == "test_order_wait":
-            return self.c_params.test_order_wait
-        elif name == "test_result_wait":
-            return self.c_params.test_result_wait
-        elif name == "self_quarantine_fraction":
-            return self.c_params.self_quarantine_fraction
-        else:
+        try:
+            return getattr(self.c_params, name)
+        except AttributeError:
             print("Parameter not found")
             return None
 
@@ -59,36 +33,14 @@ class Model:
         """
         Set parameter in the C structure
         """
-        if name == "test_on_symptoms":
-            self.c_params.test_on_symptoms = int(value)
-        elif name == "test_on_traced":
-            self.c_params.test_on_traced = int(value)
-        elif name == "quarantine_on_traced":
-            self.c_params.quarantine_on_traced = int(value)
-        elif name == "traceable_interaction_fraction":
-            self.c_params.traceable_interaction_fraction = float(value)
-        elif name == "tracing_network_depth":
-            self.c_params.tracing_network_depth = int(value)
-        elif name == "allow_clinical_diagnosis":
-            self.c_params.allow_clinical_diagnosis = int(value)
-        elif name == "quarantine_household_on_symptoms":
-            self.c_params.quarantine_household_on_symptoms = int(value)
-        elif name == "quarantine_household_on_positive":
-            self.c_params.quarantine_household_on_positive = int(value)
-        elif name == "quarantine_household_on_traced":
-            self.c_params.quarantine_household_on_traced = int(value)
-        elif name == "quarantine_household_contacts_on_positive":
-            self.c_params.quarantine_household_contacts_on_positive = int(value)
-        elif name == "quarantine_days":
-            self.c_params.quarantine_days = int(value)
-        elif name == "test_order_wait":
-            self.c_params.test_order_wait = int(value)
-        elif name == "test_result_wait":
-            self.c_params.test_result_wait = int(value)
-        elif name == "self_quarantine_fraction":
-            self.c_params.self_quarantine_fraction = float(value)
-        else:
-            print("Parameter not found") 
+        try:
+            if isinstance(getattr(self.c_params, name), int):
+                setattr(self.c_params, name, int(value))
+            elif isinstance(getattr(self.c_params, name), float):
+                setattr(self.c_params, name, float(value))
+        except AttributeError:
+            print("Parameter not found")
+            return None 
 
     def create(self):
         """
