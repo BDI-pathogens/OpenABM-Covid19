@@ -29,7 +29,15 @@ mean_time_to_recover	12.0
 sd_time_to_recover	5.0
 mean_time_to_death	12.0
 sd_time_to_death	5.0
-fraction_asymptomatic	0.2
+fraction_asymptomatic_0_9 0.2
+fraction_asymptomatic_10_19 0.2
+fraction_asymptomatic_20_29 0.2
+fraction_asymptomatic_30_39 0.2
+fraction_asymptomatic_40_49 0.2
+fraction_asymptomatic_50_59 0.2
+fraction_asymptomatic_60_69 0.2
+fraction_asymptomatic_70_79 0.2
+fraction_asymptomatic_80 0.2
 asymptomatic_infectious_factor	0.25
 mean_asymptomatic_to_recovery	15.0
 sd_asymptomatic_to_recovery	5.0
@@ -121,6 +129,6 @@ social_distancing_random_network_multiplier	0.2
 social_distancing_house_interaction_multiplier	3.0
 social_distancing_time_on	50
 social_distancing_time_off	75
-testing_symptoms_time_on 50
-testing_symptoms_time_off 300
-N_REFERENCE_HOUSEHOLDS  125455
+testing_symptoms_time_on	50
+testing_symptoms_time_off	300
+N_REFERENCE_HOUSEHOLDS	125455

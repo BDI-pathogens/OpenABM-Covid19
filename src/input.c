@@ -172,9 +172,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic));
-	if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
-	
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
+		if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
+	}
+
 	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
 	if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
 	
@@ -396,6 +399,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_critical, ");
 	fprintf(individual_output_file,"time_death, ");
 	fprintf(individual_output_file,"time_recovered, ");
+	fprintf(individual_output_file,"time_quarantined, ");
 	fprintf(individual_output_file,"infector_ID, ");
 	fprintf(individual_output_file,"infector_time_infected, ");
 	fprintf(individual_output_file,"infector_status, ");
@@ -423,7 +427,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -440,6 +444,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->time_event[CRITICAL],
 			indiv->time_event[DEATH],
 			indiv->time_event[RECOVERED],
+			indiv->time_event[QUARANTINED],
 			infector_id,
 			infector_time_infected,
 			infector_status
@@ -643,7 +648,7 @@ void write_transmissions( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf(output_file ,"ID,age_group,house_no,work_network,infector_network,infector_infected_time,infector_status,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file ,"time_infected,ID,age_group,house_no,work_network,infector_network,infector_infected_time,infector_status,ID_2,age_group_2,house_no_2,work_2\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
