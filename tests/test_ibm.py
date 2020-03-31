@@ -200,7 +200,7 @@ class TestClass(object):
         Setting fraction_asymptomatic to one (should only be asymptomatics)
         """
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("fraction_asymptomatic", 1.0)
+        params = set_fraction_asymptomatic_all( params, 1.0 )
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
