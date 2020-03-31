@@ -106,12 +106,42 @@ class TestClass(object):
             dict( 
                 test_params = dict( 
                     n_total = 50000,
-                    quarantined_daily_interactions = 3,
+                    quarantined_daily_interactions = 0,
                     end_time = 25,
                     infectious_rate = 4,
                     self_quarantine_fraction = 1.0,
                     seasonal_flu_rate = 0.0    
                 )
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 50000,
+                    quarantined_daily_interactions = 1,
+                    end_time = 25,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    seasonal_flu_rate = 0.0    
+                )
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 50000,
+                    quarantined_daily_interactions = 2,
+                    end_time = 25,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    seasonal_flu_rate = 0.0    
+                )
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 50000,
+                    quarantined_daily_interactions = 3,
+                    end_time = 25,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    seasonal_flu_rate = 0.0    
+                )      
             ) 
         ]
 
@@ -198,8 +228,9 @@ class TestClass(object):
         df_test.fillna(0,inplace=True)
         np.testing.assert_allclose( df_test.loc[:,"connections"].mean(), float( params.get_param( "quarantined_daily_interactions" ) ), rtol = tolerance )
     
-
+      
         
+            
 
 
 
