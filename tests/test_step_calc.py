@@ -97,7 +97,7 @@ class TestClass(object):
             model.one_time_step(step_model)
             print(model.one_time_step_results(step_model))
 
-            # Try to set valid parameters
+            # Try to set/get valid parameters
             model.set_param(step_model, "test_on_symptoms", 1)
             np.testing.assert_equal(model.get_param(step_model, "test_on_symptoms"), 1)
 
@@ -139,5 +139,9 @@ class TestClass(object):
 
             model.set_param(step_model, "self_quarantine_fraction", 1)
             np.testing.assert_equal(model.get_param(step_model, "self_quarantine_fraction"), 1)
+
+            # Try to set/get invalid parameters
+            np.testing.assert_equal(model.set_param(step_model, "wrong_parameter", 1), False)
+            np.testing.assert_equal(model.get_param(step_model, "wrong_parameter"), False)
 
         model.write_output_files()
