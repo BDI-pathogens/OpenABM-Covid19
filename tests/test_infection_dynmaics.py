@@ -198,6 +198,116 @@ class TestClass(object):
                 end_time = 250,
                 asymptomatic_infectious_factor = [0, 0.25, 0.5, 0.5, 1, 0.1]
             )
+        ],
+        "test_monoton_relative_susceptibility": [
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
+            ),
+            dict(
+                end_time = 250,
+                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_80 = [0.2, 0.8, 0.8, 1, 0.1]
+            )
         ]
     }   
     """
@@ -558,3 +668,101 @@ class TestClass(object):
             # refresh current values
             asymptomatic_infectious_factor_current = asymptomatic_infectious_factor_new
             total_infected_current = total_infected_new
+            
+            
+            
+    def test_monoton_relative_susceptibility(
+            self,
+            end_time,
+            relative_susceptibility_0_9,
+            relative_susceptibility_10_19,
+            relative_susceptibility_20_29,
+            relative_susceptibility_30_39,
+            relative_susceptibility_40_49,
+            relative_susceptibility_50_59,
+            relative_susceptibility_60_69,
+            relative_susceptibility_70_79,
+            relative_susceptibility_80
+        ):
+        """
+        Test that monotonic change (increase, decrease, or equal) in relative_susceptibility 
+        leads to corresponding changes (increase, decrease, or equal) in the proportion of 
+        the infections within each age group.
+        
+        """
+        tolerance = 0.000001
+        # set the first parameters
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param( "end_time", end_time )
+        params.set_param( "relative_susceptibility_0_9", relative_susceptibility_0_9[0] )
+        params.set_param( "relative_susceptibility_10_19", relative_susceptibility_10_19[0] )
+        params.set_param( "relative_susceptibility_20_29", relative_susceptibility_20_29[0] )
+        params.set_param( "relative_susceptibility_30_39", relative_susceptibility_30_39[0] )
+        params.set_param( "relative_susceptibility_40_49", relative_susceptibility_40_49[0] )
+        params.set_param( "relative_susceptibility_50_59", relative_susceptibility_50_59[0] )
+        params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[0] )
+        params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[0] )
+        params.set_param( "relative_susceptibility_80", relative_susceptibility_80[0] )
+        params.write_params(TEST_DATA_FILE)     
+
+        # get the current output
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_trans_current = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        
+        # calculate the proportion of infections in each age group
+        infected_current = df_trans_current.groupby( "age_group" ).count()
+        relative_infected_current = [x/sum(infected_current["ID"].values) for x in infected_current["ID"].values]
+                                       
+        # get the relative_susceptibility for all age groups
+        relative_susceptibility_current = [ relative_susceptibility_0_9[0],
+                                            relative_susceptibility_10_19[0],
+                                            relative_susceptibility_20_29[0],
+                                            relative_susceptibility_30_39[0],
+                                            relative_susceptibility_40_49[0],
+                                            relative_susceptibility_50_59[0],
+                                            relative_susceptibility_60_69[0],
+                                            relative_susceptibility_70_79[0],
+                                            relative_susceptibility_80[0] ]        
+        
+        # calculate the infections for the rest and compare with the current
+        for idx in range(1, len(relative_susceptibility_0_9[1:])):
+            params.set_param( "relative_susceptibility_0_9", relative_susceptibility_0_9[idx] )
+            params.set_param( "relative_susceptibility_10_19", relative_susceptibility_10_19[idx] )
+            params.set_param( "relative_susceptibility_20_29", relative_susceptibility_20_29[idx] )
+            params.set_param( "relative_susceptibility_30_39", relative_susceptibility_30_39[idx] )
+            params.set_param( "relative_susceptibility_40_49", relative_susceptibility_40_49[idx] )
+            params.set_param( "relative_susceptibility_50_59", relative_susceptibility_50_59[idx] )
+            params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[idx] )
+            params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[idx] )
+            params.set_param( "relative_susceptibility_80", relative_susceptibility_80[idx] )
+            params.write_params(TEST_DATA_FILE)     
+    
+            file_output   = open(TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+            df_trans_new = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+            
+            relative_susceptibility_new = [ relative_susceptibility_0_9[idx],
+                                            relative_susceptibility_10_19[idx],
+                                            relative_susceptibility_20_29[idx],
+                                            relative_susceptibility_30_39[idx],
+                                            relative_susceptibility_40_49[idx],
+                                            relative_susceptibility_50_59[idx],
+                                            relative_susceptibility_60_69[idx],
+                                            relative_susceptibility_70_79[idx],
+                                            relative_susceptibility_80[idx] ]
+            infected_new = df_trans_new.groupby( "age_group" ).count()
+            relative_infected_new = [x/sum(infected_new["ID"].values) for x in infected_new["ID"].values]
+            
+            # monotonicity check
+            for age, c in enumerate(relative_susceptibility_current):
+                if c - relative_susceptibility_new[age] > tolerance:
+                    np.testing.assert_equal( relative_infected_current[age] > relative_infected_new[age], True)
+                elif relative_susceptibility_new[age] - c  > tolerance:
+                    np.testing.assert_equal( relative_infected_current[age] < relative_infected_new[age], True)
+                elif abs(c - relative_susceptibility_new[age]) < tolerance:
+                    np.testing.assert_allclose( relative_infected_current[age], relative_infected_new[age], atol = 0.1)
+                    
+            # refresh current values
+            relative_susceptibility_current = relative_susceptibility_new
+            relative_infected_current = relative_infected_new
