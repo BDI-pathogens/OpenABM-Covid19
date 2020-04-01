@@ -16,7 +16,7 @@ from string import Template
 import numpy as np, pandas as pd
 import pytest
 
-from parameters import ParameterSet
+from COVID19.parameters import ParameterSet
 import utilities as utils
 
 
