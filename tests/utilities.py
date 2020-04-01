@@ -82,14 +82,23 @@ def set_fatality_fraction_all(params, fraction):
 
     return params
 
+
 def set_fraction_asymptomatic_all(params, fraction):
     """
     Set fraction asymptomatic to `fraction` for all ages
     """
-    param_names = ["fraction_asymptomatic_0_9", "fraction_asymptomatic_10_19", "fraction_asymptomatic_20_29",
-        "fraction_asymptomatic_30_39", "fraction_asymptomatic_40_49", "fraction_asymptomatic_50_59",
-        "fraction_asymptomatic_60_69", "fraction_asymptomatic_70_79", "fraction_asymptomatic_80"]
-    
+    param_names = [
+        "fraction_asymptomatic_0_9",
+        "fraction_asymptomatic_10_19",
+        "fraction_asymptomatic_20_29",
+        "fraction_asymptomatic_30_39",
+        "fraction_asymptomatic_40_49",
+        "fraction_asymptomatic_50_59",
+        "fraction_asymptomatic_60_69",
+        "fraction_asymptomatic_70_79",
+        "fraction_asymptomatic_80",
+    ]
+
     for p in param_names:
         params.set_param(p, fraction)
 
@@ -209,7 +218,7 @@ def set_homogeneous_random_network_only(params, connections, end_time):
     params.set_param("sd_asymptomatic_to_recovery", 2.0)
 
     params = turn_off_interventions(params, end_time)
-    params = set_fraction_asymptomatic_all( params, 0.0 )
+    params = set_fraction_asymptomatic_all(params, 0.0)
     params = set_relative_susceptibility_equal(params)
     params = set_random_connections_all(params, connections, 0)
     params = set_work_connections_all(params, 0)
