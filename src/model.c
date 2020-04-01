@@ -337,7 +337,7 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     for ( int ndx = 0; ndx < hospital->n_total_nurses; ndx++ )
         healthcare_workers[n_healthcare_workers++] = hospital->nurse_pdxs[ndx];
 
-    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
+    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, HOSPITAL_WORK );
     //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
     n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
     //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?

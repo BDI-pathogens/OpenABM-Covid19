@@ -39,6 +39,7 @@ struct hospital {
     int n_total_patients;   //total number of patients at the hospital
 
 //    network *healthcare_workers_patients_network;
+    //TODO: Set these to be owned by the model. Use a double pointer.
     network *doctor_patient_network;
     network *nurse_patient_network;
 };
