@@ -111,7 +111,6 @@ void build_random_network( model * );
 
 int get_param_int(model*, char*);
 double get_param_double(model*, char*);
-int set_param_int(model*, char*, int);
-int set_param_double(model*, char*, double);
+int set_param(model*, char*, char*);
 
 #endif /* MODEL_H_ */
