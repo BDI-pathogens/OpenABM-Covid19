@@ -254,7 +254,7 @@ void intervention_notify_contacts(
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, level + 1 );
+						intervention_on_traced( model, contact, model->time - ddx, level );
 				}
 				inter = inter->next;
 			}
