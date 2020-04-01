@@ -127,18 +127,11 @@ class Model:
             [type] -- [value of param stored]
         """
         try:
-            if isinstance(getattr(self.c_params, name), int):
-                value = covid19.get_param_int(self.c_model, name)
-                if value < 0:
-                    return False
-                else:
-                    return value
-            elif isinstance(getattr(self.c_params, name), float):
-                value = covid19.get_param_double(self.c_model, name)
-                if value < 0:
-                    return False
-                else:
-                    return value
+            value = getattr(covid19, f"get_param_{name}")(self.c_model)
+            if value < 0:
+                return False
+            else:
+                return value
         except AttributeError:
             raise ModelParamaterException("Parameter {param} not found")
 
