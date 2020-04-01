@@ -159,7 +159,6 @@ class Model:
         if not covid19.set_param(self.c_model, param, f"{value}"):
             raise ModelParamaterException(f"Setting {param} to {value} failed")
 
-
     def _create(self):
         """
         Call C function new_model (renamed create_model)
