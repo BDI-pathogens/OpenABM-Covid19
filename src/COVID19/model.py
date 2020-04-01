@@ -28,7 +28,6 @@ class Model:
                 return covid19.get_param_int(model, name)
             elif isinstance(getattr(self.c_params, name), float):
                 return covid19.get_param_double(model, name)
-            return value
         except AttributeError:
             print("Parameter not found")
             return None
