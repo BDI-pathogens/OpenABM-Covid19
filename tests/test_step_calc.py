@@ -23,7 +23,8 @@ from model import Model
 
 
 # STEPS > 0
-STEPS = randrange(1, 10)
+#STEPS = randrange(1, 10)
+STEPS = 2
 PARAM_LINE_NUMBER = 1
 
 # Directories
@@ -57,9 +58,6 @@ class TestClass(object):
         completed_compilation = subprocess.run(
             [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
         )
-
-        # Copy covid19.py to current dir
-        shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
 
     @classmethod
     def teardown_class(self):
@@ -99,7 +97,7 @@ class TestClass(object):
             model.one_time_step(step_model)
             print(model.one_time_step_results(step_model))
 
-            model.set_param("test_on_symptoms", step)
-            np.testing.assert_equal(model.get_param("test_on_symptoms"), step)
+            model.set_param(step_model, "test_on_symptoms", step)
+            np.testing.assert_equal(model.get_param(step_model, "test_on_symptoms"), step)
 
         model.write_output_files()
