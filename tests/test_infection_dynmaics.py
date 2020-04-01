@@ -182,16 +182,22 @@ class TestClass(object):
         "test_monoton_fraction_asymptomatic": [
             dict(
                 end_time = 250,
-                fraction_asymptomatic_0_9 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_10_19 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_20_29 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_30_39 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_40_49 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_50_59 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_60_69 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_70_79 = [0, 0.7, 0.5, 0.5, 1],
-                fraction_asymptomatic_80 = [0, 0.7, 0.5, 0.5, 1]
+                fraction_asymptomatic_0_9 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_10_19 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_20_29 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_30_39 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_40_49 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_50_59 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_60_69 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_70_79 = [0, 0.2, 0.5, 0.5, 1, 0.1],
+                fraction_asymptomatic_80 = [0, 0.2, 0.5, 0.5, 1, 0.1]
             )        
+        ],
+        "test_monoton_asymptomatic_infectious_factor": [
+            dict(
+                end_time = 250,
+                asymptomatic_infectious_factor = [0, 0.25, 0.5, 0.5, 1, 0.1]
+            )
         ]
     }   
     """
@@ -500,4 +506,55 @@ class TestClass(object):
             
             # refresh current values
             fraction_asymptomatic_current = fraction_asymptomatic_new
+            total_infected_current = total_infected_new
+        
+        
+        
+    def test_monoton_asymptomatic_infectious_factor(
+            self,
+            end_time,
+            asymptomatic_infectious_factor
+        ):
+        """
+        Test that monotonic change (increase, decrease, or equal) in asymptomatic_infectious_factor values
+        leads to corresponding change (increase, decrease, or equal) in the total infections.
+        
+        """
+        
+        # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param( "end_time", end_time )
+        params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[0] )
+        params.write_params(TEST_DATA_FILE)     
+
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        # save the current asymptomatic_infectious_factor value
+        asymptomatic_infectious_factor_current = asymptomatic_infectious_factor[0]
+        total_infected_current = df_output[ "total_infected" ].iloc[-1]
+        
+        # calculate the total infections for the rest and compare with the current
+        for idx in range(1, len(asymptomatic_infectious_factor[1:])):
+            params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[idx] )
+            params.write_params(TEST_DATA_FILE)     
+    
+            file_output   = open(TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+            df_output_new     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            
+            asymptomatic_infectious_factor_new = asymptomatic_infectious_factor[idx]
+            total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
+    
+            # check the total infections
+            if asymptomatic_infectious_factor_new > asymptomatic_infectious_factor_current:
+                np.testing.assert_equal( total_infected_new > total_infected_current, True)
+            elif asymptomatic_infectious_factor_new < asymptomatic_infectious_factor_current:
+                np.testing.assert_equal( total_infected_new < total_infected_current, True)
+            elif asymptomatic_infectious_factor_new == asymptomatic_infectious_factor_current:
+                np.testing.assert_allclose( total_infected_new, total_infected_current, atol = 0.01)
+            
+            # refresh current values
+            asymptomatic_infectious_factor_current = asymptomatic_infectious_factor_new
             total_infected_current = total_infected_new
