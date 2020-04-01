@@ -5,7 +5,7 @@ Created: March 2020
 Author: p-robot
 """
 
-from parameters import ParameterSet
+from COVID19.parameters import ParameterSet
 
 
 def turn_off_interventions(params, end_time):

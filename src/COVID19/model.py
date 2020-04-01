@@ -49,8 +49,16 @@ class Parameters(object):
         covid19.read_household_demographics_file(self.c_params)
 
     def get_param(self, param):
-        """
-        Get parameter from the C paramater structure
+        """[summary]
+        Get the value of a param from the c_params object 
+        Arguments:
+            param {[str]} -- [name of parameters]
+        
+        Raises:
+            ParamaterException: [description]
+        
+        Returns:
+            [type] -- [value of param]
         """
         try:
             return getattr(self.c_params, param)
@@ -60,6 +68,15 @@ class Parameters(object):
             )
 
     def set_param(self, param, value):
+        """[summary]
+        sets parameter on c_params
+        Arguments:
+            param {[string]} -- [parameter name]
+            value {[float or int]} -- [value]
+        
+        Raises:
+            ParamaterException: 
+        """
         if self.update_lock:
             raise ParamaterException(
                 "Paramater set has been exported to model, please use model.update_x functions"
@@ -77,6 +94,11 @@ class Parameters(object):
             raise ParamaterException(f"Can not set paramater as it doesn't exist")
 
     def return_param_object(self):
+        """[summary]
+        Run a check on the parameters and return if the c code doesn't bail 
+        Returns:
+            [type] -- [description]
+        """
         covid19.check_params(self.c_params)
         LOGGER.info(
             "Returning self.c_params into Model object, future updates to paramaters not possible"
@@ -89,12 +111,20 @@ class Model:
     def __init__(self, params_object):
         # Create C parameters object
         self.c_params = params_object.return_param_object()
-        self.create()
+        self._create()
         self._is_running = False
 
     def get_param(self, name):
-        """
-        Get parameter from the C structure
+        """[summary]
+        Get parameter by name 
+        Arguments:
+            name {[str]} -- [name of param]
+        
+        Raises:
+            ModelParamaterException: [description]
+        
+        Returns:
+            [type] -- [value of param stored]
         """
         try:
             if isinstance(getattr(self.c_params, name), int):
@@ -113,16 +143,24 @@ class Model:
             raise ModelParamaterException("Parameter {param} not found")
 
     def update_running_params(self, param, value):
+        """[summary]
+        a subset of parameters my be updated whilst the model is evaluating, these correspond to events 
+        Arguments:
+            param {[str]} -- [name of parameter]
+            value {[type]} -- [value to set]
+        
+        Raises:
+            ModelParamaterException: [description]
+            ModelParamaterException: [description]
+            ModelParamaterException: [description]
+        """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParamaterException(f"Can not update {param} during running")
-        # if not hasattr(self.c_model, param):
-        #     raise ModelParamaterException(
-        #         f"Can not set param {param} as it doesn't exist"
-        #     )
         if not covid19.set_param(self.c_model, param, f"{value}"):
             raise ModelParamaterException(f"Setting {param} to {value} failed")
 
-    def create(self):
+
+    def _create(self):
         """
         Call C function new_model (renamed create_model)
         """
