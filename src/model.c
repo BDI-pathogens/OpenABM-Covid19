@@ -649,15 +649,18 @@ void build_random_network( model *model )
 
 void build_hospital_network( model *model, int hospital_idx )
 {
+    //TODO: Separate out the interactions that doctors and nurses have with patients.
     long idx, nd_pos, nn_pos;
-    int ddx, patient;
-    //long *interactions_doctors = model->possible_interactions;
-    hospital *hospital = &(model->hospitals[hospital_idx]);
-    network *network   = hospital->healthcare_workers_patients_network;
+    int ddx, ndx, patient;
     long *working_doctors, *working_nurses;
     int n_working_doctors, n_working_nurses;
 
-    network->n_edges = 0;
+    hospital *hospital = &(model->hospitals[hospital_idx]);
+    network *doctor_network   = hospital->doctor_patient_network;
+    network *nurse_network   = hospital->nurse_patient_network;
+
+    doctor_network->n_edges = 0;
+    nurse_network->n_edges = 0;
     nd_pos           = 0;
     nn_pos           = 0;
 
@@ -676,8 +679,10 @@ void build_hospital_network( model *model, int hospital_idx )
             working_nurses[n_working_nurses++] = hospital->nurse_pdxs[idx];
 
 
-    int patients_interactions_per_doctor = round( (model->params->patient_doctor_required_interactions * hospital->n_total_patients) / n_working_doctors );
-    int patients_interactions_per_nurse = round( (model->params->patient_nurse_required_interactions * hospital->n_total_patients) / n_working_nurses );
+    int patients_interactions_per_doctor = round( (model->params->patient_doctor_required_interactions * hospital->n_total_patients)
+            / n_working_doctors );
+    int patients_interactions_per_nurse = round( (model->params->patient_nurse_required_interactions * hospital->n_total_patients)
+            / n_working_nurses );
 
     //TODO: check max (need some measure of max interactions healthcare workers can have each timestep?
 
@@ -704,23 +709,23 @@ void build_hospital_network( model *model, int hospital_idx )
     idx = 0;
     nd_pos--;
     ddx = 0;
-    while( idx < nn_pos )
+    while( idx < nd_pos ) // Tom: Switched "nd_pos" an "nn_pos" in these while loops.
     {
-        network->edges[network->n_edges].id1 = working_doctors[ ddx++ ];
-        network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
-        network->n_edges++;
+        doctor_network->edges[doctor_network->n_edges].id1 = working_doctors[ ddx++ ];
+        doctor_network->edges[doctor_network->n_edges].id2 = doctor_interactions[ idx++ ];
+        doctor_network->n_edges++;
         ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
     }
 
     idx = 0;
-    nd_pos--;
-    int ndx = 0;
-    while( idx < nd_pos )
+    nn_pos--; // Tom: Set this to "nn_pos"
+    ndx = 0;
+    while( idx < nn_pos )
     {
-        network->edges[network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
-        network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
-        network->n_edges++;
-        ndx =  ( ndx++ < hospital->n_total_doctors ) ? ndx : 0;
+        nurse_network->edges[nurse_network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
+        nurse_network->edges[nurse_network->n_edges].id2 = nurse_interactions[ idx++ ];
+        nurse_network->n_edges++;
+        ndx =  ( ndx++ < n_working_nurses ) ? ndx : 0;
     }
 
     free( nurse_interactions );
