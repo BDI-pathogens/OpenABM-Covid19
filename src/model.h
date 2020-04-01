@@ -70,6 +70,7 @@ struct model{
     //kelvin change
     hospital *hospitals;
     network **hospital_network;
+    network **hospital_doctor_patient_general;
     network **healthcare_workers_patients_network;
 };
 
