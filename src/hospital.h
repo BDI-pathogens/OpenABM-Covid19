@@ -38,8 +38,7 @@ struct hospital {
     int n_total_nurses;     //total number of nurses at the hospital
     int n_total_patients;   //total number of nurses at the hospital
 
-    network *doctor_patient_network;
-    network *nurse_patient_network;
+    network *healthcare_workers_patients_network;
 };
 
 /************************************************************************/
@@ -48,6 +47,7 @@ struct hospital {
 
 void initialise_hospital( hospital*, parameters*, int );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
+int healthcare_worker_working(individual* indiv);
 void add_patient_to_hospital(hospital *hospital, long pdx, int type);
 void destroy_hospital( hospital* );
 
