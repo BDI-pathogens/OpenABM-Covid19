@@ -37,10 +37,7 @@ class Model:
         Set parameter in the C structure
         """
         try:
-            if isinstance(getattr(self.c_params, name), int):
-                covid19.set_param_int(model, name, value)
-            elif isinstance(getattr(self.c_params, name), float):
-                covid19.set_param_double(model, name, value)
+            covid19.set_param(model, name, "{}".format(value))
         except AttributeError:
             print("Parameter not found")
             return None
