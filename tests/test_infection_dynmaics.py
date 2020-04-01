@@ -157,31 +157,41 @@ class TestClass(object):
                 hospitalised_daily_interactions = 5
             ) 
         ],
-        "test_relative_transmission": [
+        "test_monoton_relative_transmission": [
             dict(
                 end_time = 250,
                 transmission_NETWORK = HOUSEHOLD,
-                relative_transmission = "relative_transmission_household",
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
-                dict(
+            dict(
                 end_time = 250,
                 transmission_NETWORK = WORK,
-                relative_transmission = "relative_transmission_workplace",
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
-                dict(
+            dict(
                 end_time = 250,
                 transmission_NETWORK = RANDOM,
-                relative_transmission = "relative_transmission_random",
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
-                dict( # fluctuating list
+            dict( # fluctuating list
                 end_time = 250,
                 transmission_NETWORK = WORK,
-                relative_transmission = "relative_transmission_workplace",
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
+        ],
+        "test_monoton_fraction_asymptomatic": [
+            dict(
+                end_time = 250,
+                fraction_asymptomatic_0_9 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_10_19 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_20_29 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_30_39 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_40_49 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_50_59 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_60_69 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_70_79 = [0, 0.7, 0.5, 0.5, 1],
+                fraction_asymptomatic_80 = [0, 0.7, 0.5, 0.5, 1]
+            )        
         ]
     }   
     """
@@ -338,11 +348,10 @@ class TestClass(object):
 
 
         
-    def test_relative_transmission(
+    def test_monoton_relative_transmission(
             self,
             end_time,
             transmission_NETWORK,
-            relative_transmission,
             relative_transmission_values
         ):
         """
@@ -350,6 +359,8 @@ class TestClass(object):
         leads to corresponding change (increase, decrease, or equal) in counts of transmissions in the NETWORK.
         
         """
+        relative_transmissions = [ "relative_transmission_household", "relative_transmission_workplace", "relative_transmission_random" ]
+        relative_transmission = relative_transmissions[transmission_NETWORK]
         
         # calculate the transmission proportions for the first entry in the relative_transmission_values
         rel_trans_value_current = relative_transmission_values[0]
@@ -399,3 +410,94 @@ class TestClass(object):
             # refresh current values
             ratio_current = ratio_new
             rel_trans_value_current = relative_transmission_value
+    
+    
+    
+    def test_monoton_fraction_asymptomatic(
+            self,
+            end_time,
+            fraction_asymptomatic_0_9,
+            fraction_asymptomatic_10_19,
+            fraction_asymptomatic_20_29,
+            fraction_asymptomatic_30_39,
+            fraction_asymptomatic_40_49,
+            fraction_asymptomatic_50_59,
+            fraction_asymptomatic_60_69,
+            fraction_asymptomatic_70_79,
+            fraction_asymptomatic_80
+        ):
+        """
+        Test that monotonic change (increase, decrease, or equal) in fraction_asymptomatic values
+        leads to corresponding change (decrease, increase, or equal) in the total infections.
+        
+        """
+        
+        # calculate the total infections for the first entry in the fraction_asymptomatic values
+        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params.set_param( "end_time", end_time )
+        params.set_param( "fraction_asymptomatic_0_9", fraction_asymptomatic_0_9[0] )
+        params.set_param( "fraction_asymptomatic_10_19", fraction_asymptomatic_10_19[0] )
+        params.set_param( "fraction_asymptomatic_20_29", fraction_asymptomatic_20_29[0] )
+        params.set_param( "fraction_asymptomatic_30_39", fraction_asymptomatic_30_39[0] )
+        params.set_param( "fraction_asymptomatic_40_49", fraction_asymptomatic_40_49[0] )
+        params.set_param( "fraction_asymptomatic_50_59", fraction_asymptomatic_50_59[0] )
+        params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[0] )
+        params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[0] )
+        params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[0] )
+        params.write_params(TEST_DATA_FILE)     
+
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        # calculate the sum of fraction_asymptomatic for different age groups
+        fraction_asymptomatic_current = fraction_asymptomatic_0_9[0] + \
+                                        fraction_asymptomatic_10_19[0] + \
+                                        fraction_asymptomatic_20_29[0] + \
+                                        fraction_asymptomatic_30_39[0] + \
+                                        fraction_asymptomatic_40_49[0] + \
+                                        fraction_asymptomatic_50_59[0] + \
+                                        fraction_asymptomatic_60_69[0] + \
+                                        fraction_asymptomatic_70_79[0] + \
+                                        fraction_asymptomatic_80[0]
+        total_infected_current = df_output[ "total_infected" ].iloc[-1]
+        
+        # calculate the total infections for the rest and compare with the current
+        for idx in range(1, len(fraction_asymptomatic_0_9[1:])):
+            params.set_param( "fraction_asymptomatic_0_9", fraction_asymptomatic_0_9[idx] )
+            params.set_param( "fraction_asymptomatic_10_19", fraction_asymptomatic_10_19[idx] )
+            params.set_param( "fraction_asymptomatic_20_29", fraction_asymptomatic_20_29[idx] )
+            params.set_param( "fraction_asymptomatic_30_39", fraction_asymptomatic_30_39[idx] )
+            params.set_param( "fraction_asymptomatic_40_49", fraction_asymptomatic_40_49[idx] )
+            params.set_param( "fraction_asymptomatic_50_59", fraction_asymptomatic_50_59[idx] )
+            params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[idx] )
+            params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[idx] )
+            params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[idx] )
+            params.write_params(TEST_DATA_FILE)     
+    
+            file_output   = open(TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
+            df_output_new     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            
+            fraction_asymptomatic_new = fraction_asymptomatic_0_9[idx] + \
+                                        fraction_asymptomatic_10_19[idx] + \
+                                        fraction_asymptomatic_20_29[idx] + \
+                                        fraction_asymptomatic_30_39[idx] + \
+                                        fraction_asymptomatic_40_49[idx] + \
+                                        fraction_asymptomatic_50_59[idx] + \
+                                        fraction_asymptomatic_60_69[idx] + \
+                                        fraction_asymptomatic_70_79[idx] + \
+                                        fraction_asymptomatic_80[idx]
+            total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
+    
+            # check the total infections
+            if fraction_asymptomatic_new > fraction_asymptomatic_current:
+                np.testing.assert_equal( total_infected_new < total_infected_current, True)
+            elif fraction_asymptomatic_new < fraction_asymptomatic_current:
+                np.testing.assert_equal( total_infected_new > total_infected_current, True)
+            elif fraction_asymptomatic_new == fraction_asymptomatic_current:
+                np.testing.assert_allclose( total_infected_new, total_infected_current, atol = 0.01)
+            
+            # refresh current values
+            fraction_asymptomatic_current = fraction_asymptomatic_new
+            total_infected_current = total_infected_new
