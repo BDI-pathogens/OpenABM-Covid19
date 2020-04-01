@@ -180,7 +180,7 @@ class TestClass(object):
                 end_time = 250,
                 transmission_NETWORK = WORK,
                 relative_transmission = "relative_transmission_workplace",
-                relative_transmission_values = [1.1, 1, 0.5, 0, 0.1, 0.2, 0.3]
+                relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ]
     }   
@@ -374,8 +374,7 @@ class TestClass(object):
         all_trans_current = sum(lengths)
         ratio_current = float( df_trans_current[ df_trans_current[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans_current) 
         
-        # calculate the transmission proportion for the rest and compare with the current; 
-        # then switch the current values
+        # calculate the transmission proportion for the rest and compare with the current
         for relative_transmission_value in relative_transmission_values[1:]:
             params.set_param(relative_transmission , relative_transmission_value )
             params.write_params(TEST_DATA_FILE)     
@@ -395,8 +394,8 @@ class TestClass(object):
             elif relative_transmission_value < rel_trans_value_current:
                 np.testing.assert_equal( ratio_new < ratio_current, True)
             elif relative_transmission_value == rel_trans_value_current:
-                np.testing.assert_equal( ratio_new == ratio_current, True)
+                np.testing.assert_allclose( ratio_new, ratio_current, atol = 0.01)
             
-            # switch to 
+            # refresh current values
             ratio_current = ratio_new
             rel_trans_value_current = relative_transmission_value
