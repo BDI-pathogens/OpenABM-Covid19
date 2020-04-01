@@ -254,7 +254,7 @@ void intervention_notify_contacts(
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, level + 1 );
+						intervention_on_traced( model, contact, model->time - ddx, level );
 				}
 				inter = inter->next;
 			}
@@ -308,19 +308,23 @@ void intervention_quarantine_household(
 void intervention_on_symptoms( model *model, individual *indiv )
 {
 	int quarantine, time_event;
+	parameters *params = model->params;
 
-	quarantine = indiv->quarantined || gsl_ran_bernoulli( rng, model->params->self_quarantine_fraction );
+	quarantine = indiv->quarantined || gsl_ran_bernoulli( rng, params->self_quarantine_fraction );
 
 	if( quarantine )
 	{
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
 
-		if( model->params->quarantine_household_on_symptoms )
+		if( params->quarantine_household_on_symptoms )
 			intervention_quarantine_household( model, indiv, time_event, FALSE );
 
-		if( model->params->test_on_symptoms )
-			intervention_test_order( model, indiv, model->time + model->params->test_order_wait );
+		if( params->test_on_symptoms )
+			intervention_test_order( model, indiv, model->time + params->test_order_wait );
+
+		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
+			intervention_notify_contacts( model, indiv, 1 );
 	}
 }
 
@@ -364,7 +368,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( params->quarantine_household_on_positive )
 		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive );
 
-	if( params->quarantine_on_traced || params->test_on_traced )
+	if( params->trace_on_positive && ( params->quarantine_on_traced || params->test_on_traced ) )
 		intervention_notify_contacts( model, indiv, 1 );
 }
 
@@ -400,7 +404,7 @@ void intervention_on_traced(
 	int recursion_level
 )
 {
-	if( !is_in_hospital( indiv ) || indiv->is_case )
+	if( is_in_hospital( indiv ) || indiv->is_case )
 		return;
 
 	parameters *params = model->params;
