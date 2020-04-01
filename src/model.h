@@ -109,4 +109,9 @@ void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
 void build_random_network( model * );
 
+int get_param_int(model*, char*);
+double get_param_double(model*, char*);
+int set_param_int(model*, char*, int);
+int set_param_double(model*, char*, double);
+
 #endif /* MODEL_H_ */
