@@ -23,7 +23,7 @@ from model import Model
 
 
 # STEPS > 0
-#STEPS = randrange(1, 10)
+# STEPS = randrange(1, 10)
 STEPS = 2
 PARAM_LINE_NUMBER = 1
 
@@ -105,28 +105,47 @@ class TestClass(object):
             np.testing.assert_equal(model.get_param(step_model, "test_on_traced"), 1)
 
             model.set_param(step_model, "quarantine_on_traced", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_on_traced"), 1)
-            
+            np.testing.assert_equal(
+                model.get_param(step_model, "quarantine_on_traced"), 1
+            )
+
             model.set_param(step_model, "traceable_interaction_fraction", 0.30)
-            np.testing.assert_equal(model.get_param(step_model, "traceable_interaction_fraction"), 0.30)
+            np.testing.assert_equal(
+                model.get_param(step_model, "traceable_interaction_fraction"), 0.30
+            )
 
             model.set_param(step_model, "tracing_network_depth", 1)
-            np.testing.assert_equal(model.get_param(step_model, "tracing_network_depth"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "tracing_network_depth"), 1
+            )
 
             model.set_param(step_model, "allow_clinical_diagnosis", 1)
-            np.testing.assert_equal(model.get_param(step_model, "allow_clinical_diagnosis"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "allow_clinical_diagnosis"), 1
+            )
 
             model.set_param(step_model, "quarantine_household_on_positive", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_positive"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "quarantine_household_on_positive"), 1
+            )
 
             model.set_param(step_model, "quarantine_household_on_symptoms", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_symptoms"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "quarantine_household_on_symptoms"), 1
+            )
 
             model.set_param(step_model, "quarantine_household_on_traced", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_traced"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "quarantine_household_on_traced"), 1
+            )
 
             model.set_param(step_model, "quarantine_household_contacts_on_positive", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_contacts_on_positive"), 1)
+            np.testing.assert_equal(
+                model.get_param(
+                    step_model, "quarantine_household_contacts_on_positive"
+                ),
+                1,
+            )
 
             model.set_param(step_model, "quarantine_days", 1)
             np.testing.assert_equal(model.get_param(step_model, "quarantine_days"), 1)
@@ -138,7 +157,9 @@ class TestClass(object):
             np.testing.assert_equal(model.get_param(step_model, "test_result_wait"), 1)
 
             model.set_param(step_model, "self_quarantine_fraction", 1)
-            np.testing.assert_equal(model.get_param(step_model, "self_quarantine_fraction"), 1)
+            np.testing.assert_equal(
+                model.get_param(step_model, "self_quarantine_fraction"), 1
+            )
 
             # Try to set/get invalid parameters
             np.testing.assert_equal(model.set_param(step_model, "wrong_parameter", 1), False)
