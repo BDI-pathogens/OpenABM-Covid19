@@ -333,11 +333,14 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
 	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
-    //kelvin change
+    //TODO: These hospital params need to be read in from a separate hospital file
     //current sim  pop is 100,000. 66 million is uk pop. 150,000 doctors and 320,000 nurses + midwives in nhs according to https://www.nuffieldtrust.org.uk/resource/the-nhs-workforce-in-numbers
     params->n_total_doctors = 227;
     params->n_total_nurses  = 484;
     params->n_hospitals = 1;
+    params->patient_doctor_required_interactions = 3;
+    params->patient_doctor_required_interactions = 6;
+
 	fclose(parameter_file);
 }
 
