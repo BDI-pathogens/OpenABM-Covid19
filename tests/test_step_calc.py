@@ -59,9 +59,6 @@ class TestClass(object):
             [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
         )
 
-        # Copy covid19.py to current dir
-        shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
-
     @classmethod
     def teardown_class(self):
         """
@@ -100,7 +97,51 @@ class TestClass(object):
             model.one_time_step(step_model)
             print(model.one_time_step_results(step_model))
 
-            model.set_param(step_model, "test_on_symptoms", step)
-            np.testing.assert_equal(model.get_param(step_model, "test_on_symptoms"), step)
+            # Try to set/get valid parameters
+            model.set_param(step_model, "test_on_symptoms", 1)
+            np.testing.assert_equal(model.get_param(step_model, "test_on_symptoms"), 1)
+
+            model.set_param(step_model, "test_on_traced", 1)
+            np.testing.assert_equal(model.get_param(step_model, "test_on_traced"), 1)
+
+            model.set_param(step_model, "quarantine_on_traced", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_on_traced"), 1)
+            
+            model.set_param(step_model, "traceable_interaction_fraction", 0.30)
+            np.testing.assert_equal(model.get_param(step_model, "traceable_interaction_fraction"), 0.30)
+
+            model.set_param(step_model, "tracing_network_depth", 1)
+            np.testing.assert_equal(model.get_param(step_model, "tracing_network_depth"), 1)
+
+            model.set_param(step_model, "allow_clinical_diagnosis", 1)
+            np.testing.assert_equal(model.get_param(step_model, "allow_clinical_diagnosis"), 1)
+
+            model.set_param(step_model, "quarantine_household_on_positive", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_positive"), 1)
+
+            model.set_param(step_model, "quarantine_household_on_symptoms", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_symptoms"), 1)
+
+            model.set_param(step_model, "quarantine_household_on_traced", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_traced"), 1)
+
+            model.set_param(step_model, "quarantine_household_contacts_on_positive", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_contacts_on_positive"), 1)
+
+            model.set_param(step_model, "quarantine_days", 1)
+            np.testing.assert_equal(model.get_param(step_model, "quarantine_days"), 1)
+
+            model.set_param(step_model, "test_order_wait", 1)
+            np.testing.assert_equal(model.get_param(step_model, "test_order_wait"), 1)
+
+            model.set_param(step_model, "test_result_wait", 1)
+            np.testing.assert_equal(model.get_param(step_model, "test_result_wait"), 1)
+
+            model.set_param(step_model, "self_quarantine_fraction", 1)
+            np.testing.assert_equal(model.get_param(step_model, "self_quarantine_fraction"), 1)
+
+            # Try to set/get invalid parameters
+            np.testing.assert_equal(model.set_param(step_model, "wrong_parameter", 1), False)
+            np.testing.assert_equal(model.get_param(step_model, "wrong_parameter"), False)
 
         model.write_output_files()

@@ -25,26 +25,26 @@ class Model:
         """
         try:
             if isinstance(getattr(self.c_params, name), int):
-                return covid19.get_param_int(model, name)
+                value = covid19.get_param_int(model, name)
+                if ( value < 0):
+                    return False
+                else:
+                    return value
             elif isinstance(getattr(self.c_params, name), float):
-                return covid19.get_param_double(model, name)
-            return value
+                value = covid19.get_param_double(model, name) 
+                if ( value < 0):
+                    return False
+                else:
+                    return value
         except AttributeError:
             print("Parameter not found")
-            return None
+            return False
 
     def set_param(self, model, name, value):
         """
         Set parameter in the C structure
         """
-        try:
-            if isinstance(getattr(self.c_params, name), int):
-                covid19.set_param_int(model, name, value)
-            elif isinstance(getattr(self.c_params, name), float):
-                covid19.set_param_double(model, name, value)
-        except AttributeError:
-            print("Parameter not found")
-            return None
+        return bool(covid19.set_param(model, name, "{}".format(value)))
 
     def create(self):
         """
