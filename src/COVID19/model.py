@@ -17,7 +17,7 @@ PYTHON_SAFE_PARAMS = []
 PYTHON_SAFE_UPDATE_PARAMS = []
 
 
-class Paramaters(object):
+class Parameters(object):
     def __init__(
         self, input_param_file, param_line_number, output_file_dir, input_household_file
     ):
