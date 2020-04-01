@@ -324,16 +324,18 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     long *healthcare_workers;
     int n_interactions;
 
+    hospital *hospital = &(model->hospitals[hospital_idx]);
+
     n_healthcare_workers = 0;
-    healthcare_workers   = calloc( model->hospitals[hospital_idx].n_total_nurses + model->hospitals[hospital_idx].n_total_doctors, sizeof( long ) );
+    healthcare_workers   = calloc( hospital->n_total_nurses + hospital->n_total_doctors, sizeof( long ) );
 
     //get population id of all doctors at hospital
-    for ( int ddx = 0; ddx < model->hospitals[hospital_idx].n_total_doctors; ddx++ )
-        healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].doctor_pdxs[ddx];
+    for ( int ddx = 0; ddx < hospital->n_total_doctors; ddx++ )
+        healthcare_workers[n_healthcare_workers++] = hospital->doctor_pdxs[ddx];
 
     //get population id of all nurses at the hospital
-    for ( int ndx = 0; ndx < model->hospitals[hospital_idx].n_total_nurses; ndx++ )
-        healthcare_workers[n_healthcare_workers++] = model->hospitals[hospital_idx].nurse_pdxs[ndx];
+    for ( int ndx = 0; ndx < hospital->n_total_nurses; ndx++ )
+        healthcare_workers[n_healthcare_workers++] = hospital->nurse_pdxs[ndx];
 
     model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
     //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
@@ -341,6 +343,15 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
     build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
     relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
+
+//    for( int i = 0; i < hospital->n_total_doctors; i++ )
+//    {
+//        if( )
+//            person = gsl_rng_uniform_int( rng, hospital->n_total );
+//    }
+
+    hospital->doctor_patient_network = new_network( hospital->n_total_doctors, -2); //TODO: need doctor_patient_network type
+    hospital->nurse_patient_network = new_network( hospital->n_total_nurses, -2);  //TODO: need nurse_patient_network type
 
     free( healthcare_workers );
 };
@@ -408,6 +419,7 @@ void set_up_interactions( model *model )
 			model->possible_interactions[ idx++ ] = indiv_idx;
 	}
 
+    //TODO: does something to do with m
 	model->n_possible_interactions = idx;
 	model->n_total_intereactions   = 0;
 }
@@ -605,9 +617,10 @@ void build_random_network( model *model )
 
 	network->n_edges = 0;
 	n_pos            = 0;
+
 	for( person = 0; person < model->params->n_total; person++ )
 		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
-			interactions[n_pos++]=person;
+            interactions[n_pos++]=person;
 
 	if( n_pos == 0 )
 		return;
@@ -630,76 +643,96 @@ void build_random_network( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		build_patient_network
-*  Description: Builds a new random network for interactions a patient has with doctors and
- *              nurses, for a given hospital.
- * Author:      meadt
+*  Name:		build_hospital_network
+*  Description: Builds a new random network
 ******************************************************************************************/
 
-void build_patient_networks( model *model, int hospital_idx )
+void build_hospital_network( model *model, int hospital_idx )
 {
-    long idx, n_pos, doctor_idx, nurse_idx, patient;
-    long *interactions = model->possible_interactions;
+    //TODO: Separate out the interactions that doctors and nurses have with patients.
+    long idx, nd_pos, nn_pos;
+    int ddx, ndx, patient;
+    long *working_doctors, *working_nurses;
+    int n_working_doctors, n_working_nurses;
 
     hospital *hospital = &(model->hospitals[hospital_idx]);
-    network *doctor_network = hospital->doctor_patient_network;
-    network *nurse_network = hospital->nurse_patient_network;
+    network *doctor_network   = hospital->doctor_patient_network;
+    network *nurse_network   = hospital->nurse_patient_network;
 
-    n_pos  = 0;
-    doctor_idx = 0;
-    nurse_idx  = 0;
+    doctor_network->n_edges = 0;
+    nurse_network->n_edges = 0;
+    nd_pos           = 0;
+    nn_pos           = 0;
 
-    int doctor_base_interactions = 1;
-    int nurse_base_interactions =  2;
+    //get array of working doctors
+    working_doctors = calloc( hospital->n_total_doctors, sizeof(long) );
+    n_working_doctors = 0;
+    for( idx = 0; idx < hospital->n_total_doctors; idx++)
+        if( healthcare_worker_working( &(model->population[hospital->doctor_pdxs[idx]]) ) )
+            working_doctors[n_working_doctors++] = hospital->doctor_pdxs[idx];
 
-    //Tom: Free the edges currently stored in the network and reassign memory based on the new amount of patients.
-    free( doctor_network->edges );
-    free( nurse_network->edges );
-
-    doctor_network->edges = calloc( hospital->n_total_patients * doctor_base_interactions, sizeof( edge ) );
-    nurse_network->edges = calloc( hospital->n_total_patients * nurse_base_interactions, sizeof( edge ) );
-
-    //TODO: Tom: Adding in patient interactions for both doctors and nurses
-    //Base interactions a patient has for both doctors and nurses - this could potentially be set in the parameter file.
+    //get array of working nurses
+    working_nurses = calloc( hospital->n_total_nurses, sizeof(long) );
+    n_working_nurses = 0;
+    for( idx = 0; idx < hospital->n_total_nurses; idx++)
+        if( healthcare_worker_working( &(model->population[hospital->nurse_pdxs[idx]]) ) )
+            working_nurses[n_working_nurses++] = hospital->nurse_pdxs[idx];
 
 
-    for( patient = 0; patient < hospital->n_total_patients; patient++ ) {
-        for (idx = 0; idx < doctor_base_interactions; idx++) {
-            interactions[n_pos++] = hospital->doctor_pdxs[doctor_idx++];
-            if (doctor_idx == hospital->n_total_doctors)
-                doctor_idx = 0;
-        }
+    int patients_interactions_per_doctor = round( (model->params->patient_doctor_required_interactions * hospital->n_total_patients)
+            / n_working_doctors );
+    int patients_interactions_per_nurse = round( (model->params->patient_nurse_required_interactions * hospital->n_total_patients)
+            / n_working_nurses );
+
+    //TODO: check max (need some measure of max interactions healthcare workers can have each timestep?
+
+    long *nurse_interactions;
+    nurse_interactions =  calloc( patients_interactions_per_nurse * hospital->n_total_patients, sizeof(long) );
+
+    long *doctor_interactions;
+    doctor_interactions = calloc( patients_interactions_per_doctor * hospital->n_total_patients, sizeof(long) );
+
+
+    //get list of possible interactions and population ids of those patients
+    for( patient = 0; patient < hospital->n_total_patients; patient++ )
+    {
+        for( int i = 0; i < patients_interactions_per_doctor; i++ )
+            doctor_interactions[nd_pos++] = hospital->patient_pdxs[patient];
+
+        for( int i = 0; i < patients_interactions_per_nurse; i++ )
+            nurse_interactions[nn_pos++] = hospital->patient_pdxs[patient];
     }
 
-    for( patient = 0; patient < hospital->n_total_patients; patient++ ) {
-        for (idx = 0; idx < nurse_base_interactions; idx++) {
-            interactions[n_pos++] = hospital->nurse_pdxs[nurse_idx++];
-            if (nurse_idx == hospital->n_total_nurses)
-                nurse_idx = 0;
-        }
-    }
-
-    if( n_pos == 0 )
-        return;
-
-    gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
+    gsl_ran_shuffle( rng, doctor_interactions, nd_pos, sizeof(long) );
+    gsl_ran_shuffle( rng, nurse_interactions, nn_pos, sizeof(long) );
 
     idx = 0;
-    n_pos--;
-    while( idx < n_pos )
+    nd_pos--;
+    ddx = 0;
+    while( idx < nd_pos ) // Tom: Switched "nd_pos" an "nn_pos" in these while loops.
     {
-        if( interactions[ idx ] == interactions[ idx + 1 ] )
-        {
-            idx++;
-            continue;
-        }
-        network->edges[network->n_edges].id1 = interactions[ idx++ ];
-        network->edges[network->n_edges].id2 = interactions[ idx++ ];
-        network->n_edges++;
+        doctor_network->edges[doctor_network->n_edges].id1 = working_doctors[ ddx++ ];
+        doctor_network->edges[doctor_network->n_edges].id2 = doctor_interactions[ idx++ ];
+        doctor_network->n_edges++;
+        ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
     }
+
+    idx = 0;
+    nn_pos--; // Tom: Set this to "nn_pos"
+    ndx = 0;
+    while( idx < nn_pos )
+    {
+        nurse_network->edges[nurse_network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
+        nurse_network->edges[nurse_network->n_edges].id2 = nurse_interactions[ idx++ ];
+        nurse_network->n_edges++;
+        ndx =  ( ndx++ < n_working_nurses ) ? ndx : 0;
+    }
+
+    free( nurse_interactions );
+    free( doctor_interactions );
+    free( working_doctors );
+    free( working_nurses );
 }
-
-
 
 /*****************************************************************************************
 *  Name:		add_interactions_from_network
@@ -775,8 +808,10 @@ void build_daily_network( model *model )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
+	// Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
+	// with the same patients? In either case, I should probably define a new hospital function.
 	build_random_network( model );
-
+    //kelvin change: would add rebuilding of a hospital network here
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
@@ -784,7 +819,7 @@ void build_daily_network( model *model )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_patient_networks( model, idx );
+        build_hospital_network( model, idx );
 
 };
 
