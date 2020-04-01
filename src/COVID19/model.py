@@ -98,28 +98,29 @@ class Model:
         """
         try:
             if isinstance(getattr(self.c_params, name), int):
-                value = covid19.get_param_int(model, name)
-                if ( value < 0):
+                value = covid19.get_param_int(self.c_model, name)
+                if value < 0:
                     return False
                 else:
                     return value
             elif isinstance(getattr(self.c_params, name), float):
-                value = covid19.get_param_double(model, name) 
-                if ( value < 0):
+                value = covid19.get_param_double(self.c_model, name)
+                if value < 0:
                     return False
                 else:
                     return value
         except AttributeError:
             raise ModelParamaterException("Parameter {param} not found")
 
-
     def update_running_params(self, param, value):
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
-            raise ModleParamaterException(f"Can not update {param} during running")
-        if not hasattr(self.c_model, param):
-            raise ModleParamaterException(f"Can not set param {param} as it doesn't exist")
+            raise ModelParamaterException(f"Can not update {param} during running")
+        # if not hasattr(self.c_model, param):
+        #     raise ModelParamaterException(
+        #         f"Can not set param {param} as it doesn't exist"
+        #     )
         if not covid19.set_param(self.c_model, param, f"{value}"):
-            raise ModelParamaterException(f"Setting {param} to {value} failed") 
+            raise ModelParamaterException(f"Setting {param} to {value} failed")
 
     def create(self):
         """
