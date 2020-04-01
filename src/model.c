@@ -677,67 +677,77 @@ int one_time_step( model *model )
 };
 
 /*****************************************************************************************
-*  Name:        get_param_int
+*  Name:        get_param_x
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_int(model *model, char *name)
+int get_param_test_on_symptoms(model *model)
 {
-    if ( strcmp( name, "test_on_symptoms" )  == 0 ) {
-        return model->params->test_on_symptoms;
-    } 
-    else if ( strcmp( name, "test_on_traced" )  == 0 ) {
-        return model->params->test_on_traced;
-    }
-    else if ( strcmp( name, "quarantine_on_traced" )  == 0 ) {
-        return model->params->quarantine_on_traced;
-    }
-    else if ( strcmp( name, "tracing_network_depth" )  == 0 ) {
-        return model->params->tracing_network_depth;
-    }
-    else if ( strcmp( name, "allow_clinical_diagnosis" )  == 0 ) {
-        return model->params->allow_clinical_diagnosis;
-    }
-    else if ( strcmp( name, "quarantine_household_on_positive" )  == 0 ) {
-        return model->params->quarantine_household_on_positive;
-    }
-    else if ( strcmp( name, "quarantine_household_on_symptoms" )  == 0 ) {
-        return model->params->quarantine_household_on_symptoms;
-    }
-    else if ( strcmp( name, "quarantine_household_on_traced" )  == 0 ) {
-        return model->params->quarantine_household_on_traced;
-    }
-    else if ( strcmp( name, "quarantine_household_contacts_on_positive" )  == 0 ) {
-        return model->params->quarantine_household_contacts_on_positive;
-    }
-    else if ( strcmp( name, "quarantine_days" )  == 0 ) {
-        return model->params->quarantine_days;
-    }
-    else if ( strcmp( name, "test_order_wait" )  == 0 ) {
-        return model->params->test_order_wait;
-    }
-    else if ( strcmp( name, "test_result_wait" )  == 0 ) {
-        return model->params->test_result_wait;
-    }
-    else {
-        return -1;
-    }
+    return model->params->test_on_symptoms;
+} 
+
+int get_param_test_on_traced(model *model)
+{
+    return model->params->test_on_traced;
 }
 
-/*****************************************************************************************
-*  Name:        get_param_double
-*  Description: Sets the value of a float parameter
-******************************************************************************************/
-double get_param_double(model *model, char *name)
+int get_param_quarantine_on_traced(model *model)
 {
-    if ( strcmp( name, "traceable_interaction_fraction" )  == 0 ) {
-        return model->params->traceable_interaction_fraction;
-    }
-    else if ( strcmp( name, "self_quarantine_fraction" )  == 0 ) {
-        return model->params->self_quarantine_fraction;
-    }
-    else{
-        return -1;
-    }
+    return model->params->quarantine_on_traced;
+}
+
+double get_param_traceable_interaction_fraction(model *model)
+{
+    return model->params->traceable_interaction_fraction;
+}
+
+int get_param_tracing_network_depth(model *model)
+{
+    return model->params->tracing_network_depth;
+}
+
+int get_param_allow_clinical_diagnosis(model *model)
+{
+    return model->params->allow_clinical_diagnosis;
+}
+
+int get_param_quarantine_household_on_positive(model *model)
+{
+    return model->params->quarantine_household_on_positive;
+}
+
+int get_param_quarantine_household_on_symptoms(model *model)
+{
+    return model->params->quarantine_household_on_symptoms;
+}
+
+int get_param_quarantine_household_on_traced(model *model)
+{
+    return model->params->quarantine_household_on_traced;
+}
+
+int get_param_quarantine_household_contacts_on_positive(model *model)
+{
+    return model->params->quarantine_household_contacts_on_positive;
+}
+
+int get_param_quarantine_days(model *model)
+{
+    return model->params->quarantine_days;
+}
+
+int get_param_test_order_wait(model *model)
+{
+    return model->params->test_order_wait;
+}
+
+int get_param_test_result_wait(model *model)
+{
+    return model->params->test_result_wait;
+}
+
+double get_param_self_quarantine_fraction(model *model)
+{
+    return model->params->self_quarantine_fraction;
 }
 
 /*****************************************************************************************
