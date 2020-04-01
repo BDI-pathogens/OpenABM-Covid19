@@ -17,13 +17,14 @@ import subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
 from random import randrange
+import pytest
 
 sys.path.append("src/COVID19")
-from model import Model
+from model import Model, Parameters, ModelParamaterException
 
 
 # STEPS > 0
-#STEPS = randrange(1, 10)
+# STEPS = randrange(1, 10)
 STEPS = 2
 PARAM_LINE_NUMBER = 1
 
@@ -84,64 +85,77 @@ class TestClass(object):
         Test the a parameter can be changed in between step runs
         """
         # Create model object
-        model = Model(
+        params = Parameters(
             TEST_DATA_TEMPLATE,
             PARAM_LINE_NUMBER,
             DATA_DIR_TEST,
             TEST_DATA_HOUSEHOLD_DEMOGRAPHICS,
         )
-        step_model = model.create()
+        model = Model(params)
 
         # Run steps
         for step in range(0, STEPS):
-            model.one_time_step(step_model)
-            print(model.one_time_step_results(step_model))
+            model.one_time_step()
+            print(model.one_time_step_results())
 
-            # Try to set/get valid parameters
-            model.set_param(step_model, "test_on_symptoms", 1)
-            np.testing.assert_equal(model.get_param(step_model, "test_on_symptoms"), 1)
+            # Try to set valid parameters
+            model.update_running_params("test_on_symptoms", 1)
+            np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
 
-            model.set_param(step_model, "test_on_traced", 1)
-            np.testing.assert_equal(model.get_param(step_model, "test_on_traced"), 1)
+            model.update_running_params("test_on_traced", 1)
+            np.testing.assert_equal(model.get_param("test_on_traced"), 1)
 
-            model.set_param(step_model, "quarantine_on_traced", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_on_traced"), 1)
-            
-            model.set_param(step_model, "traceable_interaction_fraction", 0.30)
-            np.testing.assert_equal(model.get_param(step_model, "traceable_interaction_fraction"), 0.30)
+            model.update_running_params("quarantine_on_traced", 1)
+            np.testing.assert_equal(model.get_param("quarantine_on_traced"), 1)
 
-            model.set_param(step_model, "tracing_network_depth", 1)
-            np.testing.assert_equal(model.get_param(step_model, "tracing_network_depth"), 1)
+            model.update_running_params("traceable_interaction_fraction", 0.30)
+            np.testing.assert_equal(
+                model.get_param("traceable_interaction_fraction"), 0.30
+            )
 
-            model.set_param(step_model, "allow_clinical_diagnosis", 1)
-            np.testing.assert_equal(model.get_param(step_model, "allow_clinical_diagnosis"), 1)
+            model.update_running_params("tracing_network_depth", 1)
+            np.testing.assert_equal(model.get_param("tracing_network_depth"), 1)
 
-            model.set_param(step_model, "quarantine_household_on_positive", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_positive"), 1)
+            model.update_running_params("allow_clinical_diagnosis", 1)
+            np.testing.assert_equal(model.get_param("allow_clinical_diagnosis"), 1)
 
-            model.set_param(step_model, "quarantine_household_on_symptoms", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_symptoms"), 1)
+            model.update_running_params("quarantine_household_on_positive", 1)
+            np.testing.assert_equal(
+                model.get_param("quarantine_household_on_positive"), 1
+            )
 
-            model.set_param(step_model, "quarantine_household_on_traced", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_on_traced"), 1)
+            model.update_running_params("quarantine_household_on_symptoms", 1)
+            np.testing.assert_equal(
+                model.get_param("quarantine_household_on_symptoms"), 1
+            )
 
-            model.set_param(step_model, "quarantine_household_contacts_on_positive", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_household_contacts_on_positive"), 1)
+            model.update_running_params("quarantine_household_on_traced", 1)
+            np.testing.assert_equal(
+                model.get_param("quarantine_household_on_traced"), 1
+            )
 
-            model.set_param(step_model, "quarantine_days", 1)
-            np.testing.assert_equal(model.get_param(step_model, "quarantine_days"), 1)
+            model.update_running_params("quarantine_household_contacts_on_positive", 1)
+            np.testing.assert_equal(
+                model.get_param("quarantine_household_contacts_on_positive"), 1,
+            )
 
-            model.set_param(step_model, "test_order_wait", 1)
-            np.testing.assert_equal(model.get_param(step_model, "test_order_wait"), 1)
+            model.update_running_params("quarantine_days", 1)
+            np.testing.assert_equal(model.get_param("quarantine_days"), 1)
 
-            model.set_param(step_model, "test_result_wait", 1)
-            np.testing.assert_equal(model.get_param(step_model, "test_result_wait"), 1)
+            model.update_running_params("test_order_wait", 1)
+            np.testing.assert_equal(model.get_param("test_order_wait"), 1)
 
-            model.set_param(step_model, "self_quarantine_fraction", 1)
-            np.testing.assert_equal(model.get_param(step_model, "self_quarantine_fraction"), 1)
+            model.update_running_params("test_result_wait", 1)
+            np.testing.assert_equal(model.get_param("test_result_wait"), 1)
+
+            model.update_running_params("self_quarantine_fraction", 1)
+            np.testing.assert_equal(model.get_param("self_quarantine_fraction"), 1)
 
             # Try to set/get invalid parameters
-            np.testing.assert_equal(model.set_param(step_model, "wrong_parameter", 1), False)
-            np.testing.assert_equal(model.get_param(step_model, "wrong_parameter"), False)
+            with pytest.raises(ModelParamaterException):
+                model.update_running_params("wrong_parameter", 1)
+
+            with pytest.raises(ModelParamaterException):
+                model.get_param("wrong_parameter")
 
         model.write_output_files()
