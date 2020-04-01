@@ -19,25 +19,28 @@ class Model:
         covid19.check_params(self.c_params)
         covid19.read_household_demographics_file(self.c_params)
 
-    def get_param(self, name):
+    def get_param(self, model, name):
         """
         Get parameter from the C structure
         """
         try:
-            return getattr(self.c_params, name)
+            if isinstance(getattr(self.c_params, name), int):
+                return covid19.get_param_int(model, name)
+            elif isinstance(getattr(self.c_params, name), float):
+                return covid19.get_param_double(model, name)
         except AttributeError:
             print("Parameter not found")
             return None
 
-    def set_param(self, name, value):
+    def set_param(self, model, name, value):
         """
         Set parameter in the C structure
         """
         try:
             if isinstance(getattr(self.c_params, name), int):
-                setattr(self.c_params, name, int(value))
+                covid19.set_param_int(model, name, value)
             elif isinstance(getattr(self.c_params, name), float):
-                setattr(self.c_params, name, float(value))
+                covid19.set_param_double(model, name, value)
         except AttributeError:
             print("Parameter not found")
             return None
