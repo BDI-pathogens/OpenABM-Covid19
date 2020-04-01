@@ -1,4 +1,40 @@
 import covid19 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+class ModleParamaterException(Exception):
+    pass
+
+
+PYTHON_SAFE_PARAMS = []
+
+PYTHON_SAFE_UPDATE_PARAMS = []
+
+
+class Paramaters(object):
+    def __init__(self, input_param_file, param_line_number, output_file_dir, input_household_file):
+        self.c_params = covid19.parameters()
+        self.c_params.input_param_file = input_param_file
+        self.c_params.param_line_number = int(param_line_number)
+        self.c_params.output_file_dir = output_file_dir
+        self.c_params.input_household_file = input_household_file
+        self._read_and_check_from_file()
+
+    def _read_and_check_from_file(self):
+        covid19.read_param_file(self.c_params)
+        covid19.check_params(self.c_params)
+        covid19.read_household_demographics_file(self.c_params)
+
+
+    def get_param(self, param):
+        """
+        Get parameter from the C paramater structure
+        """
+        try:
+            return getattr(self.c_params, param)
+        except AttributeError:
+            raise ModleParamaterException(f"Can not get param {param} as it doesn't exist")
+
 
 class Model:
     def __init__(self,
@@ -13,16 +49,20 @@ class Model:
         self.c_params.output_file_dir = output_file_dir
         self.c_params.sys_write_individual = True
         self.c_params.input_household_file = input_household_file
-
+        self.c_model_init = False
         # Get params from file and check them
         covid19.read_param_file(self.c_params)
         covid19.check_params(self.c_params)
         covid19.read_household_demographics_file(self.c_params)
+        self.create()
+        self._is_running = False
 
-    def get_param(self, model, name):
+    def get_param(self, name):
         """
         Get parameter from the C structure
         """
+        if not self.c_model_init:
+            raise ModleParamaterException(f"Can not get {name} as model is not initilised")
         try:
             if isinstance(getattr(self.c_params, name), int):
                 value = covid19.get_param_int(model, name)
@@ -37,59 +77,62 @@ class Model:
                 else:
                     return value
         except AttributeError:
-            print("Parameter not found")
-            return False
+            raise ModelParamaterException("Parameter {param} not found")
 
-    def set_param(self, model, name, value):
-        """
-        Set parameter in the C structure
-        """
-        return bool(covid19.set_param(model, name, "{}".format(value)))
+
+    def update_running_params(self, param, value):
+        if param not in PYTHON_SAFE_UPDATE_PARAMS:
+            raise ModleParamaterException(f"Can not update {param} during running")
+        if not hasattr(self.c_model, param):
+            raise ModleParamaterException(f"Can not set param {param} as it doesn't exist")
+        if not covid19.set_param(self.c_model, param, "{value}"):
+            raise ModelParamaterException(f"Setting {param} to {value} failed") 
+
+
+
+        return bool()
+
 
     def create(self):
         """
         Call C function new_model (renamed create_model)
         """
         self.c_model = covid19.create_model(self.c_params)
-
+        self.c_model_init = True
         return self.c_model
 
-    def one_time_step(self, c_model=None):
+    def one_time_step(self):
         """
         Call C function on_time_step
         """
-        if not c_model:
-            c_model = self.c_model
-        covid19.one_time_step(c_model)
+        covid19.one_time_step(self.c_model)
 
-    def one_time_step_results(self, c_model=None):
+    def one_time_step_results(self):
         """
         Get results from one time step
         """
-        if not c_model:
-            c_model = self.c_model
         results = {}
-        results["time"] = c_model.time
+        results["time"] = self.c_model.time
         results["social_distancing"] = self.c_params.social_distancing_on
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = int(
-            covid19.util_n_total(c_model, covid19.PRESYMPTOMATIC)
-        ) + int(covid19.util_n_total(c_model, covid19.ASYMPTOMATIC))
-        results["total_case"] = covid19.util_n_total(c_model, covid19.CASE)
+            covid19.util_n_total(self.c_model, covid19.PRESYMPTOMATIC)
+        ) + int(covid19.util_n_total(self.c_model, covid19.ASYMPTOMATIC))
+        results["total_case"] = covid19.util_n_total(self.c_model, covid19.CASE)
         results["n_presymptom"] = covid19.util_n_current(
-            c_model, covid19.PRESYMPTOMATIC
+            self.c_model, covid19.PRESYMPTOMATIC
         )
-        results["n_asymptom"] = covid19.util_n_current(c_model, covid19.ASYMPTOMATIC)
-        results["n_quarantine"] = covid19.util_n_current(c_model, covid19.QUARANTINED)
+        results["n_asymptom"] = covid19.util_n_current(self.c_model, covid19.ASYMPTOMATIC)
+        results["n_quarantine"] = covid19.util_n_current(self.c_model, covid19.QUARANTINED)
         results["n_tests"] = covid19.util_n_daily(
-            c_model, covid19.TEST_RESULT, int(c_model.time) + 1
+            self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
         )
-        results["n_sysmptoms"] = covid19.util_n_current(c_model, covid19.SYMPTOMATIC)
-        results["n_hospital"] = covid19.util_n_current(c_model, covid19.HOSPITALISED)
-        results["n_critical"] = covid19.util_n_current(c_model, covid19.CRITICAL)
-        results["n_death"] = covid19.util_n_current(c_model, covid19.DEATH)
-        results["n_recovered"] = covid19.util_n_current(c_model, covid19.RECOVERED)
+        results["n_sysmptoms"] = covid19.util_n_current(self.c_model, covid19.SYMPTOMATIC)
+        results["n_hospital"] = covid19.util_n_current(self.c_model, covid19.HOSPITALISED)
+        results["n_critical"] = covid19.util_n_current(self.c_model, covid19.CRITICAL)
+        results["n_death"] = covid19.util_n_current(self.c_model, covid19.DEATH)
+        results["n_recovered"] = covid19.util_n_current(self.c_model, covid19.RECOVERED)
 
         return results
 
@@ -100,13 +143,10 @@ class Model:
         """
         covid19.write_output_files(self.c_model, self.c_params)
 
-    def destroy(self, c_model):
+
+    def __del__(self):
         """
         Call C functions destroy_model and destroy_params
         """
-        covid19.destroy_model(c_model)
-        covid19.destroy_params(self.c_params)
-
-    def __del__(self):
         covid19.destroy_model(self.c_model)
         covid19.destroy_params(self.c_params)
