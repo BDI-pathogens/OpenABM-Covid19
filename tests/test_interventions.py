@@ -16,7 +16,7 @@ import numpy as np, pandas as pd
 import pytest
 from scipy import optimize
 
-from parameters import ParameterSet
+from COVID19.parameters import ParameterSet
 import utilities as utils
 from math import sqrt, log, exp
 
