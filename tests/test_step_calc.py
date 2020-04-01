@@ -59,9 +59,6 @@ class TestClass(object):
             [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
         )
 
-        # Copy covid19.py to current dir
-        shutil.copy("{}/covid19.py".format(IBM_DIR_TEST), "./tests") 
-
     @classmethod
     def teardown_class(self):
         """
