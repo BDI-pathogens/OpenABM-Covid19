@@ -73,6 +73,15 @@ void add_patient_to_hospital(hospital *hospital, long pdx, int type)
     }
 }
 
+
+int healthcare_worker_working(individual* indiv)
+{
+    if( indiv->status == DEATH || is_in_hospital(indiv) || indiv->quarantined == TRUE )
+        return FALSE;
+
+    return TRUE;
+}
+
 /*****************************************************************************************
 *  Name:		destroy_hospital
 *  Description: Destroys the model structure and releases its memory
