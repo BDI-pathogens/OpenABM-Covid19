@@ -122,7 +122,8 @@ typedef struct{
     int n_hospitals;
     int hospital_n_beds;
     int hospital_n_icus;
-
+    int patient_doctor_required_interactions;
+    int patient_nurse_required_interactions;
 
 } parameters;
 
