@@ -649,7 +649,7 @@ void build_random_network( model *model )
 
 void build_hospital_network( model *model, int hospital_idx )
 {
-    //TODO: Separate out the interactions that doctors and nurses have with patients.
+    //DONE: Separate out the interactions that doctors and nurses have with patients. - Tom
     long idx, nd_pos, nn_pos;
     int ddx, ndx, patient;
     long *working_doctors, *working_nurses;
