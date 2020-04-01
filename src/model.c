@@ -741,79 +741,68 @@ double get_param_double(model *model, char *name)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_int
-*  Description: Sets the value of an int parameter
+*  Name:        set_param
+*  Description: Sets the value of a parameter
 ******************************************************************************************/
-int set_param_int(model *model, char *name, int value)
+int set_param(model *model, char *name, char *value)
 {
     if ( strcmp( name, "test_on_symptoms" )  == 0 ) {
-        model->params->test_on_symptoms = value;
+        sscanf( value, "%d", &model->params->test_on_symptoms );
         return TRUE;
     } 
     else if ( strcmp( name, "test_on_traced" )  == 0 ) {
-        model->params->test_on_traced = value;
+        sscanf( value, "%d", &model->params->test_on_traced );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_on_traced" )  == 0 ) {
-        model->params->quarantine_on_traced = value;
+        sscanf( value, "%d", &model->params->quarantine_on_traced );
+        return TRUE;
+    }
+    else if ( strcmp( name, "traceable_interaction_fraction" )  == 0 ) {
+        sscanf( value, "%lf", &model->params->traceable_interaction_fraction );
         return TRUE;
     }
     else if ( strcmp( name, "tracing_network_depth" )  == 0 ) {
-        model->params->tracing_network_depth = value;
+        sscanf( value, "%d", &model->params->tracing_network_depth );
         return TRUE;
     }
     else if ( strcmp( name, "allow_clinical_diagnosis" )  == 0 ) {
-        model->params->allow_clinical_diagnosis = value;
+        sscanf( value, "%d", &model->params->allow_clinical_diagnosis );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_household_on_positive" )  == 0 ) {
-        model->params->quarantine_household_on_positive = value;
+        sscanf( value, "%d", &model->params->quarantine_household_on_positive );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_household_on_symptoms" )  == 0 ) {
-        model->params->quarantine_household_on_symptoms = value;
+        sscanf( value, "%d", &model->params->quarantine_household_on_symptoms );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_household_on_traced" )  == 0 ) {
-        model->params->quarantine_household_on_traced = value;
+        sscanf( value, "%d", &model->params->quarantine_household_on_traced );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_household_contacts_on_positive" )  == 0 ) {
-        model->params->quarantine_household_contacts_on_positive = value;
+        sscanf( value, "%d", &model->params->quarantine_household_contacts_on_positive );
         return TRUE;
     }
     else if ( strcmp( name, "quarantine_days" )  == 0 ) {
-        model->params->quarantine_days = value;
+        sscanf( value, "%d", &model->params->quarantine_days );
         return TRUE;
     }
     else if ( strcmp( name, "test_order_wait" )  == 0 ) {
-        model->params->test_order_wait = value;
+        sscanf( value, "%d", &model->params->test_order_wait );
         return TRUE;
     }
     else if ( strcmp( name, "test_result_wait" )  == 0 ) {
-        model->params->test_result_wait = value;
-        return TRUE;
-    }
-    else {
-        return FALSE;
-    }
-}
-
-/*****************************************************************************************
-*  Name:        set_param_float
-*  Description: Sets the value of a float parameter
-******************************************************************************************/
-int set_param_double(model *model, char* name, double value)
-{
-    if ( strcmp( name, "traceable_interaction_fraction" )  == 0 ) {
-        model->params->traceable_interaction_fraction = value;
+        sscanf( value, "%d", &model->params->test_result_wait );
         return TRUE;
     }
     else if ( strcmp( name, "self_quarantine_fraction" )  == 0 ) {
-        model->params->self_quarantine_fraction = value;
+        sscanf( value, "%lf", &model->params->self_quarantine_fraction );
         return TRUE;
     }
-    else{
+    else {
         return FALSE;
     }
 }
