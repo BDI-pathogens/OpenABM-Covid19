@@ -617,6 +617,7 @@ void build_random_network( model *model )
 
 	network->n_edges = 0;
 	n_pos            = 0;
+
 	for( person = 0; person < model->params->n_total; person++ )
 		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
             interactions[n_pos++]=person;
@@ -648,116 +649,84 @@ void build_random_network( model *model )
 
 void build_hospital_network( model *model, int hospital_idx )
 {
-    long idx, n_pos;
-    int doctor, nurse, patient;
-    long *interactions_doctors = model->possible_interactions;
-    network *network   = model->hospital_network[hospital_idx];
+    long idx, nd_pos, nn_pos;
+    int ddx, patient;
+    //long *interactions_doctors = model->possible_interactions;
     hospital *hospital = &(model->hospitals[hospital_idx]);
+    network *network   = hospital->healthcare_workers_patients_network;
+    long *working_doctors, *working_nurses;
+    int n_working_doctors, n_working_nurses;
 
     network->n_edges = 0;
-    n_pos            = 0;
+    nd_pos           = 0;
+    nn_pos           = 0;
 
-    //TODO: func to work out daily interactions for nurses / doctors based on hospital stats
-    int doctor_base_interactions = 10; // should this be the work interactions var every individual has?
-    int nurse_base_interactions =  20; // and just have it set differently when assigned to healthcare worker? if quarantined / hospital set it to zero?
+    //get array of working doctors
+    working_doctors = calloc( hospital->n_total_doctors, sizeof(long) );
+    n_working_doctors = 0;
+    for( idx = 0; idx < hospital->n_total_doctors; idx++)
+        if( healthcare_worker_working( &(model->population[hospital->doctor_pdxs[idx]]) ) )
+            working_doctors[n_working_doctors++] = hospital->doctor_pdxs[idx];
 
-//    for( doctor = 0; doctor < hospital->n_total_doctors; doctor++ )
-//        for( idx = 0; idx < doctor_base_interactions; idx++ )
-//            interactions[n_pos++] = hospital->doctor_pdxs[doctor];
+    //get array of working nurses
+    working_nurses = calloc( hospital->n_total_nurses, sizeof(long) );
+    n_working_nurses = 0;
+    for( idx = 0; idx < hospital->n_total_nurses; idx++)
+        if( healthcare_worker_working( &(model->population[hospital->nurse_pdxs[idx]]) ) )
+            working_nurses[n_working_nurses++] = hospital->nurse_pdxs[idx];
 
-//    for( nurse = 0; nurse < hospital->n_total_nurses; nurse++ )
-//        for( idx = 0; idx < nurse_base_interactions; idx++ )
-//            interactions[n_pos++] = hospital->nurse_pdxs[nurse];
 
-//    if( n_pos == 0 )
-//        return;
+    int patients_interactions_per_doctor = round( (model->params->patient_doctor_required_interactions * hospital->n_total_patients) / n_working_doctors );
+    int patients_interactions_per_nurse = round( (model->params->patient_nurse_required_interactions * hospital->n_total_patients) / n_working_nurses );
 
-    int patient_doctor_required_interactions = 3;
-    int patient_nurse_required_interactions  = 6;
+    //TODO: check max (need some measure of max interactions healthcare workers can have each timestep?
 
-    int n_total_required_doctor_interactions_current = patient_doctor_required_interactions * hospital->n_total_patients;
-    int n_total_required_nurse_interactions_current = patient_nurse_required_interactions * hospital->n_total_patients;
-
-    int patients_interactions_per_doctor = round( n_total_required_doctor_interactions_current / hospital->n_total_doctors );
-    int nurse_patients_interactions_current = round( n_total_required_nurse_interactions_current / hospital->n_total_nurses );
-
-    //TODO: check max!!
     long *nurse_interactions;
-    nurse_interactions =  calloc( nurse_patients_interactions_current * hospital->n_total_patients, sizeof(long) );
+    nurse_interactions =  calloc( patients_interactions_per_nurse * hospital->n_total_patients, sizeof(long) );
 
     long *doctor_interactions;
     doctor_interactions = calloc( patients_interactions_per_doctor * hospital->n_total_patients, sizeof(long) );
 
-    int *d_interactions = calloc ( hospital->n_total_patients, sizeof(int) );
 
+    //get list of possible interactions and population ids of those patients
     for( patient = 0; patient < hospital->n_total_patients; patient++ )
-        for( int i = 0; i < patients_interactions_per_doctor; i++ )
-            doctor_interactions[n_pos++]=hospital->patient_pdxs[patient];
-
-//    for( patient = 0; patient < hospital->n_total_patients; patient++ )
-//        for( int i = 0; i < patients_interactions_per_doctor; i++ )
-//            doctor_interactions[n_pos++]=hospital->patient_pdxs[patient];
-    int n_interactions = 0;
-    long pdx;
-    while( n_interactions < n_total_required_doctor_interactions_current )
     {
-        //gsl_ran_shuffle( rng, doctor_interactions, n_pos, sizeof(long) );
-        for( int ddx = 0; ddx < hospital->n_total_doctors; ddx++ )
-        {
-            //pdx = gsl_rng_uniform_int( rng, hospital->n_total_patients );
+        for( int i = 0; i < patients_interactions_per_doctor; i++ )
+            doctor_interactions[nd_pos++] = hospital->patient_pdxs[patient];
 
-            //randomly choose patient who has not had required amount of interactions with doctors;
-            while( !(d_interactions[pdx] < patient_doctor_required_interactions) )
-            {
-                pdx = gsl_rng_uniform_int( rng, hospital->n_total_patients );
-            }
-
-            network->edges[network->n_edges].id1 = hospital->doctor_pdxs[ddx];
-            network->edges[network->n_edges].id2 = hospital->patient_pdxs[pdx];
-            n_interactions++;
-
-//            if( d_interactions[pdx] < patient_doctor_required_interactions )
-//            {
-
-//            }
-
-        }
-
-        //gsl_ran_shuffle( rng, hospital->, hospital->n_total_patients, sizeof(long) );
+        for( int i = 0; i < patients_interactions_per_nurse; i++ )
+            nurse_interactions[nn_pos++] = hospital->patient_pdxs[patient];
     }
 
-    // for each doctor / nurse randomly pick the patients they are going to see (number of calculated above)
-    // for each patient randomly checked, check to make sure they're required visits from that type of healthcare worker havent already been met
-    // if visits have been met, randomly pick another patient
-    // add these as interactions into the hospital's patient network?
-
-
-//    free( hospital->doctor_patient_network->edges );
-//    free( hospital->nurse_patient_network->edges );
-
-//    hospital->doctor_patient_network->edges = calloc( doctor_patient_base_interactions * hospital->n_total_patients, sizeof( edge ));
-//    hospital->nurse_patient_network->edges = calloc( nurse_patient_base_interactions * hospital->n_total_patients, sizeof( edge ));
-
-//    for( doctor = 0; doctor < hospital->n_total_doctors; doctor++ )
-//        for( patient = 0; jdx < model->population[person].random_interactions; jdx++ )
-//            interactions[n_pos++]=person;
-
-    gsl_ran_shuffle( rng, doctor_interactions, n_pos, sizeof(long) );
+    gsl_ran_shuffle( rng, doctor_interactions, nd_pos, sizeof(long) );
+    gsl_ran_shuffle( rng, nurse_interactions, nn_pos, sizeof(long) );
 
     idx = 0;
-    n_pos--;
-
-    while( idx < n_pos )
+    nd_pos--;
+    ddx = 0;
+    while( idx < nn_pos )
     {
-        if( doctor_interactions[ idx ] == doctor_interactions[ idx + 1 ] )
-        {
-            idx++;
-            continue;
-        }
-        network->edges[network->n_edges].id1 = doctor_interactions[ idx++ ];
+        network->edges[network->n_edges].id1 = working_doctors[ ddx++ ];
         network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
         network->n_edges++;
+        ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
     }
+
+    idx = 0;
+    nd_pos--;
+    int ndx = 0;
+    while( idx < nd_pos )
+    {
+        network->edges[network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
+        network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
+        network->n_edges++;
+        ndx =  ( ndx++ < hospital->n_total_doctors ) ? ndx : 0;
+    }
+
+    free( nurse_interactions );
+    free( doctor_interactions );
+    free( working_doctors );
+    free( working_nurses );
 }
 
 /*****************************************************************************************
