@@ -14,7 +14,22 @@ class ParamaterException(Exception):
 
 PYTHON_SAFE_PARAMS = []
 
-PYTHON_SAFE_UPDATE_PARAMS = []
+PYTHON_SAFE_UPDATE_PARAMS = [
+    "test_on_symptoms",
+    "test_on_traced",
+    "quarantine_on_traced",
+    "traceable_interaction_fraction",
+    "tracing_network_depth",
+    "allow_clinical_diagnosis",
+    "quarantine_household_on_positive",
+    "quarantine_household_on_symptoms",
+    "quarantine_household_on_traced",
+    "quarantine_household_contacts_on_positive",
+    "quarantine_days",
+    "test_order_wait",
+    "test_result_wait",
+    "self_quarantine_fraction",
+]
 
 
 class Parameters(object):
@@ -165,5 +180,7 @@ class Model:
         """
         Call C functions destroy_model and destroy_params
         """
-        covid19.destroy_model(self.c_model)
-        covid19.destroy_params(self.c_params)
+        if self.c_model:
+            covid19.destroy_model(self.c_model)
+        if self.c_params:
+            covid19.destroy_params(self.c_params)
