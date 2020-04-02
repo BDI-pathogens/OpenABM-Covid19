@@ -30,6 +30,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "self_quarantine_fraction",
     "lockdown_on",
+    "app_turned_on"
 ]
 
 
