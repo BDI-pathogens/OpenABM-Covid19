@@ -1,3 +1,0 @@
-C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/covid19ibm.dir
-C:/Users/meadt/CLionProjects/COVID19-IBM/cmake-build-debug/CMakeFiles/edit_cache.dir
