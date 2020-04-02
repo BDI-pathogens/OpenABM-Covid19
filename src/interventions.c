@@ -52,8 +52,7 @@ void set_up_app_users( model *model )
 ******************************************************************************************/
 void update_intervention_policy( model *model, int time )
 {
-	parameters *params    = model->params;
-	long pdx;
+	parameters *params = model->params;
 	int type;
 
 	if( time == 0 )
@@ -66,38 +65,19 @@ void update_intervention_policy( model *model, int time )
 	}
 
 	if( time == params->app_turn_on_time )
-		params->app_turned_on = TRUE;
+		set_param_app_turned_on( model, TRUE );
 
 	if( time == params->lockdown_time_on )
-	{
-		params->lockdown_on      = TRUE;
-		params->daily_fraction_work_used = params->daily_fraction_work * params->lockdown_work_network_multiplier;
+		set_param_lockdown_on( model, TRUE );
 
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
-		                                           	   	   	    params->lockdown_house_interaction_multiplier;
-		set_up_infectious_curves( model );
-
-		for( pdx = 0; pdx < params->n_total; pdx++ )
-			update_random_interactions( &(model->population[pdx]), params );
-	}
-	else
 	if( time == params->lockdown_time_off )
-	{
-		params->lockdown_on = FALSE;
-		params->daily_fraction_work_used = params->daily_fraction_work;
-
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
-		set_up_infectious_curves( model );
-
-		for( pdx = 0; pdx < params->n_total; pdx++ )
-			update_random_interactions( &(model->population[pdx]), params );
-	}
+		set_param_lockdown_on( model, FALSE );
 	
 	if( time == params->testing_symptoms_time_on )
-		params->test_on_symptoms = TRUE;
+		set_param_test_on_symptoms( model, TRUE );
+
 	if( time == params->testing_symptoms_time_off )
-		params->test_on_symptoms = FALSE;
-	
+		set_param_test_on_symptoms( model, FALSE );
 };
 
 /*****************************************************************************************
