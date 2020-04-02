@@ -75,6 +75,9 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
+	int trace_on_symptoms; // contract trace on symptoms
+	int trace_on_positive; // contract trace on positive result
+
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
 	int quarantine_length_traced;			// max length of quarantine if contact-traced
 	int quarantine_length_positive;			// max length of quarantine if receive positive test result

@@ -263,6 +263,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->trace_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter trace_on_positive\n"); };
+
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
 
