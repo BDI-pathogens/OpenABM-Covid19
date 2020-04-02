@@ -209,25 +209,6 @@ void set_up_networks( model *model )
                 HOSPITAL_NURSE_PATIENT_ICU );
     }
 
-//    //Set up networks for patients and doctors in the general ward.
-//    model->hospitals->doctor_patient_general_network = calloc( model->params->n_hospitals, sizeof( network* ));
-//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
-//        set_up_doctor_patient_general_network( model, idx );
-//
-//    //Set up networks for patients and nurses in the general ward.
-//    model->hospitals->nurse_patient_general_network = calloc( model->params->n_hospitals, sizeof( network* ));
-//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
-//        set_up_nurse_patient_general_network( model, idx );
-//
-//    //Set up networks for patients and nurses in the ICU ward.
-//    model->hospitals->doctor_patient_icu_network = calloc( model->params->n_hospitals, sizeof( network* ));
-//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
-//        set_up_doctor_patient_icu_network( model, idx );
-//
-//    //Set up networks for patients and nurses in the ICU ward.
-//    model->hospitals->nurse_patient_icu_network = calloc( model->params->n_hospitals, sizeof( network* ));
-//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
-//        set_up_nurse_patient_icu_network( model, idx );
 }
 
 /*****************************************************************************************
@@ -355,8 +336,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 ******************************************************************************************/
 
 void set_up_hospital_network( model *model, int hospital_idx ) {
-    //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
-    long n_healthcare_workers;
+	long n_healthcare_workers;
     long *healthcare_workers;
     int n_interactions;
 
