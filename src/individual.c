@@ -145,7 +145,7 @@ void update_random_interactions( individual *indiv, parameters* params )
 			case DEATH:			n = 0; 										 break;
 			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
 			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-			default: 			n = ifelse( params->social_distancing_on, n * params->social_distancing_random_network_multiplier, n );
+			default: 			n = ifelse( params->lockdown_on, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else

@@ -106,12 +106,12 @@ typedef struct{
 	int app_turn_on_time;   				// time after which the app is usable
 	double seasonal_flu_rate; 				// Rate of seasonal flu
 
-	double social_distancing_work_network_multiplier;		// during social distancing this multiplier is applied to the fraction of work network connections made
-	double social_distancing_random_network_multiplier; 	// during social distancing this multiplier is applied to the fraction of random network connections made
-	double social_distancing_house_interaction_multiplier;  // during social distancing this multiplier is applied to the strengin of home connections
-	int social_distancing_time_on;							// social distancing turned on at this time
-	int social_distancing_time_off;							// social distancing turned off at this time
-	int social_distancing_on;								// is social distancing currently on
+	double lockdown_work_network_multiplier;		// during lockdown distancing this multiplier is applied to the fraction of work network connections made
+	double lockdown_random_network_multiplier; 		// during lockdown distancing this multiplier is applied to the fraction of random network connections made
+	double lockdown_house_interaction_multiplier;  	// during lockdown this multiplier is applied to the strengin of home connections
+	int lockdown_time_on;							// lockdown turned on at this time
+	int lockdown_time_off;							// lockdown turned off at this time
+	int lockdown_on;								// is lockdown currently on
 	
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
