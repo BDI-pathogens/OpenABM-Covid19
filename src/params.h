@@ -127,36 +127,36 @@ typedef struct{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-int get_param_test_on_symptoms(model*);
-int get_param_test_on_traced(model*);
-int get_param_quarantine_on_traced(model*);
-double get_param_traceable_interaction_fraction(model*);
-int get_param_tracing_network_depth(model*);
-int get_param_allow_clinical_diagnosis(model*);
-int get_param_quarantine_household_on_positive(model*l);
-int get_param_quarantine_household_on_symptoms(model*);
-int get_param_quarantine_household_on_traced(model*);
-int get_param_quarantine_household_contacts_on_positive(model*);
-int get_param_quarantine_days(model*);
-int get_param_test_order_wait(model*);
-int get_param_test_result_wait(model*);
-double get_param_self_quarantine_fraction(model*);
-int get_param_lockdown_on(model*);
+int get_param_test_on_symptoms( model* );
+int get_param_test_on_traced( model* );
+int get_param_quarantine_on_traced( model* );
+double get_param_traceable_interaction_fraction( model* );
+int get_param_tracing_network_depth( model* );
+int get_param_allow_clinical_diagnosis( model* );
+int get_param_quarantine_household_on_positive( model* );
+int get_param_quarantine_household_on_symptoms( model* );
+int get_param_quarantine_household_on_traced( model* );
+int get_param_quarantine_household_contacts_on_positive( model* );
+int get_param_quarantine_days( model* );
+int get_param_test_order_wait( model* );
+int get_param_test_result_wait( model* );
+double get_param_self_quarantine_fraction( model* );
+int get_param_lockdown_on( model* );
 
-int set_param_test_on_symptoms(model*, int);
-int set_param_test_on_traced(model*, int);
-int set_param_quarantine_on_traced(model*, int);
-int set_param_traceable_interaction_fraction(model*, double);
-int set_param_tracing_network_depth(model*, int);
-int set_param_allow_clinical_diagnosis(model*, int);
-int set_param_quarantine_household_on_positive(model*, int);
-int set_param_quarantine_household_on_symptoms(model*, int);
-int set_param_quarantine_household_on_traced(model*, int);
-int set_param_quarantine_household_contacts_on_positive(model*, int);
-int set_param_quarantine_days(model*, int);
-int set_param_test_order_wait(model*, int);
-int set_param_test_result_wait(model*, int);
-int set_param_self_quarantine_fraction(model*, double);
+int set_param_test_on_symptoms( model*, int );
+int set_param_test_on_traced( model*, int );
+int set_param_quarantine_on_traced( model*, int );
+int set_param_traceable_interaction_fraction( model*, double );
+int set_param_tracing_network_depth( model*, int );
+int set_param_allow_clinical_diagnosis( model*, int );
+int set_param_quarantine_household_on_positive( model*, int );
+int set_param_quarantine_household_on_symptoms( model*, int );
+int set_param_quarantine_household_on_traced( model*, int );
+int set_param_quarantine_household_contacts_on_positive( model*, int );
+int set_param_quarantine_days( model*, int );
+int set_param_test_order_wait( model*, int );
+int set_param_test_result_wait( model*, int );
+int set_param_self_quarantine_fraction( model*, double );
 int set_param_lockdown_on( model*, int );
 
 void check_params( parameters* );
