@@ -196,11 +196,12 @@ void set_up_networks( model *model )
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_network( model, idx );
 
+    //Set up networks for hospital worker - patient interactions.
+
     // TODO: CHANGE TO ACCOUNT FOR POTENTIAL FOR COVID PATIENTS TO BE IN THE HOSPITAL ON START UP.
     // TODO: CHANGE INITIAL MEMORY ALLOCATION TO EDGES TO SOMETHING LESS HACKY - PROBABLY ONLY WHEN WE KNOW ABOUT THE FOLLOWING.
     //Assuming that the hospital has no Covid patients in it at the beginning of the simulation - check with Rob.
     for ( idx = 0; idx < model->params->n_hospitals; idx++ ) {
-
         model->hospitals[idx].doctor_patient_general_network = new_network( model->hospitals[idx].n_total_doctors,
                 HOSPITAL_DOCTOR_PATIENT_GENERAL );
 		model->hospitals[idx].doctor_patient_general_network->edges = calloc( 1, sizeof( edge ) );
