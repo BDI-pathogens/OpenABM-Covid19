@@ -189,9 +189,45 @@ void set_up_networks( model *model )
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
 
+    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+
+	//Set up networks for hospital worker interactions.
     model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_network( model, idx );
+
+    //TODO: CHANGE TO ACCOUNT FOR POTENTIAL FOR COVID PATIENTS TO BE IN THE HOSPITAL ON START UP.
+    //Assuming that the hospital has no Covid patients in it at the beginning of the simulation - check with Rob.
+    for (idx = 0; idx < model->params->n_hospitals; idx++ ) {
+        model->hospitals[idx].doctor_patient_general_network = new_network( model->hospitals[idx].n_total_doctors,
+                HOSPITAL_DOCTOR_PATIENT_GENERAL );
+        model->hospitals[idx].nurse_patient_general_network = new_network( model->hospitals[idx].n_total_nurses,
+                HOSPITAL_NURSE_PATIENT_GENERAL );
+        model->hospitals[idx].doctor_patient_icu_network = new_network( model->hospitals[idx].n_total_doctors,
+                HOSPITAL_DOCTOR_PATIENT_ICU );
+        model->hospitals[idx].nurse_patient_icu_network = new_network(model->hospitals[idx].n_total_nurses,
+                HOSPITAL_NURSE_PATIENT_ICU );
+    }
+
+//    //Set up networks for patients and doctors in the general ward.
+//    model->hospitals->doctor_patient_general_network = calloc( model->params->n_hospitals, sizeof( network* ));
+//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+//        set_up_doctor_patient_general_network( model, idx );
+//
+//    //Set up networks for patients and nurses in the general ward.
+//    model->hospitals->nurse_patient_general_network = calloc( model->params->n_hospitals, sizeof( network* ));
+//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+//        set_up_nurse_patient_general_network( model, idx );
+//
+//    //Set up networks for patients and nurses in the ICU ward.
+//    model->hospitals->doctor_patient_icu_network = calloc( model->params->n_hospitals, sizeof( network* ));
+//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+//        set_up_doctor_patient_icu_network( model, idx );
+//
+//    //Set up networks for patients and nurses in the ICU ward.
+//    model->hospitals->nurse_patient_icu_network = calloc( model->params->n_hospitals, sizeof( network* ));
+//    for (idx = 0; idx < model->params->n_hospitals; idx++ )
+//        set_up_nurse_patient_icu_network( model, idx );
 }
 
 /*****************************************************************************************
@@ -204,9 +240,9 @@ void set_up_work_network( model *model, int network )
 	long idx;
 	long n_people = 0;
 	long *people;
-	int n_interactions;
-	int age = NETWORK_TYPE_MAP[network];
+    int age = NETWORK_TYPE_MAP[network];
 
+    int n_interactions;
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		if( model->population[idx].work_network == network )
@@ -343,15 +379,6 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
     build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
     relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
-
-//    for( int i = 0; i < hospital->n_total_doctors; i++ )
-//    {
-//        if( )
-//            person = gsl_rng_uniform_int( rng, hospital->n_total );
-//    }
-
-    hospital->doctor_patient_network = new_network( hospital->n_total_doctors, -2); //TODO: need doctor_patient_network type
-    hospital->nurse_patient_network = new_network( hospital->n_total_nurses, -2);  //TODO: need nurse_patient_network type
 
     free( healthcare_workers );
 };
@@ -646,7 +673,7 @@ void build_random_network( model *model )
 *  Name:		build_hospital_network
 *  Description: Builds a new random network
 ******************************************************************************************/
-
+// TO BE REPLACED BY KELVIN
 void build_hospital_network( model *model, int hospital_idx )
 {
     //DONE: Separate out the interactions that doctors and nurses have with patients. - Tom
@@ -656,11 +683,11 @@ void build_hospital_network( model *model, int hospital_idx )
     int n_working_doctors, n_working_nurses;
 
     hospital *hospital = &(model->hospitals[hospital_idx]);
-    network *doctor_network   = hospital->doctor_patient_network;
-    network *nurse_network   = hospital->nurse_patient_network;
+//    network *doctor_network   = hospital->doctor_patient_network;
+//    network *nurse_network   = hospital->nurse_patient_network;
 
-    doctor_network->n_edges = 0;
-    nurse_network->n_edges = 0;
+//    doctor_network->n_edges = 0;
+//    nurse_network->n_edges = 0;
     nd_pos           = 0;
     nn_pos           = 0;
 
@@ -709,24 +736,24 @@ void build_hospital_network( model *model, int hospital_idx )
     idx = 0;
     nd_pos--;
     ddx = 0;
-    while( idx < nd_pos ) // Tom: Switched "nd_pos" an "nn_pos" in these while loops.
-    {
-        doctor_network->edges[doctor_network->n_edges].id1 = working_doctors[ ddx++ ];
-        doctor_network->edges[doctor_network->n_edges].id2 = doctor_interactions[ idx++ ];
-        doctor_network->n_edges++;
-        ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
-    }
-
-    idx = 0;
-    nn_pos--; // Tom: Set this to "nn_pos"
-    ndx = 0;
-    while( idx < nn_pos )
-    {
-        nurse_network->edges[nurse_network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
-        nurse_network->edges[nurse_network->n_edges].id2 = nurse_interactions[ idx++ ];
-        nurse_network->n_edges++;
-        ndx =  ( ndx++ < n_working_nurses ) ? ndx : 0;
-    }
+//    while( idx < nd_pos ) // Tom: Switched "nd_pos" an "nn_pos" in these while loops.
+//    {
+//        doctor_network->edges[doctor_network->n_edges].id1 = working_doctors[ ddx++ ];
+//        doctor_network->edges[doctor_network->n_edges].id2 = doctor_interactions[ idx++ ];
+//        doctor_network->n_edges++;
+//        ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
+//    }
+//
+//    idx = 0;
+//    nn_pos--; // Tom: Set this to "nn_pos"
+//    ndx = 0;
+//    while( idx < nn_pos )
+//    {
+//        nurse_network->edges[nurse_network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
+//        nurse_network->edges[nurse_network->n_edges].id2 = nurse_interactions[ idx++ ];
+//        nurse_network->n_edges++;
+//        ndx =  ( ndx++ < n_working_nurses ) ? ndx : 0;
+//    }
 
     free( nurse_interactions );
     free( doctor_interactions );
