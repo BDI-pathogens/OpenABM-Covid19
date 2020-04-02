@@ -5,6 +5,12 @@ else
     C = gcc
 endif
 
+ifeq (, $(shell which pip3))
+	PIP = pip
+else
+	PIP = pip3
+endif
+
 OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = ${GSLFLAGS}
@@ -27,14 +33,14 @@ swig-all:
 	# swig -outdir COVID19 -python covid19.i
 	swig -python covid19.i
 	# python3 setup.py build_ext --inplace
-	pip3 install --user --upgrade .
+	${PIP} install --user --upgrade .
 
 all: ${OBJS}
 	${C} -L${LIB} -o ${EXE} ${OBJS} ${LFLAGS}
 
 clean:
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
-	pip3 uninstall -y covid19
+	${PIP} uninstall -y covid19
 
 .c.o:
 	${C} ${CFLAGS} -c $< -o $@
