@@ -278,6 +278,9 @@ void transition_one_disese_event(
 	}
 }
 
+//TODO: transition one hospital event
+
+
 /*****************************************************************************************
 *  Name:		transition_to_symptomatic
 *  Description: Transitions infected who are due to become symptomatic. At this point

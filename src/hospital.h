@@ -36,12 +36,14 @@ struct hospital
 
     long *general_patient_pdxs;     //stores the population ids of all general patients at the hospital
     long *icu_patient_pdxs;         //stores the population ids of all general patients at the hospital
+    //TODO: at end of timestep there is an event list of people who have transitioned to admitted / hospitalised / critical / recovery
 
     int n_total_doctors;            //total number of doctors
     int n_total_nurses;             //total number of nurses
     int n_total_general_patients;   //total number of general patients
     int n_total_icu_patients;       //total number of icu patients
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
+    //TODO: add non covid patients
 };
 
 /************************************************************************/

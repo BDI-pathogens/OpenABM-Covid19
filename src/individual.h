@@ -50,7 +50,12 @@ struct individual{
 	event *quarantine_event;
 	event *quarantine_release_event;
 	int quarantine_test_result;
-	
+    //TODO: have hospitalised state
+//    int hsopitalised;
+//	event *hosdpitalised_event;
+//	event *hospitalised_release_event;
+
+
 	int app_user;
 
     int worker_type; //TODO: kelvin change
