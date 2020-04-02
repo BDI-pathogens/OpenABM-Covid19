@@ -8,6 +8,155 @@
 #include "params.h"
 #include "constant.h"
 #include "utilities.h"
+#include "model.h"
+
+/*****************************************************************************************
+*  Name:        get_param_x
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_test_on_symptoms(model *model)
+{
+    return model->params->test_on_symptoms;
+}
+
+int get_param_test_on_traced(model *model)
+{
+    return model->params->test_on_traced;
+}
+
+int get_param_quarantine_on_traced(model *model)
+{
+    return model->params->quarantine_on_traced;
+}
+
+double get_param_traceable_interaction_fraction(model *model)
+{
+    return model->params->traceable_interaction_fraction;
+}
+
+int get_param_tracing_network_depth(model *model)
+{
+    return model->params->tracing_network_depth;
+}
+
+int get_param_allow_clinical_diagnosis(model *model)
+{
+    return model->params->allow_clinical_diagnosis;
+}
+
+int get_param_quarantine_household_on_positive(model *model)
+{
+    return model->params->quarantine_household_on_positive;
+}
+
+int get_param_quarantine_household_on_symptoms(model *model)
+{
+    return model->params->quarantine_household_on_symptoms;
+}
+
+int get_param_quarantine_household_on_traced(model *model)
+{
+    return model->params->quarantine_household_on_traced;
+}
+
+int get_param_quarantine_household_contacts_on_positive(model *model)
+{
+    return model->params->quarantine_household_contacts_on_positive;
+}
+
+int get_param_quarantine_days(model *model)
+{
+    return model->params->quarantine_days;
+}
+
+int get_param_test_order_wait(model *model)
+{
+    return model->params->test_order_wait;
+}
+
+int get_param_test_result_wait(model *model)
+{
+    return model->params->test_result_wait;
+}
+
+double get_param_self_quarantine_fraction(model *model)
+{
+    return model->params->self_quarantine_fraction;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_x
+*  Description: Sets the value of x parameter
+******************************************************************************************/
+int set_param_test_on_symptoms(model *model, int value) {
+   model->params->test_on_symptoms = value;
+   return TRUE;
+}
+
+int set_param_test_on_traced(model *model, int value) {
+    model->params->test_on_traced = value;
+    return TRUE;
+}
+
+int set_param_quarantine_on_traced(model *model, int value) {
+    model->params->quarantine_on_traced = value;
+    return TRUE;
+}
+
+int set_param_traceable_interaction_fraction(model *model, double value) {
+    model->params->traceable_interaction_fraction = value;
+    return TRUE;
+}
+
+int set_param_tracing_network_depth(model *model, int value) {
+    model->params->tracing_network_depth = value;
+    return TRUE;
+}
+
+int set_param_allow_clinical_diagnosis(model *model, int value) {
+    model->params->allow_clinical_diagnosis = value;
+    return TRUE;
+}
+
+int set_param_quarantine_household_on_positive(model *model, int value) {
+    model->params->quarantine_household_on_positive = value;
+    return TRUE;
+}
+
+int set_param_quarantine_household_on_symptoms(model *model, int value) {
+    model->params->quarantine_household_on_symptoms = value;
+    return TRUE;
+}
+
+int set_param_quarantine_household_on_traced(model *model, int value) {
+    model->params->quarantine_household_on_traced = value;
+    return TRUE;
+}
+
+int set_param_quarantine_household_contacts_on_positive(model *model, int value) {
+    model->params->quarantine_household_contacts_on_positive = value;
+    return TRUE;
+}
+
+int set_param_quarantine_days(model *model, int value) {
+    model->params->quarantine_days = value;
+    return TRUE;
+}
+
+int set_param_test_order_wait(model *model, int value) {
+    model->params->test_order_wait = value;
+    return TRUE;
+}
+
+int set_param_test_result_wait(model *model, int value) {
+    model->params->test_result_wait = value;
+    return TRUE;
+}
+
+int set_param_self_quarantine_fraction(model *model, double value) {
+    model->params->self_quarantine_fraction = value;
+    return TRUE;
+}
 
 /*****************************************************************************************
 *  Name:		check_params

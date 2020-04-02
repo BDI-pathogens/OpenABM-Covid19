@@ -13,9 +13,6 @@
 #include "params.h"
 #include "network.h"
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 #define REJECTION_MULT 1.0001
 #define ACCEPTANCE_MULT 0.99
