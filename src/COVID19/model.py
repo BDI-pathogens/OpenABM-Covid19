@@ -149,7 +149,11 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParamaterException(f"Can not update {param} during running")
-        if not covid19.set_param(self.c_model, param, f"{value}"):
+        setter = getattr(covid19, f"set_param_{param}")
+        if callable(setter):
+            if not setter(self.c_model, value):
+                raise ModelParamaterException(f"Setting {param} to {value} failed")
+        else:
             raise ModelParamaterException(f"Setting {param} to {value} failed")
 
     def _create(self):
