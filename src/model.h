@@ -70,7 +70,10 @@ struct model{
     //kelvin change
     hospital *hospitals;
     network **hospital_network;
-    network **healthcare_workers_patients_network;
+    network **doctor_patients_network;
+    network **nurse_patients_network;
+    network **doctor_patients_network_icu;
+    network **nurse_patients_network_icu;
 };
 
 struct event{
@@ -116,5 +119,6 @@ void transition_events( model*, int, void( model*, individual* ), int );
 void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_network(model *model);
 void build_random_network( model * );
+void build_hospital_networks( model*, int);
 
 #endif /* MODEL_H_ */

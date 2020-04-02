@@ -116,14 +116,16 @@ typedef struct{
     long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
     int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    //kelvin change
+    //hospital params
     int n_total_doctors;       // Total number of doctors
     int n_total_nurses;        // Total number of nurses
     int n_hospitals;
     int hospital_n_beds;
     int hospital_n_icus;
-    int patient_doctor_required_interactions;
-    int patient_nurse_required_interactions;
+    int general_patient_doctor_required_interactions;
+    int general_patient_nurse_required_interactions;
+    int icu_patient_doctor_required_interactions;
+    int icu_patient_nurse_required_interactions;
 
 } parameters;
 
