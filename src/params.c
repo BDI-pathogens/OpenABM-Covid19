@@ -9,6 +9,8 @@
 #include "constant.h"
 #include "utilities.h"
 #include "model.h"
+#include "disease.h"
+#include "individual.h"
 
 /*****************************************************************************************
 *  Name:        get_param_x
@@ -84,7 +86,7 @@ double get_param_self_quarantine_fraction(model *model)
     return model->params->self_quarantine_fraction;
 }
 
-double get_param_lockdown_state(model *model)
+int get_param_lockdown_on(model *model)
 {
     return model->params->lockdown_on;
 }
@@ -161,6 +163,46 @@ int set_param_test_result_wait(model *model, int value) {
 int set_param_self_quarantine_fraction(model *model, double value) {
     model->params->self_quarantine_fraction = value;
     return TRUE;
+}
+
+
+/*****************************************************************************************
+*  Name:		set_param_lockdown_on
+*  Description: Carries out checks on the input parameters
+******************************************************************************************/
+int set_param_lockdown_on( model *model, int value )
+{
+	int pdx;
+	parameters *params = model->params;
+
+	if( value == TRUE )
+	{
+		params->lockdown_on = TRUE;
+		params->daily_fraction_work_used = params->daily_fraction_work * params->lockdown_work_network_multiplier;
+
+		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
+																params->lockdown_house_interaction_multiplier;
+		set_up_infectious_curves( model );
+
+		for( pdx = 0; pdx < params->n_total; pdx++ )
+			update_random_interactions( &(model->population[pdx]), params );
+	}
+	else
+	if( value == FALSE )
+	{
+		params->lockdown_on = FALSE;
+		params->daily_fraction_work_used = params->daily_fraction_work;
+
+		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
+		set_up_infectious_curves( model );
+
+		for( pdx = 0; pdx < params->n_total; pdx++ )
+			update_random_interactions( &(model->population[pdx]), params );
+	}
+	else
+		return FALSE;
+
+	return TRUE;
 }
 
 /*****************************************************************************************
