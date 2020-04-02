@@ -169,7 +169,6 @@ class TestClass(object):
                 hospitalised_daily_interactions=5,
             )
         ],
-<<<<<<< HEAD
         "test_monoton_relative_susceptibility": [
             dict(
                 end_time = 100,
@@ -178,7 +177,7 @@ class TestClass(object):
                 relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_40_49 = [0.2, 0.2, 0.2, 0.2, 0.2],
-                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],#[0, 0, 0, 0, 0],# 
+                relative_susceptibility_50_59 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_80 = [0.2, 0.2, 0.2, 0.2, 0.2]
@@ -280,10 +279,7 @@ class TestClass(object):
                 relative_susceptibility_80 = [0, 0.4, 0.8, 1.6, 0.1]
             )
         ]
-    }   
-=======
     }
->>>>>>> fcb4686901d88329f0531b5a5b371995ee24ce01
     """
     Test class for checking 
     """
@@ -501,7 +497,7 @@ class TestClass(object):
         # this is an analytical approximation in the limit of large
         # mean_infectious_rate, but works very well for most values
         # unless there is large amount infection the following day
-<<<<<<< HEAD
+
         theta     = sd_infectious_period * sd_infectious_period / mean_infectious_period
         k         = mean_infectious_period / theta
         char_func = lambda x: exp(x) - infectious_rate / ( 1 + x * theta )**k
@@ -830,16 +826,3 @@ class TestClass(object):
             # refresh current values
             relative_susceptibility_current = relative_susceptibility_new
             infected_current = infected_new.copy()
-=======
-        theta = sd_infectious_period * sd_infectious_period / mean_infectious_period
-        k = mean_infectious_period / theta
-        char_func = lambda x: exp(x) - infectious_rate / (1 + x * theta) ** k
-        slope_an = optimize.brentq(char_func, -0.99 / theta, 1)
-
-        np.testing.assert_allclose(
-            slope,
-            slope_an,
-            rtol=tolerance,
-            err_msg="exponential growth deviates too far from analytic approximation",
-        )
->>>>>>> fcb4686901d88329f0531b5a5b371995ee24ce01
