@@ -129,6 +129,7 @@ void build_hcw_patient_network( model *model, network *network, long *patient_pd
     hdx = 0;
     n_total_interactions--;
     //assign network edges between hcw and randomly picked patient interactions
+    //TODO: shift patterns eg day off
     while( idx < n_total_interactions )
     {
         network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
