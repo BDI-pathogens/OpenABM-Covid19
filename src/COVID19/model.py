@@ -11,9 +11,6 @@ class ModelParamaterException(Exception):
 class ParamaterException(Exception):
     pass
 
-
-PYTHON_SAFE_PARAMS = []
-
 PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_symptoms",
     "test_on_traced",
@@ -30,7 +27,8 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "self_quarantine_fraction",
     "lockdown_on",
-    "app_turned_on"
+    "app_turned_on",
+    "app_users_fraction"
 ]
 
 
@@ -83,11 +81,8 @@ class Parameters(object):
             raise ParamaterException(
                 "Paramater set has been exported to model, please use model.update_x functions"
             )
-        if param not in PYTHON_SAFE_PARAMS:
-            raise ParamaterException(
-                f"Can not set {param} safely from python please change in your input file"
-            )
-        if hasattr(self.c_params, param, value):
+        
+        if hasattr(self.c_params, param ):
             if isinstance(getattr(self.c_params, param), int):
                 setattr(self.c_params, param, int(value))
             elif isinstance(getattr(self.c_params, param), float):
