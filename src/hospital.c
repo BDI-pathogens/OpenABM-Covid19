@@ -101,8 +101,9 @@ void build_hcw_patient_network( model *model, network *network, long *patient_pd
             hc_workers[n_hcw_working++] = worker_pdxs[idx];
 
     patient_interaction_per_hcw = round( (patient_required_interactions * n_patients) / n_hcw_working );
-    //TODO: check max and reduce if over!!
-    //patient_interaction_per_hcw = (patient_interaction_per_hcw > max_hcw_interactions) ? max_hcw_interactions : patient_interaction_per_hcw;
+
+    //TODO: should there be different max interactions for doctors / nurses?
+    patient_interaction_per_hcw = (patient_interaction_per_hcw > model->params->max_hcw_daily_interactions) ? model->params->max_hcw_daily_interactions : patient_interaction_per_hcw;
 
     n_total_interactions = patient_interaction_per_hcw * n_hcw_working;
 
@@ -123,6 +124,7 @@ void build_hcw_patient_network( model *model, network *network, long *patient_pd
     //pick the capped (max) amount of interactions randomly from shuffled list;
     gsl_ran_choose( rng, capped_hcw_interactions, n_total_interactions, all_required_interactions, n_pos, sizeof(long) );
 
+    //TODO: ask rob - should we also randomly shuffle the list of healthcare workers before assigning interactions
     idx = 0;
     hdx = 0;
     n_total_interactions--;
