@@ -6,6 +6,7 @@ CMakeFiles/covid19ibm.dir/src/constant.c.obj: ../src/constant.h
 
 CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/demographics.c
+CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/model.h
 CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/network.h
@@ -16,6 +17,7 @@ CMakeFiles/covid19ibm.dir/src/demographics.c.obj: ../src/utilities.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/disease.c
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/disease.h
+CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/interventions.h
 CMakeFiles/covid19ibm.dir/src/disease.c.obj: ../src/model.h
@@ -42,6 +44,7 @@ CMakeFiles/covid19ibm.dir/src/individual.c.obj: ../src/utilities.h
 
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/demographics.h
+CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/input.c
 CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/input.h
@@ -53,6 +56,7 @@ CMakeFiles/covid19ibm.dir/src/input.c.obj: ../src/utilities.h
 
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/disease.h
+CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/interventions.c
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/interventions.h
@@ -63,6 +67,7 @@ CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/structure.h
 CMakeFiles/covid19ibm.dir/src/interventions.c.obj: ../src/utilities.h
 
 CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/constant.h
+CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/input.h
 CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/main.c
@@ -75,6 +80,7 @@ CMakeFiles/covid19ibm.dir/src/main.c.obj: ../src/utilities.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/constant.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/demographics.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/disease.h
+CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/hospital.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/individual.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/interventions.h
 CMakeFiles/covid19ibm.dir/src/model.c.obj: ../src/model.c

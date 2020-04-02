@@ -68,10 +68,9 @@ struct model{
 	long n_quarantine_days;
 
     //kelvin change
+    //TODO: Move hospital_network to hospital struct.
     hospital *hospitals;
     network **hospital_network;
-    network **hospital_doctor_patient_general;
-    network **healthcare_workers_patients_network;
 };
 
 struct event{
@@ -118,5 +117,10 @@ void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_network(model *model);
 void build_random_network( model * );
 void build_patient_networks( model *model, int hospital_idx );
+
+void set_up_doctor_patient_general_network( model *model, int hospital_idx );
+void set_up_nurse_patient_general_network( model *model, int hospital_idx );
+void set_up_doctor_patient_icu_network( model *model, int hospital_idx );
+void set_up_nurse_patient_icu_network( model *model, int hospital_idx );
 
 #endif /* MODEL_H_ */
