@@ -24,8 +24,7 @@ from model import Model, Parameters, ModelParamaterException
 
 
 # STEPS > 0
-# STEPS = randrange(1, 10)
-STEPS = 2
+STEPS = randrange(1, 10)
 PARAM_LINE_NUMBER = 1
 
 # Directories
@@ -80,7 +79,7 @@ class TestClass(object):
         """
         shutil.rmtree(DATA_DIR_TEST, ignore_errors=True)
 
-    def test_basic_step_calculation(self):
+    def test_set_get_parameters(self):
         """
         Test the a parameter can be changed in between step runs
         """
@@ -157,5 +156,3 @@ class TestClass(object):
 
             with pytest.raises(ModelParamaterException):
                 model.get_param("wrong_parameter")
-
-        model.write_output_files()
