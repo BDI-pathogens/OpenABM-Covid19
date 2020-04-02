@@ -189,7 +189,7 @@ void set_up_networks( model *model )
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
 
-    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ) );
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_network( model, idx );
 }
@@ -318,7 +318,8 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 *  Author:      meadt
 ******************************************************************************************/
 
-void set_up_hospital_network( model *model, int hospital_idx ) {
+void set_up_hospital_network( model *model, int hospital_idx )
+{
     //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
     long n_healthcare_workers;
     long *healthcare_workers;
@@ -343,15 +344,6 @@ void set_up_hospital_network( model *model, int hospital_idx ) {
     //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
     build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
     relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
-
-//    for( int i = 0; i < hospital->n_total_doctors; i++ )
-//    {
-//        if( )
-//            person = gsl_rng_uniform_int( rng, hospital->n_total );
-//    }
-
-    hospital->doctor_patient_network = new_network( hospital->n_total_doctors, -2); //TODO: need doctor_patient_network type
-    hospital->nurse_patient_network = new_network( hospital->n_total_nurses, -2);  //TODO: need nurse_patient_network type
 
     free( healthcare_workers );
 };
@@ -644,89 +636,28 @@ void build_random_network( model *model )
 
 /*****************************************************************************************
 *  Name:		build_hospital_network
-*  Description: Builds a new random network
+*  Description: Builds all the doctor / nurse -> patients networks
 ******************************************************************************************/
 
-void build_hospital_network( model *model, int hospital_idx )
+void build_hospital_networks( model *model, int hospital_idx )
 {
-    long idx, nd_pos, nn_pos;
-    int ddx, patient;
-    //long *interactions_doctors = model->possible_interactions;
     hospital *hospital = &(model->hospitals[hospital_idx]);
-    network *network   = hospital->healthcare_workers_patients_network;
-    long *working_doctors, *working_nurses;
-    int n_working_doctors, n_working_nurses;
-
-    network->n_edges = 0;
-    nd_pos           = 0;
-    nn_pos           = 0;
-
-    //get array of working doctors
-    working_doctors = calloc( hospital->n_total_doctors, sizeof(long) );
-    n_working_doctors = 0;
-    for( idx = 0; idx < hospital->n_total_doctors; idx++)
-        if( healthcare_worker_working( &(model->population[hospital->doctor_pdxs[idx]]) ) )
-            working_doctors[n_working_doctors++] = hospital->doctor_pdxs[idx];
-
-    //get array of working nurses
-    working_nurses = calloc( hospital->n_total_nurses, sizeof(long) );
-    n_working_nurses = 0;
-    for( idx = 0; idx < hospital->n_total_nurses; idx++)
-        if( healthcare_worker_working( &(model->population[hospital->nurse_pdxs[idx]]) ) )
-            working_nurses[n_working_nurses++] = hospital->nurse_pdxs[idx];
-
-
-    int patients_interactions_per_doctor = round( (model->params->patient_doctor_required_interactions * hospital->n_total_patients) / n_working_doctors );
-    int patients_interactions_per_nurse = round( (model->params->patient_nurse_required_interactions * hospital->n_total_patients) / n_working_nurses );
-
-    //TODO: check max (need some measure of max interactions healthcare workers can have each timestep?
-
-    long *nurse_interactions;
-    nurse_interactions =  calloc( patients_interactions_per_nurse * hospital->n_total_patients, sizeof(long) );
-
-    long *doctor_interactions;
-    doctor_interactions = calloc( patients_interactions_per_doctor * hospital->n_total_patients, sizeof(long) );
-
-
-    //get list of possible interactions and population ids of those patients
-    for( patient = 0; patient < hospital->n_total_patients; patient++ )
-    {
-        for( int i = 0; i < patients_interactions_per_doctor; i++ )
-            doctor_interactions[nd_pos++] = hospital->patient_pdxs[patient];
-
-        for( int i = 0; i < patients_interactions_per_nurse; i++ )
-            nurse_interactions[nn_pos++] = hospital->patient_pdxs[patient];
-    }
-
-    gsl_ran_shuffle( rng, doctor_interactions, nd_pos, sizeof(long) );
-    gsl_ran_shuffle( rng, nurse_interactions, nn_pos, sizeof(long) );
-
-    idx = 0;
-    nd_pos--;
-    ddx = 0;
-    while( idx < nn_pos )
-    {
-        network->edges[network->n_edges].id1 = working_doctors[ ddx++ ];
-        network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
-        network->n_edges++;
-        ddx =  ( ddx++ < n_working_doctors ) ? ddx : 0;
-    }
-
-    idx = 0;
-    nd_pos--;
-    int ndx = 0;
-    while( idx < nd_pos )
-    {
-        network->edges[network->n_edges].id1 = hospital->nurse_pdxs[ ndx++ ];
-        network->edges[network->n_edges].id2 = doctor_interactions[ idx++ ];
-        network->n_edges++;
-        ndx =  ( ndx++ < hospital->n_total_doctors ) ? ndx : 0;
-    }
-
-    free( nurse_interactions );
-    free( doctor_interactions );
-    free( working_doctors );
-    free( working_nurses );
+    //doctor general patients network
+    build_hcw_patient_network( model, model->doctor_patients_network[hospital_idx], hospital->general_patient_pdxs,
+                               hospital->doctor_pdxs, hospital->n_total_general_patients, hospital->n_total_doctors,
+                               model->params->general_patient_doctor_required_interactions );
+    //nurse general patients network
+    build_hcw_patient_network( model, model->nurse_patients_network[hospital_idx], hospital->general_patient_pdxs,
+                               hospital->nurse_pdxs, hospital->n_total_general_patients, hospital->n_total_nurses,
+                               model->params->general_patient_nurse_required_interactions );
+    //doctor icu patients network
+    build_hcw_patient_network( model, model->doctor_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
+                               hospital->doctor_pdxs, hospital->n_total_icu_patients, hospital->n_total_doctors,
+                               model->params->icu_patient_doctor_required_interactions );
+    //nurse icu patients network
+    build_hcw_patient_network( model, model->nurse_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
+                               hospital->nurse_pdxs, hospital->n_total_icu_patients, hospital->n_total_nurses,
+                               model->params->icu_patient_nurse_required_interactions );
 }
 
 /*****************************************************************************************
@@ -814,7 +745,7 @@ void build_daily_network( model *model )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
 
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_network( model, idx );
+        build_hospital_networks( model, idx );
 
 };
 
