@@ -119,6 +119,7 @@ typedef struct{
     //hospital params
     int n_total_doctors;       // Total number of doctors
     int n_total_nurses;        // Total number of nurses
+    int max_hcw_daily_interactions;
     int n_hospitals;
     int hospital_n_beds;
     int hospital_n_icus;
