@@ -38,12 +38,32 @@ void set_up_transition_times_intervention( model *model )
 *  Name:		set_up_app_users
 *  Description: Set up the proportion of app users in the population (default is FALSE)
 ******************************************************************************************/
-void set_up_app_users( model *model )
+void set_up_app_users( model *model, double target )
 {
-	long idx;
+	long idx, jdx, current_users, not_users, max_user, total;
 
+	current_users = 0;
 	for( idx = 0; idx < model->params->n_total; idx++ )
-		model->population[ idx ].app_user = gsl_ran_bernoulli( rng, model->params->app_users_fraction);
+		current_users += model->population[ idx ].app_user;
+	not_users = model->params->n_total - current_users;
+
+	max_user = ceil( model->params->n_total * target ) - current_users;
+	if( max_user < 0 || max_user > not_users )
+		print_exit( "Bad target app_fraction_users" );
+
+	int *users = calloc( not_users, sizeof( int ) );
+
+	for( idx = 0; idx < max_user; idx++ )
+		users[ idx ] = 1;
+
+	gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
+
+	jdx   = 0;
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		if( model->population[ idx ].app_user == FALSE )
+			model->population[ idx ].app_user = users[ jdx++ ];
+
+	free( users );
 };
 
 /*****************************************************************************************

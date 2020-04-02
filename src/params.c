@@ -11,6 +11,8 @@
 #include "model.h"
 #include "disease.h"
 #include "individual.h"
+#include "interventions.h"
+
 
 /*****************************************************************************************
 *  Name: 		get_param_test_on_symptoms
@@ -154,6 +156,15 @@ int get_param_lockdown_on( model *model )
 int get_param_app_turned_on( model *model )
 {
     return model->params->app_turned_on;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_app_users_fraction
+*  Description: Gets the value of double parameter
+******************************************************************************************/
+double get_param_app_users_fraction( model *model )
+{
+    return model->params->app_users_fraction;
 }
 
 /*****************************************************************************************
@@ -341,6 +352,23 @@ int set_param_lockdown_on( model *model, int value )
 int set_param_app_turned_on( model *model, int value )
 {
     model->params->app_turned_on = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_app_users_fraction
+*  Description: Sets the value of x parameter
+******************************************************************************************/
+int set_param_app_users_fraction( model *model, double value )
+{
+    if( value > 1 || value < model->params->app_users_fraction )
+    	return FALSE;
+
+    if( value == model->params->app_users_fraction )
+    	return TRUE;
+
+	model->params->app_users_fraction = value;
+	set_up_app_users( model, value );
     return TRUE;
 }
 
