@@ -763,14 +763,22 @@ class TestClass(object):
                 shortlist_current = nonmatch_pairs[:,1].tolist()
                 shortlist_new = nonmatch_pairs[:,2].tolist()
             
-                # conduct the monotonicity check
+                # conduct the monotonicity check on actual Numbers of infections 
                 for j, age in enumerate(ids):
                     if shortlist_current[j] - shortlist_new[j] > tolerance:
-                        np.testing.assert_equal( relative_infected_current[int(age)] > relative_infected_new[int(age)], True)
+                        np.testing.assert_equal( infected_current["ID"].values[int(age)] > infected_new["ID"].values[int(age)], True)
                     if shortlist_new[j] - shortlist_current[j]  > tolerance:
-                        np.testing.assert_equal( relative_infected_new[int(age)] > relative_infected_current[int(age)], True)
+                        np.testing.assert_equal( infected_new["ID"].values[int(age)] > infected_current["ID"].values[int(age)], True)
                     if abs(shortlist_new[j] - shortlist_current[j]) < tolerance:
-                        np.testing.assert_allclose( relative_infected_new[int(age)], relative_infected_current[int(age)], atol = tolerance)
+                        np.testing.assert_allclose( infected_new["ID"].values[int(age)], infected_current["ID"].values[int(age)], atol = tolerance)
+#                 # conduct the monotonicity check on Proportions of infections
+#                for j, age in enumerate(ids):
+#                    if shortlist_current[j] - shortlist_new[j] > tolerance:
+#                        np.testing.assert_equal( relative_infected_current[int(age)] > relative_infected_new[int(age)], True)
+#                    if shortlist_new[j] - shortlist_current[j]  > tolerance:
+#                        np.testing.assert_equal( relative_infected_new[int(age)] > relative_infected_current[int(age)], True)
+#                    if abs(shortlist_new[j] - shortlist_current[j]) < tolerance:
+#                        np.testing.assert_allclose( relative_infected_new[int(age)], relative_infected_current[int(age)], atol = tolerance)
                             
             # refresh current values
             relative_susceptibility_current = relative_susceptibility_new
