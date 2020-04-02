@@ -148,6 +148,15 @@ int get_param_lockdown_on( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		get_param_app_turned_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_app_turned_on( model *model )
+{
+    return model->params->app_turned_on;
+}
+
+/*****************************************************************************************
 *  Name:        set_param_test_on_symptoms
 *  Description: Sets the value of x parameter
 ******************************************************************************************/
@@ -323,6 +332,16 @@ int set_param_lockdown_on( model *model, int value )
 		return FALSE;
 
 	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_app_turned_on
+*  Description: Sets the value of x parameter
+******************************************************************************************/
+int set_param_app_turned_on( model *model, int value )
+{
+    model->params->app_turned_on = value;
+    return TRUE;
 }
 
 /*****************************************************************************************

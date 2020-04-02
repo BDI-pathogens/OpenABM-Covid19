@@ -56,16 +56,18 @@ void update_intervention_policy( model *model, int time )
 	long pdx;
 	int type;
 
-	params->app_turned_on =  ( time >= params->app_turn_on_time );
-
 	if( time == 0 )
 	{
-		params->lockdown_on	 = FALSE;
+		params->app_turned_on = FALSE;
+		params->lockdown_on	  = FALSE;
 		params->daily_fraction_work_used = params->daily_fraction_work;
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
 			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
 	}
-	else
+
+	if( time == params->app_turn_on_time )
+		params->app_turned_on = TRUE;
+
 	if( time == params->lockdown_time_on )
 	{
 		params->lockdown_on      = TRUE;
