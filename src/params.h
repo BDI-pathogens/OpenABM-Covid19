@@ -142,6 +142,7 @@ int get_param_test_order_wait( model* );
 int get_param_test_result_wait( model* );
 double get_param_self_quarantine_fraction( model* );
 int get_param_lockdown_on( model* );
+int get_param_app_turned_on( model* );
 
 int set_param_test_on_symptoms( model*, int );
 int set_param_test_on_traced( model*, int );
@@ -158,6 +159,8 @@ int set_param_test_order_wait( model*, int );
 int set_param_test_result_wait( model*, int );
 int set_param_self_quarantine_fraction( model*, double );
 int set_param_lockdown_on( model*, int );
+int set_param_app_turned_on( model*, int );
+
 
 void check_params( parameters* );
 void destroy_params( parameters* );
