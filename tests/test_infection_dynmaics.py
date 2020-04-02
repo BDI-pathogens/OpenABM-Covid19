@@ -202,7 +202,7 @@ class TestClass(object):
         "test_monoton_relative_susceptibility": [
             dict(
                 end_time = 250,
-                relative_susceptibility_0_9 = [0.2, 0.8, 0.8, 1, 0.1],
+                relative_susceptibility_0_9 = [0.2, 0.8, 0, 1, 0.1],
                 relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
@@ -262,7 +262,7 @@ class TestClass(object):
             ),
             dict(
                 end_time = 250,
-                relative_susceptibility_0_9 = [0.2, 0.2, 0.2, 0.2, 0.2],
+                relative_susceptibility_0_9 = [0.2, 0.8, 0.8, 1, 0.1],
                 relative_susceptibility_10_19 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_20_29 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_30_39 = [0.2, 0.2, 0.2, 0.2, 0.2],
@@ -685,12 +685,12 @@ class TestClass(object):
             relative_susceptibility_80
         ):
         """
-        Test that monotonic change (increase, decrease, or equal) in relative_susceptibility 
-        leads to corresponding changes (increase, decrease, or equal) in the proportion of 
+        Test that monotonic change (increase or decrease) in relative_susceptibility 
+        leads to corresponding changes (increase or decrease) in the proportion of 
         the infections within each age group.
         
         """
-        tolerance = 0.000001
+        tolerance = 0.00001
         # set the first parameters
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
@@ -754,15 +754,24 @@ class TestClass(object):
             infected_new = df_trans_new.groupby( "age_group" ).count()
             relative_infected_new = [x/sum(infected_new["ID"].values) for x in infected_new["ID"].values]
             
-            # monotonicity check
-            for age, c in enumerate(relative_susceptibility_current):
-                if c - relative_susceptibility_new[age] > tolerance:
-                    np.testing.assert_equal( relative_infected_current[age] > relative_infected_new[age], True)
-                elif relative_susceptibility_new[age] - c  > tolerance:
-                    np.testing.assert_equal( relative_infected_current[age] < relative_infected_new[age], True)
-                elif abs(c - relative_susceptibility_new[age]) < tolerance:
-                    np.testing.assert_allclose( relative_infected_current[age], relative_infected_new[age], atol = 0.1)
-                    
+            # detect the age group whose current and new parameters values do not match
+            nonmatch_pairs = np.array( [ [int(i), curr, newr] for i, (curr, newr) in enumerate(zip(relative_susceptibility_current, relative_susceptibility_new)) if curr != newr] )
+            
+            # for that age group
+            if len(nonmatch_pairs) > 0:
+                ids = nonmatch_pairs[:,0].tolist()
+                shortlist_current = nonmatch_pairs[:,1].tolist()
+                shortlist_new = nonmatch_pairs[:,2].tolist()
+            
+                # conduct the monotonicity check
+                for j, age in enumerate(ids):
+                    if shortlist_current[j] - shortlist_new[j] > tolerance:
+                        np.testing.assert_equal( relative_infected_current[int(age)] > relative_infected_new[int(age)], True)
+                    if shortlist_new[j] - shortlist_current[j]  > tolerance:
+                        np.testing.assert_equal( relative_infected_new[int(age)] > relative_infected_current[int(age)], True)
+                    if abs(shortlist_new[j] - shortlist_current[j]) < tolerance:
+                        np.testing.assert_allclose( relative_infected_new[int(age)], relative_infected_current[int(age)], atol = tolerance)
+                            
             # refresh current values
             relative_susceptibility_current = relative_susceptibility_new
             relative_infected_current = relative_infected_new
