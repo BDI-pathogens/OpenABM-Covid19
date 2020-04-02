@@ -175,7 +175,7 @@ class Model:
         """
         results = {}
         results["time"] = self.c_model.time
-        results["social_distancing"] = self.c_params.social_distancing_on
+        results["lockdown"] = self.c_params.lockdown_on
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = int(

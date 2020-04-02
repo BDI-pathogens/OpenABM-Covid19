@@ -31,8 +31,8 @@ def turn_off_interventions(params, end_time):
 
     # Set interventions associated with a time to be beyond the end of the simulation
     params.set_param("app_turn_on_time", end_time)
-    params.set_param("social_distancing_time_on", end_time + 1)
-    params.set_param("social_distancing_time_off", end_time + 2)
+    params.set_param("lockdown_time_on", end_time + 1)
+    params.set_param("lockdown_time_off", end_time + 2)
     params.set_param("testing_symptoms_time_on", end_time + 1)
     params.set_param("testing_symptoms_time_off", end_time + 2)
 

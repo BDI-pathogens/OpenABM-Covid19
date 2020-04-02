@@ -320,20 +320,20 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->social_distancing_work_network_multiplier));
-	if( check < 1){ print_exit("Failed to read parameter social_distancing_work_network_multiplier)\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_work_network_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_work_network_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->social_distancing_random_network_multiplier));
-	if( check < 1){ print_exit("Failed to read parameter social_distancing_random_network_multiplier)\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_random_network_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->social_distancing_house_interaction_multiplier));
-	if( check < 1){ print_exit("Failed to read parameter social_distancing_house_interaction_multiplier)\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_house_interaction_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_house_interaction_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_on));
-	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_on)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_on));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_time_on)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->social_distancing_time_off));
-	if( check < 1){ print_exit("Failed to read parameter social_distancing_time_off)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
 	
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };

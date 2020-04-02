@@ -84,6 +84,11 @@ double get_param_self_quarantine_fraction(model *model)
     return model->params->self_quarantine_fraction;
 }
 
+double get_param_lockdown_state(model *model)
+{
+    return model->params->lockdown_on;
+}
+
 /*****************************************************************************************
 *  Name:        set_param_x
 *  Description: Sets the value of x parameter
@@ -175,8 +180,8 @@ void check_params( parameters *params )
     if( params->quarantine_days > params->days_of_interactions )
     	print_exit( "BAD PARAM quarantine_days - can't be greater than days_of_interactions" );
 
-    if( params->social_distancing_time_on < 1 )
-      	print_exit( "BAD PARAM social_distancing_time_on - can only be turned on at the first time step" );
+    if( params->lockdown_time_on < 1 )
+      	print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
 
     if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
  	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );
