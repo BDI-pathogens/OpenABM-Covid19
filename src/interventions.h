@@ -16,7 +16,7 @@
 /************************************************************************/
 
 void set_up_transition_times_intervention( model* );
-void set_up_app_users( model* );
+void set_up_app_users( model*, double );
 void update_intervention_policy( model*, int );
 
 void intervention_quarantine_until( model*, individual*, int, int );
