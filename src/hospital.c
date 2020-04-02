@@ -38,8 +38,8 @@ void initialise_hospital(
     hospital->general_patient_pdxs = calloc( hospital->n_total_beds, sizeof(long) ); //TODO: should memory allocated be size of beds + icus??
     hospital->icu_patient_pdxs     = calloc( hospital->n_total_icus, sizeof(long) );
 
-    hospital->n_total_doctors = 0;
-    hospital->n_total_nurses  = 0;
+    hospital->n_total_doctors = params->n_total_doctors;
+    hospital->n_total_nurses  = params->n_total_nurses;
 }
 
 /*****************************************************************************************
@@ -121,13 +121,13 @@ void build_hcw_patient_network( model *model, network *network, long *patient_pd
     gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
 
     //pick the capped (max) amount of interactions randomly from shuffled list;
-    gsl_ran_choose( rng, capped_hcw_interactions, patient_interaction_per_hcw*n_hcw_working, all_required_interactions, n_pos, sizeof(long) );
+    gsl_ran_choose( rng, capped_hcw_interactions, n_total_interactions, all_required_interactions, n_pos, sizeof(long) );
 
     idx = 0;
     hdx = 0;
-    n_pos--;
+    n_total_interactions--;
     //assign network edges between hcw and randomly picked patient interactions
-    while( idx < n_pos )
+    while( idx < n_total_interactions )
     {
         network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
         network->edges[network->n_edges].id2 = capped_hcw_interactions[ idx++ ];

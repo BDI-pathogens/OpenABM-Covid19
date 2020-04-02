@@ -68,6 +68,7 @@ struct model{
 	long n_quarantine_days;
 
     //kelvin change
+    //TODO: Move hospital_network to hospital struct ?? ask rob
     hospital *hospitals;
     network **hospital_network;
     network **doctor_patients_network;
