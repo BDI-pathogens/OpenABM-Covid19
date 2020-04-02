@@ -338,6 +338,8 @@ void read_param_file( parameters *params)
     params->n_total_doctors = 227;
     params->n_total_nurses  = 484;
     params->n_hospitals = 1;
+    params->hospital_n_beds = 300;
+    params->hospital_n_icus = 300;
     params->general_patient_doctor_required_interactions = 1;
     params->general_patient_nurse_required_interactions = 3;
     params->icu_patient_doctor_required_interactions = 3;
