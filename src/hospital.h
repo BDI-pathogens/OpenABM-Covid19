@@ -40,11 +40,11 @@ struct hospital {
 
 //    network *healthcare_workers_patients_network;
     //TODO: Set these to be owned by the model. Use a double pointer.
-    network **doctor_patient_general_network;
-    network **nurse_patient_general_network;
+    network *doctor_patient_general_network;
+    network *nurse_patient_general_network;
 
-    network **doctor_patient_icu_network;
-    network **nurse_patient_icu_network;
+    network *doctor_patient_icu_network;
+    network *nurse_patient_icu_network;
 };
 
 /************************************************************************/
