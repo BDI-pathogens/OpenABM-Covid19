@@ -124,7 +124,7 @@ enum DISTRIBUTIONS{
 #define N_DRAW_LIST 1000
 #define INPUT_CHAR_LEN 100
 
-gsl_rng * rng;
+extern gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */
 

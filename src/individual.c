@@ -9,9 +9,6 @@
 #include "params.h"
 #include "constant.h"
 #include "utilities.h"
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -124,6 +121,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 	{
 		case FIXED:				indiv->base_random_interactions = mean; break;
 		case NEGATIVE_BINOMIAL: indiv->base_random_interactions = negative_binomial_draw( mean, sd ); break;
+        default:
 		print_exit( "random_interaction_distribution not supported" );
 	}
 
