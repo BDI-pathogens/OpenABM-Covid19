@@ -109,20 +109,4 @@ void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
 void build_random_network( model * );
 
-int get_param_test_on_symptoms(model *model);
-int get_param_test_on_traced(model *model);
-int get_param_quarantine_on_traced(model *model);
-double get_param_traceable_interaction_fraction(model *model);
-int get_param_tracing_network_depth(model *model);
-int get_param_allow_clinical_diagnosis(model *model);
-int get_param_quarantine_household_on_positive(model *model);
-int get_param_quarantine_household_on_symptoms(model *model);
-int get_param_quarantine_household_on_traced(model *model);
-int get_param_quarantine_household_contacts_on_positive(model *model);
-int get_param_quarantine_days(model *model);
-int get_param_test_order_wait(model *model);
-int get_param_test_result_wait(model *model);
-double get_param_self_quarantine_fraction(model *model);
-int set_param(model*, char*, char*);
-
 #endif /* MODEL_H_ */
