@@ -196,10 +196,10 @@ void set_up_networks( model *model )
 
 
     //allocate hcw -> patient networks' memory
-    model->doctor_patients_network = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->nurse_patients_network = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->doctor_patients_network_icu = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->nurse_patients_network_icu = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->doctor_patients_network      = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->nurse_patients_network       = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->doctor_patients_network_icu  = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->nurse_patients_network_icu   = calloc( model->params->n_hospitals, sizeof( network* ));
 
     // TODO: CHANGE TO ACCOUNT FOR POTENTIAL FOR COVID PATIENTS TO BE IN THE HOSPITAL ON START UP.
     // TODO: CHANGE INITIAL MEMORY ALLOCATION TO EDGES TO SOMETHING LESS HACKY - PROBABLY ONLY WHEN WE KNOW ABOUT THE FOLLOWING.
