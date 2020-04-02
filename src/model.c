@@ -189,9 +189,39 @@ void set_up_networks( model *model )
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
 
-    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ) );
+	//Set up networks for hospital worker interactions.
+    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_network( model, idx );
+
+
+    //allocate hcw -> patient networks' memory
+    model->doctor_patients_network = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->nurse_patients_network = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->doctor_patients_network_icu = calloc( model->params->n_hospitals, sizeof( network* ));
+    model->nurse_patients_network_icu = calloc( model->params->n_hospitals, sizeof( network* ));
+
+    // TODO: CHANGE TO ACCOUNT FOR POTENTIAL FOR COVID PATIENTS TO BE IN THE HOSPITAL ON START UP.
+    // TODO: CHANGE INITIAL MEMORY ALLOCATION TO EDGES TO SOMETHING LESS HACKY - PROBABLY ONLY WHEN WE KNOW ABOUT THE FOLLOWING.
+    //Assuming that the hospital has no Covid patients in it at the beginning of the simulation - check with Rob.
+    for ( idx = 0; idx < model->params->n_hospitals; idx++ )
+    {
+        model->doctor_patients_network[idx] = new_network( model->hospitals[idx].n_total_doctors,
+                HOSPITAL_DOCTOR_PATIENT_GENERAL );
+        model->doctor_patients_network[idx]->edges = calloc( 1, sizeof( edge ) );
+
+        model->nurse_patients_network[idx] = new_network( model->hospitals[idx].n_total_nurses,
+                HOSPITAL_NURSE_PATIENT_GENERAL );
+        model->nurse_patients_network[idx]->edges = calloc( 1, sizeof( edge ) );
+
+        model->doctor_patients_network_icu[idx] = new_network( model->hospitals[idx].n_total_doctors,
+                HOSPITAL_DOCTOR_PATIENT_ICU );
+        model->doctor_patients_network_icu[idx]->edges = calloc( 1, sizeof( edge ) );
+
+        model->nurse_patients_network_icu[idx] = new_network(model->hospitals[idx].n_total_nurses,
+                HOSPITAL_NURSE_PATIENT_ICU );
+        model->nurse_patients_network_icu[idx]->edges = calloc( 1, sizeof( edge ) );
+    }
 }
 
 /*****************************************************************************************
@@ -204,9 +234,9 @@ void set_up_work_network( model *model, int network )
 	long idx;
 	long n_people = 0;
 	long *people;
-	int n_interactions;
-	int age = NETWORK_TYPE_MAP[network];
+    int age = NETWORK_TYPE_MAP[network];
 
+    int n_interactions;
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		if( model->population[idx].work_network == network )
@@ -318,10 +348,11 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 *  Author:      meadt
 ******************************************************************************************/
 
+
+
 void set_up_hospital_network( model *model, int hospital_idx )
 {
-    //TODO: Check that changing the INTERACTION_TYPE enum has not changed relative transmission behaviour.
-    long n_healthcare_workers;
+	long n_healthcare_workers;
     long *healthcare_workers;
     int n_interactions;
 
@@ -338,7 +369,7 @@ void set_up_hospital_network( model *model, int hospital_idx )
     for ( int ndx = 0; ndx < hospital->n_total_nurses; ndx++ )
         healthcare_workers[n_healthcare_workers++] = hospital->nurse_pdxs[ndx];
 
-    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, /*HOSPITAL_WORK*/ -1 );
+    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, HOSPITAL_WORK );
     //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
     n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
     //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
@@ -638,7 +669,6 @@ void build_random_network( model *model )
 *  Name:		build_hospital_network
 *  Description: Builds all the doctor / nurse -> patients networks
 ******************************************************************************************/
-
 void build_hospital_networks( model *model, int hospital_idx )
 {
     hospital *hospital = &(model->hospitals[hospital_idx]);
