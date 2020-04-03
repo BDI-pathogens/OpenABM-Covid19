@@ -235,7 +235,7 @@ void intervention_notify_contacts(
 	int idx, ddx, day, n_contacts;
 
 	day = model->interaction_day_idx;
-	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
+	for( ddx = 0; ddx < params->quarantine_days - 1; ddx++ )
 		ring_dec( day, model->params->days_of_interactions );
 
 	for( ddx = params->quarantine_days - 1; ddx >=0; ddx-- )
