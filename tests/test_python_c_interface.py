@@ -22,7 +22,6 @@ import pytest
 sys.path.append("src/COVID19")
 from model import Model, Parameters, ModelParamaterException
 
-
 # STEPS > 0
 STEPS = randrange(1, 10)
 PARAM_LINE_NUMBER = 1

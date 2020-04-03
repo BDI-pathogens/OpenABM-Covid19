@@ -15,8 +15,10 @@ from os.path import join
 import numpy as np, pandas as pd
 import pytest
 from scipy import optimize
+import sys
 
-from COVID19.parameters import ParameterSet
+sys.path.append("src/COVID19")
+from parameters import ParameterSet
 import utilities as utils
 from math import sqrt, log, exp
 #from test.test_bufio import lengths
@@ -416,7 +418,7 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
                 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all"
+        compile_command = "make clean; make all; make swig-all"
         completed_compilation = subprocess.run([compile_command], 
             shell = True, cwd = IBM_DIR_TEST, capture_output = True)
     
