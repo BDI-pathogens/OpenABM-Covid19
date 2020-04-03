@@ -152,8 +152,40 @@ class TestClass(object):
                 population_60_69= 500000 * 0.11,
                 population_70_79= 500000 * 0.08,
                 population_80= 500000 * 0.05
-            )
-        ]
+            )],
+            "test_household_size" : [dict(n_total = 10000, # default sizes
+                                      household_size_1 = 0.29,
+                                      household_size_2 = 0.34,
+                                      household_size_3 = 0.15,
+                                      household_size_4 = 0.13,
+                                      household_size_5 = 0.04,
+                                      household_size_6 = 0.02
+                                      ),
+                                 dict(n_total=10000, # shift from small to large
+                                      household_size_1 = 0.24,
+                                      household_size_2 = 0.29,
+                                      household_size_3 = 0.10,
+                                      household_size_4 = 0.18,
+                                      household_size_5 = 0.09,
+                                      household_size_6 = 0.07
+                                      ),
+                                 dict(n_total=10000, # shift from large to small
+                                      household_size_1 = 0.33,
+                                      household_size_2 = 0.37,
+                                      household_size_3 = 0.18,
+                                      household_size_4 = 0.10,
+                                      household_size_5 = 0.02,
+                                      household_size_6 = 0.01
+                                      ),
+                                 dict(n_total=10000,# shift from medium
+                                      household_size_1 = 0.32,
+                                      household_size_2 = 0.37,
+                                      household_size_3 = 0.08,
+                                      household_size_4 = 0.05,
+                                      household_size_5 = 0.08,
+                                      household_size_6 = 0.06
+                                      )
+                                 ]
         }
     """
     Test class for checking 
@@ -258,6 +290,53 @@ class TestClass(object):
         # population proportion by age
         N_tot = len( df_indiv )
         for idx in range( len( AGES ) ):
-            
-            N = len( df_indiv[ ( df_indiv['age_group'] == AGES[idx] ) ] )
-            np.testing.assert_allclose( N , population_fraction[idx], atol = N_tot * error_tolerance )            
+           N = len(df_indiv[(df_indiv['age_group'] == AGES[idx])])
+           np.testing.assert_allclose(N, population_fraction[idx], atol=N_tot * error_tolerance)
+
+    def test_household_size(self, n_total, household_size_1, household_size_2,
+    household_size_3, household_size_4, household_size_5, household_size_6):
+        """
+        Test to check the household size distribution
+        """
+
+        # Set the parameters we want for the simulation.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("end_time", 1)
+        params.set_param("n_total", n_total)
+        params.set_param("household_size_1", household_size_1)
+        params.set_param("household_size_2", household_size_2)
+        params.set_param("household_size_3", household_size_3)
+        params.set_param("household_size_4", household_size_4)
+        params.set_param("household_size_5", household_size_5)
+        params.set_param("household_size_6", household_size_6)
+        params.write_params(TEST_DATA_FILE)
+
+        # Calculate the number of people expected to be living in households of
+        # each different size, based on the parameter definitions.
+        household_size_counts = [household_size_1, household_size_2,
+        household_size_3, household_size_4, household_size_5, household_size_6]
+        household_size_counts_weighted = np.array(
+        [count * (i + 1) for i, count in enumerate(household_size_counts)],
+        dtype=float)
+        household_size_counts_weighted *= float(n_total) / \
+        sum(household_size_counts_weighted)
+
+        # Run the simulation.
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout=file_output,
+        stderr=file_output, shell=True)
+        np.testing.assert_equal(completed_run.returncode, 0)
+
+        # Find the number of people living in households of each different size
+        # in the simulation output.
+        df_indiv = pd.read_csv(TEST_INDIVIDUAL_FILE, comment="#", sep=",",
+                               skipinitialspace=True)
+        df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
+        df_house = df_house.groupby(["size"]).size().reset_index(
+        name="house_count")
+        df_house["people_count"] = df_house["size"] * df_house["house_count"]
+        df_house["people_count_expected"] = household_size_counts_weighted
+
+        # Test!
+        np.testing.assert_allclose(df_house["people_count"],
+                                   df_house["people_count_expected"], rtol=0.02) 
