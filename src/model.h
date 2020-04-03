@@ -63,6 +63,7 @@ struct model{
 	event_list *event_lists;
 
 	trace_token *trace_tokens;
+	trace_token *next_trace_token;
 
 	int **transition_time_distributions;
 
