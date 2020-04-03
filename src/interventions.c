@@ -75,7 +75,16 @@ void set_up_app_users( model *model, double target )
 void set_up_trace_tokens( model *model )
 {
 	double tokens_per_person = 3;
-	model->trace_tokens = calloc(  model->params->n_total * tokens_per_person, sizeof( trace_token ) );
+	long n_tokens = ceil(  model->params->n_total * tokens_per_person );
+	long idx;
+
+	model->trace_tokens = calloc( n_tokens, sizeof( trace_token ) );
+
+	model->trace_tokens[0].next_index = NULL;
+	for( idx = 1; idx < n_tokens; idx++ )
+		model->trace_tokens[idx].next_index = &(model->trace_tokens[idx-1]);
+
+	model->next_trace_token = &(model->trace_tokens[ n_tokens - 1 ]);
 }
 
 /*****************************************************************************************
