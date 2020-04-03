@@ -12,12 +12,24 @@
 #include "individual.h"
 
 /************************************************************************/
+/****************************** Structures  *****************************/
+/************************************************************************/
+struct trace_token{
+	individual *individual;
+	trace_token *next_index;
+	trace_token *next;
+	trace_token *last;
+};
+
+/************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
 void set_up_transition_times_intervention( model* );
 void set_up_app_users( model*, double );
 void update_intervention_policy( model*, int );
+
+void set_up_trace_tokens( model* );
 
 void intervention_quarantine_until( model*, individual*, int, int );
 void intervention_quarantine_release( model*, individual* );
