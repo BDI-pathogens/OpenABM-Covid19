@@ -62,6 +62,8 @@ struct model{
 	event *next_event;
 	event_list *event_lists;
 
+	trace_token *trace_tokens;
+
 	int **transition_time_distributions;
 
 	long n_quarantine_days;
