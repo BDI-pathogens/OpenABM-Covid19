@@ -1,5 +1,5 @@
 /*
- * individual.c
+ * hsopital.c
  *
  *  Created on: 30 Mar 2020
  *      Author: vuurenk
@@ -31,15 +31,61 @@ void initialise_hospital(
     hospital->n_total_beds = params->hospital_n_beds;
     hospital->n_total_icus = params->hospital_n_icus;
 
-    //TODO: Change this to store the actual list of workers.
-    hospital->doctor_pdxs  = calloc(params->n_total_doctors, sizeof(long) );
-    hospital->nurse_pdxs   = calloc(params->n_total_nurses, sizeof(long) );
+    hospital->doctors = calloc( params->n_total_doctors, sizeof(doctor) );
+    hospital->nurses  = calloc( params->n_total_doctors, sizeof(doctor) );
 
     hospital->general_patient_pdxs = calloc( hospital->n_total_beds, sizeof(long) ); //TODO: should memory allocated be size of beds + icus??
     hospital->icu_patient_pdxs     = calloc( hospital->n_total_icus, sizeof(long) );
 
-    hospital->n_total_doctors = params->n_total_doctors;
-    hospital->n_total_nurses  = params->n_total_nurses;
+    //setup wards
+    hospital->n_wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(int*) );
+    hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
+
+    for( int w_type = 0; w_type < N_HOSPITAL_WARD_TYPES; w_type++ )
+    {
+        hospital->wards[w_type] = calloc( hospital->n_wards[w_type], sizeof(ward) );
+        for( int n_ward = 0; n_ward < hospital->n_wards[w_type]; n_ward++ )
+            initialise_ward( &(hospital->wards[w_type][n_ward]), w_type, n_ward);
+    }
+}
+
+/*****************************************************************************************
+*  Name:		set_up_hospital_networks
+*  Description: calls setup functions for all networks related to the hospital instance
+*  Returns:		void
+******************************************************************************************/
+void set_up_hospital_networks( hospital* hospital )
+{
+    int idx, n_healthcare_workers;
+    int ward_idx, ward_type;
+    long *healthcare_workers;
+
+    //setup hospital workplace network
+    n_healthcare_workers = 0;
+    healthcare_workers = calloc( hospital->n_total_doctors + hospital->n_total_nurses, sizeof(long) );
+
+    for ( idx = 0; idx < hospital->n_total_doctors; idx++ )
+        healthcare_workers[n_healthcare_workers++] = hospital->doctors[idx].pdx;
+
+    for ( idx = 0; idx < hospital->n_total_nurses; idx++ )
+        healthcare_workers[n_healthcare_workers++] = hospital->nurses[idx].pdx;
+
+    hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
+    hospital->hospital_workplace_network = new_network( n_healthcare_workers, HOSPITAL_WORK );
+    int n_interactions = 20;//TODO: maybe make this number of interactions set via param... and should nurses have more??
+
+    build_watts_strogatz_network( hospital->hospital_workplace_network, n_healthcare_workers, n_interactions, 0.1, TRUE ); //TODO: p_rewire probability higher??
+    relabel_network( hospital->hospital_workplace_network, healthcare_workers );
+
+    //setup hcw -> patient networks for all wards
+    hospital->wards_networks = calloc( N_HOSPITAL_WARD_TYPES, sizeof(network*) );
+
+    for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        hospital->wards_networks[N_HOSPITAL_WARD_TYPES] = calloc( hospital->n_wards[ward_type], sizeof(network*) );
+        for( ward_idx = 0; ward_idx < hospital->n_wards[N_HOSPITAL_WARD_TYPES]; ward_idx++ )
+            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]) );
+
+    free( healthcare_workers );
 }
 
 /*****************************************************************************************
@@ -49,10 +95,33 @@ void initialise_hospital(
 ******************************************************************************************/
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
 {
+    int ward_type, ward_idx;
+    int ward_found = FALSE;
+
     if( type == DOCTOR )
-        hospital->doctor_pdxs[hospital->n_total_doctors++] = pdx;
+    {
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
+            for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
+                if( hospital->wards[ward_type][ward_idx].n_doctors < hospital->wards[ward_type][ward_idx].max_doctors )
+                    ward_found = TRUE;
+
+        if( ward_found == FALSE)
+            print_exit( "attempted to allocated more than max number of doctors to hospital!!" );
+
+        initialise_doctor( &(hospital->doctors[hospital->n_total_doctors++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
+    }
     else if( type == NURSE )
-        hospital->nurse_pdxs[hospital->n_total_nurses++] = pdx;
+    {
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
+            for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
+                if( hospital->wards[ward_type][ward_idx].n_nurses < hospital->wards[ward_type][ward_idx].max_nurses )
+                    ward_found = TRUE;
+
+        if( ward_found == FALSE)
+            print_exit( "attempted to allocated more than max number of nurses to hospital!!" );
+
+        initialise_nurse( &(hospital->nurses[hospital->n_total_nurses++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
+    }
 }
 
 /*****************************************************************************************
@@ -149,8 +218,10 @@ void build_hcw_patient_network( model *model, network *network, long *patient_pd
 ******************************************************************************************/
 void destroy_hospital( hospital *hospital)
 {
-    free( hospital->doctor_pdxs );
-    free( hospital->nurse_pdxs );
+    free( hospital->nurses );
+    free( hospital->doctors );
+    free( hospital->hospital_workplace_network );
+
 };
 
 

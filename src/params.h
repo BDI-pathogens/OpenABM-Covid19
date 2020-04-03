@@ -121,6 +121,8 @@ typedef struct{
     int n_total_nurses;        // Total number of nurses
     int max_hcw_daily_interactions;
     int n_hospitals;
+    int n_covid_general_wards;
+    int n_covid_icu_wards;
     int hospital_n_beds;
     int hospital_n_icus;
     int general_patient_doctor_required_interactions;
