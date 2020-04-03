@@ -40,7 +40,7 @@ void set_up_transition_times_intervention( model *model )
 ******************************************************************************************/
 void set_up_app_users( model *model, double target )
 {
-	long idx, jdx, current_users, not_users, max_user, total;
+	long idx, jdx, current_users, not_users, max_user;
 
 	current_users = 0;
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -65,6 +65,18 @@ void set_up_app_users( model *model, double target )
 
 	free( users );
 };
+
+/*****************************************************************************************
+*  Name:		set_up_trace_tokens
+*  Description: sets up the stock trace_tokens note that these get recycled once we
+*  				move to a later date
+*  Returns:		void
+******************************************************************************************/
+void set_up_trace_tokens( model *model )
+{
+	double tokens_per_person = 3;
+	model->trace_tokens = calloc(  model->params->n_total * tokens_per_person, sizeof( trace_token ) );
+}
 
 /*****************************************************************************************
 *  Name:		update_intervention_policy
