@@ -30,6 +30,7 @@ void set_up_app_users( model*, double );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
+trace_token* new_trace_token( model* );
 
 void intervention_quarantine_until( model*, individual*, int, int );
 void intervention_quarantine_release( model*, individual* );
