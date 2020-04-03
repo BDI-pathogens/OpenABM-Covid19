@@ -123,6 +123,24 @@ trace_token* index_trace_token( model *model, individual *indiv )
 }
 
 /*****************************************************************************************
+*  Name:		remove_traced_on_this_trace
+*  Description: add the end of a tracing event this removes the tag which
+*  				prevents us from double counting people
+*  Returns:		void
+******************************************************************************************/
+void remove_traced_on_this_trace( model *model, individual *indiv )
+{
+	trace_token *token = indiv->index_trace_token;
+
+	while( token->next_index != NULL )
+	{
+		token = token->next_index;
+		token->individual->traced_on_this_trace = FALSE;
+	}
+	indiv->traced_on_this_trace = FALSE;
+}
+
+/*****************************************************************************************
 *  Name:		update_intervention_policy
 *  Description: Updates the intervention policy by adjusting parmaters
 ******************************************************************************************/
@@ -173,10 +191,15 @@ void intervention_quarantine_until(
 	if( indiv->traced_on_this_trace )
 		return;
 
+	if( is_in_hospital( indiv) )
+		return;
+
 	if( index_token != NULL )
 	{
 		// add the trace token to their list
 		trace_token *token = new_trace_token( model );
+		token->individual  = indiv;
+
 		if( indiv->trace_tokens != NULL )
 		{
 			token->next = indiv->trace_tokens;
@@ -324,10 +347,7 @@ void intervention_notify_contacts(
 	for( ddx = params->quarantine_days - 1; ddx >=0; ddx-- )
 	{
 		n_contacts = indiv->n_interactions[day];
-/*
-		if( model->time > 0 )
-			printf( "n_contacts = %i\n", n_contacts );
-*/
+
 		if( n_contacts > 0 )
 		{
 			inter = indiv->interactions[day];
@@ -395,23 +415,11 @@ void intervention_on_symptoms( model *model, individual *indiv )
 {
 	int quarantine, time_event;
 	parameters *params = model->params;
-	long pdx, traced;
 
 	quarantine = indiv->quarantined || gsl_ran_bernoulli( rng, params->self_quarantine_fraction );
 
 	if( quarantine )
 	{
-	/*
-		if( model->time > 0)
-		{
-			traced = 0;
-			for( pdx = 0; pdx < params->n_total; pdx++ )
-				if( model->population[pdx].traced_on_this_trace )
-					traced++;
-			printf( "start traced = %li\n", traced );
-		}
-*/
-
 		trace_token *index_token = index_trace_token( model, indiv );
 
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
@@ -425,18 +433,8 @@ void intervention_on_symptoms( model *model, individual *indiv )
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
 			intervention_notify_contacts( model, indiv, 1, index_token );
-/*
-		if( model->time > 0)
-		{
-			traced = 0;
-			for( pdx = 0; pdx < params->n_total; pdx++ )
-				if( model->population[pdx].traced_on_this_trace )
-					traced++;
-			printf( "end traced = %li\n", traced );
 
-			print_exit( "finish first on symptoms");
-		}
-		*/
+		remove_traced_on_this_trace( model, indiv );
 	}
 }
 
@@ -483,6 +481,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	if( params->trace_on_positive && ( params->quarantine_on_traced || params->test_on_traced ) )
 		intervention_notify_contacts( model, indiv, 1, index_token );
+
+	remove_traced_on_this_trace( model, indiv );
 }
 
 /*****************************************************************************************
