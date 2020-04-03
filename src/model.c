@@ -21,6 +21,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
+#include "hospital.h"
+
 /*****************************************************************************************
 *  Name:		new_model
 *  Description: Builds a new model object from a parameters object and returns a
@@ -43,21 +45,26 @@ model* new_model( parameters *params )
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
+	//TOM: EVENT CONTROL HERE//
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
+    //TOM: EVENT CONTROL HERE//
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
-    set_up_healthcare_workers_and_hospitals( model_ptr ); //kelvin change
-    //TODO: Finish adding in separate hospital network set up here - Tom.
+    set_up_healthcare_workers_and_hospitals( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
+
+    //TOM: EVENT CONTROL HERE//
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
+    //TOM: EVENT CONTROL HERE//
+
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr );
@@ -117,7 +124,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 {
 
 	int day, age, idx;
-	event_list *list = &(model->event_lists[ type ]);
+	event_list *list = &( model->event_lists[ type ]);
 	list->type       = type;
 
 	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
@@ -138,6 +145,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily[day] = 0;
 		list->n_daily_current[day] = 0;
 	}
+
 	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
 		list->infectious_curve[idx] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
@@ -188,8 +196,6 @@ void set_up_networks( model *model )
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
-
-    for (idx = 0; idx < model->params->n_hospitals; idx++ )
 
 	//Set up networks for hospital worker interactions.
     model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
@@ -254,7 +260,7 @@ void set_up_work_network( model *model, int network )
 void set_up_events( model *model )
 {
 	long idx;
-	int types = 6;
+	int types = 6;// TOM: Are these the types of events?
 	parameters *params = model->params;
 
 	model->events     = calloc( types * params->n_total, sizeof( event ) );
@@ -879,18 +885,30 @@ int one_time_step( model *model )
 	(model->time)++;
 	update_intervention_policy( model, model->time );
 
+    //TOM: EVENT CONTROL HERE//
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
+    //TOM: EVENT CONTROL HERE//
 
     build_daily_network(model);
 	transmit_virus( model );
 
+    //TOM: DISEASE EVENT CONTROL HERE//
 	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );
 	transition_events( model, HOSPITALISED, &transition_to_hospitalised, FALSE );
 	transition_events( model, CRITICAL,     &transition_to_critical,     FALSE );
 	transition_events( model, RECOVERED,    &transition_to_recovered,    FALSE );
 	transition_events( model, DEATH,        &transition_to_death,        FALSE );
+    //TOM: DISEASE EVENT CONTROL HERE//
+
+    //TOM: HOSPITAL EVENT CONTROL HERE//
+    transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
+    transition_events( model, GENERAL,         &transition_to_general,  FALSE );
+    transition_events( model, ICU,             &transition_to_icu,      FALSE );
+    transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
+    transition_events( model, NOT_IN_HOSPITAL, &transition_to_populace, FALSE );
+    //TOM: HOSPITAL EVENT CONTROL HERE//
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );

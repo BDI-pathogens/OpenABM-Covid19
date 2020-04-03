@@ -9,6 +9,7 @@
 #include "constant.h"
 #include "utilities.h"
 #include "network.h"
+#include "model.h"
 
 /*****************************************************************************************
 *  Name:		initialize_hospital
@@ -92,4 +93,83 @@ void destroy_hospital( hospital *hospital)
     free( hospital->nurse_pdxs );
 };
 
+/*****************************************************************************************
+*  Name:		transition_one_hospital_event
+*  Description: Generic function for updating an individual with their next
+*				event and adding the applicable events
+*  Returns:		void
+******************************************************************************************/
+void transition_one_hospital_event(
+        model *model,
+        individual *indiv,
+        int from,
+        int to,
+        int edge
+)
+{
+    indiv->status           = from;
+
+    if( from != NO_EVENT )
+        indiv->time_event[from] = model->time;
+    if( indiv->current_disease_event != NULL )
+        remove_event_from_event_list( model, indiv->current_disease_event );
+    if( indiv->next_disease_event != NULL )
+        indiv->current_disease_event = indiv->next_disease_event;
+
+    if( to != NO_EVENT )
+    {
+        indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0,
+                sample_transition_time( model, edge ) );
+        indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
+    }
+}
+
+/*****************************************************************************************
+*  Name:		transition_to_waiting
+*  Description: Transitions a severely symptomatic individual from the general populace
+*               to the admissions list for the hospital.
+*               At the moment - severely symptomatic refers to HOSPITALISED individuals.
+*  Returns:		void
+******************************************************************************************/
+void transition_to_waiting( model *model, individual *indiv ) {
+
+}
+/*****************************************************************************************
+*  Name:		transition_to_general
+*  Description: Transitions a severely symptomatic individual from the admissions list to a
+*               general ward TODO: or a recovering patient from the ICU to a general ward.
+*               This only occurs if there is enough space in the general wards.
+*  Returns:		void
+******************************************************************************************/
+void transition_to_general( model *model, individual *indiv ) {
+
+}
+/*****************************************************************************************
+*  Name:		transition_to_ICU
+*  Description: Transitions a critically ill individual to the ICU from either a general
+*               ward or the admissions list. This only occurs if there is enough space in
+*               the ICU.
+*  Returns:		void
+******************************************************************************************/
+void transition_to_icu( model *model, individual *indiv ) {
+
+}
+/*****************************************************************************************
+*  Name:		transition_to_mortuary
+*  Description: Transitions a newly deceased person from either the general ward or ICU
+*               into a "morutary" to free space for new patients.
+*  Returns:		void
+******************************************************************************************/
+void transition_to_mortuary( model *model, individual *indiv ) {
+
+}
+/*****************************************************************************************
+*  Name:		transition_to_populace
+*  Description: Transitions a recovered individual from either the general wards or ICU
+*               back into the general population.
+*  Returns:		void
+******************************************************************************************/
+void transition_to_populace( model *model, individual *indiv ) {
+
+}
 
