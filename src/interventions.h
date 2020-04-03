@@ -31,18 +31,19 @@ void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
 trace_token* new_trace_token( model* );
+trace_token* index_trace_token( model*, individual* );
 
 void intervention_quarantine_until( model*, individual*, int, int );
 void intervention_quarantine_release( model*, individual* );
-void intervention_quarantine_household( model*, individual*, int, int );
+void intervention_quarantine_household( model*, individual*, int, int, trace_token* );
 void intervention_test_take( model*, individual* );
 void intervention_test_result( model*, individual* );
-void intervention_notify_contacts( model*, individual*, int );
+void intervention_notify_contacts( model*, individual*, int, trace_token* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );
 void intervention_on_critical( model*, individual* );
 void intervention_on_positive_result( model*, individual* );
-void intervention_on_traced( model*, individual*, int, int );
+void intervention_on_traced( model*, individual*, int, int, trace_token* );
 
 #endif /* INTERVENTIONS_H_ */

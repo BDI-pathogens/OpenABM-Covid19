@@ -106,6 +106,23 @@ trace_token* new_trace_token( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		index_trace_token
+*  Description: get the index trace token at the start of a tracing cascade and
+*  				assigns it to the indiviual, note if the individual already has
+*  				one then we just add it to it
+*  Returns:		void
+******************************************************************************************/
+trace_token* index_trace_token( model *model, individual *indiv )
+{
+	if( indiv->index_trace_token == NULL )
+		indiv->index_trace_token = new_trace_token( model );
+
+	indiv->traced_on_this_trace = TRUE;
+
+	return indiv->index_trace_token;
+}
+
+/*****************************************************************************************
 *  Name:		update_intervention_policy
 *  Description: Updates the intervention policy by adjusting parmaters
 ******************************************************************************************/
@@ -262,7 +279,8 @@ void intervention_test_result( model *model, individual *indiv )
 void intervention_notify_contacts(
 	model *model,
 	individual *indiv,
-	int level
+	int level,
+	trace_token *index_token
 )
 {
 	if( !indiv->app_user || !model->params->app_turned_on )
@@ -292,7 +310,7 @@ void intervention_notify_contacts(
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, level );
+						intervention_on_traced( model, contact, model->time - ddx, level, index_token );
 				}
 				inter = inter->next;
 			}
@@ -310,7 +328,8 @@ void intervention_quarantine_household(
 	model *model,
 	individual *indiv,
 	int time,
-	int contact_trace
+	int contact_trace,
+	trace_token *index_token
 )
 {
 	individual *contact;
@@ -328,7 +347,7 @@ void intervention_quarantine_household(
 			intervention_quarantine_until( model, contact, time_event, TRUE );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
-				intervention_notify_contacts( model, contact, NOT_RECURSIVE );
+				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
 		}
 }
 
@@ -347,6 +366,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 {
 	int quarantine, time_event;
 	parameters *params = model->params;
+	trace_token *index_token = index_trace_token( model, indiv );
 
 	quarantine = indiv->quarantined || gsl_ran_bernoulli( rng, params->self_quarantine_fraction );
 
@@ -356,13 +376,13 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
 
 		if( params->quarantine_household_on_symptoms )
-			intervention_quarantine_household( model, indiv, time_event, FALSE );
+			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token );
 
 		if( params->test_on_symptoms )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
-			intervention_notify_contacts( model, indiv, 1 );
+			intervention_notify_contacts( model, indiv, 1, index_token );
 	}
 }
 
@@ -396,6 +416,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 {
 	int time_event = UNKNOWN;
 	parameters *params = model->params;
+	trace_token *index_token = index_trace_token( model, indiv );
+
 
 	if( !is_in_hospital( indiv ) )
 	{
@@ -404,10 +426,10 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	}
 
 	if( params->quarantine_household_on_positive )
-		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive );
+		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token );
 
 	if( params->trace_on_positive && ( params->quarantine_on_traced || params->test_on_traced ) )
-		intervention_notify_contacts( model, indiv, 1 );
+		intervention_notify_contacts( model, indiv, 1, index_token );
 }
 
 /*****************************************************************************************
@@ -439,7 +461,8 @@ void intervention_on_traced(
 	model *model,
 	individual *indiv,
 	int contact_time,
-	int recursion_level
+	int recursion_level,
+	trace_token *index_token
 )
 {
 	if( is_in_hospital( indiv ) || indiv->is_case )
@@ -453,7 +476,7 @@ void intervention_on_traced(
 		intervention_quarantine_until( model, indiv, time_event, TRUE );
 
 		if( params->quarantine_household_on_traced )
-			intervention_quarantine_household( model, indiv, time_event, FALSE );
+			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token );
 	}
 
 	if( params->test_on_traced )
@@ -463,6 +486,6 @@ void intervention_on_traced(
 	}
 
 	if( recursion_level < params->tracing_network_depth )
-		intervention_notify_contacts( model, indiv, recursion_level + 1 );
+		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
 }
 
