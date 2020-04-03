@@ -61,6 +61,7 @@ model* new_model( parameters *params )
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr, model_ptr->params->app_users_fraction );
+	set_up_trace_tokens( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -98,7 +99,8 @@ void destroy_model( model *model )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
-    free ( model-> household_directory );;
+    free ( model-> household_directory );
+    free( model->trace_tokens );
     free( model );
 
     gsl_rng_free( rng );
