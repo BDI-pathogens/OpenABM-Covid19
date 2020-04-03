@@ -128,7 +128,7 @@ app_users_fraction	0.0
 app_turn_on_time	10000
 lockdown_work_network_multiplier	0.2
 lockdown_random_network_multiplier	0.2
-lockdown_house_interact0ion_multiplier	3.0
+lockdown_house_interaction_multiplier	3.0
 lockdown_time_on	10000
 lockdown_time_off	10000
 testing_symptoms_time_on	10000
