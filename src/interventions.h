@@ -33,7 +33,7 @@ void set_up_trace_tokens( model* );
 trace_token* new_trace_token( model* );
 trace_token* index_trace_token( model*, individual* );
 
-void intervention_quarantine_until( model*, individual*, int, int );
+void intervention_quarantine_until( model*, individual*, int, int, trace_token* );
 void intervention_quarantine_release( model*, individual* );
 void intervention_quarantine_household( model*, individual*, int, int, trace_token* );
 void intervention_test_take( model*, individual* );
