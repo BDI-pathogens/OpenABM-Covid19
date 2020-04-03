@@ -79,6 +79,24 @@ void set_up_trace_tokens( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		new_trace_token
+*  Description: gets a new trace token
+*  Returns:		void
+******************************************************************************************/
+trace_token* new_trace_token( model *model )
+{
+	trace_token *token = model->next_trace_token;
+
+	model->next_trace_token = token->next_index;
+
+	token->last = NULL;
+	token->next = NULL;
+	token->next_index = NULL;
+
+	return token;
+}
+
+/*****************************************************************************************
 *  Name:		update_intervention_policy
 *  Description: Updates the intervention policy by adjusting parmaters
 ******************************************************************************************/
