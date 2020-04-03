@@ -79,10 +79,11 @@ class TestClass(object):
         """
         shutil.rmtree(DATA_DIR_TEST, ignore_errors=True)
 
-    def test_set_get_parameters(self):
-        """
-        Test the a parameter can be changed in between step runs
-        """
+    """
+    def test_lockdown_on_off(self):
+    """
+        #Test that a lock down can be turned on and off
+    """
         # Create model object
         params = Parameters(
             TEST_DATA_TEMPLATE,
@@ -110,21 +111,44 @@ class TestClass(object):
             
             if res["time"] == 20:
                 model.update_running_params( "lockdown_on", 1 )
+                np.testing.assert_equal(model.get_param("lockdown_on"), 1)
+
 
             if res["time"] == 30:
                 model.update_running_params( "lockdown_on", 0 )
                 model.update_running_params( "app_turned_on", 1 )
+                np.testing.assert_equal(model.get_param("lockdown_on"), 0)
+                np.testing.assert_equal(model.get_param("lockdown_on"), 1)
 
             if res["time"] == 60:
                 model.update_running_params( "app_users_fraction", 0.85 )
+    """
+    
 
+    def test_set_get_parameters(self):
+        """
+        Test the a parameter can be changed in between step runs
+        """
+        # Create model object
+        params = Parameters(
+            TEST_DATA_TEMPLATE,
+            PARAM_LINE_NUMBER,
+            DATA_DIR_TEST,
+            TEST_DATA_HOUSEHOLD_DEMOGRAPHICS,
+        )
+        params.set_param( "app_users_fraction", 0.25)
+        model = Model(params)
 
+        STEPS = 2
+        # Run steps
+        for step in range(0, STEPS):
+            model.one_time_step()
+            res = model.one_time_step_results()
+           
             # Try to set valid parameters
-         #   model.update_running_params("test_on_symptoms", 1)
-          #  np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
+            model.update_running_params("test_on_symptoms", 1)
+            np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
 
-
-            """
             model.update_running_params("test_on_traced", 1)
             np.testing.assert_equal(model.get_param("test_on_traced"), 1)
 
@@ -180,4 +204,4 @@ class TestClass(object):
 
             with pytest.raises(ModelParamaterException):
                 model.get_param("wrong_parameter")
-            """
+        
