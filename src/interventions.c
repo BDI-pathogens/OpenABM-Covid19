@@ -67,6 +67,18 @@ void set_up_app_users( model *model, double target )
 };
 
 /*****************************************************************************************
+*  Name:		set_up_trace_tokens
+*  Description: sets up the stock trace_tokens note that these get recycled once we
+*  				move to a later date
+*  Returns:		void
+******************************************************************************************/
+void set_up_trace_tokens( model *model )
+{
+	double tokens_per_person = 3;
+	model->trace_tokens = calloc(  model->params->n_total * tokens_per_person, sizeof( trace_token ) );
+}
+
+/*****************************************************************************************
 *  Name:		update_intervention_policy
 *  Description: Updates the intervention policy by adjusting parmaters
 ******************************************************************************************/
