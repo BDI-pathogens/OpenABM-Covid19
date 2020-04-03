@@ -50,6 +50,10 @@ struct individual{
 	event *quarantine_event;
 	event *quarantine_release_event;
 	int quarantine_test_result;
+
+	int hospital_location;
+	event *current_hospital_event;
+	event *next_hospital_event;
 	
 	int app_user;
 

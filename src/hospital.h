@@ -57,4 +57,10 @@ int healthcare_worker_working(individual* indiv);
 void add_patient_to_hospital(hospital *hospital, long pdx, int type);
 void destroy_hospital( hospital* );
 
+void transition_to_waiting( model *model, individual *indiv );
+void transition_to_general( model *model, individual *indiv );
+void transition_to_icu( model *model, individual *indiv );
+void transition_to_mortuary( model *model, individual *indiv );
+void transition_to_populace( model *model, individual *indiv );
+
 #endif /* HOSPITAL_H_ */

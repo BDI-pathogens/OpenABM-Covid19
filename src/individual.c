@@ -54,6 +54,12 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
+	// TOM: Assuming all individuals added to the simulation begin as not being hospitalised.
+	// Change later to account for non-COVID patients being added at the start of the simulation.
+	indiv->hospital_location = NOT_IN_HOSPITAL;
+	indiv->current_hospital_event = NULL;
+	indiv->next_hospital_event = NULL;
+
     //TODO: kelvin change
     indiv->worker_type = OTHER;
 }
