@@ -50,6 +50,10 @@ struct individual{
 	event *quarantine_release_event;
 	int quarantine_test_result;
 	
+	trace_token *trace_tokens;
+	trace_token *index_trace_token;
+	int traced_on_this_trace;
+
 	int app_user;
 };
 
