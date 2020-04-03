@@ -90,17 +90,41 @@ class TestClass(object):
             DATA_DIR_TEST,
             TEST_DATA_HOUSEHOLD_DEMOGRAPHICS,
         )
+        params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
 
+        STEPS = 100
+        last  = 0
         # Run steps
         for step in range(0, STEPS):
             model.one_time_step()
-            print(model.one_time_step_results())
+            res = model.one_time_step_results()
+            
+            print( "Time =  " + str( res["time"]) + 
+                   "; lockdown = "  +  str( res["lockdown"]) +  
+                   "; app_turned_on = "  +  str( model.get_param( "app_turned_on") ) +  
+                   "; new_infected = " + str( res[ "total_infected" ] - last )
+            )
+            
+            last = res[ "total_infected" ] 
+            
+            if res["time"] == 20:
+                model.update_running_params( "lockdown_on", 1 )
+
+            if res["time"] == 30:
+                model.update_running_params( "lockdown_on", 0 )
+                model.update_running_params( "app_turned_on", 1 )
+
+            if res["time"] == 60:
+                model.update_running_params( "app_users_fraction", 0.85 )
+
 
             # Try to set valid parameters
-            model.update_running_params("test_on_symptoms", 1)
-            np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
+         #   model.update_running_params("test_on_symptoms", 1)
+          #  np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
 
+
+            """
             model.update_running_params("test_on_traced", 1)
             np.testing.assert_equal(model.get_param("test_on_traced"), 1)
 
@@ -156,3 +180,4 @@ class TestClass(object):
 
             with pytest.raises(ModelParamaterException):
                 model.get_param("wrong_parameter")
+            """

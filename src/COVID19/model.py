@@ -64,7 +64,7 @@ class Parameters(object):
             return getattr(self.c_params, param)
         except AttributeError:
             raise ParamaterException(
-                f"Can not get param {param} as it doesn't exist in paramaters object"
+                "Can not get param {param} as it doesn't exist in paramaters object"
             )
 
     def set_param(self, param, value):
@@ -88,7 +88,7 @@ class Parameters(object):
             elif isinstance(getattr(self.c_params, param), float):
                 setattr(self.c_params, param, float(value))
         else:
-            raise ParamaterException(f"Can not set paramater as it doesn't exist")
+            raise ParamaterException("Can not set paramater as it doesn't exist")
 
     def return_param_object(self):
         """[summary]
@@ -124,7 +124,7 @@ class Model:
             [type] -- [value of param stored]
         """
         try:
-            value = getattr(covid19, f"get_param_{name}")(self.c_model)
+            value = getattr(covid19, "get_param_{name}")(self.c_model)
             if value < 0:
                 return False
             else:
@@ -145,13 +145,13 @@ class Model:
             ModelParamaterException: [description]
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
-            raise ModelParamaterException(f"Can not update {param} during running")
-        setter = getattr(covid19, f"set_param_{param}")
+            raise ModelParamaterException("Can not update {param} during running")
+        setter = getattr(covid19, "set_param_{param}")
         if callable(setter):
             if not setter(self.c_model, value):
-                raise ModelParamaterException(f"Setting {param} to {value} failed")
+                raise ModelParamaterException("Setting {param} to {value} failed")
         else:
-            raise ModelParamaterException(f"Setting {param} to {value} failed")
+            raise ModelParamaterException("Setting {param} to {value} failed")
 
     def _create(self):
         """

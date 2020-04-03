@@ -6,7 +6,6 @@ setup.py file for SWIG example
 
 from distutils.core import setup, Extension
 
-
 covid19_module = Extension(
     "_covid19",
     sources=[
