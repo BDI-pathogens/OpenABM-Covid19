@@ -210,7 +210,7 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
                 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all make swig-all"
+        compile_command = "make clean; make all; make swig-all"
         completed_compilation = subprocess.run([compile_command], 
             shell = True, cwd = IBM_DIR_TEST, capture_output = True)
     
