@@ -4,8 +4,11 @@ Utilities to modify parameters objects associated with testing the COVID19-IBM m
 Created: March 2020
 Author: p-robot
 """
+import sys
 
-from COVID19.parameters import ParameterSet
+sys.path.append("src/COVID19")
+
+from parameters import ParameterSet
 
 
 def turn_off_interventions(params, end_time):
