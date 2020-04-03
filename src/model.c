@@ -49,8 +49,7 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
-    set_up_healthcare_workers_and_hospitals( model_ptr ); //kelvin change
-    //TODO: Finish adding in separate hospital network set up here - Tom.
+    set_up_healthcare_workers_and_hospitals( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
@@ -190,7 +189,6 @@ void set_up_networks( model *model )
 		set_up_work_network( model, idx );
 
 	//Set up networks for hospital worker interactions.
-    model->hospital_network = calloc( model->params->n_hospitals, sizeof( network* ));
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_network( model, idx );
 
@@ -287,13 +285,11 @@ void set_up_population( model *model )
 		initialize_individual( &(model->population[idx]), params, idx );
 }
 
-//kelvin change
 /*****************************************************************************************
 *  Name:		set_up_healthcare_workers
 *  Description: randomly pick individuals from population between ages 20 - 69 to be doctors
 *               and nurses
 *  Returns:		void
-*  Author:      vuurenk
 ******************************************************************************************/
 
 void set_up_healthcare_workers_and_hospitals( model *model)
@@ -306,9 +302,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     //initialise hospitals
     model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
-    {
         initialise_hospital( &(model->hospitals[idx]), model->params, idx );
-    }
 
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
@@ -317,7 +311,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_60_69) )
+        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
                 continue;
 
         indiv->worker_type = DOCTOR;
@@ -332,7 +326,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_60_69) )
+        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
                 continue;
 
         indiv->worker_type = NURSE;
@@ -340,44 +334,6 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         idx++;
     }
 }
-
-/*****************************************************************************************
-*  Name:		set_up_hospital_network
-*  Description: creates a hospital network and adds healthcare workers to them.
-*  Returns:		void
-*  Author:      meadt
-******************************************************************************************/
-
-
-
-void set_up_hospital_network( model *model, int hospital_idx )
-{
-	long n_healthcare_workers;
-    long *healthcare_workers;
-    int n_interactions;
-
-    hospital *hospital = &(model->hospitals[hospital_idx]);
-
-    n_healthcare_workers = 0;
-    healthcare_workers   = calloc( hospital->n_total_nurses + hospital->n_total_doctors, sizeof( long ) );
-
-    //get population id of all doctors at hospital
-    for ( int ddx = 0; ddx < hospital->n_total_doctors; ddx++ )
-        healthcare_workers[n_healthcare_workers++] = hospital->doctor_pdxs[ddx];
-
-    //get population id of all nurses at the hospital
-    for ( int ndx = 0; ndx < hospital->n_total_nurses; ndx++ )
-        healthcare_workers[n_healthcare_workers++] = hospital->nurse_pdxs[ndx];
-
-    model->hospital_network[hospital_idx] = new_network( n_healthcare_workers, HOSPITAL_WORK );
-    //n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
-    n_interactions           = 20; //TODO: how are we going to get mean interactions for hospital network?
-    //TODO: does p_wire need to be set to a higher probability?? as there will be more interactions across a hospital?
-    build_watts_strogatz_network( model->hospital_network[hospital_idx], n_healthcare_workers, n_interactions, 0.1, TRUE );
-    relabel_network( model->hospital_network[hospital_idx], healthcare_workers );
-
-    free( healthcare_workers );
-};
 
 /*****************************************************************************************
 *  Name:		set_up_individual_hazard
