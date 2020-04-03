@@ -110,7 +110,7 @@ test_on_traced	0
 trace_on_symptoms 1
 trace_on_positive 0
 quarantine_on_traced	1
-traceable_interaction_fraction	0.8
+traceable_interaction_fraction	1.0
 tracing_network_depth	0
 allow_clinical_diagnosis	1
 quarantine_household_on_positive	0
@@ -124,7 +124,7 @@ test_insensitive_period	3
 test_order_wait	0
 test_result_wait	0
 self_quarantine_fraction	0.8
-app_users_fraction	0.8
+app_users_fraction	1.0
 app_turn_on_time	1
 lockdown_work_network_multiplier	0.2
 lockdown_random_network_multiplier	0.2
