@@ -137,7 +137,7 @@ class TestClass(object):
         Set parameter value to zero should result in zero sum of output column
         """
         params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param(parameter, 0)
+        params = utils.set_fatality_fraction_all(params, 0.0)
         params.write_params(TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
