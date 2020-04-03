@@ -30,6 +30,11 @@ enum EVENT_TYPES{
 	TEST_TAKE,
 	TEST_RESULT,
 	CASE,
+	NOT_IN_HOSPITAL, //TOM: Event transitions for hospital states.
+	WAITING,
+	GENERAL,
+	ICU,
+    MORTUARY,
 	N_EVENT_TYPES
 };
 
