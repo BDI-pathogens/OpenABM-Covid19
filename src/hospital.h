@@ -17,8 +17,6 @@
 #include "params.h"
 #include "network.h"
 #include "individual.h"
-#include "doctor.h"
-#include "nurse.h"
 #include "ward.h"
 
 /************************************************************************/
@@ -33,12 +31,6 @@ struct hospital
 
     int n_total_beds;               //total beds at hospital
     int n_total_icus;               //total icus at hospital
-
-    long *doctor_pdxs;              //stores the population ids of all doctors at the hospital
-    long *nurse_pdxs;               //stores the population ids of all nurses at the hospital
-
-    doctor *doctors;
-    nurse  *nurses;
 
     long *general_patient_pdxs;     //stores the population ids of all general patients at the hospital
     long *icu_patient_pdxs;         //stores the population ids of all general patients at the hospital
