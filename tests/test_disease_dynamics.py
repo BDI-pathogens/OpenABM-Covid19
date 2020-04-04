@@ -10,19 +10,17 @@ Created: March 2020
 Author: p-robot
 """
 
-import subprocess, shutil, os
+import pytest, sys, subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
-import pytest
-import sys
+from math import sqrt
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-import utilities as utils
-from math import sqrt
-from constant import *
 
-command = join(IBM_DIR_TEST, EXE)
+from . import constant
+from . import utilities as utils
+
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -35,7 +33,6 @@ def pytest_generate_tests(metafunc):
 
 class TestClass(object):
     params = {
-        "test_file_exists": [dict()],
         "test_disease_transition_times": [
             dict(
                 test_params = dict( 
@@ -314,64 +311,6 @@ class TestClass(object):
     """
     Test class for checking 
     """
-
-    @classmethod
-    def setup_class(self):
-        """
-        When the class is instantiated: compile the IBM in a temporary directory
-        """
-
-        # Make a temporary copy of the code (remove this temporary directory if it already exists)
-        shutil.rmtree(IBM_DIR_TEST, ignore_errors=True)
-        shutil.copytree(IBM_DIR, IBM_DIR_TEST)
-
-        # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all"
-        completed_compilation = subprocess.run(
-            [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
-        )
-
-    @classmethod
-    def teardown_class(self):
-        """
-        Remove the temporary code directory (when this class is removed)
-        """
-        shutil.rmtree(IBM_DIR_TEST, ignore_errors=True)
-
-    def setup_method(self):
-        """
-        Called before each method is run; creates a new data dir, copies test datasets
-        """
-        os.mkdir(DATA_DIR_TEST)
-        shutil.copy(TEST_DATA_TEMPLATE, TEST_DATA_FILE)
-        shutil.copy(TEST_HOUSEHOLD_TEMPLATE, TEST_HOUSEHOLD_FILE)
-
-        # Adjust any parameters that need adjusting for all tests
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", 10000)
-        params.set_param("end_time", 100)
-        params.write_params(TEST_DATA_FILE)
-
-    def teardown_method(self):
-        """
-        At the end of each method (test), remove the directory of test input/output data
-        """
-        shutil.rmtree(DATA_DIR_TEST, ignore_errors=True)
-
-    def test_file_exists(self):
-        """
-        Test that the individual file exists
-        """
-
-        # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout=file_output, shell=True)
-
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
-        df_individual = pd.read_csv(TEST_INDIVIDUAL_FILE, comment="#", sep=",")
-
-        np.testing.assert_equal(df_individual.shape[0] > 1, True)
-
     def test_disease_transition_times( self, test_params ):
         """
         Test that the mean and standard deviation of the transition times between 
@@ -379,7 +318,7 @@ class TestClass(object):
         """
         std_error_limit = 4
 
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, 50)
         params.set_param("n_total", 20000)
         params.set_param("n_seed_infection", 200)
@@ -387,11 +326,11 @@ class TestClass(object):
         params.set_param("infectious_rate", 4.0)
         params.set_param( test_params )
       
-        params.write_params(TEST_DATA_FILE)
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        params.write_params(constant.TEST_DATA_FILE)
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
 
         # time infected until showing symptoms
@@ -541,7 +480,7 @@ class TestClass(object):
         """
         std_error_limit = 5
 
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, 50)
 
         params.set_param("n_total", 20000)
@@ -598,11 +537,11 @@ class TestClass(object):
             test_params[ "fatality_fraction_80" ],
         ]
 
-        params.write_params(TEST_DATA_FILE)
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        params.write_params(constant.TEST_DATA_FILE)
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
 
         # fraction asymptomatic vs symptomatc
@@ -627,18 +566,18 @@ class TestClass(object):
         N_asymp_tot = 0
         N_symp_tot = 0
         asypmtomatic_fraction_weighted = 0
-        for idx in range( N_AGE_GROUPS ):
+        for idx in range( constant.N_AGE_GROUPS ):
 
             N_asymp = len(
                 df_indiv[
                     (df_indiv["time_infected"] > 0) & (df_indiv["time_asymptomatic"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_symp = len(
                 df_indiv[
                     (df_indiv["time_symptomatic"] > 0) & (df_indiv["time_asymptomatic"] < 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N    = N_symp + N_asymp
@@ -669,18 +608,18 @@ class TestClass(object):
         N_hosp_tot = 0
         N_symp_tot = 0
         hospitalised_fraction_weighted = 0
-        for idx in range(len(AGES)):
+        for idx in range(constant.N_AGE_GROUPS):
 
             N_hosp = len(
                 df_indiv[
                     (df_indiv["time_hospitalised"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_symp = len(
                 df_indiv[
                     (df_indiv["time_symptomatic"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             mean = N_hosp / N_symp
@@ -709,18 +648,18 @@ class TestClass(object):
         N_crit_tot = 0
         N_hosp_tot = 0
         critical_fraction_weighted = 0
-        for idx in range(len(AGES)):
+        for idx in range(constant.N_AGE_GROUPS):
 
             N_crit = len(
                 df_indiv[
                     (df_indiv["time_critical"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_hosp = len(
                 df_indiv[
                     (df_indiv["time_hospitalised"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
 
@@ -752,17 +691,17 @@ class TestClass(object):
         N_dead_tot = 0
         N_crit_tot = 0
         fatality_fraction_weighted = 0
-        for idx in range(len(AGES)):
+        for idx in range(constant.N_AGE_GROUPS):
 
             N_dead = len(
                 df_indiv[
-                    (df_indiv["time_death"] > 0) & (df_indiv["age_group"] == AGES[idx])
+                    (df_indiv["time_death"] > 0) & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_crit = len(
                 df_indiv[
                     (df_indiv["time_critical"] > 0)
-                    & (df_indiv["age_group"] == AGES[idx])
+                    & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
 
