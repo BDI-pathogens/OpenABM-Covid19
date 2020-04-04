@@ -88,6 +88,16 @@ void set_up_hospital_networks( hospital* hospital )
     free( healthcare_workers );
 }
 
+void build_hospital_networks( hospital *hospital )
+{
+    int ward_type, ward_idx;
+
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+            build_ward_networks( &(hospital->wards[ward_type][ward_idx]) );
+
+}
+
 /*****************************************************************************************
 *  Name:		add_nurse
 *  Description: adds population id of a doctor / nurse to hospital's
