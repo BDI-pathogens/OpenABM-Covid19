@@ -75,16 +75,17 @@ void set_up_app_users( model *model, double target )
 void set_up_trace_tokens( model *model )
 {
 	double tokens_per_person = 3;
-	long n_tokens = ceil(  model->params->n_total * tokens_per_person );
+	model->n_trace_tokens = ceil(  model->params->n_total * tokens_per_person );
 	long idx;
 
-	model->trace_tokens = calloc( n_tokens, sizeof( trace_token ) );
+	model->trace_tokens = calloc( model->n_trace_tokens, sizeof( trace_token ) );
 
 	model->trace_tokens[0].next_index = NULL;
-	for( idx = 1; idx < n_tokens; idx++ )
+	for( idx = 1; idx < model->n_trace_tokens; idx++ )
 		model->trace_tokens[idx].next_index = &(model->trace_tokens[idx-1]);
 
-	model->next_trace_token = &(model->trace_tokens[ n_tokens - 1 ]);
+	model->next_trace_token = &(model->trace_tokens[ model->n_trace_tokens - 1 ]);
+	model->n_trace_tokens_used = 0;
 }
 
 /*****************************************************************************************
@@ -92,7 +93,7 @@ void set_up_trace_tokens( model *model )
 *  Description: gets a new trace token
 *  Returns:		void
 ******************************************************************************************/
-trace_token* new_trace_token( model *model )
+trace_token* new_trace_token( model *model, individual *indiv )
 {
 	trace_token *token = model->next_trace_token;
 
@@ -101,6 +102,8 @@ trace_token* new_trace_token( model *model )
 	token->last = NULL;
 	token->next = NULL;
 	token->next_index = NULL;
+	token->individual = indiv;
+	model->n_trace_tokens_used++;
 
 	return token;
 }
@@ -115,7 +118,7 @@ trace_token* new_trace_token( model *model )
 trace_token* index_trace_token( model *model, individual *indiv )
 {
 	if( indiv->index_trace_token == NULL )
-		indiv->index_trace_token = new_trace_token( model );
+		indiv->index_trace_token = new_trace_token( model, indiv );
 
 	indiv->traced_on_this_trace = TRUE;
 
@@ -138,6 +141,7 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 		token->individual->traced_on_this_trace = FALSE;
 	}
 	indiv->traced_on_this_trace = FALSE;
+
 }
 
 /*****************************************************************************************
@@ -197,8 +201,7 @@ void intervention_quarantine_until(
 	if( index_token != NULL )
 	{
 		// add the trace token to their list
-		trace_token *token = new_trace_token( model );
-		token->individual  = indiv;
+		trace_token *token = new_trace_token( model, indiv );
 
 		if( indiv->trace_tokens != NULL )
 		{
@@ -369,6 +372,67 @@ void intervention_notify_contacts(
 }
 
 /*****************************************************************************************
+*  Name:		intervention_trace_token_release
+*  Description: what to do when a trace_token is released
+*  Returns:		void
+******************************************************************************************/
+void intervention_trace_token_release( model *model, individual *indiv )
+{
+	individual *contact;
+	trace_token *token = indiv->index_trace_token;
+	trace_token *next_token;
+	int zero_traced = FALSE;
+
+	if( token == NULL )
+		return;
+
+	// if nobody traced then nothing to do
+	if( token->next_index == NULL )
+		zero_traced = TRUE;
+	else
+		next_token = token->next_index;
+
+	if( zero_traced & (token->next != NULL | token->last != NULL ) )
+		print_exit( "error index token should not link to a list");
+
+	// return the index token to the stack
+	token->next_index = model->next_trace_token;
+	model->next_trace_token = token;
+	model->n_trace_tokens_used--;
+	indiv->index_trace_token = NULL;
+
+	if( zero_traced )
+		return;
+
+	while( next_token != NULL )
+	{
+		// get the next token on the list of this person trace_token
+		token = next_token;
+		next_token = token->next_index;
+
+		// remove the token from the individual and return it to the stack
+		contact = token->individual;
+		if( contact->trace_tokens == token )
+		{
+			contact->trace_tokens = token->next;
+			if( contact->trace_tokens != NULL )
+				contact->trace_tokens->last = NULL;
+		}
+		else
+		{
+			token->last->next = token->next;
+			if( token->next != NULL )
+				token->next->last = token->last;
+		}
+
+		// put the token back on the stack
+		token->next_index = model->next_trace_token;
+		model->next_trace_token = token;
+		model->n_trace_tokens_used--;
+	}
+}
+
+/*****************************************************************************************
 *  Name:		intervention_quarantine_household
 *  Description: Quarantine everyone in a household
 *  Returns:		void
@@ -435,6 +499,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_notify_contacts( model, indiv, 1, index_token );
 
 		remove_traced_on_this_trace( model, indiv );
+		add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced );
 	}
 }
 
@@ -483,6 +548,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		intervention_notify_contacts( model, indiv, 1, index_token );
 
 	remove_traced_on_this_trace( model, indiv );
+	add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced );
 }
 
 /*****************************************************************************************
@@ -541,4 +607,5 @@ void intervention_on_traced(
 	if( recursion_level < params->tracing_network_depth )
 		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
 }
+
 
