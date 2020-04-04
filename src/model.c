@@ -634,6 +634,7 @@ void transition_events(
 
 	for( idx = 0; idx < n_events; idx++ )
 	{
+
 		event      = next_event;
 		next_event = event->next;
 		indiv      = event->individual;
@@ -670,6 +671,7 @@ int one_time_step( model *model )
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
+	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,TRUE );
 
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
