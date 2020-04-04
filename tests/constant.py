@@ -78,8 +78,7 @@ NETWORK_TYPES = [NETWORK_CHILD, NETWORK_ADULT, NETWORK_ELDERLY]
 PARAM_LINE_NUMBER = 1
 
 # Construct the executable command
-EXE = "covid19ibm.exe {} {} {} {}".format(
-    TEST_DATA_FILE, PARAM_LINE_NUMBER, DATA_DIR_TEST, TEST_HOUSEHOLD_FILE
-)
+EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)
