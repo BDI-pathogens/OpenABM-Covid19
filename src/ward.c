@@ -22,6 +22,9 @@ void initialise_ward(
 {
     ward->ward_idx = ward_idx;
     ward->type = type;
+
+    ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
+    ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
 }
 
 void set_up_ward_networks( ward* ward )
