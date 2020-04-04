@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """"
 constant.py 
 
@@ -11,7 +12,6 @@ constants from the C code which are used in testing
 
 from os.path import join
 
-
 # Directories
 IBM_DIR = "src"
 IBM_DIR_TEST = "src_test"
@@ -24,7 +24,6 @@ TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
-
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -49,7 +48,7 @@ AGES = [
     AGE_50_59,
     AGE_60_69,
     AGE_70_79,
-    AGE_80,
+    AGE_80
 ]
 
 CHILD = 0
@@ -82,3 +81,5 @@ PARAM_LINE_NUMBER = 1
 EXE = "covid19ibm.exe {} {} {} {}".format(
     TEST_DATA_FILE, PARAM_LINE_NUMBER, DATA_DIR_TEST, TEST_HOUSEHOLD_FILE
 )
+
+command = join(IBM_DIR_TEST, EXE)
