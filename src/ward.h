@@ -45,6 +45,7 @@ struct ward
 
 void initialise_ward( ward*, int, int );
 void set_up_ward_networks( ward* ward );
+void build_ward_networks( ward* ward );
 void destroy_ward( ward* );
 
 #endif /* WARD_H_ */
