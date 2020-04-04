@@ -12,6 +12,8 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 #include "network.h"
+#include "doctor.h"
+#include "nurse.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -28,12 +30,15 @@ struct ward
 
     int beds;
 
-    int max_doctors;
-    int max_nurses;
+    int n_max_doctors;
+    int n_max_nurses;
 
     int n_doctors;
     int n_nurses;
     int n_patients;
+
+    doctor *doctors;
+    nurse  *nurses;
 
     network *doctor_patient_network;
     network *nurse_patient_network;
