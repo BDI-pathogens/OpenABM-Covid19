@@ -10,89 +10,21 @@ Created: March 2020
 Author: p-robot
 """
 
-import subprocess, shutil, os
+import pytest, sys, subprocess, shutil, os
 from os.path import join
 import numpy as np, pandas as pd
-import pytest
 from scipy import optimize
-import sys
+from math import sqrt, log, exp
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-import utilities as utils
-from math import sqrt, log, exp
+
+from . import constant
+from . import utilities as utils
+
 #from test.test_bufio import lengths
 #from CoreGraphics._CoreGraphics import CGRect_getMidX
 
-# Directories
-IBM_DIR       = "src"
-IBM_DIR_TEST  = "src_test"
-DATA_DIR_TEST = "data_test"
-
-TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
-TEST_DATA_FILE     = join(DATA_DIR_TEST, "test_parameters.csv")
-
-TEST_OUTPUT_FILE      = join(DATA_DIR_TEST, "test_output.csv")
-TEST_INDIVIDUAL_FILE  = join(DATA_DIR_TEST, "individual_file_Run1.csv")
-TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
-TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
-
-TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
-TEST_HOUSEHOLD_FILE     = join(DATA_DIR_TEST, "test_household_demographics.csv")
-
-# Age groups
-AGE_0_9   = 0
-AGE_10_19 = 1
-AGE_20_29 = 2
-AGE_30_39 = 3
-AGE_40_49 = 4
-AGE_50_59 = 5
-AGE_60_69 = 6
-AGE_70_79 = 7
-AGE_80    = 8
-AGES = [ AGE_0_9, AGE_10_19, AGE_20_29, AGE_30_39, AGE_40_49, AGE_50_59, AGE_60_69, AGE_70_79, AGE_80 ]
-
-CHILD   = 0
-ADULT   = 1
-ELDERLY = 2
-AGE_TYPES = [ CHILD, CHILD, ADULT, ADULT, ADULT, ADULT, ADULT, ELDERLY, ELDERLY ]
-
-# network type
-HOUSEHOLD = 0
-WORK      = 1
-RANDOM    = 2
-
-# work networks
-NETWORK_0_9   = 0
-NETWORK_10_19 = 1
-NETWORK_20_69 = 2
-NETWORK_70_79 = 3
-NETWORK_80    = 4
-NETWORKS      = [ NETWORK_0_9, NETWORK_10_19, NETWORK_20_69, NETWORK_70_79, NETWORK_80 ]
-
-# work type networks
-NETWORK_CHILD   = 0
-NETWORK_ADULT   = 1
-NETWORK_ELDERLY = 2
-NETWORK_TYPES    = [ NETWORK_CHILD,  NETWORK_ADULT,  NETWORK_ELDERLY]
-
-# infection status
-UNINFECTED      = 0
-PRESYMPTOMATIC  = 1
-ASYMPTOMATIC    = 2
-SYMPTOMATIC     = 3
-HOSPITALISED    = 4
-CRITICAL        = 5
-
-PARAM_LINE_NUMBER = 1
-
-# Construct the executable command
-EXE = "covid19ibm.exe {} {} {} {}".format(TEST_DATA_FILE,
-                                       PARAM_LINE_NUMBER,
-                                       DATA_DIR_TEST, 
-                                       TEST_HOUSEHOLD_FILE)
-
-command = join(IBM_DIR_TEST, EXE)
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -101,6 +33,30 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize(
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
+
+
+# Override setup_covid_methods() in conftest.py
+@pytest.fixture(scope = "function")
+def setup_covid_methods(request):
+    """
+    Called before each method is run; creates a new data dir, copies test datasets
+    """
+    os.mkdir(constant.DATA_DIR_TEST)
+    shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
+    shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
+
+    # Adjust any parameters that need adjusting for all tests
+    params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+    params.set_param("n_total", 10000)
+    params.set_param("end_time", 1)
+    params.write_params(constant.TEST_DATA_FILE)
+    def fin():
+        """
+        At the end of each method (test), remove the directory of test input/output data
+        """
+        shutil.rmtree(constant.DATA_DIR_TEST, ignore_errors=True)
+    request.addfinalizer(fin)
+
        
 class TestClass(object):
     params = {
@@ -162,91 +118,91 @@ class TestClass(object):
         "test_relative_transmission": [
             dict(
                 end_time = 250,
-                transmission_within = HOUSEHOLD,
+                transmission_within = constant.HOUSEHOLD,
                 relative_transmission = "relative_transmission_household",
                 relative_transmission_value = 0
             ),
             dict(
                 end_time = 250,
-                transmission_within = HOUSEHOLD,
+                transmission_within = constant.HOUSEHOLD,
                 relative_transmission = "relative_transmission_household",
                 relative_transmission_value = 0.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = HOUSEHOLD,
+                transmission_within = constant.HOUSEHOLD,
                 relative_transmission = "relative_transmission_household",
                 relative_transmission_value = 1.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = HOUSEHOLD,
+                transmission_within = constant.HOUSEHOLD,
                 relative_transmission = "relative_transmission_household",
                 relative_transmission_value = 2
             ),
             dict(
                 end_time = 250,
-                transmission_within = HOUSEHOLD,
+                transmission_within = constant.HOUSEHOLD,
                 relative_transmission = "relative_transmission_household",
                 relative_transmission_value = 5
             ),
             dict(
                 end_time = 250,
-                transmission_within = WORK,
+                transmission_within = constant.WORK,
                 relative_transmission = "relative_transmission_workplace",
                 relative_transmission_value = 0
             ),
             dict(
                 end_time = 250,
-                transmission_within = WORK,
+                transmission_within = constant.WORK,
                 relative_transmission = "relative_transmission_workplace",
                 relative_transmission_value = 0.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = WORK,
+                transmission_within = constant.WORK,
                 relative_transmission = "relative_transmission_workplace",
                 relative_transmission_value = 1.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = WORK,
+                transmission_within = constant.WORK,
                 relative_transmission = "relative_transmission_workplace",
                 relative_transmission_value = 25
             ),
             dict(
                 end_time = 250,
-                transmission_within = WORK,
+                transmission_within = constant.WORK,
                 relative_transmission = "relative_transmission_workplace",
                 relative_transmission_value = 5
             ),
             dict(
                 end_time = 250,
-                transmission_within = RANDOM,
+                transmission_within = constant.RANDOM,
                 relative_transmission = "relative_transmission_random",
                 relative_transmission_value = 0
             ),
             dict(
                 end_time = 250,
-                transmission_within = RANDOM,
+                transmission_within = constant.RANDOM,
                 relative_transmission = "relative_transmission_random",
                 relative_transmission_value = 0.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = RANDOM,
+                transmission_within = constant.RANDOM,
                 relative_transmission = "relative_transmission_random",
                 relative_transmission_value = 1.5
             ),
             dict(
                 end_time = 250,
-                transmission_within = RANDOM,
+                transmission_within = constant.RANDOM,
                 relative_transmission = "relative_transmission_random",
                 relative_transmission_value = 2
             ),
             dict(
                 end_time = 250,
-                transmission_within = RANDOM,
+                transmission_within = constant.RANDOM,
                 relative_transmission = "relative_transmission_random",
                 relative_transmission_value = 5
             )
@@ -254,22 +210,22 @@ class TestClass(object):
         "test_monoton_relative_transmission": [
             dict(
                 end_time = 250,
-                transmission_NETWORK = HOUSEHOLD,
+                transmission_NETWORK = constant.HOUSEHOLD,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
                 end_time = 250,
-                transmission_NETWORK = WORK,
+                transmission_NETWORK = constant.WORK,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
                 end_time = 250,
-                transmission_NETWORK = RANDOM,
+                transmission_NETWORK = constant.RANDOM,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict( # fluctuating list
                 end_time = 250,
-                transmission_NETWORK = WORK,
+                transmission_NETWORK = constant.WORK,
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ],
@@ -407,49 +363,6 @@ class TestClass(object):
     """
     Test class for checking 
     """
-    @classmethod
-    def setup_class(self):
-        """
-        When the class is instantiated: compile the IBM in a temporary directory
-        """
-        
-        # Make a temporary copy of the code (remove this temporary directory if it already exists)
-        shutil.rmtree(IBM_DIR_TEST, ignore_errors = True)
-        shutil.copytree(IBM_DIR, IBM_DIR_TEST)
-                
-        # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all"
-        completed_compilation = subprocess.run([compile_command], 
-            shell = True, cwd = IBM_DIR_TEST, capture_output = True)
-    
-    @classmethod
-    def teardown_class(self):
-        """
-        Remove the temporary code directory (when this class is removed)
-        """
-        shutil.rmtree(IBM_DIR_TEST, ignore_errors = True)
-    
-    def setup_method(self):
-        """
-        Called before each method is run; creates a new data dir, copies test datasets
-        """
-        os.mkdir(DATA_DIR_TEST)
-        shutil.copy(TEST_DATA_TEMPLATE, TEST_DATA_FILE)
-        shutil.copy(TEST_HOUSEHOLD_TEMPLATE, TEST_HOUSEHOLD_FILE)
-        
-        # Adjust any parameters that need adjusting for all tests
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
-        params.set_param("n_total", 10000)
-        params.set_param("end_time", 1)
-        params.write_params(TEST_DATA_FILE) 
-        
-    def teardown_method(self):
-        """
-        At the end of each method (test), remove the directory of test input/output data
-        """
-        shutil.rmtree(DATA_DIR_TEST, ignore_errors = True)
-        
-        
     def test_transmission_pairs(
         self, 
         n_total,
@@ -458,28 +371,29 @@ class TestClass(object):
         hospitalised_daily_interactions
     ):
         
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions( params, end_time)
         params.set_param( "infectious_rate", infectious_rate )
         params.set_param( "n_total", n_total )
         params.set_param( "end_time", end_time )
         params.set_param( "hospitalised_daily_interactions", hospitalised_daily_interactions )
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        df_trans      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
  
         # check to see that the number of entries in the transmission file is that in the time-series
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
         # check to see whether there are transmission from all infected states
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == PRESYMPTOMATIC ) > 0, True, "no transmission from presymptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == SYMPTOMATIC )    > 0, True, "no transmission from symptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == ASYMPTOMATIC )   > 0, True, "no transmission from asymptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == HOSPITALISED )   > 0, True, "no transmission from hospitalised people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == CRITICAL )       > 0, True, "no transmission from critical people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.PRESYMPTOMATIC ) > 0, True, "no transmission from presymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.SYMPTOMATIC )    > 0, True, "no transmission from symptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.ASYMPTOMATIC )   > 0, True, "no transmission from asymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.HOSPITALISED )   > 0, True, "no transmission from hospitalised people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.CRITICAL )       > 0, True, "no transmission from critical people" )
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "infector_infected_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
@@ -494,13 +408,13 @@ class TestClass(object):
         np.testing.assert_equal( max( df_trans[ "infector_infected_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
 
         # check that some people are infected across all networks
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == HOUSEHOLD ) > 0, True, "no transmission on the household network" )
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == WORK )      > 0, True, "no transmission on the work network" )
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == RANDOM )    > 0, True, "no transmission on the random network" )
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
 
         # check hospitalised people are not transmitting on the work and household networks
-        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == HOUSEHOLD ) & ( df_trans[ "infector_status" ] == HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
-        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == WORK ) &      ( df_trans[ "infector_status" ] == HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == constant.HOUSEHOLD ) & ( df_trans[ "infector_status" ] == HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == constant.WORK ) &      ( df_trans[ "infector_status" ] == constant.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
 
         
     def test_exponential_growth_homogeneous_random(
@@ -524,7 +438,7 @@ class TestClass(object):
         fraction_2 = 0.05
         tolerance  = 0.05
         
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_homogeneous_random_network_only(params,n_connections,end_time)
         params.set_param( "infectious_rate", infectious_rate )
         params.set_param( "mean_infectious_period", mean_infectious_period )
@@ -533,12 +447,12 @@ class TestClass(object):
         params.set_param( "n_total", n_total ) 
         params.set_param( "rng_seed", 2 ) 
         params.set_param( "random_interaction_distribution", 0 );
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)     
                 
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)      
-        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)      
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         df_ts         = df_output.loc[ :, ["Time", "total_infected"]]
 
         # calculate the rate exponential rate of grwoth from the model
@@ -575,22 +489,23 @@ class TestClass(object):
         """
         tolerance = 0.1
 
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
 #       Run for even relative transmissions
         params.set_param( "end_time", end_time )
         params.set_param( "relative_transmission_household", 1 )
         params.set_param( "relative_transmission_workplace", 1 )
         params.set_param( "relative_transmission_random", 1 )
-        params.write_params(TEST_DATA_FILE)
+        params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_trans_even      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_trans_even      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
 
         # calculating the weighted ratio
-        len_household = len( df_trans_even[ df_trans_even[ "infector_network" ] == HOUSEHOLD ] )
-        len_work = len( df_trans_even[ df_trans_even[ "infector_network" ] == WORK ] )
-        len_random = len( df_trans_even[ df_trans_even[ "infector_network" ] == RANDOM ] )
+        len_household = len( df_trans_even[ df_trans_even[ "infector_network" ] == constant.HOUSEHOLD ] )
+        len_work = len( df_trans_even[ df_trans_even[ "infector_network" ] == constant.WORK ] )
+        len_random = len( df_trans_even[ df_trans_even[ "infector_network" ] == constant.RANDOM ] )
         lengths = [int(len_household), int(len_work), int(len_random)]
         lengths[transmission_within] = lengths[transmission_within] * relative_transmission_value
         all_trans_even = sum(lengths)
@@ -598,20 +513,20 @@ class TestClass(object):
 
 #       Run for the scaled relative transmission
         params.set_param(relative_transmission , relative_transmission_value )
-        params.write_params(TEST_DATA_FILE)
+        params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)
-        df_trans      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
 
-        all_trans = len( df_trans[ df_trans[ "infector_network" ] == HOUSEHOLD ] ) + \
-                    len( df_trans[ df_trans[ "infector_network" ] == WORK ] ) + \
-                    len( df_trans[ df_trans[ "infector_network" ] == RANDOM ] )
+        all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
+                    len( df_trans[ df_trans[ "infector_network" ] == constant.WORK ] ) + \
+                    len( df_trans[ df_trans[ "infector_network" ] == constant.RANDOM ] )
         ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_within ].shape[0] ) / float(all_trans)
 
         # check the proportion of the infections
         np.testing.assert_allclose( ratio_new , ratio_even, atol = tolerance)
-
 
         
     def test_monoton_relative_transmission(
@@ -631,22 +546,23 @@ class TestClass(object):
         # calculate the transmission proportions for the first entry in the relative_transmission_values
         rel_trans_value_current = relative_transmission_values[0]
         
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "relative_transmission_household", 1 )
         params.set_param( "relative_transmission_workplace", 1 )
         params.set_param( "relative_transmission_random", 1 )
         params.set_param( relative_transmission , rel_trans_value_current )
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-        df_trans_current = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
         
         # calculating the first ratio
-        len_household = len( df_trans_current[ df_trans_current[ "infector_network" ] == HOUSEHOLD ] )
-        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == WORK ] ) 
-        len_random = len( df_trans_current[ df_trans_current[ "infector_network" ] == RANDOM ] )
+        len_household = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.HOUSEHOLD ] )
+        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.WORK ] ) 
+        len_random = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.RANDOM ] )
         lengths = [int(len_household), int(len_work), int(len_random)]
         all_trans_current = sum(lengths)
         ratio_current = float( df_trans_current[ df_trans_current[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans_current) 
@@ -654,15 +570,16 @@ class TestClass(object):
         # calculate the transmission proportion for the rest and compare with the current
         for relative_transmission_value in relative_transmission_values[1:]:
             params.set_param(relative_transmission , relative_transmission_value )
-            params.write_params(TEST_DATA_FILE)     
+            params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-            df_trans      = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+            df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+                comment = "#", sep = ",", skipinitialspace = True )
             
-            all_trans = len( df_trans[ df_trans[ "infector_network" ] == HOUSEHOLD ] ) + \
-                        len( df_trans[ df_trans[ "infector_network" ] == WORK ] ) + \
-                        len( df_trans[ df_trans[ "infector_network" ] == RANDOM ] )
+            all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
+                        len( df_trans[ df_trans[ "infector_network" ] == constant.WORK ] ) + \
+                        len( df_trans[ df_trans[ "infector_network" ] == constant.RANDOM ] )
             ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans)
     
             # check the proportion of the transmissions
@@ -676,7 +593,6 @@ class TestClass(object):
             # refresh current values
             ratio_current = ratio_new
             rel_trans_value_current = relative_transmission_value
-    
     
     
     def test_monoton_fraction_asymptomatic(
@@ -699,7 +615,7 @@ class TestClass(object):
         """
         
         # calculate the total infections for the first entry in the fraction_asymptomatic values
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "fraction_asymptomatic_0_9", fraction_asymptomatic_0_9[0] )
         params.set_param( "fraction_asymptomatic_10_19", fraction_asymptomatic_10_19[0] )
@@ -710,11 +626,11 @@ class TestClass(object):
         params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[0] )
         params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[0] )
         params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[0] )
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         # calculate the sum of fraction_asymptomatic for different age groups
         fraction_asymptomatic_current = fraction_asymptomatic_0_9[0] + \
@@ -739,11 +655,12 @@ class TestClass(object):
             params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[idx] )
             params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[idx] )
             params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[idx] )
-            params.write_params(TEST_DATA_FILE)     
+            params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-            df_output_new     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command], 
+                stdout = file_output, shell = True)     
+            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
             
             fraction_asymptomatic_new = fraction_asymptomatic_0_9[idx] + \
                                         fraction_asymptomatic_10_19[idx] + \
@@ -769,7 +686,6 @@ class TestClass(object):
             total_infected_current = total_infected_new
         
         
-        
     def test_monoton_asymptomatic_infectious_factor(
             self,
             end_time,
@@ -782,14 +698,14 @@ class TestClass(object):
         """
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[0] )
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         # save the current asymptomatic_infectious_factor value
         asymptomatic_infectious_factor_current = asymptomatic_infectious_factor[0]
@@ -797,12 +713,12 @@ class TestClass(object):
         
         # calculate the total infections for the rest and compare with the current
         for idx in range(1, len(asymptomatic_infectious_factor)):
-            params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[idx] )
-            params.write_params(TEST_DATA_FILE)     
+            params.set_param("asymptomatic_infectious_factor", asymptomatic_infectious_factor[idx])
+            params.write_params(constant.TEST_DATA_FILE)
     
-            file_output   = open(TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-            df_output_new     = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
             
             asymptomatic_infectious_factor_new = asymptomatic_infectious_factor[idx]
             total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
@@ -842,7 +758,7 @@ class TestClass(object):
         """
         tolerance = 0.00001
         # set the first parameters
-        params = ParameterSet(TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "relative_susceptibility_0_9", relative_susceptibility_0_9[0] )
         params.set_param( "relative_susceptibility_10_19", relative_susceptibility_10_19[0] )
@@ -853,12 +769,12 @@ class TestClass(object):
         params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[0] )
         params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[0] )
         params.set_param( "relative_susceptibility_80", relative_susceptibility_80[0] )
-        params.write_params(TEST_DATA_FILE)     
+        params.write_params(constant.TEST_DATA_FILE)     
 
         # get the current output
-        file_output   = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-        df_trans_current = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         
         # calculate the proportion of infections in each age group
         infected_current = df_trans_current.groupby( "age_group" ).count()["ID"].values
@@ -886,11 +802,12 @@ class TestClass(object):
             params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[idx] )
             params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[idx] )
             params.set_param( "relative_susceptibility_80", relative_susceptibility_80[idx] )
-            params.write_params(TEST_DATA_FILE)     
+            params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([command], stdout = file_output, shell = True)     
-            df_trans_new = pd.read_csv(TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+            df_trans_new = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+                comment = "#", sep = ",", skipinitialspace = True )
             
             relative_susceptibility_new = [ relative_susceptibility_0_9[idx],
                                             relative_susceptibility_10_19[idx],
