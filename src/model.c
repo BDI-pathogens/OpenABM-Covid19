@@ -190,7 +190,7 @@ void set_up_networks( model *model )
 
 	//Set up networks for hospital worker interactions.
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
-        set_up_hospital_network( model, idx );
+        set_up_hospital_networks( model );
 
 
     //allocate hcw -> patient networks' memory
@@ -625,26 +625,26 @@ void build_random_network( model *model )
 *  Name:		build_hospital_network
 *  Description: Builds all the doctor / nurse -> patients networks
 ******************************************************************************************/
-void build_hospital_networks( model *model, int hospital_idx )
-{
-    hospital *hospital = &(model->hospitals[hospital_idx]);
-    //doctor general patients network
-    build_hcw_patient_network( model, model->doctor_patients_network[hospital_idx], hospital->general_patient_pdxs,
-                               hospital->doctor_pdxs, hospital->n_total_general_patients, hospital->n_total_doctors,
-                               model->params->general_patient_doctor_required_interactions );
-    //nurse general patients network
-    build_hcw_patient_network( model, model->nurse_patients_network[hospital_idx], hospital->general_patient_pdxs,
-                               hospital->nurse_pdxs, hospital->n_total_general_patients, hospital->n_total_nurses,
-                               model->params->general_patient_nurse_required_interactions );
-    //doctor icu patients network
-    build_hcw_patient_network( model, model->doctor_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
-                               hospital->doctor_pdxs, hospital->n_total_icu_patients, hospital->n_total_doctors,
-                               model->params->icu_patient_doctor_required_interactions );
-    //nurse icu patients network
-    build_hcw_patient_network( model, model->nurse_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
-                               hospital->nurse_pdxs, hospital->n_total_icu_patients, hospital->n_total_nurses,
-                               model->params->icu_patient_nurse_required_interactions );
-}
+//void build_hospital_networks( model *model, int hospital_idx )
+//{
+//    hospital *hospital = &(model->hospitals[hospital_idx]);
+//    //doctor general patients network
+//    build_hcw_patient_network( model, model->doctor_patients_network[hospital_idx], hospital->general_patient_pdxs,
+//                               hospital->doctor_pdxs, hospital->n_total_general_patients, hospital->n_total_doctors,
+//                               model->params->general_patient_doctor_required_interactions );
+//    //nurse general patients network
+//    build_hcw_patient_network( model, model->nurse_patients_network[hospital_idx], hospital->general_patient_pdxs,
+//                               hospital->nurse_pdxs, hospital->n_total_general_patients, hospital->n_total_nurses,
+//                               model->params->general_patient_nurse_required_interactions );
+//    //doctor icu patients network
+//    build_hcw_patient_network( model, model->doctor_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
+//                               hospital->doctor_pdxs, hospital->n_total_icu_patients, hospital->n_total_doctors,
+//                               model->params->icu_patient_doctor_required_interactions );
+//    //nurse icu patients network
+//    build_hcw_patient_network( model, model->nurse_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
+//                               hospital->nurse_pdxs, hospital->n_total_icu_patients, hospital->n_total_nurses,
+//                               model->params->icu_patient_nurse_required_interactions );
+//}
 
 /*****************************************************************************************
 *  Name:		add_interactions_from_network
