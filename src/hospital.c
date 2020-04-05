@@ -62,12 +62,8 @@ void set_up_hospital_networks( hospital* hospital )
     healthcare_workers = calloc( hospital->n_total_doctors + hospital->n_total_nurses, sizeof(long) );
 
     //setup hcw -> patient networks for all wards
-    hospital->wards_networks = calloc( N_HOSPITAL_WARD_TYPES, sizeof(network*) );
-
     for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
-        hospital->wards_networks[N_HOSPITAL_WARD_TYPES] = calloc( hospital->n_wards[ward_type], sizeof(network*) );
-
         for( ward_idx = 0; ward_idx < hospital->n_wards[N_HOSPITAL_WARD_TYPES]; ward_idx++ )
         {
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_doctors; idx++ )
