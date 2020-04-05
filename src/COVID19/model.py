@@ -191,7 +191,7 @@ class Model:
         results["n_tests"] = covid19.util_n_daily(
             self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
         )
-        results["n_sysmptoms"] = covid19.util_n_current(
+        results["n_symptoms"] = covid19.util_n_current(
             self.c_model, covid19.SYMPTOMATIC
         )
         results["n_hospital"] = covid19.util_n_current(
