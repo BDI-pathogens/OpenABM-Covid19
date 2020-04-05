@@ -634,7 +634,6 @@ void transition_events(
 
 	for( idx = 0; idx < n_events; idx++ )
 	{
-
 		event      = next_event;
 		next_event = event->next;
 		indiv      = event->individual;

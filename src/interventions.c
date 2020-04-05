@@ -93,7 +93,7 @@ void set_up_trace_tokens( model *model )
 *  Description: gets a new trace token
 *  Returns:		void
 ******************************************************************************************/
-trace_token* new_trace_token( model *model, individual *indiv )
+trace_token* new_trace_token( model *model, individual *indiv, int contact_time )
 {
 	trace_token *token = model->next_trace_token;
 
@@ -103,7 +103,11 @@ trace_token* new_trace_token( model *model, individual *indiv )
 	token->next = NULL;
 	token->next_index = NULL;
 	token->individual = indiv;
+	token->days_since_contact = model->time - contact_time;
 	model->n_trace_tokens_used++;
+
+	if( model->n_trace_tokens == model->n_trace_tokens_used)
+		print_exit( "run out of trace tokens");
 
 	return token;
 }
@@ -118,7 +122,7 @@ trace_token* new_trace_token( model *model, individual *indiv )
 trace_token* index_trace_token( model *model, individual *indiv )
 {
 	if( indiv->index_trace_token == NULL )
-		indiv->index_trace_token = new_trace_token( model, indiv );
+		indiv->index_trace_token = new_trace_token( model, indiv, model->time );
 
 	indiv->traced_on_this_trace = TRUE;
 
@@ -189,7 +193,8 @@ void intervention_quarantine_until(
 	individual *indiv,
 	int time,
 	int maxof,
-	trace_token *index_token
+	trace_token *index_token,
+	int contact_time
 )
 {
 	if( indiv->traced_on_this_trace )
@@ -201,7 +206,7 @@ void intervention_quarantine_until(
 	if( index_token != NULL )
 	{
 		// add the trace token to their list
-		trace_token *token = new_trace_token( model, indiv );
+		trace_token *token = new_trace_token( model, indiv, contact_time );
 
 		if( indiv->trace_tokens != NULL )
 		{
@@ -344,10 +349,8 @@ void intervention_notify_contacts(
 	int idx, ddx, day, n_contacts;
 
 	day = model->interaction_day_idx;
-	for( ddx = 0; ddx < params->quarantine_days - 1; ddx++ )
-		ring_dec( day, model->params->days_of_interactions );
 
-	for( ddx = params->quarantine_days - 1; ddx >=0; ddx-- )
+	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
 	{
 		n_contacts = indiv->n_interactions[day];
 
@@ -367,7 +370,7 @@ void intervention_notify_contacts(
 				inter = inter->next;
 			}
 		}
-		ring_inc( day, model->params->days_of_interactions );
+		ring_dec( day, model->params->days_of_interactions );
 	}
 }
 
@@ -442,7 +445,8 @@ void intervention_quarantine_household(
 	individual *indiv,
 	int time,
 	int contact_trace,
-	trace_token *index_token
+	trace_token *index_token,
+	int contact_time
 )
 {
 	individual *contact;
@@ -457,7 +461,7 @@ void intervention_quarantine_household(
 		if( members[idx] != indiv->idx )
 		{
 			contact = &(model->population[members[idx]]);
-			intervention_quarantine_until( model, contact, time_event, TRUE, index_token );
+			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
 				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
@@ -487,10 +491,10 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		trace_token *index_token = index_trace_token( model, indiv );
 
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL );
+		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
 
 		if( params->quarantine_household_on_symptoms )
-			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token );
+			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, model->time );
 
 		if( params->test_on_symptoms )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
@@ -538,11 +542,11 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( !is_in_hospital( indiv ) )
 	{
 		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL );
+		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
 	}
 
 	if( params->quarantine_household_on_positive )
-		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token );
+		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token, model->time );
 
 	if( params->trace_on_positive && ( params->quarantine_on_traced || params->test_on_traced ) )
 		intervention_notify_contacts( model, indiv, 1, index_token );
@@ -592,10 +596,10 @@ void intervention_on_traced(
 	if( params->quarantine_on_traced )
 	{
 		int time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, index_token );
+		intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time );
 
 		if( params->quarantine_household_on_traced )
-			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token );
+			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, contact_time );
 	}
 
 	if( params->test_on_traced )
