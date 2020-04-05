@@ -50,7 +50,6 @@ struct hospital
     //ward related stuff
     int *n_wards;
     ward **wards;
-    network **wards_networks;
 };
 
 /************************************************************************/
