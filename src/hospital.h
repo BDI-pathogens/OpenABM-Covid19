@@ -59,10 +59,10 @@ struct hospital
 
 void initialise_hospital( hospital*, parameters*, int );
 void set_up_hospital_networks( hospital* );
+void build_hospital_networks( model *model, hospital *hospital );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int healthcare_worker_working(individual* indiv);
 void add_patient_to_hospital(hospital *hospital, long pdx, int type);
-void build_hcw_patient_network( model *model, network *network, long *patient_pdxs, long *worker_pdxs, int n_patients, int total_workers, int patient_required_interactions);
 void destroy_hospital( hospital* );
 
 #endif /* HOSPITAL_H_ */
