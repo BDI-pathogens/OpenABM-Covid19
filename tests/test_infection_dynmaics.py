@@ -453,12 +453,12 @@ class TestClass(object):
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)      
         df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        df_ts         = df_output.loc[ :, ["Time", "total_infected"]]
+        df_ts         = df_output.loc[ :, ["time", "total_infected"]]
 
         # calculate the rate exponential rate of grwoth from the model
         ts_1  = df_ts[ df_ts[ "total_infected" ] > ( n_total * fraction_1 ) ].min() 
         ts_2  = df_ts[ df_ts[ "total_infected" ] > ( n_total * fraction_2 ) ].min() 
-        slope = ( log( ts_2[ "total_infected"]) - log( ts_1[ "total_infected"]) ) / ( ts_2[ "Time" ] - ts_1[ "Time" ] )
+        slope = ( log( ts_2[ "total_infected"]) - log( ts_1[ "total_infected"]) ) / ( ts_2[ "time" ] - ts_1[ "time" ] )
         
         # this is an analytical approximation in the limit of large 
         # mean_infectious_rate, but works very well for most values
