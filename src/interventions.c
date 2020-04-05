@@ -461,6 +461,10 @@ void intervention_quarantine_household(
 		if( members[idx] != indiv->idx )
 		{
 			contact = &(model->population[members[idx]]);
+
+			if( contact->status == DEATH || is_in_hospital( contact ) )
+				continue;
+
 			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
