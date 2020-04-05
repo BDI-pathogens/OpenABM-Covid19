@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	printf("# rng_seed: %li\n", params.rng_seed);
 	printf("# param_line_number: %d\n", params.param_line_number);
 	
-	printf( "Time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
+	printf( "time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
 		printf( "%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
