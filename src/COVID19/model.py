@@ -4,11 +4,11 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
-class ModelParamaterException(Exception):
+class ModelParameterException(Exception):
     pass
 
 
-class ParamaterException(Exception):
+class ParameterException(Exception):
     pass
 
 PYTHON_SAFE_UPDATE_PARAMS = [
@@ -55,7 +55,7 @@ class Parameters(object):
             param {[str]} -- [name of parameters]
         
         Raises:
-            ParamaterException: [description]
+            ParameterException: [description]
         
         Returns:
             [type] -- [value of param]
@@ -63,8 +63,8 @@ class Parameters(object):
         try:
             return getattr(self.c_params, param)
         except AttributeError:
-            raise ParamaterException(
-                f"Can not get param {param} as it doesn't exist in paramaters object"
+            raise ParameterException(
+                f"Can not get param {param} as it doesn't exist in parameters object"
             )
 
     def set_param(self, param, value):
@@ -75,11 +75,11 @@ class Parameters(object):
             value {[float or int]} -- [value]
         
         Raises:
-            ParamaterException: 
+            ParameterException: 
         """
         if self.update_lock:
-            raise ParamaterException(
-                f"Paramater set has been exported to model, please use model.update_x functions"
+            raise ParameterException(
+                f"Parameter set has been exported to model, please use model.update_x functions"
             )
         
         if hasattr(self.c_params, param ):
@@ -88,7 +88,7 @@ class Parameters(object):
             elif isinstance(getattr(self.c_params, param), float):
                 setattr(self.c_params, param, float(value))
         else:
-            raise ParamaterException(f"Can not set paramater as it doesn't exist")
+            raise ParameterException(f"Can not set parameter as it doesn't exist")
 
     def return_param_object(self):
         """[summary]
@@ -98,7 +98,7 @@ class Parameters(object):
         """
         covid19.check_params(self.c_params)
         LOGGER.info(
-            "Returning self.c_params into Model object, future updates to paramaters not possible"
+            "Returning self.c_params into Model object, future updates to parameters not possible"
         )
         self.update_lock = True
         return self.c_params
@@ -118,7 +118,7 @@ class Model:
             name {[str]} -- [name of param]
         
         Raises:
-            ModelParamaterException: [description]
+            ModelParameterException: [description]
         
         Returns:
             [type] -- [value of param stored]
@@ -130,7 +130,7 @@ class Model:
             else:
                 return value
         except AttributeError:
-            raise ModelParamaterException("Parameter {param} not found")
+            raise ModelParameterException("Parameter {param} not found")
 
     def update_running_params(self, param, value):
         """[summary]
@@ -140,18 +140,18 @@ class Model:
             value {[type]} -- [value to set]
         
         Raises:
-            ModelParamaterException: [description]
-            ModelParamaterException: [description]
-            ModelParamaterException: [description]
+            ModelParameterException: [description]
+            ModelParameterException: [description]
+            ModelParameterException: [description]
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
-            raise ModelParamaterException(f"Can not update {param} during running")
+            raise ModelParameterException(f"Can not update {param} during running")
         setter = getattr(covid19, f"set_param_{param}")
         if callable(setter):
             if not setter(self.c_model, value):
-                raise ModelParamaterException(f"Setting {param} to {value} failed")
+                raise ModelParameterException(f"Setting {param} to {value} failed")
         else:
-            raise ModelParamaterException(f"Setting {param} to {value} failed")
+            raise ModelParameterException(f"Setting {param} to {value} failed")
 
     def _create(self):
         """
