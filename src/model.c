@@ -720,19 +720,18 @@ void build_daily_network( model *model )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
-	// Tom: Build random network might do for building the hospital network, or do we want the same doctors/nurses associated
-	// with the same patients? In either case, I should probably define a new hospital function.
 	build_random_network( model );
-    //kelvin change: would add rebuilding of a hospital network here
-	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
+
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_networks( model, &(model->hospitals[idx]) );
+
+    //TODO: add interactions from hospital networks
+
+    add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
-
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_networks( model, idx );
-
 };
 
 /*****************************************************************************************

@@ -6,6 +6,7 @@
  */
 
 #include "doctor.h"
+#include "constant.h"
 
 /*****************************************************************************************
 *  Name:		initialize_hospital
