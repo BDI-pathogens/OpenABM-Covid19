@@ -40,7 +40,7 @@ void set_up_transition_times_intervention( model *model )
 ******************************************************************************************/
 void set_up_app_users( model *model, double target )
 {
-	long idx, jdx, current_users, not_users, max_user, total;
+	long idx, jdx, current_users, not_users, max_user;
 
 	current_users = 0;
 	for( idx = 0; idx < model->params->n_total; idx++ )
