@@ -1,6 +1,0 @@
-<map id="event_list" name="event_list">
-<area shape="rect" id="node1" title=" " alt="" coords="5,147,83,172"/>
-<area shape="rect" id="node2" href="$structevent.html" title=" " alt="" coords="91,6,144,31"/>
-<area shape="rect" id="node3" href="$structindividual.html" title=" " alt="" coords="175,147,252,172"/>
-<area shape="rect" id="node4" href="$structinteraction.html" title=" " alt="" coords="171,233,254,259"/>
-</map>

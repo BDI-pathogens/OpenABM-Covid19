@@ -45,7 +45,7 @@ model* new_model( parameters *params )
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
-	//TOM: EVENT CONTROL HERE//
+	//TOM: EVENT CONTROL HERE// -- Set up event list for each of the events listed in the EVENT_TYPES enum.
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
@@ -59,8 +59,8 @@ model* new_model( parameters *params )
 	set_up_interactions( model_ptr );
 
     //TOM: EVENT CONTROL HERE//
-	set_up_events( model_ptr );
-	set_up_transition_times( model_ptr );
+	set_up_events( model_ptr ); // TOM: Has int number - is this for the types of events?
+	set_up_transition_times( model_ptr ); // TOM: Unsure if transition times are needed for hospital events. Could get rid of transition types I added.
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
     //TOM: EVENT CONTROL HERE//
@@ -260,7 +260,7 @@ void set_up_work_network( model *model, int network )
 void set_up_events( model *model )
 {
 	long idx;
-	int types = 6;// TOM: Are these the types of events?
+	int types = 6; // TOM: Are these the types of events or for the infectiousness curves?
 	parameters *params = model->params;
 
 	model->events     = calloc( types * params->n_total, sizeof( event ) );
@@ -902,12 +902,15 @@ int one_time_step( model *model )
 	transition_events( model, DEATH,        &transition_to_death,        FALSE );
     //TOM: DISEASE EVENT CONTROL HERE//
 
+    //TODO: WHEN WE PUT IN BED CAPACITY, WE'LL NEED TO CHECK FOR PEOPLE WHO HAVEN'T SUCCESSFULLY TRANSFERRED OVER
+    //TODO: TO THE CORRECT WARD, THEN HAVE THEM UPDATE THE EVENTS.
+
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
-    transition_events( model, NOT_IN_HOSPITAL, &transition_to_populace, FALSE );
+    transition_events( model, DISCHARGED,      &transition_to_populace, FALSE );
     //TOM: HOSPITAL EVENT CONTROL HERE//
 
 	flu_infections( model );
