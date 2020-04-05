@@ -23,6 +23,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
+#include "hospital.h"
+
 /*****************************************************************************************
 *  Name:		set_up_transition_times
 *  Description: sets up discrete distributions for the times it takes to
@@ -220,8 +222,6 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, ASYMPTOMATIC );
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
-
-    //TODO: kelvin change - we could add the non-network hospital transmissions here
 }
 
 /*****************************************************************************************
@@ -294,8 +294,10 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
+	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
+	    transition_one_hospital_event(model, indiv, NOT_IN_HOSPITAL, WAITING, NOT_IN_HOSPITAL_WAITING);
+	}
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 
@@ -311,10 +313,23 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
-		transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
-	else
-		transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
+	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) ) {
+        transition_one_disese_event(model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL);
+        if (indiv->hospital_location == GENERAL)
+            transition_one_hospital_event(model, indiv, GENERAL, ICU, GENERAL_ICU);
+        else
+            transition_one_hospital_event(model, indiv, WAITING, ICU, WAITING_ICU);
+    }
+
+	else {
+        transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);
+        if  ( indiv->hospital_location == GENERAL )
+            transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, GENERAL_DISCHARGED);
+        else if ( indiv->hospital_location == ICU )
+            transition_one_hospital_event( model, indiv, ICU, DISCHARGED, ICU_DISCHARGED);
+        else
+            transition_one_hospital_event( model, indiv, WAITING, RECOVERED, WAITING_DISCHARGED);
+    }
 
 	if( indiv->quarantined )
 		intervention_quarantine_release( model, indiv );
@@ -331,10 +346,24 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
-		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) ) {
+        transition_one_disese_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH);
+        if ( indiv->hospital_location == GENERAL )
+            transition_one_hospital_event(model, indiv, GENERAL, MORTUARY, GENERAL_MORTUARY);
+        else if ( indiv->hospital_location == ICU )
+            transition_one_hospital_event(model, indiv, ICU, MORTUARY, ICU_MORTUARY);
+        else
+            transition_one_hospital_event(model, indiv, WAITING, MORTUARY, WAITING_MORTUARY);
+    }
+
 	else
 		transition_one_disese_event( model, indiv, CRITICAL, RECOVERED, CRITICAL_RECOVERED );
+	    if ( indiv->hospital_location == GENERAL)
+            transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, GENERAL_DISCHARGED );
+	    else if ( indiv->hospital_location == ICU )
+	        transition_one_hospital_event( model, indiv, ICU, DISCHARGED, ICU_DISCHARGED );
+	    else
+            transition_one_hospital_event(model, indiv, WAITING, MORTUARY, WAITING_DISCHARGED );
 
 	intervention_on_critical( model, indiv );
 }

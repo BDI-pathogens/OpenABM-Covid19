@@ -189,7 +189,8 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	update_random_interactions( indiv, params );
+	//TOM: Removing -> interactions should now be handled by hospitalisation.
+	//update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -223,6 +224,57 @@ void set_case( individual *indiv, int time )
 {
 	indiv->is_case   = TRUE;
 	indiv->time_event[CASE] = time;
+}
+
+/*****************************************************************************************
+*  Name:		set_waiting
+*  Description: sets a person to be added to the hospital waiting list
+*  Returns:		void
+******************************************************************************************/
+void set_waiting( individual *indiv, int time )
+{
+    indiv->hospital_location = WAITING;
+}
+
+/*****************************************************************************************
+*  Name:		set_general_admission
+*  Description: sets a person to be added to a general ward
+*  Returns:		void
+******************************************************************************************/
+void set_general_admission( individual *indiv, int time )
+{
+    indiv->hospital_location = GENERAL;
+
+}
+
+/*****************************************************************************************
+*  Name:		set_icu_admission
+*  Description: sets a person to be added to an ICU
+*  Returns:		void
+******************************************************************************************/
+void set_icu_admission( individual *indiv, int time )
+{
+    indiv->hospital_location = ICU;
+}
+
+/*****************************************************************************************
+*  Name:		set_mortuary_admission
+*  Description: sets a dead person to be added to the mortuary
+*  Returns:		void
+******************************************************************************************/
+void set_mortuary_admission( individual *indiv, int time )
+{
+    indiv->hospital_location = MORTUARY;
+}
+
+/*****************************************************************************************
+*  Name:		set_mortuary_admission
+*  Description: sets a recovered person to be discharged from the hospital.
+*  Returns:		void
+******************************************************************************************/
+void set_discharged( individual *indiv, int time )
+{
+    indiv->hospital_location = DISCHARGED;
 }
 
 /*****************************************************************************************

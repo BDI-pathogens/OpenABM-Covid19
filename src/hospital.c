@@ -10,6 +10,7 @@
 #include "utilities.h"
 #include "network.h"
 #include "model.h"
+#include "disease.h"
 
 /*****************************************************************************************
 *  Name:		initialize_hospital
@@ -111,15 +112,15 @@ void transition_one_hospital_event(
 
     if( from != NO_EVENT )
         indiv->time_event[from] = model->time;
-    if( indiv->current_disease_event != NULL )
-        remove_event_from_event_list( model, indiv->current_disease_event );
-    if( indiv->next_disease_event != NULL )
-        indiv->current_disease_event = indiv->next_disease_event;
+    if( indiv->current_hospital_event != NULL )
+        remove_event_from_event_list( model, indiv->current_hospital_event );
+    if( indiv->next_hospital_event != NULL )
+        indiv->current_hospital_event = indiv->next_hospital_event;
 
     if( to != NO_EVENT )
     {
         indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0,
-                sample_transition_time( model, edge ) );
+                sample_transition_time( model, edge ) );  // TOM: PROBABLY NEEDS SOME PARAMETERISATION HERE?
         indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
     }
 }
@@ -131,18 +132,23 @@ void transition_one_hospital_event(
 *               At the moment - severely symptomatic refers to HOSPITALISED individuals.
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_waiting( model *model, individual *indiv ) {
-
+void transition_to_waiting( model *model, individual *indiv )
+{
+    set_waiting( indiv, 1 );
+    update_random_interactions( indiv, model->params );
+    //TODO: How to handle interactions for severely ill patients? Could just assume at this point they're too ill to go outside.
 }
 /*****************************************************************************************
 *  Name:		transition_to_general
 *  Description: Transitions a severely symptomatic individual from the admissions list to a
-*               general ward TODO: or a recovering patient from the ICU to a general ward.
+*               general ward.
 *               This only occurs if there is enough space in the general wards.
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_general( model *model, individual *indiv ) {
-
+void transition_to_general( model *model, individual *indiv )
+{
+    //TODO: CHECK FOR BED AVAILABILITY HERE.
+    set_general_admission( indiv, 1 );
 }
 /*****************************************************************************************
 *  Name:		transition_to_ICU
@@ -151,8 +157,10 @@ void transition_to_general( model *model, individual *indiv ) {
 *               the ICU.
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_icu( model *model, individual *indiv ) {
-
+void transition_to_icu( model *model, individual *indiv )
+{
+    //TODO: CHECK FOR BED AVAILABILITY HERE.
+    set_icu_admission( indiv, 1 );
 }
 /*****************************************************************************************
 *  Name:		transition_to_mortuary
@@ -160,8 +168,10 @@ void transition_to_icu( model *model, individual *indiv ) {
 *               into a "morutary" to free space for new patients.
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_mortuary( model *model, individual *indiv ) {
-
+void transition_to_mortuary( model *model, individual *indiv )
+{
+    set_mortuary_admission( indiv, 1 );
+    transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
 }
 /*****************************************************************************************
 *  Name:		transition_to_populace
@@ -169,7 +179,10 @@ void transition_to_mortuary( model *model, individual *indiv ) {
 *               back into the general population.
 *  Returns:		void
 ******************************************************************************************/
-void transition_to_populace( model *model, individual *indiv ) {
-
+void transition_to_populace( model *model, individual *indiv )
+{
+    set_discharged( indiv, 1 );
+    transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
+    update_random_interactions( indiv, model->params ); //TODO: RESET INTERACTIONS UPON DISCHARGE.
 }
 
