@@ -57,6 +57,8 @@ int healthcare_worker_working(individual* indiv);
 void add_patient_to_hospital(hospital *hospital, long pdx, int type);
 void destroy_hospital( hospital* );
 
+void transition_one_hospital_event( model *model, individual *indiv, int from, int to, int edge );
+
 void transition_to_waiting( model *model, individual *indiv );
 void transition_to_general( model *model, individual *indiv );
 void transition_to_icu( model *model, individual *indiv );

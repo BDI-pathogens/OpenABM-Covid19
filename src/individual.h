@@ -88,6 +88,11 @@ void set_hospitalised( individual*, parameters*, int );
 void set_critical( individual*, parameters*, int );
 void set_dead( individual*, parameters*, int );
 void set_case( individual*, int );
+void set_waiting ( individual*, int );
+void set_general_admission( individual*, int );
+void set_icu_admission( individual*, int );
+void set_mortuary_admission(individual*, int);
+void set_discharged(individual*, int);
 void update_random_interactions( individual*, parameters* );
 
 void destroy_individual( individual* );
