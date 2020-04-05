@@ -20,7 +20,7 @@ from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import Model, Parameters, ModelParamaterException
+from model import Model, Parameters, ModelParameterException
 
 from . import constant
 from . import utilities as utils
@@ -154,9 +154,9 @@ class TestClass(object):
             np.testing.assert_equal(model.get_param("self_quarantine_fraction"), 1)
 
             # Try to set/get invalid parameters
-            with pytest.raises(ModelParamaterException):
+            with pytest.raises(ModelParameterException):
                 model.update_running_params("wrong_parameter", 1)
 
-            with pytest.raises(ModelParamaterException):
+            with pytest.raises(ModelParameterException):
                 model.get_param("wrong_parameter")
         
