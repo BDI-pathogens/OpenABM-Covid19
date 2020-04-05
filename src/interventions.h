@@ -19,6 +19,7 @@ struct trace_token{
 	trace_token *next_index;
 	trace_token *next;
 	trace_token *last;
+	int days_since_contact;
 };
 
 /************************************************************************/
@@ -30,14 +31,14 @@ void set_up_app_users( model*, double );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
-trace_token* new_trace_token( model*, individual* );
+trace_token* new_trace_token( model*, individual*, int );
 trace_token* index_trace_token( model*, individual* );
 void remove_traced_on_this_trace( model*, individual* );
 void intervention_trace_token_release( model*, individual* );
 
-void intervention_quarantine_until( model*, individual*, int, int, trace_token* );
+void intervention_quarantine_until( model*, individual*, int, int, trace_token*, int );
 void intervention_quarantine_release( model*, individual* );
-void intervention_quarantine_household( model*, individual*, int, int, trace_token* );
+void intervention_quarantine_household( model*, individual*, int, int, trace_token*, int );
 void intervention_test_take( model*, individual* );
 void intervention_test_result( model*, individual* );
 void intervention_notify_contacts( model*, individual*, int, trace_token* );
