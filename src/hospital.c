@@ -114,7 +114,7 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
     {
         for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
             for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
-                if( hospital->wards[ward_type][ward_idx].n_doctors < hospital->wards[ward_type][ward_idx].max_doctors )
+                if( hospital->wards[ward_type][ward_idx].n_doctors < hospital->wards[ward_type][ward_idx].n_max_doctors )
                     ward_found = TRUE;
 
         if( ward_found == FALSE)
@@ -127,7 +127,7 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
     {
         for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
             for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
-                if( hospital->wards[ward_type][ward_idx].n_nurses < hospital->wards[ward_type][ward_idx].max_nurses )
+                if( hospital->wards[ward_type][ward_idx].n_nurses < hospital->wards[ward_type][ward_idx].n_max_nurses )
                     ward_found = TRUE;
 
         if( ward_found == FALSE)
