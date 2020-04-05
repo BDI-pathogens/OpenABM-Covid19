@@ -124,8 +124,6 @@ trace_token* index_trace_token( model *model, individual *indiv )
 	if( indiv->index_trace_token == NULL )
 		indiv->index_trace_token = new_trace_token( model, indiv, model->time );
 
-	indiv->traced_on_this_trace = TRUE;
-
 	return indiv->index_trace_token;
 }
 
@@ -496,6 +494,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
+		indiv->traced_on_this_trace = TRUE;
 
 		if( params->quarantine_household_on_symptoms )
 			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, model->time );
@@ -548,6 +547,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
 	}
+	indiv->traced_on_this_trace = TRUE;
 
 	if( params->quarantine_household_on_positive )
 		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token, model->time );
