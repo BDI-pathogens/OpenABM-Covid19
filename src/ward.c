@@ -43,7 +43,7 @@ void set_up_ward_networks( ward* ward )
 
 void build_ward_networks( model *model, ward* ward )
 {
-    int idx, n_hcw_working, required_interaction_doctors, required_interaction_nurse;
+    int idx, n_hcw_working;
     long *hc_workers;
     hc_workers = calloc( ward->n_doctors + ward->n_nurses, sizeof(long) );
     n_hcw_working = 0;
@@ -63,7 +63,7 @@ void build_ward_networks( model *model, ward* ward )
             hc_workers[n_hcw_working++] = ward->nurses[idx].pdx;
 
     //rebuild nurse -> patient network
-    build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers, n_hcw_working, model->params->patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
+    build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers, n_hcw_working, model->params->patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
 }
 
 void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, int n_hcw_working, int patient_required_interactions, int max_hcw_daily_interactions )
