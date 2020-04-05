@@ -35,6 +35,7 @@ TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
+TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -178,6 +179,18 @@ class TestClass(object):
                 )
             ),
         ],
+        "test_quarantine_household_on_symptoms": [ 
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 20,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    quarantine_household_on_symptoms = 1
+                )
+            ) 
+        ]
     }
     """
     Test class for checking 
@@ -194,10 +207,10 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all"
-        completed_compilation = subprocess.run(
-            [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
-        )
+        #compile_command = "make clean; make all;"
+        #completed_compilation = subprocess.run(
+        #    [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
+        #)
 
     @classmethod
     def teardown_class(self):
@@ -353,3 +366,55 @@ class TestClass(object):
             np.testing.assert_equal(
                 True, False, "no test run due test_params not being testable"
             )
+    def test_quarantine_household_on_symptoms(self, test_params):
+        """
+        Tests households are quarantine when somebody has symptoms
+        """
+        end_time = test_params[ "end_time" ]
+
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params = utils.turn_off_interventions(params, end_time)
+        params.set_param(test_params)
+        params.write_params(TEST_DATA_FILE)
+
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        df_int   = pd.read_csv( TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        # prepare the interaction data to get all household interations
+        df_int.rename( columns = { "ID":"index_ID", "ID_2":"traced_ID"}, inplace = True )
+        df_int[ "household" ] = ( df_int[ "house_no" ] == df_int[ "house_no_2" ] )
+        df_int = df_int.loc[ :, [ "index_ID", "traced_ID", "household"]]
+                
+        # don't consider ones with multiple index events
+        filter_single = df_trace.groupby( ["index_ID", "days_since_index"] ).size();
+        filter_single = filter_single.groupby( ["index_ID"]).size().reset_index(name="N");
+        filter_single = filter_single[ filter_single[ "N"] == 1 ]
+        
+        # look at the trace token data to get all traces
+        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
+        index_traced[ "traced" ] = True
+        index_traced = pd.merge( index_traced, filter_single, on = "index_ID", how = "inner")
+       
+        # get all the interactions for the index cases
+        index_cases  = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
+        index_inter = pd.merge( index_cases, df_int, on = "index_ID", how = "left" )             
+        index_inter = index_inter.groupby( [ "index_ID", "traced_ID", "household" ]).size().reset_index(name="N")    
+        index_inter[ "inter" ] = True
+
+        # test nobody traced without an interaction
+        t = pd.merge( index_traced, index_inter, on = [ "index_ID", "traced_ID" ], how = "outer" )
+        n_no_inter = len( t[ t[ "inter"] != True ] )
+        np.testing.assert_equal( n_no_inter, 0, "tracing someone without an interaction" )
+
+        # check everybody with a household interaction is traced
+        n_no_trace = len( t[ ( t[ "traced"] != True ) &  (t["household"] == True  )] )
+        np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
+
+        
+        
+        
+        
+        
