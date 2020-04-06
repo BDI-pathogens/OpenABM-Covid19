@@ -25,6 +25,7 @@ from . import utilities as utils
 # from test.test_bufio import lengths
 # from CoreGraphics._CoreGraphics import CGRect_getMidX
 
+
 def pytest_generate_tests(metafunc):
     # called once per each test function
     funcarglist = metafunc.cls.params[metafunc.function.__name__]
@@ -145,6 +146,7 @@ class TestClass(object):
     """
     Test class for checking 
     """
+
     def test_quarantine_interactions(self, test_params):
         """
         Tests the number of interactions people have on the interaction network is as 
@@ -365,7 +367,7 @@ class TestClass(object):
         expect_random = df_without.loc[ constant.RANDOM, ["N"] ] * test_params[ "lockdown_random_network_multiplier" ]       
         np.testing.assert_allclose( df_with.loc[ constant.RANDOM, ["N"] ], expect_random, atol = sqrt( expect_random ) * sd_diff, 
                                     err_msg = "lockdown not changing random transmission as expected" )
-        
+      
 
     def test_trace_on_symptoms(self, test_params):
         """
@@ -411,7 +413,4 @@ class TestClass(object):
         n_no_inter = len( t[ t[ "inter"] != True ] )
         np.testing.assert_equal( n_no_inter, 0, "tracing someone without an interaction" )    
 
-        
-        
-        
-        
+    
