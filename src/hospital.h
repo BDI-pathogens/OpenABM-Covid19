@@ -1,5 +1,5 @@
 /*
- * individual.h
+ * hospital.h
  *
  *  Created on: 30 Mar 2020
  *      Author: vuurenk
@@ -17,6 +17,7 @@
 #include "params.h"
 #include "network.h"
 #include "individual.h"
+#include "ward.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -24,27 +25,31 @@
 
 typedef struct hospital hospital;
 
-struct hospital {
-    int hospital_idx;
+struct hospital
+{
+    int hospital_idx;               //hospital index number
 
-    int available_beds;
-    int available_icus;
+    int n_total_beds;               //total beds at hospital
+    int n_total_icus;               //total icus at hospital
 
-    long *doctor_pdxs;      //stores the population ids of all doctors at the hospital
-    long *nurse_pdxs;       //stores the population ids of all nurses at the hospital
-    long *patient_pdxs;     //stores the population ids of all patients at the hospital
+    long *general_patient_pdxs;     //stores the population ids of all general patients at the hospital
+    long *icu_patient_pdxs;         //stores the population ids of all general patients at the hospital
+    //TODO: at end of timestep there is an event list of people who have transitioned to admitted / hospitalised / critical / recovery
 
-    int n_total_doctors;    //total number of doctors at the hospital
-    int n_total_nurses;     //total number of nurses at the hospital
-    int n_total_patients;   //total number of patients at the hospital
+    int n_total_doctors;            //total number of doctors
+    int n_total_nurses;             //total number of nurses
+    int n_total_general_patients;   //total number of general patients
+    int n_total_icu_patients;       //total number of icu patients
+    //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
+    //TODO: add non covid patients
 
-//    network *healthcare_workers_patients_network;
-    //TODO: Set these to be owned by the model. Use a double pointer.
-    network *doctor_patient_general_network;
-    network *nurse_patient_general_network;
+    int n_covid_general_wards;
+    int n_covid_icu_wards;
 
-    network *doctor_patient_icu_network;
-    network *nurse_patient_icu_network;
+    network *hospital_workplace_network;
+    //ward related stuff
+    int *n_wards;
+    ward **wards;
 };
 
 /************************************************************************/
@@ -52,6 +57,8 @@ struct hospital {
 /************************************************************************/
 
 void initialise_hospital( hospital*, parameters*, int );
+void set_up_hospital_networks( hospital* );
+void build_hospital_networks( model *model, hospital *hospital );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int healthcare_worker_working(individual* indiv);
 void add_patient_to_hospital(hospital *hospital, long pdx, int type);
