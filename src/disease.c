@@ -292,7 +292,7 @@ void transition_one_disese_event(
 void transition_to_symptomatic( model *model, individual *indiv )
 {
 	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
-		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
+        transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED ); //kelvin note: patient is being added to hospital here... shouldn't they be added to waiting list at this point?
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 
@@ -309,7 +309,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	set_hospitalised( indiv, model->params, model->time );
 
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
-        transition_one_disese_event(model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL);
+        transition_one_disese_event(model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL); //kelvin note: moving from hospitalised to critical, shouldnt the add to icu be here?
 
 	else
         transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);

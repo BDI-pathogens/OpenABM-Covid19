@@ -452,7 +452,7 @@ event* add_individual_to_event_list(
 	event *event        = new_event( model );
 	event->individual   = indiv;
 	event->type         = type;
-	event->time         = time;
+    event->time         = time;
 
 	if( list->n_daily_current[time] >0  )
 	{
