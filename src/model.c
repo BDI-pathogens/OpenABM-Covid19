@@ -188,38 +188,8 @@ void set_up_networks( model *model )
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
 
-	//Set up networks for hospital worker interactions.
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
-        set_up_hospital_networks( model );
-
-
-    //allocate hcw -> patient networks' memory
-    model->doctor_patients_network      = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->nurse_patients_network       = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->doctor_patients_network_icu  = calloc( model->params->n_hospitals, sizeof( network* ));
-    model->nurse_patients_network_icu   = calloc( model->params->n_hospitals, sizeof( network* ));
-
-    // TODO: CHANGE TO ACCOUNT FOR POTENTIAL FOR COVID PATIENTS TO BE IN THE HOSPITAL ON START UP.
-    // TODO: CHANGE INITIAL MEMORY ALLOCATION TO EDGES TO SOMETHING LESS HACKY - PROBABLY ONLY WHEN WE KNOW ABOUT THE FOLLOWING.
-    //Assuming that the hospital has no Covid patients in it at the beginning of the simulation - check with Rob.
-    for ( idx = 0; idx < model->params->n_hospitals; idx++ )
-    {
-        model->doctor_patients_network[idx] = new_network( model->hospitals[idx].n_total_doctors,
-                HOSPITAL_DOCTOR_PATIENT_GENERAL );
-        model->doctor_patients_network[idx]->edges = calloc( 1, sizeof( edge ) );
-
-        model->nurse_patients_network[idx] = new_network( model->hospitals[idx].n_total_nurses,
-                HOSPITAL_NURSE_PATIENT_GENERAL );
-        model->nurse_patients_network[idx]->edges = calloc( 1, sizeof( edge ) );
-
-        model->doctor_patients_network_icu[idx] = new_network( model->hospitals[idx].n_total_doctors,
-                HOSPITAL_DOCTOR_PATIENT_ICU );
-        model->doctor_patients_network_icu[idx]->edges = calloc( 1, sizeof( edge ) );
-
-        model->nurse_patients_network_icu[idx] = new_network(model->hospitals[idx].n_total_nurses,
-                HOSPITAL_NURSE_PATIENT_ICU );
-        model->nurse_patients_network_icu[idx]->edges = calloc( 1, sizeof( edge ) );
-    }
+        set_up_hospital_networks( &(model->hospitals[idx]) );
 }
 
 /*****************************************************************************************
@@ -620,31 +590,6 @@ void build_random_network( model *model )
 		network->n_edges++;
 	}
 }
-
-/*****************************************************************************************
-*  Name:		build_hospital_network
-*  Description: Builds all the doctor / nurse -> patients networks
-******************************************************************************************/
-//void build_hospital_networks( model *model, int hospital_idx )
-//{
-//    hospital *hospital = &(model->hospitals[hospital_idx]);
-//    //doctor general patients network
-//    build_hcw_patient_network( model, model->doctor_patients_network[hospital_idx], hospital->general_patient_pdxs,
-//                               hospital->doctor_pdxs, hospital->n_total_general_patients, hospital->n_total_doctors,
-//                               model->params->general_patient_doctor_required_interactions );
-//    //nurse general patients network
-//    build_hcw_patient_network( model, model->nurse_patients_network[hospital_idx], hospital->general_patient_pdxs,
-//                               hospital->nurse_pdxs, hospital->n_total_general_patients, hospital->n_total_nurses,
-//                               model->params->general_patient_nurse_required_interactions );
-//    //doctor icu patients network
-//    build_hcw_patient_network( model, model->doctor_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
-//                               hospital->doctor_pdxs, hospital->n_total_icu_patients, hospital->n_total_doctors,
-//                               model->params->icu_patient_doctor_required_interactions );
-//    //nurse icu patients network
-//    build_hcw_patient_network( model, model->nurse_patients_network_icu[hospital_idx], hospital->icu_patient_pdxs,
-//                               hospital->nurse_pdxs, hospital->n_total_icu_patients, hospital->n_total_nurses,
-//                               model->params->icu_patient_nurse_required_interactions );
-//}
 
 /*****************************************************************************************
 *  Name:		add_interactions_from_network
