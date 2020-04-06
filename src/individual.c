@@ -269,6 +269,7 @@ void set_icu_admission( individual *indiv, parameters* params, int time )
 void set_mortuary_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = MORTUARY;
+    indiv->current_hospital_event = NULL;
     update_random_interactions( indiv, params );
 }
 
@@ -280,8 +281,8 @@ void set_mortuary_admission( individual *indiv, parameters* params, int time )
 void set_discharged( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = DISCHARGED;
+    indiv->current_hospital_event = NULL;
     update_random_interactions( indiv, params );
-
 }
 
 /*****************************************************************************************

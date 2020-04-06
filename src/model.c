@@ -60,7 +60,7 @@ model* new_model( parameters *params )
 
     //TOM: EVENT CONTROL HERE//
 	set_up_events( model_ptr ); // TOM: Has int number - is this for the types of events?
-	set_up_transition_times( model_ptr ); // TOM: Unsure if transition times are needed for hospital events. Could get rid of transition types I added.
+	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
     //TOM: EVENT CONTROL HERE//
@@ -894,6 +894,7 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model );
 
+	//TODO: UPDATE DISEASE STATE SETTERS TO NO LONGER TAKE PARAMS AS A VARIABLE.
     //TOM: DISEASE EVENT CONTROL HERE//
 	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );
 	transition_events( model, HOSPITALISED, &transition_to_hospitalised, FALSE );

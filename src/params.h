@@ -54,10 +54,13 @@ typedef struct{
     double mean_time_to_hospital;   // mean time from symptoms to hospital
     double mean_time_to_critical;   // mean time from hospitalised to critical care
 
-    double mean_time_to_recover;	// mean time to recover after hospital
-    double sd_time_to_recover;  	// sd time to recover after hospital
-    double mean_time_to_death;		// mean time to death after hospital
-    double sd_time_to_death;		// sd time to death after hospital
+    double mean_time_to_recover;	// mean time to recover after hospitalisation/severe illness
+    double sd_time_to_recover;  	// sd time to recover after hospitalisation/severe illness
+    double mean_time_to_death;		// mean time to death after hospitalisation/severe illness
+    double sd_time_to_death;		// sd time to death after hospitalisation/severe illness
+
+    double mean_time_hospital_transition; // mean time for movement between hospital wards
+    double sd_time_hospital_transition; // sd for movement between hospital wards
 
     double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
     double population_group[N_AGE_GROUPS];		// ONS stratification of population (in millions)
