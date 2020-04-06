@@ -132,6 +132,9 @@ lockdown_random_network_multiplier	0.2
 lockdown_house_interaction_multiplier	3.0
 lockdown_time_on	10000
 lockdown_time_off	10000
+successive_lockdown_time_on 10000
+successive_lockdown_duration 21
+successive_lockdown_gap 7
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
 N_REFERENCE_HOUSEHOLDS	125455
