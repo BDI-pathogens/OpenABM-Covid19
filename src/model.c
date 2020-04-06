@@ -14,12 +14,10 @@
 #include "disease.h"
 #include "interventions.h"
 #include "demographics.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 #include "hospital.h"
 
@@ -771,7 +769,7 @@ int one_time_step( model *model )
 
 /*****************************************************************************************
 *  Name:		check_hospital_location_status
-*  Description: Checks the current hospital location of individuals against their disease state.
+*  Description: Checks the current hospital location of individuals against their disease state
 *               and attempts to transfer them to the correct part of the hospital.
 ******************************************************************************************/
 void check_hospital_location_status( model *model ) {
@@ -782,7 +780,7 @@ void check_hospital_location_status( model *model ) {
     for (idx = 0; idx < n_total; idx++ ) {
         indiv = &( model->population[idx] );
 
-        if ( indiv->status == HOSPITALISED )
+        if ( indiv->status == HOSPITALISED && indiv->hospital_location == NOT_IN_HOSPITAL )
             transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
 
         if ( indiv->hospital_location == WAITING )

@@ -209,7 +209,6 @@ void transition_one_hospital_event(
 void transition_to_waiting( model *model, individual *indiv )
 {
     add_patient_to_hospital( model, indiv );
-    // set_hospital(model->params, indiv); Search for hospital with space.
     set_waiting( indiv, model->params, 1);
 }
 /*****************************************************************************************
@@ -221,20 +220,16 @@ void transition_to_waiting( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_general( model *model, individual *indiv )
 {
-    //TODO: CHECK FOR BED AVAILABILITY HERE.
+    int hospital_idx = indiv->hospital_idx;
+    hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
 
-    //if (indiv->hospital_location == WAITING)
-    //      if( assign_to_general_ward( indiv->general_ward, indiv->hospital ) == TRUE ); // Search for an empty general ward,
-    //                                                                          adds to the general ward network and then updates the patient ward number.
-    //          set_general_admission( indiv, model->params, 1); // Changes hospital location and adjusts daily connections.
+    if ( indiv->hospital_location == WAITING )
+        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
+            set_general_admission( indiv, model->params, 1);
 
-    //else (indiv->hospital_location == ICU)
-    //  if (assign_to_general_ward( indiv->hospital )); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior general ward), assign to a new one, returns true.
-    //  -> if this fails, then return false. Add to general ward network if successful.
-    //      set_general_admission( indiv, model->params, 1);    // Changes hospital location and adjusts daily connections.
-
-
-    set_general_admission( indiv, model->params, 1);
+    if ( indiv->hospital_location == ICU );
+        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
+            set_general_admission( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_ICU
@@ -245,25 +240,22 @@ void transition_to_general( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_icu( model *model, individual *indiv )
 {
-    //TODO: CHECK FOR BED AVAILABILITY HERE.
+    int hospital_idx = indiv->hospital_idx;
+    hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
 
-    //if (indiv->hospital_location == WAITING)
-    //  if (set_hospital(indiv)); -> Search for a hospital with space. Returns true if space is found while setting the hospital.
-    //      assign_to_icu_ward( indiv->hospital ); -> Indiv has no ward, then check for empty ward, then assign.
-    //      add_to_icu_ward( indiv->general_ward_number, indiv->hospital );
-    //      set_icu_admission( indiv, model->params, 1);
+    if ( indiv->hospital_location == WAITING )
+        if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
+            set_icu_admission( indiv, model->params, 1);
 
-    //else (indiv->hospital_location == ICU)
-    //  assign_to_icu_ward( indiv->hospital ); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior ward), assign to a new one.
-    //  add_to_icu_ward( indiv->general_ward_number, indiv->hospital );
-    //  set_general_admission( indiv, model->params, 1);
-
-    set_icu_admission( indiv, model->params, 1);
+    if ( indiv->hospital_location == GENERAL )
+        if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
+            set_icu_admission( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_mortuary
 *  Description: Transitions a newly deceased person from either the general ward or ICU
-*               into a "morutary" to free space for new patients.
+*               into a "mortuary" to free space for new patients. This always succeeds in
+*               assigning the patient location.
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_mortuary( model *model, individual *indiv )
@@ -271,21 +263,28 @@ void transition_to_mortuary( model *model, individual *indiv )
     set_mortuary_admission( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
 }
+
 /*****************************************************************************************
 *  Name:		transition_to_populace
 *  Description: Transitions a recovered individual from either the general wards or ICU
-*               back into the general population.
+*               back into the general population. This always succeeds in assigning the patient
+*               location.
 *  Returns:		void
 ******************************************************************************************/
+
 void transition_to_populace( model *model, individual *indiv )
 {
     set_discharged( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
 }
 
-// void set_hospital(model->params, indiv); Search for hospital with space in a general ward, then assign the hospital to that individual.
-//                                          Consider what happens when there's no space
-//                                          at any hospital. Output that it's OVERSUBSCRIBED.
+/*****************************************************************************************
+*  Name:		add_patient_to_hospital
+*  Description: Search a for hospital with bed space, then assign the hospital to that individual based on
+*               which ward type they currently need. If there is no space available, assign the patient to the
+*               hospital with the shortest waiting list.
+*  Returns:		void
+******************************************************************************************/
 
 void add_patient_to_hospital( model* model, individual *indiv )
 {
@@ -302,10 +301,12 @@ void add_patient_to_hospital( model* model, individual *indiv )
 
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
         for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[required_ward]; ward_idx++ )
-            if( model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients <  model->hospitals[hospital_idx].wards[required_ward][ward_idx].beds )
+
+            //Check if number of patients in a ward is less than the max no. of beds.
+            if( model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients
+                    <  model->hospitals[hospital_idx].wards[required_ward][ward_idx].beds )
             {
-                 //assign_patient_to_ward( &(model->hospitals[hospital_idx].wards[required_ward][ward_idx]), indiv->idx );
-                 indiv->hospital = &(model->hospitals[hospital_idx]);
+                 indiv->hospital_idx = hospital_idx;
                  added_to_hospital = TRUE;
             }
 
@@ -318,13 +319,28 @@ void add_patient_to_hospital( model* model, individual *indiv )
             if( model->hospitals[hospital_idx].n_patients_waiting < assigned_hospital->n_patients_waiting)
                 assigned_hospital = &(model->hospitals[hospital_idx]);
         }
-
         assigned_hospital->n_patients_waiting++;
-        indiv->hospital = assigned_hospital;
+        indiv->hospital_idx = assigned_hospital;
     }
 
 }
 
+/*****************************************************************************************
+*  Name:		assign_to_ward
+*  Description:
+*  Returns:		int
+******************************************************************************************/
+
+int assign_to_ward(individual *indiv, hospital *hospital, int ward_type )
+{
+
+}
+
+/*****************************************************************************************
+*  Name:		assign_to_ward
+*  Description:
+*  Returns:		int
+******************************************************************************************/
 void release_patient_from_hospital( individual *indiv )
 {
     //remove from ward
@@ -332,15 +348,6 @@ void release_patient_from_hospital( individual *indiv )
     //update n_patients
 }
 
-int assign_to_general_ward(individual *indiv, hospital *hospital )
-{
-
-}
-
-int assign_to_icu_ward(individual *indiv, hospital *hospital )
-{
-
-}
 // int assign_to_general_ward( indiv, hospital ); Search for an empty general ward in a particular hospital,
 //                                                                      adds to the general ward patient list.
 //                                                                      Then return TRUE if the patient has been reassigned.

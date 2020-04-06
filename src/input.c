@@ -14,7 +14,6 @@
 #include "model.h"
 #include "utilities.h"
 #include "constant.h"
-#include "demographics.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -164,10 +163,18 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
 	
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
+
+    //TOM: Added for hospital state transitions.
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
+
+    //TOM: Added for hospital state transitions.
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic));
 	if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };

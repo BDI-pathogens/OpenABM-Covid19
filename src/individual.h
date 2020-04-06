@@ -16,7 +16,6 @@
 #include "structure.h"
 #include "params.h"
 #include "constant.h"
-#include "hospital.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -59,7 +58,7 @@ struct individual{
 	int app_user;
 
     int worker_type; //TODO: kelvin change
-    hospital *hospital;
+    int hospital_idx;
 };
 
 struct interaction{

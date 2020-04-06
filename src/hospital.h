@@ -70,4 +70,6 @@ void transition_to_icu( model *model, individual *indiv );
 void transition_to_mortuary( model *model, individual *indiv );
 void transition_to_populace( model *model, individual *indiv );
 
+int assign_to_ward(individual *indiv, hospital *hospital, int ward_type );
+
 #endif /* HOSPITAL_H_ */
