@@ -142,7 +142,7 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
 
 	if( !indiv->quarantined )
 	{
-		switch( indiv->hospital_location )
+        switch( indiv->hospital_location ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
 		{
 			case MORTUARY:		n = 0; 								         break; //TOM: CHANGED TO MORTUARY.
 			case WAITING:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
