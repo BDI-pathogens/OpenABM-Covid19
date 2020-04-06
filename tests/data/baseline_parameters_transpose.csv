@@ -1,7 +1,7 @@
 parameter_name	parameter_value
 rng_seed	1
 param_id	1
-n_total	20000
+n_total	100000
 mean_work_interactions_child	10
 mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
@@ -16,7 +16,7 @@ random_interaction_distribution 1
 child_network_adults	0.2
 elderly_network_adults	0.2
 days_of_interactions	10
-end_time	50
+end_time	200
 n_seed_infection	50
 mean_infectious_period	5.0
 sd_infectious_period	2.0
@@ -107,10 +107,10 @@ quarantine_dropout_traced	0.01
 quarantine_dropout_positive	0.01
 test_on_symptoms	0
 test_on_traced	0
-trace_on_symptoms 1
+trace_on_symptoms 0
 trace_on_positive 0
-quarantine_on_traced	1
-traceable_interaction_fraction	1.0
+quarantine_on_traced	0
+traceable_interaction_fraction	0.8
 tracing_network_depth	0
 allow_clinical_diagnosis	1
 quarantine_household_on_positive	0
@@ -123,9 +123,9 @@ hospitalised_daily_interactions	0
 test_insensitive_period	3
 test_order_wait	0
 test_result_wait	0
-self_quarantine_fraction	0.8
-app_users_fraction	1.0
-app_turn_on_time	1
+self_quarantine_fraction	0.0
+app_users_fraction	0.0
+app_turn_on_time	10000
 lockdown_work_network_multiplier	0.2
 lockdown_random_network_multiplier	0.2
 lockdown_house_interaction_multiplier	3.0
