@@ -134,6 +134,7 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
+    // set_hospital(model->params, indiv); Search for hospital with space.
     set_waiting( indiv, model->params, 1);
 }
 /*****************************************************************************************
@@ -148,15 +149,13 @@ void transition_to_general( model *model, individual *indiv )
     //TODO: CHECK FOR BED AVAILABILITY HERE.
 
     //if (indiv->hospital_location == WAITING)
-    //  if (set_hospital(model->params, indiv)); -> Search for a hospital with space. Returns true if space is found while setting the hospital and ward number.
-    //      add_to_general_ward( indiv->general_ward, indiv->hospital ); // Adds to the general ward network
-    //      set_general_admission( indiv, model->params, 1); // Changes hospital location and adjusts daily connections.
+    //      if( assign_to_general_ward( indiv->general_ward, indiv->hospital ) == TRUE ); // Search for an empty general ward,
+    //                                                                          adds to the general ward network and then updates the patient ward number.
+    //          set_general_admission( indiv, model->params, 1); // Changes hospital location and adjusts daily connections.
 
     //else (indiv->hospital_location == ICU)
-    //  if (assign_to_general_ward( indiv->hospital )); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior ward), assign to a new one, returns true.
-    //  -> if this fails, then return false.
-
-    //      add_to_general_ward( indiv->general_ward_number, indiv->hospital );
+    //  if (assign_to_general_ward( indiv->hospital )); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior general ward), assign to a new one, returns true.
+    //  -> if this fails, then return false. Add to general ward network if successful.
     //      set_general_admission( indiv, model->params, 1);    // Changes hospital location and adjusts daily connections.
 
 
@@ -196,7 +195,6 @@ void transition_to_mortuary( model *model, individual *indiv )
 {
     set_mortuary_admission( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
-    update_random_interactions( indiv, model->params );
 }
 /*****************************************************************************************
 *  Name:		transition_to_populace
@@ -208,6 +206,17 @@ void transition_to_populace( model *model, individual *indiv )
 {
     set_discharged( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
-    update_random_interactions( indiv, model->params );
 }
 
+// void set_hospital(model->params, indiv); Search for hospital with space in a general ward, then assign the hospital to that individual.
+//                                          Consider what happens when there's no space
+//                                          at any hospital. Output that it's OVERSUBSCRIBED.
+// int assign_to_general_ward( indiv, hospital ); Search for an empty general ward in a particular hospital,
+//                                                                      adds to the general ward patient list.
+//                                                                      Then return TRUE if the patient has been reassigned.
+//                                                                      Otherwise, return FALSE.
+// int assign_to_icu_ward( indiv, hospital ); Search for an empty ICU ward in a particular hospital,
+//                                                                      adds to the general ward patient list.
+//                                                                      Then return TRUE if the patient has been reassigned.
+//                                                                      Otherwise, return FALSE.
+// void release_from_hospital ( indiv, ward ); Remove them from ward patient list and update ward totals.

@@ -35,7 +35,6 @@
 void set_up_transition_times( model *model )
 {
 
-    //TOM: DISEASE CONTROL
 	parameters *params = model->params;
 	int idx;
 	int **transitions;
@@ -51,6 +50,7 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
 	gamma_draw_list( transitions[CRITICAL_RECOVERED],      	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
 	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		   params->sd_time_to_death );
+    gamma_draw_list( transitions[HOSPITAL_TRANSITION],         N_DRAW_LIST, params->mean_time_hospital_transition, params->sd_time_hospital_transition );
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
 
