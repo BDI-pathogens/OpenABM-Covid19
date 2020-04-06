@@ -32,14 +32,12 @@ struct hospital
     int n_total_beds;               //total beds at hospital
     int n_total_icus;               //total icus at hospital
 
-    long *general_patient_pdxs;     //stores the population ids of all general patients at the hospital
-    long *icu_patient_pdxs;         //stores the population ids of all general patients at the hospital
-    //TODO: at end of timestep there is an event list of people who have transitioned to admitted / hospitalised / critical / recovery
-
     int n_total_doctors;            //total number of doctors
     int n_total_nurses;             //total number of nurses
     int n_total_general_patients;   //total number of general patients
     int n_total_icu_patients;       //total number of icu patients
+
+    int n_patients_waiting;
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
     //TODO: add non covid patients
 
@@ -47,7 +45,7 @@ struct hospital
     int n_covid_icu_wards;
 
     network *hospital_workplace_network;
-    //ward related stuff
+
     int *n_wards;
     ward **wards;
 };
@@ -61,7 +59,7 @@ void set_up_hospital_networks( hospital* );
 void build_hospital_networks( model *model, hospital *hospital );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int healthcare_worker_working(individual* indiv);
-void add_patient_to_hospital(hospital *hospital, long pdx, int type);
+void add_patient_to_hospital( model*, individual* );
 void destroy_hospital( hospital* );
 
 void transition_one_hospital_event( model *model, individual *indiv, int from, int to, int edge );
