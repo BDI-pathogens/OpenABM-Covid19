@@ -113,6 +113,10 @@ typedef struct{
 	int lockdown_time_on;							// lockdown turned on at this time
 	int lockdown_time_off;							// lockdown turned off at this time
 	int lockdown_on;								// is lockdown currently on
+
+	int successive_lockdown_time_on;               // successive lockdowns are turned on at this time
+	int successive_lockdown_duration;              // successive lockdowns last for this duration
+	int successive_lockdown_gap;                   // successive lockdowns will have this duration of gap between them
 	
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
