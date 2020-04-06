@@ -115,6 +115,8 @@ void transition_events( model*, int, void( model*, individual* ), int );
 
 void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_network(model *model);
-void build_random_network( model * );
+void build_random_network( model *model );
+
+void check_hospital_location_status( model *model );
 
 #endif /* MODEL_H_ */
