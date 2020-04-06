@@ -211,6 +211,19 @@ class TestClass(object):
                     quarantine_household_on_symptoms = 1
                 )
             ) 
+        ],
+        "test_lockdown_transmission_rates": [ 
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 10000,
+                    end_time = 3,
+                    infectious_rate = 4,
+                    lockdown_work_network_multiplier = 0.8,
+                    lockdown_random_network_multiplier = 0.8,
+                    lockdown_house_interaction_multiplier = 1.2
+                )
+            ) 
         ]
     }
     """
@@ -230,11 +243,10 @@ class TestClass(object):
         shutil.copytree(IBM_DIR, IBM_DIR_TEST)
 
         # Construct the compilation command and compile
-        #compile_command = "make clean; make all;"
-        #completed_compilation = subprocess.run(
-        #    [compile_command], shell=True, cwd=IBM_DIR_TEST, capture_output=True
-        #)
-
+        compile_command = "make clean; make all; make swig-all"
+        completed_compilation = subprocess.run([compile_command], 
+           shell = True, cwd = IBM_DIR_TEST, capture_output = True)
+  
     @classmethod
     def teardown_class(self):
         """
@@ -483,3 +495,55 @@ class TestClass(object):
         np.testing.assert_equal( n_no_inter, 0, "tracing someone without an interaction" )    
         
         
+    def test_lockdown_transmission_rates(self, test_params):
+        """
+        Tests the change in transmission rates on lockdown are correct
+        NOTE - this can only be done soon after a random seed and for small
+        changes due to saturation effects
+        """
+        
+        sd_diff  = 3;
+        end_time = test_params[ "end_time" ]
+
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params = utils.turn_off_interventions(params, end_time)
+        params.set_param(test_params)
+        params.write_params(TEST_DATA_FILE)
+        
+        # run without lockdown
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        df_without    = pd.read_csv( TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_without    = df_without[ df_without[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
+
+        # clean up data directories
+        self.teardown_method()
+        self.setup_method()
+
+        # lockdown on t-1
+        params = utils.turn_off_interventions(params, end_time)
+        params.set_param(test_params)
+        params.write_params(TEST_DATA_FILE)
+        params.set_param( "lockdown_time_on", end_time - 1 );
+        params.write_params(TEST_DATA_FILE)
+        
+        file_output   = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([command], stdout=file_output, shell=True)
+        df_with       = pd.read_csv( TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_with       = df_with[ df_with[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
+        
+        # now check they are line
+        expect_household = df_without.loc[ HOUSEHOLD, ["N"] ] * test_params[ "lockdown_house_interaction_multiplier" ]       
+        np.testing.assert_allclose( df_with.loc[ HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff, 
+                                    err_msg = "lockdown not changing household transmission as expected" )
+        
+        expect_work = df_without.loc[ WORK, ["N"] ] * test_params[ "lockdown_work_network_multiplier" ]       
+        np.testing.assert_allclose( df_with.loc[ WORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
+                                    err_msg = "lockdown not changing work transmission as expected" )
+      
+      
+        expect_random = df_without.loc[ RANDOM, ["N"] ] * test_params[ "lockdown_random_network_multiplier" ]       
+        np.testing.assert_allclose( df_with.loc[ RANDOM, ["N"] ], expect_random, atol = sqrt( expect_random ) * sd_diff, 
+                                    err_msg = "lockdown not changing random transmission as expected" )
+        
+
