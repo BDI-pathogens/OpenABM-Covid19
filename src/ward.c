@@ -78,6 +78,7 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
     all_required_interactions = calloc( patient_required_interactions * ward->n_patients, sizeof(long) );
     capped_hcw_interactions   = calloc( n_total_interactions, sizeof(long) );
+    free( network->edges );
     network->edges            = calloc( n_total_interactions, sizeof(edge) );
     network->n_vertices       = n_hcw_working + ward->n_patients;
 
