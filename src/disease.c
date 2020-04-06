@@ -12,18 +12,12 @@
 #include "utilities.h"
 #include "constant.h"
 #include "params.h"
-#include "network.h"
 #include "disease.h"
 #include "structure.h"
 #include "interventions.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
-
-#include "hospital.h"
 
 /*****************************************************************************************
 *  Name:		set_up_transition_times

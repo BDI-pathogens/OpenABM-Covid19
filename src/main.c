@@ -1,17 +1,14 @@
 // main.c
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 #include "model.h"
 #include "network.h"
 #include "params.h"
-#include "utilities.h"
 #include "input.h"
 #include "constant.h"
 
@@ -55,7 +52,7 @@ int main(int argc, char *argv[])
 	printf("# param_line_number: %d\n", params.param_line_number);
 	
 	printf( "Time,social_distancing,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
-	while( model->time < params.end_time && one_time_step( model ) ) //Tom: Model updating occurs here.
+	while( model->time < params.end_time && one_time_step( model ) )
 	{
 		printf( "%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,

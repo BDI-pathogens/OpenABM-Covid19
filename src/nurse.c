@@ -1,12 +1,11 @@
 /*
- * hsopital.c
+ * hospital.c
  *
  *  Created on: 03 Apr 2020
  *      Author: vuurenk
  */
 
 #include "nurse.h"
-#include "constant.h"
 
 /*****************************************************************************************
 *  Name:		initialize_nurse

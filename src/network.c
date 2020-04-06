@@ -5,11 +5,9 @@
  *      Author: p-robot
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 #include <math.h>
 
 #include "network.h"
