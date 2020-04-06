@@ -51,18 +51,8 @@ enum TRANSITIONS_TYPES{
 	SYMPTOMATIC_QUARANTINE,
 	TRACED_QUARANTINE,
 	TEST_RESULT_QUARANTINE,
-	NOT_IN_HOSPITAL_WAITING, //TOM: Event transitions for hospital states.
-    WAITING_GENERAL,
-    WAITING_ICU,
-    GENERAL_ICU,
-    ICU_GENERAL,
-    ICU_MORTUARY,
-    GENERAL_MORTUARY,
-    WAITING_MORTUARY,
-    ICU_DISCHARGED,
-    WAITING_DISCHARGED,
-    GENERAL_DISCHARGED,
-	N_TRANSITION_TYPES
+	HOSPITAL_TRANSITION,    //TOM: Event transitions for all hospital states.
+	N_TRANSITION_TYPES      // Added to params: mean_time_hospital transition (1), sd_time_hospital_transition (0).
 };
 
 enum AGE_GROUPS{
