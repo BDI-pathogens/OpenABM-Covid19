@@ -54,7 +54,7 @@ struct individual{
 	int hospital_location;
 	event *current_hospital_event;
 	event *next_hospital_event;
-	
+
 	int app_user;
 
     int worker_type; //TODO: kelvin change

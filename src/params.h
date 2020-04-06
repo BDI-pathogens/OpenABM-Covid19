@@ -119,14 +119,18 @@ typedef struct{
     long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
     int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    //kelvin change
+    //hospital params
     int n_total_doctors;       // Total number of doctors
     int n_total_nurses;        // Total number of nurses
+    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
     int n_hospitals;
+    int n_covid_general_wards;
+    int n_covid_icu_wards;
     int hospital_n_beds;
     int hospital_n_icus;
-    int patient_doctor_required_interactions;
-    int patient_nurse_required_interactions;
+    int general_patient_doctor_required_interactions;
+    int general_patient_nurse_required_interactions;
+    int patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES-1]; //TODO: should worker types be changed to HEALTHCARE_WORKER_TYPES as other worker types are not modelled? (and also mean a -1 is required here)
 
 } parameters;
 

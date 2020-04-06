@@ -167,7 +167,7 @@ void transmit_virus_by_type(
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-		n_infected  = list->n_daily_current[ day];
+        n_infected  = list->n_daily_current[ day]; //n_daily_current only holds the number of people infected within each event type list????
 		next_event  = list->events[ day ];
 
 		for( idx = 0; idx < n_infected; idx++ )
@@ -279,6 +279,9 @@ void transition_one_disese_event(
 		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
 	}
 }
+
+//TODO: transition one hospital event
+
 
 /*****************************************************************************************
 *  Name:		transition_to_symptomatic
