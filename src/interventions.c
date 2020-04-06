@@ -308,6 +308,8 @@ void intervention_test_result( model *model, individual *indiv )
 	{
 		if( indiv->quarantined )
 			intervention_quarantine_release( model, indiv );
+
+		intervention_trace_token_release( model, indiv );
 	}
 	else
 	{
@@ -418,6 +420,9 @@ void intervention_trace_token_release( model *model, individual *indiv )
 			contact->trace_tokens = token->next;
 			if( contact->trace_tokens != NULL )
 				contact->trace_tokens->last = NULL;
+			else
+			if( contact->index_trace_token == NULL )
+				intervention_quarantine_release( model, contact );
 		}
 		else
 		{
