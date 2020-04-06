@@ -167,7 +167,6 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -179,7 +178,6 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************

@@ -338,8 +338,13 @@ void read_param_file( parameters *params)
     params->n_total_doctors = 227;
     params->n_total_nurses  = 484;
     params->n_hospitals = 1;
-    params->patient_doctor_required_interactions = 3;
-    params->patient_doctor_required_interactions = 6;
+    params->hospital_n_beds = 300;
+    params->hospital_n_icus = 300;
+    params->max_hcw_daily_interactions = 20;
+    params->patient_required_interactions[COVID_ICU][DOCTOR] = 3;
+    params->patient_required_interactions[COVID_ICU][NURSE] = 6;
+    params->patient_required_interactions[COVID_ICU][DOCTOR] = 1;
+    params->patient_required_interactions[COVID_ICU][NURSE] = 3;
 
 	fclose(parameter_file);
 }
