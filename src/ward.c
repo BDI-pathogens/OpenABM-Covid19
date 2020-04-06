@@ -24,6 +24,7 @@ void initialise_ward(
     ward->ward_idx = ward_idx;
     ward->type = type;
 
+    ward->patient_pdxs = calloc( ward->beds, sizeof(long) );
     ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
 }
@@ -110,6 +111,14 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     free( capped_hcw_interactions );
     free( hc_workers );
 }
+
+void assign_patient_to_ward( ward *ward, long pdx )
+{
+    for( int idx = 0; idx < ward->beds; idx++ )
+        if( ward->patient_pdxs[idx] == -1 )
+            ward->patient_pdxs[idx] = pdx;
+}
+
 
 void destroy_ward( ward* ward )
 {

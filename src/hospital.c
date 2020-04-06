@@ -32,9 +32,6 @@ void initialise_hospital(
     hospital->n_total_beds = params->hospital_n_beds;
     hospital->n_total_icus = params->hospital_n_icus;
 
-    hospital->general_patient_pdxs = calloc( hospital->n_total_beds, sizeof(long) ); //TODO: should memory allocated be size of beds + icus??
-    hospital->icu_patient_pdxs     = calloc( hospital->n_total_icus, sizeof(long) );
-
     //setup wards
     hospital->n_wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(int*) );
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
@@ -139,19 +136,19 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
 *  Description: adds population id of a doctor / nurse to hospital's
 *               doctor / nurse population id list
 ******************************************************************************************/
-void add_patient_to_hospital(hospital *hospital, long pdx, int type)
-{
-    if( type == HOSPITALISED )
-    {
-        hospital->general_patient_pdxs[hospital->n_total_general_patients++] = pdx;
-        hospital->n_total_general_patients++;
-    }
-    else if( type == HOSPITALISED_CRITICAL)
-    {
-        hospital->icu_patient_pdxs[hospital->n_total_icu_patients++] = pdx;
-        hospital->n_total_icu_patients++;
-    }
-}
+//void add_patient_to_hospital(hospital *hospital, long pdx, int type)
+//{
+//    if( type == HOSPITALISED )
+//    {
+//        hospital->general_patient_pdxs[hospital->n_total_general_patients++] = pdx;
+//        hospital->n_total_general_patients++;
+//    }
+//    else if( type == HOSPITALISED_CRITICAL)
+//    {
+//        hospital->icu_patient_pdxs[hospital->n_total_icu_patients++] = pdx;
+//        hospital->n_total_icu_patients++;
+//    }
+//}
 
 
 int healthcare_worker_working( individual* indiv )
@@ -211,6 +208,7 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
+    add_patient_to_hospital( model, indiv );
     // set_hospital(model->params, indiv); Search for hospital with space.
     set_waiting( indiv, model->params, 1);
 }
@@ -288,6 +286,61 @@ void transition_to_populace( model *model, individual *indiv )
 // void set_hospital(model->params, indiv); Search for hospital with space in a general ward, then assign the hospital to that individual.
 //                                          Consider what happens when there's no space
 //                                          at any hospital. Output that it's OVERSUBSCRIBED.
+
+void add_patient_to_hospital( model* model, individual *indiv )
+{
+    int hospital_idx, ward_idx;
+    int required_ward;
+
+    int added_to_hospital = FALSE;
+
+    if( indiv->status == HOSPITALISED )
+        required_ward = COVID_GENERAL;
+
+    if( indiv->status == CRITICAL )
+        required_ward = COVID_ICU;
+
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+        for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[required_ward]; ward_idx++ )
+            if( model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients <  model->hospitals[hospital_idx].wards[required_ward][ward_idx].beds )
+            {
+                 //assign_patient_to_ward( &(model->hospitals[hospital_idx].wards[required_ward][ward_idx]), indiv->idx );
+                 indiv->hospital = &(model->hospitals[hospital_idx]);
+                 added_to_hospital = TRUE;
+            }
+
+    if( added_to_hospital == FALSE )
+    {
+        hospital* assigned_hospital = &(model->hospitals[0]);
+
+        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+        {
+            if( model->hospitals[hospital_idx].n_patients_waiting < assigned_hospital->n_patients_waiting)
+                assigned_hospital = &(model->hospitals[hospital_idx]);
+        }
+
+        assigned_hospital->n_patients_waiting++;
+        indiv->hospital = assigned_hospital;
+    }
+
+}
+
+void release_patient_from_hospital( individual *indiv )
+{
+    //remove from ward
+    //uopdate total bed space
+    //update n_patients
+}
+
+int assign_to_general_ward(individual *indiv, hospital *hospital )
+{
+
+}
+
+int assign_to_icu_ward(individual *indiv, hospital *hospital )
+{
+
+}
 // int assign_to_general_ward( indiv, hospital ); Search for an empty general ward in a particular hospital,
 //                                                                      adds to the general ward patient list.
 //                                                                      Then return TRUE if the patient has been reassigned.
