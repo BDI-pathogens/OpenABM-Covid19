@@ -15,6 +15,7 @@
 #include "utilities.h"
 #include "constant.h"
 #include "demographics.h"
+#include "interventions.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -360,6 +361,7 @@ void write_output_files(model *model, parameters *params)
 		write_individual_file( model, params );
 		write_interactions( model );
 		write_transmissions( model );
+		write_trace_tokens( model );
 	}
 }	
 
@@ -676,6 +678,68 @@ void write_transmissions( model *model )
 			indiv->infector->house_no,
 			indiv->infector->work_network
 		);
+	}
+	fclose(output_file);
+}
+
+/*****************************************************************************************
+*  Name:		write_trace_tokens
+*  Description: write interactions details
+******************************************************************************************/
+void write_trace_tokens( model *model )
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	FILE *output_file;
+	long idx, n_events;
+	int day;
+	individual *indiv;
+	event *event, *next_event;
+	trace_token *token;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/trace_tokens_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+
+	output_file = fopen(output_file_name, "w");
+	fprintf( output_file ,"time,days_since_index,index_ID,index_status,days_since_contact,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
+
+	for( day = 1; day <= model->params->quarantine_length_traced; day++ )
+	{
+		n_events    = model->event_lists[TRACE_TOKEN_RELEASE].n_daily_current[ model->time + day ];
+		next_event  = model->event_lists[TRACE_TOKEN_RELEASE].events[ model->time + day ];
+
+		for( idx = 0; idx < n_events; idx++ )
+		{
+			event      = next_event;
+			next_event = event->next;
+			indiv      = event->individual;
+
+			token = indiv->index_trace_token;
+			if( token == NULL )
+				continue;
+
+			token = token->next_index;
+			while( token != NULL )
+			{
+				fprintf( output_file, "%i,%i,%li,%i,%i,%li,%i,%li,%i\n",
+					model->time + day - model->params->quarantine_length_traced,
+					model->params->quarantine_length_traced - day,
+					indiv->idx,
+					indiv->status,
+					token->days_since_contact,
+					token->individual->idx,
+					token->individual->status,
+					ifelse( token->individual->status > 0, token->individual->infector->idx, -1 ),
+					time_infected( token->individual )
+				);
+				token = token->next_index;
+			}
+		}
 	}
 	fclose(output_file);
 }

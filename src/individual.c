@@ -51,6 +51,9 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
+	indiv->trace_tokens         = NULL;
+	indiv->index_trace_token    = NULL;
+	indiv->traced_on_this_trace = FALSE;
 }
 
 /*****************************************************************************************
