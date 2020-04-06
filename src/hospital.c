@@ -134,9 +134,7 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
-    set_waiting( indiv, 1 );
-    update_random_interactions( indiv, model->params );
-    //TODO: How to handle interactions for severely ill patients? Could just assume at this point they're too ill to go outside.
+    set_waiting( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_general
@@ -148,7 +146,21 @@ void transition_to_waiting( model *model, individual *indiv )
 void transition_to_general( model *model, individual *indiv )
 {
     //TODO: CHECK FOR BED AVAILABILITY HERE.
-    set_general_admission( indiv, 1 );
+
+    //if (indiv->hospital_location == WAITING)
+    //  if (set_hospital(model->params, indiv)); -> Search for a hospital with space. Returns true if space is found while setting the hospital and ward number.
+    //      add_to_general_ward( indiv->general_ward, indiv->hospital ); // Adds to the general ward network
+    //      set_general_admission( indiv, model->params, 1); // Changes hospital location and adjusts daily connections.
+
+    //else (indiv->hospital_location == ICU)
+    //  if (assign_to_general_ward( indiv->hospital )); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior ward), assign to a new one, returns true.
+    //  -> if this fails, then return false.
+
+    //      add_to_general_ward( indiv->general_ward_number, indiv->hospital );
+    //      set_general_admission( indiv, model->params, 1);    // Changes hospital location and adjusts daily connections.
+
+
+    set_general_admission( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_ICU
@@ -160,7 +172,19 @@ void transition_to_general( model *model, individual *indiv )
 void transition_to_icu( model *model, individual *indiv )
 {
     //TODO: CHECK FOR BED AVAILABILITY HERE.
-    set_icu_admission( indiv, 1 );
+
+    //if (indiv->hospital_location == WAITING)
+    //  if (set_hospital(indiv)); -> Search for a hospital with space. Returns true if space is found while setting the hospital.
+    //      assign_to_icu_ward( indiv->hospital ); -> Indiv has no ward, then check for empty ward, then assign.
+    //      add_to_icu_ward( indiv->general_ward_number, indiv->hospital );
+    //      set_icu_admission( indiv, model->params, 1);
+
+    //else (indiv->hospital_location == ICU)
+    //  assign_to_icu_ward( indiv->hospital ); -> Indiv -> Check if previous ward has space, if not (or indiv has no prior ward), assign to a new one.
+    //  add_to_icu_ward( indiv->general_ward_number, indiv->hospital );
+    //  set_general_admission( indiv, model->params, 1);
+
+    set_icu_admission( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_mortuary
@@ -170,8 +194,9 @@ void transition_to_icu( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_mortuary( model *model, individual *indiv )
 {
-    set_mortuary_admission( indiv, 1 );
+    set_mortuary_admission( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
+    update_random_interactions( indiv, model->params );
 }
 /*****************************************************************************************
 *  Name:		transition_to_populace
@@ -181,8 +206,8 @@ void transition_to_mortuary( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_populace( model *model, individual *indiv )
 {
-    set_discharged( indiv, 1 );
+    set_discharged( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
-    update_random_interactions( indiv, model->params ); //TODO: RESET INTERACTIONS UPON DISCHARGE.
+    update_random_interactions( indiv, model->params );
 }
 

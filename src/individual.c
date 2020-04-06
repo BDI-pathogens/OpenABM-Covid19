@@ -143,11 +143,12 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
 
 	if( !indiv->quarantined )
 	{
-		switch( indiv->status )
+		switch( indiv->hospital_location )
 		{
-			case DEATH:			n = 0; 										 break;
-			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
-			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
+			case MORTUARY:		n = 0; 								         break; //TOM: CHANGED TO MORTUARY.
+			case WAITING:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
+            case GENERAL:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
+            case ICU:           n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
 			default: 			n = ifelse( params->social_distancing_on, n * params->social_distancing_random_network_multiplier, n );
 		}
 	}
@@ -189,7 +190,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	//TOM: Removing -> interactions should now be handled by hospitalisation.
+	//TOM: Removing: interactions should now be handled by hospitalisation.
 	//update_random_interactions( indiv, params );
 }
 
@@ -211,7 +212,8 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-	update_random_interactions( indiv, params );
+    //TOM: Removing: interactions should now be handled by hospitalisation.
+    //update_random_interactions( indiv, params );
 }
 
 
@@ -231,9 +233,10 @@ void set_case( individual *indiv, int time )
 *  Description: sets a person to be added to the hospital waiting list
 *  Returns:		void
 ******************************************************************************************/
-void set_waiting( individual *indiv, int time )
+void set_waiting( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = WAITING;
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -241,10 +244,10 @@ void set_waiting( individual *indiv, int time )
 *  Description: sets a person to be added to a general ward
 *  Returns:		void
 ******************************************************************************************/
-void set_general_admission( individual *indiv, int time )
+void set_general_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = GENERAL;
-
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -252,9 +255,10 @@ void set_general_admission( individual *indiv, int time )
 *  Description: sets a person to be added to an ICU
 *  Returns:		void
 ******************************************************************************************/
-void set_icu_admission( individual *indiv, int time )
+void set_icu_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = ICU;
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -262,9 +266,10 @@ void set_icu_admission( individual *indiv, int time )
 *  Description: sets a dead person to be added to the mortuary
 *  Returns:		void
 ******************************************************************************************/
-void set_mortuary_admission( individual *indiv, int time )
+void set_mortuary_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = MORTUARY;
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -272,9 +277,11 @@ void set_mortuary_admission( individual *indiv, int time )
 *  Description: sets a recovered person to be discharged from the hospital.
 *  Returns:		void
 ******************************************************************************************/
-void set_discharged( individual *indiv, int time )
+void set_discharged( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_location = DISCHARGED;
+    update_random_interactions( indiv, params );
+
 }
 
 /*****************************************************************************************
