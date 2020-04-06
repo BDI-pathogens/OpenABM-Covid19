@@ -28,7 +28,7 @@ struct event_list{
 	event **events;
 	long *n_daily;
 	long **n_daily_by_age;
-	long *n_daily_current;
+    long *n_daily_current; //is this the currently infected list?
 	long n_total;
 	long *n_total_by_age;
 	long n_current;
@@ -67,14 +67,7 @@ struct model{
 
 	long n_quarantine_days;
 
-    //kelvin change
-    //TODO: Move hospital_network to hospital struct ?? ask rob
     hospital *hospitals;
-    network **hospital_network;
-    network **doctor_patients_network;
-    network **nurse_patients_network;
-    network **doctor_patients_network_icu;
-    network **nurse_patients_network_icu;
 };
 
 struct event{
