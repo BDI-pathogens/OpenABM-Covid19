@@ -497,7 +497,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		indiv->traced_on_this_trace = TRUE;
 
 		if( params->quarantine_household_on_symptoms )
-			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, model->time );
+			intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_symptoms, index_token, model->time );
 
 		if( params->test_on_symptoms )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );

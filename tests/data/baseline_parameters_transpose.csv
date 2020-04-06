@@ -117,6 +117,7 @@ quarantine_household_on_positive	0
 quarantine_household_on_symptoms	0
 quarantine_household_on_traced	0
 quarantine_household_contacts_on_positive	0
+quarantine_household_contacts_on_symptoms	0
 quarantined_daily_interactions	0
 quarantine_days	5
 hospitalised_daily_interactions	0

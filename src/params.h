@@ -94,6 +94,7 @@ typedef struct{
 	int quarantine_household_on_positive;   // quarantine other household members when someone tests positive
 	int quarantine_household_on_traced;		// quarantine other household members when someone is contact traced
 	int quarantine_household_contacts_on_positive; // quarantine the contacts of other household members when someone tests positive
+	int quarantine_household_contacts_on_symptoms; // quarantine the contacts of other household members when someone gets symptoms
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results
