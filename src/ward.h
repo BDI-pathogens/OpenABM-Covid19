@@ -53,6 +53,7 @@ void initialise_ward( ward*, int, int );
 void set_up_ward_networks( ward* ward );
 void build_ward_networks(model *model, ward* ward );
 void build_hcw_patient_network(ward* ward, network *network, long *hc_workers, int n_hcw_working, int patient_required_interactions, int max_hcw_daily_interactions );
+void assign_patient_to_ward( ward *ward, long pdx );
 void destroy_ward( ward* );
 
 #endif /* WARD_H_ */
