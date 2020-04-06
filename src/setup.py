@@ -20,7 +20,6 @@ covid19_module = Extension(
         "network.c",
         "params.c",
         "utilities.c",
-        "swig_utils.c",
     ],
     extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-I$(INC);", "-O0"],
     extra_link_args=["-lgsl", "-lgslcblas", "-lm", "-O3"],

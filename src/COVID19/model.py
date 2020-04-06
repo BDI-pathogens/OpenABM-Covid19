@@ -124,7 +124,7 @@ class Model:
             [type] -- [value of param stored]
         """
         try:
-            value = getattr(covid19, f"get_param_{name}")(self.c_model)
+            value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
             if value < 0:
                 return False
             else:
@@ -146,7 +146,7 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParameterException(f"Can not update {param} during running")
-        setter = getattr(covid19, f"set_param_{param}")
+        setter = getattr(covid19, f"set_model_param_{param}")
         if callable(setter):
             if not setter(self.c_model, value):
                 raise ModelParameterException(f"Setting {param} to {value} failed")
@@ -176,35 +176,35 @@ class Model:
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = int(
-            covid19.util_n_total(self.c_model, covid19.PRESYMPTOMATIC)
-        ) + int(covid19.util_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD)
-        ) + int(covid19.util_n_total(self.c_model, covid19.ASYMPTOMATIC))
-        results["total_case"] = covid19.util_n_total(self.c_model, covid19.CASE)
-        results["n_presymptom"] = covid19.util_n_current(
+            covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC)
+        ) + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD)
+        ) + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
+        results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
+        results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
-        ) + covid19.util_n_current(
+        ) + covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC_MILD
         )
-        results["n_asymptom"] = covid19.util_n_current(
+        results["n_asymptom"] = covid19.utils_n_current(
             self.c_model, covid19.ASYMPTOMATIC
         )
-        results["n_quarantine"] = covid19.util_n_current(
+        results["n_quarantine"] = covid19.utils_n_current(
             self.c_model, covid19.QUARANTINED
         )
-        results["n_tests"] = covid19.util_n_daily(
+        results["n_tests"] = covid19.utils_n_daily(
             self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
         )
-        results["n_symptoms"] = covid19.util_n_current(
+        results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
-        ) + covid19.util_n_current(
+        ) + covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC_MILD
         )
-        results["n_hospital"] = covid19.util_n_current(
+        results["n_hospital"] = covid19.utils_n_current(
             self.c_model, covid19.HOSPITALISED
         )
-        results["n_critical"] = covid19.util_n_current(self.c_model, covid19.CRITICAL)
-        results["n_death"] = covid19.util_n_current(self.c_model, covid19.DEATH)
-        results["n_recovered"] = covid19.util_n_current(self.c_model, covid19.RECOVERED)
+        results["n_critical"] = covid19.utils_n_current(self.c_model, covid19.CRITICAL)
+        results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
+        results["n_recovered"] = covid19.utils_n_current(self.c_model, covid19.RECOVERED)
         return results
 
     def write_output_files(self):

@@ -6,7 +6,6 @@
 #include "params.h"
 #include "constant.h"
 #include "input.h"
-#include "swig_utils.h"
 %}
 
 %rename (create_model) new_model(parameters *params);
@@ -16,5 +15,5 @@
 %include "params.h"
 %include "constant.h"
 %include "input.h"
-%include "swig_utils.h"
-
+%include model_utils.i 
+%include params_utils.i
