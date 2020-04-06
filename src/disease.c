@@ -364,35 +364,3 @@ void transition_to_death( model *model, individual *indiv )
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
 	set_dead( indiv, model->params, model->time );
 }
-
-/*****************************************************************************************s
-*  Name:		transition_one_hospital_event
-*  Description: Generic function for updating an individual with their next
-*				event and adding the applicable events
-*  Returns:		void
-******************************************************************************************/
-void transition_one_hospital_event(
-        model *model,
-        individual *indiv,
-        int from,
-        int to,
-        int edge
-)
-{
-    indiv->status           = from;
-
-    if( from != NO_EVENT )
-        indiv->time_event[from] = model->time;
-    if( indiv->current_hospital_event != NULL )
-        remove_event_from_event_list( model, indiv->current_hospital_event );
-    if( indiv->next_hospital_event != NULL )
-        indiv->current_hospital_event = indiv->next_hospital_event;
-
-    if( to != NO_EVENT )
-    {
-        indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-        indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
-    }
-}
-
-
