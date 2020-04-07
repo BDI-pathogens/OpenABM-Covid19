@@ -55,7 +55,7 @@ void initialize_individual(
 
 	// TOM: Assuming all individuals added to the simulation begin as not being hospitalised.
 	// Change later to account for non-COVID patients being added at the start of the simulation.
-	indiv->hospital_location = NOT_IN_HOSPITAL;
+    indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
 
@@ -142,7 +142,7 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
 
 	if( !indiv->quarantined )
 	{
-        switch( indiv->hospital_location ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
+        switch( indiv->hospital_state ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
 		{
             case MORTUARY:		n = 0; break; //TOM: CHANGED TO MORTUARY.
             case WAITING:       n = 0; break; //TOM: ADDED WAITING.
@@ -232,7 +232,7 @@ void set_case( individual *indiv, int time )
 ******************************************************************************************/
 void set_waiting( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_location = WAITING;
+    indiv->hospital_state = WAITING;
     update_random_interactions( indiv, params );
 }
 
@@ -243,7 +243,7 @@ void set_waiting( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_general_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_location = GENERAL;
+    indiv->hospital_state = GENERAL;
     update_random_interactions( indiv, params );
 }
 
@@ -254,7 +254,7 @@ void set_general_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_icu_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_location = ICU;
+    indiv->hospital_state = ICU;
     update_random_interactions( indiv, params );
 }
 
@@ -265,7 +265,7 @@ void set_icu_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_mortuary_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_location = MORTUARY;
+    indiv->hospital_state = MORTUARY;
     indiv->current_hospital_event = NULL;
     update_random_interactions( indiv, params );
 }
@@ -277,7 +277,7 @@ void set_mortuary_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_discharged( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_location = DISCHARGED;
+    indiv->hospital_state = DISCHARGED;
     indiv->current_hospital_event = NULL;
     update_random_interactions( indiv, params );
 }

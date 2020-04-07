@@ -223,13 +223,13 @@ void transition_to_general( model *model, individual *indiv )
     int hospital_idx = indiv->hospital_idx;
     hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
 
-    if ( indiv->hospital_location == WAITING )
+    if ( indiv->hospital_state == WAITING )
         if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
             set_general_admission( indiv, model->params, 1);
 
 
     //TODO: below will be needed for transition back to general from icu
-//    if ( indiv->hospital_location == ICU );
+//    if ( indiv->hospital_state == ICU );
 //        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
 //            set_general_admission( indiv, model->params, 1);
 }
@@ -245,11 +245,11 @@ void transition_to_icu( model *model, individual *indiv )
     int hospital_idx = indiv->hospital_idx;
     hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
 
-    if ( indiv->hospital_location == WAITING )
+    if ( indiv->hospital_state == WAITING )
         if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
             set_icu_admission( indiv, model->params, 1);
 
-    if ( indiv->hospital_location == GENERAL )
+    if ( indiv->hospital_state == GENERAL )
         if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
             set_icu_admission( indiv, model->params, 1);
 }
