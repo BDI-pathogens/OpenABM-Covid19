@@ -357,7 +357,7 @@ void intervention_test_result( model *model, individual *indiv )
 void intervention_notify_contacts(
 	model *model,
 	individual *indiv,
-	int level,
+	int recursion_level,
 	trace_token *index_token
 )
 {
@@ -386,7 +386,7 @@ void intervention_notify_contacts(
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, level, index_token );
+						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token );
 				}
 				inter = inter->next;
 			}
@@ -628,7 +628,7 @@ void intervention_on_traced(
 		int time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time );
 
-		if( params->quarantine_household_on_traced )
+		if( params->quarantine_household_on_traced && recursion_level != NOT_RECURSIVE )
 			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, contact_time );
 	}
 
@@ -638,7 +638,7 @@ void intervention_on_traced(
 		intervention_test_order( model, indiv, time_test );
 	}
 
-	if( recursion_level < params->tracing_network_depth )
+	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )
 		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
 }
 
