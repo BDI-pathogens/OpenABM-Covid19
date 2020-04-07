@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
 				params.lockdown_on,
 				params.test_on_symptoms,
 				params.app_turned_on,
-				n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ),
+				n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
 				n_total( model, CASE ),
-				n_current( model, PRESYMPTOMATIC ),
+				n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
 				n_current( model, ASYMPTOMATIC ),
 				n_current( model, QUARANTINED ),
 				n_daily( model, TEST_RESULT, model->time + 1),
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
 	printf( "# Total total interactions:      %li\n", model->n_total_intereactions );
-	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, ASYMPTOMATIC ) );
+	printf( "# Total infected:                %li\n", n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ) );
 	printf( "# Total cases:                   %li\n", n_total( model, CASE ) );
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		printf( "# Total cases %11s:       %li\n", AGE_TEXT_MAP[idx], n_total_age( model, CASE, idx ) );
