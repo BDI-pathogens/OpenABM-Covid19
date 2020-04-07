@@ -304,7 +304,6 @@ void transition_to_discharged( model *model, individual *indiv )
 *               hospital with the shortest waiting list.
 *  Returns:		void
 ******************************************************************************************/
-
 void assign_patient_to_hospital( model* model, individual *indiv )
 {
     int hospital_idx, ward_idx;
@@ -318,15 +317,18 @@ void assign_patient_to_hospital( model* model, individual *indiv )
     if( indiv->status == CRITICAL )
         required_ward = COVID_ICU;
 
+    hospital* assigned_hospital;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
     {
-        for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[required_ward]; ward_idx++ )
+        assigned_hospital = &(model->hospitals[hospital_idx]);
+        for( ward_idx = 0; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
         {
             //Check if number of patients in a ward is less than the max no. of beds.
-            if( model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients
-                    <  model->hospitals[hospital_idx].wards[required_ward][ward_idx].beds )
+            if( assigned_hospital->wards[required_ward][ward_idx].n_patients
+                    <  assigned_hospital->wards[required_ward][ward_idx].beds )
             {
                  indiv->hospital_idx = hospital_idx;
+                 assigned_hospital->n_patients_waiting++;
                  added_to_hospital = TRUE;
             }
         }
