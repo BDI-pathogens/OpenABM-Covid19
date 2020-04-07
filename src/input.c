@@ -172,8 +172,17 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->mean_time_hospital_transition));
     if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
 
-    //TOM: Added for hospital state transitions.
     check = fscanf(parameter_file, " %lf ,", &(params->sd_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
+
+    //TOM: Added to account for hospital location dependent infectiousness.
+    check = fscanf(parameter_file, " %lf ,", &(params->waiting_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->general_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->icu_infectivity_modifier));
     if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic));
