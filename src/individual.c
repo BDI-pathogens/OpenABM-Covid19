@@ -61,8 +61,7 @@ void initialize_individual(
     indiv->ward_type = NO_WARD;
     indiv->ward_idx  = NO_WARD;
 
-    //TODO: kelvin change
-    indiv->worker_type = OTHER;
+    indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 
 /*****************************************************************************************
