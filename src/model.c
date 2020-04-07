@@ -795,7 +795,7 @@ void check_hospital_state_status( model *model ) {
                 transition_one_hospital_event( model, indiv, WAITING, MORTUARY, HOSPITAL_TRANSITION );
             }
             else {
-                transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION ); //TODO: patient being discharged without being assigned to hospital?
             }
         }
 
