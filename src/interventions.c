@@ -407,7 +407,7 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	else
 		next_token = token->next_index;
 
-	if( zero_traced & (token->next != NULL | token->last != NULL ) )
+	if( zero_traced & ( (token->next != NULL) | (token->last != NULL) ) )
 		print_exit( "error index token should not link to a list");
 
 	// return the index token to the stack
