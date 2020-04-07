@@ -26,7 +26,7 @@ void initialise_ward(
 
     ward->patient_pdxs = calloc( ward->beds, sizeof(long) );
     for (int i = 0; i < ward->beds; i++)
-        ward->patient_pdxs[i] = -1;
+        ward->patient_pdxs[i] = NO_PATIENT;
 
     ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
@@ -115,13 +115,37 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     free( hc_workers );
 }
 
-void assign_patient_to_ward( ward *ward, long pdx )
+int add_patient_to_ward( ward *ward, long pdx )
 {
-    for( int idx = 0; idx < ward->beds; idx++ )
-        if( ward->patient_pdxs[idx] == -1 )
-            ward->patient_pdxs[idx] = pdx;
+    if( ward->n_patients < ward->beds )
+    {
+        for( int idx = 0; idx < ward->beds; idx++ )
+        {
+            if( ward->patient_pdxs[idx] == NO_PATIENT )
+            {
+                ward->patient_pdxs[idx] = pdx;
+                ward->n_patients++;
+                return TRUE;
+            }
+        }
+    }
+    return FALSE;
 }
 
+void remove_patient_from_ward( ward* ward, long pdx)
+{
+    int idx;
+
+    for( idx = 0; idx < ward->beds; idx++ )
+    {
+        if( ward->patient_pdxs[idx] == pdx )
+        {
+            ward->patient_pdxs[idx] = NO_PATIENT;
+            ward->n_patients--;
+            break;
+        }
+    }
+}
 
 void destroy_ward( ward* ward )
 {
@@ -130,4 +154,3 @@ void destroy_ward( ward* ward )
     free( ward->doctors );
     free( ward->nurses );
 }
-
