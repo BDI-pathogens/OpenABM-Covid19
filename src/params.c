@@ -312,35 +312,79 @@ int set_param_self_quarantine_fraction(model *model, double value)
 ******************************************************************************************/
 int set_param_lockdown_on( model *model, int value )
 {
-	int pdx;
+	long pdx;
+	int network;
 	parameters *params = model->params;
 
 	if( value == TRUE )
 	{
-		params->lockdown_on = TRUE;
-		params->daily_fraction_work_used = params->daily_fraction_work * params->lockdown_work_network_multiplier;
+		for( network = 0; network < N_WORK_NETWORKS; network++ )
+			params->daily_fraction_work_used[network] = params->daily_fraction_work *
+														params->lockdown_work_network_multiplier;
 
 		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
 																params->lockdown_house_interaction_multiplier;
-		set_up_infectious_curves( model );
-
-		for( pdx = 0; pdx < params->n_total; pdx++ )
-			update_random_interactions( &(model->population[pdx]), params );
 	}
 	else
 	if( value == FALSE )
 	{
-		params->lockdown_on = FALSE;
-		params->daily_fraction_work_used = params->daily_fraction_work;
+		for( network = 0; network < N_WORK_NETWORKS; network++ )
+			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
+				params->daily_fraction_work_used[network] = params->daily_fraction_work;
 
 		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
-		set_up_infectious_curves( model );
-
-		for( pdx = 0; pdx < params->n_total; pdx++ )
-			update_random_interactions( &(model->population[pdx]), params );
 	}
 	else
 		return FALSE;
+
+	params->lockdown_on = value;
+	set_up_infectious_curves( model );
+
+	for( pdx = 0; pdx < params->n_total; pdx++ )
+		update_random_interactions( &(model->population[pdx]), params );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lockdown_elderly_on
+*  Description: Carries out checks on the input parameters
+******************************************************************************************/
+int set_param_lockdown_elderly_on( model *model, int value )
+{
+	long pdx;
+	int network;
+	parameters *params = model->params;
+	individual *indiv;
+
+	if( value == TRUE )
+	{
+		for( network = 0; network < N_WORK_NETWORKS; network++ )
+			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
+				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
+															  params->lockdown_work_network_multiplier;
+	}
+	else
+	if( value == FALSE )
+	{
+		if( !params->lockdown_on )
+		{
+			for( network = 0; network < N_WORK_NETWORKS; network++ )
+				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
+		}
+
+	}else
+		return FALSE;
+
+	params->lockdown_elderly_on = value;
+	set_up_infectious_curves( model );
+
+	for( pdx = 0; pdx < params->n_total; pdx++ )
+	{
+		indiv = &(model->population[pdx]);
+		if( indiv->age_type == AGE_TYPE_ELDERLY )
+			update_random_interactions( indiv, params );
+	}
 
 	return TRUE;
 }
@@ -391,6 +435,9 @@ void check_params( parameters *params )
 
     if( params->lockdown_time_on < 1 )
       	print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
+
+    if( params->lockdown_elderly_time_on < 1 )
+        print_exit( "BAD PARAM lockdown_elderly_time_on - can only be turned on at the first time step" );
 
     if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
  	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );

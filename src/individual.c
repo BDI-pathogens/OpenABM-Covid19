@@ -140,15 +140,20 @@ void set_age_group( individual *indiv, parameters *params, int group )
 void update_random_interactions( individual *indiv, parameters* params )
 {
 	double n = indiv->base_random_interactions;
+	int lockdown;
 
 	if( !indiv->quarantined )
 	{
+		lockdown = params->lockdown_on;
+		if( indiv->age_type == AGE_TYPE_ELDERLY )
+			lockdown = max( lockdown, params->lockdown_elderly_on );
+
 		switch( indiv->status )
 		{
 			case DEATH:			n = 0; 										 break;
 			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
 			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-			default: 			n = ifelse( params->lockdown_on, n * params->lockdown_random_network_multiplier, n );
+			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else
