@@ -37,7 +37,8 @@ struct hospital
     int n_total_general_patients;   //total number of general patients
     int n_total_icu_patients;       //total number of icu patients
 
-    int n_patients_waiting;
+    int n_patients_waiting; //TODO: have waiting list for general and icu
+
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
     //TODO: add non covid patients
 
@@ -68,7 +69,7 @@ void transition_to_waiting( model *model, individual *indiv );
 void transition_to_general( model *model, individual *indiv );
 void transition_to_icu( model *model, individual *indiv );
 void transition_to_mortuary( model *model, individual *indiv );
-void transition_to_populace( model *model, individual *indiv );
+void transition_to_discharged( model *model, individual *indiv );
 
 int assign_to_ward(individual *indiv, hospital *hospital, int ward_type );
 
