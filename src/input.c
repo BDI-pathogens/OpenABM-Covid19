@@ -312,6 +312,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
 
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_smart_release_day));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_smart_release_day\n"); };
+
 	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 

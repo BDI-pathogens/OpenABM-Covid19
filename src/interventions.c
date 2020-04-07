@@ -656,7 +656,7 @@ void intervention_smart_release( model *model )
 	event *event, *next_event;
 	trace_token *token;
 
-	int days = 4;
+	int days =  model->params->quarantine_smart_release_day;
 
 	day        = model->time + model->params->quarantine_length_traced - days;
 	time_index = model->time - days;

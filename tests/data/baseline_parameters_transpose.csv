@@ -130,6 +130,7 @@ quarantine_household_contacts_on_positive	0
 quarantine_household_contacts_on_symptoms	0
 quarantined_daily_interactions	0
 quarantine_days	7
+quarantine_smart_release_day 0
 hospitalised_daily_interactions	0
 test_insensitive_period	3
 test_order_wait	0
