@@ -672,6 +672,8 @@ int one_time_step( model *model )
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,TRUE );
 
+	// intervention_smart_release( model );
+
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
