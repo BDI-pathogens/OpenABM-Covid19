@@ -157,9 +157,12 @@ void update_intervention_policy( model *model, int time )
 
 	if( time == 0 )
 	{
-		params->app_turned_on = FALSE;
-		params->lockdown_on	  = FALSE;
-		params->daily_fraction_work_used = params->daily_fraction_work;
+		params->app_turned_on       = FALSE;
+		params->lockdown_on	        = FALSE;
+		params->lockdown_elderly_on	= FALSE;
+		for( type = 0; type < N_WORK_NETWORKS; type++ )
+			params->daily_fraction_work_used[type] = params->daily_fraction_work;
+
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
 			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
 	}
@@ -173,6 +176,12 @@ void update_intervention_policy( model *model, int time )
 	if( time == params->lockdown_time_off )
 		set_param_lockdown_on( model, FALSE );
 	
+	if( time == params->lockdown_elderly_time_on )
+		set_param_lockdown_elderly_on( model, TRUE );
+
+	if( time == params->lockdown_elderly_time_off )
+		set_param_lockdown_elderly_on( model, FALSE );
+
 	if( time == params->testing_symptoms_time_on )
 		set_param_test_on_symptoms( model, TRUE );
 

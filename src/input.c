@@ -347,6 +347,12 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_on));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_on)\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
 	
 	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_time_on));
 	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_time_on)\n"); };
