@@ -182,6 +182,15 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
 	if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
 	
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->mild_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter mild_fraction\n"); };
+	}
+
+	check = fscanf(parameter_file, " %lf ,", &(params->mild_infectious_factor));
+	if( check < 1){ print_exit("Failed to read parameter mild_infectious_factor\n"); };
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
 	

@@ -39,6 +39,16 @@ fraction_asymptomatic_60_69 0.2
 fraction_asymptomatic_70_79 0.2
 fraction_asymptomatic_80 0.2
 asymptomatic_infectious_factor	0.25
+mild_fraction_0_9 0.0
+mild_fraction_10_19 0.0
+mild_fraction_20_29 0.0
+mild_fraction_30_39 0.0
+mild_fraction_40_49 0.0
+mild_fraction_50_59 0.0
+mild_fraction_60_69 0.0
+mild_fraction_70_79 0.0
+mild_fraction_80 0.0
+mild_infectious_factor	1.0
 mean_asymptomatic_to_recovery	15.0
 sd_asymptomatic_to_recovery	5.0
 household_size_1	8197.0
