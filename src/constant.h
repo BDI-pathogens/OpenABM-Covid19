@@ -95,7 +95,6 @@ enum WORK_NETWORKS_TYPES{
 enum WORKER_TYPES {
     DOCTOR,
     NURSE,
-    OTHER,
     N_WORKER_TYPES
 };
 
@@ -150,6 +149,7 @@ enum HOSPITAL_WARD_TYPES{
 #define INPUT_CHAR_LEN 100
 
 #define NO_WARD -1
+#define NOT_HEALTHCARE_WORKER -1
 
 gsl_rng * rng;
 

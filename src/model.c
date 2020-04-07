@@ -288,7 +288,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
                 continue;
 
         indiv->worker_type = DOCTOR;
@@ -303,7 +303,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == OTHER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
                 continue;
 
         indiv->worker_type = NURSE;
@@ -552,7 +552,7 @@ void set_up_seed_infection( model *model )
     while( idx < params->n_seed_infection )
     {
         person = gsl_rng_uniform_int( rng, params->n_total );
-        if( model->population[person].worker_type == OTHER )
+        if( model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
         {
             new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
             idx++;
