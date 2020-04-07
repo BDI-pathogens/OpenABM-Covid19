@@ -467,8 +467,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->hazard,
 			indiv->random_interactions,
 			time_infected(indiv),
-			indiv->time_event[PRESYMPTOMATIC],
-			indiv->time_event[SYMPTOMATIC],
+			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
+			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
 			indiv->time_event[ASYMPTOMATIC],
 			indiv->time_event[HOSPITALISED],
 			indiv->time_event[CRITICAL],
@@ -828,7 +828,7 @@ void write_trace_tokens_ts( model *model, int initialise )
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
-				if( contact->status > 2 & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
+				if( contact->status > SYMPTOMATIC & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
 					( contact->time_event[RECOVERED] == UNKNOWN | contact->time_event[RECOVERED] > time_index )
 				)
 					n_symptoms++;

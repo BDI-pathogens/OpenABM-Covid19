@@ -177,10 +177,13 @@ class Model:
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = int(
             covid19.util_n_total(self.c_model, covid19.PRESYMPTOMATIC)
+        ) + int(covid19.util_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD)
         ) + int(covid19.util_n_total(self.c_model, covid19.ASYMPTOMATIC))
         results["total_case"] = covid19.util_n_total(self.c_model, covid19.CASE)
         results["n_presymptom"] = covid19.util_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
+        ) + covid19.util_n_current(
+            self.c_model, covid19.PRESYMPTOMATIC_MILD
         )
         results["n_asymptom"] = covid19.util_n_current(
             self.c_model, covid19.ASYMPTOMATIC
@@ -193,6 +196,8 @@ class Model:
         )
         results["n_symptoms"] = covid19.util_n_current(
             self.c_model, covid19.SYMPTOMATIC
+        ) + covid19.util_n_current(
+            self.c_model, covid19.SYMPTOMATIC_MILD
         )
         results["n_hospital"] = covid19.util_n_current(
             self.c_model, covid19.HOSPITALISED
