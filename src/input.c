@@ -423,7 +423,11 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"time_infected,");
 	fprintf(individual_output_file,"time_presypmtomatic,");
+	fprintf(individual_output_file,"time_presypmtomatic_mild,");
+	fprintf(individual_output_file,"time_presypmtomatic_severe,");
 	fprintf(individual_output_file,"time_symptomatic,");
+	fprintf(individual_output_file,"time_symptomatic_mild,");
+	fprintf(individual_output_file,"time_symptomatic_severe,");
 	fprintf(individual_output_file,"time_asymptomatic,");
 	fprintf(individual_output_file,"time_hospitalised,");
 	fprintf(individual_output_file,"time_critical,");
@@ -457,7 +461,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -468,7 +472,11 @@ void write_individual_file(model *model, parameters *params)
 			indiv->random_interactions,
 			time_infected(indiv),
 			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
+			indiv->time_event[PRESYMPTOMATIC_MILD],
+			indiv->time_event[PRESYMPTOMATIC],
 			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
+			indiv->time_event[SYMPTOMATIC_MILD],
+			indiv->time_event[SYMPTOMATIC],
 			indiv->time_event[ASYMPTOMATIC],
 			indiv->time_event[HOSPITALISED],
 			indiv->time_event[CRITICAL],
@@ -828,7 +836,7 @@ void write_trace_tokens_ts( model *model, int initialise )
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
-				if( contact->status > SYMPTOMATIC & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
+				if( contact->status >= SYMPTOMATIC & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
 					( contact->time_event[RECOVERED] == UNKNOWN | contact->time_event[RECOVERED] > time_index )
 				)
 					n_symptoms++;
