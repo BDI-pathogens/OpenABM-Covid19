@@ -733,7 +733,7 @@ int one_time_step( model *model )
     //TOM: EVENT CONTROL HERE//
 
     build_daily_network( model );
-	transmit_virus( model );
+	transmit_virus( model, model->params );
 
 	//TODO: UPDATE DISEASE STATE SETTERS TO NO LONGER TAKE PARAMS AS A VARIABLE.
     //TOM: DISEASE EVENT CONTROL HERE//

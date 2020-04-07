@@ -59,8 +59,15 @@ typedef struct{
     double mean_time_to_death;		// mean time to death after hospitalisation/severe illness
     double sd_time_to_death;		// sd time to death after hospitalisation/severe illness
 
-    double mean_time_hospital_transition; // mean time for movement between hospital wards
-    double sd_time_hospital_transition; // sd for movement between hospital wards
+    //TODO: Add in finer grained transition times between wards once we have more information on them.
+    //TOM: Determines timing for hospital event transitions.
+    double mean_time_hospital_transition; // mean time for movement between hospital locations
+    double sd_time_hospital_transition; // sd for movement between hospital locations
+
+    //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
+    double waiting_infectivity_modifier;
+    double general_infectivity_modifier;
+    double icu_infectivity_modifier;
 
     double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
     double population_group[N_AGE_GROUPS];		// ONS stratification of population (in millions)
