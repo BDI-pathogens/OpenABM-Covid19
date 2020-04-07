@@ -1,5 +1,6 @@
 import covid19
 import logging
+import enum
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,22 +32,68 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "app_users_fraction"
 ]
 
+class AgeGroupEnum(enum.Enum):
+    _0_9 = 0
+    _10_19 = 1
+    _20_29 = 2
+    _30_39 = 3
+    _40_49 = 4
+    _50_59 = 5
+    _60_69 = 6
+    _70_79 = 7
+    _80 = 8
+    
 
 class Parameters(object):
     def __init__(
-        self, input_param_file, param_line_number, output_file_dir, input_household_file
+        self, input_param_file: str = None, param_line_number: int= None, output_file_dir: str = "./", input_household_file:str=None, read_param_file=True,
     ):
         self.c_params = covid19.parameters()
-        self.c_params.input_param_file = input_param_file
-        self.c_params.param_line_number = int(param_line_number)
+        if input_param_file:
+            self.c_params.input_param_file = input_param_file
+        else:
+            LOGGER.info("Have not passed input file for params, use set_param or set_param_dict")
+        if param_line_number:
+            self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
+        if not input_household_file:
+            raise ParamaterException("Household data must be supplied as a csv")
         self.c_params.input_household_file = input_household_file
-        self._read_and_check_from_file()
+        if read_param_file and input_param_file != None:
+            self._read_and_check_from_file()
         self.update_lock = False
 
     def _read_and_check_from_file(self):
         covid19.read_param_file(self.c_params)
-        covid19.read_household_demographics_file(self.c_params)
+
+    def _read_household_demographics(self):
+        """[summary]
+        Try to read the reference household demographics file
+        If we've not set the number of lines to read, parse the file in
+        python and inset the line count to the params structure for initilisation
+        """
+        if getattr(self.c_params, "N_REFERENCE_HOUSEHOLDS") != 0:
+            covid19.read_household_demographics_file(self.c_params)
+        else:
+            n_ref_hh =-1
+            with open(self.c_params.input_household_file, 'r') as f:
+                for _ in f.readlines():
+                    n_ref_hh += 1 
+            setattr(self.c_params, "N_REFERENCE_HOUSEHOLDS", n_ref_hh)
+            self._read_household_demographics()
+
+    def set_param_dict(self, params):
+        for k,v in params.items():
+            self.set_param(k,v)
+
+    def _get_base_param_from_age_param(self, param):
+        base_name, enum_val = None, None
+        for ag in AgeGroupEnum:
+            if ag.name == param[-1* len(ag.name):]:
+                base_name = param.split(ag.name)[0]
+                enum_val = ag.value
+                break
+        return base_name, enum_val
 
     def get_param(self, param):
         """[summary]
@@ -60,12 +107,17 @@ class Parameters(object):
         Returns:
             [type] -- [value of param]
         """
-        try:
-            return getattr(self.c_params, param)
-        except AttributeError:
+        if hasattr(covid19, f"get_param_{param}"):
+            return getattr(covid19, f"get_param_{param}")(self.c_params)
+        elif hasattr(covid19, f"get_param_{self._get_base_param_from_age_param(param)[0]}"):
+            param, idx = self._get_base_param_from_age_param(param)
+            return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
+        else:
             raise ParameterException(
                 f"Can not get param {param} as it doesn't exist in parameters object"
-            )
+        )
+
+
 
     def set_param(self, param, value):
         """[summary]
@@ -81,12 +133,15 @@ class Parameters(object):
             raise ParameterException(
                 f"Parameter set has been exported to model, please use model.update_x functions"
             )
-        
-        if hasattr(self.c_params, param ):
-            if isinstance(getattr(self.c_params, param), int):
-                setattr(self.c_params, param, int(value))
-            elif isinstance(getattr(self.c_params, param), float):
-                setattr(self.c_params, param, float(value))
+
+
+        if hasattr(covid19, f"set_param_{param}"):
+            setter = getattr(covid19, f"set_param_{param}")
+            setter(self.c_params, value)
+        elif hasattr(covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"):
+            param, idx = self._get_base_param_from_age_param(param)
+            setter = getattr(covid19, f"set_param_{param}")
+            setter(self.c_params, value, idx)
         else:
             raise ParameterException(f"Can not set parameter as it doesn't exist")
 
@@ -96,6 +151,7 @@ class Parameters(object):
         Returns:
             [type] -- [description]
         """
+        self._read_household_demographics() 
         covid19.check_params(self.c_params)
         LOGGER.info(
             "Returning self.c_params into Model object, future updates to parameters not possible"
