@@ -51,7 +51,7 @@ struct individual{
 	event *quarantine_release_event;
 	int quarantine_test_result;
 
-	int hospital_location;
+    int hospital_location; //TODO: change to state
 	event *current_hospital_event;
 	event *next_hospital_event;
 

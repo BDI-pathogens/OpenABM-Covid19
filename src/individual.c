@@ -145,9 +145,9 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
         switch( indiv->hospital_location ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
 		{
 			case MORTUARY:		n = 0; 								         break; //TOM: CHANGED TO MORTUARY.
-			case WAITING:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
-            case GENERAL:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
-            case ICU:           n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING.
+            case WAITING:       n = params->hospitalised_daily_interactions; break; //TOM: ADDED WAITING. should this be 0??
+            case GENERAL:       n = params->hospitalised_daily_interactions; break; //TODO: should be 0
+            case ICU:           n = params->hospitalised_daily_interactions; break; //TODO: should be 0
 			default: 			n = ifelse( params->social_distancing_on, n * params->social_distancing_random_network_multiplier, n );
 		}
 	}
