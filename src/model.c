@@ -784,6 +784,7 @@ void check_hospital_state_status( model *model ) {
             transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
 
         if ( indiv->hospital_state == WAITING )
+        {
             if ( indiv->status == HOSPITALISED ) {
                 transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
             }
@@ -796,8 +797,10 @@ void check_hospital_state_status( model *model ) {
             else {
                 transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION );
             }
+        }
 
         if ( indiv->hospital_state == GENERAL )
+        {
             if ( indiv->status == CRITICAL ) {
                 transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
 
@@ -808,15 +811,18 @@ void check_hospital_state_status( model *model ) {
             else {
                 transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, HOSPITAL_TRANSITION );
             }
+        }
 
         //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
         if ( indiv->hospital_state == ICU )
+        {
             if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
             }
             else {
                 transition_one_hospital_event( model, indiv, ICU, DISCHARGED, HOSPITAL_TRANSITION );
             }
+        }
     }
 }
 
