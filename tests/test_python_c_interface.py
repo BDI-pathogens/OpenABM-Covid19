@@ -12,10 +12,10 @@ Created: March 2020
 Author: Daniel Montero
 """
 
-import subprocess, shutil, os, sys, pytest
-from os.path import join
-from string import Template
-import numpy as np, pandas as pd
+import pytest
+import sys
+import numpy as np
+import pandas as pd
 from random import randrange
 
 sys.path.append("src/COVID19")

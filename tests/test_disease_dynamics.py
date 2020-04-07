@@ -10,8 +10,9 @@ Created: March 2020
 Author: p-robot
 """
 
-import pytest, sys, subprocess, shutil, os
-from os.path import join
+import pytest
+import subprocess
+import sys
 import numpy as np, pandas as pd
 from math import sqrt
 

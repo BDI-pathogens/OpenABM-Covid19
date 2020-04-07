@@ -11,6 +11,8 @@ else
 	PYTHON = python3
 endif
 
+PIP_FLAGS := --upgrade
+
 OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = ${GSLFLAGS}
@@ -33,7 +35,7 @@ swig-all:
 	# swig -outdir COVID19 -python covid19.i
 	swig -python covid19.i
 	# python3 setup.py build_ext --inplace
-	${PYTHON} -m pip install --user --upgrade .
+	${PYTHON} -m pip install $(PIP_FLAGS) .
 
 all: ${OBJS}
 	${C} -L${LIB} -o ${EXE} ${OBJS} ${LFLAGS}

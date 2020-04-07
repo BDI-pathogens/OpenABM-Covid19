@@ -8,6 +8,7 @@ src/*.csv
 
 # Python testing files
 __pycache__
+.mypy_cache/
 
 # Eclipse-related files
 .project

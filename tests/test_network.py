@@ -11,10 +11,8 @@ Author: p-robot
 """
 
 import pytest, sys, subprocess, shutil, os
-from os.path import join
 import numpy as np, pandas as pd
 from scipy import optimize
-from math import sqrt, log, exp
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
