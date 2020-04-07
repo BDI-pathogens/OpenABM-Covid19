@@ -56,6 +56,7 @@ struct individual{
     int ward_idx;
     int ward_type;
     int hospital_idx;
+
     int hospital_state;
 	event *current_hospital_event;
 	event *next_hospital_event;
