@@ -67,6 +67,10 @@ typedef struct{
 
 	double fraction_asymptomatic[N_AGE_GROUPS]; // faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
+
+	double mild_fraction[N_AGE_GROUPS]; 	// faction who just have mild symptoms
+	double mild_infectious_factor;  		// relative infectiousness of people with mild symptoms
+
 	double mean_asymptomatic_to_recovery;   // mean time to recovery for asymptomatics
 	double sd_asymptomatic_to_recovery;     // sd of time to recovery for asymptomatics
 
