@@ -178,6 +178,18 @@ void update_intervention_policy( model *model, int time )
 
 	if( time == params->testing_symptoms_time_off )
 		set_param_test_on_symptoms( model, FALSE );
+	
+	if( time >= params->successive_lockdown_time_on ){
+		
+		int r_time = (time - params->successive_lockdown_time_on);
+		int duration = params->successive_lockdown_duration;
+		int gap = params->successive_lockdown_gap;
+		
+		if( (r_time % ( duration + gap ) ) < duration)
+			set_param_lockdown_on( model, TRUE );
+		else
+			set_param_lockdown_on( model, FALSE );
+	}
 };
 
 /*****************************************************************************************
@@ -395,7 +407,7 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	else
 		next_token = token->next_index;
 
-	if( zero_traced & (token->next != NULL | token->last != NULL ) )
+	if( zero_traced & ( (token->next != NULL) | (token->last != NULL) ) )
 		print_exit( "error index token should not link to a list");
 
 	// return the index token to the stack

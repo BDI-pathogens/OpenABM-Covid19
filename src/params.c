@@ -367,8 +367,8 @@ int set_param_app_users_fraction( model *model, double value )
     if( value == model->params->app_users_fraction )
     	return TRUE;
 
-	model->params->app_users_fraction = value;
-	set_up_app_users( model, value );
+    model->params->app_users_fraction = value;
+    set_up_app_users( model, value );
     return TRUE;
 }
 
