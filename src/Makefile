@@ -45,3 +45,5 @@ clean:
 .c.o:
 	${C} ${CFLAGS} -c $< -o $@
 
+
+.PHONY: swig-all all clean
