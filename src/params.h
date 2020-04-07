@@ -32,7 +32,7 @@ typedef struct{
 	int random_interaction_distribution;          // distribution from which each person random interactions are drawn
 	double mean_work_interactions[N_WORK_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
-	double daily_fraction_work_used;      		// fraction of daily work interactions with social-distancing
+	double daily_fraction_work_used[N_WORK_NETWORKS];  // fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
 
@@ -118,6 +118,10 @@ typedef struct{
 	int lockdown_time_off;							// lockdown turned off at this time
 	int lockdown_on;								// is lockdown currently on
 
+	int lockdown_elderly_time_on;					// lockdown elderly turned on at this time
+	int lockdown_elderly_time_off;					// lockdown elderly turned off at this time
+	int lockdown_elderly_on;						// is lockdown elderly currently on
+
 	int successive_lockdown_time_on;               // successive lockdowns are turned on at this time
 	int successive_lockdown_duration;              // successive lockdowns last for this duration
 	int successive_lockdown_gap;                   // successive lockdowns will have this duration of gap between them
@@ -169,6 +173,7 @@ int set_param_test_order_wait( model*, int );
 int set_param_test_result_wait( model*, int );
 int set_param_self_quarantine_fraction( model*, double );
 int set_param_lockdown_on( model*, int );
+int set_param_lockdown_elderly_on( model*, int );
 int set_param_app_turned_on( model*, int );
 int set_param_app_users_fraction( model*, double );
 

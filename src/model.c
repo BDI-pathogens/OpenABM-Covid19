@@ -609,7 +609,7 @@ void build_daily_newtork( model *model )
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
+		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
 };
 
