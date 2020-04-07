@@ -102,9 +102,9 @@ fatality_fraction_80	1.0
 quarantine_length_self	14
 quarantine_length_traced	14
 quarantine_length_positive	14
-quarantine_dropout_self	0.01
-quarantine_dropout_traced	0.01
-quarantine_dropout_positive	0.01
+quarantine_dropout_self	0.02
+quarantine_dropout_traced	0.02
+quarantine_dropout_positive	0.02
 test_on_symptoms	0
 test_on_traced	0
 trace_on_symptoms 0
@@ -119,7 +119,7 @@ quarantine_household_on_traced	0
 quarantine_household_contacts_on_positive	0
 quarantine_household_contacts_on_symptoms	0
 quarantined_daily_interactions	0
-quarantine_days	5
+quarantine_days	7
 hospitalised_daily_interactions	0
 test_insensitive_period	3
 test_order_wait	0
@@ -132,6 +132,9 @@ lockdown_random_network_multiplier	0.2
 lockdown_house_interaction_multiplier	3.0
 lockdown_time_on	10000
 lockdown_time_off	10000
+successive_lockdown_time_on 10000
+successive_lockdown_duration 21
+successive_lockdown_gap 7
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
 N_REFERENCE_HOUSEHOLDS	125455
