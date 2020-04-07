@@ -129,6 +129,8 @@ class Parameters(object):
         self.c_params.input_household_file = input_household_file
         if read_param_file and input_param_file != None:
             self._read_and_check_from_file()
+        if output_file_dir:
+            self.c_params.sys_write_individual = 1
         self.update_lock = False
 
     def _read_and_check_from_file(self):
