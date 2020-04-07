@@ -745,7 +745,7 @@ int one_time_step( model *model )
     //TOM: DISEASE EVENT CONTROL HERE//
 
     //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    check_hospital_location_status( model );
+    check_hospital_state_status( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
@@ -768,11 +768,11 @@ int one_time_step( model *model )
 };
 
 /*****************************************************************************************
-*  Name:		check_hospital_location_status
+*  Name:		check_hospital_state_status
 *  Description: Checks the current hospital location of individuals against their disease state
 *               and attempts to transfer them to the correct part of the hospital.
 ******************************************************************************************/
-void check_hospital_location_status( model *model ) {
+void check_hospital_state_status( model *model ) {
     int idx;
     long n_total = model->params->n_total;
     individual* indiv;
@@ -780,10 +780,10 @@ void check_hospital_location_status( model *model ) {
     for (idx = 0; idx < n_total; idx++ ) {
         indiv = &( model->population[idx] );
 
-        if ( indiv->status == HOSPITALISED && indiv->hospital_location == NOT_IN_HOSPITAL )
+        if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
             transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
 
-        if ( indiv->hospital_location == WAITING )
+        if ( indiv->hospital_state == WAITING )
             if ( indiv->status == HOSPITALISED ) {
                 transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
             }
@@ -797,7 +797,7 @@ void check_hospital_location_status( model *model ) {
                 transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION );
             }
 
-        if ( indiv->hospital_location == GENERAL )
+        if ( indiv->hospital_state == GENERAL )
             if ( indiv->status == CRITICAL ) {
                 transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
 
@@ -810,7 +810,7 @@ void check_hospital_location_status( model *model ) {
             }
 
         //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
-        if ( indiv->hospital_location == ICU )
+        if ( indiv->hospital_state == ICU )
             if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
             }
