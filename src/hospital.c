@@ -227,9 +227,11 @@ void transition_to_general( model *model, individual *indiv )
         if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
             set_general_admission( indiv, model->params, 1);
 
-    if ( indiv->hospital_location == ICU );
-        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
-            set_general_admission( indiv, model->params, 1);
+
+    //TODO: below will be needed for transition back to general from icu
+//    if ( indiv->hospital_location == ICU );
+//        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
+//            set_general_admission( indiv, model->params, 1);
 }
 /*****************************************************************************************
 *  Name:		transition_to_ICU
@@ -272,7 +274,7 @@ void transition_to_mortuary( model *model, individual *indiv )
 *  Returns:		void
 ******************************************************************************************/
 
-void transition_to_populace( model *model, individual *indiv )
+void transition_to_discharged( model *model, individual *indiv )
 {
     set_discharged( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
@@ -320,7 +322,7 @@ void add_patient_to_hospital( model* model, individual *indiv )
                 assigned_hospital = &(model->hospitals[hospital_idx]);
         }
         assigned_hospital->n_patients_waiting++;
-        indiv->hospital_idx = assigned_hospital;
+        indiv->hospital_idx = hospital_idx;
     }
 
 }
