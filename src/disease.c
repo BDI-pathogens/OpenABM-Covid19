@@ -40,7 +40,9 @@ void set_up_transition_times( model *model )
 
 	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
 	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, params->mean_time_to_symptoms,params->sd_time_to_symptoms );
 	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
+	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
 	gamma_draw_list( transitions[CRITICAL_RECOVERED],      	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
 	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		   params->sd_time_to_death );
@@ -125,11 +127,17 @@ void set_up_infectious_curves( model *model )
 		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
 
+		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor  );
+
 		gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor * params->asymptomatic_infectious_factor);
 
 		gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
+
+		gamma_rate_curve( model->event_lists[SYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor );
 
 		gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
@@ -211,7 +219,9 @@ void transmit_virus_by_type(
 void transmit_virus( model *model )
 {
 	transmit_virus_by_type( model, PRESYMPTOMATIC );
+	transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
 	transmit_virus_by_type( model, SYMPTOMATIC );
+	transmit_virus_by_type( model, SYMPTOMATIC_MILD );
 	transmit_virus_by_type( model, ASYMPTOMATIC );
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
@@ -228,13 +238,22 @@ void new_infection(
 	individual *infector
 )
 {
+	double draw       = gsl_rng_uniform( rng );
+	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
+	double mild_frac  = model->params->mild_fraction[infected->age_group];
+
 	infected->infector = infector;
 	infected->infector_status = infector->status;
 
-	if( gsl_ran_bernoulli( rng, model->params->fraction_asymptomatic[infected->age_group] ) )
+	if( draw < asymp_frac )
 	{
 		transition_one_disese_event( model, infected, NO_EVENT, ASYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, ASYMPTOMATIC, RECOVERED, ASYMPTOMATIC_RECOVERED );
+	}
+	else if( draw < asymp_frac + mild_frac )
+	{
+		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC_MILD, NO_EDGE );
+		transition_one_disese_event( model, infected, PRESYMPTOMATIC_MILD, SYMPTOMATIC_MILD, PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD );
 	}
 	else
 	{
@@ -292,6 +311,22 @@ void transition_to_symptomatic( model *model, individual *indiv )
 	else
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 
+	intervention_on_symptoms( model, indiv );
+}
+
+/*****************************************************************************************
+*  Name:		transition_to_symptomatic_mild
+*  Description: Transitions infected who are due to become symptomatic with mild symptoms.
+*
+*  				1. Add the recovery event
+*  				2. Does the individual self-quarantine at this point and
+*  				asks for a test
+*
+*  Returns:		void
+******************************************************************************************/
+void transition_to_symptomatic_mild( model *model, individual *indiv )
+{
+	transition_one_disese_event( model, indiv, SYMPTOMATIC_MILD, RECOVERED, SYMPTOMATIC_MILD_RECOVERED );
 	intervention_on_symptoms( model, indiv );
 }
 
