@@ -752,7 +752,7 @@ int one_time_step( model *model )
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
-    transition_events( model, DISCHARGED,      &transition_to_populace, FALSE );
+    transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
     //TOM: HOSPITAL EVENT CONTROL HERE//
 
 	flu_infections( model );
@@ -800,6 +800,7 @@ void check_hospital_location_status( model *model ) {
         if ( indiv->hospital_location == GENERAL )
             if ( indiv->status == CRITICAL ) {
                 transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
+
             }
             else if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, HOSPITAL_TRANSITION );
