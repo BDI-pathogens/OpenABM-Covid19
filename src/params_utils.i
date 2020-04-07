@@ -593,9 +593,10 @@ int get_param_test_order_wait(parameters *params)
 *  Name:		get_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
-double get_param_app_users_fraction(parameters *params)
+double get_param_app_users_fraction(parameters *params, int idx)
 {
-    return params->app_users_fraction;
+    if (idx >= N_AGE_GROUPS) return -1;
+    return params->app_users_fraction[idx];
 }
 
 /*****************************************************************************************
@@ -677,6 +678,33 @@ int get_param_lockdown_time_off(parameters *params)
 int get_param_lockdown_on(parameters *params)
 {
     return params->lockdown_on;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lockdown_elderly_time_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lockdown_elderly_time_on(parameters *params)
+{
+    return params->lockdown_elderly_time_on;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lockdown_elderly_time_off
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lockdown_elderly_time_off(parameters *params)
+{
+    return params->lockdown_elderly_time_off;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lockdown_elderly_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lockdown_elderly_on(parameters *params)
+{
+    return params->lockdown_elderly_on;
 }
 
 /*****************************************************************************************
@@ -1307,9 +1335,10 @@ int set_param_test_order_wait( parameters *params, int value )
 *  Name:		set_param_app_users_fraction
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_app_users_fraction( parameters *params, double value )
+int set_param_app_users_fraction( parameters *params, double value, int idx )
 {
-    params->app_users_fraction = value;
+    if (idx >= N_AGE_GROUPS) return FALSE;
+    params->app_users_fraction[idx] = value;
     return TRUE;
 }
 
@@ -1399,6 +1428,36 @@ int set_param_lockdown_time_off( parameters *params, int value )
 int set_param_lockdown_on( parameters *params, int value )
 {
     params->lockdown_on = TRUE;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lockdown_elderly_time_on
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lockdown_elderly_time_on( parameters *params, int value )
+{
+    params->lockdown_elderly_time_on = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lockdown_elderly_time_off
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lockdown_elderly_time_off( parameters *params, int value )
+{
+    params->lockdown_elderly_time_off = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lockdown_elderly_on
+*  Description: Carries out checks on the input parameters
+******************************************************************************************/
+int set_param_lockdown_elderly_on( parameters *params, int value )
+{
+    params->lockdown_elderly_on = TRUE;
     return TRUE;
 }
 

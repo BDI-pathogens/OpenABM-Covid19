@@ -155,7 +155,18 @@ int get_model_param_test_order_wait(model *model)
 ******************************************************************************************/
 double get_model_param_app_users_fraction(model *model)
 {
-    return model->params->app_users_fraction;
+    int age;
+	double t_pop, frac;
+
+	t_pop = 0;
+	frac  = 0;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+	{
+		t_pop += model->params->population_group[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population_group[ age ];
+	}
+
+	return frac / t_pop;
 }
 
 /*****************************************************************************************
@@ -344,12 +355,12 @@ int set_model_param_app_users_fraction( model *model, double value )
     if( value > 1 || value < 0 )
     	return FALSE;
 
-   int age;
-   for( age = 0; age < N_AGE_GROUPS; age++ )
-	   model->params->app_users_fraction[ age ] = value;
-
-   set_up_app_users( model );
-   return TRUE;
+    int age;
+    for( age = 0; age < N_AGE_GROUPS; age++ )
+        model->params->app_users_fraction[ age ] = value;
+    
+    set_up_app_users( model );
+    return TRUE;
 }
 
 /*****************************************************************************************
@@ -403,10 +414,10 @@ int set_model_param_lockdown_on( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_param_lockdown_elderly_on
+*  Name:		set_model_param_lockdown_elderly_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_param_lockdown_elderly_on( model *model, int value )
+int set_model_param_lockdown_elderly_on( model *model, int value )
 {
 	long pdx;
 	int network;

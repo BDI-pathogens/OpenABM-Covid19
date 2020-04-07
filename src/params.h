@@ -196,6 +196,7 @@ int set_model_param_test_order_wait(model *model, int value);
 int set_model_param_app_users_fraction(model *model, double value);
 int set_model_param_app_turned_on(model *model, int value);
 int set_model_param_lockdown_on(model *model, int value);
+int set_model_param_lockdown_elderly_on(model *model, int value);
 
 void check_params( parameters* );
 void destroy_params( parameters* );

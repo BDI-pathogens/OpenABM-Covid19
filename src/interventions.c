@@ -190,7 +190,7 @@ void update_intervention_policy( model *model, int time )
 
 		if( params->TEMP_lockdown_trigger_n_infected  > 0 && n_infected > params->TEMP_lockdown_trigger_n_infected && params->lockdown_on == FALSE )
 		{
-			set_param_lockdown_on( model, TRUE );
+			set_model_param_lockdown_on( model, TRUE );
 			params->TEMP_lockdown_trigger_n_infected = 0;
 			params->lockdown_time_off = model->time + params->TEMP_lockdown_trigger_length;
 			if( params->TEMP_lockdown_trigger_keep_elderly )
@@ -214,10 +214,10 @@ void update_intervention_policy( model *model, int time )
 		set_model_param_lockdown_on( model, FALSE );
 	
 	if( time == params->lockdown_elderly_time_on )
-		set_param_lockdown_elderly_on( model, TRUE );
+		set_model_param_lockdown_elderly_on( model, TRUE );
 
 	if( time == params->lockdown_elderly_time_off )
-		set_param_lockdown_elderly_on( model, FALSE );
+		set_model_param_lockdown_elderly_on( model, FALSE );
 
 	if( time == params->testing_symptoms_time_on )
 		set_model_param_test_on_symptoms( model, TRUE );

@@ -79,14 +79,14 @@ class Parameters(object):
         If we've not set the number of lines to read, parse the file in
         python and inset the line count to the params structure for initilisation
         """
-        if getattr(self.c_params, "N_REFERENCE_HOUSEHOLDS") != 0:
+        if self.get_param("N_REFERENCE_HOUSEHOLDS") != 0:
             covid19.read_household_demographics_file(self.c_params)
         else:
             n_ref_hh =-1
             with open(self.c_params.input_household_file, 'r') as f:
                 for _ in f.readlines():
                     n_ref_hh += 1 
-            setattr(self.c_params, "N_REFERENCE_HOUSEHOLDS", n_ref_hh)
+            self.set_param("N_REFERENCE_HOUSEHOLDS", n_ref_hh)
             self._read_household_demographics()
 
     def set_param_dict(self, params):
@@ -119,6 +119,8 @@ class Parameters(object):
         elif hasattr(covid19, f"get_param_{self._get_base_param_from_age_param(param)[0]}"):
             param, idx = self._get_base_param_from_age_param(param)
             return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
+        elif hasattr(self.c_params, f"{param}"):
+            return getattr(self.c_params, f"{param}")
         else:
             raise ParameterException(
                 f"Can not get param {param} as it doesn't exist in parameters object"
@@ -149,8 +151,15 @@ class Parameters(object):
             param, idx = self._get_base_param_from_age_param(param)
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value, idx)
+        elif hasattr(self.c_params, f"{param}"):
+            if isinstance(getattr(self.c_params, f"{param}"), int):
+                setattr(self.c_params,f"{param}", int(value))
+            if isinstance(getattr(self.c_params, f"{param}"), float):
+                setattr(self.c_params,f"{param}", float(value))
+            else:
+                LOGGER.info(f'param {param} has type {type(getattr(self.c_params, f"{param}"))}')
         else:
-            raise ParameterException(f"Can not set parameter as it doesn't exist")
+            raise ParameterException(f"Can not set parameter {param} as it doesn't exist")
 
     def return_param_object(self):
         """[summary]
@@ -166,9 +175,17 @@ class Parameters(object):
         self.update_lock = True
         return self.c_params
 
+    def __del__(self):
+        if self.c_params:
+            covid19.destroy_params(self.c_params)
+            self.c_params = None
+
+
 
 class Model:
     def __init__(self, params_object):
+        # Store the params object so it doesn't go out of scope and get freed
+        self._params_obj = params_object
         # Create C parameters object
         self.c_params = params_object.return_param_object()
         self._create()
@@ -282,5 +299,7 @@ class Model:
         """
         if self.c_model:
             covid19.destroy_model(self.c_model)
+            self.c_model = None
         if self.c_params:
             covid19.destroy_params(self.c_params)
+            self._params_obj.c_params = None
