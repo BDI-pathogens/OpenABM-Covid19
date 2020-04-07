@@ -356,8 +356,8 @@ void read_param_file( parameters *params)
     params->max_hcw_daily_interactions = 20;
     params->patient_required_interactions[COVID_ICU][DOCTOR] = 3;
     params->patient_required_interactions[COVID_ICU][NURSE] = 6;
-    params->patient_required_interactions[COVID_ICU][DOCTOR] = 1;
-    params->patient_required_interactions[COVID_ICU][NURSE] = 3;
+    params->patient_required_interactions[COVID_GENERAL][DOCTOR] = 1;
+    params->patient_required_interactions[COVID_GENERAL][NURSE] = 3;
 
 	fclose(parameter_file);
 }
