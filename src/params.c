@@ -164,7 +164,18 @@ int get_param_app_turned_on( model *model )
 ******************************************************************************************/
 double get_param_app_users_fraction( model *model )
 {
-    return model->params->app_users_fraction;
+	int age;
+	double t_pop, frac;
+
+	t_pop = 0;
+	frac  = 0;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+	{
+		t_pop += model->params->population_group[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population_group[ age ];
+	}
+
+	return frac / t_pop;
 }
 
 /*****************************************************************************************
@@ -405,15 +416,15 @@ int set_param_app_turned_on( model *model, int value )
 ******************************************************************************************/
 int set_param_app_users_fraction( model *model, double value )
 {
-    if( value > 1 || value < model->params->app_users_fraction )
+    if( value > 1 || value < 0 )
     	return FALSE;
 
-    if( value == model->params->app_users_fraction )
-    	return TRUE;
+   int age;
+   for( age = 0; age < N_AGE_GROUPS; age++ )
+	   model->params->app_users_fraction[ age ] = value;
 
-    model->params->app_users_fraction = value;
-    set_up_app_users( model, value );
-    return TRUE;
+   set_up_app_users( model );
+   return TRUE;
 }
 
 /*****************************************************************************************

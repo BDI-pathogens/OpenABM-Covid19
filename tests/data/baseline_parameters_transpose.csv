@@ -136,7 +136,15 @@ test_insensitive_period	3
 test_order_wait	0
 test_result_wait	0
 self_quarantine_fraction	0
-app_users_fraction	0
+app_users_fraction_0_9	0
+app_users_fraction_10_19	0
+app_users_fraction_20_29	0
+app_users_fraction_30_39	0
+app_users_fraction_40_49	0
+app_users_fraction_50_59	0
+app_users_fraction_60_69	0
+app_users_fraction_70_79	0
+app_users_fraction_80	0
 app_turn_on_time	10000
 lockdown_work_network_multiplier	0.2
 lockdown_random_network_multiplier	0.2
