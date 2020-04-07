@@ -330,8 +330,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction));
-	if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+	}
 
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
@@ -428,6 +431,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"work_network,");
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
+	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"hazard,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"time_infected,");
@@ -470,13 +474,14 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
 			indiv->house_no,
 			indiv->quarantined,
+			indiv->app_user,
 			indiv->hazard,
 			indiv->random_interactions,
 			time_infected(indiv),

@@ -60,7 +60,7 @@ model* new_model( parameters *params )
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
-	set_up_app_users( model_ptr, model_ptr->params->app_users_fraction );
+	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;

@@ -108,7 +108,7 @@ typedef struct{
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	
-	double app_users_fraction; 				// Proportion of the population that use the apps
+	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
 	int app_turn_on_time;   				// time after which the app is usable
 	double seasonal_flu_rate; 				// Rate of seasonal flu

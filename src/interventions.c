@@ -38,32 +38,40 @@ void set_up_transition_times_intervention( model *model )
 *  Name:		set_up_app_users
 *  Description: Set up the proportion of app users in the population (default is FALSE)
 ******************************************************************************************/
-void set_up_app_users( model *model, double target )
+void set_up_app_users( model *model )
 {
-	long idx, jdx, current_users, not_users, max_user;
+	long idx, jdx, age, current_users, not_users, max_user;
+	double *fraction = model->params->app_users_fraction;
 
-	current_users = 0;
-	for( idx = 0; idx < model->params->n_total; idx++ )
-		current_users += model->population[ idx ].app_user;
-	not_users = model->params->n_total - current_users;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+	{
+		current_users = 0;
+		not_users     = 0;
+		for( idx = 0; idx < model->params->n_total; idx++ )
+			if( model->population[ idx ].age_group == age )
+			{
+				current_users += model->population[ idx ].app_user;
+				not_users     += 1 - model->population[ idx ].app_user;
+			}
 
-	max_user = ceil( model->params->n_total * target ) - current_users;
-	if( max_user < 0 || max_user > not_users )
-		print_exit( "Bad target app_fraction_users" );
+		max_user = ceil( ( current_users + not_users ) * fraction[age] ) - current_users;
+		if( max_user < 0 || max_user > not_users )
+			print_exit( "Bad target app_fraction_users" );
 
-	int *users = calloc( not_users, sizeof( int ) );
+		int *users = calloc( not_users, sizeof( int ) );
 
-	for( idx = 0; idx < max_user; idx++ )
-		users[ idx ] = 1;
+		for( idx = 0; idx < max_user; idx++ )
+			users[ idx ] = 1;
 
-	gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
+		gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
 
-	jdx   = 0;
-	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[ idx ].app_user == FALSE )
-			model->population[ idx ].app_user = users[ jdx++ ];
+		jdx   = 0;
+		for( idx = 0; idx < model->params->n_total; idx++ )
+			if( model->population[ idx ].age_group == age && model->population[ idx ].app_user == FALSE )
+				model->population[ idx ].app_user = users[ jdx++ ];
 
-	free( users );
+		free( users );
+	}
 };
 
 /*****************************************************************************************
