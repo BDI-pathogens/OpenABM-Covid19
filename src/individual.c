@@ -58,6 +58,8 @@ void initialize_individual(
     indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
+    indiv->ward_type = NO_WARD;
+    indiv->ward_idx  = NO_WARD;
 
     //TODO: kelvin change
     indiv->worker_type = OTHER;

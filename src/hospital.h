@@ -34,16 +34,11 @@ struct hospital
 
     int n_total_doctors;            //total number of doctors
     int n_total_nurses;             //total number of nurses
-    int n_total_general_patients;   //total number of general patients
-    int n_total_icu_patients;       //total number of icu patients
 
     int n_patients_waiting; //TODO: have waiting list for general and icu
 
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
     //TODO: add non covid patients
-
-    int n_covid_general_wards;
-    int n_covid_icu_wards;
 
     network *hospital_workplace_network;
 
@@ -60,7 +55,7 @@ void set_up_hospital_networks( hospital* );
 void build_hospital_networks( model *model, hospital *hospital );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int healthcare_worker_working(individual* indiv);
-void add_patient_to_hospital( model*, individual* );
+void assign_patient_to_hospital( model*, individual* );
 void destroy_hospital( hospital* );
 
 void transition_one_hospital_event( model *model, individual *indiv, int from, int to, int edge );
@@ -72,5 +67,6 @@ void transition_to_mortuary( model *model, individual *indiv );
 void transition_to_discharged( model *model, individual *indiv );
 
 int assign_to_ward(individual *indiv, hospital *hospital, int ward_type );
+void release_patient_from_hospital( individual *indiv, hospital *hospital );
 
 #endif /* HOSPITAL_H_ */

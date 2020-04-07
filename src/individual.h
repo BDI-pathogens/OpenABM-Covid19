@@ -51,14 +51,16 @@ struct individual{
 	event *quarantine_release_event;
 	int quarantine_test_result;
 
-    int hospital_state; //TODO: change to state
+    int app_user;
+
+    int ward_idx;
+    int ward_type;
+    int hospital_idx;
+    int hospital_state;
 	event *current_hospital_event;
 	event *next_hospital_event;
 
-	int app_user;
-
-    int worker_type; //TODO: kelvin change
-    int hospital_idx;
+    int worker_type;
 };
 
 struct interaction{
