@@ -25,6 +25,9 @@ void initialise_ward(
     ward->type = type;
 
     ward->patient_pdxs = calloc( ward->beds, sizeof(long) );
+    for (int i = 0; i < ward->beds; i++)
+        ward->patient_pdxs[i] = -1;
+
     ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
 }
