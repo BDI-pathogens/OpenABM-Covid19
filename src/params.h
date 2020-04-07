@@ -90,6 +90,8 @@ typedef struct{
 	double quarantine_dropout_traced;		// daily dropout rate if contact-traced
 	double quarantine_dropout_positive;     // daily dropout rate if receive positive test result
 	int quarantine_on_traced;				// immediately quarantine those who are contact traced
+	int quarantine_smart_release_day;		// number of days until smart release on no contacts
+
 	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
