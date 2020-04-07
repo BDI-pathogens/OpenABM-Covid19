@@ -49,4 +49,7 @@ void intervention_on_critical( model*, individual* );
 void intervention_on_positive_result( model*, individual* );
 void intervention_on_traced( model*, individual*, int, int, trace_token* );
 
+void intervention_smart_release( model* );
+
+
 #endif /* INTERVENTIONS_H_ */
