@@ -1,6 +1,7 @@
 import covid19
 import logging
 import enum
+from itertools import chain
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +43,13 @@ class AgeGroupEnum(enum.Enum):
     _60_69 = 6
     _70_79 = 7
     _80 = 8
-    
+
+
+class ChildAdultElderlyEnum(enum.Enum):
+    _child = 0
+    _adult = 1
+    _elderly = 2
+
 
 class Parameters(object):
     def __init__(
@@ -88,10 +95,10 @@ class Parameters(object):
 
     def _get_base_param_from_age_param(self, param):
         base_name, enum_val = None, None
-        for ag in AgeGroupEnum:
-            if ag.name == param[-1* len(ag.name):]:
-                base_name = param.split(ag.name)[0]
-                enum_val = ag.value
+        for en in chain(AgeGroupEnum, ChildAdultElderlyEnum):
+            if en.name == param[-1* len(en.name):]:
+                base_name = param.split(en.name)[0]
+                enum_val = en.value
                 break
         return base_name, enum_val
 
