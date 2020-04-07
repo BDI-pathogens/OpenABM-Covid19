@@ -11,6 +11,7 @@
 #include "network.h"
 #include "model.h"
 #include "disease.h"
+#include "interventions.h"
 
 /*****************************************************************************************
 *  Name:		initialize_hospital
@@ -201,14 +202,19 @@ void transition_one_hospital_event(
 
 /*****************************************************************************************
 *  Name:		transition_to_waiting
-*  Description: Transitions a severely symptomatic individual from the general populace
-*               to the admissions list for the hospital.
-*               At the moment - severely symptomatic refers to HOSPITALISED individuals.
+*  Description: Transitions a severely symptomatic (HOSPITATLISED) individual from the
+*               general populace to the admissions list for the hospital. Also applies
+*               interventions to the patient.
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
     add_patient_to_hospital( model, indiv );
+
+    intervention_on_hospitalised( model, indiv );
+    if( indiv->quarantined )
+        intervention_quarantine_release( model, indiv );
+
     set_waiting( indiv, model->params, 1);
 }
 /*****************************************************************************************
