@@ -339,6 +339,16 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
 	
+	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_time_on));
+	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_time_on)\n"); };
+	
+	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_duration));
+	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_duration)\n"); };
+	
+	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_gap));
+	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_gap)\n"); };
+	
+	
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
@@ -394,26 +404,26 @@ void write_individual_file(model *model, parameters *params)
 	if(individual_output_file == NULL)
 		print_exit("Can't open individual output file");
 	
-	fprintf(individual_output_file,"ID, ");
-	fprintf(individual_output_file,"current_status, ");
-	fprintf(individual_output_file,"age_group, ");
-	fprintf(individual_output_file,"work_network, ");
-	fprintf(individual_output_file,"house_no, ");
-	fprintf(individual_output_file,"quarantined, ");
-	fprintf(individual_output_file,"hazard, ");
-	fprintf(individual_output_file,"mean_interactions, ");
-	fprintf(individual_output_file,"time_infected, ");
-	fprintf(individual_output_file,"time_presypmtomatic, ");
-	fprintf(individual_output_file,"time_symptomatic, ");
-	fprintf(individual_output_file,"time_asymptomatic, ");
-	fprintf(individual_output_file,"time_hospitalised, ");
-	fprintf(individual_output_file,"time_critical, ");
-	fprintf(individual_output_file,"time_death, ");
-	fprintf(individual_output_file,"time_recovered, ");
-	fprintf(individual_output_file,"time_quarantined, ");
-	fprintf(individual_output_file,"infector_ID, ");
-	fprintf(individual_output_file,"infector_time_infected, ");
-	fprintf(individual_output_file,"infector_status, ");
+	fprintf(individual_output_file,"ID,");
+	fprintf(individual_output_file,"current_status,");
+	fprintf(individual_output_file,"age_group,");
+	fprintf(individual_output_file,"work_network,");
+	fprintf(individual_output_file,"house_no,");
+	fprintf(individual_output_file,"quarantined,");
+	fprintf(individual_output_file,"hazard,");
+	fprintf(individual_output_file,"mean_interactions,");
+	fprintf(individual_output_file,"time_infected,");
+	fprintf(individual_output_file,"time_presypmtomatic,");
+	fprintf(individual_output_file,"time_symptomatic,");
+	fprintf(individual_output_file,"time_asymptomatic,");
+	fprintf(individual_output_file,"time_hospitalised,");
+	fprintf(individual_output_file,"time_critical,");
+	fprintf(individual_output_file,"time_death,");
+	fprintf(individual_output_file,"time_recovered,");
+	fprintf(individual_output_file,"time_quarantined,");
+	fprintf(individual_output_file,"infector_ID,");
+	fprintf(individual_output_file,"infector_time_infected,");
+	fprintf(individual_output_file,"infector_status");
 	fprintf(individual_output_file,"\n");
 	
 	// Loop through all individuals in the simulation
@@ -438,7 +448,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li, %d, %d, %d, %li, %d, %f, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %li, %d, %d\n",
+			"%li,%d,%d,%d,%li,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
