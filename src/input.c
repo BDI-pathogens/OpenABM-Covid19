@@ -687,7 +687,7 @@ void write_transmissions( model *model )
 
 /*****************************************************************************************
 *  Name:		write_trace_tokens
-*  Description: write interactions details
+*  Description: write trace tokens details
 ******************************************************************************************/
 void write_trace_tokens( model *model )
 {
@@ -742,6 +742,91 @@ void write_trace_tokens( model *model )
 				);
 				token = token->next_index;
 			}
+		}
+	}
+	fclose(output_file);
+}
+
+/*****************************************************************************************
+*  Name:		write_trace_tokens_ts
+*  Description: write top level stats of trace_tokens
+******************************************************************************************/
+void write_trace_tokens_ts( model *model, int initialise )
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	FILE *output_file;
+	long idx, n_events;
+	int day, n_traced,n_symptoms,n_infected,n_infected_by_index, time_index;
+	individual *indiv, *contact;
+	event *event, *next_event;
+	trace_token *token;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/trace_tokens_ts_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+
+
+	if( initialise )
+	{
+		output_file = fopen(output_file_name, "w");
+		fprintf( output_file ,"time,time_index,index_ID,n_traced,n_symptoms,n_infected,n_infected_by_index\n" );
+		fclose(output_file);
+		return;
+	}
+	else
+		output_file = fopen(output_file_name, "a");
+
+	for( day = 1; day <= model->params->quarantine_length_traced; day++ )
+	{
+		n_events    = model->event_lists[TRACE_TOKEN_RELEASE].n_daily_current[ model->time + day ];
+		next_event  = model->event_lists[TRACE_TOKEN_RELEASE].events[ model->time + day ];
+
+		for( idx = 0; idx < n_events; idx++ )
+		{
+			event      = next_event;
+			next_event = event->next;
+			indiv      = event->individual;
+			time_index = model->time + day - model->params->quarantine_length_traced;
+
+			n_traced   = 0;
+			n_symptoms = 0;
+			n_infected = 0;
+			n_infected_by_index = 0;
+
+			token = indiv->index_trace_token;
+			if( token == NULL )
+				continue;
+
+			token = token->next_index;
+			while( token != NULL )
+			{
+				contact = token->individual;
+				n_traced++;
+				if( contact->status > 0 )
+					n_infected++;
+				if( contact->status > 2 & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
+					( contact->time_event[RECOVERED] == UNKNOWN | contact->time_event[RECOVERED] > time_index )
+				)
+					n_symptoms++;
+				if( indiv == contact->infector )
+					n_infected_by_index++;
+
+				token = token->next_index;
+			}
+			fprintf( output_file, "%i,%i,%li,%i,%i,%i,%i\n",
+				model->time,
+				time_index,
+				indiv->idx,
+				n_traced,
+				n_symptoms,
+				n_infected,
+				n_infected_by_index
+			);
 		}
 	}
 	fclose(output_file);

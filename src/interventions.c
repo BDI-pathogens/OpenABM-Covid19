@@ -621,4 +621,59 @@ void intervention_on_traced(
 		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
 }
 
+/*****************************************************************************************
+*  Name:		intervention_smart_release
+*  Description: Release people from quarantine based upon how many people have developed
+*				symptoms following being quarantined by the index case
+*  Returns:		void
+******************************************************************************************/
+void intervention_smart_release( model *model )
+{
+	long idx, n_events;
+	int day,n_symptoms, time_index;
+	individual *indiv, *contact;
+	event *event, *next_event;
+	trace_token *token;
+
+	int days = 4;
+
+	day        = model->time + model->params->quarantine_length_traced - days;
+	time_index = model->time - days;
+
+	if( time_index < 1)
+		return;
+
+	n_events    = model->event_lists[TRACE_TOKEN_RELEASE].n_daily_current[  day ];
+	next_event  = model->event_lists[TRACE_TOKEN_RELEASE].events[day ];
+
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+
+		n_symptoms = 0;
+
+		token = indiv->index_trace_token;
+		if( token == NULL )
+			continue;
+
+		token = token->next_index;
+		while( token != NULL )
+		{
+			contact = token->individual;
+			if( contact->time_event[SYMPTOMATIC] >= time_index )
+			{
+				n_symptoms++;
+				break;
+			}
+			token = token->next_index;
+		}
+
+		if( n_symptoms == 0 )
+		{
+			intervention_trace_token_release( model, indiv );
+		}
+	}
+}
 
