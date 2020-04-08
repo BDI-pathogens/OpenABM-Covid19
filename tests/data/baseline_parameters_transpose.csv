@@ -18,7 +18,7 @@ elderly_network_adults	0.2
 days_of_interactions	10
 end_time	200
 n_seed_infection	5
-mean_infectious_period	6.7
+mean_infectious_period	6
 sd_infectious_period	2.8
 infectious_rate	3.5
 mean_time_to_symptoms	6
