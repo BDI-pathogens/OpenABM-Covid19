@@ -162,7 +162,6 @@ enum HOSPITAL_WARD_TYPES{
 #define NOT_HEALTHCARE_WORKER -1
 
 extern gsl_rng * rng;
-gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */
 
