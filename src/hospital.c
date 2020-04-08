@@ -28,19 +28,16 @@ void initialise_hospital(
     if( hospital->hospital_idx != 0 )
         print_exit( "a hospital can only be initialised once!");
 
-    hospital->hospital_idx   = hdx;
+    hospital->hospital_idx  = hdx;
+    hospital->params        = params;
 
     //setup wards
-    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-        hospital->n_wards[ward_type] = params->n_wards[ward_type];
-
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
-
-    for( int w_type = 0; w_type < N_HOSPITAL_WARD_TYPES; w_type++ )
+    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
-        hospital->wards[w_type] = calloc( hospital->n_wards[w_type], sizeof(ward) );
-        for( int n_ward = 0; n_ward < hospital->n_wards[w_type]; n_ward++ )
-            initialise_ward( &(hospital->wards[w_type][n_ward]), w_type, n_ward, params->n_ward_beds[w_type]);
+        hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
+        for( int ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
+            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_type, ward_idx, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
     }
 }
 

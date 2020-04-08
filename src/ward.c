@@ -19,20 +19,25 @@ void initialise_ward(
     ward *ward,
     int ward_idx,
     int type,
-    int n_beds
+    int n_beds,
+    int n_max_doctors,
+    int n_max_nurses
 )
 {
-    ward->ward_idx = ward_idx;
-    ward->type = type;
-
-    ward->patient_pdxs = calloc( ward->n_beds, sizeof(long) );
-    for (int i = 0; i < ward->n_beds; i++)
-        ward->patient_pdxs[i] = NO_PATIENT;
+    ward->ward_idx      = ward_idx;
+    ward->type          = type;
+    ward->n_beds        = n_beds;
+    ward->n_max_doctors = n_max_doctors;
+    ward->n_max_nurses  = n_max_nurses;
+    ward->n_doctors     = 0;
+    ward->n_doctors     = 0;
 
     ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
 
-    ward->n_beds = n_beds;
+    ward->patient_pdxs = calloc( ward->n_beds, sizeof(long) );
+    for (int i = 0; i < ward->n_beds; i++)
+        ward->patient_pdxs[i] = NO_PATIENT;
 }
 
 void set_up_ward_networks( ward* ward )
@@ -154,6 +159,7 @@ void destroy_ward( ward* ward )
 {
     free( ward->doctor_patient_network );
     free( ward->nurse_patient_network );
+    free( ward->patient_pdxs );
     free( ward->doctors );
     free( ward->nurses );
 }
