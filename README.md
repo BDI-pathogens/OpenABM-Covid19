@@ -12,6 +12,12 @@ cd COVID19-IBM/src
 make clean; make all
 ```
 
+To install the Python interface, first install [SWIG](http://www.swig.org/), then:
+
+```bash
+make swig-all
+```
+
 Usage
 -----
 
