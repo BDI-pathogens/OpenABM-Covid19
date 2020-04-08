@@ -30,7 +30,15 @@ def turn_off_interventions(params, end_time):
     params.set_param("quarantine_household_contacts_on_positive", 0)
     params.set_param("quarantined_daily_interactions", 0)
     
-    params.set_param("app_users_fraction", 0.0)
+    params.set_param("app_users_fraction_0_9", 0.0)
+    params.set_param("app_users_fraction_10_19", 0.0)
+    params.set_param("app_users_fraction_20_29", 0.0)
+    params.set_param("app_users_fraction_30_39", 0.0)
+    params.set_param("app_users_fraction_40_49", 0.0)
+    params.set_param("app_users_fraction_50_59", 0.0)
+    params.set_param("app_users_fraction_60_69", 0.0)
+    params.set_param("app_users_fraction_70_79", 0.0)
+    params.set_param("app_users_fraction_80", 0.0)
     
     # Set interventions associated with a time to be beyond the end of the simulation
     params.set_param("app_turn_on_time", end_time)
