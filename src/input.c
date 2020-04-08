@@ -851,8 +851,8 @@ void write_trace_tokens_ts( model *model, int initialise )
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
-				if( contact->status >= SYMPTOMATIC & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
-					( contact->time_event[RECOVERED] == UNKNOWN | contact->time_event[RECOVERED] > time_index )
+				if( (contact->status >= SYMPTOMATIC) & (contact->time_event[ASYMPTOMATIC] == UNKNOWN)  &
+					( (contact->time_event[RECOVERED] == UNKNOWN) | (contact->time_event[RECOVERED] > time_index) )
 				)
 					n_symptoms++;
 				if( indiv == contact->infector )
