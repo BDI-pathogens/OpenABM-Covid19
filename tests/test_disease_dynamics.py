@@ -351,6 +351,104 @@ class TestClass(object):
                     fatality_fraction_80   =0.20,
                 )
             ),
+            dict(
+                test_params = dict( 
+                    fraction_asymptomatic_0_9   = 0.18,
+                    fraction_asymptomatic_10_19 = 0.18,
+                    fraction_asymptomatic_20_29 = 0.18,
+                    fraction_asymptomatic_30_39 = 0.18,
+                    fraction_asymptomatic_40_49 = 0.18,
+                    fraction_asymptomatic_50_59 = 0.18,
+                    fraction_asymptomatic_60_69 = 0.18,
+                    fraction_asymptomatic_70_79 = 0.18,
+                    fraction_asymptomatic_80    = 0.18,
+                    mild_fraction_0_9           = 0.79,
+                    mild_fraction_10_19         = 0.79,
+                    mild_fraction_20_29         = 0.73,
+                    mild_fraction_30_39         = 0.68,
+                    mild_fraction_40_49         = 0.65,
+                    mild_fraction_50_59         = 0.59,
+                    mild_fraction_60_69         = 0.53,
+                    mild_fraction_70_79         = 0.41,
+                    mild_fraction_80            = 0.27,
+                    hospitalised_fraction_0_9  =0.03,
+                    hospitalised_fraction_10_19=0.08,
+                    hospitalised_fraction_20_29=0.11,
+                    hospitalised_fraction_30_39=0.19,
+                    hospitalised_fraction_40_49=0.24,
+                    hospitalised_fraction_50_59=0.36,
+                    hospitalised_fraction_60_69=0.46,
+                    hospitalised_fraction_70_79=0.48,
+                    hospitalised_fraction_80   =0.41,
+                    critical_fraction_0_9  =0.05,
+                    critical_fraction_10_19=0.05,
+                    critical_fraction_20_29=0.05,
+                    critical_fraction_30_39=0.05,
+                    critical_fraction_40_49=0.063,
+                    critical_fraction_50_59=0.122,
+                    critical_fraction_60_69=0.274,
+                    critical_fraction_70_79=0.432,
+                    critical_fraction_80   =0.709,
+                    fatality_fraction_0_9  =0.33,
+                    fatality_fraction_10_19=0.25,
+                    fatality_fraction_20_29=0.5,
+                    fatality_fraction_30_39=0.5,
+                    fatality_fraction_40_49=0.5,
+                    fatality_fraction_50_59=0.69,
+                    fatality_fraction_60_69=0.65,
+                    fatality_fraction_70_79=0.88,
+                    fatality_fraction_80   =1,
+                )
+            ),
+            dict(
+                test_params = dict( 
+                    fraction_asymptomatic_0_9   = 0.10,
+                    fraction_asymptomatic_10_19 = 0.10,
+                    fraction_asymptomatic_20_29 = 0.10,
+                    fraction_asymptomatic_30_39 = 0.10,
+                    fraction_asymptomatic_40_49 = 0.10,
+                    fraction_asymptomatic_50_59 = 0.10,
+                    fraction_asymptomatic_60_69 = 0.10,
+                    fraction_asymptomatic_70_79 = 0.10,
+                    fraction_asymptomatic_80    = 0.10,
+                    mild_fraction_0_9           = 0.10,
+                    mild_fraction_10_19         = 0.10,
+                    mild_fraction_20_29         = 0.10,
+                    mild_fraction_30_39         = 0.10,
+                    mild_fraction_40_49         = 0.10,
+                    mild_fraction_50_59         = 0.10,
+                    mild_fraction_60_69         = 0.10,
+                    mild_fraction_70_79         = 0.10,
+                    mild_fraction_80            = 0.10,
+                    hospitalised_fraction_0_9  =0.20,
+                    hospitalised_fraction_10_19=0.20,
+                    hospitalised_fraction_20_29=0.20,
+                    hospitalised_fraction_30_39=0.20,
+                    hospitalised_fraction_40_49=0.20,
+                    hospitalised_fraction_50_59=0.20,
+                    hospitalised_fraction_60_69=0.20,
+                    hospitalised_fraction_70_79=0.20,
+                    hospitalised_fraction_80   =0.20,
+                    critical_fraction_0_9  =0.20,
+                    critical_fraction_10_19=0.20,
+                    critical_fraction_20_29=0.20,
+                    critical_fraction_30_39=0.20,
+                    critical_fraction_40_49=0.20,
+                    critical_fraction_50_59=0.20,
+                    critical_fraction_60_69=0.20,
+                    critical_fraction_70_79=0.20,
+                    critical_fraction_80   =0.20,
+                    fatality_fraction_0_9  =0.20,
+                    fatality_fraction_10_19=0.20,
+                    fatality_fraction_20_29=0.20,
+                    fatality_fraction_30_39=0.20,
+                    fatality_fraction_40_49=0.20,
+                    fatality_fraction_50_59=0.20,
+                    fatality_fraction_60_69=0.20,
+                    fatality_fraction_70_79=0.20,
+                    fatality_fraction_80   =0.20,
+                )
+            ),
         ],
     }
     """
@@ -530,8 +628,9 @@ class TestClass(object):
 
         params.set_param("n_total", 20000)
         params.set_param("n_seed_infection", 200)
-        params.set_param("end_time", 50)
+        params.set_param("end_time", 250)
         params.set_param("infectious_rate", 4.0)
+        #params.set_param("mild_infectious_factor", 1.0)
         params.set_param( test_params )
 
         fraction_asymptomatic = [
@@ -545,7 +644,19 @@ class TestClass(object):
             test_params[ "fraction_asymptomatic_70_79" ],
             test_params[ "fraction_asymptomatic_80" ],
         ]
-
+         
+        mild_fraction = [
+            test_params[ "mild_fraction_0_9" ],
+            test_params[ "mild_fraction_10_19" ],
+            test_params[ "mild_fraction_20_29" ],
+            test_params[ "mild_fraction_30_39" ],
+            test_params[ "mild_fraction_40_49" ],
+            test_params[ "mild_fraction_50_59" ],
+            test_params[ "mild_fraction_60_69" ],
+            test_params[ "mild_fraction_70_79" ],
+            test_params[ "mild_fraction_80" ],
+        ]
+        
         hospitalised_fraction = [
             test_params[ "hospitalised_fraction_0_9" ],
             test_params[ "hospitalised_fraction_10_19" ],
@@ -589,7 +700,7 @@ class TestClass(object):
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
 
-        # fraction asymptomatic vs symptomatc
+        # fraction asymptomatic vs mild+symptomatc
         N_asym = len(
             df_indiv[
                 (df_indiv["time_infected"] > 0) & (df_indiv["time_asymptomatic"] > 0)
@@ -597,10 +708,15 @@ class TestClass(object):
         )
         N_sym = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_asymptomatic"] < 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
             ]
         )
-        N = N_sym + N_asym
+        N_mild = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+            ]
+        )
+        N = N_sym + N_asym + N_mild
         mean = N_asym / N
         sd = sqrt(mean * (1 - mean))
      #   np.testing.assert_allclose(
@@ -610,7 +726,9 @@ class TestClass(object):
         # asymptomatic fraction by age
         N_asymp_tot = 0
         N_symp_tot = 0
+        N_mild_tot = 0
         asypmtomatic_fraction_weighted = 0
+        mild_fraction_weighted = 0
         for idx in range( constant.N_AGE_GROUPS ):
 
             N_asymp = len(
@@ -621,32 +739,58 @@ class TestClass(object):
             )
             N_symp = len(
                 df_indiv[
-                    (df_indiv["time_symptomatic"] > 0) & (df_indiv["time_asymptomatic"] < 0)
+                    (df_indiv["time_presypmtomatic"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
-            N    = N_symp + N_asymp
-            mean = N_asymp / N
-            sd   = sqrt(mean * (1 - mean))
+            N_mild = len(
+                df_indiv[
+                    (df_indiv["time_presypmtomatic"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                    & (df_indiv["age_group"] == constant.AGES[idx])
+                ]
+            )   
+            
+            N    = N_symp + N_asymp + N_mild
+            mean_asym = N_asymp / N
+            sd_asym   = sqrt(mean_asym * (1 - mean_asym))
             np.testing.assert_allclose(
-                mean,
+                mean_asym,
                 fraction_asymptomatic[idx],
-                atol=std_error_limit * sd / sqrt( N ),
+                atol=std_error_limit * sd_asym / sqrt( N ),
             )
-
+            
+            mean_mild = N_mild / N
+            sd_mild   = sqrt(mean_mild * (1 - mean_mild))
+            np.testing.assert_allclose(
+                mean_mild,
+                mild_fraction[idx],
+                atol=std_error_limit * sd_mild / sqrt( N ),
+            )
+            
             N_asymp_tot += N_asymp
             N_symp_tot  += N_symp
+            N_mild_tot += N_mild
             asypmtomatic_fraction_weighted += fraction_asymptomatic[idx] * N
-
-        # overall hospitalised fraction
-        N    = N_symp_tot + N_asymp_tot 
-        mean = N_asymp_tot / N
-        sd   = sqrt(mean * (1 - mean))
+            mild_fraction_weighted += mild_fraction[idx] * N
+            
+        # overall asymptomatic and mild fractions
+        N    = N_symp_tot + N_asymp_tot + N_mild_tot
+        mean_asym = N_asymp_tot / N
+        sd_asym   = sqrt(mean_asym * (1 - mean_asym))
         asypmtomatic_fraction_weighted = asypmtomatic_fraction_weighted / N
         np.testing.assert_allclose(
-            mean,
+            mean_asym,
             asypmtomatic_fraction_weighted,
-            atol=std_error_limit * sd / sqrt(N),
+            atol=std_error_limit * sd_asym / sqrt(N),
+        )
+        
+        mean_mild = N_mild_tot / N
+        sd_mild   = sqrt(mean_mild * (1 - mean_mild))
+        mild_fraction_weighted = mild_fraction_weighted / N
+        np.testing.assert_allclose(
+            mean_mild,
+            mild_fraction_weighted,
+            atol=std_error_limit * sd_mild / sqrt(N),
         )
 
         # hospitalised fraction by age
@@ -663,7 +807,7 @@ class TestClass(object):
             )
             N_symp = len(
                 df_indiv[
-                    (df_indiv["time_symptomatic"] > 0)
+                    (df_indiv["time_symptomatic_severe"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
@@ -772,3 +916,4 @@ class TestClass(object):
             fatality_fraction_weighted,
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
+        
