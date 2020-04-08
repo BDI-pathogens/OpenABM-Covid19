@@ -378,6 +378,24 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
     if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
+    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_intervention_trigger_n_infected));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_intervention_trigger_n_infected)\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_lockdown_trigger_n_infected));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_n_infected)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_length));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_length)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_keep_elderly));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_keep_elderly)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_app_on_end));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_app_on_end)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_time_to_test));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_time_to_test)\n"); };
+
 	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
 	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	

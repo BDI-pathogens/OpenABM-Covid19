@@ -159,4 +159,10 @@ successive_lockdown_gap	7
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
 intervention_start_time 0
+TEMP_intervention_trigger_n_infected 0
+TEMP_lockdown_trigger_n_infected 0
+TEMP_lockdown_trigger_length 25
+TEMP_lockdown_trigger_keep_elderly 1
+TEMP_lockdown_trigger_app_on_end 1
+TEMP_lockdown_trigger_time_to_test 10000
 N_REFERENCE_HOUSEHOLDS	125455
