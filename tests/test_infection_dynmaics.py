@@ -373,6 +373,33 @@ class TestClass(object):
                 mild_fraction_80= 0.8,
                 mild_infectious_factor = [0.1, 0.25, 0.5, 0.5, 1, 0.1]
             )        
+        ],
+        "test_ratio_presymptomatic_symptomatic": [
+            dict(
+                n_total = 10000,
+                n_seed_infection = 1,
+                end_time = 100
+            ),
+            dict(
+                n_total = 100000,
+                n_seed_infection = 10,
+                end_time = 1
+            ),
+            dict(
+                n_total = 1000000,
+                n_seed_infection = 100,
+                end_time = 1
+            ),
+            dict(
+                n_total = 10000000,
+                n_seed_infection = 1000,
+                end_time = 1
+            ),
+            dict(
+                n_total = 100000,
+                n_seed_infection = 10000,
+                end_time = 1
+            )
         ]
     }
     """
@@ -945,3 +972,93 @@ class TestClass(object):
             # refresh current values
             mild_infectious_factor_current = mild_infectious_factor_new
             total_infected_current = total_infected_new
+
+
+
+    def test_ratio_presymptomatic_symptomatic( 
+            self, 
+            n_total,
+            n_seed_infection,
+            end_time
+        ):
+        """
+        Test that ratio presymptomatic to symptomatic individuals is correct; currently must be 1.
+        """
+        tolerance = 1/n_total
+
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+
+        params.set_param("n_total", n_total)
+        params.set_param("n_seed_infection", n_seed_infection)
+        params.set_param("end_time", end_time)
+        params.write_params(constant.TEST_DATA_FILE)
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        df_indiv = pd.read_csv(
+            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+        )
+
+        # all presymptomatic vs symptomatic
+        N_severe_pre = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+            ]
+        )
+        N_mild_pre = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+            ]
+        )
+        
+        N_severe_sym = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_symptomatic_severe"] > 0)
+            ]
+        )
+        N_mild_sym = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_symptomatic_mild"] > 0)
+            ]
+        )
+        N_pre = N_severe_pre + N_mild_pre
+        N_sym = N_severe_sym + N_mild_sym
+        
+        np.testing.assert_allclose(
+            N_pre, N_sym, atol=tolerance
+        )
+
+        # presymptomatic vs symptomatic by age
+        for idx in range( constant.N_AGE_GROUPS ):
+            N_severe_pre = len(
+            df_indiv[
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+                & (df_indiv["age_group"] == constant.AGES[idx])
+                ]
+            )
+            N_mild_pre = len(
+                df_indiv[
+                    (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                    & (df_indiv["age_group"] == constant.AGES[idx])
+                ]
+            )
+            
+            N_severe_sym = len(
+                df_indiv[
+                    (df_indiv["time_infected"] > 0) & (df_indiv["time_symptomatic_severe"] > 0)
+                    & (df_indiv["age_group"] == constant.AGES[idx])
+                ]
+            )
+            N_mild_sym = len(
+                df_indiv[
+                    (df_indiv["time_infected"] > 0) & (df_indiv["time_symptomatic_mild"] > 0)
+                    & (df_indiv["age_group"] == constant.AGES[idx])
+                ]
+            )
+            N_pre = N_severe_pre + N_mild_pre
+            N_sym = N_severe_sym + N_mild_sym
+            
+            np.testing.assert_allclose(
+                N_pre, N_sym, atol = tolerance
+            )
+            
+      
