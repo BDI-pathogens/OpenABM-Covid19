@@ -67,10 +67,10 @@ void set_up_hospital_networks( hospital* hospital )
     {
         for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
         {
-            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_doctors; idx++ )
+            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[idx].pdx;
 
-            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_nurses; idx++ )
+            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
 
             set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]) );
@@ -101,35 +101,26 @@ void build_hospital_networks( model *model, hospital *hospital )
 *  Description: adds population id of a doctor / nurse to hospital's
 *               doctor / nurse population id list
 ******************************************************************************************/
-void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
+void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int hcw_type)
 {
     int ward_type, ward_idx;
-    int ward_found = FALSE;
+    int hcw_allocated;
 
-    if( type == DOCTOR )
-    {
-        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
-            for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
-                if( hospital->wards[ward_type][ward_idx].n_doctors < hospital->wards[ward_type][ward_idx].n_max_doctors )
-                    ward_found = TRUE;
+    hcw_allocated = FALSE;
 
-        if( ward_found == FALSE)
-            print_exit( "attempted to allocated more than max number of doctors to hospital!!" );
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && hcw_allocated != TRUE; ward_type++ )
+        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && hcw_allocated != TRUE; ward_idx++ )
+            if( hospital->wards[ward_type][ward_idx].n_worker[hcw_type] < hospital->wards[ward_type][ward_idx].n_max_hcw[hcw_type] )
+                hcw_allocated = TRUE;
 
-        initialise_doctor( &(hospital->wards[ward_type][ward_idx].doctors[hospital->wards[ward_type][ward_idx].n_doctors++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
-    }
-    else if( type == NURSE )
-    {
-        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && ward_found != TRUE; ward_type++ )
-            for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && ward_found != TRUE; ward_idx++ )
-                if( hospital->wards[ward_type][ward_idx].n_nurses < hospital->wards[ward_type][ward_idx].n_max_nurses )
-                    ward_found = TRUE;
+    if( hcw_allocated == FALSE)
+        print_exit( "attempted to allocated more than max number of doctors to hospital!!" );
 
-        if( ward_found == FALSE)
-            print_exit( "attempted to allocated more than max number of nurses to hospital!!" );
-
-        initialise_nurse( &(hospital->wards[ward_type][ward_idx].nurses[hospital->wards[ward_type][ward_idx].n_nurses++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
-    }
+    //TODO: if statement below not necessary when separate doctor / nurse structs are moved into a hcw struct
+    if( hcw_type == DOCTOR )
+        initialise_doctor( &(hospital->wards[ward_type][ward_idx].doctors[hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
+    else
+        initialise_nurse( &(hospital->wards[ward_type][ward_idx].nurses[hospital->wards[ward_type][ward_idx].n_worker[NURSE]++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
 }
 
 int healthcare_worker_working( individual* indiv )
