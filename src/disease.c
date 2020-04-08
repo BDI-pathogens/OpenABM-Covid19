@@ -18,9 +18,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#include <gsl/gsl_rng.h>
-//#include <gsl/gsl_randist.h>
-
 /*****************************************************************************************
 *  Name:		set_up_transition_times
 *  Description: sets up discrete distributions for the times it takes to

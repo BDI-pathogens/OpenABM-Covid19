@@ -96,7 +96,7 @@ enum WORK_NETWORKS_TYPES{
 	N_WORK_NETWORK_TYPES
 };
 
-//TODO: kelvin change
+//TODO: change to HOSPITAL_WORKER_TYPES
 enum WORKER_TYPES {
     DOCTOR,
     NURSE,
