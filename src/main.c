@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 	
 	printf("# Read input parameter file\n");
 	read_param_file( &params );
+    read_hospital_param_file( &params );
 	check_params( &params );
 	
 	printf("# Read household demographics file\n");
