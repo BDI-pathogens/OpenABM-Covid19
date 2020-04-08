@@ -281,7 +281,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 {
     //TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
     long pdx;
-    int idx;
+    int idx, n_total_doctors, n_total_nurses;
     individual *indiv;
 
     //initialise hospitals
@@ -291,7 +291,9 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
-    while( idx < model->params->n_total_doctors )
+    n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];
+    n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
+    while( idx < n_total_doctors )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
@@ -306,7 +308,9 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be nurses and assign to a hospital
-    while( idx < model->params->n_total_nurses )
+    n_total_nurses = model->params->n_hcw_per_ward[COVID_GENERAL][NURSE] * model->params->n_wards[COVID_GENERAL];
+    n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
+    while( idx < n_total_nurses )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);

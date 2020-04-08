@@ -146,7 +146,7 @@ int healthcare_worker_working( individual* indiv )
 void destroy_hospital( hospital *hospital)
 {
     free( hospital->hospital_workplace_network );
-    for( int ward_type; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
         for(int ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
             destroy_ward( &(hospital->wards[ward_type][ward_idx]) );
