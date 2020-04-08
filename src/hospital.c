@@ -30,18 +30,17 @@ void initialise_hospital(
 
     hospital->hospital_idx   = hdx;
 
-    hospital->n_total_beds = params->hospital_n_beds;
-    hospital->n_total_icus = params->hospital_n_icus;
-
     //setup wards
-    hospital->n_wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(int*) );
+    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        hospital->n_wards[ward_type] = params->n_wards[ward_type];
+
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
 
     for( int w_type = 0; w_type < N_HOSPITAL_WARD_TYPES; w_type++ )
     {
         hospital->wards[w_type] = calloc( hospital->n_wards[w_type], sizeof(ward) );
         for( int n_ward = 0; n_ward < hospital->n_wards[w_type]; n_ward++ )
-            initialise_ward( &(hospital->wards[w_type][n_ward]), w_type, n_ward);
+            initialise_ward( &(hospital->wards[w_type][n_ward]), w_type, n_ward, params->n_ward_beds[w_type]);
     }
 }
 
@@ -63,7 +62,7 @@ void set_up_hospital_networks( hospital* hospital )
     //setup hcw -> patient networks for all wards
     for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
-        for( ward_idx = 0; ward_idx < hospital->n_wards[N_HOSPITAL_WARD_TYPES]; ward_idx++ )
+        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
         {
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_doctors; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[idx].pdx;
@@ -132,26 +131,6 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
     }
 }
 
-/*****************************************************************************************
-*  Name:		add_nurse
-*  Description: adds population id of a doctor / nurse to hospital's
-*               doctor / nurse population id list
-******************************************************************************************/
-//void add_patient_to_hospital(hospital *hospital, long pdx, int type)
-//{
-//    if( type == HOSPITALISED )
-//    {
-//        hospital->general_patient_pdxs[hospital->n_total_general_patients++] = pdx;
-//        hospital->n_total_general_patients++;
-//    }
-//    else if( type == HOSPITALISED_CRITICAL)
-//    {
-//        hospital->icu_patient_pdxs[hospital->n_total_icu_patients++] = pdx;
-//        hospital->n_total_icu_patients++;
-//    }
-//}
-
-
 int healthcare_worker_working( individual* indiv )
 {
     if( indiv->status == DEATH || is_in_hospital(indiv) || indiv->quarantined == TRUE )
@@ -167,6 +146,15 @@ int healthcare_worker_working( individual* indiv )
 void destroy_hospital( hospital *hospital)
 {
     free( hospital->hospital_workplace_network );
+    for( int ward_type; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        for(int ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+            destroy_ward( &(hospital->wards[ward_type][ward_idx]) );
+
+        free( hospital->wards[ward_type] );
+    }
+
+    free( hospital->wards );
 }
 
 /*****************************************************************************************
@@ -325,7 +313,7 @@ void assign_patient_to_hospital( model* model, individual *indiv )
         {
             //Check if number of patients in a ward is less than the max no. of beds.
             if( assigned_hospital->wards[required_ward][ward_idx].n_patients
-                    <  assigned_hospital->wards[required_ward][ward_idx].beds )
+                    <  assigned_hospital->wards[required_ward][ward_idx].n_beds )
             {
                  indiv->hospital_idx = hospital_idx;
                  assigned_hospital->n_patients_waiting++;
