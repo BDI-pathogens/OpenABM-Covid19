@@ -357,16 +357,6 @@ class TestClass(object):
                 relative_susceptibility_60_69 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_70_79 = [0.2, 0.2, 0.2, 0.2, 0.2],
                 relative_susceptibility_80 = [0.1, 0.4, 0.8, 1.6, 0.1]
-#                end_time = 250,
-#                relative_susceptibility_0_9 = [0.2, 0.2],
-#                relative_susceptibility_10_19 = [0.2, 0.2],
-#                relative_susceptibility_20_29 = [0.2, 0.2],
-#                relative_susceptibility_30_39 = [0.2, 0.2],
-#                relative_susceptibility_40_49 = [0.2, 0.2],
-#                relative_susceptibility_50_59 = [0.2, 0.2],
-#                relative_susceptibility_60_69 = [0.2, 0.2],
-#                relative_susceptibility_70_79 = [0.2, 0.2],
-#                relative_susceptibility_80 =  [ 1.6, 0.1 ]
             )
         ],
         "test_monoton_mild_infectious_factor": [
