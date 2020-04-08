@@ -114,6 +114,9 @@ void set_up_infectious_curves( model *model )
 	double mean_interactions[N_AGE_TYPES];
 	int type, group;
 
+    //TODO: double check that the hospital hcw-> patients interactions are being taken into account properluy here and in estimate mean
+    //      interaction... it does not look like they are being used in the estimate mean interactions func
+    //      is it ok to leave them out or is this affecting the rest of the simulation?
 	mean_interactions[AGE_TYPE_CHILD]   = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
 	mean_interactions[AGE_TYPE_ADULT]   = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
 	mean_interactions[AGE_TYPE_ELDERLY] = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
