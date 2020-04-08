@@ -10,7 +10,6 @@
 #include "individual.h"
 #include "utilities.h"
 #include "constant.h"
-#include "params.h"
 #include "network.h"
 #include <math.h>
 
@@ -60,10 +59,7 @@ void set_up_allocate_work_places( model *model )
 		{
 			prob[adx][ndx] = 0;
 			if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] != NETWORK_TYPE_ADULT )
-            {
 				prob[adx][ndx] = ( ndx == AGE_WORK_MAP[adx] );
-                double t = prob[adx][ndx];
-            }
 			else
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
@@ -71,6 +67,9 @@ void set_up_allocate_work_places( model *model )
 					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
 					other         += prob[adx][ndx];
 				}
+
+                // TODO: kelvin have probability func for adults being in the hospital network??
+                // Tom - is this handled by the set hospital worker function?
 			}
 		}
 		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
@@ -78,19 +77,12 @@ void set_up_allocate_work_places( model *model )
 	}
 
 	// randomly assign a work place networks using the probability map
+	// Added: Healthcare workers are not added to workplace networks. - Tom & Kelvin.
 
-    //old way w/o healthcare workers
-//	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-//		model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
-
-    //kelvin change, make sure no healthcare workers assigned to a work network
     for (pdx = 0; pdx < model->params->n_total; pdx++)
     {
-        if( model->population[pdx].worker_type == OTHER )
+        if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
             model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
-        else
-            model->population[pdx].work_network = -1; //TODO: set work network to hospital. How does this affect the rest of the project if addign hospital to WORK_NETWORKS?
-
     }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
@@ -264,7 +256,7 @@ void set_up_household_distribution( model *model )
 *  Name:		build_household_network_from_directory
 *  Description: Builds a network of household i
 ******************************************************************************************/
-void build_household_network_from_directroy( network *network, directory *directory )
+void build_household_network_from_directory(network *network, directory *directory )
 {
 	long hdx, edge_idx, h_size;
 	int pdx, p2dx;
@@ -276,7 +268,7 @@ void build_household_network_from_directroy( network *network, directory *direct
 	for( hdx = 0; hdx < directory->n_idx; hdx++ )
 	{
 		h_size   = directory->n_jdx[hdx];
-		network->n_edges += h_size  * ( h_size - 1 ) / 2;
+        network->n_edges += h_size  * ( h_size - 1 ) / 2; //TODO: why this func to determine edges?
 	}
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
 

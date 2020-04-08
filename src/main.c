@@ -1,14 +1,12 @@
 // main.c
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
 #include "model.h"
 #include "network.h"
 #include "params.h"
-#include "utilities.h"
 #include "input.h"
 #include "constant.h"
 
@@ -41,7 +39,8 @@ int main(int argc, char *argv[])
 	read_household_demographics_file( &params );
 	
 	printf("# Start model set-up\n");
-	model *model = new_model( &params );
+
+    model *model = new_model( &params );
 	
 	printf("# param_id: %li\n", params.param_id);
 	printf("# rng_seed: %li\n", params.rng_seed);

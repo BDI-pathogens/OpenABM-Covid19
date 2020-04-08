@@ -17,6 +17,7 @@
 #include "individual.h"
 #include "network.h"
 #include "params.h"
+#include "hospital.h" //kelvin change
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -27,7 +28,7 @@ struct event_list{
 	event **events;
 	long *n_daily;
 	long **n_daily_by_age;
-	long *n_daily_current;
+    long *n_daily_current; //is this the currently infected list?
 	long n_total;
 	long *n_total_by_age;
 	long n_current;
@@ -70,6 +71,8 @@ struct model{
 	int **transition_time_distributions;
 
 	long n_quarantine_days;
+
+    hospital *hospitals;
 };
 
 struct event{
@@ -91,7 +94,7 @@ struct event{
 
 model* new_model(parameters *);
 void set_up_population( model* );
-void set_up_healthcare_workers( model* ); //kelvin change
+void set_up_healthcare_workers_and_hospitals( model* ); //kelvin change
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
@@ -112,7 +115,9 @@ void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
 
 void add_interactions_from_network( model*, network*, int, int, double );
-void build_daily_newtork( model* );
-void build_random_network( model * );
+void build_daily_network(model *model);
+void build_random_network( model *model );
+void check_hospital_state_status( model *model );
+
 
 #endif /* MODEL_H_ */

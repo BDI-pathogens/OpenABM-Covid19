@@ -11,7 +11,8 @@ else
 	PIP = pip3
 endif
 
-OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o
+OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o hospital.o doctor.o nurse.o ward.o
+
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = ${GSLFLAGS}
 

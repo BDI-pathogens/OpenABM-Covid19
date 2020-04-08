@@ -54,9 +54,17 @@ struct individual{
 	trace_token *index_trace_token;
 	int traced_on_this_trace;
 
-	int app_user;
+    int app_user;
 
-    int worker_type; //TODO: kelvin change
+    int ward_idx;
+    int ward_type;
+    int hospital_idx;
+
+    int hospital_state;
+	event *current_hospital_event;
+	event *next_hospital_event;
+
+    int worker_type;
 };
 
 struct interaction{
@@ -87,6 +95,11 @@ void set_hospitalised( individual*, parameters*, int );
 void set_critical( individual*, parameters*, int );
 void set_dead( individual*, parameters*, int );
 void set_case( individual*, int );
+void set_waiting( individual*, parameters*, int );
+void set_general_admission( individual*, parameters*, int );
+void set_icu_admission( individual*, parameters*, int );
+void set_mortuary_admission( individual*, parameters*, int );
+void set_discharged( individual*, parameters*, int );
 void update_random_interactions( individual*, parameters* );
 
 void destroy_individual( individual* );
