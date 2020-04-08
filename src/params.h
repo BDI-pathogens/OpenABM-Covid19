@@ -131,6 +131,9 @@ typedef struct{
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
+	int interventions_on;           // should we use interventions
+	int intervention_start_time;	// time at which interventions start
+
 	int sys_write_individual; 		// Should an individual file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file

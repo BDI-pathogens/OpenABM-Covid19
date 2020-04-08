@@ -175,6 +175,8 @@ void update_intervention_policy( model *model, int time )
 			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
 	}
 
+	params->interventions_on = time >= params->intervention_start_time;
+
 	if( time == params->app_turn_on_time )
 		set_param_app_turned_on( model, TRUE );
 
@@ -517,6 +519,9 @@ void intervention_quarantine_household(
 ******************************************************************************************/
 void intervention_on_symptoms( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	int quarantine, time_event;
 	parameters *params = model->params;
 
@@ -555,6 +560,9 @@ void intervention_on_symptoms( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_hospitalised( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	intervention_test_order( model, indiv, model->time );
 
 	if( model->params->allow_clinical_diagnosis )
@@ -572,6 +580,9 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_positive_result( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	int time_event = UNKNOWN;
 	parameters *params = model->params;
 	trace_token *index_token = index_trace_token( model, indiv );
@@ -600,6 +611,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_critical( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
 }
 
 /*****************************************************************************************

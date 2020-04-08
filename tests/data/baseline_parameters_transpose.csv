@@ -158,4 +158,5 @@ successive_lockdown_duration	21
 successive_lockdown_gap	7
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
+intervention_start_time 0
 N_REFERENCE_HOUSEHOLDS	125455
