@@ -18,9 +18,11 @@
 typedef struct{
 	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
+    char hospital_input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
 	char input_household_file[INPUT_CHAR_LEN]; //path to input household demographics file
 	char output_file_dir[INPUT_CHAR_LEN];	// path to output directory
 	int param_line_number;			// line number to be read from parameter file
+    int hospital_param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
 	int days_of_interactions;		// the number of days of interactions to keep
@@ -136,6 +138,16 @@ typedef struct{
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
     int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
+    //hospital params
+    int n_total_doctors;
+    int n_total_nurses;
+    int n_hospitals;
+    int n_wards[N_HOSPITAL_WARD_TYPES];
+    int n_ward_beds[N_HOSPITAL_WARD_TYPES];
+    int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
+
     //TODO: Add in finer grained transition times between wards once we have more information on them.
     //TOM: Determines timing for hospital event transitions.
     double mean_time_hospital_transition; // mean time for movement between hospital locations
@@ -146,18 +158,6 @@ typedef struct{
     double general_infectivity_modifier;
     double icu_infectivity_modifier;
 
-    //hospital params
-    int n_total_doctors;       // Total number of doctors
-    int n_total_nurses;        // Total number of nurses
-    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
-    int n_hospitals;
-    int n_covid_general_wards;
-    int n_covid_icu_wards;
-    int hospital_n_beds;
-    int hospital_n_icus;
-    int patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES]; //TODO: should worker types be changed to HEALTHCARE_WORKER_TYPES as other worker types are not modelled? (and also mean a -1 is required here)
-    int n_wards[N_HOSPITAL_WARD_TYPES];
-    int n_ward_beds[N_HOSPITAL_WARD_TYPES];
 
 } parameters;
 
