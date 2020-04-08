@@ -17,9 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
+#include <string.h>
 
 /*****************************************************************************************
 *  Name:		new_model
@@ -41,6 +39,10 @@ model* new_model( parameters *params )
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
+    gsl_rng_env_setup();
+    rng = gsl_rng_alloc ( gsl_rng_default);
+    gsl_rng_set( rng, params->rng_seed );
+
 	update_intervention_policy( model_ptr, model_ptr->time );
 
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
@@ -59,7 +61,8 @@ model* new_model( parameters *params )
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
-	set_up_app_users( model_ptr );
+	set_up_app_users( model_ptr, model_ptr->params->app_users_fraction );
+	set_up_trace_tokens( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -97,9 +100,11 @@ void destroy_model( model *model )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
-    free ( model-> household_directory );;
+    free ( model-> household_directory );
+    free( model->trace_tokens );
     free( model );
 
+    gsl_rng_free( rng );
 };
 
 /*****************************************************************************************
@@ -194,7 +199,7 @@ void set_up_work_network( model *model, int network )
 	long idx;
 	long n_people = 0;
 	long *people;
-	int n_interactions;
+	double n_interactions;
 	int age = NETWORK_TYPE_MAP[network];
 
 	people = calloc( model->params->n_total, sizeof( long ) );
@@ -204,7 +209,7 @@ void set_up_work_network( model *model, int network )
 
 
 	model->work_network[network] = new_network( n_people, WORK );
-	n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work );
+	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->work_network[network], people );
 
@@ -647,7 +652,7 @@ void build_daily_newtork( model *model )
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used );
+		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
 };
 
@@ -698,16 +703,21 @@ int one_time_step( model *model )
 	build_daily_newtork( model );
 	transmit_virus( model );
 
-	transition_events( model, SYMPTOMATIC,  &transition_to_symptomatic,  FALSE );
-	transition_events( model, HOSPITALISED, &transition_to_hospitalised, FALSE );
-	transition_events( model, CRITICAL,     &transition_to_critical,     FALSE );
-	transition_events( model, RECOVERED,    &transition_to_recovered,    FALSE );
-	transition_events( model, DEATH,        &transition_to_death,        FALSE );
+	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
+	transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
+	transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
+	transition_events( model, CRITICAL,          &transition_to_critical,         FALSE );
+	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
+	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
+	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,TRUE );
+
+	if( model->params->quarantine_smart_release_day > 0 )
+		intervention_smart_release( model );
 
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
@@ -715,5 +725,3 @@ int one_time_step( model *model )
 
 	return 1;
 };
-
-

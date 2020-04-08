@@ -27,6 +27,9 @@ void write_output_files(model *, parameters *);
 void write_individual_file(model *, parameters *);
 void write_interactions( model* );
 void write_transmissions( model* );
+void write_trace_tokens( model* );
+void write_trace_tokens_ts( model*, int );
+
 void print_interactions_averages( model*, int );
 
 #endif /* INPUT_H_ */
