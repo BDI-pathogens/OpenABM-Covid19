@@ -30,7 +30,7 @@ struct ward
 
     int n_beds;
 
-    int n_max_doctors; //TODO: maybe get rid of max variables as number of hcw is static
+    int n_max_doctors;
     int n_max_nurses;
 
     int n_doctors;
@@ -49,7 +49,7 @@ struct ward
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_ward(ward*, int, int , int n_beds);
+void initialise_ward(ward*, int, int , int n_beds, int n_max_doctors, int n_max_nurses);
 void set_up_ward_networks( ward* ward );
 void build_ward_networks(model *model, ward* ward );
 void build_hcw_patient_network(ward* ward, network *network, long *hc_workers, int n_hcw_working, int n_patient_required_interactions, int max_hcw_daily_interactions );

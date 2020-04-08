@@ -33,12 +33,14 @@ int main(int argc, char *argv[])
 	
 	printf("# Read input parameter file\n");
 	read_param_file( &params );
-    read_hospital_param_file( &params );
 	check_params( &params );
 	
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
+    printf("# Read hospital parameter file\n");
+    read_hospital_param_file( &params );
+
 	printf("# Start model set-up\n");
 
     model *model = new_model( &params );
