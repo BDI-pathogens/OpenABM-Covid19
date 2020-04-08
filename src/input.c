@@ -17,6 +17,7 @@
 #include "demographics.h"
 #include "interventions.h"
 
+
 /*****************************************************************************************
 *  Name:		read_command_line_args
 *  Description: Read command-line arguments and attach to params struct
@@ -168,10 +169,27 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
 	
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
+
+    //TOM: Added for hospital state transitions.
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
+
+    //TOM: Added to account for hospital location dependent infectiousness.
+    check = fscanf(parameter_file, " %lf ,", &(params->waiting_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->general_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->icu_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
@@ -377,10 +395,19 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
 	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
-    //kelvin change
+    //TODO: These hospital params need to be read in from a separate hospital file
     //current sim  pop is 100,000. 66 million is uk pop. 150,000 doctors and 320,000 nurses + midwives in nhs according to https://www.nuffieldtrust.org.uk/resource/the-nhs-workforce-in-numbers
     params->n_total_doctors = 227;
     params->n_total_nurses  = 484;
+    params->n_hospitals = 1;
+    params->hospital_n_beds = 300;
+    params->hospital_n_icus = 300;
+    params->max_hcw_daily_interactions = 20;
+    params->patient_required_interactions[COVID_ICU][DOCTOR] = 3;
+    params->patient_required_interactions[COVID_ICU][NURSE] = 6;
+    params->patient_required_interactions[COVID_GENERAL][DOCTOR] = 1;
+    params->patient_required_interactions[COVID_GENERAL][NURSE] = 3;
+
 	fclose(parameter_file);
 }
 

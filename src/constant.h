@@ -15,7 +15,7 @@
 #define FALSE 0
 #define TRUE 1
 
-
+//TODO: add hospitalised type event
 enum EVENT_TYPES{
 	UNINFECTED,
 	PRESYMPTOMATIC,
@@ -23,7 +23,7 @@ enum EVENT_TYPES{
 	ASYMPTOMATIC,
 	SYMPTOMATIC,
 	SYMPTOMATIC_MILD,
-	HOSPITALISED,
+    HOSPITALISED, //severe
 	CRITICAL,
 	RECOVERED,
 	DEATH,
@@ -33,9 +33,15 @@ enum EVENT_TYPES{
 	TEST_RESULT,
 	CASE,
 	TRACE_TOKEN_RELEASE,
+	NOT_IN_HOSPITAL, //TOM: Events for hospital states.
+	WAITING,
+	GENERAL,
+	ICU,
+    MORTUARY,
+    DISCHARGED,
 	N_EVENT_TYPES
 };
-
+//for transition time curves
 enum TRANSITIONS_TYPES{
 	ASYMPTOMATIC_RECOVERED,
 	PRESYMPTOMATIC_SYMPTOMATIC,
@@ -50,7 +56,8 @@ enum TRANSITIONS_TYPES{
 	SYMPTOMATIC_QUARANTINE,
 	TRACED_QUARANTINE,
 	TEST_RESULT_QUARANTINE,
-	N_TRANSITION_TYPES
+	HOSPITAL_TRANSITION,    //TOM: Event transitions for all hospital states.
+	N_TRANSITION_TYPES      // Added to params: mean_time_hospital transition (1), sd_time_hospital_transition (0).
 };
 
 enum AGE_GROUPS{
@@ -79,7 +86,6 @@ enum WORK_NETWORKS{
     NETWORK_20_69, // pick certain number from this network to be healthcare worker
 	NETWORK_70_79,
 	NETWORK_80,
-    //NETWORK_HOSPITAL, //TODO: kelvin change
 	N_WORK_NETWORKS
 };
 
@@ -94,7 +100,6 @@ enum WORK_NETWORKS_TYPES{
 enum WORKER_TYPES {
     DOCTOR,
     NURSE,
-    OTHER,
     N_WORKER_TYPES
 };
 
@@ -102,6 +107,7 @@ extern const int AGE_WORK_MAP[N_AGE_GROUPS];
 extern const int NETWORK_TYPE_MAP[N_WORK_NETWORKS];
 extern const int AGE_TYPE_MAP[N_AGE_GROUPS];
 extern const char* AGE_TEXT_MAP[N_AGE_GROUPS];
+
 
 
 enum HOUSEHOLD_SIZE{
@@ -114,16 +120,30 @@ enum HOUSEHOLD_SIZE{
 	N_HOUSEHOLD_MAX
 };
 
+//DONE: Add hospital interaction type for workers and patients.
+//TODO: ALTER INFECTIVITY OF HOSPITAL INTERACTION TYPES.
 enum INTERACTION_TYPE{
 	HOUSEHOLD,
 	WORK,
 	RANDOM,
+    HOSPITAL_WORK, //Interactions between healthcare workers
+    HOSPITAL_DOCTOR_PATIENT_GENERAL,
+    HOSPITAL_NURSE_PATIENT_GENERAL,
+    HOSPITAL_DOCTOR_PATIENT_ICU,
+    HOSPITAL_NURSE_PATIENT_ICU,
 	N_INTERACTION_TYPES
 };
 
 enum DISTRIBUTIONS{
 	FIXED,
 	NEGATIVE_BINOMIAL
+};
+
+enum HOSPITAL_WARD_TYPES{
+    COVID_GENERAL,
+    COVID_ICU,
+    //TODO: nursing_home ???
+    N_HOSPITAL_WARD_TYPES
 };
 
 #define UNKNOWN -1
@@ -138,7 +158,11 @@ enum DISTRIBUTIONS{
 #define N_DRAW_LIST 1000
 #define INPUT_CHAR_LEN 100
 
+#define NO_WARD -1
+#define NOT_HEALTHCARE_WORKER -1
+
 extern gsl_rng * rng;
+gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */
 

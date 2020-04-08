@@ -136,9 +136,26 @@ typedef struct{
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
     int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    //kelvin change
+    //TODO: Add in finer grained transition times between wards once we have more information on them.
+    //TOM: Determines timing for hospital event transitions.
+    double mean_time_hospital_transition; // mean time for movement between hospital locations
+    double sd_time_hospital_transition; // sd for movement between hospital locations
+
+    //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
+    double waiting_infectivity_modifier;
+    double general_infectivity_modifier;
+    double icu_infectivity_modifier;
+
+    //hospital params
     int n_total_doctors;       // Total number of doctors
     int n_total_nurses;        // Total number of nurses
+    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
+    int n_hospitals;
+    int n_covid_general_wards;
+    int n_covid_icu_wards;
+    int hospital_n_beds;
+    int hospital_n_icus;
+    int patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES]; //TODO: should worker types be changed to HEALTHCARE_WORKER_TYPES as other worker types are not modelled? (and also mean a -1 is required here)
 
 } parameters;
 
