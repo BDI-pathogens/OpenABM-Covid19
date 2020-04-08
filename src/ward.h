@@ -29,12 +29,9 @@ struct ward
     int type;
 
     int n_beds;
+    int n_max_hcw[N_WORKER_TYPES];
+    int n_worker[N_WORKER_TYPES];
 
-    int n_max_doctors;
-    int n_max_nurses;
-
-    int n_doctors;
-    int n_nurses;
     int n_patients;
 
     doctor *doctors;
