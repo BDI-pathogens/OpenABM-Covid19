@@ -8,6 +8,7 @@ Author: p-robot (W. Probert)
 from collections import OrderedDict
 import itertools, json, sys
 
+
 class ParameterSet(object):
     """
     Class representing a single parameter set for COVID19-IBM
@@ -78,78 +79,126 @@ class ParameterSet(object):
     params.write_varying_params(param_names, values_list, "new_parameter_file.csv")
     
     """
-    def __init__(self, param_file, line_number = 1):
-        
+
+    def __init__(self, param_file, line_number=1):
+
         # Read-in parameter file
         with open(param_file) as f:
             read_data = f.read()
         data = read_data.split("\n")
-        
+
         # Pull header and parameter line of interest (line number from the parameter file)
         header = [c.strip() for c in data[0].split(",")]
         param_line = [c.strip() for c in data[line_number].split(",")]
-        
-        self._NPARAMS = len(header)
-        
-        # Save parameters as an ordered dict
-        self.params = OrderedDict([(param, value) for param, value in zip(header, param_line)])
-    
-    def get_param(self, param):
-        return(self.params[param])
 
-    def set_param(self, param, value):
-        self.params[param] = str(value)
+        self._NPARAMS = len(header)
+
+        # Save parameters as an ordered dict
+        self.params = OrderedDict(
+            [(param, value) for param, value in zip(header, param_line)]
+        )
+
+    def get_param(self, param):
+        """Get parameter value
+        
+        Arguments
+        ---------
+        param : str
+            Parameter name
+        
+        Returns
+        -------
+        parameter value as a str
+        """
+        # Check the parameter exists in the parameter set dictionary
+        assert param in self.params, "Parameter {} does not exist.".format(param)
+
+        return self.params[param]
+
+    def set_param(self, param, value=None):
+        """Set parameter value
+        
+        Arguments
+        ---------
+        param : str or dict
+            Parameter name (or a dict of parameter name-value key-value pairs)
+        value : int, float, str
+            Parameter value to set as value for parameter `param` (None if 'param' is a dict)
+        
+        Returns
+        -------
+        Nothing.
+        """
+
+        if isinstance(param, dict):
+            for p, v in param.items():
+                self.set_param(p, v)
+        else:
+            # Check the parameter exists in the parameter set dictionary
+            assert param in self.params, "Parameter {} does not exist.".format(param)
+            self.params[param] = str(value)
 
     def list_params(self):
-        return(self.params.keys())
-    
-    
+        return self.params.keys()
+
     def write_varying_params_from_json(self, json_file, output_param_file):
         """
         Read JSON file of parameter values to vary, write parameter set to file
         """
-        
+
         # Read JSON file of parameters
         with open(json_file) as f:
             json_string = f.read()
         json_dict = json.loads(json_string)
-        
+
         # Pull out the list of parameters
         parameter_dict = json_dict["parameters"]
-        
+
         # Check that n_replicates and rng_seed aren't both specified
         if ("n_replicates" in json_dict) & ("rng_seed" in parameter_dict):
             print("Both n_replicates and rng_seed are specified - only specify one")
             sys.exit()
-        
+
         # Adjust single parameter values
         for param, value in parameter_dict.items():
             if not isinstance(value, list):
-                self.set_param(param, value) 
-        
+                self.set_param(param, value)
+
         # Make a dict of param values that are varying
         params = [k for k, v in parameter_dict.items() if isinstance(v, list)]
         values_list = [v for k, v in parameter_dict.items() if isinstance(v, list)]
-        
+
         if "n_replicates" in json_dict:
             n_replicates = json_dict["n_replicates"]
             params = params + ["rng_seed"]
             values_list = values_list + [range(n_replicates)]
-        
+
         # Write varying parameters to file
         self.write_varying_params(params, values_list, output_param_file)
-        
-    
+
     def write_params(self, param_file):
+        """Write parameters to CSV file
         
+        Arguements
+        ----------
+        param_file: str
+            Path to CSV file where parameter file should be written
+        """
+
         header = ", ".join(list(self.params.keys()))
         line = ", ".join(list(self.params.values()))
-        
+
         with open(param_file, "w+") as f:
             f.write(header + "\n" + line)
-    
-    def write_varying_params(self, params, values_list, output_param_file,
-            index_var = "param_id", reset_index = True):
+
+    def write_varying_params(
+        self,
+        params,
+        values_list,
+        output_param_file,
+        index_var="param_id",
+        reset_index=True,
+    ):
         """
         Write parameters to file from lists of parameter values across which to vary
             
@@ -167,7 +216,8 @@ class ParameterSet(object):
         """
         header = ", ".join(list(self.params.keys()))
 
-        lines = []; lines.append(header)
+        lines = []
+        lines.append(header)
 
         index = 1
         for values in list(itertools.product(*values_list)):
@@ -184,7 +234,7 @@ class ParameterSet(object):
 
         with open(output_param_file, "w+") as f:
             f.write("\n".join(lines))
-    
+
     @property
     def NPARAMS(self):
         "Number of parameters"
@@ -216,13 +266,13 @@ if __name__ == "__main__":
     Writes a new parameter file to disk at location <output_parameter_file>.  
     
     """
-    
+
     input_parameter_file = sys.argv[1]
     json_file = sys.argv[2]
     output_parameter_file = sys.argv[3]
-    
+
     # Read input parameter file and instantiate object
     p = ParameterSet(input_parameter_file)
-    
-    # Write new parameter file 
+
+    # Write new parameter file
     p.write_varying_params_from_json(json_file, output_parameter_file)
