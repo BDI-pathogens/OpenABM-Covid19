@@ -407,6 +407,11 @@ void read_param_file( parameters *params)
     params->patient_required_interactions[COVID_ICU][NURSE] = 6;
     params->patient_required_interactions[COVID_GENERAL][DOCTOR] = 1;
     params->patient_required_interactions[COVID_GENERAL][NURSE] = 3;
+    params->n_wards[COVID_GENERAL] = 40;
+    params->n_wards[COVID_ICU] = 10;
+    params->n_ward_beds[COVID_GENERAL] = 50;
+    params->n_ward_beds[COVID_ICU] = 50;
+
 
 	fclose(parameter_file);
 }

@@ -156,6 +156,8 @@ typedef struct{
     int hospital_n_beds;
     int hospital_n_icus;
     int patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES]; //TODO: should worker types be changed to HEALTHCARE_WORKER_TYPES as other worker types are not modelled? (and also mean a -1 is required here)
+    int n_wards[N_HOSPITAL_WARD_TYPES];
+    int n_ward_beds[N_HOSPITAL_WARD_TYPES];
 
 } parameters;
 
