@@ -29,9 +29,6 @@ struct hospital
 {
     int hospital_idx;               //hospital index number
 
-    int n_total_beds;               //total beds at hospital
-    int n_total_icus;               //total icus at hospital
-
     int n_total_doctors;            //total number of doctors
     int n_total_nurses;             //total number of nurses
 
@@ -42,7 +39,7 @@ struct hospital
 
     network *hospital_workplace_network;
 
-    int *n_wards;
+    int n_wards[N_HOSPITAL_WARD_TYPES];
     ward **wards;
 };
 

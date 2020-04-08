@@ -18,18 +18,21 @@
 void initialise_ward(
     ward *ward,
     int ward_idx,
-    int type
+    int type,
+    int n_beds
 )
 {
     ward->ward_idx = ward_idx;
     ward->type = type;
 
-    ward->patient_pdxs = calloc( ward->beds, sizeof(long) );
-    for (int i = 0; i < ward->beds; i++)
+    ward->patient_pdxs = calloc( ward->n_beds, sizeof(long) );
+    for (int i = 0; i < ward->n_beds; i++)
         ward->patient_pdxs[i] = NO_PATIENT;
 
     ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
+
+    ward->n_beds = n_beds;
 }
 
 void set_up_ward_networks( ward* ward )
@@ -117,9 +120,9 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
 int add_patient_to_ward( ward *ward, long pdx )
 {
-    if( ward->n_patients < ward->beds )
+    if( ward->n_patients < ward->n_beds )
     {
-        for( int idx = 0; idx < ward->beds; idx++ )
+        for( int idx = 0; idx < ward->n_beds; idx++ )
         {
             if( ward->patient_pdxs[idx] == NO_PATIENT )
             {
@@ -136,7 +139,7 @@ void remove_patient_from_ward( ward* ward, long pdx)
 {
     int idx;
 
-    for( idx = 0; idx < ward->beds; idx++ )
+    for( idx = 0; idx < ward->n_beds; idx++ )
     {
         if( ward->patient_pdxs[idx] == pdx )
         {
