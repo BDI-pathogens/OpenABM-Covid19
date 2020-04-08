@@ -25,18 +25,24 @@ void initialise_hospital(
     int hdx
 )
 {
+    int ward_type, ward_idx, hcw_type;
+
     if( hospital->hospital_idx != 0 )
         print_exit( "a hospital can only be initialised once!");
 
     hospital->hospital_idx  = hdx;
-    hospital->params        = params;
 
-    //setup wards
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
-    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
+        hospital->n_wards[ward_type] = params->n_wards[ward_type];
+
+        for( hcw_type = 0; hcw_type < N_WORKER_TYPES; hcw_type++ )
+            hospital->n_workers[hcw_type] += params->n_wards[ward_type] * params->n_hcw_per_ward[ward_type][hcw_type];
+
         hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
-        for( int ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
+        for( ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
             initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_type, ward_idx, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
     }
 }
@@ -54,7 +60,7 @@ void set_up_hospital_networks( hospital* hospital )
 
     //setup hospital workplace network
     n_healthcare_workers = 0;
-    healthcare_workers = calloc( hospital->n_total_doctors + hospital->n_total_nurses, sizeof(long) );
+    healthcare_workers = calloc( hospital->n_workers[DOCTOR] + hospital->n_workers[NURSE], sizeof(long) );
 
     //setup hcw -> patient networks for all wards
     for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
@@ -110,7 +116,6 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
         if( ward_found == FALSE)
             print_exit( "attempted to allocated more than max number of doctors to hospital!!" );
 
-        hospital->n_total_doctors++;
         initialise_doctor( &(hospital->wards[ward_type][ward_idx].doctors[hospital->wards[ward_type][ward_idx].n_doctors++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
     }
     else if( type == NURSE )
@@ -123,7 +128,6 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type)
         if( ward_found == FALSE)
             print_exit( "attempted to allocated more than max number of nurses to hospital!!" );
 
-        hospital->n_total_nurses++;
         initialise_nurse( &(hospital->wards[ward_type][ward_idx].nurses[hospital->wards[ward_type][ward_idx].n_nurses++]) , pdx, hospital->hospital_idx, ward_idx, ward_type);
     }
 }

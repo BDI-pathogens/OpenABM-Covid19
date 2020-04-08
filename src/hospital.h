@@ -29,19 +29,16 @@ struct hospital
 {
     int hospital_idx;               //hospital index number
 
-    int hcw_p;            //total number of doctors
-    int n_total_nurses;             //total number of nurses
+    int n_workers[N_WORKER_TYPES];
 
     int n_patients_waiting; //TODO: have waiting list for general and icu
-
-    parameters* params;
 
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
     //TODO: add non covid patients
 
     network *hospital_workplace_network;
 
-    //int n_wards[N_HOSPITAL_WARD_TYPES];
+    int n_wards[N_HOSPITAL_WARD_TYPES];
     ward **wards;
 };
 
