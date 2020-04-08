@@ -5,6 +5,8 @@ COVID19-IBM: Individual-based model for modelling of a COVID-19 outbreak
 Compilation
 -----------
 
+COVID19-IBM requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed. 
+
 ```bash
 cd COVID19-IBM/src
 make clean; make all
@@ -23,8 +25,9 @@ where:
 * `param_line_number` : the line number of the parameter file for which to use for the simulation
 * `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model
 
+
 Tests
 -----
 
-Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
+Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.6 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
 

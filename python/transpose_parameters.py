@@ -13,7 +13,7 @@ else:
 
 if len(sys.argv) > 2:
     wide_parameter_file = sys.argv[2]
-else: 
+else:
     wide_parameter_file = "./tests/data/baseline_parameters.csv"
 
 if __name__ == "__main__":
@@ -22,10 +22,10 @@ if __name__ == "__main__":
 
     # Discard the header
     data = data[1:]
-    
+
     # Split lines
     parameters = [row.strip().split() for row in data]
-    
+
     # Separate parameter names and values
     parameter_names = [row[0].strip() for row in parameters]
     parameter_values = [row[1].strip() for row in parameters]
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # Create header and first parameter line
     header = ",".join(parameter_names)
     line = ",".join(parameter_values)
-    
+
     # Write to file
     with open(wide_parameter_file, "w+") as f:
         f.write(header + "\n" + line)
