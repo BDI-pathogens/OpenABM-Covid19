@@ -10,6 +10,9 @@
 #include "constant.h"
 #include "utilities.h"
 
+//#include <gsl/gsl_rng.h>
+//#include <gsl/gsl_randist.h>
+
 /*****************************************************************************************
 *  Name:		initialize_individual
 *  Description: initializes and individual at the start of the simulation, note can
@@ -51,11 +54,20 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
-    indiv->worker_type = OTHER;
 
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
+
+    // TOM: Assuming all individuals added to the simulation begin as not being hospitalised.
+	// Change later to account for non-COVID patients being added at the start of the simulation.
+    indiv->hospital_state = NOT_IN_HOSPITAL;
+	indiv->current_hospital_event = NULL;
+	indiv->next_hospital_event = NULL;
+    indiv->ward_type = NO_WARD;
+    indiv->ward_idx  = NO_WARD;
+
+    indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 
 /*****************************************************************************************
@@ -139,7 +151,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 *  				change in status both at the individual level or national policy
 *  Returns:		void
 ******************************************************************************************/
-void update_random_interactions( individual *indiv, parameters* params )
+void update_random_interactions( individual *indiv, parameters* params ) //TODO: kelvin - probably need a update healthcare workers interactions func?
 {
 	double n = indiv->base_random_interactions;
 	int lockdown;
@@ -150,12 +162,13 @@ void update_random_interactions( individual *indiv, parameters* params )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			lockdown = max( lockdown, params->lockdown_elderly_on );
 
-		switch( indiv->status )
+        switch( indiv->hospital_state ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
 		{
-			case DEATH:			n = 0; 										 break;
-			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
-			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
+            case MORTUARY:		n = 0; break;
+            case WAITING:       n = 0; break;
+            case GENERAL:       n = params->hospitalised_daily_interactions; break;
+            case ICU:           n = params->hospitalised_daily_interactions; break;
+            default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else
@@ -173,7 +186,6 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -185,7 +197,6 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -196,7 +207,8 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	update_random_interactions( indiv, params );
+	//TOM: Removing: interactions should now be handled by hospitalisation.
+	//update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -217,7 +229,8 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-	update_random_interactions( indiv, params );
+    //TOM: Removing: interactions should now be handled by hospitalisation.
+    //update_random_interactions( indiv, params );
 }
 
 
@@ -230,6 +243,63 @@ void set_case( individual *indiv, int time )
 {
 	indiv->is_case   = TRUE;
 	indiv->time_event[CASE] = time;
+}
+
+/*****************************************************************************************
+*  Name:		set_waiting
+*  Description: sets a person to be added to the hospital waiting list
+*  Returns:		void
+******************************************************************************************/
+void set_waiting( individual *indiv, parameters* params, int time )
+{
+    indiv->hospital_state = WAITING;
+    update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_general_admission
+*  Description: sets a person to be added to a general ward
+*  Returns:		void
+******************************************************************************************/
+void set_general_admission( individual *indiv, parameters* params, int time )
+{
+    indiv->hospital_state = GENERAL;
+    update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_icu_admission
+*  Description: sets a person to be added to an ICU
+*  Returns:		void
+******************************************************************************************/
+void set_icu_admission( individual *indiv, parameters* params, int time )
+{
+    indiv->hospital_state = ICU;
+    update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_mortuary_admission
+*  Description: sets a dead person to be added to the mortuary
+*  Returns:		void
+******************************************************************************************/
+void set_mortuary_admission( individual *indiv, parameters* params, int time )
+{
+    indiv->hospital_state = MORTUARY;
+    indiv->current_hospital_event = NULL;
+    update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_mortuary_admission
+*  Description: sets a recovered person to be discharged from the hospital.
+*  Returns:		void
+******************************************************************************************/
+void set_discharged( individual *indiv, parameters* params, int time )
+{
+    indiv->hospital_state = DISCHARGED;
+    indiv->current_hospital_event = NULL;
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
