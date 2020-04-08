@@ -9,9 +9,6 @@
 #include "params.h"
 #include "constant.h"
 #include "utilities.h"
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -54,6 +51,9 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
+	indiv->trace_tokens         = NULL;
+	indiv->index_trace_token    = NULL;
+	indiv->traced_on_this_trace = FALSE;
 }
 
 /*****************************************************************************************
@@ -119,7 +119,15 @@ void set_age_group( individual *indiv, parameters *params, int group )
 
 	mean = params->mean_random_interactions[indiv->age_type];
 	sd   = params->sd_random_interactions[indiv->age_type];
-	indiv->base_random_interactions = negative_binomial_draw( mean, sd );
+
+	switch( params->random_interaction_distribution )
+	{
+		case FIXED:				indiv->base_random_interactions = mean; break;
+		case NEGATIVE_BINOMIAL: indiv->base_random_interactions = negative_binomial_draw( mean, sd ); break;
+        default:
+		print_exit( "random_interaction_distribution not supported" );
+	}
+
 	update_random_interactions( indiv, params );
 }
 
@@ -132,15 +140,20 @@ void set_age_group( individual *indiv, parameters *params, int group )
 void update_random_interactions( individual *indiv, parameters* params )
 {
 	double n = indiv->base_random_interactions;
+	int lockdown;
 
 	if( !indiv->quarantined )
 	{
+		lockdown = params->lockdown_on;
+		if( indiv->age_type == AGE_TYPE_ELDERLY )
+			lockdown = max( lockdown, params->lockdown_elderly_on );
+
 		switch( indiv->status )
 		{
 			case DEATH:			n = 0; 										 break;
 			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
 			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-			default: 			n = ifelse( params->social_distancing_on, n * params->social_distancing_random_network_multiplier, n );
+			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else

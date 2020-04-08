@@ -12,7 +12,6 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 
-#include <gsl/gsl_rng.h>
 #include "structure.h"
 #include "params.h"
 #include "constant.h"
@@ -51,6 +50,10 @@ struct individual{
 	event *quarantine_release_event;
 	int quarantine_test_result;
 	
+	trace_token *trace_tokens;
+	trace_token *index_trace_token;
+	int traced_on_this_trace;
+
 	int app_user;
 };
 
@@ -65,7 +68,7 @@ struct interaction{
 /******************************  Macros**** *****************************/
 /************************************************************************/
 
-#define time_infected( indiv ) ( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ) )
+#define time_infected( indiv ) ( max( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ), indiv->time_event[PRESYMPTOMATIC_MILD] ) )
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL ) )
 
 /************************************************************************/
