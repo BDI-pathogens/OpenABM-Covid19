@@ -1,7 +1,7 @@
 parameter_name	parameter_value
 rng_seed	1
 param_id	1
-n_total	100000
+n_total	500000
 mean_work_interactions_child	10
 mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
@@ -17,11 +17,11 @@ child_network_adults	0.2
 elderly_network_adults	0.2
 days_of_interactions	10
 end_time	200
-n_seed_infection	50
-mean_infectious_period	6.7
+n_seed_infection	5
+mean_infectious_period	6
 sd_infectious_period	2.8
 infectious_rate	3.5
-mean_time_to_symptoms	7.44
+mean_time_to_symptoms	6
 sd_time_to_symptoms	4.39
 mean_time_to_hospital	5.14
 mean_time_to_critical	2.5
@@ -69,7 +69,7 @@ population_50_59	8968000
 population_60_69	7069000
 population_70_79	5488000
 population_80	3281000
-seasonal_flu_rate	0.0003
+daily_non_cov_symptoms_rate	0.002
 relative_susceptibility_0_9	0.71
 relative_susceptibility_10_19	0.74
 relative_susceptibility_20_29	0.79
@@ -109,7 +109,7 @@ fatality_fraction_50_59	0.69
 fatality_fraction_60_69	0.65
 fatality_fraction_70_79	0.88
 fatality_fraction_80	1
-quarantine_length_self	14
+quarantine_length_self	7
 quarantine_length_traced	14
 quarantine_length_positive	14
 quarantine_dropout_self	0.02
