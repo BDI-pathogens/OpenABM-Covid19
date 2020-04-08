@@ -24,16 +24,16 @@ void initialise_ward(
     int n_max_nurses
 )
 {
-    ward->ward_idx      = ward_idx;
-    ward->type          = type;
-    ward->n_beds        = n_beds;
-    ward->n_max_doctors = n_max_doctors;
-    ward->n_max_nurses  = n_max_nurses;
-    ward->n_doctors     = 0;
-    ward->n_doctors     = 0;
+    ward->ward_idx          = ward_idx;
+    ward->type              = type;
+    ward->n_beds            = n_beds;
+    ward->n_max_hcw[DOCTOR] = n_max_doctors;
+    ward->n_max_hcw[NURSE]  = n_max_nurses;
+    ward->n_worker[DOCTOR]  = 0;
+    ward->n_worker[NURSE]   = 0;
 
-    ward->doctors = calloc( ward->n_max_doctors, sizeof(doctor) );
-    ward->nurses  = calloc( ward->n_max_nurses, sizeof(nurse) );
+    ward->doctors = calloc( ward->n_max_hcw[DOCTOR], sizeof(doctor) );
+    ward->nurses  = calloc( ward->n_max_hcw[NURSE], sizeof(nurse) );
 
     ward->patient_pdxs = calloc( ward->n_beds, sizeof(long) );
     for (int i = 0; i < ward->n_beds; i++)
@@ -46,10 +46,10 @@ void set_up_ward_networks( ward* ward )
 
     //TODO: there must be a better way of getting these interactiont type enums... should there be some kind of enum map?
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
-    ward->doctor_patient_network = new_network( ward->n_doctors, interaction_type );
+    ward->doctor_patient_network = new_network( ward->n_worker[DOCTOR], interaction_type );
     ward->doctor_patient_network->edges = NULL;
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
-    ward->nurse_patient_network = new_network( ward->n_nurses, interaction_type );
+    ward->nurse_patient_network = new_network( ward->n_worker[NURSE], interaction_type );
     ward->nurse_patient_network->edges = NULL;
 }
 
@@ -57,11 +57,12 @@ void build_ward_networks( model *model, ward* ward )
 {
     int idx, n_hcw_working;
     long *hc_workers;
-    hc_workers = calloc( ward->n_doctors + ward->n_nurses, sizeof(long) );
+    hc_workers = calloc( ward->n_worker[DOCTOR] + ward->n_worker[NURSE], sizeof(long) );
     n_hcw_working = 0;
+    int hcw_type;
 
     //get list of ward's working doctor pdxs
-    for( idx = 0; idx < ward->n_doctors; idx++ )
+    for( idx = 0; idx < ward->n_worker[DOCTOR]; idx++ )
         if( healthcare_worker_working( &(model->population[ ward->doctors[idx].pdx ]) ))
             hc_workers[n_hcw_working++] = ward->doctors[idx].pdx;
 
@@ -70,7 +71,7 @@ void build_ward_networks( model *model, ward* ward )
 
     //get list of ward's working nurse's pdxs
     n_hcw_working = 0;
-    for( idx = 0; idx < ward->n_nurses; idx++ )
+    for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
         if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
             hc_workers[n_hcw_working++] = ward->nurses[idx].pdx;
 
