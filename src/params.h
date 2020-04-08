@@ -134,6 +134,14 @@ typedef struct{
 	int interventions_on;           // should we use interventions
 	int intervention_start_time;	// time at which interventions start
 
+	double TEMP_intervention_trigger_n_infected; // start interventions when n_infected is above a threshold
+	double TEMP_lockdown_trigger_n_infected; 	 // start lockdown when n_infected is above a threshold
+	int TEMP_lockdown_trigger_length;			 // length of lockdown after a trigger
+	int TEMP_lockdown_trigger_keep_elderly;  	 // keep elderly lockdown after the main triggered lockdown
+	int TEMP_lockdown_trigger_app_on_end;		 // start the app at the end of lockdown
+	int TEMP_lockdown_trigger_time_to_test;      // start testing symptomatic at a time after testing
+
+
 	int sys_write_individual; 		// Should an individual file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
