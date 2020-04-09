@@ -688,8 +688,8 @@ void build_daily_network( model *model )
 
 	build_random_network( model );
 
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_networks( model, &(model->hospitals[idx]) );
+//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+//        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
@@ -697,19 +697,18 @@ void build_daily_network( model *model )
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-    {
-        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-        {
-            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-            {
-                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-            }
-        }
-
-    }
+//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+//    {
+//        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+//        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+//        {
+//            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+//            {
+//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+//            }
+//        }
+//    }
 };
 
 /*****************************************************************************************
@@ -768,17 +767,18 @@ int one_time_step( model *model )
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
-    //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    check_hospital_state_status( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
-    transition_events( model, DISCHARGED,      &transition_to_discharged, TRUE );
+    transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
 
-	flu_infections( model );
+    //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
+    check_hospital_state_status( model );
+
+    flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
@@ -808,9 +808,10 @@ void check_hospital_state_status( model *model ) {
         indiv = &( model->population[idx] );
 
         if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
+        {
             transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
-
-        if ( indiv->hospital_state == WAITING )
+        }
+        else if ( indiv->hospital_state == WAITING )
         {
             if ( indiv->status == HOSPITALISED ) {
                 transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
@@ -825,8 +826,7 @@ void check_hospital_state_status( model *model ) {
                 transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION ); //TODO: patient being discharged without being assigned to hospital?
             }
         }
-
-        if ( indiv->hospital_state == GENERAL )
+        else if ( indiv->hospital_state == GENERAL )
         {
             if ( indiv->status == CRITICAL ) {
                 transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
@@ -839,9 +839,7 @@ void check_hospital_state_status( model *model ) {
                 transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, HOSPITAL_TRANSITION );
             }
         }
-
-        //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
-        if ( indiv->hospital_state == ICU )
+        else if ( indiv->hospital_state == ICU ) //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
         {
             if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
