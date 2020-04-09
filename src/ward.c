@@ -101,6 +101,8 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
+    network->n_edges = 0;
+
     patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->n_patients) / n_hcw_working );
     //TODO: should there be different max interactions for doctors / nurses?
     patient_interactions_per_hcw = (patient_interactions_per_hcw > max_hcw_daily_interactions) ? max_hcw_daily_interactions : patient_interactions_per_hcw;
@@ -110,7 +112,7 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     all_required_interactions = calloc( n_patient_required_interactions * ward->n_patients, sizeof(long) );
     capped_hcw_interactions   = calloc( n_total_interactions, sizeof(long) );
     //free( network->edges );
-    network->edges            = (edge*)realloc( network->edges, n_total_interactions );
+    network->edges            = (edge*)realloc( network->edges, n_total_interactions ); //TODO: maybe just allocate the max amount of edges that a ward could possibly have rather than re allocating
     network->n_vertices       = n_hcw_working + ward->n_patients;
 
     n_pos = 0;

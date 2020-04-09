@@ -183,8 +183,7 @@ void transition_one_hospital_event(
 
     if( to != NO_EVENT )
     {
-        indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0,
-                sample_transition_time( model, edge ) );  // TOM: PROBABLY NEEDS SOME PARAMETERISATION HERE?
+        indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );  // TOM: PROBABLY NEEDS SOME PARAMETERISATION HERE?
         indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
     }
 }
@@ -283,6 +282,7 @@ void transition_to_discharged( model *model, individual *indiv )
 {
     release_patient_from_hospital( indiv, &(model->hospitals[indiv->hospital_idx]) );
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
+    //set_discharged( indiv, model->params, 1);
     set_discharged( indiv, model->params, 1);
 }
 
