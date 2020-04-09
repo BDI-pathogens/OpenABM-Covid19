@@ -680,7 +680,7 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_network( model *model )
 {
-	int idx, day;
+    int idx, day, ward_idx, ward_type;
 
 	day = model->interaction_day_idx;
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -691,13 +691,25 @@ void build_daily_network( model *model )
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
         build_hospital_networks( model, &(model->hospitals[idx]) );
 
-    //TODO: add interactions from hospital networks
-
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
+
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+    {
+        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        {
+            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+            {
+                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+            }
+        }
+
+    }
 };
 
 /*****************************************************************************************
