@@ -29,8 +29,9 @@ void initialise_ward(
     ward->n_beds            = n_beds;
     ward->n_max_hcw[DOCTOR] = n_max_doctors;
     ward->n_max_hcw[NURSE]  = n_max_nurses;
-    ward->n_worker[DOCTOR]  = 0;
+
     ward->n_worker[NURSE]   = 0;
+    ward->n_worker[DOCTOR]  = 0;
 
     ward->doctors = calloc( ward->n_max_hcw[DOCTOR], sizeof(doctor) );
     ward->nurses  = calloc( ward->n_max_hcw[NURSE], sizeof(nurse) );
@@ -59,7 +60,6 @@ void build_ward_networks( model *model, ward* ward )
     long *hc_workers;
     hc_workers = calloc( ward->n_worker[DOCTOR] + ward->n_worker[NURSE], sizeof(long) );
     n_hcw_working = 0;
-    int hcw_type;
 
     //get list of ward's working doctor pdxs
     for( idx = 0; idx < ward->n_worker[DOCTOR]; idx++ )

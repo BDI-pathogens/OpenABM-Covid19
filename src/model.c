@@ -289,6 +289,8 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
         initialise_hospital( &(model->hospitals[idx]), model->params, idx );
 
+    //TODO: add below into for loop for all hospitals and also change to for loop over worketypes when hc_worker struct created
+
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
     n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];

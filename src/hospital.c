@@ -67,9 +67,11 @@ void set_up_hospital_networks( hospital* hospital )
     {
         for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
         {
+            int n_doctors = hospital->wards[ward_type][ward_idx].n_worker[DOCTOR];
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[idx].pdx;
 
+            int n_nurse = hospital->wards[ward_type][ward_idx].n_worker[NURSE];
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
 
@@ -108,10 +110,19 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int hcw_typ
 
     hcw_allocated = FALSE;
 
-    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES && hcw_allocated != TRUE; ward_type++ )
-        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type] && hcw_allocated != TRUE; ward_idx++ )
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+        {
             if( hospital->wards[ward_type][ward_idx].n_worker[hcw_type] < hospital->wards[ward_type][ward_idx].n_max_hcw[hcw_type] )
+            {
                 hcw_allocated = TRUE;
+                break;
+            }
+        }
+        if( hcw_allocated == TRUE)
+            break;
+    }
 
     if( hcw_allocated == FALSE)
         print_exit( "attempted to allocated more than max number of doctors to hospital!!" );
