@@ -776,7 +776,7 @@ int one_time_step( model *model )
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
-    transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
+    transition_events( model, DISCHARGED,      &transition_to_discharged, TRUE );
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
@@ -821,7 +821,7 @@ void check_hospital_state_status( model *model ) {
             else if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, WAITING, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED){
                 transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION ); //TODO: patient being discharged without being assigned to hospital?
             }
         }
@@ -835,7 +835,7 @@ void check_hospital_state_status( model *model ) {
             else if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED){
                 transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, HOSPITAL_TRANSITION );
             }
         }
@@ -846,7 +846,7 @@ void check_hospital_state_status( model *model ) {
             if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED) {
                 transition_one_hospital_event( model, indiv, ICU, DISCHARGED, HOSPITAL_TRANSITION );
             }
         }
