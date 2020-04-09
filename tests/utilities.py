@@ -113,6 +113,18 @@ def set_critical_fraction_all(params, fraction):
     
     return(params)
 
+def set_app_users_fraction_all(params, fraction):
+    """
+    Set app_users_fraction for all ages
+    """
+    param_names = [ "app_users_fraction_0_9", "app_users_fraction_10_19",  "app_users_fraction_20_29",  
+        "app_users_fraction_30_39",  "app_users_fraction_40_49", "app_users_fraction_50_59",    
+        "app_users_fraction_60_69",  "app_users_fraction_70_79", "app_users_fraction_80" ]
+    
+    for p in param_names:
+        params.set_param(p, fraction)
+    
+    return(params)
 
 def set_hospitalisation_fraction_all(params, fraction):
     """
@@ -196,4 +208,4 @@ def set_homogeneous_random_network_only(params,connections,end_time):
     params = set_work_connections_all(params,0)
         
     return(params)
-
+""
