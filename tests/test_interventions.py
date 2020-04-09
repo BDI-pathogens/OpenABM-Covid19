@@ -45,7 +45,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=1.0,
-                    seasonal_flu_rate=0.0,
+                    daily_non_cov_symptoms_rate=0.0,
                 )
             ),
             dict(
@@ -55,7 +55,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.75,
-                    seasonal_flu_rate=0.0005,
+                    daily_non_cov_symptoms_rate=0.0005,
                 )
             ),
             dict(
@@ -65,7 +65,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.50,
-                    seasonal_flu_rate=0.001,
+                    daily_non_cov_symptoms_rate=0.001,
                 )
             ),
             dict(
@@ -75,7 +75,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.25,
-                    seasonal_flu_rate=0.005,
+                    daily_non_cov_symptoms_rate=0.005,
                 )
             ),
         ],
@@ -86,7 +86,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.8,
-                    seasonal_flu_rate=0.0,
+                    daily_non_cov_symptoms_rate=0.0,
                     asymptomatic_infectious_factor=0.4,
                 )
             ),
@@ -96,7 +96,7 @@ class TestClass(object):
                     end_time=1,
                     infectious_rate=4,
                     self_quarantine_fraction=0.5,
-                    seasonal_flu_rate=0.05,
+                    daily_non_cov_symptoms_rate=0.05,
                     asymptomatic_infectious_factor=1.0,
                 )
             ),
@@ -123,10 +123,11 @@ class TestClass(object):
                     self_quarantine_fraction = 1.0,
                     trace_on_symptoms = 1,
                     quarantine_on_traced = 1,
-                    app_users_fraction = 0.85,
                     app_turn_on_time = 1,
                     quarantine_household_on_symptoms = 1
-                )
+                ),
+                app_users_fraction = 0.85
+
             ) 
         ],
         "test_lockdown_transmission_rates": [ 
@@ -174,6 +175,14 @@ class TestClass(object):
             (df_indiv["quarantined"] == 1) & (df_indiv["time_quarantined"] < end_time)
         ]
         df_quar = df_quar.loc[:, "ID"]
+
+        if test_params[ "daily_non_cov_symptoms_rate"] == 0:
+            np.testing.assert_equal( 
+                len(df_quar), 0, "quarantining people with no tests of self-diagnosis" 
+            )
+            return;
+            
+        print( len( df_quar ) )
 
         # get the number of interactions by type
         df_int = df_int.groupby(["ID", "type"]).size().reset_index(name="connections")
@@ -242,12 +251,12 @@ class TestClass(object):
         n_symp = len(df_symp)
 
         # if no seasonal flu or contact tracing then this is the only path
-        if test_params["seasonal_flu_rate"] == 0:
+        if test_params["daily_non_cov_symptoms_rate"] == 0:
             df = pd.merge(df_quar, df_symp, on="ID", how="inner")
             np.testing.assert_equal(
                 n_quar,
                 len(df),
-                "people quarantined without symptoms when seasonal flu turned off",
+                "people quarantined without symptoms when daily_non_cov_symptoms_rate turned off",
             )
 
             n_exp_quar = n_symp * test_params["self_quarantine_fraction"]
@@ -260,21 +269,21 @@ class TestClass(object):
 
         # if no symptomatic then check number of newly quarantined is from flu
         elif end_time == 1 and test_params["asymptomatic_infectious_factor"] == 1:
-            n_flu = test_params["n_total"] * test_params["seasonal_flu_rate"]
+            n_flu = test_params["n_total"] * test_params["daily_non_cov_symptoms_rate"]
             n_exp_quar = n_flu * test_params["self_quarantine_fraction"]
 
             np.testing.assert_allclose(
                 n_exp_quar,
                 n_quar,
                 atol=tol_sd * sqrt(n_exp_quar),
-                err_msg="the number of quarantined not explained by seasonal flu",
+                err_msg="the number of quarantined not explained by daily_non_cov_symptoms_rate",
             )
 
         else:
             np.testing.assert_equal(
                 True, False, "no test run due test_params not being testable"
             )
-    def test_quarantine_household_on_symptoms(self, test_params):
+    def test_quarantine_household_on_symptoms(self, test_params ):
         """
         Tests households are quarantine when somebody has symptoms
         """
@@ -369,7 +378,7 @@ class TestClass(object):
                                     err_msg = "lockdown not changing random transmission as expected" )
       
 
-    def test_trace_on_symptoms(self, test_params):
+    def test_trace_on_symptoms(self, test_params, app_users_fraction ):
         """
         Tests that people who are traced on symptoms are
         real contacts
@@ -378,6 +387,7 @@ class TestClass(object):
 
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, end_time)
+        params = utils.set_app_users_fraction_all( params, app_users_fraction )
         params.set_param(test_params)
         params.write_params(constant.TEST_DATA_FILE)
 
