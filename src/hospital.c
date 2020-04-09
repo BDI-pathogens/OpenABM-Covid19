@@ -67,11 +67,9 @@ void set_up_hospital_networks( hospital* hospital )
     {
         for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
         {
-            int n_doctors = hospital->wards[ward_type][ward_idx].n_worker[DOCTOR];
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[idx].pdx;
 
-            int n_nurse = hospital->wards[ward_type][ward_idx].n_worker[NURSE];
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
 
