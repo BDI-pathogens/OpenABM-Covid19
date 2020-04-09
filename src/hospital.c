@@ -172,8 +172,8 @@ void transition_one_hospital_event(
         int edge
 )
 {
-    indiv->status           = from;
-
+//    indiv->status           = from;
+    indiv->hospital_state = from;
     if( from != NO_EVENT )
         indiv->time_event[from] = model->time;
     if( indiv->current_hospital_event != NULL )
@@ -282,8 +282,8 @@ void transition_to_mortuary( model *model, individual *indiv )
 void transition_to_discharged( model *model, individual *indiv )
 {
     release_patient_from_hospital( indiv, &(model->hospitals[indiv->hospital_idx]) );
-    set_discharged( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, DISCHARGED, NO_EVENT, NO_EDGE );
+    set_discharged( indiv, model->params, 1);
 }
 
 /*****************************************************************************************
@@ -367,7 +367,11 @@ int assign_to_ward(individual *indiv, hospital *hospital, int ward_type ) {
 ******************************************************************************************/
 void release_patient_from_hospital( individual *indiv, hospital *hospital )
 {
-    remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv->idx );
+    if( indiv->hospital_state == WAITING )
+        hospital->n_patients_waiting--;
+    else
+        remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv->idx );
+
     indiv->ward_type = NO_WARD;
     indiv->ward_idx  = NO_WARD;
 }
