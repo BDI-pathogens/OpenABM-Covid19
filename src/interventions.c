@@ -180,7 +180,7 @@ void update_intervention_policy( model *model, int time )
 	if( time == params->intervention_start_time )
 		params->interventions_on = TRUE;
 
-	if( time > 0 && ( params->TEMP_intervention_trigger_n_infected > 0 | params->TEMP_lockdown_trigger_n_infected > 0 ) )
+	if( time > 0 && ( (params->TEMP_intervention_trigger_n_infected > 0) | (params->TEMP_lockdown_trigger_n_infected > 0) ) )
 	{
 		double n_infected = n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC );
 		n_infected /= params->n_total;
