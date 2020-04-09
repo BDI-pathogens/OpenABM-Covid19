@@ -1,7 +1,7 @@
 parameter_name	parameter_value
 rng_seed	1
 param_id	1
-n_total	500000
+n_total	1000000
 mean_work_interactions_child	10
 mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
@@ -19,8 +19,8 @@ days_of_interactions	10
 end_time	200
 n_seed_infection	5
 mean_infectious_period	6
-sd_infectious_period	2.8
-infectious_rate	3.5
+sd_infectious_period	2.5
+infectious_rate	6.75
 mean_time_to_symptoms	6
 sd_time_to_symptoms	4.39
 mean_time_to_hospital	5.14
