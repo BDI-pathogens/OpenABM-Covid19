@@ -142,7 +142,32 @@ class TestClass(object):
                     lockdown_house_interaction_multiplier = 1.2
                 )
             ) 
-        ]
+        ],
+         "test_app_users_fraction": [ 
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 20,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 1,
+                    app_users_fraction_0_9 = 0,
+                    app_users_fraction_10_19 = 0.8,
+                    app_users_fraction_20_29 = 0.8,
+                    app_users_fraction_30_39 = 0.8,
+                    app_users_fraction_40_49 = 0.8,
+                    app_users_fraction_50_59 = 0.8,
+                    app_users_fraction_60_69 = 0.8,
+                    app_users_fraction_70_79 = 0.4,
+                    app_users_fraction_80 = 0.2,
+                    traceable_interaction_fraction = 1
+                ),
+
+            ) 
+        ],
     }
     """
     Test class for checking 
@@ -423,4 +448,60 @@ class TestClass(object):
         n_no_inter = len( t[ t[ "inter"] != True ] )
         np.testing.assert_equal( n_no_inter, 0, "tracing someone without an interaction" )    
 
+    
+    def test_app_users_fraction(self, test_params ):
+        """
+        Tests that the correct number of people are assigned
+        use the app and that only app users start tracing 
+        and can be traced if household options are not turned on
+        """
+        end_time = test_params[ "end_time" ]
+
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param(test_params)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        app_users  = df_indiv[ df_indiv[ "app_user" ] == 1 ].groupby( [ "age_group" ] ).size().reset_index(name="app_users")    
+        all_users  = df_indiv.groupby( [ "age_group" ] ).size().reset_index(name="all")    
+        app_params = [ "app_users_fraction_0_9", "app_users_fraction_10_19",  "app_users_fraction_20_29",  
+            "app_users_fraction_30_39",  "app_users_fraction_40_49", "app_users_fraction_50_59",    
+            "app_users_fraction_60_69",  "app_users_fraction_70_79", "app_users_fraction_80" ]
+        
+        for age in constant.AGES:
+            if test_params[ app_params[ age ] ] == 0 :
+                users = app_users[ app_users[ "age_group"] == age ]
+                np.testing.assert_equal( len( users ), 0, "nobody should have a phone in this age group" )
+            else :
+                n     = all_users[ all_users[ "age_group"] == age ].iloc[0,1]
+                users = app_users[ app_users[ "age_group"] == age ].iloc[0,1]
+                np.testing.assert_allclose( users / n, test_params[ app_params[ age ] ], atol = 0.01, err_msg = "wrong fraction of users have app in age group")
+            
+        df_trace     = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
+        index_traced = index_traced[ index_traced[ "index_ID" ] != index_traced[ "traced_ID" ] ]
+        np.testing.assert_equal( len( index_traced ) > 0, True, "no tracing has occured") 
+        
+        df_indiv.rename( columns = { "ID":"index_ID" }, inplace = True )
+        test = pd.merge( index_traced, df_indiv, on = "index_ID", how = "left")
+        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users starting tracing" ) 
+        
+        df_indiv.rename( columns = { "index_ID":"traced_ID" }, inplace = True )
+        test = pd.merge( index_traced, df_indiv, on = "traced_ID", how = "left")
+        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" ) 
+        
+        
+
+         
+         
+         
+         
+        
+         
+     
+    
     
