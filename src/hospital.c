@@ -52,7 +52,7 @@ void initialise_hospital(
 *  Description: calls setup functions for all networks related to the hospital instance
 *  Returns:		void
 ******************************************************************************************/
-void set_up_hospital_networks( hospital* hospital )
+void set_up_hospital_networks( hospital* hospital, int max_hcw_daily_interactions )
 {
     int idx, n_healthcare_workers;
     int ward_idx, ward_type;
@@ -73,7 +73,7 @@ void set_up_hospital_networks( hospital* hospital )
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
 
-            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]) );
+            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]), max_hcw_daily_interactions );
         }
     }
 
