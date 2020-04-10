@@ -23,7 +23,7 @@ enum EVENT_TYPES{
 	ASYMPTOMATIC,
 	SYMPTOMATIC,
 	SYMPTOMATIC_MILD,
-    HOSPITALISED, //severe
+    HOSPITALISED, //severe TODO: change this to hospitalisation required!! might be added to waiting list before hand
 	CRITICAL,
 	RECOVERED,
 	DEATH,
@@ -160,6 +160,7 @@ enum HOSPITAL_WARD_TYPES{
 
 #define NO_WARD -1
 #define NOT_HEALTHCARE_WORKER -1
+#define NO_HOSPITAL -1
 
 extern gsl_rng * rng;
 
