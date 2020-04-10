@@ -42,32 +42,30 @@ void initialise_ward(
         ward->patient_pdxs[i] = NO_PATIENT;
 }
 
-void set_up_ward_networks( ward* ward )
+void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
 {
     int interaction_type;
 
     //TODO: there must be a better way of getting these interactiont type enums... should there be some kind of enum map?
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->doctor_patient_network = new_network( ward->n_worker[DOCTOR], interaction_type );
-    ward->doctor_patient_network->edges = NULL;
+    ward->doctor_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->nurse_patient_network = new_network( ward->n_worker[NURSE], interaction_type );
-    ward->nurse_patient_network->edges = NULL;
+    ward->nurse_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[NURSE], sizeof(edge) );
 }
 
 void build_ward_networks( model *model, ward* ward )
 {
-    if (ward->n_patients == 0 )
-    {
-        ward->doctor_patient_network->n_edges = 0;
-        ward->nurse_patient_network->n_edges  = 0;
-    }
-    else
+    ward->doctor_patient_network->n_edges = 0;
+    ward->nurse_patient_network->n_edges  = 0;
+
+    if (ward->n_patients > 0 )
     {
         int idx, n_hcw_working;
         long *hc_workers;
         long *hc_workers_nurse;
-//        hc_workers = calloc( ward->n_worker[DOCTOR] + ward->n_worker[NURSE], sizeof(long) );
+
         hc_workers = calloc(ward->n_worker[DOCTOR], sizeof (long) );
         n_hcw_working = 0;
 
@@ -101,7 +99,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
-    network->n_edges = 0;
 
     patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->n_patients) / n_hcw_working );
     //TODO: should there be different max interactions for doctors / nurses?
@@ -111,8 +108,8 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
     all_required_interactions = calloc( n_patient_required_interactions * ward->n_patients, sizeof(long) );
     capped_hcw_interactions   = calloc( n_total_interactions, sizeof(long) );
-    //free( network->edges );
-    network->edges            = (edge*)realloc( network->edges, n_total_interactions ); //TODO: maybe just allocate the max amount of edges that a ward could possibly have rather than re allocating
+
+    network->n_edges = 0;
     network->n_vertices       = n_hcw_working + ward->n_patients;
 
     n_pos = 0;
@@ -141,7 +138,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
     free( all_required_interactions );
     free( capped_hcw_interactions );
-    //free( hc_workers );
 }
 
 int add_patient_to_ward( ward *ward, long pdx )
