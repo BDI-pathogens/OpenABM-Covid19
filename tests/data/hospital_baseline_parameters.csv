@@ -1,2 +1,2 @@
 n_hospitals,n_covid_general_wards,n_beds_covid_general_ward,n_doctors_covid_general_ward,n_patient_doctor_required_interactions_covid_general,n_nurses_covid_general_ward,n_patient_nurse_required_interactions_covid_general_ward,n_covid_icu_wards,n_beds_covid_icu_ward,n_doctors_covid_icu_ward,n_patient_doctor_required_interactions_covid_icu_ward,n_nurses_covid_icu_ward,n_patient_nurse_required_interactions_covid_icu_ward,max_hcw_daily_interactions,waiting_infectivity_modifier,general_infectivity_modifier,icu_infectivity_modifier,mean_time_hospital_transition,sd_time_hospital_transition
-1,40,30,5,1,10,3,10,10,3,3,6,6,20,1,0.5,0.5,1,0
+1,40,30,5,1,10,3,10,10,3,3,6,6,20,1,0.5,0.5,1,1

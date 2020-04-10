@@ -52,10 +52,10 @@ int main(int argc, char *argv[])
 //	if( params.sys_write_individual  )
 //		write_trace_tokens_ts( model, TRUE );
 
-	printf( "time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered\n");
+	printf( "time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered,n_waiting,n_general,n_icu,n_discharged,n_mortuary\n");
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-		printf( "%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+		printf( "%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				params.lockdown_on,
 				params.test_on_symptoms,
@@ -70,7 +70,12 @@ int main(int argc, char *argv[])
 				n_current( model, HOSPITALISED ),
 				n_current( model, CRITICAL ),
 				n_current( model, DEATH ),
-				n_current( model, RECOVERED )
+				n_current( model, RECOVERED ),
+				n_current( model, WAITING ),
+				n_current( model, GENERAL ),
+				n_current( model, ICU),
+				n_current( model, DISCHARGED),
+				n_current( model, MORTUARY)
 		);
 //		if( params.sys_write_individual )
 //			write_trace_tokens_ts( model, FALSE );
