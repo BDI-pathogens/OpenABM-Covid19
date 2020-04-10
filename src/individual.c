@@ -66,6 +66,7 @@ void initialize_individual(
 	indiv->next_hospital_event = NULL;
     indiv->ward_type = NO_WARD;
     indiv->ward_idx  = NO_WARD;
+    indiv->hospital_idx = NO_HOSPITAL;
 
     indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
