@@ -201,7 +201,7 @@ void set_up_networks( model *model )
 		set_up_work_network( model, idx );
 
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
-        set_up_hospital_networks( &(model->hospitals[idx]) );
+        set_up_hospital_networks( &(model->hospitals[idx]), model->params->max_hcw_daily_interactions );
 }
 
 /*****************************************************************************************
