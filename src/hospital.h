@@ -29,8 +29,7 @@ struct hospital
 {
     int hospital_idx;               //hospital index number
 
-    int n_total_doctors;            //total number of doctors
-    int n_total_nurses;             //total number of nurses
+    int n_workers[N_WORKER_TYPES];
 
     int n_patients_waiting; //TODO: have waiting list for general and icu
 
@@ -48,7 +47,7 @@ struct hospital
 /************************************************************************/
 
 void initialise_hospital( hospital*, parameters*, int );
-void set_up_hospital_networks( hospital* );
+void set_up_hospital_networks(hospital* , int max_hcw_daily_interactions);
 void build_hospital_networks( model *model, hospital *hospital );
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int healthcare_worker_working(individual* indiv);

@@ -201,7 +201,7 @@ void set_up_networks( model *model )
 		set_up_work_network( model, idx );
 
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
-        set_up_hospital_networks( &(model->hospitals[idx]) );
+        set_up_hospital_networks( &(model->hospitals[idx]), model->params->max_hcw_daily_interactions );
 }
 
 /*****************************************************************************************
@@ -281,7 +281,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 {
     //TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
     long pdx;
-    int idx;
+    int idx, n_total_doctors, n_total_nurses;
     individual *indiv;
 
     //initialise hospitals
@@ -289,9 +289,13 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
         initialise_hospital( &(model->hospitals[idx]), model->params, idx );
 
+    //TODO: add below into for loop for all hospitals and also change to for loop over worketypes when hc_worker struct created
+
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
-    while( idx < model->params->n_total_doctors )
+    n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];
+    n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
+    while( idx < n_total_doctors )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
@@ -306,7 +310,9 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 
     idx = 0;
     //randomly pick individuals from population between ages 20 - 69 to be nurses and assign to a hospital
-    while( idx < model->params->n_total_nurses )
+    n_total_nurses = model->params->n_hcw_per_ward[COVID_GENERAL][NURSE] * model->params->n_wards[COVID_GENERAL];
+    n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
+    while( idx < n_total_nurses )
     {
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
@@ -611,7 +617,6 @@ void build_random_network( model *model )
 *  Description: Adds the daily interactions to all individual from a network
 ******************************************************************************************/
 void add_interactions_from_network(
-
 	model *model,
 	network *network,
 	int skip_hospitalised,
@@ -674,7 +679,7 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_network( model *model )
 {
-	int idx, day;
+    int idx, day, ward_idx, ward_type;
 
 	day = model->interaction_day_idx;
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -682,16 +687,27 @@ void build_daily_network( model *model )
 
 	build_random_network( model );
 
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_networks( model, &(model->hospitals[idx]) );
-
-    //TODO: add interactions from hospital networks
+//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+//        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
+
+//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+//    {
+//        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+//        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+//        {
+//            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+//            {
+//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+//            }
+//        }
+//    }
 };
 
 /*****************************************************************************************
@@ -750,8 +766,6 @@ int one_time_step( model *model )
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
-    //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    check_hospital_state_status( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
@@ -760,7 +774,10 @@ int one_time_step( model *model )
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
     transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
 
-	flu_infections( model );
+    //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
+    check_hospital_state_status( model );
+
+    flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
@@ -790,9 +807,10 @@ void check_hospital_state_status( model *model ) {
         indiv = &( model->population[idx] );
 
         if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
+        {
             transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
-
-        if ( indiv->hospital_state == WAITING )
+        }
+        else if ( indiv->hospital_state == WAITING )
         {
             if ( indiv->status == HOSPITALISED ) {
                 transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
@@ -803,12 +821,11 @@ void check_hospital_state_status( model *model ) {
             else if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, WAITING, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED){
                 transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION ); //TODO: patient being discharged without being assigned to hospital?
             }
         }
-
-        if ( indiv->hospital_state == GENERAL )
+        else if ( indiv->hospital_state == GENERAL )
         {
             if ( indiv->status == CRITICAL ) {
                 transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
@@ -817,18 +834,16 @@ void check_hospital_state_status( model *model ) {
             else if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED){
                 transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, HOSPITAL_TRANSITION );
             }
         }
-
-        //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
-        if ( indiv->hospital_state == ICU )
+        else if ( indiv->hospital_state == ICU ) //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
         {
             if ( indiv->status == DEATH ) {
                 transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
             }
-            else {
+            else if (indiv->status == RECOVERED) {
                 transition_one_hospital_event( model, indiv, ICU, DISCHARGED, HOSPITAL_TRANSITION );
             }
         }
