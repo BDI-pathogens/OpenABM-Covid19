@@ -25,9 +25,11 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number;
+    int hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
+    char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	
 	if(argc > 1)
 	{
@@ -64,11 +66,34 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 			INPUT_CHAR_LEN );
 	}
 
+    if(argc > 5)
+    {
+        strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN );
+    }else{
+        strncpy(hospital_input_param_file, "../tests/data/hospital_baseline_parameters.csv",
+            INPUT_CHAR_LEN );
+    }
+
+    if(argc > 6)
+    {
+        hospital_param_line_number = (int) strtol(argv[6], NULL, 10);
+
+        if(hospital_param_line_number <= 0)
+            print_exit("Error Invalid line number, line number starts from 1");
+    }else{
+        hospital_param_line_number = 1;
+    }
+
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
+    params->hospital_param_line_number = hospital_param_line_number;
+
 	
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
+
+    strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
+    params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
 	
 	strncpy(params->input_household_file, input_household_file, 
 		sizeof(params->input_household_file) - 1);
@@ -367,42 +392,72 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_gap));
     if( check < 1){ print_exit("Failed to read parameter successive_lockdown_gap)\n"); };
 
-
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
 
-
     check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
     if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 
     fclose(parameter_file);
-	
-    //TODO: These hospital params need to be read in from a separate hospital file
-    //current sim  pop is 100,000. 66 million is uk pop. 150,000 doctors and 320,000 nurses + midwives in nhs according to https://www.nuffieldtrust.org.uk/resource/the-nhs-workforce-in-numbers
-    params->n_total_doctors = 227;
-    params->n_total_nurses  = 484;
-    params->n_hospitals = 1;
-    params->hospital_n_beds = 300;
-    params->hospital_n_icus = 300;
-    params->max_hcw_daily_interactions = 20;
-    params->patient_required_interactions[COVID_ICU][DOCTOR] = 3;
-    params->patient_required_interactions[COVID_ICU][NURSE] = 6;
-    params->patient_required_interactions[COVID_GENERAL][DOCTOR] = 1;
-    params->patient_required_interactions[COVID_GENERAL][NURSE] = 3;
-    params->n_wards[COVID_GENERAL] = 40;
-    params->n_wards[COVID_ICU] = 10;
-    params->n_ward_beds[COVID_GENERAL] = 50;
-    params->n_ward_beds[COVID_ICU] = 50;
+}
 
+void read_hospital_param_file( parameters *params)
+{
+    FILE *hospital_parameter_file;
+    int i, j, check;
 
-    params->mean_time_hospital_transition = 1;
-    params->sd_time_hospital_transition = 0;
-    params->waiting_infectivity_modifier = 0.8;
-    params->general_infectivity_modifier = 0.5;
-    params->icu_infectivity_modifier = 0.5;
+    hospital_parameter_file = fopen(params->hospital_input_param_file, "r");
+    if(hospital_parameter_file == NULL)
+        print_exit("Can't open hospital parameter file");
+
+    // Throw away header (and first `params->hospital_param_line_number` lines)
+    for(i = 0; i < params->param_line_number; i++)
+        fscanf(hospital_parameter_file, "%*[^\n]\n");
+
+    // Read and attach parameter values to parameter structure
+    check = fscanf(hospital_parameter_file, " %i ,", &(params->n_hospitals));
+    if( check < 1){ print_exit("Failed to read parameter n_hospitals\n"); };
+
+    for( i = 0; i < N_HOSPITAL_WARD_TYPES; i++ )
+    {
+        check = fscanf(hospital_parameter_file, " %i ,", &(params->n_wards[i]));
+        if( check < 1){ print_exit("Failed to read parameter n_wards\n"); };
+
+        check = fscanf(hospital_parameter_file, " %i ,", &(params->n_ward_beds[i]));
+        if( check < 1){ print_exit("Failed to read parameter n_ward_beds\n"); };
+
+        for( j = 0; j < N_WORKER_TYPES; j++)
+        {
+            check = fscanf(hospital_parameter_file, " %i ,", &(params->n_hcw_per_ward[i][j]));
+            if( check < 1){ print_exit("Failed to read parameter n_hcw_per_ward\n"); };
+
+            check = fscanf(hospital_parameter_file, " %i ,", &(params->n_patient_required_interactions[i][j]));
+            if( check < 1){ print_exit("Failed to read parameter n_n_patient_required_interactions\n"); };
+        }
+    }
+
+    check = fscanf(hospital_parameter_file, " %i ,", &(params->max_hcw_daily_interactions));
+    if( check < 1){ print_exit("Failed to read parametermax_hcw_daily_interactions\n"); };
+
+    check = fscanf(hospital_parameter_file, " %lf ,", &(params->waiting_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter max_hcw_daily_interactions\n"); };
+
+    check = fscanf(hospital_parameter_file, " %lf ,", &(params->general_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter general_infectivity_modifier\n"); };
+
+    check = fscanf(hospital_parameter_file, " %lf ,", &(params->icu_infectivity_modifier));
+    if( check < 1){ print_exit("Failed to read parameter icu_infectivity_modifier\n"); };
+
+    check = fscanf(hospital_parameter_file, " %lf ,", &(params->mean_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospital_transition\n"); };
+
+    check = fscanf(hospital_parameter_file, " %lf ,", &(params->sd_time_hospital_transition));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospital_transition\n"); };
+
+    fclose(hospital_parameter_file);
 }
 
 /*****************************************************************************************
