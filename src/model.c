@@ -759,12 +759,12 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
-	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
-	transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
-	transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
-	transition_events( model, CRITICAL,          &transition_to_critical,         FALSE );
-	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
-	transition_events( model, DEATH,             &transition_to_death,            FALSE );
+    transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
+    transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
+    transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
+    transition_events( model, CRITICAL,          &transition_to_critical,         FALSE );
+    transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
+    transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
