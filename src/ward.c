@@ -24,6 +24,10 @@ void initialise_ward(
     int n_max_nurses
 )
 {
+
+    if( type == 2)
+        printf("break");
+
     ward->ward_idx          = ward_idx;
     ward->type              = type;
     ward->n_beds            = n_beds;
@@ -84,7 +88,7 @@ void build_ward_networks( model *model, ward* ward )
         n_hcw_working = 0;
         for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
-                hc_workers[n_hcw_working++] = ward->nurses[idx].pdx;
+                hc_workers_nurse[n_hcw_working++] = ward->nurses[idx].pdx;
 
         //rebuild nurse -> patient network
         build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
@@ -130,8 +134,10 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     //TODO: shift patterns eg day off
     while( idx < n_total_interactions )
     {
-        network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
-        network->edges[network->n_edges].id2 = capped_hcw_interactions[ idx++ ];
+//        network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
+//        network->edges[network->n_edges].id2 = capped_hcw_interactions[ idx++ ];
+        network->edges[network->n_edges].id1 = capped_hcw_interactions[ idx++ ];
+        network->edges[network->n_edges].id2 = hc_workers[ hdx++ ];
         network->n_edges++;
         hdx = ( hdx++ < n_hcw_working ) ? hdx : 0;
     }

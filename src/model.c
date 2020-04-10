@@ -636,13 +636,17 @@ void add_interactions_from_network(
 		indiv1 = &(model->population[ network->edges[idx].id1 ] );
 		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
 
+        if( model->time == 30)
+            if( indiv1->idx == 72245 || indiv2->idx == 72245)
+                printf("break");
+
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
 		if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
-		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
+        if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
         //TODO: kelvin check no healthcare workers in these networks
@@ -687,27 +691,32 @@ void build_daily_network( model *model )
 
 	build_random_network( model );
 
-//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-//        build_hospital_networks( model, &(model->hospitals[idx]) );
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
-	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
+    for( idx = 0; idx < N_WORK_NETWORKS; idx++ ) //TODO: doctor was in 0 - 9 work network... make sure no hcw in work networks
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-//    {
-//        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-//        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-//        {
-//            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-//            {
-//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-//            }
-//        }
-//    }
+    if( model->time == 30)
+        printf("break");
+
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+    {
+        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        {
+            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+            {
+                if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
+                    add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+                if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
+                    add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+            }
+        }
+    }
 };
 
 /*****************************************************************************************
@@ -756,7 +765,8 @@ int one_time_step( model *model )
 		update_event_list_counters( model, idx );
     //TOM: EVENT CONTROL HERE//
 
-    build_daily_network( model );
+      build_daily_network( model );
+//    build_daily_network( model );
 	transmit_virus( model, model->params );
 
 	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
@@ -766,6 +776,7 @@ int one_time_step( model *model )
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
+    if( model->time)
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
@@ -782,6 +793,8 @@ int one_time_step( model *model )
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,TRUE );
+
+//    build_daily_network( model );
 
 	if( model->params->quarantine_smart_release_day > 0 )
 		intervention_smart_release( model );
