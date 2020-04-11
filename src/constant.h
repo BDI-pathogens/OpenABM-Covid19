@@ -142,7 +142,6 @@ enum DISTRIBUTIONS{
 enum HOSPITAL_WARD_TYPES{
     COVID_GENERAL,
     COVID_ICU,
-    //TODO: nursing_home ???
     N_HOSPITAL_WARD_TYPES
 };
 
