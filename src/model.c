@@ -349,6 +349,7 @@ double estimate_total_interactions( model *model )
 {
 	long idx;
 	double n_interactions;
+    int hospital_idx, ward_type, ward_idx;
 	n_interactions = 0;
 
 	n_interactions += model->household_network->n_edges;
@@ -356,6 +357,19 @@ double estimate_total_interactions( model *model )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
 	for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
 		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
+
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
+    {
+        n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        {
+            for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
+            {
+                n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
+                n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
+            }
+        }
+    }
     //TODO:kelvin - should add something similar to the random network here for the hospital networks
 	return n_interactions;
 }
