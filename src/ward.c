@@ -34,11 +34,11 @@ void initialise_ward(
     ward->n_worker[DOCTOR]  = 0;
     ward->n_patients        = 0;
 
-    ward->doctors = calloc( ward->n_max_hcw[DOCTOR], sizeof(doctor) );
-    ward->nurses  = calloc( ward->n_max_hcw[NURSE], sizeof(nurse) );
+    ward->doctors = calloc( n_max_doctors, sizeof(doctor) );
+    ward->nurses  = calloc( n_max_nurses, sizeof(nurse) );
 
-    ward->patient_pdxs = calloc( ward->n_beds, sizeof(long) );
-    for (int i = 0; i < ward->n_beds; i++)
+    ward->patient_pdxs = calloc( n_beds, sizeof(long) );
+    for (int i = 0; i < n_beds; i++)
         ward->patient_pdxs[i] = NO_PATIENT;
 }
 
@@ -69,7 +69,6 @@ void build_ward_networks( model *model, ward* ward )
         hc_workers = calloc(ward->n_worker[DOCTOR], sizeof (long) );
         n_hcw_working = 0;
 
-        //get list of ward's working doctor pdxs
         for( idx = 0; idx < ward->n_worker[DOCTOR]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->doctors[idx].pdx ]) ))
                 hc_workers[n_hcw_working++] = ward->doctors[idx].pdx;
@@ -84,7 +83,7 @@ void build_ward_networks( model *model, ward* ward )
         n_hcw_working = 0;
         for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
-                hc_workers[n_hcw_working++] = ward->nurses[idx].pdx;
+                hc_workers_nurse[n_hcw_working++] = ward->nurses[idx].pdx;
 
         //rebuild nurse -> patient network
         build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
@@ -99,6 +98,9 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
+    for(int i = 0; i < n_hcw_working; i ++)
+        if(hc_workers[i] == 0)
+            printf("passed array val = to 0!!");
 
     patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->n_patients) / n_hcw_working );
     //TODO: should there be different max interactions for doctors / nurses?
@@ -112,16 +114,25 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     network->n_edges = 0;
     network->n_vertices       = n_hcw_working + ward->n_patients;
 
+    patient = 0;
     n_pos = 0;
-    for( patient = 0; patient < ward->n_patients; patient++ )
-        for (idx = 0; idx < n_patient_required_interactions; idx++)
-            all_required_interactions[n_pos++] = ward->patient_pdxs[patient];
+
+    int npatients = 0;
+    for(int idx = 0; idx < ward->n_beds; idx++ )
+    {
+        if( ward->patient_pdxs[idx] != NO_PATIENT )
+        {
+            for( int i = 0; i < n_patient_required_interactions; i++)
+                all_required_interactions[n_pos++] = ward->patient_pdxs[idx];
+            npatients++;
+        }
+    }
+
+    if( npatients != ward->n_patients )
+        print_exit("number of patients in patient pdx list is not equal to ward's n_patients!!");
 
     //shuffle list of all interactions
     gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
-
-    //pick the capped (max) amount of interactions randomly from shuffled list;
-    gsl_ran_choose( rng, capped_hcw_interactions, n_total_interactions, all_required_interactions, n_pos, sizeof(long) );
 
     idx = 0;
     hdx = 0;
@@ -130,10 +141,23 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     //TODO: shift patterns eg day off
     while( idx < n_total_interactions )
     {
-        network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
-        network->edges[network->n_edges].id2 = capped_hcw_interactions[ idx++ ];
+        network->edges[network->n_edges].id1 = hc_workers[ hdx ];
+        network->edges[network->n_edges].id2 = all_required_interactions[ idx++ ];
+
+        if( network->edges[network->n_edges].id2 == 0 )
+        {
+            printf("edge2 pdx ewual to null!!");
+        }
+
+        if(  network->edges[network->n_edges].id1 == 0 )
+        {
+            printf("edge1 pdx ewual to null!!");
+        }
+
         network->n_edges++;
-        hdx = ( hdx++ < n_hcw_working ) ? hdx : 0;
+        hdx++;
+        if( hdx >= n_hcw_working )
+            hdx = 0;
     }
 
     free( all_required_interactions );
