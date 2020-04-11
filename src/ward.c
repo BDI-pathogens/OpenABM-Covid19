@@ -116,16 +116,44 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     network->n_edges = 0;
     network->n_vertices       = n_hcw_working + ward->n_patients;
 
+//    n_pos = 0;
+//    for( patient = 0; patient < ward->n_patients; patient++ )
+//        for (idx = 0; idx < n_patient_required_interactions; idx++)
+//            all_required_interactions[n_pos++] = ward->patient_pdxs[patient];
+    patient = 0;
     n_pos = 0;
-    for( patient = 0; patient < ward->n_patients; patient++ )
-        for (idx = 0; idx < n_patient_required_interactions; idx++)
-            all_required_interactions[n_pos++] = ward->patient_pdxs[patient];
+    int bed = 0;
+
+    int npatients = 0;
+    for(int idx = 0; idx < ward->n_beds; idx++ )
+    {
+        if( ward->patient_pdxs[idx] != NO_PATIENT )
+        {
+            for( int i = 0; i < n_patient_required_interactions; i++)
+                all_required_interactions[n_pos++] = ward->patient_pdxs[i];
+            npatients++;
+        }
+    }
+
+    if( npatients != ward->n_patients )
+        print_exit("number of patients in patient pdx list is not equal to ward's n_patients!!");
+
+//    while( patient < ward->n_patients )
+//    {
+//        if( ward->patient_pdxs[bed++] == NO_PATIENT )
+//            continue;
+
+//        for (idx = 0; idx < n_patient_required_interactions; idx++)
+//            all_required_interactions[n_pos++] = ward->patient_pdxs[bed];
+
+//        patient++;
+//    }
 
     //shuffle list of all interactions
     gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
 
     //pick the capped (max) amount of interactions randomly from shuffled list;
-    gsl_ran_choose( rng, capped_hcw_interactions, n_total_interactions, all_required_interactions, n_pos, sizeof(long) );
+    //gsl_ran_choose( rng, capped_hcw_interactions, n_total_interactions, all_required_interactions, n_pos, sizeof(long) );
 
     idx = 0;
     hdx = 0;
@@ -134,10 +162,19 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     //TODO: shift patterns eg day off
     while( idx < n_total_interactions )
     {
-//        network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
+
+        network->edges[network->n_edges].id1 = hc_workers[ hdx++ ];
 //        network->edges[network->n_edges].id2 = capped_hcw_interactions[ idx++ ];
-        network->edges[network->n_edges].id1 = capped_hcw_interactions[ idx++ ];
-        network->edges[network->n_edges].id2 = hc_workers[ hdx++ ];
+        network->edges[network->n_edges].id2 = all_required_interactions[ idx++ ];
+//        network->edges[network->n_edges].id1 = capped_hcw_interactions[ idx++ ];
+//        network->edges[network->n_edges].id2 = hc_workers[ hdx++ ];
+
+        if( network->edges[network->n_edges].id2 == 0 )
+        {
+            printf("break");
+        }
+
+
         network->n_edges++;
         hdx = ( hdx++ < n_hcw_working ) ? hdx : 0;
     }
