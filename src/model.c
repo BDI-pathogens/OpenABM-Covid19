@@ -349,6 +349,7 @@ double estimate_total_interactions( model *model )
 {
 	long idx;
 	double n_interactions;
+    int hospital_idx, ward_type, ward_idx;
 	n_interactions = 0;
 
 	n_interactions += model->household_network->n_edges;
@@ -356,6 +357,19 @@ double estimate_total_interactions( model *model )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
 	for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
 		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
+
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
+    {
+        n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        {
+            for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
+            {
+                n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
+                n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
+            }
+        }
+    }
     //TODO:kelvin - should add something similar to the random network here for the hospital networks
 	return n_interactions;
 }
@@ -642,7 +656,7 @@ void add_interactions_from_network(
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
-		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
+        if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
         //TODO: kelvin check no healthcare workers in these networks
@@ -687,27 +701,30 @@ void build_daily_network( model *model )
 
 	build_random_network( model );
 
-//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-//        build_hospital_networks( model, &(model->hospitals[idx]) );
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
-	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
+    for( idx = 0; idx < N_WORK_NETWORKS; idx++ ) //TODO: doctor was in 0 - 9 work network... make sure no hcw in work networks
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-//    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-//    {
-//        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-//        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-//        {
-//            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-//            {
-//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-//                add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-//            }
-//        }
-//    }
+	//TODO: should these hospital / ward networks be added into this func? if so is the implementation below correct?
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+    {
+        add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+        for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+        {
+            for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+            {
+                if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
+                    add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+               if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
+                   add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
+            }
+        }
+    }
 };
 
 /*****************************************************************************************
@@ -766,6 +783,7 @@ int one_time_step( model *model )
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
+    if( model->time)
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
@@ -782,6 +800,8 @@ int one_time_step( model *model )
 	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
 	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,TRUE );
+
+//    build_daily_network( model );
 
 	if( model->params->quarantine_smart_release_day > 0 )
 		intervention_smart_release( model );

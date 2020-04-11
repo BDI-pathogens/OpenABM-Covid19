@@ -43,7 +43,7 @@ void initialise_hospital(
 
         hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
         for( ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
-            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_type, ward_idx, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
+            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_idx, ward_type, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
     }
 }
 
@@ -253,6 +253,7 @@ void transition_to_icu( model *model, individual *indiv )
     } else if ( indiv->hospital_state == GENERAL )
     {
         if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
+            remove_patient_from_ward(&(model->hospitals[indiv->hospital_idx].wards[indiv->ward_type][indiv->ward_idx]), indiv->idx);
             set_icu_admission( indiv, model->params, 1);
     }
 }
