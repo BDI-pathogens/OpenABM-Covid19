@@ -43,7 +43,7 @@ void initialise_hospital(
 
         hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
         for( ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
-            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_type, ward_idx, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
+            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_idx, ward_type, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
     }
 }
 
@@ -52,7 +52,7 @@ void initialise_hospital(
 *  Description: calls setup functions for all networks related to the hospital instance
 *  Returns:		void
 ******************************************************************************************/
-void set_up_hospital_networks( hospital* hospital )
+void set_up_hospital_networks( hospital* hospital, int max_hcw_daily_interactions )
 {
     int idx, n_healthcare_workers;
     int ward_idx, ward_type;
@@ -73,7 +73,7 @@ void set_up_hospital_networks( hospital* hospital )
             for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
                 healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
 
-            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]) );
+            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]), max_hcw_daily_interactions );
         }
     }
 
@@ -253,6 +253,7 @@ void transition_to_icu( model *model, individual *indiv )
     } else if ( indiv->hospital_state == GENERAL )
     {
         if ( assign_to_ward( indiv, assigned_hospital, COVID_ICU ) == TRUE )
+            remove_patient_from_ward(&(model->hospitals[indiv->hospital_idx].wards[indiv->ward_type][indiv->ward_idx]), indiv->idx);
             set_icu_admission( indiv, model->params, 1);
     }
 }
@@ -265,6 +266,9 @@ void transition_to_icu( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_mortuary( model *model, individual *indiv )
 {
+    if (indiv->idx == 87333)
+        printf("break");
+
     release_patient_from_hospital( indiv, &(model->hospitals[indiv->hospital_idx]) );
     set_mortuary_admission( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
