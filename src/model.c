@@ -650,10 +650,6 @@ void add_interactions_from_network(
 		indiv1 = &(model->population[ network->edges[idx].id1 ] );
 		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
 
-        if( model->time == 30)
-            if( indiv1->idx == 72245 || indiv2->idx == 72245)
-                printf("break");
-
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
 		if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
@@ -714,9 +710,7 @@ void build_daily_network( model *model )
     for( idx = 0; idx < N_WORK_NETWORKS; idx++ ) //TODO: doctor was in 0 - 9 work network... make sure no hcw in work networks
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-    if( model->time == 30)
-        printf("break");
-
+	//TODO: should these hospital / ward networks be added into this func? if so is the implementation below correct?
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
     {
         add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
@@ -726,8 +720,8 @@ void build_daily_network( model *model )
             {
                 if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
                     add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-                if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
-                    add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+               if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
+                   add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
             }
         }
     }
@@ -779,8 +773,7 @@ int one_time_step( model *model )
 		update_event_list_counters( model, idx );
     //TOM: EVENT CONTROL HERE//
 
-      build_daily_network( model );
-//    build_daily_network( model );
+    build_daily_network( model );
 	transmit_virus( model, model->params );
 
 	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
