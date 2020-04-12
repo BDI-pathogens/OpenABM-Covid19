@@ -266,9 +266,6 @@ void transition_to_icu( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_mortuary( model *model, individual *indiv )
 {
-    if (indiv->idx == 87333)
-        printf("break");
-
     release_patient_from_hospital( indiv, &(model->hospitals[indiv->hospital_idx]) );
     set_mortuary_admission( indiv, model->params, 1);
     transition_one_hospital_event( model, indiv, MORTUARY, NO_EVENT, NO_EDGE );
