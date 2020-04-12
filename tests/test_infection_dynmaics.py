@@ -80,13 +80,13 @@ class TestClass(object):
                 n_total                = 100000
             ),
             dict(
-                n_connections          = 5,
-                end_time               = 75,
-                infectious_rate        = 2.0,
-                mean_infectious_period = 6.0,
-                sd_infectious_period   = 2.0,
-                n_seed_infection       = 10,
-                n_total                = 100000
+                n_connections=5,
+                end_time=75,
+                infectious_rate=2.0,
+                mean_infectious_period=6.0,
+                sd_infectious_period=2.0,
+                n_seed_infection=10,
+                n_total=100000
             ),
             dict(
                 n_connections          = 5,
@@ -102,7 +102,7 @@ class TestClass(object):
                 end_time               = 75,
                 infectious_rate        = 3.0,
                 mean_infectious_period = 8.0,
-                sd_infectious_period   = 8.0,
+                sd_infectious_period   = 7,
                 n_seed_infection       = 10,
                 n_total                = 100000
             ),
@@ -489,6 +489,20 @@ class TestClass(object):
         params.set_param( "n_total", n_total ) 
         params.set_param( "rng_seed", 2 ) 
         params.set_param( "random_interaction_distribution", 0 );
+
+        # Make mild and asymptomatic infections as infectious as normal ones:
+        params.set_param("mild_infectious_factor", 1)
+        params.set_param("asymptomatic_infectious_factor", 1)
+
+        # Make recovery happen slowly enough that we explore the full
+        # infectiousness(tau) function, assumed for the analytical calculation.
+        params.set_param("mean_time_to_recover",
+        mean_infectious_period + 2 * sd_infectious_period)
+        params.set_param("mean_asymptomatic_to_recovery",
+                         mean_infectious_period + 2 * sd_infectious_period)
+        params.set_param("sd_time_to_recover", 0.5)
+        params.set_param("sd_asymptomatic_to_recovery", 0.5)
+
         params.write_params(constant.TEST_DATA_FILE)     
                 
         # Call the model using baseline parameters, pipe output to file, read output file
@@ -501,16 +515,15 @@ class TestClass(object):
         ts_1  = df_ts[ df_ts[ "total_infected" ] > ( n_total * fraction_1 ) ].min() 
         ts_2  = df_ts[ df_ts[ "total_infected" ] > ( n_total * fraction_2 ) ].min() 
         slope = ( log( ts_2[ "total_infected"]) - log( ts_1[ "total_infected"]) ) / ( ts_2[ "time" ] - ts_1[ "time" ] )
-        
+
         # this is an analytical approximation in the limit of large 
         # mean_infectious_rate, but works very well for most values
         # unless there is large amount infection the following day
-
         theta     = sd_infectious_period * sd_infectious_period / mean_infectious_period
         k         = mean_infectious_period / theta
         char_func = lambda x: exp(x) - infectious_rate / ( 1 + x * theta )**k
         slope_an  = optimize.brentq( char_func, - 0.99 / theta, 1  )
-        
+
         np.testing.assert_allclose( slope, slope_an, rtol = tolerance, err_msg = "exponential growth deviates too far from analytic approximation")
 
     def test_relative_transmission(
