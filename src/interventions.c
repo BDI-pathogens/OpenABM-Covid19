@@ -727,6 +727,9 @@ void intervention_smart_release( model *model )
 		if( token == NULL )
 			continue;
 
+		if( is_in_hospital( indiv ) || ( indiv->time_event[CASE] >= time_index) )
+			continue;
+
 		token = token->next_index;
 		while( token != NULL )
 		{
