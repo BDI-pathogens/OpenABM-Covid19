@@ -74,6 +74,12 @@ typedef struct{
 	double mean_asymptomatic_to_recovery;   // mean time to recovery for asymptomatics
 	double sd_asymptomatic_to_recovery;     // sd of time to recovery for asymptomatics
 
+	double mean_time_hospitalised_recovery; // mean time to recover if hospitalised
+	double sd_time_hospitalised_recovery;   // sd time to recover if hospitalised
+	double mean_time_critical_survive;      // mean time to survive if critical
+	double sd_time_critical_survive;        // sd time to survive if critical
+	double icu_allocation[N_AGE_GROUPS];    // probability of getting an ICU place if needed
+
 	int quarantined_daily_interactions; 	// number of interactions a quarantined person has
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
 
