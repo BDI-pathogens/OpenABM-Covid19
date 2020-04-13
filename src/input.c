@@ -249,6 +249,24 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
 	}
 
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_hospitalised_recovery ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_hospitalised_recovery\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->sd_time_hospitalised_recovery ));
+	if( check < 1){ print_exit("Failed to read parameter sd_time_hospitalised_recovery\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_critical_survive ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_critical_survive\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
+	if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
+		if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
+	}
+
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
 
@@ -463,6 +481,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_asymptomatic,");
 	fprintf(individual_output_file,"time_hospitalised,");
 	fprintf(individual_output_file,"time_critical,");
+	fprintf(individual_output_file,"time_hospitalised_recovering,");
 	fprintf(individual_output_file,"time_death,");
 	fprintf(individual_output_file,"time_recovered,");
 	fprintf(individual_output_file,"time_quarantined,");
@@ -493,7 +512,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -513,6 +532,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->time_event[ASYMPTOMATIC],
 			indiv->time_event[HOSPITALISED],
 			indiv->time_event[CRITICAL],
+			indiv->time_event[HOSPITALISED_RECOVERING],
 			indiv->time_event[DEATH],
 			indiv->time_event[RECOVERED],
 			indiv->time_event[QUARANTINED],
