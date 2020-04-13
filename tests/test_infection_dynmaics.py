@@ -431,11 +431,11 @@ class TestClass(object):
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
         # check to see whether there are transmission from all infected states
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.PRESYMPTOMATIC ) > 0, True, "no transmission from presymptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.SYMPTOMATIC )    > 0, True, "no transmission from symptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.ASYMPTOMATIC )   > 0, True, "no transmission from asymptomatic people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.HOSPITALISED )   > 0, True, "no transmission from hospitalised people" )
-        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.CRITICAL )       > 0, True, "no transmission from critical people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC ) > 0, True, "no transmission from presymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC )    > 0, True, "no transmission from symptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.EVENT_TYPES.ASYMPTOMATIC )   > 0, True, "no transmission from asymptomatic people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED )   > 0, True, "no transmission from hospitalised people" )
+        np.testing.assert_equal( sum( df_trans[ "infector_status" ] == constant.EVENT_TYPES.CRITICAL )       > 0, True, "no transmission from critical people" )
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "infector_infected_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
