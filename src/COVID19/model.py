@@ -169,13 +169,13 @@ class Parameters(object):
 
     def get_param(self, param):
         """[summary]
-        Get the value of a param from the c_params object 
+        Get the value of a param from the c_params object
         Arguments:
             param {[str]} -- [name of parameters]
-        
+
         Raises:
             ParameterException: [description]
-        
+
         Returns:
             [type] -- [value of param]
         """
@@ -199,9 +199,9 @@ class Parameters(object):
         Arguments:
             param {[string]} -- [parameter name]
             value {[float or int]} -- [value]
-        
+
         Raises:
-            ParameterException: 
+            ParameterException:
         """
         if self.update_lock:
             raise ParameterException(
@@ -233,7 +233,7 @@ class Parameters(object):
 
     def return_param_object(self):
         """[summary]
-        Run a check on the parameters and return if the c code doesn't bail 
+        Run a check on the parameters and return if the c code doesn't bail
         Returns:
             [type] -- [description]
         """
@@ -258,13 +258,13 @@ class Model:
 
     def get_param(self, name):
         """[summary]
-        Get parameter by name 
+        Get parameter by name
         Arguments:
             name {[str]} -- [name of param]
-        
+
         Raises:
             ModelParameterException: [description]
-        
+
         Returns:
             [type] -- [value of param stored]
         """
@@ -280,11 +280,11 @@ class Model:
 
     def update_running_params(self, param, value):
         """[summary]
-        a subset of parameters my be updated whilst the model is evaluating, these correspond to events 
+        a subset of parameters my be updated whilst the model is evaluating, these correspond to events
         Arguments:
             param {[str]} -- [name of parameter]
             value {[type]} -- [value to set]
-        
+
         Raises:
             ModelParameterException: [description]
             ModelParameterException: [description]

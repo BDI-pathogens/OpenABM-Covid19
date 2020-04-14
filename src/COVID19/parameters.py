@@ -12,72 +12,72 @@ import itertools, json, sys, copy
 class ParameterSet(object):
     """
     Class representing a single parameter set for COVID19-IBM
-    
-    Stores the parameter file as an OrderedDict.  
-    
+
+    Stores the parameter file as an OrderedDict.
+
     Arguments
     ---------
-    param_file: 
+    param_file:
         path to a parameter file of the COVID19-IBM
-    line_number : 
+    line_number :
         int of the line number of the parameter file to read (header line is 0)
-    
-    
+
+
     Methods
     -------
     get_param(param)
         List parameter value for 'param'
-    
+
     set_param(param, value)
         Set parameter value for 'param' to 'value'
-    
+
     list_params()
         List ordered dictionary that stores parameters
-    
+
     write_params(param_file)
         Write parameter set to csv file at location 'param_file'
-    
-    write_varying_params(params, values_list, param_file, 
+
+    write_varying_params(params, values_list, param_file,
         index_var = "param_id", reset_index = True)
-        
+
         params : list, values: list, param_file: str of path
-        
+
         Write several parameter sets to a single file at location
         'param_file' for all combinations of lists of parameter values
-        given in 'values_list' and parameter names given in list 'params'.  
+        given in 'values_list' and parameter names given in list 'params'.
         The index_var parameter specifies the ID column of the new file.
         If reset_index = True then a new ID column is produced to index
-        the parameter sets.  
-    
+        the parameter sets.
+
     Example
     -------
     # Load a parameter set
     params = ParameterSet("./tests/data/test_parameters.csv")
-    
+
     # Get parameter value for parameter called "n_total"
     params.get_param("n_total")
-    
+
     # Set parameter called "n_total" to 500
     params.set_param("n_total", 500)
-    
+
     # Write parameter set to file in a file called "new_parameter_file.csv"
     params.write_params("new_parameter_file.csv")
-    
+
     # Write the same parameter set to file for 5 different values of the random seed (rng_seed)
     params = ParameterSet("./tests/data/test_parameters.csv")
     params.write_varying_params(["rng_seed"], [range(5)], "new_parameter_file.csv")
-    
-    
+
+
     # Write the same parameter set to file for 5 different values of the random seed (rng_seed) and
-    # for different values of "infectious_rate".  
-    
+    # for different values of "infectious_rate".
+
     params = ParameterSet("./tests/data/test_parameters.csv")
-    
+
     param_names = ["rng_seed", "infectious_rate"]
     values_list = [range(5), [0.1, 0.2, 0.3]]
-    
+
     params.write_varying_params(param_names, values_list, "new_parameter_file.csv")
-    
+
     """
 
     def __init__(self, param_file, line_number=1):
@@ -100,12 +100,12 @@ class ParameterSet(object):
 
     def get_param(self, param):
         """Get parameter value
-        
+
         Arguments
         ---------
         param : str
             Parameter name
-        
+
         Returns
         -------
         parameter value as a str
@@ -117,14 +117,14 @@ class ParameterSet(object):
 
     def set_param(self, param, value=None):
         """Set parameter value
-        
+
         Arguments
         ---------
         param : str or dict
             Parameter name (or a dict of parameter name-value key-value pairs)
         value : int, float, str
             Parameter value to set as value for parameter `param` (None if 'param' is a dict)
-        
+
         Returns
         -------
         Nothing.
@@ -178,7 +178,7 @@ class ParameterSet(object):
 
     def write_params(self, param_file):
         """Write parameters to CSV file
-        
+
         Arguements
         ----------
         param_file: str
@@ -201,17 +201,17 @@ class ParameterSet(object):
     ):
         """
         Write parameters to file from lists of parameter values across which to vary
-            
+
         Arguments
         ---------
         params : list
             str of parameter names over which to vary
-            
+
         values_list : list of lists
-            
+
         param_file : str
             path to output parameter file
-        
+
         index_var = "param_id", reset_index = True
         """
         header = ", ".join(list(self.params.keys()))
@@ -292,26 +292,26 @@ if __name__ == "__main__":
     """
     Usage:
     python parameters.py <input_parameter_file> <json_file> <output_parameter_file>
-    
+
     Arguments
     ----------
     input_parameter_file : str
         path to input parameter file with "baseline" parameter values
 
     json_file : str
-        path to JSON file of parameters to adjust (or vary).  JSON file has a key "parameters" 
-        within which there are key/value pairs of parameter names/values.  JSON file has an 
-        optional key of "n_replicates" with int value which will generate 'n_replicates' 
-        replicates for each set of parameter values.  
-        
+        path to JSON file of parameters to adjust (or vary).  JSON file has a key "parameters"
+        within which there are key/value pairs of parameter names/values.  JSON file has an
+        optional key of "n_replicates" with int value which will generate 'n_replicates'
+        replicates for each set of parameter values.
+
     output_parameter_file : str
-        path of where to save output parameter file after adjustments in JSON file are made 
-    
-    
+        path of where to save output parameter file after adjustments in JSON file are made
+
+
     Returns
     -------
-    Writes a new parameter file to disk at location <output_parameter_file>.  
-    
+    Writes a new parameter file to disk at location <output_parameter_file>.
+
     """
 
     input_parameter_file = sys.argv[1]

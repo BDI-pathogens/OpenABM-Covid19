@@ -1,5 +1,5 @@
 """
-Class representing a simulation object to store model output and 
+Class representing a simulation object to store model output and
 run model across mutiple time steps or simulations
 
 Created: 5 April 2020
@@ -113,8 +113,8 @@ class Simulation:
     def steps(self, n_steps):
         """
         Run the model for a specific number of steps, starting from the current state,
-        save data as model progresses.  
-        
+        save data as model progresses.
+
         Arguments
         ---------
             n_steps: number of steps for which to call self.model.one_time_step()
