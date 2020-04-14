@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		last_test = n_total( model, TEST_RESULT );
 	};
 
-	printf( "death = %li \n", n_current( model, DEATH  ) );
+	printf( "# death = %li \n", n_current( model, DEATH  ) );
 
 
 	printf( "\n# End_time:                      %i\n",  model->time );
