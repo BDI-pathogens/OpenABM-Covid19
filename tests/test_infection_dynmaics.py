@@ -107,12 +107,17 @@ class TestClass(object):
                 n_total                = 100000
             ),
         ],
-        "test_transmission_pairs": [ 
+        "test_transmission_pairs": [
             dict( 
-                n_total         = 50000,
-                infectious_rate = 6.75,
-                end_time        = 50,
-                hospitalised_daily_interactions = 5
+                n_total         = 200000,
+                infectious_rate = 8,
+                end_time        = 150,
+                hospitalised_daily_interactions = 5,
+                mean_infectious_period=8.0,
+                sd_infectious_period=5,
+                mean_time_to_hospital=2,
+                mean_time_to_critical=2,
+                mean_time_to_symptoms=2
             )
         ],
 #        "test_relative_transmission": [
@@ -410,7 +415,12 @@ class TestClass(object):
         n_total,
         end_time,
         infectious_rate,
-        hospitalised_daily_interactions
+        hospitalised_daily_interactions,
+        mean_infectious_period,
+        sd_infectious_period,
+        mean_time_to_hospital,
+        mean_time_to_critical,
+        mean_time_to_symptoms
     ):
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
@@ -421,7 +431,11 @@ class TestClass(object):
         params.set_param( "hospitalised_daily_interactions", hospitalised_daily_interactions )
         params.set_param( "mild_infectious_factor", 1)
         params.set_param( "asymptomatic_infectious_factor", 1)
-        params.set_param( "mean_time_to_symptoms", 10)
+        params.set_param("mean_infectious_period", mean_infectious_period)
+        params.set_param("sd_infectious_period", sd_infectious_period)
+        params.set_param("mean_time_to_hospital", mean_time_to_hospital)
+        params.set_param("mean_time_to_critical", mean_time_to_critical)
+        params.set_param("mean_time_to_symptoms", mean_time_to_symptoms)
         params.write_params(constant.TEST_DATA_FILE)     
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
@@ -433,13 +447,13 @@ class TestClass(object):
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
         # check to see whether there are transmission from all infected states
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC] ) > 0, True, "no transmission from presymptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD] ) > 0, True, "no transmission from presymptomatic (mild) people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC] ) > 0 , True, "no transmission from symptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD] ) > 0, True, "no transmission from symptomatic (mild) people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.ASYMPTOMATIC] )  > 0, True, "no transmission from asymptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED] )  > 0, True, "no transmission from hospitalised people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.CRITICAL] )      > 0, True, "no transmission from critical people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC.value] ) > 0, True, "no transmission from presymptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from presymptomatic (mild) people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC.value] ) > 0 , True, "no transmission from symptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from symptomatic (mild) people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.ASYMPTOMATIC.value] )  > 0, True, "no transmission from asymptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED.value] )  > 0, True, "no transmission from hospitalised people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.CRITICAL.value] )      > 0, True, "no transmission from critical people" )
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "infector_infected_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
