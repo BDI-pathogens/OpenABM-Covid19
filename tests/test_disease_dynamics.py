@@ -46,6 +46,10 @@ class TestClass(object):
                     sd_time_to_death=5.0,
                     mean_asymptomatic_to_recovery=15.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=6,
+                    sd_time_hospitalised_recovery=3,
+                    mean_time_critical_survive=4,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -60,6 +64,10 @@ class TestClass(object):
                     sd_time_to_death=5.5,
                     mean_asymptomatic_to_recovery=17.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=8,
+                    sd_time_hospitalised_recovery=4,
+                    mean_time_critical_survive=5,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -74,6 +82,10 @@ class TestClass(object):
                     sd_time_to_death=6,
                     mean_asymptomatic_to_recovery=18.0,
                     sd_asymptomatic_to_recovery=7.0,
+                    mean_time_hospitalised_recovery=10,
+                    sd_time_hospitalised_recovery=5,
+                    mean_time_critical_survive=6,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -88,6 +100,10 @@ class TestClass(object):
                     sd_time_to_death=5,
                     mean_asymptomatic_to_recovery=12.0,
                     sd_asymptomatic_to_recovery=4.0,
+                    mean_time_hospitalised_recovery=12,
+                    sd_time_hospitalised_recovery=6,
+                    mean_time_critical_survive=3,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -102,6 +118,10 @@ class TestClass(object):
                     sd_time_to_death=6,
                     mean_asymptomatic_to_recovery=14.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=8,
+                    sd_time_hospitalised_recovery=3,
+                    mean_time_critical_survive=6,
+                    sd_time_critical_survive=3,
                 )
             ),
         ],
@@ -519,7 +539,7 @@ class TestClass(object):
         mean = df_indiv[
             (df_indiv["time_recovered"] > 0)
             & (df_indiv["time_asymptomatic"] < 0)
-            & (df_indiv["time_hospitalised"] < 0)
+            & (df_indiv["time_hospitalised"] <  0)
         ]["t_s_r"].mean()
         sd = df_indiv[
             (df_indiv["time_recovered"] > 0)
@@ -560,35 +580,41 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
 
-        # time from ICU to recover if don't die
-        df_indiv["t_c_r"] = df_indiv["time_recovered"] - df_indiv["time_critical"]
+        # time in ICU
+        df_indiv["t_c_r"] = df_indiv["time_hospitalised_recovering"] - df_indiv["time_critical"]
         mean = df_indiv[
-            (df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)
+            (df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_r"].mean()
         sd = df_indiv[
-            (df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)
+            (df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_r"].std()
         N = len(
-            df_indiv[(df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)]
+            df_indiv[(df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from ICU to death
         df_indiv["t_c_d"] = df_indiv["time_death"] - df_indiv["time_critical"]
-        mean = df_indiv[(df_indiv["time_death"] > 0)]["t_c_d"].mean()
-        sd = df_indiv[(df_indiv["time_death"] > 0)]["t_c_d"].std()
-        N = len(df_indiv[(df_indiv["time_death"] > 0)])
+        mean = df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ]["t_c_d"].mean()
+        sd = df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ]["t_c_d"].std()
+        N = len( df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ] )
         np.testing.assert_allclose(
             mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
         )
