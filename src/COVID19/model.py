@@ -51,6 +51,37 @@ class ChildAdultElderlyEnum(enum.Enum):
     _elderly = 2
 
 
+class AgeGroupEnum(enum.Enum):
+    _0_9 = 0
+    _10_19 = 1
+    _20_29 = 2
+    _30_39 = 3
+    _40_49 = 4
+    _50_59 = 5
+    _60_69 = 6
+    _70_79 = 7
+    _80 = 8
+
+
+class ChildAdultElderlyEnum(enum.Enum):
+    _child = 0
+    _adult = 1
+    _elderly = 2
+
+class ListIndiciesEnum(enum.Enum):
+    _1 = 0
+    _2 = 1
+    _3 = 2
+    _4 = 3
+    _5 = 4
+    _6 = 5
+
+class TransmissionTypeEnum(enum.Enum):
+    _household = 0
+    _workplace = 1
+    _random = 2
+
+
 class Parameters(object):
     def __init__(
         self, input_param_file: str = None, param_line_number: int= None, output_file_dir: str = "./", input_household_file:str=None, read_param_file=True,
@@ -95,7 +126,7 @@ class Parameters(object):
 
     def _get_base_param_from_age_param(self, param):
         base_name, enum_val = None, None
-        for en in chain(AgeGroupEnum, ChildAdultElderlyEnum):
+        for en in chain(AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum):
             if en.name == param[-1* len(en.name):]:
                 base_name = param.split(en.name)[0]
                 enum_val = en.value
@@ -143,21 +174,20 @@ class Parameters(object):
                 f"Parameter set has been exported to model, please use model.update_x functions"
             )
 
-
-        if hasattr(covid19, f"set_param_{param}"):
-            setter = getattr(covid19, f"set_param_{param}")
-            setter(self.c_params, value)
-        elif hasattr(covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"):
-            param, idx = self._get_base_param_from_age_param(param)
-            setter = getattr(covid19, f"set_param_{param}")
-            setter(self.c_params, value, idx)
-        elif hasattr(self.c_params, f"{param}"):
+        if hasattr(self.c_params, f"{param}"):
             if isinstance(getattr(self.c_params, f"{param}"), int):
                 setattr(self.c_params,f"{param}", int(value))
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params,f"{param}", float(value))
             else:
                 LOGGER.info(f'param {param} has type {type(getattr(self.c_params, f"{param}"))}')
+        elif hasattr(covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"):
+            param, idx = self._get_base_param_from_age_param(param)
+            setter = getattr(covid19, f"set_param_{param}")
+            setter(self.c_params, value, idx)
+        elif hasattr(covid19, f"set_param_{param}"):
+            setter = getattr(covid19, f"set_param_{param}")
+            setter(self.c_params, value)
         else:
             raise ParameterException(f"Can not set parameter {param} as it doesn't exist")
 
@@ -175,11 +205,6 @@ class Parameters(object):
         self.update_lock = True
         return self.c_params
 
-    def __del__(self):
-        if self.c_params:
-            covid19.destroy_params(self.c_params)
-            self.c_params = None
-
 
 
 class Model:
@@ -187,6 +212,7 @@ class Model:
         # Store the params object so it doesn't go out of scope and get freed
         self._params_obj = params_object
         # Create C parameters object
+        self.c_model = None
         self.c_params = params_object.return_param_object()
         self._create()
         self._is_running = False
@@ -204,6 +230,7 @@ class Model:
             [type] -- [value of param stored]
         """
         try:
+            LOGGER.info(f"Getting param {name}")
             value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
             if value < 0:
                 return False
@@ -237,6 +264,7 @@ class Model:
         """
         Call C function new_model (renamed create_model)
         """
+        LOGGER.info("Started model creation")
         self.c_model = covid19.create_model(self.c_params)
         LOGGER.info("Successfuly created model")
 
@@ -292,14 +320,3 @@ class Model:
         Write output files
         """
         covid19.write_output_files(self.c_model, self.c_params)
-
-    def __del__(self):
-        """
-        Call C functions destroy_model and destroy_params
-        """
-        if self.c_model:
-            covid19.destroy_model(self.c_model)
-            self.c_model = None
-        if self.c_params:
-            covid19.destroy_params(self.c_params)
-            self._params_obj.c_params = None
