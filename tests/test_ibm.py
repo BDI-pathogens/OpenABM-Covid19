@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 """
 Tests of the individual-based model, COVID19-IBM
 
@@ -71,6 +71,10 @@ class TestClass(object):
         Set parameter value to zero should result in zero sum of output column
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        if parameter == 'fraction_asymptomatic':
+            params = utils.set_fraction_asymptomatic_all( params, 0.0 )
+        if parameter == 'n_seed_infection':
+            params.set_param( 'n_seed_infection', 0 )
         params = utils.set_fatality_fraction_all(params, 0.0)
         params.write_params(constant.TEST_DATA_FILE)
         
