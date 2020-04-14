@@ -164,7 +164,7 @@ class TestClass(object):
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
-            "n_hospital", "n_death", "n_recovered", "n_critical"]]
+            "n_hospital", "n_death", "n_recovered", "n_critical", "n_hospitalised_recovering"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
