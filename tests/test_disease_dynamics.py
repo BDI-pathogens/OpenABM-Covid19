@@ -656,7 +656,7 @@ class TestClass(object):
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 250)
         params.set_param("infectious_rate", 4.0)
-        #params.set_param("mild_infectious_factor", 1.0)
+        params.set_param("mild_infectious_factor", 1.0)
         params.set_param( test_params )
 
         fraction_asymptomatic = [
