@@ -169,7 +169,8 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
             case WAITING:       n = 0; break;
             case GENERAL:       n = params->hospitalised_daily_interactions; break;
             case ICU:           n = params->hospitalised_daily_interactions; break;
-            default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
+			case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break; //TODO is this messing with hospital transition stuff
+			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else
@@ -234,6 +235,16 @@ void set_critical( individual *indiv, parameters* params, int time )
     //update_random_interactions( indiv, params );
 }
 
+/*****************************************************************************************
+*  Name:		set_hospitalised_recovering
+*  Description: sets a person to hospitalised recovering
+*  Returns:		void
+******************************************************************************************/
+void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
+{
+	indiv->status = HOSPITALISED_RECOVERING;
+	update_random_interactions( indiv, params );
+}
 
 /*****************************************************************************************
 *  Name:		set_case

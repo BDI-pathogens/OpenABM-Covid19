@@ -27,7 +27,7 @@ struct trace_token{
 /************************************************************************/
 
 void set_up_transition_times_intervention( model* );
-void set_up_app_users( model*, double );
+void set_up_app_users( model* );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
