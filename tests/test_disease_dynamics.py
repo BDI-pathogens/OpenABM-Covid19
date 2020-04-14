@@ -30,9 +30,11 @@ def pytest_generate_tests(metafunc):
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
 
-
 class TestClass(object):
     params = {
+        "test_total_infectious_rate_zero": [dict()],
+        "test_zero_infected": [dict()],
+        "test_zero_recovery": [dict()],
         "test_disease_transition_times": [
             dict(
                 test_params = dict( 
@@ -474,6 +476,62 @@ class TestClass(object):
     """
     Test class for checking 
     """
+    def test_zero_recovery(self):
+        """
+        Setting recover times to be very large should avoid seeing any in recovered compartment
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        
+        # Make recovery very long
+        params.set_param("mean_time_to_recover", 200.0)
+        params.set_param("mean_asymptomatic_to_recovery", 200.0)
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
+        
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_array_equal(
+            df_output[["n_recovered"]].sum(), 
+            0)
+    
+    def test_total_infectious_rate_zero(self):
+        """
+        Set infectious rate to zero results in only "n_seed_infection" as total_infected
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param("infectious_rate", 0.0)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        output = df_output["total_infected"].iloc[-1]
+        expected_output = int(params.get_param("n_seed_infection"))
+        
+        np.testing.assert_equal(output, expected_output)
+    
+    def test_zero_infected(self):
+        """
+        Set seed-cases to zero should result in zero sum of output column
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_seed_infection", 0)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["total_infected"].sum(), 0)
+    
     def test_disease_transition_times( self, test_params ):
         """
         Test that the mean and standard deviation of the transition times between 
