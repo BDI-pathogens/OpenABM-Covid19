@@ -129,7 +129,7 @@ enum DISTRIBUTIONS{
 #define MAX_TIME 500
 #define MAX_INFECTIOUS_PERIOD 200
 #define N_DRAW_LIST 1000
-#define INPUT_CHAR_LEN 100
+#define INPUT_CHAR_LEN 300
 
 extern gsl_rng * rng;
 
