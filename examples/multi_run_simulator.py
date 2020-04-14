@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Example script to evaluate models over time range with changes from the default parameter set
+This example sets different random seeds for each evaulation and collects the data into pandas dataframes 
+Note that individual traces, interactions etc are not saved due to the large number of them.
+This is designed to be run to generate a stochastic window to gain a staticial interpretation of the model
+Run the senario once with full output on to enable detailed knowledge of the model
+"""
+from COVID19.model import Parameters, Model
+from tqdm import tqdm
+from multiprocessing.pool import ThreadPool
+from concurrent.futures import ProcessPoolExecutor
+import pandas as pd
+import random
+from pathlib import Path
+
+base_path = Path(__file__).parent.absolute()
+print(base_path)
+
+BASELINE_PARAMS = base_path / "../tests/data/baseline_parameters.csv"
+HOUSEHOLDS = base_path / "../tests/data/baseline_household_demographics.csv"
+
+def setup_parameters(d: dict=None, output_dir: str="./"):
+    # Set up Parameters
+    # Override defaults that we pass in input dict
+    p = Parameters(
+        input_param_file=str(BASELINE_PARAMS),
+        param_line_number=1,
+        output_file_dir=output_dir,
+        input_household_file=str(HOUSEHOLDS),
+        read_param_file=True,
+    )
+    if d:
+        for k, v in d.items():
+            p.set_param(k, v)
+    return p
+
+
+def setup_model(d: dict=None, di:str=None):
+    params = setup_parameters(di, d)
+    params.set_param("sys_write_individual", 0)
+    model = Model(params)
+    return model
+
+
+def run_model(d: dict=None, di:str = None):
+    m = setup_model(di,d)
+    results = []
+    for _ in range(100):
+        m.one_time_step()
+        results.append(m.one_time_step_results())
+    return pd.DataFrame(results)
+
+
+def run_many_inline(parameter_set_list, processes=None, progress_bar=True):
+    if progress_bar:
+        progress_monitor = tqdm
+    else:
+        progress_monitor = lambda x: x
+
+    # Create a pool and evaluate models concurrently 
+    with ThreadPool(processes=processes) as pool:
+        
+        outputs = list(
+            progress_monitor(
+                pool.imap(run_model, parameter_set_list), total=len(parameter_set_list)
+
+            )
+        )
+        return outputs
+
+
+if __name__ == "__main__":
+
+    print(BASELINE_PARAMS, HOUSEHOLDS)
+    # Edit so we only run over 100k people, default is 1m but 10x speed increase for testing.
+    # Remove n_total setting to run over larger population. 
+    params_list = [{"rng_seed": random.randint(0, 2**32 -1), "n_total": 100000} for x in range(100)]
+
+    results_dataframes = run_many_inline(params_list, processes=None)
+
+    # Ouput individual dataframes as CSVs
+    for p, df in zip(params_list, results_dataframes):
+        df.to_csv(f"./results/model_rng_seed_{p['rng_seed']}.csv")
