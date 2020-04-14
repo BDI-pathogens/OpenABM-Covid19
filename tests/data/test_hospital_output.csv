@@ -1,13 +1,3 @@
-# Starting simulation
-# Date: 14-04-2020 02:17:00
-# Read command-line args
-# Read input parameter file
-# Read household demographics file
-# Read hospital parameter file
-# Start model set-up
-# param_id: 1
-# rng_seed: 1
-# param_line_number: 1
 time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_death,n_recovered,n_waiting,n_general,n_icu,n_discharged,n_mortuary
 1,0,0,0,50,0,41,8,0,0,0,0,0,0,0,0,0,0,0,0
 2,0,0,0,50,0,38,8,0,0,1,0,0,0,0,0,0,0,0,0
@@ -209,30 +199,3 @@ time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_a
 198,0,0,0,62263,4117,0,0,0,0,0,0,0,1498,60762,0,0,1498,2619,1498
 199,0,0,0,62263,4117,0,0,0,0,0,0,0,1498,60762,0,0,1498,2619,1498
 200,0,0,0,62263,4117,0,0,0,0,0,0,0,1498,60762,0,0,1498,2619,1498
-
-# End_time:                      200
-# Total population:              100000
-# Total edges in network:        166287
-# Total total interactions:      126214628
-# Total infected:                62263
-# Total cases:                   4117
-# Total cases   0-9 years:       7
-# Total cases 10-19 years:       14
-# Total cases 20-29 years:       132
-# Total cases 30-39 years:       258
-# Total cases 40-49 years:       492
-# Total cases 50-59 years:       907
-# Total cases 60-69 years:       1050
-# Total cases 70-79 years:       1141
-# Total cases   80+ years:       116
-# Total deaths   0-9 years:      0
-# Total deaths 10-19 years:      2
-# Total deaths 20-29 years:      3
-# Total deaths 30-39 years:      7
-# Total deaths 40-49 years:      38
-# Total deaths 50-59 years:      150
-# Total deaths 60-69 years:      416
-# Total deaths 70-79 years:      842
-# Total deaths   80+ years:      40
-# Total quarantined days:        0
-# Ending simulation, run time:   15.92s
