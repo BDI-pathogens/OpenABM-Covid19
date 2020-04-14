@@ -37,6 +37,8 @@ def pytest_generate_tests(metafunc):
 
 class TestClass(object):
     params = {
+        "test_zero_quarantine": [dict()],
+        "test_hospitalised_zero": [dict()],
         "test_quarantine_interactions": [
             dict(
                 test_params=dict(
@@ -166,13 +168,41 @@ class TestClass(object):
                     traceable_interaction_fraction = 1
                 ),
 
-            ) 
-        ],
+            ),
+        ]
     }
     """
     Test class for checking 
     """
-
+    def test_zero_quarantine(self):
+        """
+        Test there are no individuals quarantined if all quarantine parameters are "turned off"
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_quarantine(params)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
+    
+    def test_hospitalised_zero(self):
+        """
+        Test setting hospitalised fractions to zero (should be no hospitalised)
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.set_hospitalisation_fraction_all(params, 0.0)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
+    
     def test_quarantine_interactions(self, test_params):
         """
         Tests the number of interactions people have on the interaction network is as 
@@ -484,16 +514,5 @@ class TestClass(object):
         
         df_indiv.rename( columns = { "index_ID":"traced_ID" }, inplace = True )
         test = pd.merge( index_traced, df_indiv, on = "traced_ID", how = "left")
-        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" ) 
-        
-        
-
-         
-         
-         
-         
-        
-         
-     
-    
+        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" )
     
