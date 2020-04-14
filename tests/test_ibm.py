@@ -172,7 +172,7 @@ class TestClass(object):
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
-        
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model
@@ -181,7 +181,7 @@ class TestClass(object):
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", \
-            "n_critical", "n_hospital", "n_death"]]
+            "n_critical", "n_hospital", "n_death", "n_hospitalised_recovering"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
