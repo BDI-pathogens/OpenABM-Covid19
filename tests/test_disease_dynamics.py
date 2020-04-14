@@ -30,9 +30,12 @@ def pytest_generate_tests(metafunc):
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
 
-
 class TestClass(object):
     params = {
+        "test_total_infectious_rate_zero": [dict()],
+        "test_zero_infected": [dict()],
+        "test_zero_recovery": [dict()],
+        "test_zero_deaths": [dict()],
         "test_disease_transition_times": [
             dict(
                 test_params = dict( 
@@ -46,6 +49,10 @@ class TestClass(object):
                     sd_time_to_death=5.0,
                     mean_asymptomatic_to_recovery=15.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=6,
+                    sd_time_hospitalised_recovery=3,
+                    mean_time_critical_survive=4,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -60,6 +67,10 @@ class TestClass(object):
                     sd_time_to_death=5.5,
                     mean_asymptomatic_to_recovery=17.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=8,
+                    sd_time_hospitalised_recovery=4,
+                    mean_time_critical_survive=5,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -74,6 +85,10 @@ class TestClass(object):
                     sd_time_to_death=6,
                     mean_asymptomatic_to_recovery=18.0,
                     sd_asymptomatic_to_recovery=7.0,
+                    mean_time_hospitalised_recovery=10,
+                    sd_time_hospitalised_recovery=5,
+                    mean_time_critical_survive=6,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -88,6 +103,10 @@ class TestClass(object):
                     sd_time_to_death=5,
                     mean_asymptomatic_to_recovery=12.0,
                     sd_asymptomatic_to_recovery=4.0,
+                    mean_time_hospitalised_recovery=12,
+                    sd_time_hospitalised_recovery=6,
+                    mean_time_critical_survive=3,
+                    sd_time_critical_survive=2,
                 )
             ),
             dict(
@@ -102,6 +121,10 @@ class TestClass(object):
                     sd_time_to_death=6,
                     mean_asymptomatic_to_recovery=14.0,
                     sd_asymptomatic_to_recovery=5.0,
+                    mean_time_hospitalised_recovery=8,
+                    sd_time_hospitalised_recovery=3,
+                    mean_time_critical_survive=6,
+                    sd_time_critical_survive=3,
                 )
             ),
         ],
@@ -454,6 +477,78 @@ class TestClass(object):
     """
     Test class for checking 
     """
+    def test_zero_recovery(self):
+        """
+        Setting recover times to be very large should avoid seeing any in recovered compartment
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        
+        # Make recovery very long
+        params.set_param("mean_time_to_recover", 200.0)
+        params.set_param("mean_asymptomatic_to_recovery", 200.0)
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
+        
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_array_equal(
+            df_output[["n_recovered"]].sum(), 
+            0)
+    
+    def test_zero_deaths(self):
+        """
+        Set fatality ratio to zero, should have no deaths if always places in the ICU
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.set_fatality_fraction_all(params, 0.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["n_death"].sum(), 0)
+    
+    def test_total_infectious_rate_zero(self):
+        """
+        Set infectious rate to zero results in only "n_seed_infection" as total_infected
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param("infectious_rate", 0.0)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        output = df_output["total_infected"].iloc[-1]
+        expected_output = int(params.get_param("n_seed_infection"))
+        
+        np.testing.assert_equal(output, expected_output)
+    
+    def test_zero_infected(self):
+        """
+        Set seed-cases to zero should result in zero sum of output column
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param("n_seed_infection", 0)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["total_infected"].sum(), 0)
+    
     def test_disease_transition_times( self, test_params ):
         """
         Test that the mean and standard deviation of the transition times between 
@@ -519,7 +614,7 @@ class TestClass(object):
         mean = df_indiv[
             (df_indiv["time_recovered"] > 0)
             & (df_indiv["time_asymptomatic"] < 0)
-            & (df_indiv["time_hospitalised"] < 0)
+            & (df_indiv["time_hospitalised"] <  0)
         ]["t_s_r"].mean()
         sd = df_indiv[
             (df_indiv["time_recovered"] > 0)
@@ -560,35 +655,41 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
 
-        # time from ICU to recover if don't die
-        df_indiv["t_c_r"] = df_indiv["time_recovered"] - df_indiv["time_critical"]
+        # time in ICU
+        df_indiv["t_c_r"] = df_indiv["time_hospitalised_recovering"] - df_indiv["time_critical"]
         mean = df_indiv[
-            (df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)
+            (df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_r"].mean()
         sd = df_indiv[
-            (df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)
+            (df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_r"].std()
         N = len(
-            df_indiv[(df_indiv["time_recovered"] > 0) & (df_indiv["time_critical"] > 0)]
+            df_indiv[(df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
         )
 
         # time from ICU to death
         df_indiv["t_c_d"] = df_indiv["time_death"] - df_indiv["time_critical"]
-        mean = df_indiv[(df_indiv["time_death"] > 0)]["t_c_d"].mean()
-        sd = df_indiv[(df_indiv["time_death"] > 0)]["t_c_d"].std()
-        N = len(df_indiv[(df_indiv["time_death"] > 0)])
+        mean = df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ]["t_c_d"].mean()
+        sd = df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ]["t_c_d"].std()
+        N = len( df_indiv[
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+        ] )
         np.testing.assert_allclose(
             mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
         )
@@ -630,7 +731,7 @@ class TestClass(object):
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 250)
         params.set_param("infectious_rate", 4.0)
-        #params.set_param("mild_infectious_factor", 1.0)
+        params.set_param("mild_infectious_factor", 1.0)
         params.set_param( test_params )
 
         fraction_asymptomatic = [
@@ -841,7 +942,7 @@ class TestClass(object):
 
             N_crit = len(
                 df_indiv[
-                    (df_indiv["time_critical"] > 0)
+                    ( (df_indiv["time_critical"] > 0) | (df_indiv["time_death"] > 0) )
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
@@ -876,7 +977,7 @@ class TestClass(object):
             atol=std_error_limit * sd / sqrt(N_hosp_tot),
         )
 
-        # critical fraction by age
+        # critical fraction who die by age go to the ICU
         N_dead_tot = 0
         N_crit_tot = 0
         fatality_fraction_weighted = 0
@@ -884,7 +985,9 @@ class TestClass(object):
 
             N_dead = len(
                 df_indiv[
-                    (df_indiv["time_death"] > 0) & (df_indiv["age_group"] == constant.AGES[idx])
+                    (df_indiv["time_death"] > 0) & 
+                    (df_indiv["time_critical"] > 0) & 
+                    (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_crit = len(
