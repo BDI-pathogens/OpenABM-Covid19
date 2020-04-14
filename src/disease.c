@@ -177,7 +177,7 @@ void transmit_virus_by_type(
 			next_event = event->next;
 			infector   = event->individual;
 
-			t_infect = model->time - 1 - time_infected( infector );
+			t_infect = model->time - time_infected( infector );
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
 				continue;
 
@@ -190,7 +190,7 @@ void transmit_virus_by_type(
 				{
 					if( interaction->individual->status == UNINFECTED )
 					{
-						hazard_rate = list->infectious_curve[interaction->type][ t_infect ];
+						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
 						interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
@@ -226,6 +226,8 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, ASYMPTOMATIC );
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
+	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
+
 }
 
 /*****************************************************************************************
