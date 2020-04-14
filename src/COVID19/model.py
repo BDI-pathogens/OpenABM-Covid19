@@ -13,6 +13,7 @@ class ModelParameterException(Exception):
 class ParameterException(Exception):
     pass
 
+
 PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_symptoms",
     "test_on_traced",
@@ -30,26 +31,9 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "self_quarantine_fraction",
     "lockdown_on",
     "app_turned_on",
-    "app_users_fraction"
+    "app_users_fraction",
 ]
 
-class AgeGroupEnum(enum.Enum):
-    _0_9 = 0
-    _10_19 = 1
-    _20_29 = 2
-    _30_39 = 3
-    _40_49 = 4
-    _50_59 = 5
-    _60_69 = 6
-    _70_79 = 7
-    _80 = 8
-
-
-class ChildAdultElderlyEnum(enum.Enum):
-    _child = 0
-    _adult = 1
-    _elderly = 2
-
 
 class AgeGroupEnum(enum.Enum):
     _0_9 = 0
@@ -67,6 +51,25 @@ class ChildAdultElderlyEnum(enum.Enum):
     _child = 0
     _adult = 1
     _elderly = 2
+
+
+class AgeGroupEnum(enum.Enum):
+    _0_9 = 0
+    _10_19 = 1
+    _20_29 = 2
+    _30_39 = 3
+    _40_49 = 4
+    _50_59 = 5
+    _60_69 = 6
+    _70_79 = 7
+    _80 = 8
+
+
+class ChildAdultElderlyEnum(enum.Enum):
+    _child = 0
+    _adult = 1
+    _elderly = 2
+
 
 class ListIndiciesEnum(enum.Enum):
     _1 = 0
@@ -76,6 +79,7 @@ class ListIndiciesEnum(enum.Enum):
     _5 = 4
     _6 = 5
 
+
 class TransmissionTypeEnum(enum.Enum):
     _household = 0
     _workplace = 1
@@ -84,13 +88,20 @@ class TransmissionTypeEnum(enum.Enum):
 
 class Parameters(object):
     def __init__(
-        self, input_param_file: str = None, param_line_number: int= None, output_file_dir: str = "./", input_household_file:str=None, read_param_file=True,
+        self,
+        input_param_file: str = None,
+        param_line_number: int = None,
+        output_file_dir: str = "./",
+        input_household_file: str = None,
+        read_param_file=True,
     ):
         self.c_params = covid19.parameters()
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         else:
-            LOGGER.info("Have not passed input file for params, use set_param or set_param_dict")
+            LOGGER.info(
+                "Have not passed input file for params, use set_param or set_param_dict"
+            )
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
@@ -113,21 +124,23 @@ class Parameters(object):
         if self.get_param("N_REFERENCE_HOUSEHOLDS") != 0:
             covid19.read_household_demographics_file(self.c_params)
         else:
-            n_ref_hh =-1
-            with open(self.c_params.input_household_file, 'r') as f:
+            n_ref_hh = -1
+            with open(self.c_params.input_household_file, "r") as f:
                 for _ in f.readlines():
-                    n_ref_hh += 1 
+                    n_ref_hh += 1
             self.set_param("N_REFERENCE_HOUSEHOLDS", n_ref_hh)
             self._read_household_demographics()
 
     def set_param_dict(self, params):
-        for k,v in params.items():
-            self.set_param(k,v)
+        for k, v in params.items():
+            self.set_param(k, v)
 
     def _get_base_param_from_age_param(self, param):
         base_name, enum_val = None, None
-        for en in chain(AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum):
-            if en.name == param[-1* len(en.name):]:
+        for en in chain(
+            AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
+        ):
+            if en.name == param[-1 * len(en.name) :]:
                 base_name = param.split(en.name)[0]
                 enum_val = en.value
                 break
@@ -147,7 +160,9 @@ class Parameters(object):
         """
         if hasattr(covid19, f"get_param_{param}"):
             return getattr(covid19, f"get_param_{param}")(self.c_params)
-        elif hasattr(covid19, f"get_param_{self._get_base_param_from_age_param(param)[0]}"):
+        elif hasattr(
+            covid19, f"get_param_{self._get_base_param_from_age_param(param)[0]}"
+        ):
             param, idx = self._get_base_param_from_age_param(param)
             return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
         elif hasattr(self.c_params, f"{param}"):
@@ -155,9 +170,7 @@ class Parameters(object):
         else:
             raise ParameterException(
                 f"Can not get param {param} as it doesn't exist in parameters object"
-        )
-
-
+            )
 
     def set_param(self, param, value):
         """[summary]
@@ -176,12 +189,16 @@ class Parameters(object):
 
         if hasattr(self.c_params, f"{param}"):
             if isinstance(getattr(self.c_params, f"{param}"), int):
-                setattr(self.c_params,f"{param}", int(value))
+                setattr(self.c_params, f"{param}", int(value))
             if isinstance(getattr(self.c_params, f"{param}"), float):
-                setattr(self.c_params,f"{param}", float(value))
+                setattr(self.c_params, f"{param}", float(value))
             else:
-                LOGGER.info(f'param {param} has type {type(getattr(self.c_params, f"{param}"))}')
-        elif hasattr(covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"):
+                LOGGER.info(
+                    f'param {param} has type {type(getattr(self.c_params, f"{param}"))}'
+                )
+        elif hasattr(
+            covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"
+        ):
             param, idx = self._get_base_param_from_age_param(param)
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value, idx)
@@ -189,7 +206,9 @@ class Parameters(object):
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value)
         else:
-            raise ParameterException(f"Can not set parameter {param} as it doesn't exist")
+            raise ParameterException(
+                f"Can not set parameter {param} as it doesn't exist"
+            )
 
     def return_param_object(self):
         """[summary]
@@ -197,14 +216,13 @@ class Parameters(object):
         Returns:
             [type] -- [description]
         """
-        self._read_household_demographics() 
+        self._read_household_demographics()
         covid19.check_params(self.c_params)
         LOGGER.info(
             "Returning self.c_params into Model object, future updates to parameters not possible"
         )
         self.update_lock = True
         return self.c_params
-
 
 
 class Model:
@@ -283,16 +301,15 @@ class Model:
         results["lockdown"] = self.c_params.lockdown_on
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
-        results["total_infected"] = int(
-            covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC)
-        ) + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD)
-        ) + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
+        results["total_infected"] = (
+            int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC))
+            + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD))
+            + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
+        )
         results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
         results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
-        ) + covid19.utils_n_current(
-            self.c_model, covid19.PRESYMPTOMATIC_MILD
-        )
+        ) + covid19.utils_n_current(self.c_model, covid19.PRESYMPTOMATIC_MILD)
         results["n_asymptom"] = covid19.utils_n_current(
             self.c_model, covid19.ASYMPTOMATIC
         )
@@ -304,15 +321,15 @@ class Model:
         )
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
-        ) + covid19.utils_n_current(
-            self.c_model, covid19.SYMPTOMATIC_MILD
-        )
+        ) + covid19.utils_n_current(self.c_model, covid19.SYMPTOMATIC_MILD)
         results["n_hospital"] = covid19.utils_n_current(
             self.c_model, covid19.HOSPITALISED
         )
         results["n_critical"] = covid19.utils_n_current(self.c_model, covid19.CRITICAL)
         results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
-        results["n_recovered"] = covid19.utils_n_current(self.c_model, covid19.RECOVERED)
+        results["n_recovered"] = covid19.utils_n_current(
+            self.c_model, covid19.RECOVERED
+        )
         return results
 
     def write_output_files(self):

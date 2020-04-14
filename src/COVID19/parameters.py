@@ -215,7 +215,7 @@ class ParameterSet(object):
         index_var = "param_id", reset_index = True
         """
         header = ", ".join(list(self.params.keys()))
-        
+
         lines = []
         lines.append(header)
 
@@ -234,7 +234,7 @@ class ParameterSet(object):
 
         with open(output_param_file, "w+") as f:
             f.write("\n".join(lines))
-    
+
     def write_univariate_sensitivity_from_json(self, json_file, output_param_file):
         """
         Read JSON file of parameter values to vary in a univariate sensitivity analysis,
@@ -253,35 +253,35 @@ class ParameterSet(object):
         if ("n_replicates" in json_dict) & ("rng_seed" in parameter_dict):
             print("Both n_replicates and rng_seed are specified - only specify one")
             sys.exit()
-        
+
         # Save central parameters
         central_params = copy.copy(self.params)
-        
+
         lines = []
         # Adjust single parameter values
         for param, value_list in parameter_dict.items():
-            
+
             if not isinstance(value_list, list):
                 value_list = [value_list]
-            
+
             for value in value_list:
                 # Set the parameter value
                 self.set_param(param, value)
-                
+
                 # Save the line
                 line = ", ".join(list(self.params.values()))
                 lines.append(line)
-                
+
                 # Reset the parameter value
                 self.set_param(param, central_params[param])
-        
+
         # Write lines to file
         header = ",".join(list(self.params.keys()))
         param_lines = "\n".join(lines)
-        
+
         with open(output_param_file, "w+") as f:
             f.write(header + "\n" + param_lines)
-    
+
     @property
     def NPARAMS(self):
         "Number of parameters"
