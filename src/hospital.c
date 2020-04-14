@@ -301,11 +301,13 @@ void assign_patient_to_hospital( model* model, individual *indiv )
 
     int added_to_hospital = FALSE;
 
-    if( indiv->status == HOSPITALISED )
+    if( indiv->status == HOSPITALISED || indiv->status == HOSPITALISED_RECOVERING )
         required_ward = COVID_GENERAL;
-
-    if( indiv->status == CRITICAL )
+    else if( indiv->status == CRITICAL )
         required_ward = COVID_ICU;
+    else
+        print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
+    
 
     hospital* assigned_hospital;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
