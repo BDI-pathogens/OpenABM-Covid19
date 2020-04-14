@@ -5,8 +5,11 @@ Created: 10 March 2020
 Author: p-robot (W. Probert)
 """
 
+import copy
+import itertools
+import json
+import sys
 from collections import OrderedDict
-import itertools, json, sys, copy
 
 
 class ParameterSet(object):

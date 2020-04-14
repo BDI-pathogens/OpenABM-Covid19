@@ -1,7 +1,8 @@
-import covid19
 import logging
 import enum
 from itertools import chain
+
+import covid19
 
 LOGGER = logging.getLogger(__name__)
 
