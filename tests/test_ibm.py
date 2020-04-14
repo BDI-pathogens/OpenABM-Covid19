@@ -105,11 +105,12 @@ class TestClass(object):
 
     def test_long_time_to_death(self):
         """
-        Setting mean_time_to_death beyond end of simulation should result in no recorded deaths
+        Setting mean_time_to_death beyond end of simulation should result in no recorded deaths if always place in the ICU
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("mean_time_to_death", 200.0)
         params.set_param("sd_time_to_death", 2.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
