@@ -867,7 +867,7 @@ class TestClass(object):
 
             N_crit = len(
                 df_indiv[
-                    (df_indiv["time_critical"] > 0)
+                    ( (df_indiv["time_critical"] > 0) | (df_indiv["time_death"] > 0) )
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
@@ -902,7 +902,7 @@ class TestClass(object):
             atol=std_error_limit * sd / sqrt(N_hosp_tot),
         )
 
-        # critical fraction by age
+        # critical fraction who die by age go to the ICU
         N_dead_tot = 0
         N_crit_tot = 0
         fatality_fraction_weighted = 0
@@ -910,7 +910,9 @@ class TestClass(object):
 
             N_dead = len(
                 df_indiv[
-                    (df_indiv["time_death"] > 0) & (df_indiv["age_group"] == constant.AGES[idx])
+                    (df_indiv["time_death"] > 0) & 
+                    (df_indiv["time_critical"] > 0) & 
+                    (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_crit = len(
