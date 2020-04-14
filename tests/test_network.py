@@ -124,7 +124,7 @@ class TestClass(object):
         ],
         "test_work_network": [ 
             dict( 
-                n_total = 10000,
+                n_total = 40000,
                 mean_work_interactions_child   = 10,
                 mean_work_interactions_adult   = 7,
                 mean_work_interactions_elderly = 3,
@@ -321,7 +321,7 @@ class TestClass(object):
         """  
       
         # absolute tolerance
-        tolerance = 0.03
+        tolerance = 0.035
         
         # note when counting connections we count each end
         ageTypeMap         = pd.DataFrame( data={ "age_group": constant.AGES, "age_type": constant.AGE_TYPES } );
