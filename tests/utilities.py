@@ -99,6 +99,18 @@ def set_fraction_asymptomatic_all(params, fraction):
 
     return(params)
 
+def set_icu_allocation_all(params, fraction):
+    """
+    Set icu_allocation to the same for all ages
+    """
+    param_names = ["icu_allocation_0_9", "icu_allocation_10_19", "icu_allocation_20_29",
+        "icu_allocation_30_39", "icu_allocation_40_49", "icu_allocation_50_59",
+        "icu_allocation_60_69", "icu_allocation_70_79", "icu_allocation_80"]
+
+    for p in param_names:
+        params.set_param(p, fraction)
+
+    return(params)
 
 def set_critical_fraction_all(params, fraction):
     """
