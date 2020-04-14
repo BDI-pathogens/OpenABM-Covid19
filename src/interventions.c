@@ -199,8 +199,8 @@ void update_intervention_policy( model *model, int time )
 			if( params->TEMP_lockdown_trigger_app_on_end )
 				params->app_turn_on_time = params->lockdown_time_off;
 
-			if( params->TEMP_lockdown_trigger_time_to_test )
-				params->testing_symptoms_time_on = params->lockdown_time_off + params->TEMP_lockdown_trigger_time_to_test ;
+			if( params->TEMP_lockdown_trigger_time_to_test < params->end_time )
+				params->testing_symptoms_time_on = params->lockdown_time_off + params->TEMP_lockdown_trigger_time_to_test;
 		}
 	}
 
