@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 
     struct timespec  tv;
     double tstart, tend;
+    long last_test;
     int idx;
 	char date_time[30];
 	
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
 	printf("# param_line_number: %d\n", params.param_line_number);
 	
 	printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered\n");
+	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
 		printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
@@ -62,7 +64,7 @@ int main(int argc, char *argv[])
 				n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
 				n_current( model, ASYMPTOMATIC ),
 				n_current( model, QUARANTINED ),
-				n_daily( model, TEST_RESULT, model->time + 1),
+			    n_total( model, TEST_RESULT ) - last_test,
 				n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
 				n_current( model, HOSPITALISED ),
 				n_current( model, CRITICAL ),
@@ -70,7 +72,11 @@ int main(int argc, char *argv[])
 				n_current( model, DEATH ),
 				n_current( model, RECOVERED )
 		);
+		last_test = n_total( model, TEST_RESULT );
 	};
+
+	printf( "death = %li \n", n_current( model, DEATH  ) );
+
 
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
