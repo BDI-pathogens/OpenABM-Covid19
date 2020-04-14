@@ -67,7 +67,7 @@ model* new_model( parameters *params )
 
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
-	set_up_app_users( model_ptr, model_ptr->params->app_users_fraction );
+	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
@@ -443,19 +443,17 @@ void flu_infections( model *model )
 
 	n_infected = round( model->params->n_total * model->params->seasonal_flu_rate );
 
-	idx = 0;
-	while( idx < n_infected )
+	for( idx = 0; idx < n_infected; idx++ )
 	{
 		pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-		if( !(indiv->status == UNINFECTED && indiv->quarantined == FALSE ) )
+		if( is_in_hospital( indiv ) || indiv->status == DEATH )
 			continue;
 
 		intervention_on_symptoms( model, indiv );
-
-		idx++;
 	}
+
 }
 
 /*****************************************************************************************
@@ -780,6 +778,7 @@ int one_time_step( model *model )
 	transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
 	transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
 	transition_events( model, CRITICAL,          &transition_to_critical,         FALSE );
+	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering, FALSE );
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
