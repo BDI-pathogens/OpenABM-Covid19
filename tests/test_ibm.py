@@ -88,10 +88,11 @@ class TestClass(object):
 
     def test_zero_deaths(self):
         """
-        Set fatality ratio to zero, should have no deaths
+        Set fatality ratio to zero, should have no deaths if always places in the ICU
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_fatality_fraction_all(params, 0.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
