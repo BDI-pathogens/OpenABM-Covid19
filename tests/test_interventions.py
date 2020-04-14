@@ -201,14 +201,6 @@ class TestClass(object):
         ]
         df_quar = df_quar.loc[:, "ID"]
 
-        if test_params[ "daily_non_cov_symptoms_rate"] == 0:
-            np.testing.assert_equal( 
-                len(df_quar), 0, "quarantining people with no tests of self-diagnosis" 
-            )
-            return;
-            
-        print( len( df_quar ) )
-
         # get the number of interactions by type
         df_int = df_int.groupby(["ID", "type"]).size().reset_index(name="connections")
 
