@@ -74,6 +74,12 @@ typedef struct{
 	double mean_asymptomatic_to_recovery;   // mean time to recovery for asymptomatics
 	double sd_asymptomatic_to_recovery;     // sd of time to recovery for asymptomatics
 
+	double mean_time_hospitalised_recovery; // mean time to recover if hospitalised
+	double sd_time_hospitalised_recovery;   // sd time to recover if hospitalised
+	double mean_time_critical_survive;      // mean time to survive if critical
+	double sd_time_critical_survive;        // sd time to survive if critical
+	double icu_allocation[N_AGE_GROUPS];    // probability of getting an ICU place if needed
+
 	int quarantined_daily_interactions; 	// number of interactions a quarantined person has
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
 
@@ -108,7 +114,7 @@ typedef struct{
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	
-	double app_users_fraction; 				// Proportion of the population that use the apps
+	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
 	int app_turn_on_time;   				// time after which the app is usable
 	double seasonal_flu_rate; 				// Rate of seasonal flu
@@ -131,6 +137,17 @@ typedef struct{
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
+	int interventions_on;           // should we use interventions
+	int intervention_start_time;	// time at which interventions start
+
+	double TEMP_intervention_trigger_n_infected; // start interventions when n_infected is above a threshold
+	double TEMP_lockdown_trigger_n_infected; 	 // start lockdown when n_infected is above a threshold
+	int TEMP_lockdown_trigger_length;			 // length of lockdown after a trigger
+	int TEMP_lockdown_trigger_keep_elderly;  	 // keep elderly lockdown after the main triggered lockdown
+	int TEMP_lockdown_trigger_app_on_end;		 // start the app at the end of lockdown
+	int TEMP_lockdown_trigger_time_to_test;      // start testing symptomatic at a time after testing
+
+
 	int sys_write_individual; 		// Should an individual file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file

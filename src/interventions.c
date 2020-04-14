@@ -38,32 +38,40 @@ void set_up_transition_times_intervention( model *model )
 *  Name:		set_up_app_users
 *  Description: Set up the proportion of app users in the population (default is FALSE)
 ******************************************************************************************/
-void set_up_app_users( model *model, double target )
+void set_up_app_users( model *model )
 {
-	long idx, jdx, current_users, not_users, max_user;
+	long idx, jdx, age, current_users, not_users, max_user;
+	double *fraction = model->params->app_users_fraction;
 
-	current_users = 0;
-	for( idx = 0; idx < model->params->n_total; idx++ )
-		current_users += model->population[ idx ].app_user;
-	not_users = model->params->n_total - current_users;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+	{
+		current_users = 0;
+		not_users     = 0;
+		for( idx = 0; idx < model->params->n_total; idx++ )
+			if( model->population[ idx ].age_group == age )
+			{
+				current_users += model->population[ idx ].app_user;
+				not_users     += 1 - model->population[ idx ].app_user;
+			}
 
-	max_user = ceil( model->params->n_total * target ) - current_users;
-	if( max_user < 0 || max_user > not_users )
-		print_exit( "Bad target app_fraction_users" );
+		max_user = ceil( ( current_users + not_users ) * fraction[age] ) - current_users;
+		if( max_user < 0 || max_user > not_users )
+			print_exit( "Bad target app_fraction_users" );
 
-	int *users = calloc( not_users, sizeof( int ) );
+		int *users = calloc( not_users, sizeof( int ) );
 
-	for( idx = 0; idx < max_user; idx++ )
-		users[ idx ] = 1;
+		for( idx = 0; idx < max_user; idx++ )
+			users[ idx ] = 1;
 
-	gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
+		gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
 
-	jdx   = 0;
-	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[ idx ].app_user == FALSE )
-			model->population[ idx ].app_user = users[ jdx++ ];
+		jdx   = 0;
+		for( idx = 0; idx < model->params->n_total; idx++ )
+			if( model->population[ idx ].age_group == age && model->population[ idx ].app_user == FALSE )
+				model->population[ idx ].app_user = users[ jdx++ ];
 
-	free( users );
+		free( users );
+	}
 };
 
 /*****************************************************************************************
@@ -165,6 +173,35 @@ void update_intervention_policy( model *model, int time )
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
 			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
+
+		params->interventions_on = ( params->intervention_start_time == 0 );
+	}
+
+	if( time == params->intervention_start_time )
+		params->interventions_on = TRUE;
+
+	if( time > 0 && ( (params->TEMP_intervention_trigger_n_infected > 0) | (params->TEMP_lockdown_trigger_n_infected > 0) ) )
+	{
+		double n_infected = n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC );
+		n_infected /= params->n_total;
+
+		if( n_infected > params->TEMP_intervention_trigger_n_infected )
+			params->interventions_on = TRUE;
+
+		if( params->TEMP_lockdown_trigger_n_infected  > 0 && n_infected > params->TEMP_lockdown_trigger_n_infected && params->lockdown_on == FALSE )
+		{
+			set_param_lockdown_on( model, TRUE );
+			params->TEMP_lockdown_trigger_n_infected = 0;
+			params->lockdown_time_off = model->time + params->TEMP_lockdown_trigger_length;
+			if( params->TEMP_lockdown_trigger_keep_elderly )
+				params->lockdown_elderly_time_on = params->lockdown_time_off;
+
+			if( params->TEMP_lockdown_trigger_app_on_end )
+				params->app_turn_on_time = params->lockdown_time_off;
+
+			if( params->TEMP_lockdown_trigger_time_to_test < params->end_time )
+				params->testing_symptoms_time_on = params->lockdown_time_off + params->TEMP_lockdown_trigger_time_to_test;
+		}
 	}
 
 	if( time == params->app_turn_on_time )
@@ -509,6 +546,9 @@ void intervention_quarantine_household(
 ******************************************************************************************/
 void intervention_on_symptoms( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	int quarantine, time_event;
 	parameters *params = model->params;
 
@@ -547,6 +587,9 @@ void intervention_on_symptoms( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_hospitalised( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	intervention_test_order( model, indiv, model->time );
 
 	if( model->params->allow_clinical_diagnosis )
@@ -564,6 +607,9 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_positive_result( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
+
 	int time_event = UNKNOWN;
 	parameters *params = model->params;
 	trace_token *index_token = index_trace_token( model, indiv );
@@ -592,6 +638,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_on_critical( model *model, individual *indiv )
 {
+	if( !model->params->interventions_on )
+		return;
 }
 
 /*****************************************************************************************
@@ -677,6 +725,9 @@ void intervention_smart_release( model *model )
 
 		token = indiv->index_trace_token;
 		if( token == NULL )
+			continue;
+
+		if( is_in_hospital( indiv ) || ( indiv->time_event[CASE] >= time_index) )
 			continue;
 
 		token = token->next_index;

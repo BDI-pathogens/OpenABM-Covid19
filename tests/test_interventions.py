@@ -45,7 +45,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=1.0,
-                    seasonal_flu_rate=0.0,
+                    daily_non_cov_symptoms_rate=0.0,
                 )
             ),
             dict(
@@ -55,7 +55,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.75,
-                    seasonal_flu_rate=0.0005,
+                    daily_non_cov_symptoms_rate=0.0005,
                 )
             ),
             dict(
@@ -65,7 +65,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.50,
-                    seasonal_flu_rate=0.001,
+                    daily_non_cov_symptoms_rate=0.001,
                 )
             ),
             dict(
@@ -75,7 +75,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.25,
-                    seasonal_flu_rate=0.005,
+                    daily_non_cov_symptoms_rate=0.005,
                 )
             ),
         ],
@@ -86,7 +86,7 @@ class TestClass(object):
                     end_time=25,
                     infectious_rate=4,
                     self_quarantine_fraction=0.8,
-                    seasonal_flu_rate=0.0,
+                    daily_non_cov_symptoms_rate=0.0,
                     asymptomatic_infectious_factor=0.4,
                 )
             ),
@@ -96,7 +96,7 @@ class TestClass(object):
                     end_time=1,
                     infectious_rate=4,
                     self_quarantine_fraction=0.5,
-                    seasonal_flu_rate=0.05,
+                    daily_non_cov_symptoms_rate=0.05,
                     asymptomatic_infectious_factor=1.0,
                 )
             ),
@@ -123,10 +123,11 @@ class TestClass(object):
                     self_quarantine_fraction = 1.0,
                     trace_on_symptoms = 1,
                     quarantine_on_traced = 1,
-                    app_users_fraction = 0.85,
                     app_turn_on_time = 1,
                     quarantine_household_on_symptoms = 1
-                )
+                ),
+                app_users_fraction = 0.85
+
             ) 
         ],
         "test_lockdown_transmission_rates": [ 
@@ -141,7 +142,32 @@ class TestClass(object):
                     lockdown_house_interaction_multiplier = 1.2
                 )
             ) 
-        ]
+        ],
+         "test_app_users_fraction": [ 
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 20,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 1,
+                    app_users_fraction_0_9 = 0,
+                    app_users_fraction_10_19 = 0.8,
+                    app_users_fraction_20_29 = 0.8,
+                    app_users_fraction_30_39 = 0.8,
+                    app_users_fraction_40_49 = 0.8,
+                    app_users_fraction_50_59 = 0.8,
+                    app_users_fraction_60_69 = 0.8,
+                    app_users_fraction_70_79 = 0.4,
+                    app_users_fraction_80 = 0.2,
+                    traceable_interaction_fraction = 1
+                ),
+
+            ) 
+        ],
     }
     """
     Test class for checking 
@@ -174,6 +200,14 @@ class TestClass(object):
             (df_indiv["quarantined"] == 1) & (df_indiv["time_quarantined"] < end_time)
         ]
         df_quar = df_quar.loc[:, "ID"]
+
+        if test_params[ "daily_non_cov_symptoms_rate"] == 0:
+            np.testing.assert_equal( 
+                len(df_quar), 0, "quarantining people with no tests of self-diagnosis" 
+            )
+            return;
+            
+        print( len( df_quar ) )
 
         # get the number of interactions by type
         df_int = df_int.groupby(["ID", "type"]).size().reset_index(name="connections")
@@ -242,12 +276,12 @@ class TestClass(object):
         n_symp = len(df_symp)
 
         # if no seasonal flu or contact tracing then this is the only path
-        if test_params["seasonal_flu_rate"] == 0:
+        if test_params["daily_non_cov_symptoms_rate"] == 0:
             df = pd.merge(df_quar, df_symp, on="ID", how="inner")
             np.testing.assert_equal(
                 n_quar,
                 len(df),
-                "people quarantined without symptoms when seasonal flu turned off",
+                "people quarantined without symptoms when daily_non_cov_symptoms_rate turned off",
             )
 
             n_exp_quar = n_symp * test_params["self_quarantine_fraction"]
@@ -260,21 +294,21 @@ class TestClass(object):
 
         # if no symptomatic then check number of newly quarantined is from flu
         elif end_time == 1 and test_params["asymptomatic_infectious_factor"] == 1:
-            n_flu = test_params["n_total"] * test_params["seasonal_flu_rate"]
+            n_flu = test_params["n_total"] * test_params["daily_non_cov_symptoms_rate"]
             n_exp_quar = n_flu * test_params["self_quarantine_fraction"]
 
             np.testing.assert_allclose(
                 n_exp_quar,
                 n_quar,
                 atol=tol_sd * sqrt(n_exp_quar),
-                err_msg="the number of quarantined not explained by seasonal flu",
+                err_msg="the number of quarantined not explained by daily_non_cov_symptoms_rate",
             )
 
         else:
             np.testing.assert_equal(
                 True, False, "no test run due test_params not being testable"
             )
-    def test_quarantine_household_on_symptoms(self, test_params):
+    def test_quarantine_household_on_symptoms(self, test_params ):
         """
         Tests households are quarantine when somebody has symptoms
         """
@@ -369,7 +403,7 @@ class TestClass(object):
                                     err_msg = "lockdown not changing random transmission as expected" )
       
 
-    def test_trace_on_symptoms(self, test_params):
+    def test_trace_on_symptoms(self, test_params, app_users_fraction ):
         """
         Tests that people who are traced on symptoms are
         real contacts
@@ -378,6 +412,7 @@ class TestClass(object):
 
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, end_time)
+        params = utils.set_app_users_fraction_all( params, app_users_fraction )
         params.set_param(test_params)
         params.write_params(constant.TEST_DATA_FILE)
 
@@ -413,4 +448,60 @@ class TestClass(object):
         n_no_inter = len( t[ t[ "inter"] != True ] )
         np.testing.assert_equal( n_no_inter, 0, "tracing someone without an interaction" )    
 
+    
+    def test_app_users_fraction(self, test_params ):
+        """
+        Tests that the correct number of people are assigned
+        use the app and that only app users start tracing 
+        and can be traced if household options are not turned on
+        """
+        end_time = test_params[ "end_time" ]
+
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param(test_params)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        app_users  = df_indiv[ df_indiv[ "app_user" ] == 1 ].groupby( [ "age_group" ] ).size().reset_index(name="app_users")    
+        all_users  = df_indiv.groupby( [ "age_group" ] ).size().reset_index(name="all")    
+        app_params = [ "app_users_fraction_0_9", "app_users_fraction_10_19",  "app_users_fraction_20_29",  
+            "app_users_fraction_30_39",  "app_users_fraction_40_49", "app_users_fraction_50_59",    
+            "app_users_fraction_60_69",  "app_users_fraction_70_79", "app_users_fraction_80" ]
+        
+        for age in constant.AGES:
+            if test_params[ app_params[ age ] ] == 0 :
+                users = app_users[ app_users[ "age_group"] == age ]
+                np.testing.assert_equal( len( users ), 0, "nobody should have a phone in this age group" )
+            else :
+                n     = all_users[ all_users[ "age_group"] == age ].iloc[0,1]
+                users = app_users[ app_users[ "age_group"] == age ].iloc[0,1]
+                np.testing.assert_allclose( users / n, test_params[ app_params[ age ] ], atol = 0.01, err_msg = "wrong fraction of users have app in age group")
+            
+        df_trace     = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
+        index_traced = index_traced[ index_traced[ "index_ID" ] != index_traced[ "traced_ID" ] ]
+        np.testing.assert_equal( len( index_traced ) > 0, True, "no tracing has occured") 
+        
+        df_indiv.rename( columns = { "ID":"index_ID" }, inplace = True )
+        test = pd.merge( index_traced, df_indiv, on = "index_ID", how = "left")
+        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users starting tracing" ) 
+        
+        df_indiv.rename( columns = { "index_ID":"traced_ID" }, inplace = True )
+        test = pd.merge( index_traced, df_indiv, on = "traced_ID", how = "left")
+        np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" ) 
+        
+        
+
+         
+         
+         
+         
+        
+         
+     
+    
     

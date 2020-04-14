@@ -28,6 +28,7 @@ void new_infection( model*, individual*, individual* );
 void transition_to_symptomatic( model*, individual* );
 void transition_to_symptomatic_mild( model*, individual* );
 void transition_to_hospitalised( model*, individual* );
+void transition_to_hospitalised_recovering( model*, individual* );
 void transition_to_critical( model*, individual* );
 void transition_to_recovered( model*, individual* );
 void transition_to_death( model*, individual* );
