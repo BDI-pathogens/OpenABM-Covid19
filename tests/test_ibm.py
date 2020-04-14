@@ -124,6 +124,7 @@ class TestClass(object):
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
         
         params.write_params(constant.TEST_DATA_FILE)
         
