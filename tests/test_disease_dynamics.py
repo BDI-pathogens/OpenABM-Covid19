@@ -35,6 +35,7 @@ class TestClass(object):
         "test_total_infectious_rate_zero": [dict()],
         "test_zero_infected": [dict()],
         "test_zero_recovery": [dict()],
+        "test_zero_deaths": [dict()],
         "test_disease_transition_times": [
             dict(
                 test_params = dict( 
@@ -497,6 +498,22 @@ class TestClass(object):
         np.testing.assert_array_equal(
             df_output[["n_recovered"]].sum(), 
             0)
+    
+    def test_zero_deaths(self):
+        """
+        Set fatality ratio to zero, should have no deaths if always places in the ICU
+        """
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.set_fatality_fraction_all(params, 0.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        
+        np.testing.assert_equal(df_output["n_death"].sum(), 0)
     
     def test_total_infectious_rate_zero(self):
         """
