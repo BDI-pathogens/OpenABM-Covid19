@@ -337,6 +337,10 @@ class Model:
             + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
         )
         results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
+        for age in AgeGroupEnum:
+            key = f"total_case{age.name}"
+            value = covid19.utils_n_total_age(self.c_model, covid19.CASE, age.value)
+            results[key] = value
         results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.PRESYMPTOMATIC_MILD)
