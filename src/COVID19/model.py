@@ -341,6 +341,7 @@ class Model:
             key = f"total_case{age.name}"
             value = covid19.utils_n_total_age(self.c_model, covid19.CASE, age.value)
             results[key] = value
+        results["total_death"] = covid19.utils_n_total(self.c_model, covid19.DEATH)
         results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.PRESYMPTOMATIC_MILD)
