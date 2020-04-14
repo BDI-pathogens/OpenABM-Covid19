@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 """
 Tests of the individual-based model, COVID19-IBM
 
@@ -28,37 +28,6 @@ class TestClass(object):
     """
     Test class for checking 
     """
-    def test_columns_non_negative(self):
-        """
-        Test that all columns are non-negative
-        """
-        
-        # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
-    
-    
-    def test_total_infectious_rate_zero(self):
-        """
-        Set infectious rate to zero results in only "n_seed_infection" as total_infected
-        """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
-        params.set_param("infectious_rate", 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
-
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        output = df_output["total_infected"].iloc[-1]
-        expected_output = int(params.get_param("n_seed_infection"))
-        
-        np.testing.assert_equal(output, expected_output)
     
     
     @pytest.mark.parametrize(
@@ -71,6 +40,10 @@ class TestClass(object):
         Set parameter value to zero should result in zero sum of output column
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        if parameter == 'fraction_asymptomatic':
+            params = utils.set_fraction_asymptomatic_all( params, 0.0 )
+        if parameter == 'n_seed_infection':
+            params.set_param( 'n_seed_infection', 0 )
         params = utils.set_fatality_fraction_all(params, 0.0)
         params.write_params(constant.TEST_DATA_FILE)
         
@@ -84,10 +57,11 @@ class TestClass(object):
 
     def test_zero_deaths(self):
         """
-        Set fatality ratio to zero, should have no deaths
+        Set fatality ratio to zero, should have no deaths if always places in the ICU
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_fatality_fraction_all(params, 0.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -100,11 +74,12 @@ class TestClass(object):
 
     def test_long_time_to_death(self):
         """
-        Setting mean_time_to_death beyond end of simulation should result in no recorded deaths
+        Setting mean_time_to_death beyond end of simulation should result in no recorded deaths if always place in the ICU
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("mean_time_to_death", 200.0)
         params.set_param("sd_time_to_death", 2.0)
+        params = utils.set_icu_allocation_all(params, 1.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
@@ -158,7 +133,7 @@ class TestClass(object):
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
-            "n_hospital", "n_death", "n_recovered", "n_critical"]]
+            "n_hospital", "n_death", "n_recovered", "n_critical", "n_hospitalised_recovering"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
@@ -175,6 +150,7 @@ class TestClass(object):
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
         
         params.write_params(constant.TEST_DATA_FILE)
         
@@ -196,7 +172,7 @@ class TestClass(object):
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
-        
+        params.set_param("mean_time_hospitalised_recovery", 200.0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model
@@ -205,7 +181,7 @@ class TestClass(object):
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         df_sub = df_output[["n_presymptom", "n_asymptom", "n_symptoms", \
-            "n_critical", "n_hospital", "n_death"]]
+            "n_critical", "n_hospital", "n_death", "n_hospitalised_recovering"]]
         
         np.testing.assert_array_equal(
             df_sub.sum(axis = 1).values, 
