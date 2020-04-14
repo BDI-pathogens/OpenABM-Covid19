@@ -29,32 +29,6 @@ class TestClass(object):
     Test class for checking 
     """
     
-    
-    @pytest.mark.parametrize(
-        'parameter, output_column', [
-            ('n_seed_infection', 'total_infected'), 
-            ('fraction_asymptomatic', 'n_asymptom')]
-        )
-    def test_zero_output(self, parameter, output_column):
-        """
-        Set parameter value to zero should result in zero sum of output column
-        """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
-        if parameter == 'fraction_asymptomatic':
-            params = utils.set_fraction_asymptomatic_all( params, 0.0 )
-        if parameter == 'n_seed_infection':
-            params.set_param( 'n_seed_infection', 0 )
-        params = utils.set_fatality_fraction_all(params, 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
-        
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        np.testing.assert_equal(df_output[output_column].sum(), 0)
-    
-
     def test_zero_deaths(self):
         """
         Set fatality ratio to zero, should have no deaths if always places in the ICU
