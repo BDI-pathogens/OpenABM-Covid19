@@ -116,7 +116,7 @@ void read_param_file( parameters *params)
     if(parameter_file == NULL)
         print_exit("Can't open parameter file");
 
-    // Throw away header (and first `params->param_line_number` lines)
+    // Throw away header (and first params->param_line_number lines)
     for(i = 0; i < params->param_line_number; i++)
         fscanf(parameter_file, "%*[^\n]\n");
 
@@ -275,6 +275,24 @@ void read_param_file( parameters *params)
         if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
     }
 
+    check = fscanf(parameter_file, " %lf,", &(params->mean_time_hospitalised_recovery ));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_hospitalised_recovery\n"); };
+
+    check = fscanf(parameter_file, " %lf,", &(params->sd_time_hospitalised_recovery ));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_hospitalised_recovery\n"); };
+
+    check = fscanf(parameter_file, " %lf,", &(params->mean_time_critical_survive ));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_critical_survive\n"); };
+
+    check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
+
+    for( i = 0; i < N_AGE_GROUPS; i++ )
+    {
+        check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
+        if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
+    }
+
     check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
     if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
 
@@ -356,8 +374,11 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
     if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction));
-    if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+    for( i = 0; i < N_AGE_GROUPS; i++ )
+    {
+        check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction[i]));
+        if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+    }
 
     check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
     if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
@@ -398,10 +419,31 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
 
-    check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
-    if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
+    check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
+    if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
-    fclose(parameter_file);
+    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_intervention_trigger_n_infected));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_intervention_trigger_n_infected)\n"); };
+
+    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_lockdown_trigger_n_infected));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_n_infected)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_length));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_length)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_keep_elderly));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_keep_elderly)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_app_on_end));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_app_on_end)\n"); };
+
+    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_time_to_test));
+    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_time_to_test)\n"); };
+
+	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
+	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
+	
+	fclose(parameter_file);
 }
 
 void read_hospital_param_file( parameters *params)
@@ -508,6 +550,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"work_network,");
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
+	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"hazard,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"time_infected,");
@@ -520,6 +563,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_asymptomatic,");
 	fprintf(individual_output_file,"time_hospitalised,");
 	fprintf(individual_output_file,"time_critical,");
+	fprintf(individual_output_file,"time_hospitalised_recovering,");
 	fprintf(individual_output_file,"time_death,");
 	fprintf(individual_output_file,"time_recovered,");
 	fprintf(individual_output_file,"time_quarantined,");
@@ -550,13 +594,14 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
 			indiv->house_no,
 			indiv->quarantined,
+			indiv->app_user,
 			indiv->hazard,
 			indiv->random_interactions,
 			time_infected(indiv),
@@ -569,6 +614,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->time_event[ASYMPTOMATIC],
 			indiv->time_event[HOSPITALISED],
 			indiv->time_event[CRITICAL],
+			indiv->time_event[HOSPITALISED_RECOVERING],
 			indiv->time_event[DEATH],
 			indiv->time_event[RECOVERED],
 			indiv->time_event[QUARANTINED],
@@ -925,8 +971,8 @@ void write_trace_tokens_ts( model *model, int initialise )
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
-				if( contact->status >= SYMPTOMATIC & contact->time_event[ASYMPTOMATIC] == UNKNOWN  &
-					( contact->time_event[RECOVERED] == UNKNOWN | contact->time_event[RECOVERED] > time_index )
+				if( (contact->status >= SYMPTOMATIC) & (contact->time_event[ASYMPTOMATIC] == UNKNOWN)  &
+					( (contact->time_event[RECOVERED] == UNKNOWN) | (contact->time_event[RECOVERED] > time_index) )
 				)
 					n_symptoms++;
 				if( indiv == contact->infector )

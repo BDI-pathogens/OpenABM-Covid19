@@ -11,6 +11,7 @@ constants from the C code which are used in testing
 """
 
 from os.path import join
+from enum import Enum
 
 # Directories
 IBM_DIR = "src"
@@ -28,6 +29,25 @@ TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
+
+class EVENT_TYPES(Enum):
+    UNINFECTED = 0
+    PRESYMPTOMATIC = 1
+    PRESYMPTOMATIC_MILD = 2
+    ASYMPTOMATIC = 3
+    SYMPTOMATIC = 4
+    SYMPTOMATIC_MILD = 5
+    HOSPITALISED = 6
+    CRITICAL = 7
+    RECOVERED = 8
+    DEATH = 9
+    QUARANTINED = 10
+    QUARANTINE_RELEASE = 11
+    TEST_TAKE = 12
+    TEST_RESULT = 13
+    CASE = 14
+    TRACE_TOKEN_RELEASE = 15
+    N_EVENT_TYPES = 16
 
 # Age groups
 AGE_0_9 = 0
