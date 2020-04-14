@@ -90,18 +90,37 @@ class Parameters(object):
     def __init__(
         self,
         input_param_file: str = None,
-        param_line_number: int = None,
+        param_line_number: int = 1,
         output_file_dir: str = "./",
         input_household_file: str = None,
         read_param_file=True,
     ):
+        """[summary]
+        
+        Arguments:
+            object {[type]} -- [description]
+        
+        Keyword Arguments:
+            input_param_file {str} -- [Parameters file path] (default: {None})
+            param_line_number {int} -- [Which column of the input param file to read] (default: {1})
+            output_file_dir {str} -- [Where to write output files to] (default: {"./"})
+            input_household_file {str} -- [Household demographics file (required)] (default: {None})
+            read_param_file {bool} -- [Read param file, all params can be set from python interface] (default: {True})
+        
+        Raises:
+            ParameterException: [Warnings if parameters are not correctly set]
+            Sys.exit(0): [Underlaying C code will exist if params are not viable]
+        """
         self.c_params = covid19.parameters()
         if input_param_file:
             self.c_params.input_param_file = input_param_file
+        elif not input_param_file and self.read_param_file:
+            raise ParameterException("Input param path is None and read param file set to true")
         else:
             LOGGER.info(
                 "Have not passed input file for params, use set_param or set_param_dict"
             )
+
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
