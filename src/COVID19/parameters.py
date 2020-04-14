@@ -63,13 +63,14 @@ class ParameterSet(object):
     # Write parameter set to file in a file called "new_parameter_file.csv"
     params.write_params("new_parameter_file.csv")
 
-    # Write the same parameter set to file for 5 different values of the random seed (rng_seed)
+    # Write the same parameter set to file for 5 different values of the
+    # random seed (rng_seed)
     params = ParameterSet("./tests/data/test_parameters.csv")
     params.write_varying_params(["rng_seed"], [range(5)], "new_parameter_file.csv")
 
 
-    # Write the same parameter set to file for 5 different values of the random seed (rng_seed) and
-    # for different values of "infectious_rate".
+    # Write the same parameter set to file for 5 different values of the random seed
+    # (rng_seed) and for different values of "infectious_rate".
 
     params = ParameterSet("./tests/data/test_parameters.csv")
 
@@ -87,7 +88,8 @@ class ParameterSet(object):
             read_data = f.read()
         data = read_data.split("\n")
 
-        # Pull header and parameter line of interest (line number from the parameter file)
+        # Pull header and parameter line of interest
+        # (line number from the parameter file)
         header = [c.strip() for c in data[0].split(",")]
         param_line = [c.strip() for c in data[line_number].split(",")]
 
@@ -123,7 +125,8 @@ class ParameterSet(object):
         param : str or dict
             Parameter name (or a dict of parameter name-value key-value pairs)
         value : int, float, str
-            Parameter value to set as value for parameter `param` (None if 'param' is a dict)
+            Parameter value to set as value for parameter `param`
+            (None if 'param' is a dict)
 
         Returns
         -------
@@ -299,13 +302,15 @@ if __name__ == "__main__":
         path to input parameter file with "baseline" parameter values
 
     json_file : str
-        path to JSON file of parameters to adjust (or vary).  JSON file has a key "parameters"
-        within which there are key/value pairs of parameter names/values.  JSON file has an
-        optional key of "n_replicates" with int value which will generate 'n_replicates'
-        replicates for each set of parameter values.
+        path to JSON file of parameters to adjust (or vary).  JSON file has a
+        key "parameters" within which there are key/value pairs of parameter
+        names/values.  JSON file has an optional key of "n_replicates" with
+        int value which will generate 'n_replicates' replicates for each set
+        of parameter values.
 
     output_parameter_file : str
-        path of where to save output parameter file after adjustments in JSON file are made
+        path of where to save output parameter file after adjustments in JSON
+        file are made
 
 
     Returns

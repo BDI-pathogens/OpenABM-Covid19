@@ -147,8 +147,8 @@ class Simulation:
 
     def simulations(self, n_simulations):
         """
-        Run the model for a specific number of simulations, starting from the current state,
-        save data as model progresses.
+        Run the model for a specific number of simulations, starting from the
+        current state, save data as model progresses.
         """
 
         if self.timestep >= self.end_time:

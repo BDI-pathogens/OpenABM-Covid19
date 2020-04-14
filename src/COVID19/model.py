@@ -205,7 +205,10 @@ class Parameters(object):
         """
         if self.update_lock:
             raise ParameterException(
-                f"Parameter set has been exported to model, please use model.update_x functions"
+                (
+                    "Parameter set has been exported to model, "
+                    "please use model.update_x functions"
+                )
             )
 
         if hasattr(self.c_params, f"{param}"):
@@ -240,7 +243,10 @@ class Parameters(object):
         self._read_household_demographics()
         covid19.check_params(self.c_params)
         LOGGER.info(
-            "Returning self.c_params into Model object, future updates to parameters not possible"
+            (
+                "Returning self.c_params into Model object, "
+                "future updates to parameters not possible"
+            )
         )
         self.update_lock = True
         return self.c_params
@@ -280,7 +286,9 @@ class Model:
 
     def update_running_params(self, param, value):
         """[summary]
-        a subset of parameters my be updated whilst the model is evaluating, these correspond to events
+        a subset of parameters my be updated whilst the model is evaluating,
+        these correspond to events
+
         Arguments:
             param {[str]} -- [name of parameter]
             value {[type]} -- [value to set]
