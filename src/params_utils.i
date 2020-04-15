@@ -51,7 +51,7 @@ int get_param_days_of_interactions(parameters *params)
 *  Name: 		get_param_mean_random_interactions
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_mean_random_interactions(parameters *params, int idx)
+double get_param_mean_random_interactions(parameters *params, int idx)
 {
     if (idx >= N_AGE_TYPES) return -1;
 
@@ -62,7 +62,7 @@ double get_mean_random_interactions(parameters *params, int idx)
 *  Name: 		get_param_sd_random_interactions
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_sd_random_interactions(parameters *params, int idx)
+double get_param_sd_random_interactions(parameters *params, int idx)
 {
     if (idx >= N_AGE_TYPES) return -1;
 
@@ -182,7 +182,7 @@ double get_param_adjusted_susceptibility(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_relative_transmission_by_type(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_INTERACTION_TYPES) return -1;
 
     return params->relative_transmission_by_type[idx];
 }
@@ -331,7 +331,7 @@ double get_param_population_group(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_population_type(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_TYPES) return -1;
 
     return params->population_type[idx];
 }
@@ -364,6 +364,18 @@ double get_param_mean_asymptomatic_to_recover(parameters *params)
 {
     return params->mean_asymptomatic_to_recovery;
 }
+/*****************************************************************************************
+*  Name: 		get_param_mild_fraction
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_mild_fraction(parameters *params, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return -1;
+    return params->mild_fraction[idx];
+}
+
+
+
 
 /*****************************************************************************************
 *  Name: 		get_param_sd_asymptomatic_to_recover
@@ -1481,6 +1493,37 @@ int set_param_testing_symptoms_time_off( parameters *params, int value )
     params->testing_symptoms_time_off = value;
     return TRUE;
 }
+/*****************************************************************************************
+*  Name: 		get_param_mild_fraction
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double set_param_mild_fraction(parameters *params, double value, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return FALSE; 
+    params->mild_fraction[idx] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_param_icu_allocation
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double set_param_icu_allocation(parameters *params, double value, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return FALSE; 
+    params->icu_allocation[idx] = value;
+    return TRUE;
+}
+/*****************************************************************************************
+*  Name: 		get_param_icu_allocation
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_icu_allocation(parameters *params, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return FALSE; 
+    return params->icu_allocation[idx];
+}
+
 %}
 
 %extend parameters{

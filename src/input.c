@@ -222,7 +222,7 @@ void read_param_file( parameters *params)
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission_by_type[i]));
-		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
+		if( check < 1){ print_exit("Failed to read parameter relative_transmission_by_type_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )

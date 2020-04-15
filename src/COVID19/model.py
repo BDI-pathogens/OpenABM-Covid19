@@ -131,7 +131,7 @@ class Parameters(object):
             self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
         if not input_household_file:
-            raise ParamaterException("Household data must be supplied as a csv")
+            raise ParameterException("Household data must be supplied as a csv")
         self.c_params.input_household_file = input_household_file
         if read_param_file and input_param_file != None:
             self._read_and_check_from_file()
@@ -163,13 +163,16 @@ class Parameters(object):
             self.set_param(k, v)
 
     def _get_base_param_from_age_param(self, param):
+        LOGGER.debug("Trying to split {param}")
         base_name, enum_val = None, None
         for en in chain(
             AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
         ):
+            LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
             if en.name == param[-1 * len(en.name) :]:
                 base_name = param.split(en.name)[0]
                 enum_val = en.value
+                LOGGER.debug(f"Split to {base_name} and {enum_val}")
                 break
         return base_name, enum_val
 
@@ -187,15 +190,16 @@ class Parameters(object):
         """
         if hasattr(covid19, f"get_param_{param}"):
             return getattr(covid19, f"get_param_{param}")(self.c_params)
-        elif hasattr(
-            covid19, f"get_param_{self._get_base_param_from_age_param(param)[0]}"
-        ):
-            param, idx = self._get_base_param_from_age_param(param)
-            return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
-        else:
-            raise ParameterException(
+        else: 
+            param, idx = self._get_base_param_from_age_param(param)
+            LOGGER.debug(f"not found full length param, trying get_param_{param} with index getter")
+            if hasattr(covid19, f"get_param_{param}"):
+                return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
+            else:
+                LOGGER.debug(f"Could not find get_param_{param} in covid19 getters")
+        raise ParameterException(
                 f"Can not get param {param} as it doesn't exist in parameters object"
             )
 
