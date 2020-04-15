@@ -51,34 +51,40 @@ def setup_params(updated_params: Dict[str, Any] = None):
     return p
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    param_updates = {"rng_seed": randint(0, 65000)}
+def run_model(param_updates, n_steps=100, lockdown_at=None):
     params = setup_params(param_updates)
     # Create an instance of the Model
     model = Model(params)
     m_out = []
-    # Run for 300 days
-    for step in trange(300):
+    for step in trange(n_steps):
         # Evaluate each step and save the results
         model.one_time_step()
         # LOGGER.info(
         #     model.one_time_step_results()
         # )  # If we want to see the results as we go uncomment this block 
         m_out.append(model.one_time_step_results())
-        if step == 50:
-            model.update_running_params("lockdown_on", 1)
-            LOGGER.info(f"turning on lock down at step {step}")
-            LOGGER.info(
-                f'lockdown_house_interaction_multiplier = {params.get_param("lockdown_house_interaction_multiplier")}'
-            )
-            LOGGER.info(
-                f'lockdown_random_network_multiplier = {params.get_param("lockdown_random_network_multiplier")}'
-            )
-            LOGGER.info(
-                f'lockdown_work_network_multiplier = {params.get_param("lockdown_work_network_multiplier")}'
-            )
+        if lockdown_at:
+            if step == lockdown_at:
+                model.update_running_params("lockdown_on", 1)
+                LOGGER.info(f"turning on lock down at step {step}")
+                LOGGER.info(
+                    f'lockdown_house_interaction_multiplier = {params.get_param("lockdown_house_interaction_multiplier")}'
+                )
+                LOGGER.info(
+                    f'lockdown_random_network_multiplier = {params.get_param("lockdown_random_network_multiplier")}'
+                )
+                LOGGER.info(
+                    f'lockdown_work_network_multiplier = {params.get_param("lockdown_work_network_multiplier")}'
+                )
     df = pd.DataFrame(m_out)
     model.write_output_files()
-    df.to_csv("results/timeseries_lockdown_at_50.csv", index=False)
+    return df
+
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    param_updates = {"rng_seed": randint(0, 65000)}
+    df = run_model(param_updates=param_updates, n_steps=100, lockdown_at=None)
+    df.to_csv("results/covid_timeseries_Run1.csv", index=False)
     print(df)
