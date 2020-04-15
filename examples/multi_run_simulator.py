@@ -52,14 +52,14 @@ def run_model(d: dict = None):
     return pd.DataFrame(results)
 
 
-def run_many_inline(parameter_set_list, processes=None, progress_bar=True):
+def run_many_inline(parameter_set_list, n_threads=None, progress_bar=True):
     if progress_bar:
         progress_monitor = tqdm
     else:
         progress_monitor = lambda x: x
 
     # Create a pool and evaluate models concurrently
-    with ThreadPool(processes=processes) as pool:
+    with ThreadPool(processes=n_threads) as pool:
 
         outputs = list(
             progress_monitor(
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         for _ in range(100)
     ]
 
-    results_dataframes = run_many_inline(params_list, processes=None)
+    results_dataframes = run_many_inline(params_list, n_threads=None)
 
     # Ouput individual dataframes as CSVs
     for p, df in zip(params_list, results_dataframes):

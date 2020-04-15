@@ -9,7 +9,7 @@ COVID19-IBM requires a C compiler (such as gcc) and the [GSL](https://www.gnu.or
 
 ```bash
 cd COVID19-IBM/src
-make clean; make all
+make all
 ```
 
 To install the Python interface, first install [SWIG](http://www.swig.org/), then:

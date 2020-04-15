@@ -14,6 +14,7 @@ import covid19
 from random import randint
 from tqdm import trange
 from typing import Dict, Any
+import os
 
 import logging
 import pandas as pd
@@ -24,6 +25,7 @@ base_path = Path(__file__).parent.absolute()
 
 BASELINE_PARAMS = base_path.parent / "tests/data/baseline_parameters.csv"
 HOUSEHOLDS = base_path.parent / "tests/data/baseline_household_demographics.csv"
+OUTPUT_DIR = base_path / "results"
 
 
 def setup_params(updated_params: Dict[str, Any] = None):
@@ -36,10 +38,10 @@ def setup_params(updated_params: Dict[str, Any] = None):
         Parameter set
     """
     p = Parameters(
-        input_param_file=str(BASELINE_PARAMS),
-        output_file_dir="./results",
+        input_param_file=os.fspath(BASELINE_PARAMS),
+        output_file_dir=os.fspath(OUTPUT_DIR),
         param_line_number=1,
-        input_household_file=str(HOUSEHOLDS),
+        input_household_file=os.fspath(HOUSEHOLDS),
         read_param_file=True,
     )
 
