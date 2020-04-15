@@ -5,7 +5,7 @@
 src/*.o
 src/*.exe
 src/*.csv
-
+examples/results/*.csv
 # Python testing files
 __pycache__
 .mypy_cache/
