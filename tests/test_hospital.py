@@ -24,6 +24,7 @@ TEST_OUTPUT_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test
 TEST_OUTPUT_FILE_HOSPITAL = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_hospital_output.csv"
 TEST_INTERACTIONS_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/interactions_Run1.csv"
 EXECUTABLE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src/covid19ibm.exe"
+TEST_HCW_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/hcw_output.csv"
 
 
 # Construct the executable command
@@ -70,7 +71,8 @@ class TestClass(object):
 
     def test_interactions(self):
         """
-        Test that hospital workers are not in the list of work interac
+        Test that hospital workers are not in the list of work interactions
+        # Another test: other work networks to make sure no healthcare workers?
         """
         # Load interactions df
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
@@ -95,11 +97,11 @@ class TestClass(object):
         for ind in range(interactionCount):
 
             # If individuals are healthworkers, their work network is zero
+            # TODO: change to new version of healthcare worker network
             if(indivTypeList_1[ind] != nonHealthCareWorkerType):
                 assert indivWorkerNetwork_1[ind] == 0
             if(indivTypeList_2[ind] != nonHealthCareWorkerType):
                 assert indivWorkerNetwork_2[ind] == 0
-
 
         # This does the same as above, except much slower
         # # Iterate over dataframe, check whether healthcare workers have zero as their work network
@@ -118,6 +120,18 @@ class TestClass(object):
         #     # Worker type healthworker should have work_network = 0
         #     if(worker_type_2 != nonHealthCareWorkerType):
         #         assert work_network_2 == 0
+
+    def test_hcwList(self):
+
+        df_hcw = pd.read_csv(TEST_HCW_FILE)
+
+        assert len(df_hcw.index) > 0
+
+        #Check that interactions file was loaded df_interactions.columns
+        columnArray = df_interactions.columns.values
+        np.testing.assert_equal(columnArray, ["HospitalID","eg1","eg2"]) 
+
+
 
 
 
