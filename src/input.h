@@ -30,6 +30,7 @@ void write_interactions( model* );
 void write_transmissions( model* );
 void write_trace_tokens( model* );
 void write_trace_tokens_ts( model*, int );
+void write_hcw_data( model* );
 
 void print_interactions_averages( model*, int );
 
