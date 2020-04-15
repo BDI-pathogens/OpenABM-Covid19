@@ -29,7 +29,7 @@ cd COVID19-IBM/src
 where:
 * `input_param_file` : is a csv file of parameter values (see [params.h](src/params.h) for description of parameters)
 * `param_line_number` : the line number of the parameter file for which to use for the simulation
-* `output_file_dir` : path to output directory
+* `output_file_dir` : path to output directory (this directory must already exist)
 * `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model
 
 Here is an example on how to use the Python interface:

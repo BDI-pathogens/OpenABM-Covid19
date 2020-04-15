@@ -12,23 +12,26 @@ import json
 from pathlib import Path
 import covid19
 from random import randint
-from tqdm import tqdm
+from tqdm import trange
+from typing import Dict, Any
 
-import pandas as pd
-base_path = Path(__file__).parent.absolute()
-print(base_path)
-
-BASELINE_PARAMS = base_path / "../tests/data/baseline_parameters.csv"
-HOUSEHOLDS = base_path / "../tests/data/baseline_household_demographics.csv"
 import logging
+import pandas as pd
+
+LOGGER = logging.getLogger(__name__)
+
+base_path = Path(__file__).parent.absolute()
+
+BASELINE_PARAMS = base_path.parent / "tests/data/baseline_parameters.csv"
+HOUSEHOLDS = base_path.parent / "tests/data/baseline_household_demographics.csv"
 
 
-def setup_params(updated_params: dict = None):
+def setup_params(updated_params: Dict[str, Any] = None):
     """[summary]
     set up a parameters object from the baseline file
     Customise any parameters supplied in the updated params dict 
     Keyword Arguments:
-        updated_params {dict} -- [description] (default: {None})
+        updated_params {dict} -- [description] (default: None)
     Returns:
         Parameter set
     """
@@ -47,24 +50,33 @@ def setup_params(updated_params: dict = None):
 
 
 if __name__ == "__main__":
-    updates = {"rng_seed": randint(0, 65000)}
-    params = setup_params(updates)
+    logging.basicConfig(level=logging.INFO)
+    param_updates = {"rng_seed": randint(0, 65000)}
+    params = setup_params(param_updates)
     # Create an instance of the Model
     model = Model(params)
     m_out = []
     # Run for 300 days
-    for step in tqdm(range(300)):
+    for step in trange(300):
         # Evaluate each step and save the results
         model.one_time_step()
-        # print(model.one_time_step_results()) # If we want to see the results as we go uncomment this line
+        # LOGGER.info(
+        #     model.one_time_step_results()
+        # )  # If we want to see the results as we go uncomment this block 
         m_out.append(model.one_time_step_results())
         if step == 50:
             model.update_running_params("lockdown_on", 1)
-            print("turning on lock down")
-            print("lockdown_house_interaction_multiplier", params.get_param("lockdown_house_interaction_multiplier"))
-            print("lockdown_random_network_multiplier",params.get_param("lockdown_random_network_multiplier"))
-            print("lockdown_work_network_multiplier",params.get_param("lockdown_work_network_multiplier"))
+            LOGGER.info(f"turning on lock down at step {step}")
+            LOGGER.info(
+                f'lockdown_house_interaction_multiplier = {params.get_param("lockdown_house_interaction_multiplier")}'
+            )
+            LOGGER.info(
+                f'lockdown_random_network_multiplier = {params.get_param("lockdown_random_network_multiplier")}'
+            )
+            LOGGER.info(
+                f'lockdown_work_network_multiplier = {params.get_param("lockdown_work_network_multiplier")}'
+            )
     df = pd.DataFrame(m_out)
     model.write_output_files()
-    df.to_csv("results/timeseries_lockdown_at_50.csv")
+    df.to_csv("results/timeseries_lockdown_at_50.csv", index=False)
     print(df)
