@@ -37,6 +37,26 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "app_users_fraction",
 ]
 
+class EVENT_TYPES(enum.Enum):
+    UNINFECTED = 0
+    PRESYMPTOMATIC = 1 # Pre-symptompatic, severe disease (progressing to symptomatic severe)
+    PRESYMPTOMATIC_MILD = 2 # Pre-symptompatic, mild disease (progressing to symptomatic mild)
+    ASYMPTOMATIC = 3 # Asymptompatic (progressing to recovered)
+    SYMPTOMATIC = 4 # Symptompatic, severe disease
+    SYMPTOMATIC_MILD = 5 # Symptompatic, mild disease
+    HOSPITALISED = 6
+    CRITICAL = 7
+    HOSPITALISED_RECOVERING = 8
+    RECOVERED = 9
+    DEATH = 10
+    QUARANTINED = 11
+    QUARANTINE_RELEASE = 12
+    TEST_TAKE = 13
+    TEST_RESULT = 14
+    CASE = 15
+    TRACE_TOKEN_RELEASE = 16
+    N_EVENT_TYPES = 17
+
 
 class AgeGroupEnum(enum.Enum):
     _0_9 = 0
@@ -66,12 +86,6 @@ class AgeGroupEnum(enum.Enum):
     _60_69 = 6
     _70_79 = 7
     _80 = 8
-
-
-class ChildAdultElderlyEnum(enum.Enum):
-    _child = 0
-    _adult = 1
-    _elderly = 2
 
 
 class ListIndiciesEnum(enum.Enum):
@@ -105,7 +119,7 @@ class Parameters(object):
         
         Keyword Arguments:
             input_param_file {str} -- [Parameters file path] (default: {None})
-            param_line_number {int} -- [Which column of the input param file to read] (default: {1})
+            param_line_number {int} -- [Which column of the input param file to read] (default: 1)
             output_file_dir {str} -- [Where to write output files to] (default: {"./"})
             input_households {str} -- [Household demographics file (required)] (default: {None})
             read_param_file {bool} -- [Read param file, all params can be set from python interface] (default: {True})
