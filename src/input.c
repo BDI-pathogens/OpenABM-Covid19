@@ -473,6 +473,7 @@ void write_output_files(model *model, parameters *params)
 		write_interactions( model );
 		write_transmissions( model );
 		write_trace_tokens( model );
+        write_hcw_data( model );
 	}
 }	
 
@@ -483,7 +484,7 @@ void write_output_files(model *model, parameters *params)
 void write_individual_file(model *model, parameters *params)
 {
 	
-	char output_file[INPUT_CHAR_LEN];
+    char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
 	int infector_time_infected, infector_status;
@@ -753,6 +754,42 @@ void write_interactions( model *model )
 		}
 	}
 	fclose(output_file);
+}
+
+/*****************************************************************************************
+*  Name:        write_hcw_data
+*  Description: write data about healthcare workers
+    // TODO: integrate the file path as a command line argument
+******************************************************************************************/
+void write_hcw_data( model *model )
+{
+    char output_file_name[INPUT_CHAR_LEN];
+    FILE *hcw_output_file;
+
+    long pdx;
+    int day, idx;
+    // individual *indiv;
+    // interaction *inter;
+    hospital *hosp;
+
+    char param_line_number[10];
+    sprintf(param_line_number, "%d", model->params->param_line_number);
+
+    // Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/hcw_output");
+    strcat(output_file_name, ".csv");
+    hcw_output_file = fopen(output_file_name, "w");
+
+    day = model->interaction_day_idx;
+    ring_dec( day, model->params->days_of_interactions );
+
+    // Print column names
+    fprintf(hcw_output_file ,"HospitalID,eg1,eg2\n");
+
+    // TODO: output data here
+
+    fclose(hcw_output_file);
 }
 
 
