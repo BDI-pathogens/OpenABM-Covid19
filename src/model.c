@@ -224,7 +224,6 @@ void set_up_work_network( model *model, int network )
 
 	model->work_network[network] = new_network( n_people, WORK );
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
-//    n_interactions           = (int) round( model->params->mean_work_interactions[age] / model->params->daily_fraction_work ); TODO: this is old version, why has it been changed to line above?
 	build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
 
 
@@ -370,7 +369,7 @@ double estimate_total_interactions( model *model )
             }
         }
     }
-    //TODO:kelvin - should add something similar to the random network here for the hospital networks
+    //TODO: is the above the correct way to add interactions from hospital related networks? what exactly is the purpose of estimating the amount of interactions?
 	return n_interactions;
 }
 
@@ -782,7 +781,8 @@ int one_time_step( model *model )
 	transition_events( model, RECOVERED,         &transition_to_recovered,        FALSE );
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
-    if( model->time)
+	//TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
+    check_hospital_state_status( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
@@ -790,9 +790,6 @@ int one_time_step( model *model )
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
     transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
-
-    //TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    check_hospital_state_status( model );
 
     flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
@@ -821,17 +818,27 @@ void check_hospital_state_status( model *model ) {
     int idx;
     long n_total = model->params->n_total;
     individual* indiv;
+	
 
     for (idx = 0; idx < n_total; idx++ ) {
         indiv = &( model->population[idx] );
 
+		if( indiv->idx == 222282 )
+			printf("state: %i ", indiv->status);
+
         if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
         {
-            transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, HOSPITAL_TRANSITION );
+			if( indiv->idx == 222282 )
+        		printf("break");
+
+            transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, /*HOSPITAL_TRANSITION*/ NO_EDGE );
         }
         else if ( indiv->hospital_state == WAITING )
         {
-            if ( indiv->status == HOSPITALISED ) {
+			if( indiv->idx == 222282 )
+        		printf("break");
+            
+			if ( indiv->status == HOSPITALISED ) {
                 transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
             }
             else if ( indiv->status == CRITICAL ) {
