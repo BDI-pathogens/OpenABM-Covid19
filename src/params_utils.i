@@ -1505,7 +1505,7 @@ int set_param_testing_symptoms_time_off( parameters *params, int value )
     return TRUE;
 }
 /*****************************************************************************************
-*  Name: 		set_param_mild_fraction
+*  Name: 		get_param_mild_fraction
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double set_param_mild_fraction(parameters *params, double value, int idx)
@@ -1542,6 +1542,16 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
 }
 
 
+
+/*****************************************************************************************
+*  Name: 		get_param_icu_allocation
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_icu_allocation(parameters *params, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return FALSE; 
+    return params->icu_allocation[idx];
+}
 
 %}
 
