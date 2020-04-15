@@ -192,16 +192,18 @@ class Parameters(object):
             return getattr(covid19, f"get_param_{param}")(self.c_params)
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
-        else: 
+        else:
             param, idx = self._get_base_param_from_age_param(param)
-            LOGGER.debug(f"not found full length param, trying get_param_{param} with index getter")
+            LOGGER.debug(
+                f"not found full length param, trying get_param_{param} with index getter"
+            )
             if hasattr(covid19, f"get_param_{param}"):
                 return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
             else:
                 LOGGER.debug(f"Could not find get_param_{param} in covid19 getters")
         raise ParameterException(
-                f"Can not get param {param} as it doesn't exist in parameters object"
-            )
+            f"Can not get param {param} as it doesn't exist in parameters object"
+        )
 
     def set_param(self, param, value):
         """[summary]
