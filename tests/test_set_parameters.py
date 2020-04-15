@@ -4,8 +4,14 @@ from COVID19.model import Parameters, Model
 
 
 class TestSetObjects:
+    def test_set_params_classic(self):
+        all_params = pd.read_csv("tests/data/baseline_parameters.csv")
+        p = Parameters(read_param_file=True, input_households="tests/data/baseline_household_demographics.csv", input_param_file="tests/data/baseline_parameters.csv",param_line_number=1)
+        for key in all_params:
+            value = all_params[key][0]
+            assert p.get_param(key) == value, f"{key} was not set properly"
 
-    def test_set_params(self):
+    def test_set_params_from_python(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
         p = Parameters(read_param_file=False, input_households="notused")
         for key in all_params:
