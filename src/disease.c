@@ -48,7 +48,10 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
-    bernoulli_draw_list( transitions[HOSPITAL_TRANSITION],   N_DRAW_LIST, params->mean_time_hospital_transition );
+
+	for( int idx = 0; idx < N_DRAW_LIST; idx++)
+		transitions[HOSPITAL_TRANSITION][idx] = params->mean_time_hospital_transition;
+    //bernoulli_draw_list( transitions[HOSPITAL_TRANSITION],   N_DRAW_LIST, params->mean_time_hospital_transition );
     //gamma_draw_list( transitions[HOSPITAL_TRANSITION],         N_DRAW_LIST, params->mean_time_hospital_transition, params->sd_time_hospital_transition );
 
 }
@@ -369,6 +372,8 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
+	if( indiv->idx == 222282)
+		printf("break3 ");
 
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 	{

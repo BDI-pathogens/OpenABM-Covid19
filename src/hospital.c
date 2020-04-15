@@ -305,9 +305,10 @@ void assign_patient_to_hospital( model* model, individual *indiv )
         required_ward = COVID_GENERAL;
     else if( indiv->status == CRITICAL )
         required_ward = COVID_ICU;
-    else
-        print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
-    
+    // else
+    //     print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
+    if( indiv->idx == 222282 )
+        printf("break");
 
     hospital* assigned_hospital;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
