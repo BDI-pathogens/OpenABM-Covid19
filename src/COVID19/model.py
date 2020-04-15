@@ -1,6 +1,8 @@
 import logging
 import enum
 from itertools import chain
+from typing import Union
+import pandas as pd
 
 import covid19
 
@@ -93,7 +95,7 @@ class Parameters(object):
         input_param_file: str = None,
         param_line_number: int = 1,
         output_file_dir: str = "./",
-        input_household_file: str = None,
+        input_households: Union[str, pd.DataFrame] = None,
         read_param_file=True,
     ):
         """[summary]
@@ -130,19 +132,33 @@ class Parameters(object):
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
-        if not input_household_file:
+        if isinstance(input_households, str):
+            self.c_params.input_household_file = input_households
+            self.household_df = None
+        elif isinstance(input_households, pd.DataFrame):
+            self.household_df = input_households
+        elif not input_households:
             raise ParameterException("Household data must be supplied as a csv")
-        self.c_params.input_household_file = input_household_file
+
+
         if read_param_file and input_param_file != None:
             self._read_and_check_from_file()
+
         if output_file_dir:
             self.c_params.sys_write_individual = 1
         self.update_lock = False
+
 
     def _read_and_check_from_file(self):
         covid19.read_param_file(self.c_params)
 
     def _read_household_demographics(self):
+        if self.household_df is None:
+            self._read_household_demographics_file()
+        else:
+            self._read_household_demographics_df()
+
+    def _read_household_demographics_file(self):
         """[summary]
         Try to read the reference household demographics file
         If we've not set the number of lines to read, parse the file in
@@ -157,6 +173,18 @@ class Parameters(object):
                     n_ref_hh += 1
             self.set_param("N_REFERENCE_HOUSEHOLDS", n_ref_hh)
             self._read_household_demographics()
+
+    def _read_household_demographics_df(self):
+        """[summary]
+        """
+        if isinstance(self.household_df, pd.DataFrame):
+            self.set_param("N_REFERENCE_HOUSEHOLDS", len(self.household_df))
+            LOGGER.debug(f"setting up ref household memory for {getattr(self.c_params,'N_REFERENCE_HOUSEHOLDS')}")
+            covid19.set_up_reference_household_memory(self.c_params)
+            LOGGER.debug("memory set up")
+            _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]) for t in self.household_df.itertuples()]
+                
+
 
     def set_param_dict(self, params):
         for k, v in params.items():

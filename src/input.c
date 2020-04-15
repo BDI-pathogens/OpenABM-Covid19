@@ -642,9 +642,7 @@ void read_household_demographics_file( parameters *params)
 		print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
 
 	// allocate memory on the params object
-	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
-	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
-		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	set_up_reference_household_memory(params);
 	
 	// read in the data (throw away the header line)
 	hh_file = fopen(params->input_household_file, "r");
@@ -659,6 +657,15 @@ void read_household_demographics_file( parameters *params)
 		}
 	}
 	fclose(hh_file);
+}
+
+
+void set_up_reference_household_memory(parameters *params){
+	long hdx;
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	}
 }
 
 /*****************************************************************************************
