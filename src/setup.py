@@ -37,4 +37,9 @@ setup(
         "COVID19/model",
         "COVID19/simulation",
     ],
+    requires=[
+        "numpy",
+        "pandas",
+        "tqdm",
+    ]
 )
