@@ -723,7 +723,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"ID,age_group,house_no,work_network,type,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file ,"ID,age_group,worker_type_1,house_no,work_network,type,ID_2,age_group_2,worker_type_2,house_no_2,work_network_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -735,14 +735,16 @@ void write_interactions( model *model )
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
 
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%li,%i,%li,%i\n",
+				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
+                    indiv->worker_type,
 					indiv->house_no,
 					indiv->work_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
+                    inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->work_network
 				);
