@@ -198,8 +198,7 @@ class Parameters(object):
         for k, v in params.items():
             self.set_param(k, v)
 
-    def _get_base_param_from_age_param(self, param):
-        LOGGER.debug("Trying to split {param}")
+    def _get_base_param_from_enum(self, param):
         base_name, enum_val = None, None
         for en in chain(
             AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
@@ -229,7 +228,7 @@ class Parameters(object):
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
         else:
-            param, idx = self._get_base_param_from_age_param(param)
+            param, idx = self._get_base_param_from_enum(param)
             LOGGER.debug(
                 f"not found full length param, trying get_param_{param} with index getter"
             )
@@ -265,9 +264,9 @@ class Parameters(object):
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params, f"{param}", float(value))
         elif hasattr(
-            covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"
+            covid19, f"set_param_{self._get_base_param_from_enum(param)[0]}"
         ):
-            param, idx = self._get_base_param_from_age_param(param)
+            param, idx = self._get_base_param_from_enum(param)
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value, idx)
         elif hasattr(covid19, f"set_param_{param}"):
