@@ -1,14 +1,26 @@
-COVID19-IBM: Individual-based model for modelling of a COVID-19 outbreak
+OpenABM-Covid19: Agent-based model for modelling the Covid-19 
 ========================================================================
+
+Description
+-----------
+
+OpenABM-Covid19 is an agent-based model (ABM) developed to simulate the spread of Covid-19 in a city and to analyse the effect of both passive and active intervention strategies.
+Interactions between individuals are modelled on networks representing households, work-places and random contacts.
+The infection is transmitted between these contacts and the progression of the disease in individuals is modelled.
+Instantaneous contract-tracing and quarantining of contacts is modelled allowing the
+evaluation of the design and configuration of digital contract-tracing mobile phone apps.
+
+A full description of the model can be found [here](https://github.com/p-robot/COVID19-IBM/blob/master/documentation/covid19_model.pdf). A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf). 
+The model was developed by the Fraser group at the Big Data Institute at the University of Oxford in conjunction with IBM UK and faculty.ai. More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
 
 
 Compilation
 -----------
 
-COVID19-IBM requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed.
+OpenABM-Covid19 requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed.
 
 ```bash
-cd COVID19-IBM/src
+cd OpenABM-Covid19/src
 make all
 ```
 
@@ -22,7 +34,7 @@ Usage
 -----
 
 ```bash
-cd COVID19-IBM/src
+cd OpenABM-Covid19/src
 ./covid19ibm.exe <input_param_file> <param_line_number> <output_file_dir> <household_demographics_file>
 ```
 
@@ -56,4 +68,5 @@ print(simulation.results_all_simulations)
 Tests
 -----
 
+A full description of the tests run on the model can be found [here](https://github.com/p-robot/COVID19-IBM/blob/master/documentation/covid19_model.pdf).
 Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.6 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
