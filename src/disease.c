@@ -372,9 +372,14 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
-	if( indiv->idx == 222282)
-		printf("break3 ");
+	float patient_waiting_effect = 0;
 
+	if ( add_patient_to_hospital(model, indiv) )
+		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
+	else
+		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
+
+	//TODO have the patient_waiting_effect affect the probabilities below
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 	{
 		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
