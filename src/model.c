@@ -354,7 +354,7 @@ void flu_infections( model *model )
 	long idx, pdx, n_infected;
 	individual *indiv;
 
-	n_infected = round( model->params->n_total * model->params->seasonal_flu_rate );
+	n_infected = round( model->params->n_total * model->params->daily_non_cov_symptoms_rate );
 
 	for( idx = 0; idx < n_infected; idx++ )
 	{

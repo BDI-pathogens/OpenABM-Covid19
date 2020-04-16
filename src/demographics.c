@@ -128,7 +128,7 @@ void set_up_household_distribution( model *model )
 	long *households               = calloc( model->params->n_total, sizeof(long));
 
 	// assign targets
-	copy_normalize_array( population_target, model->params->population_group, N_AGE_GROUPS );
+	copy_normalize_array( population_target, model->params->population, N_AGE_GROUPS );
 	copy_normalize_array( household_target, model->params->household_size, N_HOUSEHOLD_MAX );
 
 	// get number of people in household for each group

@@ -162,8 +162,8 @@ double get_model_param_app_users_fraction(model *model)
 	frac  = 0;
 	for( age = 0; age < N_AGE_GROUPS; age++ )
 	{
-		t_pop += model->params->population_group[ age ];
-		frac  += model->params->app_users_fraction[ age ] * model->params->population_group[ age ];
+		t_pop += model->params->population[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
 	}
 
 	return frac / t_pop;
@@ -191,8 +191,8 @@ int get_model_param_lockdown_on(model *model)
 	frac  = 0;
 	for( age = 0; age < N_AGE_GROUPS; age++ )
 	{
-		t_pop += model->params->population_group[ age ];
-		frac  += model->params->app_users_fraction[ age ] * model->params->population_group[ age ];
+		t_pop += model->params->population[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
 	}
 
 	return frac / t_pop;
@@ -389,7 +389,7 @@ int set_model_param_lockdown_on( model *model, int value )
 			params->daily_fraction_work_used[network] = params->daily_fraction_work *
 														params->lockdown_work_network_multiplier;
 
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
+		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD] *
 																params->lockdown_house_interaction_multiplier;
 	}
 	else
@@ -399,7 +399,7 @@ int set_model_param_lockdown_on( model *model, int value )
 			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
 				params->daily_fraction_work_used[network] = params->daily_fraction_work;
 
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
+		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD];
 	}
 	else
 		return FALSE;

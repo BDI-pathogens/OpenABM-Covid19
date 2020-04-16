@@ -177,25 +177,25 @@ double get_param_adjusted_susceptibility(parameters *params, int idx)
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_relative_transmission_by_type
+*  Name: 		get_param_relative_transmission
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_param_relative_transmission_by_type(parameters *params, int idx)
+double get_param_relative_transmission(parameters *params, int idx)
 {
     if (idx >= N_INTERACTION_TYPES) return -1;
 
-    return params->relative_transmission_by_type[idx];
+    return params->relative_transmission[idx];
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_relative_transmission_by_type_used
+*  Name: 		get_param_relative_transmission_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_param_relative_transmission_by_type_used(parameters *params, int idx)
+double get_param_relative_transmission_used(parameters *params, int idx)
 {
     if (idx >= N_AGE_GROUPS) return -1;
 
-    return params->relative_transmission_by_type_used[idx];
+    return params->relative_transmission_used[idx];
 }
 
 /*****************************************************************************************
@@ -315,26 +315,16 @@ double get_param_household_size(parameters *params, int idx)
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_population_group
+*  Name: 		get_param_population
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_param_population_group(parameters *params, int idx)
+double get_param_population(parameters *params, int idx)
 {
     if (idx >= N_AGE_GROUPS) return -1;
 
-    return params->population_group[idx];
+    return params->population[idx];
 }
 
-/*****************************************************************************************
-*  Name: 		get_param_population_type
-*  Description: Gets the value of a parameter
-******************************************************************************************/
-double get_param_population_type(parameters *params, int idx)
-{
-    if (idx >= N_AGE_TYPES) return -1;
-
-    return params->population_type[idx];
-}
 
 /*****************************************************************************************
 *  Name: 		get_param_fraction_asymptomatic
@@ -581,7 +571,7 @@ int get_param_test_on_traced(parameters *params)
 ******************************************************************************************/
 int get_param_test_insensitive_period(parameters *params)
 {
-    return params->test_insensititve_period;
+    return params->test_insensitive_period;
 }
 
 /*****************************************************************************************
@@ -631,12 +621,12 @@ int get_param_app_turn_on_time(parameters *params)
 }
 
 /*****************************************************************************************
-*  Name:		get_param_seasonal_flu_rate
+*  Name:		get_param_daily_non_cov_symptoms_rate
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
-double get_param_seasonal_flu_rate(parameters *params)
+double get_param_daily_non_cov_symptoms_rate(parameters *params)
 {
-    return params->seasonal_flu_rate;
+    return params->daily_non_cov_symptoms_rate;
 }
 
 /*****************************************************************************************
@@ -926,24 +916,24 @@ int set_param_adjusted_susceptibility(parameters *params, double value, int idx)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_relative_transmission_by_type
+*  Name:        set_param_relative_transmission
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_relative_transmission_by_type(parameters *params, double value, int idx)
+int set_param_relative_transmission(parameters *params, double value, int idx)
 {
     if (idx >= N_INTERACTION_TYPES) return FALSE;
-    params->relative_transmission_by_type[idx] = value;
+    params->relative_transmission[idx] = value;
     return TRUE;
 }
 
 /*****************************************************************************************
-*  Name:        set_param_relative_transmission_by_type_used
+*  Name:        set_param_relative_transmission_used
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_relative_transmission_by_type_used(parameters *params, double value, int idx)
+int set_param_relative_transmission_used(parameters *params, double value, int idx)
 {
     if (idx >= N_INTERACTION_TYPES) return FALSE;
-    params->relative_transmission_by_type_used[idx] = value;
+    params->relative_transmission_used[idx] = value;
     return TRUE;
 }
 
@@ -1062,26 +1052,16 @@ int set_param_household_size(parameters *params, double value, int idx)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_population_group
+*  Name:        set_param_population
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_population_group(parameters *params, double value, int idx)
+int set_param_population(parameters *params, double value, int idx)
 {
     if (idx >= N_AGE_GROUPS) return FALSE;
-    params->population_group[idx] = value;
+    params->population[idx] = value;
     return TRUE;
 }
 
-/*****************************************************************************************
-*  Name:        set_param_population_type
-*  Description: Sets the value of parameter in array
-******************************************************************************************/
-int set_param_population_type(parameters *params, double value, int idx)
-{
-    if (idx >= N_AGE_TYPES) return FALSE;
-    params->population_type[idx] = value;
-    return TRUE;
-}
 
 /*****************************************************************************************
 *  Name:        set_param_fraction_asymptomatic
@@ -1387,12 +1367,12 @@ int set_param_app_turned_on( parameters *params, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_param_seasonal_flu_rate
+*  Name:		set_param_daily_non_cov_symptoms_rate
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_seasonal_flu_rate( parameters *params, double value )
+int set_param_daily_non_cov_symptoms_rate( parameters *params, double value )
 {
-    params->seasonal_flu_rate = value;
+    params->daily_non_cov_symptoms_rate = value;
     return TRUE;
 }
 

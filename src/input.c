@@ -206,12 +206,12 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population_group[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_group_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
-	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->daily_non_cov_symptoms_rate));
+	if( check < 1){ print_exit("Failed to read parameter daily_non_cov_symptoms_rate\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 		{
@@ -221,8 +221,8 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission_by_type[i]));
-		if( check < 1){ print_exit("Failed to read parameter relative_transmission_by_type_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
+		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
@@ -330,8 +330,8 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
-	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
+	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };

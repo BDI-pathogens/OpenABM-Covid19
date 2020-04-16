@@ -172,7 +172,7 @@ void update_intervention_policy( model *model, int time )
 			params->daily_fraction_work_used[type] = params->daily_fraction_work;
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
-			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
+			params->relative_transmission_used[type] = params->relative_transmission[type];
 
 		params->interventions_on = ( params->intervention_start_time == 0 );
 	}
@@ -342,7 +342,7 @@ void intervention_test_take( model *model, individual *indiv )
 		indiv->quarantine_test_result = FALSE;
 	else
 	{
-		if( model->time - time_infected( indiv ) >= model->params->test_insensititve_period )
+		if( model->time - time_infected( indiv ) >= model->params->test_insensitive_period )
 			indiv->quarantine_test_result = TRUE;
 		else
 			indiv->quarantine_test_result = FALSE;
@@ -682,7 +682,7 @@ void intervention_on_traced(
 
 	if( params->test_on_traced )
 	{
-		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensititve_period );
+		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 		intervention_test_order( model, indiv, time_test );
 	}
 
