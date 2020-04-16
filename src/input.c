@@ -204,12 +204,6 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
-	for( i = 0; i < N_AGE_TYPES; i++ )
-	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population_type[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_type_**\n"); };
-	}
-
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->population_group[i]));
