@@ -25,7 +25,6 @@ documentation/*synctex*
 documentation/*.log
 documentation/*.aux
 documentation/*.key
-documentation/*.pdf
 documentation/*.dvi
 documentation/*.blg
 documentation/*.bbl
