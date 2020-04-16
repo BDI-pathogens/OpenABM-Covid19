@@ -184,8 +184,6 @@ class Parameters(object):
             LOGGER.debug("memory set up")
             _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]) for t in self.household_df.itertuples()]
                 
-
-
     def set_param_dict(self, params):
         for k, v in params.items():
             self.set_param(k, v)
