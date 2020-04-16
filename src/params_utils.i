@@ -1505,7 +1505,7 @@ int set_param_testing_symptoms_time_off( parameters *params, int value )
     return TRUE;
 }
 /*****************************************************************************************
-*  Name: 		get_param_mild_fraction
+*  Name: 		set_param_mild_fraction
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double set_param_mild_fraction(parameters *params, double value, int idx)
@@ -1526,32 +1526,6 @@ double set_param_icu_allocation(parameters *params, double value, int idx)
     return TRUE;
 }
 
-
-void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int i_10_19, int i_20_29, int i_30_39, int i_40_49, int i_50_59, int i_60_69, int i_70_79, int i_80){
-    // if(idx >= params->N_REFERENCE_HOUSEHOLDS) return FALSE;
-    params->REFERENCE_HOUSEHOLDS[idx][0] = i_0_9;
-    params->REFERENCE_HOUSEHOLDS[idx][1] = i_10_19;
-    params->REFERENCE_HOUSEHOLDS[idx][2] = i_20_29;
-    params->REFERENCE_HOUSEHOLDS[idx][3] = i_30_39;
-    params->REFERENCE_HOUSEHOLDS[idx][4] = i_40_49;
-    params->REFERENCE_HOUSEHOLDS[idx][5] = i_50_59;
-    params->REFERENCE_HOUSEHOLDS[idx][6] = i_60_69;
-    params->REFERENCE_HOUSEHOLDS[idx][7] = i_70_79;
-    params->REFERENCE_HOUSEHOLDS[idx][8] = i_80;
-    // return TRUE;
-}
-
-
-
-/*****************************************************************************************
-*  Name: 		get_param_icu_allocation
-*  Description: Gets the value of a parameter
-******************************************************************************************/
-double get_param_icu_allocation(parameters *params, int idx)
-{
-    if (idx >= N_AGE_GROUPS) return FALSE; 
-    return params->icu_allocation[idx];
-}
 
 void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int i_10_19, int i_20_29, int i_30_39, int i_40_49, int i_50_59, int i_60_69, int i_70_79, int i_80){
     // if(idx >= params->N_REFERENCE_HOUSEHOLDS) return FALSE;
