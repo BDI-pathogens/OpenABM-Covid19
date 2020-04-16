@@ -37,7 +37,7 @@ class TestClass(object):
     """
     def test_lockdown_on_off(self):
     """
-    # Test that a lock down can be turned on and off
+        #Test that a lock down can be turned on and off
     """
         # Create model object
         params = Parameters(
@@ -78,6 +78,7 @@ class TestClass(object):
             if res["time"] == 60:
                 model.update_running_params( "app_users_fraction", 0.85 )
     """
+    
 
     def test_set_get_parameters(self):
         """
@@ -90,7 +91,7 @@ class TestClass(object):
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
         )
-        params.set_param("app_users_fraction", 0.25)
+        params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
 
         STEPS = 2
@@ -98,7 +99,7 @@ class TestClass(object):
         for step in range(0, STEPS):
             model.one_time_step()
             res = model.one_time_step_results()
-
+           
             # Try to set valid parameters
             model.update_running_params("test_on_symptoms", 1)
             np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
@@ -158,3 +159,4 @@ class TestClass(object):
 
             with pytest.raises(ModelParameterException):
                 model.get_param("wrong_parameter")
+        
