@@ -61,7 +61,7 @@ long pop( waiting_list* waiting_list )
     return retval;
 }
 
-void remove(long pdx, waiting_list* waiting_list)
+void remove_patient(long pdx, waiting_list* waiting_list)
 {
     node *current = waiting_list->head;            
     node *previous = current;
@@ -96,5 +96,4 @@ void destroy_waiting_list( waiting_list* waiting_list )
     }
 
     free( waiting_list );
-
 }
