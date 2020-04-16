@@ -30,7 +30,6 @@ TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
-
 class EVENT_TYPES(Enum):
     UNINFECTED = 0
     PRESYMPTOMATIC = 1
@@ -49,7 +48,6 @@ class EVENT_TYPES(Enum):
     CASE = 14
     TRACE_TOKEN_RELEASE = 15
     N_EVENT_TYPES = 16
-
 
 # Age groups
 AGE_0_9 = 0
@@ -71,7 +69,7 @@ AGES = [
     AGE_50_59,
     AGE_60_69,
     AGE_70_79,
-    AGE_80,
+    AGE_80
 ]
 
 CHILD = 0
@@ -101,9 +99,7 @@ NETWORK_TYPES = [NETWORK_CHILD, NETWORK_ADULT, NETWORK_ELDERLY]
 PARAM_LINE_NUMBER = 1
 
 # Construct the executable command
-EXE = (
-    f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "
-    + f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"
-)
+EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)
