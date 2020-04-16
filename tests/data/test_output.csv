@@ -1,5 +1,5 @@
 # Starting simulation
-# Date: 15-04-2020 12:53:42
+# Date: 16-04-2020 10:12:53
 # Read command-line args
 # Read input parameter file
 # Read household demographics file
@@ -235,4 +235,4 @@ time,lockdown,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_a
 # Total deaths 70-79 years:      842
 # Total deaths   80+ years:      40
 # Total quarantined days:        0
-# Ending simulation, run time:   16.51s
+# Ending simulation, run time:   16.78s
