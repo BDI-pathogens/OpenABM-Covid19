@@ -20,7 +20,6 @@ covid19_module = Extension(
         "network.c",
         "params.c",
         "utilities.c",
-        "swig_utils.c",
     ],
     extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-I$(INC);", "-O0"],
     extra_link_args=["-lgsl", "-lgslcblas", "-lm", "-O3"],
@@ -32,5 +31,15 @@ setup(
     author="SWIG Docs",
     description="""Individual-based model for modelling of a COVID-19 outbreak""",
     ext_modules=[covid19_module],
-    py_modules=["covid19", "COVID19/parameters", "COVID19/model",],
+    py_modules=[
+        "covid19",
+        "COVID19/parameters",
+        "COVID19/model",
+        "COVID19/simulation",
+    ],
+    requires=[
+        "numpy",
+        "pandas",
+        "tqdm",
+    ]
 )

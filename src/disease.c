@@ -63,7 +63,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	long pdx, ndx;
 	long people = 0;
 	double inter  = 0;
-	double *weight = model->params->relative_transmission_by_type;
+	double *weight = model->params->relative_transmission;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 		if( model->population[pdx].age_type == age )
@@ -123,7 +123,7 @@ void set_up_infectious_curves( model *model )
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
-		type_factor = params->relative_transmission_by_type_used[type];
+		type_factor = params->relative_transmission_used[type];
 
 		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );

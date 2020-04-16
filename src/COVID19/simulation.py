@@ -1,5 +1,5 @@
 """
-Class representing a simulation object to store model output and 
+Class representing a simulation object to store model output and
 run model across mutiple time steps or simulations
 
 Created: 5 April 2020
@@ -84,20 +84,20 @@ class Simulation:
         # Containers for model output
         self.results = None
         self.results_all_simulations = []
-        
+
         self.verbose = verbose
-        
+
         self.start_simulation()
-    
+
     def start_simulation(self):
         """Initialisation of the simulation; reset the model
         """
         if self.verbose:
             print("Starting simulation")
-        
+
         # Set the current time step
         self.timestep = 0
-        
+
         # Reset the model, fixme - add method for initialising the model
         self.current_state = self.env.start_simulation()
         
@@ -107,20 +107,19 @@ class Simulation:
         # Append current state
         if self.results:
             self.results_all_simulations.append(copy.copy(self.results))
-        
+
         self.results = defaultdict(list)
-        
-    
+
     def steps(self, n_steps):
         """
         Run the model for a specific number of steps, starting from the current state,
-        save data as model progresses.  
-        
+        save data as model progresses.
+
         Arguments
         ---------
             n_steps: number of steps for which to call self.model.one_time_step()
         """
-        
+
         if self.timestep > self.end_time:
             self.start_simulation()
         
@@ -140,18 +139,18 @@ class Simulation:
             if self.timestep >= self.end_time:
                 self.simulation_number += 1
                 self.start_simulation()
-                
+
             else:
                 self.current_state = next_state
                 self.current_action = next_action
                 self.timestep += 1
-    
+
     def simulations(self, n_simulations):
         """
-        Run the model for a specific number of simulations, starting from the current state,
-        save data as model progresses.
+        Run the model for a specific number of simulations, starting from the
+        current state, save data as model progresses.
         """
-        
+
         if self.timestep >= self.end_time:
             self.start_simulation()
         
@@ -161,8 +160,8 @@ class Simulation:
                 print("simulation_number:", self.simulation_number)
             
             self.timestep = 0
-            while( self.timestep <= self.end_time):
-                
+            while self.timestep <= self.end_time:
+
                 if self.verbose:
                     print("Current timestep:", self.timestep)
                 
@@ -173,7 +172,7 @@ class Simulation:
                 self.collect_results(current_state, next_action)
                 
                 self.timestep += 1
-            
+
             self.start_simulation()
     
     def collect_results(self, state, action):

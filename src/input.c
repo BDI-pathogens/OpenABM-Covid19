@@ -204,20 +204,14 @@ void read_param_file( parameters *params)
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
-	for( i = 0; i < N_AGE_TYPES; i++ )
-	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population_type[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_type_**\n"); };
-	}
-
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population_group[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_group_**\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,", &(params->seasonal_flu_rate));
-	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->daily_non_cov_symptoms_rate));
+	if( check < 1){ print_exit("Failed to read parameter daily_non_cov_symptoms_rate\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 		{
@@ -227,7 +221,7 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission_by_type[i]));
+		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
 	}
 
@@ -336,8 +330,8 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->test_insensititve_period));
-	if( check < 1){ print_exit("Failed to read parameter test_insensititve_period\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
+	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
@@ -413,9 +407,6 @@ void read_param_file( parameters *params)
 
     check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_time_to_test));
     if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_time_to_test)\n"); };
-
-	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
-	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
 	fclose(parameter_file);
 }
@@ -634,20 +625,28 @@ void read_household_demographics_file( parameters *params)
 {
 	FILE *hh_file;
 	int check, value, adx;
-	long hdx;
+	long hdx, fileSize;
+	char lineBuffer[80];
 	
-	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
-	
-	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
-		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
-	
+	// get the length of the reference household file
 	hh_file = fopen(params->input_household_file, "r");
 	if(hh_file == NULL)
 		print_exit("Can't open household demographics file");
+	fileSize = 0;
+	while( fgets(lineBuffer, 80, hh_file ) )
+		fileSize++;
+	fclose( hh_file );
+	params->N_REFERENCE_HOUSEHOLDS = fileSize - 1;
+
+	if( params->N_REFERENCE_HOUSEHOLDS < 100 )
+		print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
+
+	// allocate memory on the params object
+	set_up_reference_household_memory(params);
 	
-	// Throw away header
+	// read in the data (throw away the header line)
+	hh_file = fopen(params->input_household_file, "r");
 	fscanf(hh_file, "%*[^\n]\n");
-	
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
 		for(adx = 0; adx < N_AGE_GROUPS; adx++){
 			// Read and attach parameter values to parameter structure
@@ -658,6 +657,15 @@ void read_household_demographics_file( parameters *params)
 		}
 	}
 	fclose(hh_file);
+}
+
+
+void set_up_reference_household_memory(parameters *params){
+	long hdx;
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	}
 }
 
 /*****************************************************************************************

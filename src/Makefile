@@ -5,15 +5,17 @@ else
     C = gcc
 endif
 
-ifeq (, $(shell which pip3))
-	PIP = pip
+ifeq (, $(shell which python3))
+	PYTHON = python
 else
-	PIP = pip3
+	PYTHON = python3
 endif
+
+PIP_FLAGS := --upgrade
 
 OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
-LFLAGS = ${GSLFLAGS}
+LFLAGS = $(GSLFLAGS)
 
 # Name of executable
 _EXE = covid19ibm.exe
@@ -33,15 +35,16 @@ swig-all:
 	# swig -outdir COVID19 -python covid19.i
 	swig -python covid19.i
 	# python3 setup.py build_ext --inplace
-	${PIP} install --user --upgrade .
+	$(PYTHON) -m pip install $(PIP_FLAGS) .
 
-all: ${OBJS}
-	${C} -L${LIB} -o ${EXE} ${OBJS} ${LFLAGS}
+all: $(OBJS)
+	$(C) -L$(LIB) -o $(EXE) $(OBJS) $(LFLAGS)
 
 clean:
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
-	${PIP} uninstall -y covid19
+	$(PYTHON) -m pip uninstall -y covid19
 
 .c.o:
-	${C} ${CFLAGS} -c $< -o $@
+	$(C) $(CFLAGS) -c $< -o $@
 
+.PHONY: swig-all all clean

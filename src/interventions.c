@@ -172,7 +172,7 @@ void update_intervention_policy( model *model, int time )
 			params->daily_fraction_work_used[type] = params->daily_fraction_work;
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
-			params->relative_transmission_by_type_used[type] = params->relative_transmission_by_type[type];
+			params->relative_transmission_used[type] = params->relative_transmission[type];
 
 		params->interventions_on = ( params->intervention_start_time == 0 );
 	}
@@ -190,7 +190,7 @@ void update_intervention_policy( model *model, int time )
 
 		if( params->TEMP_lockdown_trigger_n_infected  > 0 && n_infected > params->TEMP_lockdown_trigger_n_infected && params->lockdown_on == FALSE )
 		{
-			set_param_lockdown_on( model, TRUE );
+			set_model_param_lockdown_on( model, TRUE );
 			params->TEMP_lockdown_trigger_n_infected = 0;
 			params->lockdown_time_off = model->time + params->TEMP_lockdown_trigger_length;
 			if( params->TEMP_lockdown_trigger_keep_elderly )
@@ -205,25 +205,25 @@ void update_intervention_policy( model *model, int time )
 	}
 
 	if( time == params->app_turn_on_time )
-		set_param_app_turned_on( model, TRUE );
+		set_model_param_app_turned_on( model, TRUE );
 
 	if( time == params->lockdown_time_on )
-		set_param_lockdown_on( model, TRUE );
+		set_model_param_lockdown_on( model, TRUE );
 
 	if( time == params->lockdown_time_off )
-		set_param_lockdown_on( model, FALSE );
+		set_model_param_lockdown_on( model, FALSE );
 	
 	if( time == params->lockdown_elderly_time_on )
-		set_param_lockdown_elderly_on( model, TRUE );
+		set_model_param_lockdown_elderly_on( model, TRUE );
 
 	if( time == params->lockdown_elderly_time_off )
-		set_param_lockdown_elderly_on( model, FALSE );
+		set_model_param_lockdown_elderly_on( model, FALSE );
 
 	if( time == params->testing_symptoms_time_on )
-		set_param_test_on_symptoms( model, TRUE );
+		set_model_param_test_on_symptoms( model, TRUE );
 
 	if( time == params->testing_symptoms_time_off )
-		set_param_test_on_symptoms( model, FALSE );
+		set_model_param_test_on_symptoms( model, FALSE );
 	
 	if( time >= params->successive_lockdown_time_on ){
 		
@@ -232,9 +232,9 @@ void update_intervention_policy( model *model, int time )
 		int gap = params->successive_lockdown_gap;
 		
 		if( (r_time % ( duration + gap ) ) < duration)
-			set_param_lockdown_on( model, TRUE );
+			set_model_param_lockdown_on( model, TRUE );
 		else
-			set_param_lockdown_on( model, FALSE );
+			set_model_param_lockdown_on( model, FALSE );
 	}
 };
 
@@ -342,7 +342,7 @@ void intervention_test_take( model *model, individual *indiv )
 		indiv->quarantine_test_result = FALSE;
 	else
 	{
-		if( model->time - time_infected( indiv ) >= model->params->test_insensititve_period )
+		if( model->time - time_infected( indiv ) >= model->params->test_insensitive_period )
 			indiv->quarantine_test_result = TRUE;
 		else
 			indiv->quarantine_test_result = FALSE;
@@ -682,7 +682,7 @@ void intervention_on_traced(
 
 	if( params->test_on_traced )
 	{
-		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensititve_period );
+		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 		intervention_test_order( model, indiv, time_test );
 	}
 

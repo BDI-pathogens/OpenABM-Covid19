@@ -57,9 +57,6 @@ household_size_3	4416
 household_size_4	4140
 household_size_5	1104
 household_size_6	552
-population_child	23
-population_adult	63
-population_elderly	13
 population_0_9	8054000
 population_10_19	7528000
 population_20_29	8712000
@@ -178,4 +175,3 @@ TEMP_lockdown_trigger_length 25
 TEMP_lockdown_trigger_keep_elderly 1
 TEMP_lockdown_trigger_app_on_end 1
 TEMP_lockdown_trigger_time_to_test 10000
-N_REFERENCE_HOUSEHOLDS	125455
