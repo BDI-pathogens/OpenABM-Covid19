@@ -444,5 +444,5 @@ long remove_first_patient_from_waiting_list( hospital *hospital, int ward_type )
 ******************************************************************************************/
 void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, int ward_type )
 {
-    remove( indiv->idx, &(hospital->waiting_list[ward_type]));
+    remove_patient( indiv->idx, &(hospital->waiting_list[ward_type]));
 }
