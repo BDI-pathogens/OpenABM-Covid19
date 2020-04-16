@@ -107,7 +107,7 @@ class Parameters(object):
             input_param_file {str} -- [Parameters file path] (default: {None})
             param_line_number {int} -- [Which column of the input param file to read] (default: {1})
             output_file_dir {str} -- [Where to write output files to] (default: {"./"})
-            input_household_file {str} -- [Household demographics file (required)] (default: {None})
+            input_households {str} -- [Household demographics file (required)] (default: {None})
             read_param_file {bool} -- [Read param file, all params can be set from python interface] (default: {True})
         
         Raises:
