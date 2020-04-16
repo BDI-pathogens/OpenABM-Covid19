@@ -139,7 +139,7 @@ class TestClass(object):
 
         #Check that interactions file was loaded df_interactions.columns
         columnArray = df_hcw.columns.values
-        np.testing.assert_equal(columnArray, ["HospitalID","eg1","eg2"]) 
+        np.testing.assert_equal(columnArray, ["n_hospitals","n_total_doctors","n_total_nurses"]) 
 
 
 

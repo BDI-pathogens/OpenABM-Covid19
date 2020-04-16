@@ -756,6 +756,8 @@ void write_interactions( model *model )
 	fclose(output_file);
 }
 
+
+
 /*****************************************************************************************
 *  Name:        write_hcw_data
 *  Description: write data about healthcare workers
