@@ -413,9 +413,6 @@ void read_param_file( parameters *params)
 
     check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_time_to_test));
     if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_time_to_test)\n"); };
-
-	check = fscanf(parameter_file, " %li ,", &(params->N_REFERENCE_HOUSEHOLDS));
-	if( check < 1){ print_exit("Failed to read parameter N_REFERENCE_HOUSEHOLDS)\n"); };
 	
 	fclose(parameter_file);
 }
@@ -634,20 +631,30 @@ void read_household_demographics_file( parameters *params)
 {
 	FILE *hh_file;
 	int check, value, adx;
-	long hdx;
+	long hdx, fileSize;
+	char lineBuffer[80];
 	
-	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
-	
-	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
-		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
-	
+	// get the length of the reference household file
 	hh_file = fopen(params->input_household_file, "r");
 	if(hh_file == NULL)
 		print_exit("Can't open household demographics file");
+	fileSize = 0;
+	while( fgets(lineBuffer, 80, hh_file ) )
+		fileSize++;
+	fclose( hh_file );
+	params->N_REFERENCE_HOUSEHOLDS = fileSize - 1;
+
+	if( params->N_REFERENCE_HOUSEHOLDS < 100 )
+		print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
+
+	// allocate memory on the params object
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
 	
-	// Throw away header
+	// read in the data (throw away the header line)
+	hh_file = fopen(params->input_household_file, "r");
 	fscanf(hh_file, "%*[^\n]\n");
-	
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
 		for(adx = 0; adx < N_AGE_GROUPS; adx++){
 			// Read and attach parameter values to parameter structure
