@@ -782,7 +782,7 @@ int one_time_step( model *model )
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
 	//TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    check_hospital_state_status( model );
+    //check_hospital_state_status( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
     transition_events( model, WAITING,         &transition_to_waiting,  FALSE );

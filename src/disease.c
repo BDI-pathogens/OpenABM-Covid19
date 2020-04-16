@@ -374,23 +374,24 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	set_hospitalised( indiv, model->params, model->time );
 	float patient_waiting_effect = 0;
 
-	// for( int i = 0; i < model->params->n_hospitals; i++ )
-	// 	if( space_in_ward(hospital, COVID_GENERAL) + hospital->pending_admissions[COVID_GENERAL] <)
 
-	//if space in ward:
-	//	transition general, update pending
-	// else 
-	//  transition waiting
-	
-	if ( add_patient_to_hospital(model, indiv) )
-		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
-	else
-		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
-
-	//TODO have the patient_waiting_effect affect the probabilities below
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+	if( assign_patient_to_hospital(model, indiv) )
 	{
-		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
+		//set to transition to general ward this timestep 
+		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
+	}
+	else
+	{
+		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
+		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
+		transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION ); 
+		patient_waiting_effect = 0.1;
+	}
+
+	//TODO : check that patient_waiting_effect is correct
+	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] + patient_waiting_effect ) )
+	{
+		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] + patient_waiting_effect ) ) //TODO: why can patients go directly to death?
 			transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 		else
 			transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );

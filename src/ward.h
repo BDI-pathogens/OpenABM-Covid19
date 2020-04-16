@@ -51,6 +51,7 @@ void set_up_ward_networks(ward* ward , int max_hcw_daily_interactions);
 void build_ward_networks(model *model, ward* ward );
 void build_hcw_patient_network(ward* ward, network *network, long *hc_workers, int n_hcw_working, int n_patient_required_interactions, int max_hcw_daily_interactions );
 int  add_patient_to_ward( ward *ward, long pdx );
+int  ward_available_beds( ward* ward);
 void remove_patient_from_ward( ward* ward, long pdx);
 void destroy_ward( ward* );
 
