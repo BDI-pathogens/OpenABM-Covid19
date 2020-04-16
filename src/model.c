@@ -72,7 +72,7 @@ model* new_model( parameters *params )
 *  Name:		destroy_model
 *  Description: Destroys the model structure and releases its memory
 ******************************************************************************************/
-void destory_model( model *model )
+void destroy_model( model *model )
 {
 	long idx;
 

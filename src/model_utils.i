@@ -23,6 +23,6 @@ int utils_n_daily( model *model, int type, int day ) {
 
 %extend model{
     ~model() {
-        destory_model($self);
+        destroy_model($self);
     }
 }
