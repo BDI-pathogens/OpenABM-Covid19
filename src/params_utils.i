@@ -1,4 +1,5 @@
 %module params_utils
+#include "params.h"
 
 %inline %{
 /*****************************************************************************************
@@ -1481,3 +1482,9 @@ int set_param_testing_symptoms_time_off( parameters *params, int value )
     return TRUE;
 }
 %}
+
+%extend parameters{
+    ~parameters() {
+        destroy_params($self);
+    }
+}

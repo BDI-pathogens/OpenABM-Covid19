@@ -31,5 +31,10 @@ setup(
     author="SWIG Docs",
     description="""Individual-based model for modelling of a COVID-19 outbreak""",
     ext_modules=[covid19_module],
-    py_modules=["covid19", "COVID19/parameters", "COVID19/model", "COVID19/simulation",],
+    py_modules=[
+        "covid19",
+        "COVID19/parameters",
+        "COVID19/model",
+        "COVID19/simulation",
+    ],
 )

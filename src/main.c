@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
 	write_output_files( model, &params );
 	
-	destroy_model( model );
+	destory_model( model );
 	destroy_params( &params );
 
     clock_gettime( CLOCK_REALTIME, &tv );

@@ -116,7 +116,9 @@ class Parameters(object):
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         elif not input_param_file and read_param_file:
-            raise ParameterException("Input param path is None and read param file set to true")
+            raise ParameterException(
+                "Input param path is None and read param file set to true"
+            )
         else:
             LOGGER.info(
                 "Have not passed input file for params, use set_param or set_param_dict"
