@@ -192,6 +192,11 @@ void remove_patient_from_ward( ward* ward, long pdx)
     }
 }
 
+int ward_available_beds( ward* ward)
+{
+    return ( ward->n_beds - ward->n_patients );
+}
+
 void destroy_ward( ward* ward )
 {
     free( ward->doctor_patient_network );

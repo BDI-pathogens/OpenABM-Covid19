@@ -12,6 +12,7 @@
 #include "model.h"
 #include "disease.h"
 #include "interventions.h"
+#include "waiting_list.h"
 
 /*****************************************************************************************
 *  Name:		initialize_hospital
@@ -33,15 +34,18 @@ void initialise_hospital(
     hospital->hospital_idx  = hdx;
 
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
+    hospital->waiting_list = calloc( N_HOSPITAL_WARD_TYPES, sizeof(waiting_list) );
 
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
         hospital->n_wards[ward_type] = params->n_wards[ward_type];
+        hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
+        //hospital->waiting_list[ward_type] = initialise_waiting_list();
+        initialise_waiting_list( &(hospital->waiting_list[ward_type]) );
 
         for( hcw_type = 0; hcw_type < N_WORKER_TYPES; hcw_type++ )
             hospital->n_workers[hcw_type] += params->n_wards[ward_type] * params->n_hcw_per_ward[ward_type][hcw_type];
-
-        hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
+        
         for( ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
             initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_idx, ward_type, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
     }
@@ -290,7 +294,7 @@ int add_patient_to_hospital( model* model, individual *indiv )
 {
     int hospital_idx, ward_idx;
     int required_ward;
-    hospital* assigned_hospital;
+    
     int added_to_hospital = FALSE;
     
     if( indiv->status == HOSPITALISED || indiv->status == HOSPITALISED_RECOVERING )
@@ -305,7 +309,7 @@ int add_patient_to_hospital( model* model, individual *indiv )
 
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
     {
-        for( ward_idx = 0; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
+        for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[required_ward]; ward_idx++ )
         {
             if( model->hospitals[assigned_hospital_idx].wards[required_ward][assigned_ward_idx].n_patients > model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients)
             {
@@ -315,7 +319,7 @@ int add_patient_to_hospital( model* model, individual *indiv )
         }
     }
 
-    return add_patient_to_ward( &(model->hospitals[assigned_hospital_idx].wards[assigned_ward_idx]), indiv->idx );
+    return add_patient_to_ward( &(model->hospitals[assigned_hospital_idx].wards[required_ward][assigned_ward_idx]), indiv->idx );
     // if( add_patient_to_ward( &(model->hospitals[assigned_hospital_idx].wards[assigned_ward_idx]), indiv->idx ) == TRUE )
     // {
     //     if( required_ward == COVID_GENERAL )
@@ -341,12 +345,10 @@ int add_patient_to_hospital( model* model, individual *indiv )
 *               hospital with the shortest waiting list.
 *  Returns:		void
 ******************************************************************************************/
-void assign_patient_to_hospital( model* model, individual *indiv )
+int assign_patient_to_hospital( model* model, individual *indiv )
 {
-    int hospital_idx, ward_idx;
-    int required_ward;
-
-    int added_to_hospital = FALSE;
+    int hospital_idx, required_ward, added_to_hospital;
+    added_to_hospital = FALSE;
     
     if( indiv->status == HOSPITALISED || indiv->status == HOSPITALISED_RECOVERING )
         required_ward = COVID_GENERAL;
@@ -355,35 +357,66 @@ void assign_patient_to_hospital( model* model, individual *indiv )
     else
         print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
 
-    hospital* assigned_hospital;
-    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    int assigned_hospital_idx = 0;
+    int available_beds = hospital_available_beds( &(model->hospitals[assigned_hospital_idx]), required_ward) - model->hospitals[assigned_hospital_idx].waiting_list[required_ward].size;
+
+    for( hospital_idx = 1; hospital_idx < model->params->n_hospitals; hospital_idx++ )
     {
-        assigned_hospital = &(model->hospitals[hospital_idx]);
-        for( ward_idx = 0; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
+        int next_available_beds = hospital_available_beds( &(model->hospitals[hospital_idx]), required_ward) - model->hospitals[hospital_idx].waiting_list[required_ward].size;
+        
+        if( next_available_beds > available_beds)
         {
-            //Check if number of patients in a ward is less than the max no. of beds.
-            if( assigned_hospital->wards[required_ward][ward_idx].n_patients
-                    <  assigned_hospital->wards[required_ward][ward_idx].n_beds )
-            {
-                 indiv->hospital_idx = hospital_idx;
-                 assigned_hospital->n_patients_waiting++;
-                 added_to_hospital = TRUE;
-            }
+            assigned_hospital_idx = hospital_idx;
+            available_beds = next_available_beds;
         }
     }
 
-    if( added_to_hospital == FALSE )
-    {
-        hospital* assigned_hospital = &(model->hospitals[0]);
+    indiv->hospital_idx = assigned_hospital_idx;
+    add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), required_ward );
 
-        for( hospital_idx = 1; hospital_idx < model->params->n_hospitals; hospital_idx++ )
-        {
-            if( model->hospitals[hospital_idx].n_patients_waiting < assigned_hospital->n_patients_waiting)
-                assigned_hospital = &(model->hospitals[hospital_idx]);
-        }
-        assigned_hospital->n_patients_waiting++;
-        indiv->hospital_idx = assigned_hospital->hospital_idx;
-    }
+    return available_beds > 0;
+    
+    // if( available_beds > 0)
+    // {    
+    //     model->hospitals[assigned_hospital_idx].timestep_pending_admissions[required_ward]++;
+    //     return TRUE;
+    // } else
+    // {
+    //     model->hospitals[assigned_hospital_idx].n_patients_waiting++;
+    //     return FALSE;
+    // }
+    
+
+    
+
+    // for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    // {
+    //     assigned_hospital = &(model->hospitals[hospital_idx]);
+    //     for( ward_idx = 0; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
+    //     {
+    //         //Check if number of patients in a ward is less than the max no. of beds.
+    //         if( assigned_hospital->wards[required_ward][ward_idx].n_patients
+    //                 <  assigned_hospital->wards[required_ward][ward_idx].n_beds )
+    //         {
+    //              indiv->hospital_idx = hospital_idx;
+    //              assigned_hospital->pending_admissions[required_ward]++;
+    //              added_to_hospital = TRUE;
+    //         }
+    //     }
+    // }
+
+    // if( added_to_hospital == FALSE )
+    // {
+    //     hospital* assigned_hospital = &(model->hospitals[0]);
+
+    //     for( hospital_idx = 1; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    //     {
+    //         if( model->hospitals[hospital_idx].n_patients_waiting < assigned_hospital->n_patients_waiting)
+    //             assigned_hospital = &(model->hospitals[hospital_idx]);
+    //     }
+    //     assigned_hospital->pending_admissions[required_ward]++;
+    //     indiv->hospital_idx = assigned_hospital->hospital_idx;
+    //}
 }
 
 /*****************************************************************************************
@@ -409,6 +442,19 @@ int assign_to_ward(individual *indiv, hospital *hospital, int ward_type ) {
     return FALSE;
 }
 
+int hospital_available_beds( hospital* hospital, int ward_type )
+{
+    int ward_idx;
+    int available_beds = 0;
+
+    for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+    {
+        available_beds += ( ward_available_beds( &(hospital->wards[ward_type][ward_idx]) ));
+    }
+
+    return available_beds;
+}
+
 /*****************************************************************************************
 *  Name:		release_patient_from_hospital
 *  Description:
@@ -423,4 +469,9 @@ void release_patient_from_hospital( individual *indiv, hospital *hospital )
 
     indiv->ward_type = NO_WARD;
     indiv->ward_idx  = NO_WARD;
+}
+
+void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type)
+{
+    push( indiv->idx, &(hospital->waiting_list[ward_type]) );
 }
