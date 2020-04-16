@@ -759,18 +759,14 @@ void write_interactions( model *model )
 /*****************************************************************************************
 *  Name:        write_hcw_data
 *  Description: write data about healthcare workers
-    // TODO: integrate the file path as a command line argument
 ******************************************************************************************/
 void write_hcw_data( model *model )
 {
     char output_file_name[INPUT_CHAR_LEN];
     FILE *hcw_output_file;
 
-    long pdx;
-    int day, idx;
-    // individual *indiv;
-    // interaction *inter;
-    hospital *hosp;
+    hospital *hospx;
+    long hdx;
 
     char param_line_number[10];
     sprintf(param_line_number, "%d", model->params->param_line_number);
@@ -781,13 +777,50 @@ void write_hcw_data( model *model )
     strcat(output_file_name, ".csv");
     hcw_output_file = fopen(output_file_name, "w");
 
-    day = model->interaction_day_idx;
-    ring_dec( day, model->params->days_of_interactions );
+    // day = model->interaction_day_idx;
+    // ring_dec( day, model->params->days_of_interactions );
 
     // Print column names
-    fprintf(hcw_output_file ,"HospitalID,eg1,eg2\n");
+    fprintf(hcw_output_file ,"n_hospitals,n_total_doctors,n_total_nurses\n");
+    fprintf(hcw_output_file ,"%li,%i,%i\n",
+            model->params->n_hospitals,
+            model->params->n_total_doctors,
+            model->params->n_total_nurses);
 
     // TODO: output data here
+    // List of hospitals?
+    //model->hospitals[idx]
+    // for( hdx = 0; hdx < model->params->n_hospitals; hdx++ )
+    // {
+        
+    //     // Reference to particular hospital
+    //     hospx = &(model->hospitals[hdx]);
+
+    //     fprintf(hcw_output_file ,"%li,%i,%i\n",
+    //         model->params->n_hospitals,
+    //         ,
+    //         2);
+    // }
+
+    // int n_total_doctors;
+    // int n_total_nurses;
+    // int n_hospitals;
+    // int n_wards[N_HOSPITAL_WARD_TYPES];
+    // int n_ward_beds[N_HOSPITAL_WARD_TYPES];
+    // int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    // int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    // int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
+
+    // //TODO: Add in finer grained transition times between wards once we have more information on them.
+    // //TOM: Determines timing for hospital event transitions.
+    // double mean_time_hospital_transition; // mean time for movement between hospital locations
+    // double sd_time_hospital_transition; // sd for movement between hospital locations
+
+    // //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
+    // double waiting_infectivity_modifier;
+    // double general_infectivity_modifier;
+    // double icu_infectivity_modifier;
+
 
     fclose(hcw_output_file);
 }
