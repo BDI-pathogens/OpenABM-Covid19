@@ -13,14 +13,17 @@ class TestSetObjects:
 
     def test_set_params_from_python(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
-        p = Parameters(read_param_file=False, input_households="notused")
+        p = Parameters(read_param_file=False, input_households="tests/data/baseline_household_demographics.csv")
         for key in all_params:
             value = all_params[key][0]
             try:
                 p.set_param(key, float(value))
             except TypeError:
                 p.set_param(key, int(value))
+            print(f"set {key}")
             assert p.get_param(key) == value, f"{key} was not set properly"
+            p._read_household_demographics()
+        print("finished setting params")
 
     def test_run_model_read_prama_file_false(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")

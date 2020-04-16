@@ -254,10 +254,6 @@ class Parameters(object):
                 setattr(self.c_params, f"{param}", int(value))
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params, f"{param}", float(value))
-            else:
-                LOGGER.info(
-                    f'param {param} has type {type(getattr(self.c_params, f"{param}"))}'
-                )
         elif hasattr(
             covid19, f"set_param_{self._get_base_param_from_age_param(param)[0]}"
         ):
