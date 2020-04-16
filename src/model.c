@@ -827,50 +827,46 @@ void check_hospital_state_status( model *model ) {
 			printf("state: %i ", indiv->status);
 
         if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
-        {
-			if( indiv->idx == 222282 )
-        		printf("break");
+            transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
 
-            transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, /*HOSPITAL_TRANSITION*/ NO_EDGE );
-        }
         else if ( indiv->hospital_state == WAITING )
         {
 			if( indiv->idx == 222282 )
         		printf("break");
             
 			if ( indiv->status == HOSPITALISED ) {
-                transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, WAITING, GENERAL, NO_EDGE );
             }
             else if ( indiv->status == CRITICAL ) {
-                transition_one_hospital_event( model, indiv, WAITING, ICU, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, WAITING, ICU, NO_EDGE );
             }
             else if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, WAITING, MORTUARY, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, WAITING, MORTUARY, NO_EDGE );
             }
             else if (indiv->status == RECOVERED){
-                transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, HOSPITAL_TRANSITION ); //TODO: patient being discharged without being assigned to hospital?
+                transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, NO_EDGE ); //TODO: patient being discharged without being assigned to hospital?
             }
         }
         else if ( indiv->hospital_state == GENERAL )
         {
             if ( indiv->status == CRITICAL ) {
-                transition_one_hospital_event( model, indiv, GENERAL, ICU, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, GENERAL, ICU, NO_EDGE );
 
             }
             else if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, NO_EDGE );
             }
             else if (indiv->status == RECOVERED){
-                transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, NO_EDGE );
             }
         }
         else if ( indiv->hospital_state == ICU ) //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
         {
             if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, ICU, MORTUARY, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, ICU, MORTUARY, NO_EDGE );
             }
             else if (indiv->status == RECOVERED) {
-                transition_one_hospital_event( model, indiv, ICU, DISCHARGED, HOSPITAL_TRANSITION );
+                transition_one_hospital_event( model, indiv, ICU, DISCHARGED, NO_EDGE );
             }
         }
     }

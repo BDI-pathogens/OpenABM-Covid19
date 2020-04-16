@@ -65,4 +65,6 @@ void transition_to_discharged( model *model, individual *indiv );
 int assign_to_ward(individual *indiv, hospital *hospital, int ward_type );
 void release_patient_from_hospital( individual *indiv, hospital *hospital );
 
+int add_patient_to_hospital( model* model, individual *indiv );
+
 #endif /* HOSPITAL_H_ */

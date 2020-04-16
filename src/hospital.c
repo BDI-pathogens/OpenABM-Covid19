@@ -172,7 +172,6 @@ void transition_one_hospital_event(
         int edge
 )
 {
-//    indiv->status           = from;
     indiv->hospital_state = from;
     if( from != NO_EVENT )
         indiv->time_event[from] = model->time;
@@ -197,9 +196,15 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
-    assign_patient_to_hospital( model, indiv );
+    //assign_patient_to_hospital( model, indiv );
 
+    if( add_patient_to_hospital( model, indiv) )
+        transition_one_hospital_event( model, indiv, WAITING, GENERAL, NO_EDGE );
+    else
+        transition_one_hospital_event( model, indiv, WAITING, WAITING, HOSPITAL_TRANSITION );
+    
     intervention_on_hospitalised( model, indiv );
+
     if( indiv->quarantined )
         intervention_quarantine_release( model, indiv );
 
@@ -214,19 +219,19 @@ void transition_to_waiting( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_general( model *model, individual *indiv )
 {
-    int hospital_idx = indiv->hospital_idx;
-    hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
+    set_general_admission( indiv, model->params, 1);
+    // int hospital_idx = indiv->hospital_idx;
+    // hospital* assigned_hospital = &(model->hospitals[hospital_idx]);
 
-    if ( indiv->hospital_state == WAITING )
-    {
-        if ( assign_to_ward( indiv, assigned_hospital, COVID_GENERAL ) == TRUE )
-        {
-            set_general_admission( indiv, model->params, 1);
+    // if( indiv->hospital_state == )
+    // set_general_admission( indiv, model->params, 1);
 
-            if (assigned_hospital->n_patients_waiting > 0 )
-                assigned_hospital->n_patients_waiting--;
-        }
-    }
+    // if ( indiv->hospital_state == NOT_IN_HOSPITAL || indiv->hospital_state == WAITING )
+    // {
+    //     set_general_admission( indiv, model->params, 1);
+    //     if (assigned_hospital->n_patients_waiting > 0 )
+    //         assigned_hospital->n_patients_waiting--;
+    // }
     //TODO: at some point will need to add transition from icu back to general
 }
 /*****************************************************************************************
@@ -287,6 +292,54 @@ void transition_to_discharged( model *model, individual *indiv )
     set_discharged( indiv, model->params, 1);
 }
 
+int add_patient_to_hospital( model* model, individual *indiv )
+{
+    int hospital_idx, ward_idx;
+    int required_ward;
+    hospital* assigned_hospital;
+    int added_to_hospital = FALSE;
+    
+    if( indiv->status == HOSPITALISED || indiv->status == HOSPITALISED_RECOVERING )
+        required_ward = COVID_GENERAL;
+    else if( indiv->status == CRITICAL )
+        required_ward = COVID_ICU;
+    else
+        print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
+    
+    int assigned_hospital_idx = 0;
+    int assigned_ward_idx   = 0;
+
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    {
+        for( ward_idx = 0; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
+        {
+            if( model->hospitals[assigned_hospital_idx].wards[required_ward][assigned_ward_idx].n_patients > model->hospitals[hospital_idx].wards[required_ward][ward_idx].n_patients)
+            {
+                assigned_ward_idx = ward_idx;
+                assigned_hospital_idx = hospital_idx;
+            }
+        }
+    }
+
+    return add_patient_to_ward( &(model->hospitals[assigned_hospital_idx].wards[assigned_ward_idx]), indiv->idx );
+    // if( add_patient_to_ward( &(model->hospitals[assigned_hospital_idx].wards[assigned_ward_idx]), indiv->idx ) == TRUE )
+    // {
+    //     if( required_ward == COVID_GENERAL )
+    //         set_general_admission( indiv, model->params, 1);
+    //     else if ( required_ward == COVID_ICU )
+    //         set_icu_admission( indiv, model->params, 1);
+    //     else
+    //         print_exit("ERROR: added patient to ward that is not COVID_GENERAK or COVID_ICU");
+
+    //     return TRUE;
+    // } else {
+    //     //TODO: find and add to shortest waiting list
+    //     set_waiting( indiv, model->params, 1);
+    //     return FALSE;
+    // }
+}
+
+
 /*****************************************************************************************
 *  Name:		assign_patient_to_hospital
 *  Description: Search a for hospital with bed space, then assign the hospital to that individual based on
@@ -300,15 +353,13 @@ void assign_patient_to_hospital( model* model, individual *indiv )
     int required_ward;
 
     int added_to_hospital = FALSE;
-
+    
     if( indiv->status == HOSPITALISED || indiv->status == HOSPITALISED_RECOVERING )
         required_ward = COVID_GENERAL;
     else if( indiv->status == CRITICAL )
         required_ward = COVID_ICU;
-    // else
-    //     print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
-    if( indiv->idx == 222282 )
-        printf("break");
+    else
+        print_exit("ERROR: Adding individual to hospital who is not in HOSPITALISED/HOSPITALISED_RECOVERING/CRIITICAL state!");
 
     hospital* assigned_hospital;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
