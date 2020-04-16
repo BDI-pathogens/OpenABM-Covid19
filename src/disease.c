@@ -374,6 +374,14 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	set_hospitalised( indiv, model->params, model->time );
 	float patient_waiting_effect = 0;
 
+	// for( int i = 0; i < model->params->n_hospitals; i++ )
+	// 	if( space_in_ward(hospital, COVID_GENERAL) + hospital->pending_admissions[COVID_GENERAL] <)
+
+	//if space in ward:
+	//	transition general, update pending
+	// else 
+	//  transition waiting
+	
 	if ( add_patient_to_hospital(model, indiv) )
 		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
 	else
