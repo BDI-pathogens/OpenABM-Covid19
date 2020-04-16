@@ -196,15 +196,9 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 {
-    //assign_patient_to_hospital( model, indiv );
+    assign_patient_to_hospital( model, indiv );
 
-    if( add_patient_to_hospital( model, indiv) )
-        transition_one_hospital_event( model, indiv, WAITING, GENERAL, NO_EDGE );
-    else
-        transition_one_hospital_event( model, indiv, WAITING, WAITING, HOSPITAL_TRANSITION );
-    
     intervention_on_hospitalised( model, indiv );
-
     if( indiv->quarantined )
         intervention_quarantine_release( model, indiv );
 

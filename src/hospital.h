@@ -30,9 +30,9 @@ struct hospital
     int hospital_idx;               //hospital index number
 
     int n_workers[N_WORKER_TYPES];
-
     int n_patients_waiting; //TODO: have waiting list for general and icu
-
+    int pending_admissions[N_HOSPITAL_WARD_TYPES];
+    
     //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
     //TODO: add non covid patients
 
