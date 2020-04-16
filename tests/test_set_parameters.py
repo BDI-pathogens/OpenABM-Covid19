@@ -9,7 +9,7 @@ class TestSetObjects:
         p = Parameters(read_param_file=True, input_households="tests/data/baseline_household_demographics.csv", input_param_file="tests/data/baseline_parameters.csv",param_line_number=1)
         for key in all_params:
             value = all_params[key][0]
-            assert p.get_param(key) == value, f"{key} was not set properly"
+            assert pytest.approx(p.get_param(key), value), f"{key} was not set properly"
 
     def test_set_params_from_python(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
@@ -21,7 +21,7 @@ class TestSetObjects:
             except TypeError:
                 p.set_param(key, int(value))
             print(f"set {key}")
-            assert p.get_param(key) == value, f"{key} was not set properly"
+            assert pytest.approx(p.get_param(key), value), f"{key} was not set properly"
             p._read_household_demographics()
         print("finished setting params")
 
