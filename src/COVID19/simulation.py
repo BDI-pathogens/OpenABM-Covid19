@@ -209,6 +209,11 @@ class COVID19IBM(Environment):
         """
         Run the simulation through one time step, return the state of the system
         """
+        
+        # If the action is non-empty, then update model parameters in the simulation
+        if action:
+            for param, value in action.items():
+                self.model.update_running_params(param, value)
+        
         self.model.one_time_step()
         return(self.model.one_time_step_results())
-
