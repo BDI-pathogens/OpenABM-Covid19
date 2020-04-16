@@ -61,6 +61,7 @@ def basic_example_lockdown_agent():
     # Run the model for 25 time steps, print output
     sim.steps(25)
     print(sim.results)
+    model.model.write_output_files()
 
 
 
