@@ -27,7 +27,7 @@ def setup_parameters(d: dict = None):
         input_param_file=str(BASELINE_PARAMS),
         param_line_number=1,
         output_file_dir=str(OUTPUT_DIR),
-        input_household_file=str(HOUSEHOLDS),
+        input_households=str(HOUSEHOLDS),
         read_param_file=True,
     )
     if d:

@@ -41,7 +41,7 @@ def setup_params(updated_params: Dict[str, Any] = None):
         input_param_file=os.fspath(BASELINE_PARAMS),
         output_file_dir=os.fspath(OUTPUT_DIR),
         param_line_number=1,
-        input_household_file=os.fspath(HOUSEHOLDS),
+        input_households=os.fspath(HOUSEHOLDS),
         read_param_file=True,
     )
 
