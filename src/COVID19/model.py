@@ -125,10 +125,6 @@ class Parameters(object):
             LOGGER.info(
                 "Have not passed input file for params, use set_param or set_param_dict"
             )
-<<<<<<< HEAD
-
-=======
->>>>>>> black format
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
         self.c_params.output_file_dir = output_file_dir
