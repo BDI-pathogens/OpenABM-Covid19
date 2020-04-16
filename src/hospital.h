@@ -70,8 +70,11 @@ void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
 int  add_patient_to_hospital( model* model, individual *indiv );
 void release_patient_from_hospital( individual *indiv, hospital *hospital );
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type);
+void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, int ward_type );
+long remove_first_patient_from_waiting_list( hospital *hospital, int ward_type );
 
-int hospital_available_beds( hospital* hospital, int ward_type );
+
+int hospital_available_beds( hospital *hospital, int ward_type );
 
 
 #endif /* HOSPITAL_H_ */
