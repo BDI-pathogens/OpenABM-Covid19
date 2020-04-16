@@ -19,18 +19,6 @@ node* initialise_node( long pdx )
     return node;
 }
 
-// waiting_list* initialise_waiting_list()
-// {
-//     waiting_list* waiting_list = malloc( sizeof(waiting_list));
-//     if( !waiting_list )
-//         return NULL;
-    
-//     waiting_list->head = NULL;
-//     waiting_list->size = 0;
-
-//     return waiting_list;
-// }   
-
 void initialise_waiting_list( waiting_list *waiting_list )
 {   
     waiting_list->head = NULL;
@@ -62,18 +50,38 @@ long pop( waiting_list* waiting_list )
     node* next = top->next;
     
     if( top == NULL )
-        return -1;
+        return WAITING_LIST_EMPTY;
     
     retval = top->pdx;
-    top->next = NULL;
-    
+    free( top );
+
     waiting_list->head = next;
     waiting_list->size--;
-    
-    free( top );
 
     return retval;
 }
+
+void remove(long pdx, waiting_list* waiting_list)
+{
+    node *current = waiting_list->head;            
+    node *previous = current;
+
+    while( current != NULL )
+    {           
+        if( current->pdx == pdx )
+        {      
+            previous->next = current->next;
+
+            if( current == waiting_list->head )
+            waiting_list->head = current->next;
+            
+            free( current );
+            return;
+        }                               
+        previous = current;             
+        current = current->next;        
+    }                                 
+}     
 
 void destroy_waiting_list( waiting_list* waiting_list )
 {

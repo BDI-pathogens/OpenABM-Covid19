@@ -374,7 +374,6 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	set_hospitalised( indiv, model->params, model->time );
 	float patient_waiting_effect = 0;
 
-
 	if( assign_patient_to_hospital(model, indiv) )
 	{
 		//set to transition to general ward this timestep 
@@ -398,7 +397,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	}
 	else
         transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);
-
+	//TODO: does the below need to be put back into this location?
 	//TOM: Quarantine lifting and intervention is now handled by transitioning to the "WAITING" hospital state.
 //	if( indiv->quarantined )
 //		intervention_quarantine_release( model, indiv );
@@ -414,8 +413,22 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
+	float patient_waiting_effect = 0;
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+	if( assign_patient_to_hospital(model, indiv) )
+	{
+		//set to transition to general ward this timestep 
+		transition_one_hospital_event( model, indiv, indiv->hospital_state, ICU, NO_EDGE );
+	}
+	else
+	{
+		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
+		transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
+		transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION ); 
+		patient_waiting_effect = 0.1;
+	}
+
+	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] + patient_waiting_effect ) ) //TODO: check patient_waiting_effect is working correctly
         transition_one_disese_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH);
 	else
 		transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
@@ -443,6 +456,8 @@ void transition_to_recovered( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
 	set_recovered( indiv, model->params, model->time );
+
+	transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
 }
 
 /*****************************************************************************************
@@ -454,4 +469,5 @@ void transition_to_death( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
 	set_dead( indiv, model->params, model->time );
+	transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
 }
