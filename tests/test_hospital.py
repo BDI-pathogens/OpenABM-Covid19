@@ -14,6 +14,7 @@ import subprocess
 import numpy as np, pandas as pd
 import pytest
 
+
 # File paths/ command line parameters
 TEST_DATA_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/baseline_parameters.csv"
 PARAM_LINE_NUMBER = 1
@@ -25,6 +26,15 @@ TEST_OUTPUT_FILE_HOSPITAL = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/
 TEST_INTERACTIONS_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/interactions_Run1.csv"
 EXECUTABLE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src/covid19ibm.exe"
 TEST_HCW_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/hcw_output.csv"
+SRC_DIR = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src"
+
+# Construct the compilation command and compile
+compile_command = "make clean; make all"
+completed_compilation = subprocess.run([compile_command], 
+    shell = True, 
+    cwd = SRC_DIR, 
+    capture_output = True
+    )
 
 
 # Construct the executable command
@@ -128,7 +138,7 @@ class TestClass(object):
         assert len(df_hcw.index) > 0
 
         #Check that interactions file was loaded df_interactions.columns
-        columnArray = df_interactions.columns.values
+        columnArray = df_hcw.columns.values
         np.testing.assert_equal(columnArray, ["HospitalID","eg1","eg2"]) 
 
 
