@@ -24,8 +24,9 @@ TEST_HOSPITAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/ho
 TEST_OUTPUT_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_output.csv"
 TEST_OUTPUT_FILE_HOSPITAL = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_hospital_output.csv"
 TEST_INTERACTIONS_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/interactions_Run1.csv"
+TEST_INDIVIDUAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/individual_file_Run1.csv"
 EXECUTABLE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src/covid19ibm.exe"
-TEST_HCW_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/hcw_output.csv"
+TEST_HCW_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/ward_output.csv"
 SRC_DIR = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src"
 
 # Construct the compilation command and compile
@@ -47,7 +48,8 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
 file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-
+# df_hcw = pd.read_csv(TEST_HCW_FILE)
+# print(df_hcw).head()
 
 # Create a dataframe out of the terminal output
 numHeader = 10
@@ -85,7 +87,6 @@ class TestClass(object):
     def test_interactions(self):
         """
         Test that hospital workers are not in the list of work interactions
-        # Another test: other work networks to make sure no healthcare workers?
         """
         # Load interactions df
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
@@ -110,39 +111,25 @@ class TestClass(object):
         for ind in range(interactionCount):
 
             # If individuals are healthworkers, their work network is zero
-            # TODO: change to new version of healthcare worker network
             if(indivTypeList_1[ind] != nonHealthCareWorkerType):
                 assert indivWorkerNetwork_1[ind] == 0
             if(indivTypeList_2[ind] != nonHealthCareWorkerType):
                 assert indivWorkerNetwork_2[ind] == 0
 
-        # This does the same as above, except much slower
-        # # Iterate over dataframe, check whether healthcare workers have zero as their work network
-        # for index, row in df_interactions.iterrows():
-
-        #     worker_type_1 = row["worker_type_1"]
-        #     worker_type_2 = row["worker_type_2"]
-
-        #     work_network = row["work_network"]
-        #     work_network_2 = row["work_network_2"]
-
-        #     # Worker type healthworker should have work_network = 0
-        #     if(worker_type_1 != nonHealthCareWorkerType):
-        #         assert work_network == 0
-
-        #     # Worker type healthworker should have work_network = 0
-        #     if(worker_type_2 != nonHealthCareWorkerType):
-        #         assert work_network_2 == 0
 
     def test_hcwList(self):
 
+        # Test that healthcare worker IDs correspond to population IDs
         df_hcw = pd.read_csv(TEST_HCW_FILE)
+        df_population = pd.read_csv(TEST_INDIVIDUAL_FILE)
 
-        assert len(df_hcw.index) > 0
+        hcw_idx_list = df_hcw.pdx.values
+        population_idx_list = df_population.ID.values
 
-        #Check that interactions file was loaded df_interactions.columns
-        columnArray = df_hcw.columns.values
-        np.testing.assert_equal(columnArray, ["n_hospitals","n_total_doctors","n_total_nurses"]) 
+        assert all(idx in population_idx_list for idx in hcw_idx_list)
+
+
+    
 
 
 
