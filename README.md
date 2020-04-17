@@ -66,6 +66,19 @@ print(simulation.results_all_simulations)
 
 ```
 
+Examples
+-----
+
+The `examples/` directory contains some very simple Python scripts and Jupyter notebooks for running the model. In particular
+
+1. `examples/example_101.py` - the simplest Python script for running the model
+2. `examples/example_101.ipynb` - the simplest notebook of running the model and plotting some output
+3. `examples/example_102.ipynb` - introduces a lock-down based upon the number of infected people and then after the lock-down turns on digital contact-tracing
+4. `examples/example_extended_output.ipynb` - a detailed notebook analysing many aspect of the model and infection transmission.
+5. `examples/multi_run_simulator.py` - an example of running the model multi-threaded
+
+_____
+
 Tests
 -----
 
