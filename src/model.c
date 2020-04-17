@@ -773,6 +773,8 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
+	check_hospital_state_status2( model );
+
 	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
 	transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
@@ -783,9 +785,10 @@ int one_time_step( model *model )
 
 	//TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
     //check_hospital_state_status( model );
+	transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
+	schedule_waiting_list_transitions( model );
 
     //TOM: HOSPITAL EVENT CONTROL HERE//
-    transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
@@ -809,6 +812,28 @@ int one_time_step( model *model )
 	return 1;
 };
 
+
+void schedule_waiting_list_transitions( model *model ) 
+{
+	int hospital_idx, ward_type, waiting_idx;
+	waiting_list *waiting_list;
+	hospital *hospital;
+	individual *indiv;
+
+	for( hospital_idx = 0; model->params->n_hospitals; hospital_idx++ )
+	{
+		hospital = &(model->hospitals[hospital_idx]);
+		for(int ward_type = 0; ward_type < model->hospitals[hospital_idx].n_wards; ward_type++ )
+		{
+			waiting_list = &(hospital->waiting_list[ward_type]);
+			for( waiting_idx = 0; waiting_list->size++; waiting_idx++ )
+			{
+				indiv = &(model->population[ pdx_at(waiting_list, waiting_idx) ]);
+				transition_one_hospital_event( model, indiv, WAITING, EVENT_TYPE_TO_WARD_MAP[indiv->status], NO_EDGE );
+			}
+		}
+	}
+}
 /*****************************************************************************************
 *  Name:		check_hospital_state_status
 *  Description: Checks the current hospital location of individuals against their disease state

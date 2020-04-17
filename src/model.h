@@ -118,6 +118,7 @@ void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_network(model *model);
 void build_random_network( model *model );
 void check_hospital_state_status( model *model );
+void schedule_waiting_list_transitions( model *model ) 
 
 
 #endif /* MODEL_H_ */

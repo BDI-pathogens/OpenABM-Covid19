@@ -353,9 +353,12 @@ int assign_patient_to_hospital( model* model, individual *indiv )
     }
 
     indiv->hospital_idx = assigned_hospital_idx;
-    add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), required_ward );
-
-    return available_beds > 0;
+    if( available_beds < 0 )
+    {
+        add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), required_ward );    
+        return FALSE;
+    }
+    return TRUE;
 }
 
 /*****************************************************************************************
