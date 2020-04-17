@@ -129,23 +129,11 @@ typedef struct{
 	int lockdown_elderly_time_off;					// lockdown elderly turned off at this time
 	int lockdown_elderly_on;						// is lockdown elderly currently on
 
-	int successive_lockdown_time_on;               // successive lockdowns are turned on at this time
-	int successive_lockdown_duration;              // successive lockdowns last for this duration
-	int successive_lockdown_gap;                   // successive lockdowns will have this duration of gap between them
-	
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int interventions_on;           // should we use interventions
 	int intervention_start_time;	// time at which interventions start
-
-	double TEMP_intervention_trigger_n_infected; // start interventions when n_infected is above a threshold
-	double TEMP_lockdown_trigger_n_infected; 	 // start lockdown when n_infected is above a threshold
-	int TEMP_lockdown_trigger_length;			 // length of lockdown after a trigger
-	int TEMP_lockdown_trigger_keep_elderly;  	 // keep elderly lockdown after the main triggered lockdown
-	int TEMP_lockdown_trigger_app_on_end;		 // start the app at the end of lockdown
-	int TEMP_lockdown_trigger_time_to_test;      // start testing symptomatic at a time after testing
-
 
 	int sys_write_individual; 		// Should an individual file be written to output?
 	

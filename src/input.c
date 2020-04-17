@@ -372,15 +372,6 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
 	
-	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_time_on));
-	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_time_on)\n"); };
-	
-	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_duration));
-	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_duration)\n"); };
-	
-	check = fscanf(parameter_file, " %i ,", &(params->successive_lockdown_gap));
-	if( check < 1){ print_exit("Failed to read parameter successive_lockdown_gap)\n"); };
-	
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
@@ -390,24 +381,6 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
     if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_intervention_trigger_n_infected));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_intervention_trigger_n_infected)\n"); };
-
-    check = fscanf(parameter_file, " %lf ,", &(params->TEMP_lockdown_trigger_n_infected));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_n_infected)\n"); };
-
-    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_length));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_length)\n"); };
-
-    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_keep_elderly));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_keep_elderly)\n"); };
-
-    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_app_on_end));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_app_on_end)\n"); };
-
-    check = fscanf(parameter_file, " %i,", &(params->TEMP_lockdown_trigger_time_to_test));
-    if( check < 1){ print_exit("Failed to read parameter TEMP_lockdown_trigger_time_to_test)\n"); };
-	
 	fclose(parameter_file);
 }
 
