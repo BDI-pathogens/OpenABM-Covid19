@@ -1,0 +1,54 @@
+# Mac-related files
+.DS_Store
+
+# File associated with compilation/linking
+src/*.o
+src/*.exe
+src/*.csv
+examples/results/*.csv
+# Python testing files
+__pycache__
+.mypy_cache/
+
+# Eclipse-related files
+.project
+.cproject
+.settings
+.pydevproject
+
+# temp copies
+*~
+
+# latex unwanted files
+documentation/*copy*
+documentation/*synctex*
+documentation/*.log
+documentation/*.aux
+documentation/*.key
+documentation/*.dvi
+documentation/*.blg
+documentation/*.bbl
+documentation/*.out
+documentation/*.toc
+
+# R-related files
+.Rhistory
+
+# performance related
+performance/*.trace
+performance/*.dtps
+
+scratch/*
+
+src_test/*
+data_test/*
+
+venv/*
+
+src/covid19.py
+src/covid19_wrap.c
+
+sandbox/*.csv
+examples/*.csv
+examples/.ipynb_checkpoints
+sandbox/.ipynb_checkpoints
