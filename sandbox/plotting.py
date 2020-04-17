@@ -6,21 +6,41 @@ Created: 30 March 2020
 Author: p-robot
 """
 
-import numpy as np, pandas as pd
-from matplotlib import pyplot as plt
-from matplotlib import cm
-from scipy.stats import gamma
-from pandas.api.types import CategoricalDtype
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
 import os, re
 from os.path import join
 
-from constant import N_NETWORK_TYPES, HOUSEHOLD, WORK, RANDOM, EVENT_TYPES, EVENT_TYPE_STRING
+import numpy as np, pandas as pd
+from pandas.api.types import CategoricalDtype
+from scipy.stats import gamma
+
+from matplotlib import pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 network_colours = ['#009E73', '#0072B2', '#D55E00']
 
+EVENT_TYPE_STRING = {
+    0: "Uninfected",
+    1: "Presymptomatic (severe)",
+    2: "Presymptomatic (mild)",
+    3: "Asymptomatic",
+    4: "Symptomatic (severe)",
+    5: "Symptomatic (mild)",
+    6: "Hospitalised",
+    7: "ICU", 
+    8: "Recovering in hospital",
+    9: "Recovered",
+    10: "Dead",
+    11: "Quarantined", 
+    12: "Quarantined release",
+    13: "Test taken", 
+    14: "Test result",
+    15: "Case", 
+    16: "Trace token release",
+    17: "N event types"
+    }
+
 key_params = [
-    "n_total", 
     "n_seed_infection", 
     "infectious_rate", 
     "asymptomatic_infectious_factor", 
@@ -59,12 +79,6 @@ sensitivity_analysis_params = [
     "relative_susceptibility_80",
     "mean_infectious_period",
     "relative_transmission_household"]
-
-
-network_labels = [ None ] * N_NETWORK_TYPES
-network_labels[HOUSEHOLD] = "Household"
-network_labels[WORK] = "Workplace"
-network_labels[RANDOM] = "Random"
 
 
 asymptomatic_cols = [
@@ -121,6 +135,13 @@ app_users_cols = [
     "app_users_fraction_60_69", "app_users_fraction_70_79",
     "app_users_fraction_80"]
 
+population_cols = [
+    "population_0_9", "population_10_19",
+    "population_20_29", "population_30_39",
+    "population_40_49", "population_50_59", 
+    "population_60_69", "population_70_79", 
+    "population_80"]
+
 intervention_params = [
     "self_quarantine_fraction", 
     "quarantine_length_self", 
@@ -163,9 +184,6 @@ intervention_params = [
     "lockdown_time_off",
     "lockdown_elderly_time_on",
     "lockdown_elderly_time_off",
-    "successive_lockdown_time_on",
-    "successive_lockdown_duration",
-    "successive_lockdown_gap",
     "testing_symptoms_time_on",
     "testing_symptoms_time_off",
     "intervention_start_time"]
@@ -207,6 +225,7 @@ def get_discrete_viridis_colours(n):
 
 
 def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontimevar,
+    nonsymptomatic_status, symptomatic_status, event_types_label_dict, 
     start = 1, stop = 100, window = 5, ylims = None):
     """
     Plot proportion of transmissions through time according to disease state
@@ -224,6 +243,10 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
         List of disease states
     infectiontimevar : str
         Variable name specifying time of infection (default -1 if never infected)
+    nonsymptomatic_status : list
+        Values of column `groupvar` that code for nonsymptomatic disease status 
+    symptomatic_status
+        Values of column `groupvar` that code for symptomatic disease status 
     start : int
         Time at which to start plotting
     stop : int
@@ -239,7 +262,7 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
     cat_type = CategoricalDtype(categories = groups, ordered = False)
     df_trans[groupvar] = df_trans[groupvar].astype(cat_type)
     
-    bins = overlapping_bins(start = start, stop = stop, window = window, by = 1)
+    bins = overlapping_bins(start = start, stop = stop + window, window = window, by = 1)
     
     # Find proportion of transmissions from each "infector_status" through a sliding window
     output = []
@@ -267,7 +290,7 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
     ax[0].set_xlim([start, stop])
     
     ax[0].set_xlabel(""); ax[0].set_ylabel(""); 
-    ax[0].legend(prop = {'size':16})
+    ax[0].legend(prop = {'size':12})
     ax[0].spines["top"].set_visible(False)
     ax[0].spines["right"].set_visible(False)
     
@@ -276,21 +299,10 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
     for tick in ax[0].yaxis.get_major_ticks():
         tick.label.set_fontsize(14)
     
-    # Add total non-symptomatic
-    nonsymptomatic_status = [
-        EVENT_TYPES.ASYMPTOMATIC.value, 
-        EVENT_TYPES.PRESYMPTOMATIC.value, 
-        EVENT_TYPES.PRESYMPTOMATIC_MILD.value]
-    
     non = df[df[groupvar].isin(nonsymptomatic_status)]
     df_non = non.groupby("time")["proportion"].sum().reset_index()
     ax[1].plot(df_non.time, 100*df_non.proportion, 
         label = "Non-symptomatic (total)", lw = 3, c = "#E69F00")
-    
-    # Add total symptomatic
-    symptomatic_status = [
-        EVENT_TYPES.SYMPTOMATIC.value,
-        EVENT_TYPES.SYMPTOMATIC_MILD.value]
     
     sym = df[df[groupvar].isin(symptomatic_status)]
     df_sym = sym.groupby("time")["proportion"].sum().reset_index()
@@ -299,7 +311,7 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
     
     ax[1].set_xlabel(""); 
     ax[1].set_ylabel("Percent incidence\nover next 5 days\n", size = 16)
-    ax[1].legend(prop = {'size':16})
+    ax[1].legend(prop = {'size':12})
     ax[1].spines["top"].set_visible(False)
     ax[1].spines["right"].set_visible(False)
     
@@ -319,14 +331,14 @@ def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontime
     for status in non_zero_status:
         df_plot = df[df[groupvar] == status]
         ax[2].plot(df_plot.time, 100*df_plot.proportion, 
-            label = EVENT_TYPE_STRING[EVENT_TYPES(status).value], 
+            label = event_types_label_dict[status], 
             lw = 3)
     
     ax[2].spines["top"].set_visible(False)
     ax[2].spines["right"].set_visible(False)
     ax[2].set_xlabel("Day since infection seeded", size = 20)
     ax[2].set_ylabel("Percent incidence\nover next 5 days\n", size = 16)
-    ax[2].legend(prop = {'size':16})
+    ax[2].legend(prop = {'size':12})
     
     for tick in ax[2].xaxis.get_major_ticks():
         tick.label.set_fontsize(14)
@@ -667,16 +679,19 @@ def BarByGroup(df, groupvar, binvar, bins = None, groups = None, group_labels = 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    ax.set_xlabel(xlabel, size = 16)
-    ax.set_ylabel(ylabel, size = 16)
+    ax.set_xlabel(xlabel, size = 18)
+    ax.set_ylabel(ylabel, size = 18)
     ax.set_title(title, size = 20)
     
     if xlimits is not None:
         ax.set_xlim(xlimits)
     
     if xticklabels is not None:
-        ax.set_xticks(bin_list)
-        ax.set_xticklabels(xticklabels, size = 12)
+        ax.set_xticks(bin_list + n_groups/2*width - width/2.)
+        ax.set_xticklabels(xticklabels, size = 14)
+    
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(14)
     
     return(fig, ax)
 
@@ -763,9 +778,13 @@ def add_heatmap_to_axes(ax, df,
     array, xbins, ybins = np.histogram2d(df[group1var].values, df[group2var].values, bin_list)
     
     if normalise:
-        array = array/array.sum(axis = 0)
+        
+        norm = array/array.sum(axis = 0)
+        
+        array = norm
+        
     
-    im = ax.imshow(array, origin = 'lower', aspect = "equal")
+    im = ax.imshow(array, origin = "lower", aspect = "equal")
     
     return(ax, im)
 
@@ -1115,7 +1134,7 @@ def PlotHistByAge(df,
         
         for bi in range(len(bins) - 1):
             ax[axi].text(bins[bi] + 0.425, height[bi], str(np.round(height[bi], 2)), 
-                ha = "center", va = "bottom", color = "grey")
+                ha = "center", va = "bottom", color = "grey", size = 12)
         
         ax[axi].set_xlim([0, np.max(bins)])
         ax[axi].spines["top"].set_visible(False)

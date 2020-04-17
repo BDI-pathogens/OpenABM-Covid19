@@ -436,9 +436,9 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"hazard,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"time_infected,");
-	fprintf(individual_output_file,"time_presypmtomatic,");
-	fprintf(individual_output_file,"time_presypmtomatic_mild,");
-	fprintf(individual_output_file,"time_presypmtomatic_severe,");
+	fprintf(individual_output_file,"time_presymptomatic,");
+	fprintf(individual_output_file,"time_presymptomatic_mild,");
+	fprintf(individual_output_file,"time_presymptomatic_severe,");
 	fprintf(individual_output_file,"time_symptomatic,");
 	fprintf(individual_output_file,"time_symptomatic_mild,");
 	fprintf(individual_output_file,"time_symptomatic_severe,");
