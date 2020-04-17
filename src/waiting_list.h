@@ -29,6 +29,7 @@ struct waiting_list
 node* initialise_node( long pdx );
 void initialise_waiting_list( waiting_list *waiting_list );
 
+long pdx_at( waiting_list* waiting_list, int idx );
 void push( long pdx, waiting_list *waiting_list );
 long pop( waiting_list* waiting_list );
 void remove_patient( long pdx, waiting_list* waiting_list);

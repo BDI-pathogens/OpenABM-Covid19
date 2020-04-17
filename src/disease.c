@@ -383,7 +383,6 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	{
 		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
 		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
-		transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION ); 
 		patient_waiting_effect = 0.1;
 	}
 
@@ -422,9 +421,13 @@ void transition_to_critical( model *model, individual *indiv )
 	}
 	else
 	{
+		if( indiv->hospital_state == WAITING )
+			remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), GENERAL );
+		else
+			transition_one_hospital_event( model, indiv, GENERAL, WAITING, NO_EDGE );	
 		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
-		transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
-		transition_one_hospital_event( model, indiv, WAITING, GENERAL, HOSPITAL_TRANSITION ); 
+		
+		//transition_one_hospital_event( model, indiv, WAITING, ICU, HOSPITAL_TRANSITION ); 
 		patient_waiting_effect = 0.1;
 	}
 
