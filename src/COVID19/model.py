@@ -35,6 +35,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_on",
     "app_turned_on",
     "app_users_fraction",
+    "trace_on_symptoms"
 ]
 
 class EVENT_TYPES(enum.Enum):
