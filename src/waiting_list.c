@@ -25,6 +25,17 @@ void initialise_waiting_list( waiting_list *waiting_list )
     waiting_list->size = 0;
 }   
 
+long pdx_at( waiting_list* waiting_list, int idx )
+{
+    int i = 0;
+    node* current = waiting_list->head;
+    
+    while( i < idx )
+        current = current->next;
+
+    return current->pdx;
+}
+
 void push( long pdx, waiting_list *waiting_list )
 {
     node *current = NULL;
