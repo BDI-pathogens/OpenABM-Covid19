@@ -75,9 +75,6 @@ int main(int argc, char *argv[])
 		last_test = n_total( model, TEST_RESULT );
 	};
 
-	printf( "# death = %li \n", n_current( model, DEATH  ) );
-
-
 	printf( "\n# End_time:                      %i\n",  model->time );
 	printf( "# Total population:              %li\n", params.n_total );
 	printf( "# Total edges in network:        %li\n", model->random_network->n_edges );
@@ -86,6 +83,7 @@ int main(int argc, char *argv[])
 	printf( "# Total cases:                   %li\n", n_total( model, CASE ) );
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		printf( "# Total cases %11s:       %li\n", AGE_TEXT_MAP[idx], n_total_age( model, CASE, idx ) );
+	printf( "# Total deaths:                  %li\n", n_total( model, DEATH ) );
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		printf( "# Total deaths %11s:      %li\n", AGE_TEXT_MAP[idx], n_total_age( model, DEATH, idx ) );
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
