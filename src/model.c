@@ -773,8 +773,6 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
-	check_hospital_state_status2( model );
-
 	transition_events( model, SYMPTOMATIC,       &transition_to_symptomatic,      FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  &transition_to_symptomatic_mild, FALSE );
 	transition_events( model, HOSPITALISED,      &transition_to_hospitalised,     FALSE );
@@ -784,11 +782,9 @@ int one_time_step( model *model )
 	transition_events( model, DEATH,             &transition_to_death,            FALSE );
 
 	//TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-    //check_hospital_state_status( model );
-	transition_events( model, WAITING,         &transition_to_waiting,  FALSE );
-	schedule_waiting_list_transitions( model );
+	hsopital_transition_scheduler( model );
 
-    //TOM: HOSPITAL EVENT CONTROL HERE//
+	transition_events( model, WAITING,           &transition_to_waiting,  FALSE );
     transition_events( model, GENERAL,         &transition_to_general,  FALSE );
     transition_events( model, ICU,             &transition_to_icu,      FALSE );
     transition_events( model, MORTUARY,        &transition_to_mortuary, FALSE );
@@ -812,6 +808,59 @@ int one_time_step( model *model )
 	return 1;
 };
 
+void hsopital_transition_scheduler( model *model )
+{
+		long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
+	hospital* hospital;
+	int can_bed_added = FALSE;
+	
+	for(int i = 0; i < hospital->waiting_list[COVID_GENERAL].size; i++ )
+	{
+		indiv = pdx_at( &( hospital->waiting_list[COVID_GENERAL] ), i);
+
+		can_bed_added = hospital_available_beds(hospital, COVID_GENERAL) + i > 0;
+		if( can_bed_added )
+			transition_one_hospital_event(model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
+		else
+			if( indiv->hospital_state == NOT_IN_HOSPITAL )
+				transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
+	}
+}
+
+void swap_waiting_general_and_icu_patients( model *model )
+{
+	hospital *hospital;
+	waiting_list patient_general_list, patient_icu_list;
+	initialise_waiting_list( &(patient_general_list) );
+	initialise_waiting_list( &(patient_icu_list) );
+	
+	for( int ward_idx = 0; hospital->n_wards[COVID_GENERAL]; ward_idx++ )
+		for( int patient_pdx = 0; hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_pdx++ )
+			if( patient_pdx != NO_PATIENT && model->population[patient_pdx].status == CRITICAL )
+				push_back( patient_pdx, &patient_general_list);
+
+	for( int ward_idx = 0; hospital->n_wards[COVID_ICU]; ward_idx++ )
+		for( int patient_pdx = 0; hospital->wards[COVID_ICU][ward_idx].n_beds; patient_pdx++ )
+			if( patient_pdx != NO_PATIENT && model->population[patient_pdx].status == GENERAL )
+				push_back( patient_pdx, &patient_icu_list);
+	
+	int idx = 0;
+	while( idx < patient_general_list.size && idx < patient_icu_list.size )
+	{
+		individual *indiv_general = &model->population[ pdx_at( &patient_general_list, idx )];
+		individual *indiv_icu   = &model->population[ pdx_at( &patient_icu_list, idx )];
+		remove_patient_from_ward( hospital->ward[COVID_GENERAL][] );
+	}
+
+	for(int patient_idx; hospital->)
+	for(int patient_idx; hospital->)
+
+	for(int i = 0; i < hospital->waiting_list[COVID_GENERAL].size; i++ )
+	{
+}
+
 
 void schedule_waiting_list_transitions( model *model ) 
 {
@@ -829,7 +878,8 @@ void schedule_waiting_list_transitions( model *model )
 			for( waiting_idx = 0; waiting_list->size++; waiting_idx++ )
 			{
 				indiv = &(model->population[ pdx_at(waiting_list, waiting_idx) ]);
-				transition_one_hospital_event( model, indiv, WAITING, EVENT_TYPE_TO_WARD_MAP[indiv->status], NO_EDGE );
+				if( indiv->status == WAITING)
+					transition_one_hospital_event( model, indiv, WAITING, EVENT_TYPE_TO_WARD_MAP[indiv->status], NO_EDGE );
 			}
 		}
 	}

@@ -75,6 +75,7 @@ long remove_first_patient_from_waiting_list( hospital *hospital, int ward_type )
 
 
 int hospital_available_beds( hospital *hospital, int ward_type );
+int find_least_full_hospital(model* model, int required_ward);
 
 
 #endif /* HOSPITAL_H_ */
