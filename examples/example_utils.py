@@ -18,6 +18,7 @@ def get_baseline_parameters():
     return params
 
 def get_simulation( params ):
+    params.set_param( "end_time", 500 )
     model = simulation.COVID19IBM(model = Model(params))
     sim = simulation.Simulation(env = model, end_time = params.get_param( "end_time" ) )
     return sim
