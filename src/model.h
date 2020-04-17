@@ -118,7 +118,10 @@ void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_network(model *model);
 void build_random_network( model *model );
 void check_hospital_state_status( model *model );
-void schedule_waiting_list_transitions( model *model ) 
+
+void schedule_waiting_list_transitions( model *model );
+void hsopital_transition_scheduler( model *model );
+void swap_waiting_general_and_icu_patients( model *model );
 
 
 #endif /* MODEL_H_ */

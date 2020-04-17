@@ -374,6 +374,9 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	set_hospitalised( indiv, model->params, model->time );
 	float patient_waiting_effect = 0;
 
+	int hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
+	add_patient_to_waiting_list( indiv, &(model->hospitals[hospital_idx]), COVID_GENERAL );
+
 	if( assign_patient_to_hospital(model, indiv) )
 	{
 		//set to transition to general ward this timestep 
