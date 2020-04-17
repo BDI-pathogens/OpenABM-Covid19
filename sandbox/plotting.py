@@ -483,7 +483,7 @@ def ParameterAssumptions(df_parameters, xlimits = [0, 30], lw = 3):
     
     a, b = gamma_params(df.mean_time_hospitalised_recovery, df.sd_time_hospitalised_recovery)
     ax[2,1].plot(x, gamma.pdf(x, a = a, loc = 0, scale = b), linewidth= lw, color = "#0072B2")
-    ax[2,1].axvline(df.mean_asymptomatic_to_recovery.values, color = "#D55E00", 
+    ax[2,1].axvline(df.mean_time_hospitalised_recovery.values, color = "#D55E00", 
         linestyle = "dashed", alpha = 0.7)
     ax[2,1].set_xlabel("Time to recover\n(from hospitalisation to discharge if not ICU\nor from ICU discharge to discharge if ICU; days)")
     ax[2,1].set_title("")
@@ -603,6 +603,12 @@ def EpidemicCurves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
         ax[i].legend(loc = "center left")
         ax[i].set_xlim(xlimits)
         
+        for tick in ax[i].xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+    
+        for tick in ax[i].yaxis.get_major_ticks():
+            tick.label.set_fontsize(12)
+        
         if i == 3:
             ax[i].set_xlabel("Day since infection seeded", size = 18)
         else:
@@ -689,6 +695,9 @@ def BarByGroup(df, groupvar, binvar, bins = None, groups = None, group_labels = 
     if xticklabels is not None:
         ax.set_xticks(bin_list + n_groups/2*width - width/2.)
         ax.set_xticklabels(xticklabels, size = 14)
+    
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(14)
     
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(14)
@@ -845,196 +854,43 @@ def transmission_heatmap_by_age(df,
     return(fig, ax)
 
 
-
-def transmission_heatmap_by_age_by_panels(df, 
-        group1var, group2var, panelvar, 
-        NBINS = None,
-        groups = None,
-        group_labels = None,
-        panels = None,
-        panel_labels = None,
-        xlabel = "",
-        ylabel = "",
-        legend_title = "", legend_loc = "right",
-        xticklabels = None, yticklabels = None,
-        normalise = False
-    ):
+def PlotInteractionsByAge(df_interact, groupvar, group_labels, 
+    xlabel = "", ylabel = "", legend_title  = "", title = "", nbins = 40):
     """
-    Plot subplots of heatmaps of transmissions from one age group to another across
-    
-    Arguments
-    ---------
-    group1var : str
-        Column name of first grouping variable (x-axis in heatmap)
-    group2var : str
-        Column name of second grouping variable (x-axis in heatmap)
-    panelvar
-        Column name of variable for making panels
-    NBINS
-        Number of bins
-    group_labels
-    normalise
-    
     """
-    
-    bin_list = np.arange(NBINS)
-    
-    if not panels: 
-        panels = np.unique(df[panelvar])
-    n_panels = len(panels)
-    
-    if not panel_labels:
-        panel_labels = panels
-    
-    fig, ax = plt.subplots(ncols = n_panels)
-    
-    ax[0].set_ylabel(ylabel, size = 16)
-    for i, panel in enumerate(panels):
-        
-        df_sub = df.loc[df[panelvar] == panel]
-        
-        ax[i], im = add_heatmap_to_axes(ax[i], df_sub, group1var, group2var, bin_list, normalise)
-        
-        ax[i] = adjust_ticks(ax[i], xtick_fontsize = 14, ytick_fontsize = 14, 
-            xticklabels = xticklabels, yticklabels = yticklabels)
-        
-        if i > 0:
-            ax[i].set_yticks([])
-        
-        ax[i].set_xlabel(xlabel, size = 16)
-        ax[i].set_title(panel_labels[i], size = 20)
-    
-    divider = make_axes_locatable(ax[2])
-    cax = divider.append_axes('right', size = "7%", pad = 0.2,)
-    
-    cbar = fig.colorbar(im, fraction = 0.046, pad = 0.04, cax = cax)
-    cbar.set_label(legend_title, size = 18)
-    
-    return(fig, ax)
-
-
-
-def PlotInteractionsByAge(df_interact):
-    """
-    
-    """
-    a = 1.0
     
     # Aggregate by age group and ID
-    df_agg = df_interact.groupby(["age_group", "ID"]).size().reset_index(name = "counts")
+    df_agg = df_interact.groupby([groupvar, "ID"]).size().reset_index(name = "counts")
     
     # Define age groups, size of bins
-    age_groups = np.unique(df_agg.age_group)
-    n_age_groups = len(age_groups)
-    bins = np.arange(50)
-    age_groups_labels = ["{} - {} years".format(10*i, 10*age_groups[i+1]-1) for i in np.arange(0, n_age_groups-1)]
-    age_groups_labels = age_groups_labels + ["80+ years"]
+    groups = np.unique(df_agg[groupvar])
+    n_groups = len(groups)
+    bins = np.arange(nbins)
     
     # Split by age group
-    hists = [df_agg.loc[df_agg.age_group == age].counts for age in age_groups]
-
-    # Define the colourmap
-    colours = get_discrete_viridis_colours(n_age_groups)
+    hists = [df_agg.loc[df_agg[groupvar] == g].counts for g in groups]
     
+    # Define the colourmap
+    colours = get_discrete_viridis_colours(n_groups)
     
     fig, ax = plt.subplots()
     ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
-    ax.hist(hists, bins, stacked = True, label = age_groups_labels, width = 0.8, alpha = a, color = colours, edgecolor = "#0d1a26", linewidth = 0.5, zorder = 3)
+    ax.hist(hists, bins, stacked = True, label = group_labels, 
+        width = 0.8, color = colours, edgecolor = "#0d1a26", linewidth = 0.5, zorder = 3)
+    
     ax.set_xlim([0, np.max(bins)])
-
-    legend = ax.legend(loc = 'right', borderaxespad = 0, frameon = False, prop = {'size': 16}, fontsize = "x-large")
-    legend.set_title("Age group", prop = {'size':18})
+    
+    legend = ax.legend(loc = 'right', borderaxespad = 0, frameon = False, 
+        prop = {'size': 16}, fontsize = "x-large")
+    
+    legend.set_title(legend_title, prop = {'size':18})
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    ax.set_xlabel("Number of daily connections", size = 16)
+    ax.set_xlabel(xlabel, size = 16)
     ax.set_ylabel("Count", size = 16)
-    ax.set_title("Number of daily interactions by age group", size = 20)
-    
-    return(fig, ax)
-
-
-
-
-
-def PlotREffective(df_indiv, df_trans, start = 1, stop = 100, window = 5):
-    
-    bins = overlapping_bins(start = start, stop = stop, window = window, by = 1)
-    
-    Reff = []
-    Reff_std = []
-    Reff_q025 = []
-    Reff_q975 = []
-    
-    Reff_pre = []
-    Reff_asym = []
-    Reff_sym = []
-    
-    for b in bins:
-        
-        # Of those infectious at time b[0]
-        cond1 = (df_indiv["time_presypmtomatic"] < b[0]) & (df_indiv["time_presypmtomatic"] != -1)
-        cond2 = (df_indiv["time_symptomatic"] < b[0]) & (df_indiv["time_symptomatic"] != -1)
-        cond3 = (df_indiv["time_asymptomatic"] < b[0]) & (df_indiv["time_asymptomatic"] != -1)
-        
-        cond4 = (df_indiv["time_hospitalised"] > b[0]) | (df_indiv["time_hospitalised"] == -1)
-        cond5 = (df_indiv["time_critical"] > b[0]) | (df_indiv["time_critical"] == -1)
-        cond6 = (df_indiv["time_death"] > b[0]) | (df_indiv["time_death"] == -1 )
-        cond7 = (df_indiv["time_recovered"] > b[0]) | (df_indiv["time_recovered"] == -1)
-        
-        df_infected = df_indiv[(cond1 | cond2 | cond3) & (cond4 & cond5 & cond6 & cond7)]
-        
-        cond8 = cond1 & (df_infected["time_symptomatic"] > b[0])
-        df_presymptomatic = df_indiv[cond8]
-        
-        cond9 = cond3 & cond7
-        df_asymptomatic = df_indiv[cond9]
-        
-        cond10 = cond2 & cond4 & cond5 & cond6 & cond7
-        df_symptomatic = df_indiv[cond10]
-        
-        # Find infection events where these people were the infector (ID_2)
-        cat_type = CategoricalDtype(categories = df_infected.ID.values, ordered = False)
-        R = df_trans.ID_2.astype(cat_type).value_counts().reset_index(name = "R")
-        
-        R.columns = ["ID", "R"]
-        Reff.append(R.R.mean())
-        Reff_std.append(R.R.std()/np.sqrt(R.shape[0]))
-        Reff_q025.append(np.quantile(R.R.values, 0.025))
-        Reff_q975.append(np.quantile(R.R.values, 0.975))
-        
-        cat_type = CategoricalDtype(categories = df_presymptomatic.ID.values, ordered = False)
-        R_pre = df_trans.ID_2.astype(cat_type).value_counts().reset_index(name = "R_pre")
-        R_pre.columns = ["ID", "R"]
-        Reff_pre.append(R_pre.R.mean())
-        
-        if(cond9.sum() > 0):
-            #df_asymptomatic = df_infected[cond9]
-            cat_type = CategoricalDtype(categories = df_asymptomatic.ID.values, ordered = False)
-            R_asym = df_trans.ID_2.astype(cat_type).value_counts().reset_index(name = "R_asym")
-            R_asym.columns = ["ID", "R"]
-            Reff_asym.append(R_asym.R.mean())
-        else:
-            Reff_asym.append(0)
-        
-        cat_type = CategoricalDtype(categories = df_symptomatic.ID.values, ordered = False)
-        R_sym = df_trans.ID_2.astype(cat_type).value_counts().reset_index(name = "R_sym")
-        R_sym.columns = ["ID", "R"]
-        Reff_sym.append(R_sym.R.mean())
-    
-    fig, ax = plt.subplots()
-    ax.plot(np.arange(len(Reff)), Reff, linewidth = 3, 
-        c = "#0072B2", label  = "All infectious")
-    ax.plot(np.arange(len(Reff)), Reff_asym, linewidth = 3, 
-        c = "#E69F00", label = "Asymptomatic")
-    ax.plot(np.arange(len(Reff)), Reff_pre, linewidth = 3, 
-        c = "#CC79A7", label = "Presymptomatic")
-    ax.plot(np.arange(len(Reff)), Reff_sym, linewidth = 3, 
-        c = "#D55E00", label = "Symptomatic")
-    
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+    ax.set_title(title, size = 20)
     
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(16)
@@ -1042,12 +898,6 @@ def PlotREffective(df_indiv, df_trans, start = 1, stop = 100, window = 5):
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(16)
     
-    ax.axhline(1, c = "red", linestyle = "dashed", alpha = 0.6)
-    ax.legend(prop = {'size': 16})
-    ax.set_xlabel("Time since infection seeded", size = 16)
-    ax.set_ylabel("Infections over next {} days".format(window) + 
-        "\nper infectious case ($R_{eff}$)",
-        size = 16)
     
     return(fig, ax)
 
@@ -1163,8 +1013,9 @@ def PlotHistByAge(df,
 
 
 def PlotStackedHistByGroup(df, 
-        groupvar, countvar,
+        groupvar, binvar,
         NBINS = None,
+        groups = None,
         group_labels = None,
         xlabel = "",
         ylabel = "",
@@ -1173,20 +1024,17 @@ def PlotStackedHistByGroup(df,
         xticklabels = None
     ):
     """
-    
     """
-    
-    a = 1.0
-    
     # Define groups and size of groups
-    groups = np.unique(df[groupvar])
+    if not groups:
+        groups = np.unique(df[groupvar])
     n_groups = len(groups)
     
     if group_labels is None:
         group_labels = groups
     
     # Split by group
-    hists = [df.loc[df[groupvar] == state][countvar] for state in groups]
+    hists = [df.loc[df[groupvar] == state][binvar] for state in groups]
     
     # Define the colourmap
     colours = get_discrete_viridis_colours(n_groups)
@@ -1197,7 +1045,7 @@ def PlotStackedHistByGroup(df,
     
     ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
     ax.hist(hists, bins, stacked = True, label = group_labels, width = 0.8, 
-        alpha = a, color = colours, edgecolor = "#0d1a26", linewidth = 0.5, 
+        color = colours, edgecolor = "#0d1a26", linewidth = 0.5, 
         zorder = 3)
     
     ax.set_xlim([0, np.max(bins)])
@@ -1216,8 +1064,14 @@ def PlotStackedHistByGroup(df,
     if xticklabels is not None:
         ax.set_xticklabels(xticklabels)
     else:
-        ax.set_xticks(bins)
+        ax.set_xticks(bins + 0.45)
         ax.set_xticklabels(bins)
+    
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
+    
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(16)
     
     return(fig, ax)
 
