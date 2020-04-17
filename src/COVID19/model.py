@@ -76,18 +76,6 @@ class ChildAdultElderlyEnum(enum.Enum):
     _elderly = 2
 
 
-class AgeGroupEnum(enum.Enum):
-    _0_9 = 0
-    _10_19 = 1
-    _20_29 = 2
-    _30_39 = 3
-    _40_49 = 4
-    _50_59 = 5
-    _60_69 = 6
-    _70_79 = 7
-    _80 = 8
-
-
 class ListIndiciesEnum(enum.Enum):
     _1 = 0
     _2 = 1
