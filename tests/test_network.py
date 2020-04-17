@@ -80,7 +80,7 @@ class TestClass(object):
                 sd_random_interactions_adult     = 4,
                 mean_random_interactions_elderly = 3,
                 sd_random_interactions_elderly   = 3,
-                n_total                          = 10000
+                n_total                          = 50000
             ),
             dict( 
                 mean_random_interactions_child   = 1,
@@ -89,7 +89,7 @@ class TestClass(object):
                 sd_random_interactions_adult     = 2,
                 mean_random_interactions_elderly = 1,
                 sd_random_interactions_elderly   = 2,
-                n_total                          = 50000
+                n_total                          = 100000
             ),
                dict( 
                 mean_random_interactions_child   = 0,
@@ -287,8 +287,7 @@ class TestClass(object):
         
         # check mean and 
         mean = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].mean()
-        sd   = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].std()        
-        np.testing.assert_allclose( mean,   mean_random_interactions_child, rtol = tolerance )
+        sd   = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].std()    
         if mean_random_interactions_child > 0:
             np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = tolerance )
         
