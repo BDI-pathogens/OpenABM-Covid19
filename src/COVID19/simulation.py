@@ -67,7 +67,7 @@ class Simulation:
     """
     Simulation object to run the model and store data across multiple simulations
     """
-    def __init__(self, env, agent = None, end_time = None, verbose = False):
+    def __init__(self, env, agent = Agent(), end_time = None, verbose = False):
         
         
         self.env = env
