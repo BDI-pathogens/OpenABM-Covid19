@@ -294,6 +294,7 @@ int add_patient_to_hospital( model* model, individual *indiv )
     hospital *assigned_hospital;
 
     required_ward = NO_WARD;
+
     assigned_hospital = &(model->hospitals[indiv->hospital_idx]); 
     if( assigned_hospital < 0 )
         print_exit("ERROR: calling add_patient_to_hospital who has not previously been assigned to a hospital!!");
@@ -309,6 +310,7 @@ int add_patient_to_hospital( model* model, individual *indiv )
 
     if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
     {   
+        //TODO only do check if hospital state = waiting? so that transitions for critical -> general can be put in front here
         if( assigned_hospital->waiting_list[required_ward].size > 0 )
             if( indiv->idx != remove_first_patient_from_waiting_list( assigned_hospital, required_ward ) )
                 print_exit( "ERROR: adding patient to hospital who is not at the top of the waiting list!!");
@@ -359,6 +361,25 @@ int assign_patient_to_hospital( model* model, individual *indiv )
         return FALSE;
     }
     return TRUE;
+}
+
+int find_least_full_hospital(model* model, int required_ward)
+{
+    int hospital_idx, avilable_beds;
+
+    int assigned_hospital_idx = 0;
+    int available_beds = hospital_available_beds( &(model->hospitals[assigned_hospital_idx]), required_ward) - model->hospitals[assigned_hospital_idx].waiting_list[required_ward].size;
+    for( hospital_idx = 1; hospital_idx < model->params->n_hospitals; hospital_idx++ )
+    {
+        int next_available_beds = hospital_available_beds( &(model->hospitals[hospital_idx]), required_ward) - model->hospitals[hospital_idx].waiting_list[required_ward].size;
+        
+        if( next_available_beds > available_beds)
+        {
+            assigned_hospital_idx = hospital_idx;
+            available_beds = next_available_beds;
+        }
+    }
+    return assigned_hospital_idx;
 }
 
 /*****************************************************************************************
@@ -427,7 +448,7 @@ void release_patient_from_hospital( individual *indiv, hospital *hospital )
 
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type)
 {
-    push( indiv->idx, &(hospital->waiting_list[ward_type]) );
+    push_back( indiv->idx, &(hospital->waiting_list[ward_type]) );
 }
 
 /*****************************************************************************************

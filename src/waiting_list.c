@@ -36,13 +36,30 @@ long pdx_at( waiting_list* waiting_list, int idx )
     return current->pdx;
 }
 
-void push( long pdx, waiting_list *waiting_list )
+void push_front( long pdx, waiting_list *waiting_list )
+{
+    node* current = NULL;
+
+    if( waiting_list->head = NULL )
+        waiting_list->head = initialise_node( pdx );
+    else 
+    {
+        current = waiting_list->head;
+        waiting_list->head = initialise_node( pdx );
+        waiting_list->head->next = current;
+    }
+    
+    waiting_list->size++;
+}
+
+void push_back( long pdx, waiting_list *waiting_list )
 {
     node *current = NULL;
+
     if( waiting_list->head == NULL )
-    {
         waiting_list->head = initialise_node( pdx );
-    } else {
+    else 
+    {
         current = waiting_list->head; 
         
         while (current->next != NULL )
