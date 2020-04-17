@@ -16,6 +16,7 @@
 #include "constant.h"
 #include "demographics.h"
 #include "interventions.h"
+#include "hospital.h"
 
 
 /*****************************************************************************************
@@ -474,6 +475,7 @@ void write_output_files(model *model, parameters *params)
 		write_transmissions( model );
 		write_trace_tokens( model );
         write_hcw_data( model );
+        write_ward_data( model );
 	}
 }	
 
@@ -767,65 +769,64 @@ void write_hcw_data( model *model )
     char output_file_name[INPUT_CHAR_LEN];
     FILE *hcw_output_file;
 
-    hospital *hospx;
-    long hdx;
-
-    char param_line_number[10];
-    sprintf(param_line_number, "%d", model->params->param_line_number);
-
     // Concatenate file name
     strcpy(output_file_name, model->params->output_file_dir);
     strcat(output_file_name, "/hcw_output");
     strcat(output_file_name, ".csv");
     hcw_output_file = fopen(output_file_name, "w");
 
-    // day = model->interaction_day_idx;
-    // ring_dec( day, model->params->days_of_interactions );
-
-    // Print column names
-    fprintf(hcw_output_file ,"n_hospitals,n_total_doctors,n_total_nurses\n");
-    fprintf(hcw_output_file ,"%li,%i,%i\n",
-            model->params->n_hospitals,
-            model->params->n_total_doctors,
-            model->params->n_total_nurses);
-
-    // TODO: output data here
-    // List of hospitals?
-    //model->hospitals[idx]
-    // for( hdx = 0; hdx < model->params->n_hospitals; hdx++ )
-    // {
-        
-    //     // Reference to particular hospital
-    //     hospx = &(model->hospitals[hdx]);
-
-    //     fprintf(hcw_output_file ,"%li,%i,%i\n",
-    //         model->params->n_hospitals,
-    //         ,
-    //         2);
-    // }
-
-    // int n_total_doctors;
-    // int n_total_nurses;
-    // int n_hospitals;
-    // int n_wards[N_HOSPITAL_WARD_TYPES];
-    // int n_ward_beds[N_HOSPITAL_WARD_TYPES];
-    // int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    // int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    // int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
-
-    // //TODO: Add in finer grained transition times between wards once we have more information on them.
-    // //TOM: Determines timing for hospital event transitions.
-    // double mean_time_hospital_transition; // mean time for movement between hospital locations
-    // double sd_time_hospital_transition; // sd for movement between hospital locations
-
-    // //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
-    // double waiting_infectivity_modifier;
-    // double general_infectivity_modifier;
-    // double icu_infectivity_modifier;
-
+    // Params
+    fprintf(hcw_output_file, "%s\t%d\n", "n_hospitals", model->params->n_hospitals);
+    fprintf(hcw_output_file, "%s\t%d\n", "n_total_doctors", model->params->n_total_doctors);
+    fprintf(hcw_output_file, "%s\t%d\n", "n_total_nurses",  model->params->n_total_nurses);
+    fprintf(hcw_output_file, "%s\t%li\n", "length of n_wards array",  sizeof(model->params->n_wards)/ sizeof(model->params->n_wards[0]));
+    // TODO: add rest of params
 
     fclose(hcw_output_file);
 }
+
+/*****************************************************************************************
+*  Name:        write_ward_data
+*  Description: write data about healthcare workers in each ward
+******************************************************************************************/
+void write_ward_data( model *model)
+{
+    char output_file_name[INPUT_CHAR_LEN];
+    FILE *ward_output_file;
+    int ward_type, ward_idx;
+    //hospital hospx = *(model->hospitals[0]);
+
+    // Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/ward_output");
+    strcat(output_file_name, ".csv");
+    ward_output_file = fopen(output_file_name, "w");
+
+    // Loop over wards
+    // For every ward type
+    fprintf(ward_output_file,"%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses");//, "n_beds");
+
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        // For every ward
+        for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+        {
+            long number_doctors = model->hospitals->wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
+            long number_nurses = model->hospitals->wards[ward_type][ward_idx].n_max_hcw[NURSE]; //model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR];
+
+            fprintf(ward_output_file,"%i,%i,%li,%li\n",ward_idx, ward_type, size_doctor, size_doctors);
+            // Look on stackOverflow?
+
+        }
+    }
+        
+}
+
+// // For every doctor in the ward
+//             for( doctor_idx = 0; ward_idx < model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR]; doctor_idx++)
+
+//                 //fprintf(ward_output_file,"%i,%i\n", ward_idx, ward_type); //,  model->hospitals->n_wards[ward_type]->n_beds);
+//                 fprintf(ward_output_file,"%i\n", model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR]);
 
 
 /*****************************************************************************************
