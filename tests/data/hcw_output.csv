@@ -1,2 +1,4 @@
-n_hospitals,n_total_doctors,n_total_nurses
-1,256397312,1
+n_hospitals	1
+n_total_doctors	-303556520
+n_total_nurses	32766
+length of n_wards array	2
