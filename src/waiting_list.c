@@ -91,6 +91,9 @@ long pop( waiting_list* waiting_list )
 
 void remove_patient(long pdx, waiting_list* waiting_list)
 {
+    if( waiting_list->head == NULL )
+        return;
+
     node *current = waiting_list->head;            
     node *previous = current;
 
@@ -108,7 +111,9 @@ void remove_patient(long pdx, waiting_list* waiting_list)
         }                               
         previous = current;             
         current = current->next;        
-    }                                 
+    } 
+
+    waiting_list->size--;                                
 }     
 
 void destroy_waiting_list( waiting_list* waiting_list )
