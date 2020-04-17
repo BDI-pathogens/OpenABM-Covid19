@@ -878,12 +878,12 @@ class TestClass(object):
         # all presymptomatic vs symptomatic
         N_severe_pre = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_severe"] > 0)
             ]
         )
         N_mild_pre = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_mild"] > 0)
             ]
         )
         
@@ -908,13 +908,13 @@ class TestClass(object):
         for idx in range( constant.N_AGE_GROUPS ):
             N_severe_pre = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_severe"] > 0)
                 & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_mild_pre = len(
                 df_indiv[
-                    (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                    (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_mild"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
