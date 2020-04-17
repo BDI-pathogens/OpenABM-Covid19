@@ -833,32 +833,41 @@ void swap_waiting_general_and_icu_patients( model *model )
 {
 	hospital *hospital;
 	waiting_list patient_general_list, patient_icu_list;
-	initialise_waiting_list( &(patient_general_list) );
-	initialise_waiting_list( &(patient_icu_list) );
-	
-	for( int ward_idx = 0; hospital->n_wards[COVID_GENERAL]; ward_idx++ )
-		for( int patient_pdx = 0; hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_pdx++ )
-			if( patient_pdx != NO_PATIENT && model->population[patient_pdx].status == CRITICAL )
-				push_back( patient_pdx, &patient_general_list);
+	int hospital_idx, ward_idx, patient_idx;
 
-	for( int ward_idx = 0; hospital->n_wards[COVID_ICU]; ward_idx++ )
-		for( int patient_pdx = 0; hospital->wards[COVID_ICU][ward_idx].n_beds; patient_pdx++ )
-			if( patient_pdx != NO_PATIENT && model->population[patient_pdx].status == GENERAL )
-				push_back( patient_pdx, &patient_icu_list);
-	
-	int idx = 0;
-	while( idx < patient_general_list.size && idx < patient_icu_list.size )
+	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
-		individual *indiv_general = &model->population[ pdx_at( &patient_general_list, idx )];
-		individual *indiv_icu   = &model->population[ pdx_at( &patient_icu_list, idx )];
-		remove_patient_from_ward( hospital->ward[COVID_GENERAL][] );
+		initialise_waiting_list( &(patient_general_list) );
+		initialise_waiting_list( &(patient_icu_list) );
+		
+		for( ward_idx = 0; hospital->n_wards[COVID_GENERAL]; ward_idx++ )
+			for( patient_idx = 0; hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
+				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == CRITICAL )
+					push_back( patient_idx, &patient_general_list);
+
+		for( ward_idx = 0; hospital->n_wards[COVID_ICU]; ward_idx++ )
+			for( patient_idx = 0; hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
+				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == GENERAL )
+					push_back( patient_idx, &patient_icu_list);
+		
+		patient_idx = 0;
+		while( patient_idx < patient_general_list.size && patient_idx < patient_icu_list.size )
+		{
+			individual *indiv_general = &model->population[ pdx_at( &patient_general_list, patient_idx )];
+			individual *indiv_icu   = &model->population[ pdx_at( &patient_icu_list, patient_idx )];
+
+			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
+			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
+
+			push_front( indiv_general->idx, &hospital->waiting_list[COVID_ICU] );
+			push_front( indiv_icu->idx, &hospital->waiting_list[COVID_GENERAL] );
+
+			patient_idx++;
+		}
+
+		destroy_waiting_list( &patient_general_list );
+		destroy_waiting_list( &patient_icu_list );
 	}
-
-	for(int patient_idx; hospital->)
-	for(int patient_idx; hospital->)
-
-	for(int i = 0; i < hospital->waiting_list[COVID_GENERAL].size; i++ )
-	{
 }
 
 
