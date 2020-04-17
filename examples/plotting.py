@@ -478,14 +478,14 @@ def ParameterAssumptions(df_parameters, xlimits = [0, 30], lw = 3):
         ha = 'right', va = 'center', transform = ax[2,0].transAxes)
     
     ########################################
-    # Gamma of mean hospitalised to recovery ... if don't go into CRITICAL
-    ########################################... if don't go into critical care: FIXME - definitions
+    # Gamma of mean hospitalised to recovery
+    ########################################
     
     a, b = gamma_params(df.mean_time_hospitalised_recovery, df.sd_time_hospitalised_recovery)
     ax[2,1].plot(x, gamma.pdf(x, a = a, loc = 0, scale = b), linewidth= lw, color = "#0072B2")
     ax[2,1].axvline(df.mean_time_hospitalised_recovery.values, color = "#D55E00", 
         linestyle = "dashed", alpha = 0.7)
-    ax[2,1].set_xlabel("Time to recover\n(from hospitalisation to discharge if not ICU\nor from ICU discharge to discharge if ICU; days)")
+    ax[2,1].set_xlabel("Time to recover\n(from hospitalisation to hospital discharge if not ICU\nor from ICU discharge to hospital discharge if ICU; days)")
     ax[2,1].set_title("")
     ax[2,1].spines["top"].set_visible(False)
     ax[2,1].spines["right"].set_visible(False)
