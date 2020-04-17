@@ -793,7 +793,7 @@ void write_ward_data( model *model)
 {
     char output_file_name[INPUT_CHAR_LEN];
     FILE *ward_output_file;
-    int ward_type, ward_idx;
+    int ward_type, ward_idx, doctor_idx, nurse_idx;
     //hospital hospx = *(model->hospitals[0]);
 
     // Concatenate file name
@@ -804,7 +804,7 @@ void write_ward_data( model *model)
 
     // Loop over wards
     // For every ward type
-    fprintf(ward_output_file,"%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses");//, "n_beds");
+    fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx");
 
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
@@ -813,9 +813,19 @@ void write_ward_data( model *model)
         {
             long number_doctors = model->hospitals->wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
             long number_nurses = model->hospitals->wards[ward_type][ward_idx].n_max_hcw[NURSE]; //model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR];
-
-            fprintf(ward_output_file,"%i,%i,%li,%li\n",ward_idx, ward_type, size_doctor, size_doctors);
-            // Look on stackOverflow?
+            
+            // For every doctor
+            for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+            {
+                int doctor_pdx = model->hospitals->wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
+                fprintf(ward_output_file,"%i,%i,%li,%li,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx);
+            }
+            // Loop for every nurse
+            for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+            {
+                int nurse_pdx = model->hospitals->wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
+                fprintf(ward_output_file,"%i,%i,%li,%li,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx);
+            }
 
         }
     }
