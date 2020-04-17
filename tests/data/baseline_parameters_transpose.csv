@@ -20,7 +20,7 @@ end_time	200
 n_seed_infection	5
 mean_infectious_period	6
 sd_infectious_period	2.5
-infectious_rate	6.75
+infectious_rate	5.75
 mean_time_to_symptoms	6
 sd_time_to_symptoms	2.5
 mean_time_to_hospital	5.14
