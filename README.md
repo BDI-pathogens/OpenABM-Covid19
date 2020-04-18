@@ -69,7 +69,7 @@ print( sim.results )
 Examples
 -----
 
-The `examples/` directory contains some very simple Python scripts and Jupyter notebooks for running the model. In particular
+The `examples/` directory contains some very simple Python scripts and Jupyter notebooks for running the model. The examples must be run from the example directory. In particular
 
 1. `examples/example_101.py` - the simplest Python script for running the model
 2. `examples/example_101.ipynb` - the simplest notebook of running the model and plotting some output
