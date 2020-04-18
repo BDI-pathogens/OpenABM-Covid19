@@ -37,8 +37,6 @@ completed_compilation = subprocess.run([compile_command],
     capture_output = True
     )
 
-#print(type(completed_compilation))
-
 
 # Construct the executable command
 EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
@@ -48,8 +46,6 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
 file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-# df_hcw = pd.read_csv(TEST_HCW_FILE)
-# print(df_hcw).head()
 
 # Create a dataframe out of the terminal output
 numHeader = 10
@@ -118,8 +114,9 @@ class TestClass(object):
 
 
     def test_hcwList(self):
-
-        # Test that healthcare worker IDs correspond to population IDs
+        """
+        Test that healthcare worker IDs correspond to population IDs
+        """
         df_hcw = pd.read_csv(TEST_HCW_FILE)
         df_population = pd.read_csv(TEST_INDIVIDUAL_FILE)
 
@@ -128,6 +125,17 @@ class TestClass(object):
 
         assert all(idx in population_idx_list for idx in hcw_idx_list)
 
+    
+    def test_hcwOnce(self):
+        """
+        Test that healthcare workers IDs appear only once in the hcw file and therefore only belong to one ward/ hospital
+        """
+        df_hcw = pd.read_csv(TEST_HCW_FILE)
+
+        hcw_idx_list = df_hcw.pdx.values
+
+        # Test no duplicates
+        assert len(hcw_idx_list) == len(set(hcw_idx_list))
 
     
 
