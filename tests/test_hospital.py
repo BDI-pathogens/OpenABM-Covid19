@@ -23,6 +23,7 @@ TEST_HOUSEHOLD_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/b
 TEST_HOSPITAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/hospital_baseline_parameters.csv"
 TEST_OUTPUT_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_output.csv"
 TEST_OUTPUT_FILE_HOSPITAL = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_hospital_output.csv"
+TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/time_step_hospital_output.csv"
 TEST_INTERACTIONS_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/interactions_Run1.csv"
 TEST_INDIVIDUAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/individual_file_Run1.csv"
 EXECUTABLE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src/covid19ibm.exe"
@@ -43,7 +44,7 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
 # Call the model using baseline parameters, pipe output to file, read output file
-file_output = open(TEST_OUTPUT_FILE, "w")
+file_output = open(TEST_OUTPUT_FILE, "r")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 
@@ -113,7 +114,7 @@ class TestClass(object):
                 assert indivWorkerNetwork_2[ind] == 0
 
 
-    def test_hcwList(self):
+    def test_hcw_in_population_list(self):
         """
         Test that healthcare worker IDs correspond to population IDs
         """
@@ -126,7 +127,7 @@ class TestClass(object):
         assert all(idx in population_idx_list for idx in hcw_idx_list)
 
     
-    def test_hcwOnce(self):
+    def test_hcw_listed_once(self):
         """
         Test that healthcare workers IDs appear only once in the hcw file and therefore only belong to one ward/ hospital
         """
@@ -137,10 +138,18 @@ class TestClass(object):
         # Test no duplicates
         assert len(hcw_idx_list) == len(set(hcw_idx_list))
 
-    
 
+    def test_ward_capacity(self):
+        """
+        Test that patients in ward do not exceed ward beds
+        """
 
+        df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
+        # Return dataframe where all elements have n_patients > n_beds
+        df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
+
+        assert len(df_number_beds_exceeded.index) == 0
 
 
 
