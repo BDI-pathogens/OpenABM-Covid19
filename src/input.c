@@ -762,7 +762,7 @@ void write_interactions( model *model )
 
 /*****************************************************************************************
 *  Name:        write_hcw_data
-*  Description: write data about healthcare workers
+*  Description: write summary data about healthcare workers
 ******************************************************************************************/
 void write_hcw_data( model *model )
 {
@@ -801,7 +801,6 @@ void write_ward_data( model *model)
     strcat(output_file_name, ".csv");
     ward_output_file = fopen(output_file_name, "w");
 
-    // Loop over wards
     // For every ward type
     fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
 
@@ -832,13 +831,6 @@ void write_ward_data( model *model)
     }
         
 }
-
-// // For every doctor in the ward
-//             for( doctor_idx = 0; ward_idx < model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR]; doctor_idx++)
-
-//                 //fprintf(ward_output_file,"%i,%i\n", ward_idx, ward_type); //,  model->hospitals->n_wards[ward_type]->n_beds);
-//                 fprintf(ward_output_file,"%i\n", model->hospitals->wards[ward_idx]->n_max_hcw[DOCTOR]);
-
 
 /*****************************************************************************************
 *  Name:		write_transmissions
