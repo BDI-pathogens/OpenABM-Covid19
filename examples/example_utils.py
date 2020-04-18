@@ -4,6 +4,8 @@ Utility functions for examples for OpenABM-Covid19
 Created: 17 April 2020
 Author: roberthinch
 """
+import sys
+sys.path.append("../src/COVID19")
 
 from COVID19.model import Model, Parameters, ModelParameterException
 import COVID19.simulation as simulation
