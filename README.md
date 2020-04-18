@@ -45,26 +45,8 @@ where:
 * `output_file_dir` : path to output directory (this directory must already exist)
 * `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model
 
-Here is an example on how to use the Python interface:
+Usage of the running the model via the Python interface (recommended) can be found in the Examples below.
 
-```python
-from COVID19.model import Model, Parameters
-from COVID19.simulation import Simulation
-
-parameters = Parameters(
-    input_param_file="./tests/data/baseline_parameters.csv",
-    param_line_number=1,
-    output_file_dir="./data_test",
-    input_household_file="./tests/data/baseline_household_demographics.csv"
-)
-
-model = Model(parameters)
-
-simulation = Simulation(model, end_time=100, verbose=True)
-simulation.simulations(n_simulations=3)
-print(simulation.results_all_simulations)
-
-```
 
 Examples
 -----
