@@ -336,6 +336,8 @@ void write_time_step_hospital_data( model *model)
     FILE *time_step_hospital_file;
     int ward_type, ward_idx, doctor_idx, nurse_idx;
     int hospital_idx = 0;
+    // TODO: for each hospital
+    // TODO: consider only writing to file at certain timesteps if file becomes too large (e.g., every 10 time steps)
 
     // Concatenate file name
     strcpy(output_file_name, model->params->output_file_dir);
@@ -346,7 +348,7 @@ void write_time_step_hospital_data( model *model)
     if(model->time == 1)
     {
     	time_step_hospital_file = fopen(output_file_name, "w");
-    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
+    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx","n_patients","n_beds");
     }
     else
     {
@@ -355,26 +357,28 @@ void write_time_step_hospital_data( model *model)
     
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
-        // For every ward
+        // For each ward
         for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
         {
             int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
             int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
+            int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_patients;
+            int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
 
-            // For every doctor
+            // For each doctor
             for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
             {
                 int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
                 int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
 
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx);
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
             }
-            // Loop for every nurse
+            // For each nurse
             for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
             {
                 int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
                 int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx);
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
             }
 
         }
