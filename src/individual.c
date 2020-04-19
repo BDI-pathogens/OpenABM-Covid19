@@ -67,7 +67,8 @@ void initialize_individual(
     indiv->ward_type = NO_WARD;
     indiv->ward_idx  = NO_WARD;
     indiv->hospital_idx = NO_HOSPITAL;
-
+	indiv->disease_progression_predicted[0] = FALSE;
+	indiv->disease_progression_predicted[1] = FALSE;
     indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 

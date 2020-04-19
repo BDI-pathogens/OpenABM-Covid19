@@ -61,6 +61,7 @@ struct individual{
     int hospital_idx;
 
     int hospital_state;
+	int disease_progression_predicted[N_HOSPITAL_WARD_TYPES];
 	event *current_hospital_event;
 	event *next_hospital_event;
 

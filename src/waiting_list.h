@@ -36,7 +36,7 @@ void push_front( long pdx, waiting_list *waiting_list );
 void push_back( long pdx, waiting_list *waiting_list );
 long pop( waiting_list* waiting_list );
 void remove_patient( long pdx, waiting_list* waiting_list);
-
+int  list_elem_exists( long pdx, waiting_list *list );
 void destroy_waiting_list( waiting_list* waiting_list );
 
 #endif

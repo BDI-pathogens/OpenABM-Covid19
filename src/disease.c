@@ -323,9 +323,6 @@ void transition_one_disese_event(
 	}
 }
 
-//TODO: transition one hospital event
-
-
 /*****************************************************************************************
 *  Name:		transition_to_symptomatic
 *  Description: Transitions infected who are due to become symptomatic. At this point
@@ -371,34 +368,12 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_hospitalised( model *model, individual *indiv )
 {
+	int assigned_hospital_idx;
+
 	set_hospitalised( indiv, model->params, model->time );
-	float patient_waiting_effect = 0;
+	assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
+	add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), COVID_GENERAL );
 
-	int hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
-	add_patient_to_waiting_list( indiv, &(model->hospitals[hospital_idx]), COVID_GENERAL );
-
-	if( assign_patient_to_hospital(model, indiv) )
-	{
-		//set to transition to general ward this timestep 
-		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
-	}
-	else
-	{
-		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
-		transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
-		patient_waiting_effect = 0.1;
-	}
-
-	//TODO : check that patient_waiting_effect is correct
-	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] + patient_waiting_effect ) )
-	{
-		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] + patient_waiting_effect ) ) //TODO: why can patients go directly to death?
-			transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
-		else
-			transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
-	}
-	else
-        transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);
 	//TODO: does the below need to be put back into this location?
 	//TOM: Quarantine lifting and intervention is now handled by transitioning to the "WAITING" hospital state.
 //	if( indiv->quarantined )
@@ -415,29 +390,11 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-	float patient_waiting_effect = 0;
 
-	if( assign_patient_to_hospital(model, indiv) )
-	{
-		//set to transition to general ward this timestep 
-		transition_one_hospital_event( model, indiv, indiv->hospital_state, ICU, NO_EDGE );
-	}
-	else
-	{
-		if( indiv->hospital_state == WAITING )
-			remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), GENERAL );
-		else
-			transition_one_hospital_event( model, indiv, GENERAL, WAITING, NO_EDGE );	
-		//set to transition to waiting this timestep and schedule attempt to transition to general ward for next timestep
-		
-		//transition_one_hospital_event( model, indiv, WAITING, ICU, HOSPITAL_TRANSITION ); 
-		patient_waiting_effect = 0.1;
-	}
+	if( indiv->hospital_state == WAITING )
+		remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
 
-	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] + patient_waiting_effect ) ) //TODO: check patient_waiting_effect is working correctly
-        transition_one_disese_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH);
-	else
-		transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
+	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
 
 	intervention_on_critical( model, indiv );
 }
@@ -450,7 +407,12 @@ void transition_to_critical( model *model, individual *indiv )
 void transition_to_hospitalised_recovering( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, HOSPITALISED_RECOVERING, RECOVERED, HOSPITALISED_RECOVERING_RECOVERED );
+	
+	remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
+	add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
+	
 	set_hospitalised_recovering( indiv, model->params, model->time );
+	transition_one_hospital_event( model, indiv, CRITICAL, GENERAL, NO_EDGE );
 }
 
 /*****************************************************************************************
@@ -461,9 +423,8 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 void transition_to_recovered( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
-	set_recovered( indiv, model->params, model->time );
-
 	transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
+	set_recovered( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -474,6 +435,6 @@ void transition_to_recovered( model *model, individual *indiv )
 void transition_to_death( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
-	set_dead( indiv, model->params, model->time );
 	transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
+	set_dead( indiv, model->params, model->time );
 }
