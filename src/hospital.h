@@ -53,7 +53,6 @@ void initialise_hospital( hospital*, parameters*, int );
 void set_up_hospital_networks(hospital* , int max_hcw_daily_interactions);
 void build_hospital_networks( model *model, hospital *hospital );
 int healthcare_worker_working(individual* indiv);
-int assign_patient_to_hospital( model*, individual* );
 void destroy_hospital( hospital* );
 
 void transition_one_hospital_event( model *model, individual *indiv, int from, int to, int edge );
@@ -67,13 +66,16 @@ void transition_to_discharged( model *model, individual *indiv );
 int assign_to_ward(individual *indiv, hospital *hospital, int ward_type );
 
 void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
-int  add_patient_to_hospital( model* model, individual *indiv );
+int  add_patient_to_hospital( model* model, individual *indiv, int required_ward );
 void release_patient_from_hospital( individual *indiv, hospital *hospital );
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type);
 void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, int ward_type );
-long remove_first_patient_from_waiting_list( hospital *hospital, int ward_type );
 
+void hospital_waiting_list_transition_scheduler( model *model, int disease_state );
+void swap_waiting_general_and_icu_patients( model *model );
+void predict_patient_disease_progression( model *model, individual *indiv, int patient_waiting_modifier, int type );
 
+void remove_if_in_waiting_list( individual *indiv, hospital *hospital );
 int hospital_available_beds( hospital *hospital, int ward_type );
 int find_least_full_hospital(model* model, int required_ward);
 

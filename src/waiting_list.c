@@ -6,6 +6,7 @@
  */
 #include <stdlib.h>
 #include "waiting_list.h"
+#include "constant.h"
 
 node* initialise_node( long pdx )
 {
@@ -40,8 +41,10 @@ void push_front( long pdx, waiting_list *waiting_list )
 {
     node* current = NULL;
 
-    if( waiting_list->head = NULL )
+    if( waiting_list->head == NULL )
+    {
         waiting_list->head = initialise_node( pdx );
+    }
     else 
     {
         current = waiting_list->head;
@@ -70,6 +73,25 @@ void push_back( long pdx, waiting_list *waiting_list )
     waiting_list->size++;
 }
 
+int list_elem_exists( long pdx, waiting_list *list )
+{
+    if( list->head == NULL )
+        return FALSE;
+    
+    node* current = list->head;
+
+    while( current != NULL )
+    {           
+        if( current->pdx == pdx )
+        {      
+            return TRUE;
+        }             
+        current = current->next;        
+    } 
+
+    return FALSE;
+
+}
 long pop( waiting_list* waiting_list )
 {
     long retval;

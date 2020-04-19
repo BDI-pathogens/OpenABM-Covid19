@@ -768,27 +768,26 @@ int one_time_step( model *model )
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
-    //TOM: EVENT CONTROL HERE//
 
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
-	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
-	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
-	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering, FALSE );
 	transition_events( model, RECOVERED,         	   &transition_to_recovered,        		FALSE );
 	transition_events( model, DEATH,             	   &transition_to_death,            		FALSE );
+	transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
+    transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
+	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
+	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
+	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
 
-	//TOM: CHECK HOSPITAL LOCATION AGAINST CURRENT DISEASE STATUS FOR POPULATION.
-	hsopital_transition_scheduler( model );
 
+	hospital_waiting_list_transition_scheduler( model, HOSPITALISED );
+	hospital_waiting_list_transition_scheduler( model, CRITICAL );
 	transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
     transition_events( model, GENERAL,         &transition_to_general,    FALSE );
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
-    transition_events( model, MORTUARY,        &transition_to_mortuary,   FALSE );
-    transition_events( model, DISCHARGED,      &transition_to_discharged, FALSE );
 
     flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
@@ -805,171 +804,3 @@ int one_time_step( model *model )
 
 	return 1;
 };
-
-void hsopital_transition_scheduler( model *model )
-{
-	long idx, n_events;
-	event *event, *next_event;
-	individual *indiv;
-	hospital* hospital;
-	int can_bed_added = FALSE;
-
-	swap_waiting_general_and_icu_patients( model );
-
-	for( int hospital_idx; hospital_idx < model->params->n_hospitals; hospital_idx++ )
-	{
-		hospital = &(model->hospitals[hospital_idx]);
-		for(int i = 0; i < hospital->waiting_list[COVID_GENERAL].size; i++ )
-		{
-			indiv = pdx_at( &( hospital->waiting_list[COVID_GENERAL] ), i);
-
-			can_bed_added = hospital_available_beds(hospital, COVID_GENERAL) + i > 0;
-			if( can_bed_added )
-				transition_one_hospital_event(model, indiv, indiv->hospital_state, GENERAL, NO_EDGE );
-			else
-				if( indiv->hospital_state == NOT_IN_HOSPITAL )
-					transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
-		}
-
-		for(int i = 0; i < hospital->waiting_list[COVID_ICU].size; i++ )
-		{
-			indiv = pdx_at( &( hospital->waiting_list[COVID_ICU] ), i);
-
-			can_bed_added = hospital_available_beds(hospital, COVID_ICU) + i > 0;
-			if( can_bed_added )
-				transition_one_hospital_event(model, indiv, indiv->hospital_state, ICU, NO_EDGE );
-			else
-				if( indiv->hospital_state == NOT_IN_HOSPITAL )
-					transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
-		}
-	}
-}
-
-void swap_waiting_general_and_icu_patients( model *model )
-{
-	hospital *hospital;
-	waiting_list patient_general_list, patient_icu_list;
-	int hospital_idx, ward_idx, patient_idx;
-
-	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
-	{
-		initialise_waiting_list( &(patient_general_list) );
-		initialise_waiting_list( &(patient_icu_list) );
-		
-		for( ward_idx = 0; hospital->n_wards[COVID_GENERAL]; ward_idx++ )
-			for( patient_idx = 0; hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
-				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == CRITICAL )
-					push_back( patient_idx, &patient_general_list);
-
-		for( ward_idx = 0; hospital->n_wards[COVID_ICU]; ward_idx++ )
-			for( patient_idx = 0; hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
-				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == GENERAL )
-					push_back( patient_idx, &patient_icu_list);
-		
-		patient_idx = 0;
-		while( patient_idx < patient_general_list.size && patient_idx < patient_icu_list.size )
-		{
-			individual *indiv_general = &model->population[ pdx_at( &patient_general_list, patient_idx )];
-			individual *indiv_icu   = &model->population[ pdx_at( &patient_icu_list, patient_idx )];
-
-			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
-			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu->idx);
-
-			remove_patient( indiv_general->idx, &(hospital->waiting_list[COVID_ICU]) ); 
-			remove_patient( indiv_icu->idx, &(hospital->waiting_list[COVID_GENERAL]) ); 
-
-			push_front( indiv_general->idx, &hospital->waiting_list[COVID_ICU] ) ;
-			push_front( indiv_icu->idx, &hospital->waiting_list[COVID_GENERAL] );
-
-			patient_idx++;
-		}
-
-		destroy_waiting_list( &patient_general_list );
-		destroy_waiting_list( &patient_icu_list );
-	}
-}
-
-void schedule_waiting_list_transitions( model *model ) 
-{
-	int hospital_idx, ward_type, waiting_idx;
-	waiting_list *waiting_list;
-	hospital *hospital;
-	individual *indiv;
-
-	for( hospital_idx = 0; model->params->n_hospitals; hospital_idx++ )
-	{
-		hospital = &(model->hospitals[hospital_idx]);
-		for(int ward_type = 0; ward_type < model->hospitals[hospital_idx].n_wards; ward_type++ )
-		{
-			waiting_list = &(hospital->waiting_list[ward_type]);
-			for( waiting_idx = 0; waiting_list->size++; waiting_idx++ )
-			{
-				indiv = &(model->population[ pdx_at(waiting_list, waiting_idx) ]);
-				if( indiv->status == WAITING)
-					transition_one_hospital_event( model, indiv, WAITING, EVENT_TYPE_TO_WARD_MAP[indiv->status], NO_EDGE );
-			}
-		}
-	}
-}
-/*****************************************************************************************
-*  Name:		check_hospital_state_status
-*  Description: Checks the current hospital location of individuals against their disease state
-*               and attempts to transfer them to the correct part of the hospital.
-******************************************************************************************/
-void check_hospital_state_status( model *model ) {
-    int idx;
-    long n_total = model->params->n_total;
-    individual* indiv;
-	
-
-    for (idx = 0; idx < n_total; idx++ ) {
-        indiv = &( model->population[idx] );
-
-		if( indiv->idx == 222282 )
-			printf("state: %i ", indiv->status);
-
-        if ( indiv->status == HOSPITALISED && indiv->hospital_state == NOT_IN_HOSPITAL )
-            transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, GENERAL, NO_EDGE );
-
-        else if ( indiv->hospital_state == WAITING )
-        {
-			if( indiv->idx == 222282 )
-        		printf("break");
-            
-			if ( indiv->status == HOSPITALISED ) {
-                transition_one_hospital_event( model, indiv, WAITING, GENERAL, NO_EDGE );
-            }
-            else if ( indiv->status == CRITICAL ) {
-                transition_one_hospital_event( model, indiv, WAITING, ICU, NO_EDGE );
-            }
-            else if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, WAITING, MORTUARY, NO_EDGE );
-            }
-            else if (indiv->status == RECOVERED){
-                transition_one_hospital_event( model, indiv, WAITING, DISCHARGED, NO_EDGE ); //TODO: patient being discharged without being assigned to hospital?
-            }
-        }
-        else if ( indiv->hospital_state == GENERAL )
-        {
-            if ( indiv->status == CRITICAL ) {
-                transition_one_hospital_event( model, indiv, GENERAL, ICU, NO_EDGE );
-
-            }
-            else if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, GENERAL, MORTUARY, NO_EDGE );
-            }
-            else if (indiv->status == RECOVERED){
-                transition_one_hospital_event( model, indiv, GENERAL, DISCHARGED, NO_EDGE );
-            }
-        }
-        else if ( indiv->hospital_state == ICU ) //TODO: ADD IN CAPABILITY FOR PEOPLE TO GO BACK TO THE GENERAL WARD WHEN THEY ARE RECOVERING.
-        {
-            if ( indiv->status == DEATH ) {
-                transition_one_hospital_event( model, indiv, ICU, MORTUARY, NO_EDGE );
-            }
-            else if (indiv->status == RECOVERED) {
-                transition_one_hospital_event( model, indiv, ICU, DISCHARGED, NO_EDGE );
-            }
-        }
-    }
-}
