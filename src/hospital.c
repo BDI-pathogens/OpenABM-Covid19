@@ -378,7 +378,7 @@ void swap_waiting_general_and_icu_patients( model *model )
 	}
 }
 
-void predict_patient_disease_progression( model *model, individual *indiv, int patient_waiting_modifier, int type )
+void predict_patient_disease_progression( model *model, individual *indiv, float patient_waiting_modifier, int type )
 {
 	if( indiv->disease_progression_predicted[type] == FALSE )
 	{
