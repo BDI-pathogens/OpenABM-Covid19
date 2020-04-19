@@ -412,7 +412,6 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 	add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
 	
 	set_hospitalised_recovering( indiv, model->params, model->time );
-	transition_one_hospital_event( model, indiv, CRITICAL, GENERAL, NO_EDGE );
 }
 
 /*****************************************************************************************
