@@ -78,310 +78,531 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 }
 
 /*****************************************************************************************
-*  Name:		read_param_file
-*  Description: Read line from parameter file (csv), attach parame values to params struct
+*  Name:		load_parameters_file_to_buffer
+*  Description: Return a buffer with the data from the parameters file
 ******************************************************************************************/
-void read_param_file( parameters *params)
+char *load_parameters_file_to_buffer( char *file_name )
 {
-	FILE *parameter_file;
-	int i, check;
-	
-	parameter_file = fopen(params->input_param_file, "r");
-	if(parameter_file == NULL)
+	FILE *file = NULL;
+	int ret = 0;
+    long file_size = 0;
+    char *buffer = NULL;
+
+    file = fopen(file_name, "r");
+	if(file == NULL)
 		print_exit("Can't open parameter file");
-	
-	// Throw away header (and first `params->param_line_number` lines)
+
+    /* Go to the end of the file */
+    ret = fseek(file, 0, SEEK_END);
+    if (ret) print_exit("Can't get to end of file");
+
+    /* Get the size */
+    file_size = ftell(file);
+    if (file_size < 0) print_exit("Can't get size of file");
+
+    if (file_size >= INPUT_BUFFER_LEN) print_exit("Input buffer is too big");
+
+   /* Go back to the start */
+    ret = fseek(file, 0, SEEK_SET);
+    if (ret) print_exit("Can't get to start of file");
+
+    buffer = malloc(file_size + 1);
+    if (buffer == NULL) print_exit("Unable to allocate memory");
+
+    /* Read file to buffer */
+    ret = fread(buffer, 1, file_size, file);
+    buffer[file_size] = '\0';
+
+    fclose(file);
+
+    return buffer;
+}
+
+/*****************************************************************************************
+*  Name:		load_household_demographics_file_to_buffer
+*  Description: Return a buffer with the data from the household demographics file
+******************************************************************************************/
+char *load_household_demographics_file_to_buffer( parameters *params, char *file_name )
+{
+	FILE *file = NULL;
+	int ret = 0;
+    long lines = 0, file_size = 0;
+    char *buffer = NULL;
+    char ch;
+
+    file = fopen(file_name, "r");
+	if(file == NULL)
+		print_exit("Can't open parameter file");
+
+    /* Save file size for future memory allocation */
+    while ((ch = fgetc(file)) != EOF)
+        if (ch == '\n') lines++;
+
+    params->N_REFERENCE_HOUSEHOLDS = lines - 1;
+    
+    /* Go to the end of the file */
+    ret = fseek(file, 0, SEEK_END);
+    if (ret) print_exit("Can't get to end of file");
+
+    /* Get the size */
+    file_size = ftell(file);
+    if (file_size < 0) print_exit("Can't get size of file");
+
+    if (file_size >= INPUT_BUFFER_LEN) print_exit("Input buffer is too big");
+
+   /* Go back to the start */
+    ret = fseek(file, 0, SEEK_SET);
+    if (ret) print_exit("Can't get to start of file");
+
+    buffer = malloc(file_size + 1);
+    if (buffer == NULL) print_exit("Unable to allocate memory");
+
+    /* Read file to buffer */
+    ret = fread(buffer, 1, file_size, file);
+    buffer[file_size] = '\0';
+
+    fclose(file);
+
+    return buffer;
+}
+/*****************************************************************************************
+*  Name:		update_params_from_buffer
+*  Description: Update parameters from csv formatted buffer
+******************************************************************************************/
+void update_params_from_buffer( parameters *params, char *buffer )
+{
+    int i = 0;
+	int check = 0;
+    char *line, *token;
+
+    if (buffer == NULL) print_exit("Empty buffer");
+
+	/* Throw away header (and first `params->param_line_number` lines) */
+    line = strtok(buffer, "\n");
 	for(i = 0; i < params->param_line_number; i++)
-		fscanf(parameter_file, "%*[^\n]\n");
-	
+        line = strtok(NULL, "\n");
+
 	// Read and attach parameter values to parameter structure
-	check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
+    token = strtok(line, ",");
+	check = sscanf(token, "%li", &(params->rng_seed));
 	if( check < 1){ print_exit("Failed to read parameter rng_seed\n"); };
-	
-	check = fscanf(parameter_file, " %li ,", &(params->param_id));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%li", &(params->param_id));
 	if( check < 1){ print_exit("Failed to read parameter param_id\n"); };
-	
-	check = fscanf(parameter_file, " %li ,", &(params->n_total));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%li", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
-	
+
 	for( i = 0; i < N_WORK_NETWORK_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf",  &(params->daily_fraction_work));
 	if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
 
 	for( i = 0; i < N_AGE_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,",  &(params->mean_random_interactions[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf",  &(params->mean_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
 
-		check = fscanf(parameter_file, " %lf ,",  &(params->sd_random_interactions[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf",  &(params->sd_random_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
 	}
 
-	check = fscanf(parameter_file, " %i ,",  &(params->random_interaction_distribution));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",  &(params->random_interaction_distribution));
 	if( check < 1){ print_exit("Failed to read parameter random_interaction_distribution\n"); };
 
-	check = fscanf(parameter_file, " %lf ,",  &(params->child_network_adults));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf",  &(params->child_network_adults));
 	if( check < 1){ print_exit("Failed to read parameter child_network_adults\n"); };
 
-	check = fscanf(parameter_file, " %lf ,",  &(params->elderly_network_adults));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf",  &(params->elderly_network_adults));
 	if( check < 1){ print_exit("Failed to read parameter elderly_network_adults\n"); };
 
-	check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",  &(params->days_of_interactions));
 	if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
-	
-	check = fscanf(parameter_file, " %i ,",  &(params->end_time));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, " %i ,",  &(params->end_time));
 	if( check < 1){ print_exit("Failed to read parameter end_time\n"); };
-	
-	check = fscanf(parameter_file, " %i ,",  &(params->n_seed_infection));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",  &(params->n_seed_infection));
 	if( check < 1){ print_exit("Failed to read parameter n_seed_infection\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_infectious_period));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_infectious_period));
 	if( check < 1){ print_exit("Failed to read parameter mean_infectious_period\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectious_period));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_infectious_period));
 	if( check < 1){ print_exit("Failed to read parameter sd_infectious_period\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->infectious_rate));
 	if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_symptoms));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_symptoms\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_to_hospital));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_hospital\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_to_critical));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->fraction_asymptomatic[i]));
 		if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->asymptomatic_infectious_factor));
 	if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
-	
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->mild_fraction[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->mild_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter mild_fraction\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mild_infectious_factor));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mild_infectious_factor));
 	if( check < 1){ print_exit("Failed to read parameter mild_infectious_factor\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
-	
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
+
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
-	
+
 	for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->household_size[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->household_size[i]));
 		if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
-		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->population[i]));
+		if( check < 1){ print_exit("Failed to read parameter population\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf ,", &(params->daily_non_cov_symptoms_rate));
-	if( check < 1){ print_exit("Failed to read parameter daily_non_cov_symptoms_rate\n"); };
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->daily_non_cov_symptoms_rate));
+	if( check < 1){ print_exit("Failed to read parameter seasonal_flu_rate\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
-		{
-			check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility[i]));
-			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
-		}
+	{
+        token = strtok(NULL, ",");
+        check = sscanf(token, "%lf", &(params->relative_susceptibility[i]));
+        if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
+    }
 
 	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->hospitalised_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->critical_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
 	}
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->fatality_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
 	}
 
-	check = fscanf(parameter_file, " %lf,", &(params->mean_time_hospitalised_recovery ));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_hospitalised_recovery ));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_hospitalised_recovery\n"); };
 
-	check = fscanf(parameter_file, " %lf,", &(params->sd_time_hospitalised_recovery ));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_time_hospitalised_recovery ));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_hospitalised_recovery\n"); };
 
-	check = fscanf(parameter_file, " %lf,", &(params->mean_time_critical_survive ));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->mean_time_critical_survive ));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_critical_survive\n"); };
 
-	check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->sd_time_critical_survive ));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->icu_allocation[i]));
 		if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
 	}
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_length_self));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_length_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_positive));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_length_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_positive\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_self));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->quarantine_dropout_self));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_self\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->quarantine_dropout_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_positive));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->quarantine_dropout_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_positive\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->test_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->test_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->trace_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->trace_on_positive));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->trace_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter trace_on_positive\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->traceable_interaction_fraction));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->traceable_interaction_fraction));
 	if( check < 1){ print_exit("Failed to read parameter traceable_interaction_fraction\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->tracing_network_depth));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->tracing_network_depth));
 	if( check < 1){ print_exit("Failed to read parameter tracing_network_depth\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->allow_clinical_diagnosis));
+    token = strtok(NULL, ",");
+	check = sscanf(token, " %i ,", &(params->allow_clinical_diagnosis));
 	if( check < 1){ print_exit("Failed to read parameter allow_clinical_diagnosis\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_positive));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_household_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_positive\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_symptoms));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_household_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_household_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_household_contacts_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_symptoms));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_household_contacts_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %i  ,", &(params->quarantined_daily_interactions));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantined_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter quarantined_daily_interactions\n"); };
 
-	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_days));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
 
-	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_smart_release_day));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->quarantine_smart_release_day));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_smart_release_day\n"); };
 
-	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->hospitalised_daily_interactions));
 	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",   &(params->test_insensitive_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
 
-	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction[i]));
+        token = strtok(NULL, ",");
+		check = sscanf(token, "%lf", &(params->app_users_fraction[i]));
 		if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
 	}
 
-	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_work_network_multiplier));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->lockdown_work_network_multiplier));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_work_network_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->lockdown_random_network_multiplier));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_random_network_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_house_interaction_multiplier));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%lf", &(params->lockdown_house_interaction_multiplier));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_house_interaction_multiplier)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_on));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->lockdown_time_on));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_time_on)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->lockdown_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_on));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->lockdown_elderly_time_on));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_on)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
+    token = strtok(NULL, ",");
+	check = sscanf(token, "%i", &(params->lockdown_elderly_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
-	
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
+
+    token = strtok(NULL, ",");
+    check = sscanf(token, "%i", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
+    token = strtok(NULL, ",");
+    check = sscanf(token, "%i", &(params->testing_symptoms_time_off));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
+    token = strtok(NULL, ",");
+    check = sscanf(token, "%i", &(params->intervention_start_time));
     if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
+}
 
-	fclose(parameter_file);
+/*****************************************************************************************
+*  Name:        update_household_demographics_from_buffer
+*  Description: Update the parameters structure from a csv formatted buffer
+******************************************************************************************/
+void update_household_demographics_from_buffer( parameters *params, char *buffer )
+{
+    int ret = 0;
+    long hdx = 0;
+    char *line;
+
+    if (buffer == NULL) print_exit("Empty buffer");
+
+    params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+
+    for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++)
+        params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+
+    /* Throw away header */
+    line = strtok(buffer, "\n");
+    line = strtok(NULL, "\n");
+
+    /* Update parameters from buffer */
+    for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+        ret = sscanf(line,
+                     "%d,%d,%d,%d,%d,%d,%d,%d,%d",
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_0_9],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_10_19],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_20_29],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_30_39],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_40_49],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_50_59],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_60_69],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_70_79],
+                     &params->REFERENCE_HOUSEHOLDS[hdx][AGE_80]);
+        if (ret < 0) print_exit("Error parsing buffer");
+
+        line = strtok(NULL, "\n");
+    }
+}
+
+/*****************************************************************************************
+*  Name:		read_param_file
+*  Description: Read line from parameter file (csv), attach parame values to params struct
+******************************************************************************************/
+void read_param_file( parameters *params)
+{
+    char *buffer = NULL;
+
+    buffer = load_parameters_file_to_buffer(params->input_param_file);
+    update_params_from_buffer(params, buffer);
+    free(buffer);
 }
 
 /*****************************************************************************************
@@ -596,40 +817,11 @@ void print_interactions_averages(model *model, int header)
 ******************************************************************************************/
 void read_household_demographics_file( parameters *params)
 {
-	FILE *hh_file;
-	int check, value, adx;
-	long hdx, fileSize;
-	char lineBuffer[80];
-	
-	// get the length of the reference household file
-	hh_file = fopen(params->input_household_file, "r");
-	if(hh_file == NULL)
-		print_exit("Can't open household demographics file");
-	fileSize = 0;
-	while( fgets(lineBuffer, 80, hh_file ) )
-		fileSize++;
-	fclose( hh_file );
-	params->N_REFERENCE_HOUSEHOLDS = fileSize - 1;
+    char *buffer = NULL;
 
-	if( params->N_REFERENCE_HOUSEHOLDS < 100 )
-		print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
-
-	// allocate memory on the params object
-	set_up_reference_household_memory(params);
-	
-	// read in the data (throw away the header line)
-	hh_file = fopen(params->input_household_file, "r");
-	fscanf(hh_file, "%*[^\n]\n");
-	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
-		for(adx = 0; adx < N_AGE_GROUPS; adx++){
-			// Read and attach parameter values to parameter structure
-			check = fscanf(hh_file, " %d ,", &value);
-			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
-			
-			params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
-		}
-	}
-	fclose(hh_file);
+    buffer = load_household_demographics_file_to_buffer(params, params->input_household_file);
+    update_household_demographics_from_buffer(params, buffer);
+    free(buffer);
 }
 
 
