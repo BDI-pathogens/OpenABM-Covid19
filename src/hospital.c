@@ -324,6 +324,9 @@ void hospital_waiting_list_transition_scheduler( model *model, int disease_state
 
             if ( hospital_available_beds( hospital, ward_type ) + idx > 0 )
 			{
+                if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
+                        print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
+
 				transition_one_hospital_event( model, indiv, indiv->hospital_state, disease_state, NO_EDGE );
 				patient_waiting_modifier = 1;
 			} else
@@ -398,7 +401,7 @@ void predict_patient_disease_progression( model *model, individual *indiv, float
 		{
 			if( gsl_ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 			{
-				if( gsl_ran_bernoulli( rng, min(model->params->icu_allocation[ indiv->age_group ] * patient_waiting_modifier, 1) ) ) //TODO: why can patients go directly to death?
+                if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
 					transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 				else
 					transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
