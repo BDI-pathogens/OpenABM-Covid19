@@ -7,13 +7,11 @@ With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) t
 run by calling 'pytest' from project folder.  
 
 Created: April 2020
-Author: feldnerd
+Author: Dylan Feldner-Busztin
 """
 
-import subprocess
+import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
-import pytest
-import os
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
