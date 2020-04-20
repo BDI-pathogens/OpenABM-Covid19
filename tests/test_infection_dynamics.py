@@ -303,7 +303,7 @@ class TestClass(object):
                 end_time = 1
             ),
             dict(
-                n_total = 10000000,
+                n_total = 1000000,
                 n_seed_infection = 1000,
                 end_time = 1
             ),

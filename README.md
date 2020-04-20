@@ -43,7 +43,7 @@ where:
 * `input_param_file` : is a csv file of parameter values (see [params.h](src/params.h) for description of parameters)
 * `param_line_number` : the line number of the parameter file for which to use for the simulation
 * `output_file_dir` : path to output directory (this directory must already exist)
-* `household_demographics` : a csv file from which samples are taken to represent household demographics in the model
+* `household_demographics` : a csv file, or dataframe from which samples are taken to represent household demographics in the model
 
 We recommend running the model via the Python interface (see Examples section with scripts and notebooks below). Alternatively
 
