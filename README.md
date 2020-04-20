@@ -18,7 +18,7 @@ Compilation
 -----------
 
 OpenABM-Covid19 requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed.
-Python installation requires Python 3.7+
+Python installation requires Python 3.7+ and pip.
 
 ```bash
 cd OpenABM-Covid19/src
@@ -83,4 +83,30 @@ Tests
 -----
 
 A full description of the tests run on the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19_tests.pdf).
-Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.6 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
+Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.7 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
+
+Docker
+------
+
+For Windows, MacOS and Linux users a development environment can be created using Docker, first build the container:
+
+```
+cd COVID19-IBM/
+docker build --no-cache --tag covid19-ibm .
+```
+
+Then run it like this for Windows:
+
+```
+docker run -v C:/full/path/to/COVID19-IBM:/COVID19-IBM -it covid19-ibm
+```
+
+Or like this for MacOS/Linux:
+
+```
+docker run -v /full/path/to/COVID19-IBM:/COVID19-IBM -it covid19-ibm
+```
+
+Open the COVID19-IBM folder with your favourite IDE for editing. Compile and run the program inside the container by following the compilation and usage instructions.
+
+NOTE: The program can be very memory/cpu intensive, if it fails to run assign more resources to your Docker engine.

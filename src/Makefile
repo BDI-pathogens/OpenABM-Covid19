@@ -5,10 +5,10 @@ else
     C = gcc
 endif
 
-ifeq (, $(shell which python3))
+ifeq (, $(shell which python3.7))
 	PYTHON = python
 else
-	PYTHON = python3
+	PYTHON = python3.7
 endif
 
 PIP_FLAGS := --upgrade
@@ -41,7 +41,7 @@ all: $(OBJS)
 	$(C) -L$(LIB) -o $(EXE) $(OBJS) $(LFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
+	-rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
 	$(PYTHON) -m pip uninstall -y covid19
 
 .c.o:
