@@ -17,7 +17,7 @@ import os
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"p
+TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"
 PARAM_LINE_NUMBER = 1
 DATA_DIR_TEST = TEST_DIR + "/data"
 TEST_HOUSEHOLD_FILE = TEST_DIR + "/data/baseline_household_demographics.csv"
@@ -151,6 +151,21 @@ class TestClass(object):
         df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
 
         assert len(df_number_beds_exceeded.index) == 0
+
+
+    def test_constant_hcw_number(self):
+        """
+        Test that the number of hcw in hospital remains constant
+        """
+        # TODO: update to test for multiple hospitals
+        
+        df_hcw = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+
+        df_time_step = df_hcw.groupby('time_step').sum()
+
+        assert df_time_step.number_doctors.nunique() == 1
+        assert df_time_step.number_nurses.nunique() == 1
+
 
 
 
