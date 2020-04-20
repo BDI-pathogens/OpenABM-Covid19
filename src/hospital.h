@@ -39,7 +39,7 @@ struct hospital
 
     network *hospital_workplace_network;
 
-    waiting_list *waiting_list;
+    waiting_list *waiting_list[N_HOSPITAL_WARD_TYPES];
 
     int n_wards[N_HOSPITAL_WARD_TYPES];
     ward **wards;

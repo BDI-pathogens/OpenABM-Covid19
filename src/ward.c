@@ -160,6 +160,12 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     free( capped_hcw_interactions );
 }
 
+
+int patient_pdx_at( ward* ward, int idx )
+{
+    return ward->patient_pdxs[idx];
+}
+
 int add_patient_to_ward( ward *ward, long pdx )
 {
     if( ward->n_patients < ward->n_beds )
