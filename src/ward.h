@@ -53,6 +53,7 @@ void build_hcw_patient_network(ward* ward, network *network, long *hc_workers, i
 int  add_patient_to_ward( ward *ward, long pdx );
 int  ward_available_beds( ward* ward);
 void remove_patient_from_ward( ward* ward, long pdx);
+int  patient_pdx_at( ward* ward, int idx );
 void destroy_ward( ward* );
 
 #endif /* WARD_H_ */

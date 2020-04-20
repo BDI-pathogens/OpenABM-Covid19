@@ -772,6 +772,8 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
+    printf("indiv 545104 diseas state: %i , hospital state: %i ", model->population[545104].status, model->population[545104].hospital_state );
+
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, RECOVERED,         	   &transition_to_recovered,        		FALSE );
