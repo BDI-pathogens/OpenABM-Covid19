@@ -13,22 +13,24 @@ Author: feldnerd
 import subprocess
 import numpy as np, pandas as pd
 import pytest
+import os
 
 
-# File paths/ command line parameters
-TEST_DATA_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/baseline_parameters.csv"
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"p
 PARAM_LINE_NUMBER = 1
-DATA_DIR_TEST = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data"
-TEST_HOUSEHOLD_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/baseline_household_demographics.csv"
-TEST_HOSPITAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/hospital_baseline_parameters.csv"
-TEST_OUTPUT_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/test_hospital_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/time_step_hospital_output.csv"
-TEST_INTERACTIONS_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/interactions_Run1.csv"
-TEST_INDIVIDUAL_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/individual_file_Run1.csv"
-EXECUTABLE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src/covid19ibm.exe"
-TEST_HCW_FILE = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/tests/data/ward_output.csv"
-SRC_DIR = "/Users/feldnerd/Documents/GitHub/COVID19-IBM/src"
+DATA_DIR_TEST = TEST_DIR + "/data"
+TEST_HOUSEHOLD_FILE = TEST_DIR + "/data/baseline_household_demographics.csv"
+TEST_HOSPITAL_FILE = TEST_DIR +"/data/hospital_baseline_parameters.csv"
+TEST_OUTPUT_FILE = TEST_DIR +"/data/test_output.csv"
+TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR +"/data/test_hospital_output.csv"
+TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR +"/data/time_step_hospital_output.csv"
+TEST_INTERACTIONS_FILE = TEST_DIR +"/data/interactions_Run1.csv"
+TEST_INDIVIDUAL_FILE = TEST_DIR +"/data/individual_file_Run1.csv"
+TEST_HCW_FILE = TEST_DIR +"/data/ward_output.csv"
+SRC_DIR = TEST_DIR.replace("tests","") + "src"
+EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
+
 
 # Construct the compilation command and compile
 compile_command = "make clean; make all"
@@ -37,7 +39,6 @@ completed_compilation = subprocess.run([compile_command],
     cwd = SRC_DIR, 
     capture_output = True
     )
-
 
 # Construct the executable command
 EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
