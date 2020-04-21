@@ -422,8 +422,10 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 void transition_to_recovered( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
+
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
         transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
+	
 	set_recovered( indiv, model->params, model->time );
 }
 

@@ -175,7 +175,8 @@ int add_patient_to_ward( ward *ward, long pdx )
             if( ward->patient_pdxs[idx] == NO_PATIENT )
             {
                 ward->patient_pdxs[idx] = pdx;
-                ward->n_patients++;
+                //ward->n_patients++;
+                increment_patients(ward);
                 return TRUE;
             }
         }
@@ -192,7 +193,8 @@ void remove_patient_from_ward( ward* ward, long pdx)
         if( ward->patient_pdxs[idx] == pdx )
         {
             ward->patient_pdxs[idx] = NO_PATIENT;
-            ward->n_patients--;
+            //ward->n_patients--;
+            decrement_patients(ward);
             break;
         }
     }
@@ -211,3 +213,16 @@ void destroy_ward( ward* ward )
     free( ward->doctors );
     free( ward->nurses );
 }
+
+void increment_patients( ward* ward )
+{
+    ward->n_patients++;
+    printf("INCREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
+}
+
+void decrement_patients( ward* ward )
+{
+    ward->n_patients--;
+    printf("DECREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
+}
+    

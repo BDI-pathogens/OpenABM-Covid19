@@ -29,9 +29,6 @@ void initialise_waiting_list( waiting_list *waiting_list )
 
 long pdx_at( waiting_list* waiting_list, int idx )
 {
-    if( waiting_list->size == 31)
-        printf("break");
-
     int i = 0;
     node* current = waiting_list->head;
     
@@ -104,10 +101,13 @@ long pop( waiting_list* waiting_list )
     long retval;
 
     node* top = waiting_list->head;
-    node* next = top->next;
+    node* next = NULL;
     
     if( top == NULL )
         return WAITING_LIST_EMPTY;
+    
+    if( waiting_list->size > 1 )
+        next = top->next;
     
     retval = top->pdx;
     free( top );

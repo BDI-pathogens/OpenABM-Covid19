@@ -54,6 +54,8 @@ int  add_patient_to_ward( ward *ward, long pdx );
 int  ward_available_beds( ward* ward);
 void remove_patient_from_ward( ward* ward, long pdx);
 int  patient_pdx_at( ward* ward, int idx );
+void increment_patients( ward* ward );
+void decrement_patients( ward* ward );
 void destroy_ward( ward* );
 
 #endif /* WARD_H_ */
