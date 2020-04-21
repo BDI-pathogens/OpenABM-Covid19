@@ -10,8 +10,10 @@ The infection is transmitted between these contacts and the progression of the d
 Instantaneous contract-tracing and quarantining of contacts is modelled allowing the
 evaluation of the design and configuration of digital contract-tracing mobile phone apps.
 
-A full description of the model can be found [here](https://github.com/p-robot/COVID19-IBM/blob/master/documentation/covid19_model.pdf). A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf). 
-The model was developed by the Fraser group at the Big Data Institute at the University of Oxford in conjunction with IBM UK and faculty.ai. More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
+A full description of the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19_model.pdf).
+A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf). 
+The model was developed by the Pathogen Dynamics group, at the [Big Data Institute](https://www.bdi.ox.ac.uk/) at the University of Oxford, in conjunction with IBM UK and [Faculty](https://faculty.ai).
+More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
 
 
 Compilation
@@ -45,31 +47,31 @@ where:
 * `output_file_dir` : path to output directory (this directory must already exist)
 * `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model
 
-Here is an example on how to use the Python interface:
+We recommend running the model via the Python interface (see Examples section with scripts and notebooks below). Alternatively
 
 ```python
 from COVID19.model import Model, Parameters
-from COVID19.simulation import Simulation
+import COVID19.simulation as simulation
 
-parameters = Parameters(
+params = Parameters(
     input_param_file="./tests/data/baseline_parameters.csv",
     param_line_number=1,
     output_file_dir="./data_test",
-    input_household_file="./tests/data/baseline_household_demographics.csv"
+    input_households="./tests/data/baseline_household_demographics.csv"
 )
+params.set_param( "n_total", 10000)
 
-model = Model(parameters)
-
-simulation = Simulation(model, end_time=100, verbose=True)
-simulation.simulations(n_simulations=3)
-print(simulation.results_all_simulations)
+model = simulation.COVID19IBM(model = Model(params))
+sim   = simulation.Simulation(env = model, end_time = 10 )
+sim.steps( 10 )
+print( sim.results )     
 
 ```
 
 Examples
 -----
 
-The `examples/` directory contains some very simple Python scripts and Jupyter notebooks for running the model. In particular
+The `examples/` directory contains some very simple Python scripts and Jupyter notebooks for running the model. The examples must be run from the example directory. In particular
 
 1. `examples/example_101.py` - the simplest Python script for running the model
 2. `examples/example_101.ipynb` - the simplest notebook of running the model and plotting some output
@@ -82,5 +84,5 @@ _____
 Tests
 -----
 
-A full description of the tests run on the model can be found [here](https://github.com/p-robot/COVID19-IBM/blob/master/documentation/covid19_tests.pdf).
+A full description of the tests run on the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19_tests.pdf).
 Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.6 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
