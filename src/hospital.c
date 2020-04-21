@@ -34,20 +34,25 @@ void initialise_hospital(
     hospital->hospital_idx  = hdx;
 
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
-    hospital->waiting_list = calloc( N_HOSPITAL_WARD_TYPES, sizeof(waiting_list) );
+    //hospital->waiting_list = calloc( N_HOSPITAL_WARD_TYPES, sizeof(waiting_list) );
 
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
         hospital->n_wards[ward_type] = params->n_wards[ward_type];
         hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
         //hospital->waiting_list[ward_type] = initialise_waiting_list();
-        initialise_waiting_list( &(hospital->waiting_list[ward_type]) );
+        hospital->waiting_list[ward_type] = malloc( sizeof(waiting_list) );
+        initialise_waiting_list( hospital->waiting_list[ward_type] );
 
         for( hcw_type = 0; hcw_type < N_WORKER_TYPES; hcw_type++ )
             hospital->n_workers[hcw_type] += params->n_wards[ward_type] * params->n_hcw_per_ward[ward_type][hcw_type];
         
         for( ward_idx = 0; ward_idx < params->n_wards[ward_type]; ward_idx++ )
-            initialise_ward( &(hospital->wards[ward_type][ward_idx]), ward_idx, ward_type, params->n_ward_beds[ward_type], params->n_hcw_per_ward[ward_type][DOCTOR], params->n_hcw_per_ward[ward_type][NURSE] );
+            initialise_ward( &(hospital->wards[ward_type][ward_idx]),
+                             ward_idx, ward_type,
+                             params->n_ward_beds[ward_type],
+                             params->n_hcw_per_ward[ward_type][DOCTOR],
+                             params->n_hcw_per_ward[ward_type][NURSE] );
     }
 }
 
@@ -288,8 +293,8 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
 
     if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
     {   
-        if( assigned_hospital->waiting_list[required_ward].size > 0 )
-            if( indiv->idx != pop( &assigned_hospital->waiting_list[required_ward] ) )
+        if( assigned_hospital->waiting_list[required_ward]->size > 0 )
+            if( indiv->idx != pop( assigned_hospital->waiting_list[required_ward] ) )
                 print_exit( "ERROR: adding patient to hospital who is not at the top of the waiting list!!");
 
         return TRUE;
@@ -313,12 +318,15 @@ void hospital_waiting_list_transition_scheduler( model *model, int disease_state
 	{
 		hospital = &(model->hospitals[hospital_idx]);
 
-        for( idx = 0; idx < hospital->waiting_list[ ward_type ].size; idx++ )
+        for( idx = 0; idx < hospital->waiting_list[ ward_type ]->size; idx++ )
         {
-            indiv = &model->population[ pdx_at( &( hospital->waiting_list[ ward_type ] ), idx ) ];
+            indiv = &model->population[ pdx_at( hospital->waiting_list[ ward_type ], idx ) ];
 
             if ( hospital_available_beds( hospital, ward_type ) + idx > 0 )
 			{
+                if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
+                        print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
+
 				transition_one_hospital_event( model, indiv, indiv->hospital_state, disease_state, NO_EDGE );
 				patient_waiting_modifier = 1;
 			} else
@@ -335,50 +343,57 @@ void hospital_waiting_list_transition_scheduler( model *model, int disease_state
 void swap_waiting_general_and_icu_patients( model *model )
 {
 	hospital *hospital;
-	waiting_list patient_general_list, patient_icu_list;
+    waiting_list *patient_general_list, *patient_icu_list;
 	int hospital_idx, ward_idx, patient_idx;
+
+    patient_general_list = NULL;
+    patient_icu_list     = NULL;
 
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
         hospital = &model->hospitals[hospital_idx];
 
-		initialise_waiting_list( &(patient_general_list) );
-		initialise_waiting_list( &(patient_icu_list) );
+        patient_general_list = malloc(sizeof(waiting_list));
+        patient_icu_list = malloc(sizeof(waiting_list));
+        initialise_waiting_list( patient_general_list );
+        initialise_waiting_list( patient_icu_list );
 		
-		for( ward_idx = 0; hospital->n_wards[COVID_GENERAL]; ward_idx++ )
-			for( patient_idx = 0; hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
-				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == CRITICAL )
-					push_back( patient_idx, &patient_general_list);
+        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
+            for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
+                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
+                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == CRITICAL )
+                        push_back( patient_idx, patient_general_list);
 
-		for( ward_idx = 0; hospital->n_wards[COVID_ICU]; ward_idx++ )
-			for( patient_idx = 0; hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
-				if( patient_idx != NO_PATIENT && model->population[patient_idx].status == GENERAL )
-					push_back( patient_idx, &patient_icu_list);
+        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_ICU]; ward_idx++ )
+            for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
+                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
+                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == GENERAL )
+                        push_back( patient_idx, patient_icu_list);
 		
 		patient_idx = 0;
-		while( patient_idx < patient_general_list.size && patient_idx < patient_icu_list.size )
+        while( patient_idx < patient_general_list->size && patient_idx < patient_icu_list->size)
 		{
-			individual *indiv_general = &model->population[ pdx_at( &patient_general_list, patient_idx )];
-			individual *indiv_icu   = &model->population[ pdx_at( &patient_icu_list, patient_idx )];
+            individual *indiv_general = &model->population[ pdx_at( patient_general_list, patient_idx )];
+            individual *indiv_icu   = &model->population[ pdx_at( patient_icu_list, patient_idx )];
 
 			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
 			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu->idx);
 
-			remove_patient( indiv_general->idx, &(hospital->waiting_list[COVID_ICU]) ); 
-			remove_patient( indiv_icu->idx, &(hospital->waiting_list[COVID_GENERAL]) ); 
+            remove_patient( indiv_general->idx, hospital->waiting_list[COVID_ICU] );
+            remove_patient( indiv_icu->idx, hospital->waiting_list[COVID_GENERAL] );
 
-			push_front( indiv_general->idx, &hospital->waiting_list[COVID_ICU] ) ;
-			push_front( indiv_icu->idx, &hospital->waiting_list[COVID_GENERAL] );
+            push_front( indiv_general->idx, hospital->waiting_list[COVID_ICU] ) ;
+            push_front( indiv_icu->idx, hospital->waiting_list[COVID_GENERAL] );
 
 			patient_idx++;
 		}
 
-		destroy_waiting_list( &patient_general_list );
-		destroy_waiting_list( &patient_icu_list );
+        destroy_waiting_list( patient_general_list );
+        destroy_waiting_list( patient_icu_list );
 	}
 }
 
-void predict_patient_disease_progression( model *model, individual *indiv, int patient_waiting_modifier, int type )
+void predict_patient_disease_progression( model *model, individual *indiv, float patient_waiting_modifier, int type )
 {
 	if( indiv->disease_progression_predicted[type] == FALSE )
 	{
@@ -386,7 +401,7 @@ void predict_patient_disease_progression( model *model, individual *indiv, int p
 		{
 			if( gsl_ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 			{
-				if( gsl_ran_bernoulli( rng, min(model->params->icu_allocation[ indiv->age_group ] * patient_waiting_modifier, 1) ) ) //TODO: why can patients go directly to death?
+                if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
 					transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 				else
 					transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
@@ -410,11 +425,11 @@ int find_least_full_hospital(model* model, int required_ward)
     int hospital_idx, available_beds, assigned_hospital_idx;
 
     assigned_hospital_idx = 0;
-    available_beds = hospital_available_beds( &(model->hospitals[assigned_hospital_idx]), required_ward) - model->hospitals[assigned_hospital_idx].waiting_list[required_ward].size;
+    available_beds = hospital_available_beds( &(model->hospitals[assigned_hospital_idx]), required_ward) - model->hospitals[assigned_hospital_idx].waiting_list[required_ward]->size;
 
     for( hospital_idx = 1; hospital_idx < model->params->n_hospitals; hospital_idx++ )
     {
-        int next_available_beds = hospital_available_beds( &(model->hospitals[hospital_idx]), required_ward) - model->hospitals[hospital_idx].waiting_list[required_ward].size;
+        int next_available_beds = hospital_available_beds( &(model->hospitals[hospital_idx]), required_ward) - model->hospitals[hospital_idx].waiting_list[required_ward]->size;
         
         if( next_available_beds > available_beds)
         {
@@ -491,8 +506,8 @@ void release_patient_from_hospital( individual *indiv, hospital *hospital )
 
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type)
 {
-    push_back( indiv->idx, &(hospital->waiting_list[ward_type]) );
-    indiv->hospital_state = hospital->hospital_idx;
+    push_back( indiv->idx, hospital->waiting_list[ward_type] );
+    indiv->hospital_idx = hospital->hospital_idx;
 }
 
 /*****************************************************************************************
@@ -502,13 +517,13 @@ void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int war
 ******************************************************************************************/
 void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, int ward_type )
 {
-    remove_patient( indiv->idx, &(hospital->waiting_list[ward_type]));
+    remove_patient( indiv->idx, hospital->waiting_list[ward_type] );
 }
 
 void remove_if_in_waiting_list( individual *indiv, hospital *hospital )
 {
-    if( list_elem_exists( indiv->idx, &hospital->waiting_list[COVID_GENERAL] ))
-        remove_patient( indiv->idx, &hospital->waiting_list[COVID_GENERAL] );
-    else if( list_elem_exists( indiv->idx, &hospital->waiting_list[COVID_ICU] ) )
-        remove_patient( indiv->idx, &hospital->waiting_list[COVID_ICU] );
+    if( list_elem_exists( indiv->idx, hospital->waiting_list[COVID_GENERAL] ))
+        remove_patient( indiv->idx, hospital->waiting_list[COVID_GENERAL] );
+    else if( list_elem_exists( indiv->idx, hospital->waiting_list[COVID_ICU] ) )
+        remove_patient( indiv->idx, hospital->waiting_list[COVID_ICU] );
 }

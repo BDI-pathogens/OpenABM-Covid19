@@ -22,17 +22,24 @@ node* initialise_node( long pdx )
 
 void initialise_waiting_list( waiting_list *waiting_list )
 {   
+    //waiting_list = calloc( 1, sizeof(waiting_list));
     waiting_list->head = NULL;
     waiting_list->size = 0;
 }   
 
 long pdx_at( waiting_list* waiting_list, int idx )
 {
+    if( waiting_list->size == 31)
+        printf("break");
+
     int i = 0;
     node* current = waiting_list->head;
     
     while( i < idx )
+    {
         current = current->next;
+        i++;
+    }
 
     return current->pdx;
 }
@@ -75,7 +82,7 @@ void push_back( long pdx, waiting_list *waiting_list )
 
 int list_elem_exists( long pdx, waiting_list *list )
 {
-    if( list->head == NULL )
+    if( list->size == 0 || list->head == NULL )
         return FALSE;
     
     node* current = list->head;
@@ -90,8 +97,8 @@ int list_elem_exists( long pdx, waiting_list *list )
     } 
 
     return FALSE;
-
 }
+
 long pop( waiting_list* waiting_list )
 {
     long retval;
@@ -129,13 +136,12 @@ void remove_patient(long pdx, waiting_list* waiting_list)
             waiting_list->head = current->next;
             
             free( current );
+            waiting_list->size--;                                
             return;
         }                               
         previous = current;             
         current = current->next;        
     } 
-
-    waiting_list->size--;                                
 }     
 
 void destroy_waiting_list( waiting_list* waiting_list )
@@ -150,5 +156,5 @@ void destroy_waiting_list( waiting_list* waiting_list )
         current = next;
     }
 
-    free( waiting_list );
+    //free( waiting_list );
 }
