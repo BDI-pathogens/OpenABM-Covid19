@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );
-	
+
 	destroy_model( model );
 	destroy_params( &params );
 
