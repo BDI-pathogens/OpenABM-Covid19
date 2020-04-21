@@ -39,7 +39,7 @@ struct hospital
 
     network *hospital_workplace_network;
 
-    waiting_list *waiting_list;
+    waiting_list *waiting_list[N_HOSPITAL_WARD_TYPES];
 
     int n_wards[N_HOSPITAL_WARD_TYPES];
     ward **wards;
@@ -73,7 +73,7 @@ void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, in
 
 void hospital_waiting_list_transition_scheduler( model *model, int disease_state );
 void swap_waiting_general_and_icu_patients( model *model );
-void predict_patient_disease_progression( model *model, individual *indiv, int patient_waiting_modifier, int type );
+void predict_patient_disease_progression( model *model, individual *indiv, float patient_waiting_modifier, int type );
 
 void remove_if_in_waiting_list( individual *indiv, hospital *hospital );
 int hospital_available_beds( hospital *hospital, int ward_type );
