@@ -326,6 +326,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     }
 }
 
+// Dylan change
 /*****************************************************************************************
 *  Name:        write_time_step_hospital_data
 *  Description: write data concerning the status of hospitals at each time step
