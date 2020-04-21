@@ -772,6 +772,19 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
+	if( model->time == 135 )
+	{
+		printf("break");
+		ward *ward = &model->hospitals[0].wards[COVID_GENERAL][0];
+		printf("end");
+
+		for(int i = 0; i < ward->n_patients; i++)
+		{
+			individual *indiv = &model->population[ ward->patient_pdxs[i] ];
+			printf("break2");
+		}
+	}
+		
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
@@ -783,12 +796,27 @@ int one_time_step( model *model )
     transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
     transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 
-    hospital_waiting_list_transition_scheduler( model, HOSPITALISED );
-	hospital_waiting_list_transition_scheduler( model, CRITICAL );
+    hospital_waiting_list_transition_scheduler( model, GENERAL );
+	hospital_waiting_list_transition_scheduler( model, ICU );
 	transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
     transition_events( model, GENERAL,         &transition_to_general,    FALSE );
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
+		// printf("GENERAL WARDS:\n");
+		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_GENERAL]; i++)
+		// {
+		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_GENERAL][i]));
+		// }
+		// printf("\n");
+		// printf("ICU WARDS:\n");
+		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_ICU]; i++)
+		// {
+		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_ICU][i]));
+		// }
+		// printf("\n");
+
+
+	printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
     flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
 	transition_events( model, TEST_RESULT,         &intervention_test_result,         TRUE );
