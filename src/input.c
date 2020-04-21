@@ -759,7 +759,7 @@ void write_interactions( model *model )
 }
 
 
-
+// Dylan change
 /*****************************************************************************************
 *  Name:        write_hcw_data
 *  Description: write summary data about healthcare workers
@@ -785,6 +785,7 @@ void write_hcw_data( model *model )
     fclose(hcw_output_file);
 }
 
+// Dylan change
 /*****************************************************************************************
 *  Name:        write_ward_data
 *  Description: write data about healthcare workers in each ward
