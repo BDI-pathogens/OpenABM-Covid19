@@ -44,7 +44,7 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
 
 # Call the model using baseline parameters, pipe output to file, read output file
 file_output = open(TEST_OUTPUT_FILE, "r")
-#completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 
 # Create a dataframe out of the terminal output
