@@ -223,12 +223,22 @@ void transition_to_waiting( model *model, individual *indiv )
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_general( model *model, individual *indiv )
-{
+{   
+    //printf("attempting transition for: %li \n", indiv->idx );
+    //remove patient from old ward if already in hospital
+    if( indiv->hospital_state == ICU || indiv->hospital_state == HOSPITALISED_RECOVERING )
+        remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_ICU][indiv->ward_idx], indiv->idx );
+
     if( add_patient_to_hospital( model, indiv, COVID_GENERAL) )
     {
         remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
         set_general_admission( indiv, model->params, 1);
     }
+    else
+    {
+        print_exit(" scheduled transition to general but failed to add to hospital!!");
+    }
+    
 }
 
 /*****************************************************************************************
@@ -240,11 +250,21 @@ void transition_to_general( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_icu( model *model, individual *indiv )
 {
+    //remove patient from old ward if already in hospital
+    if( indiv->hospital_state == GENERAL )
+        remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_GENERAL][indiv->ward_idx], indiv->idx );
+
+    //add patient to covid ward and update status / waiting list
     if( add_patient_to_hospital( model, indiv, COVID_ICU) )
     {
         remove_patient_from_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_ICU );
         set_icu_admission( indiv, model->params, 1);
     }
+    else
+    {
+        print_exit("schedule transition to icu that was not possible!!");
+    }
+    
 }
 /*****************************************************************************************
 *  Name:		transition_to_mortuary
@@ -292,10 +312,12 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
             assigned_ward_idx = ward_idx;
 
     if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
-    {   
-        if( assigned_hospital->waiting_list[required_ward]->size > 0 )
-            if( indiv->idx != pop( assigned_hospital->waiting_list[required_ward] ) )
-                print_exit( "ERROR: adding patient to hospital who is not at the top of the waiting list!!");
+    {  
+        indiv->ward_idx  = assigned_ward_idx;
+        indiv->ward_type = required_ward;
+
+        if( indiv->idx != pop( assigned_hospital->waiting_list[required_ward] ) )
+            print_exit( "ERROR: adding patient to hospital who is not at the top of the waiting list!!");
 
         return TRUE;
     }
@@ -303,40 +325,62 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
 }
 
 
-void hospital_waiting_list_transition_scheduler( model *model, int disease_state )
+void hospital_waiting_list_transition_scheduler( model *model, int hospital_state )
 {
 	int idx, hospital_idx, ward_type;
     float patient_waiting_modifier;
 	individual *indiv;
 	hospital* hospital;
 
-	ward_type = EVENT_TYPE_TO_WARD_MAP[ disease_state ];
+	ward_type = EVENT_TYPE_TO_WARD_MAP[ hospital_state ];
 
 	swap_waiting_general_and_icu_patients( model );
 
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
 		hospital = &(model->hospitals[hospital_idx]);
-
-        for( idx = 0; idx < hospital->waiting_list[ ward_type ]->size; idx++ )
+        
+        //have to loop through waiting list in reverse as the events list are scheduled as first in last out but waiting list needs
+        //to be first in first out
+        for( idx = hospital->waiting_list[ ward_type ]->size - 1; idx >= 0; idx-- )
         {
             indiv = &model->population[ pdx_at( hospital->waiting_list[ ward_type ], idx ) ];
 
-            if ( hospital_available_beds( hospital, ward_type ) + idx > 0 )
+            if ( hospital_available_beds( hospital, ward_type ) - idx > 0 )
 			{
-                if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
-                        print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
-
-				transition_one_hospital_event( model, indiv, indiv->hospital_state, disease_state, NO_EDGE );
+                // if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
+                //         print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
+                //printf( "scheduling general transition for %li \n", indiv->idx );
+				transition_one_hospital_event( model, indiv, indiv->hospital_state, hospital_state, NO_EDGE );
 				patient_waiting_modifier = 1;
 			} else
 			{
+                //printf( "!! HOSPITAL FULL at indiv: %li \n", indiv->idx );
 				transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
 				patient_waiting_modifier = 1.3; //TODO: this value needs to be calibrated (should it be different per age group as well?)
 			}
 			
 			predict_patient_disease_progression( model, indiv, patient_waiting_modifier, ward_type );
         }
+        // for( idx = 0; idx < hospital->waiting_list[ ward_type ]->size; idx++ )
+        // {
+        //     indiv = &model->population[ pdx_at( hospital->waiting_list[ ward_type ], idx ) ];
+
+        //     if ( hospital_available_beds( hospital, ward_type ) + idx > 0 )
+		// 	{
+        //         // if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
+        //         //         print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
+        //         printf( "scheduling general transition for %li \n", indiv->idx );
+		// 		transition_one_hospital_event( model, indiv, indiv->hospital_state, hospital_state, NO_EDGE );
+		// 		patient_waiting_modifier = 1;
+		// 	} else
+		// 	{
+		// 		transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
+		// 		patient_waiting_modifier = 1.3; //TODO: this value needs to be calibrated (should it be different per age group as well?)
+		// 	}
+			
+		// 	predict_patient_disease_progression( model, indiv, patient_waiting_modifier, ward_type );
+        // }
 	}
 }
 
@@ -475,9 +519,7 @@ int hospital_available_beds( hospital* hospital, int ward_type )
     int available_beds = 0;
 
     for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
-    {
         available_beds += ( ward_available_beds( &(hospital->wards[ward_type][ward_idx]) ));
-    }
 
     return available_beds;
 }
