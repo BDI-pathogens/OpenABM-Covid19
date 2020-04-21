@@ -325,6 +325,71 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     }
 }
 
+// Dylan change
+/*****************************************************************************************
+*  Name:        write_time_step_hospital_data
+*  Description: write data concerning the status of hospitals at each time step
+******************************************************************************************/
+void write_time_step_hospital_data( model *model)
+{
+    char output_file_name[INPUT_CHAR_LEN];
+    FILE *time_step_hospital_file;
+    int ward_type, ward_idx, doctor_idx, nurse_idx;
+    int hospital_idx = 0;
+    // TODO: for each hospital
+    // TODO: consider only writing to file at certain timesteps if file becomes too large (e.g., every 10 time steps)
+
+    // Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/time_step_hospital_output");
+    strcat(output_file_name, ".csv");
+
+    // Open outputfile in different mode depending on whether this is the first time step
+    if(model->time == 1)
+    {
+    	time_step_hospital_file = fopen(output_file_name, "w");
+    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx","n_patients","n_beds");
+    }
+    else
+    {
+    	time_step_hospital_file = fopen(output_file_name, "a");
+    }
+    
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        // For each ward
+        for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+        {
+            int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
+            int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
+            int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_patients;
+            int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
+
+            // For each doctor
+            for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+            {
+                int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
+                int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
+
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
+            }
+            // For each nurse
+            for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+            {
+                int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
+                int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
+            }
+
+        }
+    }
+
+
+    fclose(time_step_hospital_file);
+    
+}
+
+
 /*****************************************************************************************
 *  Name:		set_up_individual_hazard
 *  Description: sets the initial hazard for each individual
@@ -829,6 +894,9 @@ int one_time_step( model *model )
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
+
+	// Output hospital data for each time step
+	write_time_step_hospital_data( model );
 
 	return 1;
 };
