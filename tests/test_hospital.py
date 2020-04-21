@@ -44,7 +44,7 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
 
 # Call the model using baseline parameters, pipe output to file, read output file
 file_output = open(TEST_OUTPUT_FILE, "r")
-completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+#completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 
 # Create a dataframe out of the terminal output
@@ -125,6 +125,29 @@ class TestClass(object):
 
         assert all(idx in population_idx_list for idx in hcw_idx_list)
 
+
+    def test_hcw_not_in_work_network(self):
+        """
+        Test that healthcare worker IDs correspond to population IDs
+        """
+        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
+
+        # Worker 1
+        # If worker type not -1, then work network must be -1
+        w1_hcw_condition = df_interactions['worker_type_1'] != -1
+        w1_worknetwork_condition = df_interactions['work_network'] == -1
+        df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
+
+        #assert len(df_interactions.index) == len(df_test_worker1.index)
+        
+        # Worker 2
+        # If worker type not -1, then work network must be -1
+        w2_hcw_condition = df_interactions['worker_type_2'] != -1
+        w2_worknetwork_condition = df_interactions['work_network_2'] == -1
+        df_test_worker2 = df_interactions[w2_hcw_condition & w2_worknetwork_condition]
+
+        assert len(df_interactions.index) == len(df_test_worker2.index)
+
     
     def test_hcw_listed_once(self):
         """
@@ -163,6 +186,9 @@ class TestClass(object):
 
         assert df_time_step.number_doctors.nunique() == 1
         assert df_time_step.number_nurses.nunique() == 1
+
+
+
 
 
 
