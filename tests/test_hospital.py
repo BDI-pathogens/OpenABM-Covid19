@@ -80,39 +80,6 @@ class TestClass(object):
         assert r == 200
 
 
-    def test_interactions(self):
-        """
-        Test that hospital workers are not in the list of work interactions
-        """
-        # Load interactions df
-        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
-
-        # Check that interactions file was loaded df_interactions.columns
-        columnArray = df_interactions.columns.values
-        np.testing.assert_equal(columnArray, ["ID","age_group","worker_type_1","house_no","work_network","type","ID_2","age_group_2","worker_type_2","house_no_2","work_network_2"])
-
-        # Check that none of the interactions occur with healthcare workers
-        interactionCount = len(df_interactions.index)
-        nonHealthCareWorkerType = -1
-
-        # Array of individual types
-        indivTypeList_1 = df_interactions.worker_type_1.values
-        indivTypeList_2 = df_interactions.worker_type_2.values
-
-        # Array of work_networks
-        indivWorkerNetwork_1 = df_interactions.work_network.values
-        indivWorkerNetwork_2 = df_interactions.work_network_2.values
-
-        # Iterate over interaction arrays
-        for ind in range(interactionCount):
-
-            # If individuals are healthworkers, their work network is zero
-            if(indivTypeList_1[ind] != nonHealthCareWorkerType):
-                assert indivWorkerNetwork_1[ind] == 0
-            if(indivTypeList_2[ind] != nonHealthCareWorkerType):
-                assert indivWorkerNetwork_2[ind] == 0
-
-
     def test_hcw_in_population_list(self):
         """
         Test that healthcare worker IDs correspond to population IDs
