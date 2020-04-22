@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-		printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%i\n",
+        printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li \n",
 				model->time,
 				params.lockdown_on,
 				params.lockdown_elderly_on,

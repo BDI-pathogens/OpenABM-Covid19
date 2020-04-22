@@ -772,17 +772,27 @@ int one_time_step( model *model )
     build_daily_network( model );
 	transmit_virus( model, model->params );
 
-	if( model->time == 135 )
+    if( model->time > 135 )
 	{
+		int totalDuds = 0;
 		printf("break");
-		ward *ward = &model->hospitals[0].wards[COVID_GENERAL][0];
-		printf("end");
+		for( int ward_idx = 0; ward_idx < model->hospitals[0].n_wards[COVID_GENERAL]; ward_idx++ )
+		{		
+			ward *ward = &model->hospitals[0].wards[COVID_GENERAL][ward_idx];
+			printf("end");
 
-		for(int i = 0; i < ward->n_patients; i++)
-		{
-			individual *indiv = &model->population[ ward->patient_pdxs[i] ];
-			printf("break2");
+			for(int i = 0; i < ward->n_patients; i++)
+			{
+				if(ward->patient_pdxs[i] != NO_PATIENT )
+				{
+					long pdx = ward->patient_pdxs[i];
+					individual *indiv = &model->population[ ward->patient_pdxs[i] ];
+					printf("break2");
+					totalDuds++;
+				}
+			}
 		}
+		printf("TOTAL DUDS: %i\n", totalDuds);
 	}
 
     transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
@@ -816,7 +826,42 @@ int one_time_step( model *model )
 		// }
 		// printf("\n");
 
+
     hospital* h = &model->hospitals[0];
+    int duplicates = 0;
+    for( int current_ward_type = 0; current_ward_type < N_HOSPITAL_WARD_TYPES; current_ward_type++ )
+    {
+        for(int current_ward_idx = 0; current_ward_idx < h->n_wards[current_ward_type]; current_ward_idx++)
+        {
+            ward* current_ward = &h->wards[current_ward_type][current_ward_idx];
+            for( int current_patient_idx = 0; current_patient_idx < current_ward->n_beds; current_patient_idx++ )
+            {
+                if(current_ward->patient_pdxs[current_patient_idx] != NO_PATIENT)
+                {
+                    //loop through all other patients and make sure no duplicates
+                    for( int next_ward_type = 0; next_ward_type < N_HOSPITAL_WARD_TYPES; next_ward_type++ )
+                    {
+                        for(int next_ward_idx = 0; next_ward_idx < h->n_wards[next_ward_type]; next_ward_idx++)
+                        {
+                            ward* next_ward = &h->wards[next_ward_type][next_ward_idx];
+                            for( int next_patient_idx = 0; next_patient_idx < current_ward->n_beds; next_patient_idx++ )
+                            {
+                                if(next_ward->patient_pdxs[next_patient_idx] != NO_PATIENT && (current_ward != next_ward || (current_ward == next_ward && current_patient_idx != next_patient_idx ) ) )
+                                {
+                                    if( current_ward->patient_pdxs[current_patient_idx] == next_ward->patient_pdxs[next_patient_idx])
+                                    {
+                                        printf( "DUPLICATE IN WARDS PATIENTS LISTS!!!\n");
+                                        duplicates++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    printf("duplicate: %i\n", duplicates);
 
     for( int i = 0; i < h->n_wards[COVID_GENERAL]; i++ )
     {
