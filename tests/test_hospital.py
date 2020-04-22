@@ -102,18 +102,18 @@ class TestClass(object):
         # Worker 1
         # If worker type not -1, then work network must be -1
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
-        w1_worknetwork_condition = df_interactions['work_network'] == -1
+        w1_worknetwork_condition = df_interactions['work_network'] != -1
         df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
 
-        #assert len(df_interactions.index) == len(df_test_worker1.index)
+        assert len(df_test_worker1.index) == 0
         
         # Worker 2
         # If worker type not -1, then work network must be -1
         w2_hcw_condition = df_interactions['worker_type_2'] != -1
-        w2_worknetwork_condition = df_interactions['work_network_2'] == -1
+        w2_worknetwork_condition = df_interactions['work_network_2'] != -1
         df_test_worker2 = df_interactions[w2_hcw_condition & w2_worknetwork_condition]
 
-        assert len(df_interactions.index) == len(df_test_worker2.index)
+        assert len(df_test_worker2.index) == 0
 
     
     def test_hcw_listed_once(self):
