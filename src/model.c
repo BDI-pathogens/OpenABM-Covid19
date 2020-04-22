@@ -784,8 +784,8 @@ int one_time_step( model *model )
 			printf("break2");
 		}
 	}
-		
-	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
+
+    transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
@@ -793,15 +793,16 @@ int one_time_step( model *model )
     transition_events( model, RECOVERED,         	   &transition_to_recovered,        		FALSE );
     transition_events( model, DEATH,             	   &transition_to_death,            		FALSE );
 
-    transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
-    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 
+    swap_waiting_general_and_icu_patients( model );
     hospital_waiting_list_transition_scheduler( model, GENERAL );
 	hospital_waiting_list_transition_scheduler( model, ICU );
 	transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
     transition_events( model, GENERAL,         &transition_to_general,    FALSE );
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
+    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
+    transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
 		// printf("GENERAL WARDS:\n");
 		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_GENERAL]; i++)
 		// {
@@ -814,6 +815,35 @@ int one_time_step( model *model )
 		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_ICU][i]));
 		// }
 		// printf("\n");
+
+    hospital* h = &model->hospitals[0];
+
+    for( int i = 0; i < h->n_wards[COVID_GENERAL]; i++ )
+    {
+        ward* general_w = &h->wards[COVID_GENERAL][i];
+        for( int j = 0; j < general_w->n_beds; j++ )
+        {
+            if( general_w->patient_pdxs[j] != NO_PATIENT )
+            {
+                for( int k = 0; k < h->n_wards[COVID_ICU]; k++ )
+                {
+                    ward* icu_w = &h->wards[COVID_ICU][k];
+                    for(int l = 0; l < icu_w->n_beds; l++ )
+                    {
+                        if( icu_w->patient_pdxs[l] != NO_PATIENT )
+                        {
+                            if(general_w->patient_pdxs[j] == icu_w->patient_pdxs[l])
+                            {
+                                individual *indiv = &model->population[general_w->patient_pdxs[j]];
+                                printf("!!GENERAL PATIENT ALSO IN ICU!!\n");
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
 
 
 	printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));

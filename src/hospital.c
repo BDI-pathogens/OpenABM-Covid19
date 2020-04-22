@@ -334,8 +334,6 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 
 	ward_type = EVENT_TYPE_TO_WARD_MAP[ hospital_state ];
 
-	swap_waiting_general_and_icu_patients( model );
-
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
 		hospital = &(model->hospitals[hospital_idx]);
@@ -345,6 +343,8 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
         for( idx = hospital->waiting_list[ ward_type ]->size - 1; idx >= 0; idx-- )
         {
             indiv = &model->population[ pdx_at( hospital->waiting_list[ ward_type ], idx ) ];
+//            if( indiv->status == DEATH || indiv->status == RECOVERED )
+//                remove_patient_from_ward()
 
             if ( hospital_available_beds( hospital, ward_type ) - idx > 0 )
 			{
@@ -356,7 +356,8 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 			} else
 			{
                 //printf( "!! HOSPITAL FULL at indiv: %li \n", indiv->idx );
-				transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
+                if( indiv->hospital_state == NOT_IN_HOSPITAL )
+                    transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
 				patient_waiting_modifier = 1.3; //TODO: this value needs to be calibrated (should it be different per age group as well?)
 			}
 			
@@ -423,6 +424,8 @@ void swap_waiting_general_and_icu_patients( model *model )
 			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
 			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu->idx);
 
+//            remove_patient_from_waiting_list(indiv_general, &model->hospitals[indiv_general->idx], COVID_ICU);
+//            remove_patient_from_waiting_list(indiv_icu, &model->hospitals[indiv_icu->idx], COVID_GENERAL);
             remove_patient( indiv_general->idx, hospital->waiting_list[COVID_ICU] );
             remove_patient( indiv_icu->idx, hospital->waiting_list[COVID_GENERAL] );
 

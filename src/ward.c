@@ -195,7 +195,7 @@ void remove_patient_from_ward( ward* ward, long pdx)
             ward->patient_pdxs[idx] = NO_PATIENT;
             //ward->n_patients--;
             decrement_patients(ward);
-            break;
+            //break;
         }
     }
 }
@@ -217,12 +217,12 @@ void destroy_ward( ward* ward )
 void increment_patients( ward* ward )
 {
     ward->n_patients++;
-    printf("INCREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
+    //printf("INCREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
 }
 
 void decrement_patients( ward* ward )
 {
     ward->n_patients--;
-    printf("DECREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
+    //printf("DECREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
 }
     

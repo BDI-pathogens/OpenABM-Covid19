@@ -391,8 +391,9 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-	if( indiv->hospital_state == WAITING )
-		remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
+    //remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
+    if( indiv->hospital_state == WAITING )
+        remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
 
 	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
 
@@ -424,7 +425,10 @@ void transition_to_recovered( model *model, individual *indiv )
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
 
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
+    {
+        //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
+    }
 	
 	set_recovered( indiv, model->params, model->time );
 }
@@ -437,7 +441,11 @@ void transition_to_recovered( model *model, individual *indiv )
 void transition_to_death( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
+
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
+    {
+        //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
+    }
 	set_dead( indiv, model->params, model->time );
 }
