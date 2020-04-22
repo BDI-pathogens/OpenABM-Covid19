@@ -36,10 +36,6 @@ sys.path.append(PYTHON_C_DIR)
 from parameters import ParameterSet
 
 
-# print(params.list_params())
-# print(params.get_param("sd_time_hospital_transition"))
-# params.set_param("sd_time_hospital_transition", 4)
-
 class TestClass(object):
     """
     Test class for checking
@@ -81,6 +77,9 @@ class TestClass(object):
             skiprows=numHeader, 
             skipfooter=numFooter, 
             engine='python')
+
+        # Write df_output to file
+        df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
 
         output = df_output["total_infected"].iloc[-1]
         expected_output = int(params.get_param("n_seed_infection"))
