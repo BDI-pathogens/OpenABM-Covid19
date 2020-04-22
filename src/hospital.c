@@ -205,14 +205,14 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 { 
-    if( indiv->hospital_state == WAITING && indiv->status == CRITICAL)
-        remove_patient_from_waiting_list(indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL);
+//    if( indiv->hospital_state == WAITING && indiv->status == CRITICAL)
+//        remove_patient_from_waiting_list(indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL);
+    set_waiting( indiv, model->params, 1);
     
     intervention_on_hospitalised( model, indiv );
     if( indiv->quarantined )
         intervention_quarantine_release( model, indiv );
 
-    set_waiting( indiv, model->params, 1);
 }
 
 /*****************************************************************************************
@@ -231,7 +231,7 @@ void transition_to_general( model *model, individual *indiv )
 
     if( add_patient_to_hospital( model, indiv, COVID_GENERAL) )
     {
-        remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
+        //remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
         set_general_admission( indiv, model->params, 1);
     }
     else
@@ -257,7 +257,7 @@ void transition_to_icu( model *model, individual *indiv )
     //add patient to covid ward and update status / waiting list
     if( add_patient_to_hospital( model, indiv, COVID_ICU) )
     {
-        remove_patient_from_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_ICU );
+//        remove_patient_from_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_ICU );
         set_icu_admission( indiv, model->params, 1);
     }
     else
@@ -357,7 +357,8 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 			{
                 //printf( "!! HOSPITAL FULL at indiv: %li \n", indiv->idx );
                 if( indiv->hospital_state == NOT_IN_HOSPITAL )
-                    transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
+                    transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
+
 				patient_waiting_modifier = 1.3; //TODO: this value needs to be calibrated (should it be different per age group as well?)
 			}
 			
@@ -402,6 +403,8 @@ void swap_waiting_general_and_icu_patients( model *model )
         patient_icu_list = malloc(sizeof(waiting_list));
         initialise_waiting_list( patient_general_list );
         initialise_waiting_list( patient_icu_list );
+
+        //TODO: go through waiting list instead of all wards
 		
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )

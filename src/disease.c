@@ -371,8 +371,10 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	int assigned_hospital_idx;
 
 	set_hospitalised( indiv, model->params, model->time );
+
 	assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
 	add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), COVID_GENERAL );
+//    transition_one_hospital_event(model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE);
 
 	//TODO: does the below need to be put back into this location?
 	//TOM: Quarantine lifting and intervention is now handled by transitioning to the "WAITING" hospital state.
@@ -391,9 +393,9 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-    //remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
-    if( indiv->hospital_state == WAITING )
-        remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
+    remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
+//    if( indiv->hospital_state == WAITING )
+//        remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
 
 	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
 
@@ -424,8 +426,11 @@ void transition_to_recovered( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
 
+    //TODO: remove if in waiting list here maybe
+    // potential flaw
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
+        remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
         //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
     }
@@ -442,8 +447,12 @@ void transition_to_death( model *model, individual *indiv )
 {
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
 
+    //TODO: remove if in waiting list here maybe
+    // potential flaw
+
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
+        remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
         //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
     }

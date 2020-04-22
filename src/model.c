@@ -788,21 +788,21 @@ int one_time_step( model *model )
     transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
+//    transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
 	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
     transition_events( model, RECOVERED,         	   &transition_to_recovered,        		FALSE );
     transition_events( model, DEATH,             	   &transition_to_death,            		FALSE );
 
-
     swap_waiting_general_and_icu_patients( model );
     hospital_waiting_list_transition_scheduler( model, GENERAL );
 	hospital_waiting_list_transition_scheduler( model, ICU );
-	transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
+    transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
     transition_events( model, GENERAL,         &transition_to_general,    FALSE );
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
-    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
     transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
+    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 		// printf("GENERAL WARDS:\n");
 		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_GENERAL]; i++)
 		// {
