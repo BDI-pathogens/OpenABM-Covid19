@@ -24,4 +24,4 @@
 %include "utilities.h"
 %include model_utils.i 
 %include params_utils.i
-
+%include input_utils.i

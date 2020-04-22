@@ -246,7 +246,8 @@ class Parameters(object):
         self.update_lock = False
 
     def _read_and_check_from_file(self):
-        covid19.read_param_file(self.c_params)
+        with open(self.c_params.input_param_file, "rb") as f:
+            covid19.utils_update_param_from_buffer(self.c_params, f.read())
 
     def _read_household_demographics(self):
         if self.household_df is None:
@@ -261,7 +262,8 @@ class Parameters(object):
         python and inset the line count to the params structure for initilisation
         """
         if self.get_param("N_REFERENCE_HOUSEHOLDS") != 0:
-            covid19.read_household_demographics_file(self.c_params)
+            with open(self.c_params.input_household_file, "rb") as f:
+                covid19.utils_update_household_demographics_param_from_buffer(self.c_params, f.read())
         else:
             n_ref_hh = -1
             with open(self.c_params.input_household_file, "r") as f:

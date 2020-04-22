@@ -23,7 +23,7 @@ Compilation
 -----------
 
 OpenABM-Covid19 requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed.
-Python installation requires Python 3.7+
+Python installation requires Python 3.7+ and Swig 4+
 
 ```bash
 cd OpenABM-Covid19/src

@@ -21,6 +21,8 @@
 /************************************************************************/
 
 void read_command_line_args(parameters *, int, char **);
+void update_param_from_buffer(parameters *, char *);
+void update_household_demographics_param_from_buffer(parameters *, char *);
 void read_param_file(parameters *);
 void read_household_demographics_file(parameters *);
 void read_hospital_param_file( parameters *);
