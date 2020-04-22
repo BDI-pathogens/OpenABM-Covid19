@@ -20,7 +20,7 @@ struct node
 
 typedef struct waiting_list waiting_list;
 
-//TODO: rename to list?
+//TODO: rename to list
 struct waiting_list 
 {
     node* head;
