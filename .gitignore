@@ -47,3 +47,4 @@ venv/*
 
 src/covid19.py
 src/covid19_wrap.c
+*.ipynb
