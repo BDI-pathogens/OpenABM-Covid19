@@ -413,13 +413,13 @@ class Model:
         covid19.write_individual_file(self.c_model, self.c_params)
 
     def write_interactions_file(self):
-        covid19.write_interactions(self.c_model, self.c_params)
+        covid19.write_interactions(self.c_model)
 
     def write_trace_tokens_timeseries(self):
-        covid19.write_trace_tokens_ts(self.c_model, self.c_params)
+        covid19.write_trace_tokens_ts(self.c_model)
 
     def write_trace_tokens(self):
-        covid19.write_trace_tokens(self.c_model, self.c_params)
+        covid19.write_trace_tokens(self.c_model)
 
     def write_transmissions(self):
-        covid19.write_transmissions(self.c_model, self.c_params)
+        covid19.write_transmissions(self.c_model)
