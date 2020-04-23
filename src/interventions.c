@@ -589,9 +589,7 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 {
 	if( !model->params->interventions_on )
 		return;
-
 	intervention_test_order( model, indiv, model->time );
-
 	if( model->params->allow_clinical_diagnosis )
 		intervention_on_positive_result( model, indiv );
 }

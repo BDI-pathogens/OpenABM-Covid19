@@ -153,7 +153,7 @@ void set_age_group( individual *indiv, parameters *params, int group )
 *  				change in status both at the individual level or national policy
 *  Returns:		void
 ******************************************************************************************/
-void update_random_interactions( individual *indiv, parameters* params ) //TODO: kelvin - probably need a update healthcare workers interactions func?
+void update_random_interactions( individual *indiv, parameters* params )
 {
 	double n = indiv->base_random_interactions;
 	int lockdown;
@@ -164,14 +164,14 @@ void update_random_interactions( individual *indiv, parameters* params ) //TODO:
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			lockdown = max( lockdown, params->lockdown_elderly_on );
 
-        switch( indiv->hospital_state ) //kelvin note: there are already required interactions defined for both icu and general patients... the function below is setting their randoms interactions and should be set to 0
+        switch( indiv->hospital_state )
 		{
-            case MORTUARY:		n = 0; break;
-            case WAITING:       n = 0; break;
-            case GENERAL:       n = params->hospitalised_daily_interactions; break;
-            case ICU:           n = params->hospitalised_daily_interactions; break;
-			case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break; //TODO is this messing with hospital transition stuff
-			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
+            case MORTUARY:		            n = 0; break;
+            case WAITING:                   n = 0; break;
+            case GENERAL:                   n = params->hospitalised_daily_interactions; break;
+            case ICU:                       n = params->hospitalised_daily_interactions; break;
+			case HOSPITALISED_RECOVERING:   n = params->hospitalised_daily_interactions; break;
+			default: 			            n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
 	}
 	else
@@ -210,8 +210,6 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	//TOM: Removing: interactions should now be handled by hospitalisation.
-	//update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -232,8 +230,6 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-    //TOM: Removing: interactions should now be handled by hospitalisation.
-    //update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -244,7 +240,6 @@ void set_critical( individual *indiv, parameters* params, int time )
 void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED_RECOVERING;
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************

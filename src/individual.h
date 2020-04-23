@@ -80,7 +80,7 @@ struct interaction{
 /************************************************************************/
 
 #define time_infected( indiv ) ( max( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ), indiv->time_event[PRESYMPTOMATIC_MILD] ) )
-#define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
+#define is_in_hospital( indiv ) ( ( indiv->hospital_state == WAITING || indiv->hospital_state == GENERAL || indiv->hospital_state == ICU ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
