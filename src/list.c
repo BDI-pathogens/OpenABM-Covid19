@@ -5,148 +5,146 @@
  *      Author: vuurenk
  */
 #include <stdlib.h>
-#include "waiting_list.h"
+#include "list.h"
 #include "constant.h"
 
-node* initialise_node( long pdx )
+node* initialise_node( long data )
 {
     node* node = malloc(sizeof(node));
 
     if (!node) 
         return NULL;
 
-    node->pdx = pdx;
+    node->data = data;
     node->next = NULL;
     return node;
 }
 
-void initialise_waiting_list( waiting_list *waiting_list )
+void initialise_list( list *list )
 {   
     //waiting_list = calloc( 1, sizeof(waiting_list));
-    waiting_list->head = NULL;
-    waiting_list->size = 0;
+    list->head = NULL;
+    list->size = 0;
 }   
 
-long pdx_at( waiting_list* waiting_list, int idx )
+long list_element_at( list* list, int index )
 {
     int i = 0;
-    node* current = waiting_list->head;
+    node* current = list->head;
     
-    while( i < idx )
+    while( i < index )
     {
         current = current->next;
         i++;
     }
 
-    return current->pdx;
+    return current->data;
 }
 
-void push_front( long pdx, waiting_list *waiting_list )
+void list_push_front( long data, list *list )
 {
     node* current = NULL;
 
-    if( waiting_list->head == NULL )
+    if( list->head == NULL )
     {
-        waiting_list->head = initialise_node( pdx );
+        list->head = initialise_node( data );
     }
     else 
     {
-        current = waiting_list->head;
-        waiting_list->head = initialise_node( pdx );
-        waiting_list->head->next = current;
+        current = list->head;
+        list->head = initialise_node( data );
+        list->head->next = current;
     }
     
-    waiting_list->size++;
+    list->size++;
 }
 
-void push_back( long pdx, waiting_list *waiting_list )
+void list_push_back( long data, list *list )
 {
     node *current = NULL;
 
-    if( waiting_list->head == NULL )
-        waiting_list->head = initialise_node( pdx );
+    if( list->head == NULL )
+        list->head = initialise_node( data );
     else 
     {
-        current = waiting_list->head; 
+        current = list->head;
         
         while (current->next != NULL )
             current = current->next;
         
-        current->next = initialise_node( pdx );
+        current->next = initialise_node( data );
     }
-    waiting_list->size++;
+    list->size++;
 }
 
-int list_elem_exists( long pdx, waiting_list *list )
+int list_elem_exists( long data, list *list )
 {
-    if( list->size == 0 || list->head == NULL )
+    if( list->head == NULL )
         return FALSE;
     
     node* current = list->head;
 
     while( current != NULL )
     {           
-        if( current->pdx == pdx )
-        {      
+        if( current->data == data )
             return TRUE;
-        }             
+
         current = current->next;        
     } 
 
     return FALSE;
 }
 
-long pop( waiting_list* waiting_list )
+long list_pop( list* list )
 {
     long retval;
 
-    node* top = waiting_list->head;
+    node* top = list->head;
     node* next = NULL;
     
     if( top == NULL )
         return WAITING_LIST_EMPTY;
     
-    if( waiting_list->size > 1 )
-        next = top->next;
+    next = top->next;
     
-    retval = top->pdx;
+    retval = top->data;
     free( top );
 
-    waiting_list->head = next;
-    waiting_list->size--;
+    list->head = next;
+    list->size--;
 
     return retval;
 }
 
-void remove_patient(long pdx, waiting_list* waiting_list)
+void list_remove_element( long data, list* list )
 {
-    if( waiting_list->head == NULL )
+    if( list->head == NULL )
         return;
 
-    node *current = waiting_list->head;            
+    node *current = list->head;
     node *previous = current;
 
     while( current != NULL )
-    {           
-        if( current->pdx == pdx )
-        {      
+    {
+        if( current->data == data )
+        {
             previous->next = current->next;
 
-            if( current == waiting_list->head )
-            waiting_list->head = current->next;
-            
-            free( current );
-            waiting_list->size--;                                
-            return;
-        }                               
-        previous = current;             
-        current = current->next;        
-    } 
-}     
+            if( current == list->head )
+                list->head = current->next;
 
-void destroy_waiting_list( waiting_list* waiting_list )
+            free( current );
+            list->size--;
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
+}
+
+void destroy_list( list* list )
 {
-    node* current = waiting_list->head;
+    node* current = list->head;
     node* next = NULL;
     
     while( current != NULL )
@@ -156,5 +154,5 @@ void destroy_waiting_list( waiting_list* waiting_list )
         current = next;
     }
 
-    //free( waiting_list );
+    //free( list );
 }
