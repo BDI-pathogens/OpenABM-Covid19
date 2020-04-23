@@ -310,7 +310,7 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
     assigned_ward_idx = 0;
     
     for( ward_idx = 1; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
-        if( assigned_hospital->wards[required_ward][assigned_ward_idx].n_patients > assigned_hospital->wards[required_ward][ward_idx].n_patients)
+        if( assigned_hospital->wards[required_ward][assigned_ward_idx].patients->size > assigned_hospital->wards[required_ward][ward_idx].patients->size )
             assigned_ward_idx = ward_idx;
 
     if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
@@ -405,18 +405,28 @@ void swap_waiting_general_and_icu_patients( model *model )
         initialise_list( patient_icu_list );
 
         //TODO: go through waiting list instead of all wards
-		
+
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
-            for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
-                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
-                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == CRITICAL )
-                        list_push_back( patient_idx, patient_general_list);
+            for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].patients->size; patient_idx++ )
+                if( model->population[ list_element_at(hospital->wards[COVID_GENERAL][ward_idx].patients, patient_idx) ].status == CRITICAL )
+                    list_push_back( list_element_at(hospital->wards[COVID_GENERAL][ward_idx].patients, patient_idx), patient_general_list );
 
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_ICU]; ward_idx++ )
-            for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
-                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
-                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == GENERAL )
-                        list_push_back( patient_idx, patient_icu_list);
+            for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].patients->size; patient_idx++ )
+                if( model->population[ list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx) ].status == HOSPITALISED_RECOVERING )
+                    list_push_back( list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx), patient_icu_list );
+
+//        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
+//            for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
+//                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
+//                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == CRITICAL )
+//                        list_push_back( patient_idx, patient_general_list);
+
+//        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_ICU]; ward_idx++ )
+//            for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
+//                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
+//                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == GENERAL )
+//                        list_push_back( patient_idx, patient_icu_list);
 		
 		patient_idx = 0;
         while( patient_idx < patient_general_list->size && patient_idx < patient_icu_list->size)

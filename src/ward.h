@@ -14,6 +14,7 @@
 #include "network.h"
 #include "doctor.h"
 #include "nurse.h"
+#include "list.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -32,11 +33,13 @@ struct ward
     int n_max_hcw[N_WORKER_TYPES];
     int n_worker[N_WORKER_TYPES];
 
-    int n_patients;
+    //int n_patients;
 
     doctor *doctors;
     nurse  *nurses;
-    long *patient_pdxs;
+    //long *patient_pdxs;
+
+    list *patients;
 
     network *doctor_patient_network;
     network *nurse_patient_network;
