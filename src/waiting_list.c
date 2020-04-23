@@ -1,5 +1,5 @@
 /*
- * hsopital.c
+ * waiting_list.c
  *
  *  Created on: 16 Apr 2020
  *      Author: vuurenk
@@ -8,6 +8,11 @@
 #include "waiting_list.h"
 #include "constant.h"
 
+/*****************************************************************************************
+*
+* Generic functions for creating a linked list. Used primarily for hospital wards.
+*
+******************************************************************************************/
 node* initialise_node( long pdx )
 {
     node* node = malloc(sizeof(node));

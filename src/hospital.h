@@ -28,14 +28,11 @@ typedef struct hospital hospital;
 
 struct hospital
 {
-    int hospital_idx;               //hospital index number
+    int hospital_idx;
 
     int n_workers[N_WORKER_TYPES];
-    int n_patients_waiting; //TODO: have waiting list for general and icu
+    int n_patients_waiting;
     int timestep_pending_admissions[N_HOSPITAL_WARD_TYPES];
-    
-    //TODO: need ventilator variables... when will a ventilator be needed? - question for rest of nhsx team
-    //TODO: add non covid patients
 
     network *hospital_workplace_network;
 
