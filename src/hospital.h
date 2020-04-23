@@ -18,7 +18,7 @@
 #include "network.h"
 #include "individual.h"
 #include "ward.h"
-#include "waiting_list.h"
+#include "list.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -39,7 +39,10 @@ struct hospital
 
     network *hospital_workplace_network;
 
-    waiting_list *waiting_list[N_HOSPITAL_WARD_TYPES];
+    list *waiting_list[N_HOSPITAL_WARD_TYPES];
+
+//    list *general_ward_waiting_list;
+//    list *icu_ward_waiting_list;
 
     int n_wards[N_HOSPITAL_WARD_TYPES];
     ward **wards;

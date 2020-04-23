@@ -140,16 +140,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
         network->edges[network->n_edges].id1 = hc_workers[ hdx ];
         network->edges[network->n_edges].id2 = all_required_interactions[ idx++ ];
 
-        if( network->edges[network->n_edges].id2 == 0 )
-        {
-            printf("edge2 pdx ewual to null!!");
-        }
-
-        if(  network->edges[network->n_edges].id1 == 0 )
-        {
-            printf("edge1 pdx ewual to null!!");
-        }
-
         network->n_edges++;
         hdx++;
         if( hdx >= n_hcw_working )
