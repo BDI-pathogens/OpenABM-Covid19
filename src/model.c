@@ -805,30 +805,40 @@ int one_time_step( model *model )
     transition_events( model, DEATH,             	   &transition_to_death,            		FALSE );
 
     swap_waiting_general_and_icu_patients( model );
-    hospital_waiting_list_transition_scheduler( model, GENERAL );
-	hospital_waiting_list_transition_scheduler( model, ICU );
-    transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
-    transition_events( model, GENERAL,         &transition_to_general,    FALSE );
-    transition_events( model, ICU,             &transition_to_icu,        FALSE );
-
-    transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
-    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
-		// printf("GENERAL WARDS:\n");
-		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_GENERAL]; i++)
-		// {
-		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_GENERAL][i]));
-		// }
-		// printf("\n");
-		// printf("ICU WARDS:\n");
-		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_ICU]; i++)
-		// {
-		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_ICU][i]));
-		// }
-		// printf("\n");
-
 
     hospital* h = &model->hospitals[0];
     int duplicates = 0;
+
+//    for( int current_ward_type = 0; current_ward_type < N_HOSPITAL_WARD_TYPES; current_ward_type++ )
+//    {
+//        waiting_list *current_list = h->waiting_list[current_ward_type];
+
+//        for( int currentidx = 0; currentidx < current_list->size; currentidx++ )
+//        {
+//            long current_pdx = pdx_at( current_list, currentidx );
+
+//            for( int other_ward_type = 0; other_ward_type < N_HOSPITAL_WARD_TYPES; other_ward_type++ )
+//            {
+//                waiting_list *other_list = h->waiting_list[other_ward_type];
+
+//                for( int nidx = 0; nidx < other_list->size; nidx++ )
+//                {
+//                    long other_pdx = pdx_at( other_list, nidx );
+//                    if (current_list != other_list || (current_list == other_list && currentidx != nidx))
+//                    {
+//                        if( current_pdx == other_pdx)
+//                        {
+//                            printf("DUPLICATED IN WAITING LIST: %li \n", current_pdx);
+//                            duplicates++;
+//                        }
+//                    }
+
+//                }
+//            }
+//        }
+//    }
+//    printf("waiting list duplicates: %i\n", duplicates);
+
     for( int current_ward_type = 0; current_ward_type < N_HOSPITAL_WARD_TYPES; current_ward_type++ )
     {
         for(int current_ward_idx = 0; current_ward_idx < h->n_wards[current_ward_type]; current_ward_idx++)
@@ -861,6 +871,64 @@ int one_time_step( model *model )
             }
         }
     }
+
+    hospital_waiting_list_transition_scheduler( model, GENERAL );
+	hospital_waiting_list_transition_scheduler( model, ICU );
+    transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
+    transition_events( model, GENERAL,         &transition_to_general,    FALSE );
+    transition_events( model, ICU,             &transition_to_icu,        FALSE );
+
+    transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
+    transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
+		// printf("GENERAL WARDS:\n");
+		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_GENERAL]; i++)
+		// {
+		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_GENERAL][i]));
+		// }
+		// printf("\n");
+		// printf("ICU WARDS:\n");
+		// for( int i = 0; i < model->hospitals[0].n_wards[COVID_ICU]; i++)
+		// {
+		// 	printf("ward%i:%i, ", i, ward_available_beds(&model->hospitals[0].wards[COVID_ICU][i]));
+		// }
+		// printf("\n");
+
+
+//    hospital* h = &model->hospitals[0];
+//    int duplicates = 0;
+//    for( int current_ward_type = 0; current_ward_type < N_HOSPITAL_WARD_TYPES; current_ward_type++ )
+//    {
+//        for(int current_ward_idx = 0; current_ward_idx < h->n_wards[current_ward_type]; current_ward_idx++)
+//        {
+//            ward* current_ward = &h->wards[current_ward_type][current_ward_idx];
+//            for( int current_patient_idx = 0; current_patient_idx < current_ward->n_beds; current_patient_idx++ )
+//            {
+//                if(current_ward->patient_pdxs[current_patient_idx] != NO_PATIENT)
+//                {
+//                    //loop through all other patients and make sure no duplicates
+//                    for( int next_ward_type = 0; next_ward_type < N_HOSPITAL_WARD_TYPES; next_ward_type++ )
+//                    {
+//                        for(int next_ward_idx = 0; next_ward_idx < h->n_wards[next_ward_type]; next_ward_idx++)
+//                        {
+//                            ward* next_ward = &h->wards[next_ward_type][next_ward_idx];
+//                            for( int next_patient_idx = 0; next_patient_idx < current_ward->n_beds; next_patient_idx++ )
+//                            {
+//                                if(next_ward->patient_pdxs[next_patient_idx] != NO_PATIENT && (current_ward != next_ward || (current_ward == next_ward && current_patient_idx != next_patient_idx ) ) )
+//                                {
+//                                    if( current_ward->patient_pdxs[current_patient_idx] == next_ward->patient_pdxs[next_patient_idx])
+//                                    {
+//                                        printf( "DUPLICATE IN WARDS PATIENTS LISTS!!!\n");
+//                                        duplicates++;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+
     printf("duplicate: %i\n", duplicates);
 
     for( int i = 0; i < h->n_wards[COVID_GENERAL]; i++ )
