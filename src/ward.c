@@ -10,9 +10,8 @@
 #include "model.h"
 
 /*****************************************************************************************
-*  Name:		initialize_hospital
-*  Description: initializes and individual at the start of the simulation, note can
-*  				only be called once per individual
+*  Name:		initialise_ward
+*  Description: initialises a ward at the start of the simulation, assigns .
 *  Returns:		void
 ******************************************************************************************/
 void initialise_ward(
@@ -27,7 +26,7 @@ void initialise_ward(
     ward->ward_idx          = ward_idx;
     ward->type              = type;
     ward->n_beds            = n_beds;
-    ward->n_max_hcw[DOCTOR] = n_max_doctors; //TODO: can get rid of this n_max_hcw array... hospital can have knowledge of it as only used in hospital.c
+    ward->n_max_hcw[DOCTOR] = n_max_doctors;
     ward->n_max_hcw[NURSE]  = n_max_nurses;
 
     ward->n_worker[NURSE]   = 0;

@@ -10,6 +10,10 @@
 
 #define WAITING_LIST_EMPTY -1
 
+/************************************************************************/
+/****************************** Structures  *****************************/
+/************************************************************************/
+
 typedef struct node node;
 
 struct node 
@@ -20,17 +24,18 @@ struct node
 
 typedef struct waiting_list waiting_list;
 
-//TODO: rename to list
 struct waiting_list 
 {
     node* head;
     int size;
 };
 
+/************************************************************************/
+/******************************  Functions  *****************************/
+/************************************************************************/
 node* initialise_node( long pdx );
 void initialise_waiting_list( waiting_list *waiting_list );
 
-//TODO: rename these. maybe put list_ in front of each name to make clear?
 long pdx_at( waiting_list* waiting_list, int idx );
 void push_front( long pdx, waiting_list *waiting_list );
 void push_back( long pdx, waiting_list *waiting_list );

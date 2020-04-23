@@ -48,12 +48,6 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
-
-	for( int idx = 0; idx < N_DRAW_LIST; idx++)
-		transitions[HOSPITAL_TRANSITION][idx] = params->mean_time_hospital_transition;
-    //bernoulli_draw_list( transitions[HOSPITAL_TRANSITION],   N_DRAW_LIST, params->mean_time_hospital_transition );
-    //gamma_draw_list( transitions[HOSPITAL_TRANSITION],         N_DRAW_LIST, params->mean_time_hospital_transition, params->sd_time_hospital_transition );
-
 }
 
 /*****************************************************************************************
@@ -116,14 +110,13 @@ void set_up_infectious_curves( model *model )
 	double mean_interactions[N_AGE_TYPES];
 	int type, group;
 
-    //TODO: double check that the hospital hcw-> patients interactions are being taken into account properluy here and in estimate mean
-    //      interaction... it does not look like they are being used in the estimate mean interactions func
-    //      is it ok to leave them out or is this affecting the rest of the simulation?
+    //TODO: Double check that the hospital HCW-patient interactions are being taken into account properly here and
+    //      in estimate_mean_interactions.
 	mean_interactions[AGE_TYPE_CHILD]   = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
 	mean_interactions[AGE_TYPE_ADULT]   = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
 	mean_interactions[AGE_TYPE_ELDERLY] = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
 
-	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
+	infectious_rate = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
 
 	for( group = 0; group < N_AGE_GROUPS; group++ )
 		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
@@ -181,7 +174,7 @@ void transmit_virus_by_type(
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-        n_infected  = list->n_daily_current[ day]; //n_daily_current only holds the number of people infected within each event type list????
+        n_infected  = list->n_daily_current[ day];
 		next_event  = list->events[ day ];
 
 		for( idx = 0; idx < n_infected; idx++ )
@@ -199,7 +192,7 @@ void transmit_virus_by_type(
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
 
-				//TOM: Determine the effect hospitalisation has on the hazard rate.
+				//Determine the effect hospitalisation has on the hazard rate.
                 switch( infector->hospital_state )
                 {
                     case WAITING:       hospital_state_modifier = params->waiting_infectivity_modifier; break;
@@ -208,7 +201,8 @@ void transmit_virus_by_type(
                     default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
                 }
 
-				if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
+                //TODO: Check hazard rate is being applied correctly to interactions.
+                if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
 					hazard_rate = 0.0;
 				else {
 					hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
@@ -307,8 +301,7 @@ void transition_one_disese_event(
 	int edge
 )
 {
-	indiv->status           = from;
-
+	indiv->status = from;
 	if( from != NO_EVENT )
 		indiv->time_event[from] = model->time;
 	if( indiv->current_disease_event != NULL )
@@ -363,25 +356,17 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 
 /*****************************************************************************************
 *  Name:		transition_to_hospitalised
-*  Description: Transitions symptomatic individual to hospital
+*  Description: Transitions symptomatic individual to a severe disease state, and assigns them
+*               to a hospital for upcoming hospital states.
 *  Returns:		void
 ******************************************************************************************/
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	int assigned_hospital_idx;
-
 	set_hospitalised( indiv, model->params, model->time );
-
 	assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
 	add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), COVID_GENERAL );
-//    transition_one_hospital_event(model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE);
-
-	//TODO: does the below need to be put back into this location?
-	//TOM: Quarantine lifting and intervention is now handled by transitioning to the "WAITING" hospital state.
-//	if( indiv->quarantined )
-//		intervention_quarantine_release( model, indiv );
-
-//	intervention_on_hospitalised( model, indiv );
+	intervention_on_hospitalised( model, indiv );
 }
 
 /*****************************************************************************************
@@ -392,13 +377,8 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-
     remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
-//    if( indiv->hospital_state == WAITING )
-//        remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
-
 	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
-
 	intervention_on_critical( model, indiv );
 }
 
@@ -409,12 +389,10 @@ void transition_to_critical( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_hospitalised_recovering( model *model, individual *indiv )
 {
+    set_hospitalised_recovering( indiv, model->params, model->time );
 	transition_one_disese_event( model, indiv, HOSPITALISED_RECOVERING, RECOVERED, HOSPITALISED_RECOVERING_RECOVERED );
-	
 	remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
 	add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
-	
-	set_hospitalised_recovering( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -424,18 +402,13 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
+    set_recovered( indiv, model->params, model->time );
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
-
-    //TODO: remove if in waiting list here maybe
-    // potential flaw
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
         remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
-        //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
     }
-	
-	set_recovered( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -445,16 +418,11 @@ void transition_to_recovered( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_death( model *model, individual *indiv )
 {
+    set_dead( indiv, model->params, model->time );
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
-
-    //TODO: remove if in waiting list here maybe
-    // potential flaw
-
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
         remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
-        //release_patient_from_hospital(indiv, &model->hospitals[indiv->hospital_idx]);
         transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
     }
-	set_dead( indiv, model->params, model->time );
 }

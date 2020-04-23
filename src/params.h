@@ -163,14 +163,13 @@ typedef struct{
     int n_ward_beds[N_HOSPITAL_WARD_TYPES];
     int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
     int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
+    int max_hcw_daily_interactions;
 
     //TODO: Add in finer grained transition times between wards once we have more information on them.
-    //TOM: Determines timing for hospital event transitions.
     double mean_time_hospital_transition; // mean time for movement between hospital locations
     double sd_time_hospital_transition; // sd for movement between hospital locations
 
-    //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
+    //TOM: Added for infectivity dependency based on hospital location. Applied to hazard rate when transmitting the virus.
     double waiting_infectivity_modifier;
     double general_infectivity_modifier;
     double icu_infectivity_modifier;
