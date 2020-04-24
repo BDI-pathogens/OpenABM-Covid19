@@ -1,0 +1,23 @@
+{
+    "gdp": {
+        "lockdown_recovery_time": 1,
+        "optimal_recovery": false
+    },
+    "corporate_bankruptcy": {
+        "beta": 1.5,
+        "large_cap_cash_surplus_months": 3
+    },
+    "personal_insolvency": {
+        "saving": 10,
+        "default_th": 100,
+        "beta": 1,
+        "gamma": 0.3,
+        "utilization_ratio_ill": 0.1,
+        "utilization_ratio_furloughed_lockdown": 0.4,
+        "utilization_ratio_wfh_lockdown": 0.5,
+        "utilization_ratio_working_lockdown": 0.1,
+        "utilization_ratio_furloughed_no_lockdown": 0.0,
+        "utilization_ratio_wfh_no_lockdown": 0.1,
+        "utilization_ratio_working_no_lockdown": 0.9
+    }
+}
