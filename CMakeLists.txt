@@ -38,6 +38,8 @@ add_executable(covid19ibm
         src/structure.h
         src/utilities.c
         src/utilities.h
+        src/waiting_list.h
+        src/waiting_list.c
         src/ward.c
         src/ward.h)
 
