@@ -508,7 +508,6 @@ void read_hospital_param_file( parameters *params)
 ******************************************************************************************/
 void write_output_files(model *model, parameters *params)
 {
-
 	if(params->sys_write_individual == TRUE)
 	{
 		write_individual_file( model, params );
@@ -524,7 +523,6 @@ void write_output_files(model *model, parameters *params)
 ******************************************************************************************/
 void write_individual_file(model *model, parameters *params)
 {
-	
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
