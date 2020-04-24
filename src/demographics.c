@@ -67,25 +67,20 @@ void set_up_allocate_work_places( model *model )
 					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
 					other         += prob[adx][ndx];
 				}
-
-                // TODO: kelvin have probability func for adults being in the hospital network??
-                // Tom - is this handled by the set hospital worker function?
 			}
 		}
 		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
 			prob[adx][AGE_WORK_MAP[adx]] = 1.0 - other;
 	}
 
-	// randomly assign a work place networks using the probability map
-	// Added: Healthcare workers are not added to workplace networks. - Tom & Kelvin.
-
+	// Assigns workers to work networks if they are not healthcare workers. Otherwise, sets their "work network"
+	// to -1, i.e. not in a hospital.
     for (pdx = 0; pdx < model->params->n_total; pdx++)
     {
         if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
             model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
 		else
 			model->population[pdx].work_network = HOSPITAL_WORK_NETWORK;
-		
     }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )

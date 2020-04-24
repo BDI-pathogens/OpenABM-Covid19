@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-        printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li \n",
+		printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 				model->time,
 				params.lockdown_on,
 				params.lockdown_elderly_on,
@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
 				n_current( model, HOSPITALISED ),
 				n_current( model, CRITICAL ),
 			    n_current( model, HOSPITALISED_RECOVERING ),
-				n_current( model, DEATH ),
 				n_current( model, RECOVERED ),
+                n_current( model, DEATH ),
 				n_current( model, WAITING ),
 				n_current( model, GENERAL ),
 				n_current( model, ICU),

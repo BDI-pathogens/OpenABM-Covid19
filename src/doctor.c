@@ -8,9 +8,9 @@
 #include "doctor.h"
 
 /*****************************************************************************************
-*  Name:		initialize_hospital
-*  Description: initializes and individual at the start of the simulation, note can
-*  				only be called once per individual
+*  Name:		initialise_doctor
+*  Description: initialises a doctor and assigns them to a hospital at the start of the
+*               simulation. Can only be called once per individual.
 *  Returns:		void
 ******************************************************************************************/
 void initialise_doctor(

@@ -17,7 +17,6 @@
 #include "hospital.h"
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
 
 /*****************************************************************************************
 *  Name:		new_model
@@ -45,11 +44,9 @@ model* new_model( parameters *params )
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
-	//TOM: EVENT CONTROL HERE// -- Set up event list for each of the events listed in the EVENT_TYPES enum.
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
-    //TOM: EVENT CONTROL HERE//
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
@@ -58,12 +55,10 @@ model* new_model( parameters *params )
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 
-    //TOM: EVENT CONTROL HERE//
-	set_up_events( model_ptr ); // TOM: Has int number - is this for the types of events?
+	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
-    //TOM: EVENT CONTROL HERE//
 
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
@@ -89,6 +84,7 @@ void destroy_model( model *model )
     free( model->possible_interactions );
     free( model->interactions );
     free( model->events );
+
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
 		free( model->transition_time_distributions[ idx ] );
 	free( model->transition_time_distributions );
@@ -99,9 +95,11 @@ void destroy_model( model *model )
     	destroy_network( model->work_network[idx] );
 
     free( model->work_network );
+
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
     free( model->event_lists );
+
     for( idx = 0; idx < model->household_directory->n_idx; idx++ )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
@@ -156,6 +154,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 /*****************************************************************************************
 *  Name:		destroy_event_list
 *  Description: Destroys an event list
+*  Returns:     void
 ******************************************************************************************/
 void destroy_event_list( model *model, int type )
 {
@@ -240,7 +239,7 @@ void set_up_work_network( model *model, int network )
 void set_up_events( model *model )
 {
 	long idx;
-	int types = 6; // TOM: Are these the types of events or for the infectiousness curves?
+	int types = 6;
 	parameters *params = model->params;
 
 	model->events     = calloc( types * params->n_total, sizeof( event ) );
@@ -283,15 +282,14 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     int idx, n_total_doctors, n_total_nurses;
     individual *indiv;
 
-    //initialise hospitals
+    //Initialise hospitals.
     model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
         initialise_hospital( &(model->hospitals[idx]), model->params, idx );
 
-    //TODO: add below into for loop for all hospitals and also change to for loop over worketypes when hc_worker struct created
-
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be doctors and assign to a hospital
+
+    //Randomly pick individuals from population between ages 20 - 69 to be doctors and assign them to a hospital.
     n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];
     n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
     while( idx < n_total_doctors )
@@ -308,7 +306,8 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     }
 
     idx = 0;
-    //randomly pick individuals from population between ages 20 - 69 to be nurses and assign to a hospital
+
+    //Randomly pick individuals from population between ages 20 - 69 to be nurses and assign them to a hospital.
     n_total_nurses = model->params->n_hcw_per_ward[COVID_GENERAL][NURSE] * model->params->n_wards[COVID_GENERAL];
     n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
     while( idx < n_total_nurses )
@@ -369,7 +368,6 @@ double estimate_total_interactions( model *model )
             }
         }
     }
-    //TODO: is the above the correct way to add interactions from hospital related networks? what exactly is the purpose of estimating the amount of interactions?
 	return n_interactions;
 }
 
@@ -402,7 +400,6 @@ void set_up_interactions( model *model )
 			model->possible_interactions[ idx++ ] = indiv_idx;
 	}
 
-    //TODO: does something to do with m
 	model->n_possible_interactions = idx;
 	model->n_total_intereactions   = 0;
 }
@@ -572,7 +569,7 @@ void set_up_seed_infection( model *model )
 	int idx;
 	unsigned long int person;
 
-    //kelvin change, only seed random infection if not a healthcare worker
+    //Only seed random infection if not a healthcare worker.
     idx = 0;
     while( idx < params->n_seed_infection )
     {
@@ -656,7 +653,7 @@ void add_interactions_from_network(
         if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
-        //TODO: kelvin check no healthcare workers in these networks
+        //TODO: Check no healthcare workers are in these networks.
 
 		inter1 = &(model->interactions[ all_idx++ ]);
 		inter2 = &(model->interactions[ all_idx++ ]);
@@ -704,10 +701,10 @@ void build_daily_network( model *model )
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
-    for( idx = 0; idx < N_WORK_NETWORKS; idx++ ) //TODO: doctor was in 0 - 9 work network... make sure no hcw in work networks
+    //TODO: HCW previously found in 0 - 9 work network. Fixed?
+    for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-	//TODO: should these hospital / ward networks be added into this func? if so is the implementation below correct?
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
     {
         add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
@@ -758,6 +755,7 @@ int duplicates = 0;
 /*****************************************************************************************
 *  Name:		one_time_step
 *  Description: Move the model through one time step
+*  Returns:     int
 ******************************************************************************************/
 int one_time_step( model *model )
 {
@@ -770,14 +768,14 @@ int one_time_step( model *model )
 
     build_daily_network( model );
 	transmit_virus( model, model->params );
-	
+
     transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
 	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
-    transition_events( model, RECOVERED,         	   &transition_to_recovered,        		FALSE );
-    transition_events( model, DEATH,             	   &transition_to_death,            		FALSE );
+    transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
+    transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
     transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
     transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
@@ -785,11 +783,13 @@ int one_time_step( model *model )
     swap_waiting_general_and_icu_patients( model );
     hospital_waiting_list_transition_scheduler( model, GENERAL );
 	hospital_waiting_list_transition_scheduler( model, ICU );
+
     transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
     transition_events( model, GENERAL,         &transition_to_general,    FALSE );
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
-	
-	printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+
+    ///use printf below to see available beds each timestep
+    printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
