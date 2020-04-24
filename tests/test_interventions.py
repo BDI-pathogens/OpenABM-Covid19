@@ -10,11 +10,12 @@ Created: March 2020
 Author: p-robot
 """
 
-import pytest, sys, subprocess, shutil, os
-from os.path import join
+import pytest
+import subprocess
+import sys
 import numpy as np, pandas as pd
 from scipy import optimize
-from math import sqrt, log, exp
+from math import sqrt
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet

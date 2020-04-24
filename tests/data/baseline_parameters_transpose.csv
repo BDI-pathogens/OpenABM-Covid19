@@ -20,7 +20,7 @@ end_time	200
 n_seed_infection	5
 mean_infectious_period	6
 sd_infectious_period	2.5
-infectious_rate	6.75
+infectious_rate	5.75
 mean_time_to_symptoms	6
 sd_time_to_symptoms	2.5
 mean_time_to_hospital	5.14
@@ -57,9 +57,6 @@ household_size_3	4416
 household_size_4	4140
 household_size_5	1104
 household_size_6	552
-population_child	23
-population_adult	63
-population_elderly	13
 population_0_9	8054000
 population_10_19	7528000
 population_20_29	8712000
@@ -86,7 +83,7 @@ hospitalised_fraction_0_9	0.01
 hospitalised_fraction_10_19	0.0267
 hospitalised_fraction_20_29	0.0367
 hospitalised_fraction_30_39	0.0633
-hospitalised_fraction_40_49	0.8
+hospitalised_fraction_40_49	0.08
 hospitalised_fraction_50_59	0.12
 hospitalised_fraction_60_69	0.1533
 hospitalised_fraction_70_79	0.16
@@ -166,16 +163,6 @@ lockdown_time_on	10000
 lockdown_time_off	10000
 lockdown_elderly_time_on	10000
 lockdown_elderly_time_off	10000
-successive_lockdown_time_on	10000
-successive_lockdown_duration	21
-successive_lockdown_gap	7
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
 intervention_start_time 0
-TEMP_intervention_trigger_n_infected 0
-TEMP_lockdown_trigger_n_infected 0
-TEMP_lockdown_trigger_length 25
-TEMP_lockdown_trigger_keep_elderly 1
-TEMP_lockdown_trigger_app_on_end 1
-TEMP_lockdown_trigger_time_to_test 10000
-N_REFERENCE_HOUSEHOLDS	125455

@@ -12,9 +12,11 @@
 #include "utilities.h"
 #include "constant.h"
 #include "params.h"
+#include "network.h"
 #include "disease.h"
 #include "structure.h"
 #include "interventions.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -27,7 +29,6 @@
 ******************************************************************************************/
 void set_up_transition_times( model *model )
 {
-
 	parameters *params = model->params;
 	int idx;
 	int **transitions;
@@ -61,7 +62,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	long pdx, ndx;
 	long people = 0;
 	double inter  = 0;
-	double *weight = model->params->relative_transmission_by_type;
+	double *weight = model->params->relative_transmission;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 		if( model->population[pdx].age_type == age )
@@ -110,20 +111,18 @@ void set_up_infectious_curves( model *model )
 	double mean_interactions[N_AGE_TYPES];
 	int type, group;
 
-    //TODO: Double check that the hospital HCW-patient interactions are being taken into account properly here and
-    //      in estimate_mean_interactions.
 	mean_interactions[AGE_TYPE_CHILD]   = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
 	mean_interactions[AGE_TYPE_ADULT]   = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
 	mean_interactions[AGE_TYPE_ELDERLY] = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
 
-	infectious_rate = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
+	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
 
 	for( group = 0; group < N_AGE_GROUPS; group++ )
 		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
-		type_factor = params->relative_transmission_by_type_used[type];
+		type_factor = params->relative_transmission_used[type];
 
 		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
@@ -301,7 +300,8 @@ void transition_one_disese_event(
 	int edge
 )
 {
-	indiv->status = from;
+	indiv->status           = from;
+
 	if( from != NO_EVENT )
 		indiv->time_event[from] = model->time;
 	if( indiv->current_disease_event != NULL )
@@ -369,8 +369,6 @@ void transition_to_hospitalised( model *model, individual *indiv )
 
     if( indiv->quarantined )
         intervention_quarantine_release( model, indiv );
-	
-	intervention_on_hospitalised( model, indiv );
 }
 
 /*****************************************************************************************
@@ -381,8 +379,10 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
+
     remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
 	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
+
 	intervention_on_critical( model, indiv );
 }
 
@@ -393,13 +393,12 @@ void transition_to_critical( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_hospitalised_recovering( model *model, individual *indiv )
 {
-    set_hospitalised_recovering( indiv, model->params, model->time );
-
     remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
 	if( indiv->ward_type != COVID_GENERAL )
 		add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
 
     transition_one_disese_event( model, indiv, HOSPITALISED_RECOVERING, RECOVERED, HOSPITALISED_RECOVERING_RECOVERED );
+    set_hospitalised_recovering( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -409,13 +408,13 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-    set_recovered( indiv, model->params, model->time );
-	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
         remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
         transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
     }
+    transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
+    set_recovered( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************
@@ -425,11 +424,11 @@ void transition_to_recovered( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_death( model *model, individual *indiv )
 {
-    set_dead( indiv, model->params, model->time );
-	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
     if( indiv->hospital_state != NOT_IN_HOSPITAL )
     {
         remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
         transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
     }
+	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
+	set_dead( indiv, model->params, model->time );
 }
