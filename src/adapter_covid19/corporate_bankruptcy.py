@@ -14,12 +14,12 @@ class NaiveCorporateBankruptcyModel:
         pass
 
     def gdp_discount_factor(
-            self,
-            days_since_lockdown: int,
-            gdp_discount: Optional[Mapping[Sector, float]] = None,
-            comp_discount: Optional[Mapping[Sector, float]] = None,
-            tax_discount: Optional[Mapping[Sector, float]] = None,
-            consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
+        self,
+        days_since_lockdown: int,
+        gdp_discount: Optional[Mapping[Sector, float]] = None,
+        comp_discount: Optional[Mapping[Sector, float]] = None,
+        tax_discount: Optional[Mapping[Sector, float]] = None,
+        consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
     ) -> Mapping[Sector, float]:
         """
         Amount to discount GDP by due to companies
@@ -38,9 +38,9 @@ class NaiveCorporateBankruptcyModel:
 
 class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
     def __init__(
-            self,
-            beta: float = 1 + np.random.rand(),
-            large_cap_cash_surplus_months: float = np.random.rand() * 12,
+        self,
+        beta: float = 1 + np.random.rand(),
+        large_cap_cash_surplus_months: float = np.random.rand() * 12,
     ):
         self.beta = beta
         theta = sp.pi / self.beta
@@ -56,27 +56,49 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         self.sme_clipped_cash_buffer: Mapping[Sector, float] = {}
 
     def load(self, reader: Reader) -> None:
-        io_df = reader.load_csv('input_output').set_index('Sector')
-        self.small_cap_cash_buffer = SectorDataSource('smallcap_cash').load(reader)
-        self.large_cap_pct = SectorDataSource('largecap_pct_turnover').load(reader)
-        self.employee_compensation = {Sector[k]: v for k, v in io_df.employee_compensation.to_dict().items()}
-        self.taxes_minus_subsidies = {Sector[k]: v for k, v in io_df.taxes_minus_subsidies.to_dict().items()}
-        self.capital_consumption = {Sector[k]: v for k, v in io_df.capital_consumption.to_dict().items()}
-        outflows = io_df.employee_compensation + io_df.taxes_minus_subsidies + io_df.capital_consumption
-        gross_operating_surplus = io_df.net_operating_surplus + io_df.capital_consumption
+        io_df = reader.load_csv("input_output").set_index("Sector")
+        self.small_cap_cash_buffer = SectorDataSource("smallcap_cash").load(reader)
+        self.large_cap_pct = SectorDataSource("largecap_pct_turnover").load(reader)
+        self.employee_compensation = {
+            Sector[k]: v for k, v in io_df.employee_compensation.to_dict().items()
+        }
+        self.taxes_minus_subsidies = {
+            Sector[k]: v for k, v in io_df.taxes_minus_subsidies.to_dict().items()
+        }
+        self.capital_consumption = {
+            Sector[k]: v for k, v in io_df.capital_consumption.to_dict().items()
+        }
+        outflows = (
+            io_df.employee_compensation
+            + io_df.taxes_minus_subsidies
+            + io_df.capital_consumption
+        )
+        gross_operating_surplus = (
+            io_df.net_operating_surplus + io_df.capital_consumption
+        )
         lcap_cash_buffer = (
             gross_operating_surplus
             * np.array([self.large_cap_pct[s] for s in Sector])
-            * self.large_cap_cash_surplus_months / 12
+            * self.large_cap_cash_surplus_months
+            / 12
         )
-        sme_factor = np.array([
-            (self.small_cap_cash_buffer[s] / self.sinc_theta) / 365 * (1 - self.large_cap_pct[s]) for s in Sector
-        ])
+        sme_factor = np.array(
+            [
+                (self.small_cap_cash_buffer[s] / self.sinc_theta)
+                / 365
+                * (1 - self.large_cap_pct[s])
+                for s in Sector
+            ]
+        )
         sme_cash_buffer = outflows * sme_factor
         lcap_clipped_cash_buffer = lcap_cash_buffer.apply(lambda x: max(x, 0))
         sme_clipped_cash_buffer = sme_cash_buffer.apply(lambda x: max(x, 0))
-        self.lcap_clipped_cash_buffer = {Sector[k]: v for k, v in lcap_clipped_cash_buffer.to_dict().items()}
-        self.sme_clipped_cash_buffer = {Sector[k]: v for k, v in sme_clipped_cash_buffer.to_dict().items()}
+        self.lcap_clipped_cash_buffer = {
+            Sector[k]: v for k, v in lcap_clipped_cash_buffer.to_dict().items()
+        }
+        self.sme_clipped_cash_buffer = {
+            Sector[k]: v for k, v in sme_clipped_cash_buffer.to_dict().items()
+        }
         value_added = (
             io_df.net_operating_surplus
             + io_df.employee_compensation
@@ -86,12 +108,12 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         self.value_added = {Sector[k]: v for k, v in value_added.to_dict().items()}
 
     def _get_mean_cash_buffer_days(
-            self,
-            lcap: bool,
-            gdp_discount: Optional[Mapping[Sector, float]],
-            comp_discount: Optional[Mapping[Sector, float]],
-            tax_discount: Optional[Mapping[Sector, float]],
-            consumption_cost_discount: Optional[Mapping[Sector, float]],
+        self,
+        lcap: bool,
+        gdp_discount: Optional[Mapping[Sector, float]],
+        comp_discount: Optional[Mapping[Sector, float]],
+        tax_discount: Optional[Mapping[Sector, float]],
+        consumption_cost_discount: Optional[Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
         """
 
@@ -114,41 +136,49 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
             clipped_cash_buffer = self.sme_clipped_cash_buffer
         return {
             # Added a nugget for when the denominator is 0
-            s: 365 * clipped_cash_buffer[s] / (
-                size_modifier[s] * (
+            s: 365
+            * clipped_cash_buffer[s]
+            / (
+                size_modifier[s]
+                * (
                     self.employee_compensation[s] * comp_discount[s]
                     + self.taxes_minus_subsidies[s] * tax_discount[s]
                     + self.capital_consumption[s] * consumption_cost_discount[s]
                     - self.value_added[s] * gdp_discount[s]
-                ) - 1e-6)
+                )
+                - 1e-6
+            )
             for s in Sector
         }
 
     def _get_median_cash_buffer_days(
-            self,
-            lcap: bool,
-            gdp_discount: Optional[Mapping[Sector, float]],
-            comp_discount: Optional[Mapping[Sector, float]],
-            tax_discount: Optional[Mapping[Sector, float]],
-            consumption_cost_discount: Optional[Mapping[Sector, float]],
+        self,
+        lcap: bool,
+        gdp_discount: Optional[Mapping[Sector, float]],
+        comp_discount: Optional[Mapping[Sector, float]],
+        tax_discount: Optional[Mapping[Sector, float]],
+        consumption_cost_discount: Optional[Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
         mean_cash_buffer_days = self._get_mean_cash_buffer_days(
-            lcap, gdp_discount, comp_discount, tax_discount, consumption_cost_discount)
+            lcap, gdp_discount, comp_discount, tax_discount, consumption_cost_discount
+        )
         return {k: v * self.sinc_theta for k, v in mean_cash_buffer_days.items()}
 
-    def _proportion_solvent(self, days_since_lockdown: int, median_cash_buffer_day: float) -> float:
+    def _proportion_solvent(
+        self, days_since_lockdown: int, median_cash_buffer_day: float
+    ) -> float:
         solvent = fisk.sf(days_since_lockdown, self.beta, scale=median_cash_buffer_day)
         if np.isnan(solvent):
             return 0
         return solvent
 
     def gdp_discount_factor(
-            self,
-            days_since_lockdown: int,
-            gdp_discount: Optional[Mapping[Sector, float]] = None,
-            comp_discount: Optional[Mapping[Sector, float]] = None,
-            tax_discount: Optional[Mapping[Sector, float]] = None,
-            consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
+        self,
+        days_since_lockdown: int,
+        gdp_discount: Optional[Mapping[Sector, float]] = None,
+        comp_discount: Optional[Mapping[Sector, float]] = None,
+        tax_discount: Optional[Mapping[Sector, float]] = None,
+        consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
     ) -> Mapping[Sector, float]:
         """
         Proportion of Companies Insolvent on a Specified Number of Days in the Future
@@ -166,16 +196,25 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
             gdp_discount=gdp_discount,
             comp_discount=comp_discount,
             tax_discount=tax_discount,
-            consumption_cost_discount=consumption_cost_discount
+            consumption_cost_discount=consumption_cost_discount,
         )
         sme_median_cash_buffer_days = self._get_mean_cash_buffer_days(
             lcap=False,
             gdp_discount=gdp_discount,
             comp_discount=comp_discount,
             tax_discount=tax_discount,
-            consumption_cost_discount=consumption_cost_discount
+            consumption_cost_discount=consumption_cost_discount,
         )
-        return {s: (
-                self._proportion_solvent(days_since_lockdown, lcap_median_cash_buffer_days[s]) * self.large_cap_pct[s]
-                + self._proportion_solvent(days_since_lockdown, sme_median_cash_buffer_days[s]) * (1 - self.large_cap_pct[s])
-            ) for s in Sector}
+        return {
+            s: (
+                self._proportion_solvent(
+                    days_since_lockdown, lcap_median_cash_buffer_days[s]
+                )
+                * self.large_cap_pct[s]
+                + self._proportion_solvent(
+                    days_since_lockdown, sme_median_cash_buffer_days[s]
+                )
+                * (1 - self.large_cap_pct[s])
+            )
+            for s in Sector
+        }
