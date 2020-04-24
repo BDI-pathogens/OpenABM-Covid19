@@ -15,6 +15,7 @@
 #define FALSE 0
 #define TRUE 1
 
+
 enum EVENT_TYPES{
 	UNINFECTED,
 	PRESYMPTOMATIC,
@@ -81,9 +82,9 @@ enum AGE_TYPES{
 };
 
 enum WORK_NETWORKS{
-    NETWORK_0_9, // Healthcare workers children still in school (intervention where only key workers can have children at school).
-    NETWORK_10_19,
-    NETWORK_20_69,
+	NETWORK_0_9,
+	NETWORK_10_19,
+	NETWORK_20_69,
 	NETWORK_70_79,
 	NETWORK_80,
 	N_WORK_NETWORKS
@@ -96,7 +97,6 @@ enum WORK_NETWORKS_TYPES{
 	N_WORK_NETWORK_TYPES
 };
 
-//TODO: change to HOSPITAL_WORKER_TYPES
 enum WORKER_TYPES {
     DOCTOR,
     NURSE,
@@ -109,8 +109,6 @@ extern const int AGE_TYPE_MAP[N_AGE_GROUPS];
 extern const char* AGE_TEXT_MAP[N_AGE_GROUPS];
 extern const int EVENT_TYPE_TO_WARD_MAP[N_EVENT_TYPES];
 
-
-
 enum HOUSEHOLD_SIZE{
 	HH_1,
 	HH_2,
@@ -121,13 +119,11 @@ enum HOUSEHOLD_SIZE{
 	N_HOUSEHOLD_MAX
 };
 
-//DONE: Add hospital interaction type for workers and patients.
-//TODO: ALTER INFECTIVITY OF HOSPITAL INTERACTION TYPES.
 enum INTERACTION_TYPE{
 	HOUSEHOLD,
 	WORK,
 	RANDOM,
-    HOSPITAL_WORK, //Interactions between healthcare workers
+    HOSPITAL_WORK,
     HOSPITAL_DOCTOR_PATIENT_GENERAL,
     HOSPITAL_NURSE_PATIENT_GENERAL,
     HOSPITAL_DOCTOR_PATIENT_ICU,

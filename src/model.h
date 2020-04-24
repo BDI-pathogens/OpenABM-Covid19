@@ -28,10 +28,10 @@ struct event_list{
 	event **events;
 	long *n_daily;
 	long **n_daily_by_age;
-    long *n_daily_current; //is this the currently infected list?
+	long *n_daily_current;
 	long n_total;
 	long *n_total_by_age;
-    long n_current; //
+	long n_current;
 	double **infectious_curve;
 };
 
@@ -94,7 +94,7 @@ struct event{
 
 model* new_model(parameters *);
 void set_up_population( model* );
-void set_up_healthcare_workers_and_hospitals( model* ); //kelvin change
+void set_up_healthcare_workers_and_hospitals( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
