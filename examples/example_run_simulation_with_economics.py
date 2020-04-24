@@ -13,7 +13,7 @@ import pandas as pd
 from COVID19 import simulation
 from COVID19.model import Model, Parameters
 
-from adapter_covid19.datasources import Reader
+from adapter_covid19.datasources import Reader, RegionSectorAgeDataSource
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
 from adapter_covid19.gdp import LinearGdpModel, SupplyDemandGdpModel
@@ -35,6 +35,7 @@ ECON_MODELS = {
 
 LOGGER = logging.getLogger('__name__')
 
+
 def _write_csv(data: pd.DataFrame, filename: str, output_dir: str) -> None:
     data.to_csv(
         pathlib.Path(output_dir).joinpath(f'{filename}.csv'),
@@ -43,6 +44,8 @@ def _write_csv(data: pd.DataFrame, filename: str, output_dir: str) -> None:
 
 
 def _output_econ_data(model: Economics, end_time: int, output_dir: str) -> None:
+    # TODO: The economic model generates a lot of data, and we only save a subset of it.
+    # Either figure out how to save it nicely, or determine what's useful and save it
     output_data = {
         'gdp_by_sector': pd.DataFrame(
             [model.results.fraction_gdp_by_sector(i) for i in range(end_time)],
@@ -64,29 +67,70 @@ def _output_econ_data(model: Economics, end_time: int, output_dir: str) -> None:
         _write_csv(data, name, output_dir)
 
 
-def plot_econ_data(results_dir: str):
-    # GDP by sectors
-    gdp_path = os.path.join(results_dir, 'gdp_by_sector.csv')
-    gdp_data = pd.read_csv(gdp_path)
+def plot_econ_data(model: Economics, total_individuals: int, end_time: int, data_dir: str, results_dir: str) -> None:
+    # Time series plot of overall values
+    # Load all necessary data
+    reader = Reader(data_dir)
+    gdp_data = RegionSectorAgeDataSource('gdp').load(reader)
+    gdp_per_sector = {s: sum(gdp_data[r, s, a] for r, a in itertools.product(Region, Age)) for s in Sector}
+    gdp_per_sector = {s: v / sum(gdp_per_sector.values()) for s, v in gdp_per_sector.items()}
+    workers_data = RegionSectorAgeDataSource('gdp').load(reader)
+    workers_per_region = {r: sum(workers_data[r, s, a] for s, a in itertools.product(Sector, Age)) for r in Region}
+    workers_per_region = {r: v / sum(workers_per_region.values()) for r, v in workers_per_region.items()}
+    populations_path = os.path.join(data_dir, 'populations.csv')
+    people_per_region = {
+        Region[k]: v for k, v in pd.read_csv(populations_path).set_index('region').sum(axis=1).to_dict().items()}
+    people_per_region = {r: v / sum(people_per_region.values()) for r, v in people_per_region.items()}
+    gdp = pd.Series({k: sum(g.values()) / model.results.gdp_result.max_gdp for k, g in model.results.gdp.items()})
+    corporate_bankruptcies = 1 - pd.Series(
+        {k: sum(cs[s] * gdp_per_sector[s] for s in Sector) for k, cs in model.results.corporate_solvencies.items()})
+    personal_bankruptcies = pd.Series({
+        k: sum(pb[r].personal_bankruptcy * workers_per_region[r] for r in Region)
+        for k, pb in model.results.personal_bankruptcy.items()
+    })
+    epidemic_data = {r: pd.read_csv(os.path.join(results_dir, f'{r.name}_ts.csv')) for r in Region}
+    deaths = pd.Series({
+        i: sum(epidemic_data[r].loc[i, 'n_death'] / total_individuals * people_per_region[r] for r in Region)
+        for i in range(end_time)
+    })
+    recoveries = pd.Series({
+        i: sum(epidemic_data[r].loc[i, 'n_recovered'] / total_individuals * people_per_region[r] for r in Region)
+        for i in range(end_time)
+    })
+    # Plot
     fig, ax = plt.subplots()
-    # Fill first sector
-    ax.fill_between(gdp_data.index, gdp_data.iloc[:, 0] * 0, gdp_data.iloc[:, 0], label=gdp_data.columns[0])
-    for i in range(1, gdp_data.shape[1]):
-        ax.fill_between(gdp_data.index, gdp_data.iloc[:, i - 1], gdp_data.iloc[:, i], label=gdp_data.columns[i])
+    gdp.plot(ax=ax, label='gdp')
+    corporate_bankruptcies.plot(ax=ax, label='corporate_bankruptcies')
+    personal_bankruptcies.plot(ax=ax, label='personal_bankruptcies')
+    (deaths * 100).plot(ax=ax, label='deaths * 100')
+    recoveries.plot(ax=ax, label='recoveries')
+    ax.set_xlabel('time / days')
+    ax.legend()
+
+    # GDP by sectors, area chart
+    gdp_by_sector_path = os.path.join(results_dir, 'gdp_by_sector.csv')
+    gdp_by_sector = pd.read_csv(gdp_by_sector_path)
+    fig, ax = plt.subplots()
+    # First sector is special - need to fill between 0 and it
+    ax.fill_between(
+        gdp_by_sector.index, gdp_by_sector.iloc[:, 0] * 0, gdp_by_sector.iloc[:, 0], label=gdp_by_sector.columns[0])
+    for i in range(1, gdp_by_sector.shape[1]):
+        ax.fill_between(
+            gdp_by_sector.index, gdp_by_sector.iloc[:, i - 1], gdp_by_sector.iloc[:, i], label=gdp_by_sector.columns[i])
     ax.set_xlabel('Time / days')
     ax.set_ylabel('GDP / Pre-crisis GDP')
     ax.legend(ncol=2)
 
     # Affect of corporate bankruptcies on GDP, by sector
-    fig, ax = plt.subplots()
     corp_bank_path = os.path.join(results_dir, 'corporate_solvencies_sector.csv')
     corp_bank_df = pd.read_csv(corp_bank_path)
+    fig, ax = plt.subplots()
     corp_bank_df.plot(ax=ax)
 
     # Fraction personal bankruptcies, by sector
-    fig, ax = plt.subplots()
     personal_bank_path = os.path.join(results_dir, 'personal_bankruptcies.csv')
     personal_bank_df = pd.read_csv(personal_bank_path)
+    fig, ax = plt.subplots()
     personal_bank_df.plot(ax=ax)
 
     plt.show()
@@ -98,7 +142,7 @@ def _econ_worker(
         total_individuals: int,
         end_time: int,
         output_dir: str,
-) -> None:
+) -> Economics:
     utilisations = {}
     for step in range(end_time):
         lockdowns = {}
@@ -120,6 +164,7 @@ def _econ_worker(
         model.simulate(step, lockdown, utilisations)
 
     _output_econ_data(model, end_time, output_dir)
+    return model
 
 
 def _worker(
@@ -257,13 +302,6 @@ def _worker(
     help='time to end simulation',
     show_default=True,
 )
-@click.option(
-    '--n-workers',
-    type=int,
-    default=None,
-    help='Number of workers (None means all CPUs)',
-    show_default=True,
-)
 def main(
         parameters,
         household_demographics,
@@ -274,7 +312,6 @@ def main(
         end_time,
         econ_data_dir,
         gdp_model,
-        n_workers,
 ) -> None:
     """
     Run simulations by region
@@ -324,14 +361,13 @@ def main(
         multiprocessing.Process(target=worker, args=((r, populations_by_region[r], queues[r]),))
         for r in Region
     ]
-    econ_process = multiprocessing.Process(target=econ_worker, args=(queues,))
-    processes = spread_processes + [econ_process]
-    for p in processes:
+    for p in spread_processes:
         p.start()
-    for p in processes:
+    econ_model = econ_worker(queues)
+    for p in spread_processes:
         p.join()
 
-    plot_econ_data(output_dir)
+    plot_econ_data(econ_model, total_individuals, end_time, econ_data_dir, output_dir)
 
 
 if __name__ == '__main__':
