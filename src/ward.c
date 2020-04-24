@@ -27,22 +27,17 @@ void initialise_ward(
     ward->ward_idx          = ward_idx;
     ward->type              = type;
     ward->n_beds            = n_beds;
-    ward->n_max_hcw[DOCTOR] = n_max_doctors; //TODO: can get rid of this n_max_hcw array... hospital can have knowledge of it as only used in hospital.c
+    ward->n_max_hcw[DOCTOR] = n_max_doctors; 
     ward->n_max_hcw[NURSE]  = n_max_nurses;
 
     ward->n_worker[NURSE]   = 0;
     ward->n_worker[DOCTOR]  = 0;
-    //ward->n_patients        = 0;
 
     ward->doctors = calloc( n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( n_max_nurses, sizeof(nurse) );
 
     ward->patients = malloc( sizeof (list) );
     initialise_list( ward->patients );
-
-//    ward->patient_pdxs = calloc( n_beds, sizeof(long) );
-//    for (int i = 0; i < n_beds; i++)
-//        ward->patient_pdxs[i] = NO_PATIENT;
 }
 
 void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
@@ -120,20 +115,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
         for( int i = 0; i < n_patient_required_interactions; i++)
             all_required_interactions[n_pos++] = list_element_at(ward->patients, idx);
 
-//    int npatients = 0;
-//    for(int idx = 0; idx < ward->n_beds; idx++ )
-//    {
-//        if( ward->patient_pdxs[idx] != NO_PATIENT )
-//        {
-//            for( int i = 0; i < n_patient_required_interactions; i++)
-//                all_required_interactions[n_pos++] = ward->patient_pdxs[idx];
-//            npatients++;
-//        }
-//    }
-
-//    if( npatients != ward->n_patients )
-//        print_exit("number of patients in patient pdx list is not equal to ward's n_patients!!");
-
     //shuffle list of all interactions
     gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
 
@@ -157,13 +138,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     free( capped_hcw_interactions );
 }
 
-
-int patient_pdx_at( ward* ward, int idx )
-{
-//    return ward->patient_pdxs[idx];
-    return list_element_at( ward->patients, idx );
-}
-
 int add_patient_to_ward( ward *ward, long pdx )
 {
     if( ward->patients->size < ward->n_beds )
@@ -172,65 +146,24 @@ int add_patient_to_ward( ward *ward, long pdx )
         return TRUE;
     }
     return FALSE;
-//    if( ward->n_patients < ward->n_beds )
-//    {
-//        for( int idx = 0; idx < ward->n_beds; idx++ )
-//        {
-//            if( ward->patient_pdxs[idx] == NO_PATIENT )
-//            {
-//                ward->patient_pdxs[idx] = pdx;
-//                //ward->n_patients++;
-//                increment_patients(ward);
-//                return TRUE;
-//            }
-//        }
-//    }
-//    return FALSE;
 }
 
 void remove_patient_from_ward( ward* ward, long pdx)
 {
     list_remove_element( pdx, ward->patients );
-//    int idx;
-
-//    for( idx = 0; idx < ward->n_beds; idx++ )
-//    {
-//        if( ward->patient_pdxs[idx] == pdx )
-//        {
-//            ward->patient_pdxs[idx] = NO_PATIENT;
-//            //ward->n_patients--;
-//            decrement_patients(ward);
-//            //break;
-//        }
-//    }
 }
 
 int ward_available_beds( ward* ward)
 {
     return ward->n_beds - ward->patients->size;
-//    return ( ward->n_beds - ward->n_patients );
 }
 
 void destroy_ward( ward* ward )
 {
     free( ward->doctor_patient_network );
     free( ward->nurse_patient_network );
-    //free( ward->patient_pdxs );
     destroy_list( ward->patients );
     free( ward->patients );
     free( ward->doctors );
     free( ward->nurses );
 }
-
-void increment_patients( ward* ward )
-{
-    //ward->n_patients++;
-    //printf("INCREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
-}
-
-void decrement_patients( ward* ward )
-{
-    //ward->n_patients--;
-    //printf("DECREMENTED: ward type%i idx%i beds: %i\n", ward->type, ward->ward_idx, ward_available_beds( ward ));
-}
-    
