@@ -367,6 +367,11 @@ class Model:
             + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD))
             + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
         )
+        for age in AgeGroupEnum:
+            key = f"total_infected{age.name}"
+            results[key] = sum(
+                [covid19.utils_n_total_age(self.c_model, ty,  age.value) for ty in 
+                [covid19.PRESYMPTOMATIC, covid19.PRESYMPTOMATIC_MILD, covid19.ASYMPTOMATIC]])
         results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
         for age in AgeGroupEnum:
             key = f"total_case{age.name}"
