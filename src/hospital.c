@@ -34,11 +34,6 @@ void initialise_hospital(
     hospital->hospital_idx  = hdx;
 
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
-//    hospital->general_ward_waiting_list = malloc( sizeof (list) );
-//    hospital->icu_ward_waiting_list = malloc( sizeof (list) );
-//    initialise_list( hospital->general_ward_waiting_list );
-//    initialise_list( hospital->icu_ward_waiting_list );
-
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
         hospital->n_wards[ward_type] = params->n_wards[ward_type];
@@ -152,24 +147,6 @@ int healthcare_worker_working( individual* indiv )
 }
 
 /*****************************************************************************************
-*  Name:		destroy_hospital
-*  Description: Destroys the model structure and releases its memory
-******************************************************************************************/
-void destroy_hospital( hospital *hospital)
-{
-    free( hospital->hospital_workplace_network );
-    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-    {
-        for(int ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
-            destroy_ward( &(hospital->wards[ward_type][ward_idx]) );
-
-        free( hospital->wards[ward_type] );
-    }
-
-    free( hospital->wards );
-}
-
-/*****************************************************************************************
 *  Name:		transition_one_hospital_event
 *  Description: Generic function for updating an individual with their next
 *				event and adding the applicable events
@@ -207,14 +184,7 @@ void transition_one_hospital_event(
 ******************************************************************************************/
 void transition_to_waiting( model *model, individual *indiv )
 { 
-//    if( indiv->hospital_state == WAITING && indiv->status == CRITICAL)
-//        remove_patient_from_waiting_list(indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL);
     set_waiting( indiv, model->params, 1);
-    
-    intervention_on_hospitalised( model, indiv );
-    if( indiv->quarantined )
-        intervention_quarantine_release( model, indiv );
-
 }
 
 /*****************************************************************************************
@@ -226,21 +196,14 @@ void transition_to_waiting( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_general( model *model, individual *indiv )
 {   
-    //printf("attempting transition for: %li \n", indiv->idx );
     //remove patient from old ward if already in hospital
-    if( indiv->hospital_state == ICU || indiv->hospital_state == HOSPITALISED_RECOVERING )
+    if( indiv->status == HOSPITALISED_RECOVERING && indiv->hospital_state == ICU )
         remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_ICU][indiv->ward_idx], indiv->idx );
-
-    if( add_patient_to_hospital( model, indiv, COVID_GENERAL) )
-    {
-        //remove_patient_from_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_GENERAL );
-        set_general_admission( indiv, model->params, 1);
-    }
-    else
-    {
-        print_exit(" scheduled transition to general but failed to add to hospital!!");
-    }
     
+    if( add_patient_to_hospital( model, indiv, COVID_GENERAL) )
+        set_general_admission( indiv, model->params, 1);
+    else
+        print_exit(" scheduled transition to general but failed to add to hospital!!");
 }
 
 /*****************************************************************************************
@@ -256,17 +219,10 @@ void transition_to_icu( model *model, individual *indiv )
     if( indiv->hospital_state == GENERAL )
         remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_GENERAL][indiv->ward_idx], indiv->idx );
 
-    //add patient to covid ward and update status / waiting list
-    if( add_patient_to_hospital( model, indiv, COVID_ICU) )
-    {
-//        remove_patient_from_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_ICU );
+    if( add_patient_to_hospital( model, indiv, COVID_ICU) )        
         set_icu_admission( indiv, model->params, 1);
-    }
     else
-    {
         print_exit("schedule transition to icu that was not possible!!");
-    }
-    
 }
 /*****************************************************************************************
 *  Name:		transition_to_mortuary
@@ -348,14 +304,10 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 
             if ( hospital_available_beds( hospital, ward_type ) - idx > 0 )
 			{
-                // if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
-                //         print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
-                //printf( "scheduling general transition for %li \n", indiv->idx );
 				transition_one_hospital_event( model, indiv, indiv->hospital_state, hospital_state, NO_EDGE );
 				patient_waiting_modifier = 1;
 			} else
 			{
-                //printf( "!! HOSPITAL FULL at indiv: %li \n", indiv->idx );
                 if( indiv->hospital_state == NOT_IN_HOSPITAL )
                     transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
 
@@ -364,25 +316,6 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 			
 			predict_patient_disease_progression( model, indiv, patient_waiting_modifier, ward_type );
         }
-        // for( idx = 0; idx < hospital->waiting_list[ ward_type ]->size; idx++ )
-        // {
-        //     indiv = &model->population[ pdx_at( hospital->waiting_list[ ward_type ], idx ) ];
-
-        //     if ( hospital_available_beds( hospital, ward_type ) + idx > 0 )
-		// 	{
-        //         // if( add_patient_to_hospital(model, indiv, ward_type ) == FALSE )
-        //         //         print_exit("ERROR: failed to add patient to hospital when there are available spaces!");
-        //         printf( "scheduling general transition for %li \n", indiv->idx );
-		// 		transition_one_hospital_event( model, indiv, indiv->hospital_state, hospital_state, NO_EDGE );
-		// 		patient_waiting_modifier = 1;
-		// 	} else
-		// 	{
-		// 		transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
-		// 		patient_waiting_modifier = 1.3; //TODO: this value needs to be calibrated (should it be different per age group as well?)
-		// 	}
-			
-		// 	predict_patient_disease_progression( model, indiv, patient_waiting_modifier, ward_type );
-        // }
 	}
 }
 
@@ -404,8 +337,7 @@ void swap_waiting_general_and_icu_patients( model *model )
         initialise_list( patient_general_list );
         initialise_list( patient_icu_list );
 
-        //TODO: go through waiting list instead of all wards
-
+        //TODO: go through waiting list instead of all wards // is that a good idea though? 
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].patients->size; patient_idx++ )
                 if( model->population[ list_element_at(hospital->wards[COVID_GENERAL][ward_idx].patients, patient_idx) ].status == CRITICAL )
@@ -415,21 +347,9 @@ void swap_waiting_general_and_icu_patients( model *model )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].patients->size; patient_idx++ )
                 if( model->population[ list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx) ].status == HOSPITALISED_RECOVERING )
                     list_push_back( list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx), patient_icu_list );
-
-//        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
-//            for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
-//                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
-//                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == CRITICAL )
-//                        list_push_back( patient_idx, patient_general_list);
-
-//        for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_ICU]; ward_idx++ )
-//            for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].n_beds; patient_idx++ )
-//                if( hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] != NO_PATIENT &&
-//                    model->population[ hospital->wards[COVID_GENERAL][ward_idx].patient_pdxs[patient_idx] ].status == GENERAL )
-//                        list_push_back( patient_idx, patient_icu_list);
 		
 		patient_idx = 0;
-        while( patient_idx < patient_general_list->size && patient_idx < patient_icu_list->size)
+        while( patient_idx < patient_general_list->size && patient_idx < patient_icu_list->size ) 
 		{
             individual *indiv_general = &model->population[ list_element_at( patient_general_list, patient_idx )];
             individual *indiv_icu   = &model->population[ list_element_at( patient_icu_list, patient_idx )];
@@ -437,8 +357,6 @@ void swap_waiting_general_and_icu_patients( model *model )
 			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
 			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu->idx);
 
-//            remove_patient_from_waiting_list(indiv_general, &model->hospitals[indiv_general->idx], COVID_ICU);
-//            remove_patient_from_waiting_list(indiv_icu, &model->hospitals[indiv_icu->idx], COVID_GENERAL);
             list_remove_element( indiv_general->idx, hospital->waiting_list[COVID_ICU] );
             list_remove_element( indiv_icu->idx, hospital->waiting_list[COVID_GENERAL] );
 
@@ -501,34 +419,10 @@ int find_least_full_hospital(model* model, int required_ward)
 }
 
 /*****************************************************************************************
-*  Name:		assign_to_ward
-*  Description:
-*  Returns:		int
-******************************************************************************************/
-
-int assign_to_ward(individual *indiv, hospital *hospital, int ward_type ) {
-    int ward_idx;
-
-    for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
-    {
-        if( add_patient_to_ward( &(hospital->wards[ward_type][ward_idx]), indiv->idx ) == TRUE )
-        {
-            indiv->ward_type = ward_type;
-            indiv->ward_idx  = ward_idx;
-
-            return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
-/*****************************************************************************************
 *  Name:		release_patient_from_hospital
 *  Description:
 *  Returns:		int
 ******************************************************************************************/
-
 int hospital_available_beds( hospital* hospital, int ward_type )
 {
     int ward_idx;
@@ -573,15 +467,29 @@ void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int war
 *  Description:
 *  Returns:		int
 ******************************************************************************************/
-void remove_patient_from_waiting_list( individual *indiv, hospital *hospital, int ward_type )
-{
-    list_remove_element( indiv->idx, hospital->waiting_list[ward_type] );
-}
-
 void remove_if_in_waiting_list( individual *indiv, hospital *hospital )
 {
     if( list_elem_exists( indiv->idx, hospital->waiting_list[COVID_GENERAL] ))
         list_remove_element( indiv->idx, hospital->waiting_list[COVID_GENERAL] );
     else if( list_elem_exists( indiv->idx, hospital->waiting_list[COVID_ICU] ) )
         list_remove_element( indiv->idx, hospital->waiting_list[COVID_ICU] );
+}
+
+
+/*****************************************************************************************
+*  Name:		destroy_hospital
+*  Description: Destroys the model structure and releases its memory
+******************************************************************************************/
+void destroy_hospital( hospital *hospital)
+{
+    free( hospital->hospital_workplace_network );
+    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        for(int ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+            destroy_ward( &(hospital->wards[ward_type][ward_idx]) );
+
+        free( hospital->wards[ward_type] );
+    }
+
+    free( hospital->wards );
 }

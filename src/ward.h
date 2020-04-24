@@ -33,13 +33,9 @@ struct ward
     int n_max_hcw[N_WORKER_TYPES];
     int n_worker[N_WORKER_TYPES];
 
-    //int n_patients;
-
     doctor *doctors;
     nurse  *nurses;
-    //long *patient_pdxs;
-
-    list *patients;
+    list   *patients;
 
     network *doctor_patient_network;
     network *nurse_patient_network;
@@ -56,9 +52,6 @@ void build_hcw_patient_network(ward* ward, network *network, long *hc_workers, i
 int  add_patient_to_ward( ward *ward, long pdx );
 int  ward_available_beds( ward* ward);
 void remove_patient_from_ward( ward* ward, long pdx);
-int  patient_pdx_at( ward* ward, int idx );
-void increment_patients( ward* ward );
-void decrement_patients( ward* ward );
 void destroy_ward( ward* );
 
 #endif /* WARD_H_ */
