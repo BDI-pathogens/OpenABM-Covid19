@@ -44,35 +44,35 @@ class TestClass(object):
     Test class for checking
     """
 
-    # def test_zero_infectivity(self):
-    #     """
-    #     Set infections rate to zero, total infections should be equal to seed infections
-    #     """
+    def test_zero_infectivity(self):
+        """
+        Set infections rate to zero, total infections should be equal to seed infections
+        """
 
-    #     # Adjust baseline parameter
-    #     params = ParameterSet(TEST_DATA_FILE, line_number=1)
-    #     params.set_param("infectious_rate", 0.0)
-    #     params.write_params(SCENARIO_FILE)
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("infectious_rate", 0.0)
+        params.write_params(SCENARIO_FILE)
 
-    #     # Construct the executable command
-    #     EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
-    #     # Call the model using baseline parameters, pipe output to file, read output file
-    #     file_output = open(TEST_OUTPUT_FILE, "r")
-    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "r")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-    #     df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
 
-    #     # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
-    #     expected_output = int(params.get_param("n_seed_infection"))
+        # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
+        expected_output = int(params.get_param("n_seed_infection"))
         
 
-    #     output = df_individual_output["time_infected"] != -1
-    #     output = df_individual_output[output]
-    #     output = len(output.index)
+        output = df_individual_output["time_infected"] != -1
+        output = df_individual_output[output]
+        output = len(output.index)
 
-    #     np.testing.assert_equal(output, expected_output)
+        np.testing.assert_equal(output, expected_output)
 
 
     def test_zero_space(self):
@@ -110,7 +110,6 @@ class TestClass(object):
 
         assert n_hospitalised == 0
 
-        # np.testing.assert_equal(output, expected_output)
 
 
 
