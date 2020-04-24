@@ -1,7 +1,10 @@
 import abc
+import copy
 import itertools
+import logging
+import random
 from dataclasses import dataclass
-from typing import Tuple, Mapping, MutableMapping
+from typing import Tuple, Mapping, MutableMapping, Sequence
 
 import numpy as np
 from scipy.optimize import linprog
@@ -9,6 +12,9 @@ from scipy.optimize import linprog
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
 from adapter_covid19.datasources import Reader, RegionSectorAgeDataSource, SectorDataSource, WeightMatrix, DataSource
 from adapter_covid19.enums import Region, Sector, Age
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -76,7 +82,10 @@ class BaseGdpModel(abc.ABC):
     workers: Mapping[Tuple[Region, Sector, Age], float]
     keyworker: Mapping[Sector, float]
 
-    def __init__(self):
+    def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
+        self.lockdown_recovery_time = lockdown_recovery_time
+        self.optimal_recovery = optimal_recovery
+        self.recovery_order: Sequence[Tuple[Region, Sector, Age]] = []
         self.results = GdpResult({}, {}, 0, 0)
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
@@ -135,16 +144,50 @@ class BaseGdpModel(abc.ABC):
             self.gdp[key] for key in itertools.product(Region, Sector, Age))
         self.results.max_workers = sum(
             self.workers[key] for key in itertools.product(Region, Sector, Age))
+        gdp_per_worker = {k: self.gdp[k] / self.workers[k] for k in self.gdp}
+        # Sort in terms of greatest productivity to least productivity
+        self.recovery_order = sorted(gdp_per_worker, key=lambda x: gdp_per_worker[x], reverse=True)
+        if not self.optimal_recovery:
+            random.shuffle(self.recovery_order)
+
+    def _apply_lockdown(
+            self,
+            time: int,
+            lockdown: bool,
+            lockdown_exit_time: int,
+            utilisations: Mapping[Tuple[Region, Sector, Age], float]
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        base_utilisations = {(r, s, a): u * self.keyworker[s] for (r, s, a), u in utilisations.items()}
+        if lockdown:
+            utilisations = base_utilisations
+        elif lockdown_exit_time:
+            full_utilisations = copy.deepcopy(utilisations)
+            full_workers = sum(self.workers[k] * utilisations[k] for k in itertools.product(Region, Sector, Age))
+            current_workers = key_workers = sum(
+                self.workers[k] * base_utilisations[k] for k in itertools.product(Region, Sector, Age))
+            utilisations = copy.deepcopy(base_utilisations)
+            recovery_factor = min((time - lockdown_exit_time) / self.lockdown_recovery_time, 1)
+            to_send_back = key_workers + (full_workers - key_workers) * recovery_factor
+            for key in self.recovery_order:
+                if current_workers >= to_send_back:
+                    break
+                spare_capacity = (full_utilisations[key] - utilisations[key]) * self.workers[key]
+                increase = min(spare_capacity, to_send_back - current_workers)
+                utilisations[key] += increase / self.workers[key]
+                if utilisations[key] > 1:
+                    raise ValueError(f'Utilisation > 1: {key}: {utilisations[key]}')
+                current_workers += increase
+        return utilisations
 
     @abc.abstractmethod
     def simulate(
             self,
             time: int,
             lockdown: bool,
+            lockdown_exit_time: int,
             utilisations: Mapping[Tuple[Region, Sector, Age], float]
     ) -> None:
-        # if lockdown:
-        #     utilisations = {(r, s, a): u * self.keyworker[s] for (r, s, a), u in utilisations.items()}
+        # utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
         pass
 
 
@@ -154,8 +197,8 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
     wfh: Mapping[str, float]
     vulnerability: Mapping[str, float]
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
+        super().__init__(lockdown_recovery_time, optimal_recovery)
         self.load_beta()
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
@@ -180,10 +223,10 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self,
             time: int,
             lockdown: bool,
+            lockdown_exit_time: int,
             utilisations: Mapping[Tuple[Region, Sector, Age], float]
     ) -> None:
-        if lockdown:
-            utilisations = {(r, s, a): u * self.keyworker[s] for (r, s, a), u in utilisations.items()}
+        utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
 
         gdp = {(r, s, a): self._simulate_gdp(r, s, a, u) for (r, s, a), u in utilisations.items()}
         workers = {(r, s, a): self._simulate_workers(r, s, a, u) for (r, s, a), u in utilisations.items()}
@@ -201,10 +244,9 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
     supply: np.array
     demand: np.array
 
-    def __init__(self, theta: float = 1.2):
-        super().__init__()
+    def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False, theta: float = 1.2):
+        super().__init__(lockdown_recovery_time, optimal_recovery)
         self.theta = theta
-
         self.load_beta()
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
@@ -278,10 +320,11 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self,
             time: int,
             lockdown: bool,
+            lockdown_exit_time: int,
             utilisations: Mapping[Tuple[Region, Sector, Age], float]
     ) -> None:
-        if lockdown:
-            utilisations = {(r, s, a): u * self.keyworker[s] for (r, s, a), u in utilisations.items()}
+        utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
+
         workers = {(r, s, a): self._simulate_workers(r, s, a, u) for (r, s, a), u in utilisations.items()}
         gdp = self._simulate_gdp(utilisations)
         if not lockdown:
