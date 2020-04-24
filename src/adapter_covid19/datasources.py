@@ -16,7 +16,7 @@ class Reader:
         return os.path.join(self.data_path, filename)
 
     def load_csv(self, filename: str) -> pd.DataFrame:
-        return pd.read_csv(self._get_filepath(f'{filename}.csv'))
+        return pd.read_csv(self._get_filepath(f"{filename}.csv"))
 
 
 class DataSource(abc.ABC):
@@ -30,12 +30,16 @@ class DataSource(abc.ABC):
 
 class RegionDataSource(DataSource):
     # TODO: the interface for all of these should be the same
-    def load(self, reader: Reader) -> Union[Mapping[Region, float], Mapping[Region, Mapping[str, float]]]:
+    def load(
+        self, reader: Reader
+    ) -> Union[Mapping[Region, float], Mapping[Region, Mapping[str, float]]]:
         frame = reader.load_csv(self.filename)
         n_cols = frame.shape[1]
         if n_cols > 2:
             return {
-                frame.columns[i]: {Region[t.Region]: t[i] for t in frame.itertuples(index=False)}
+                frame.columns[i]: {
+                    Region[t.Region]: t[i] for t in frame.itertuples(index=False)
+                }
                 for i in range(1, n_cols)
             }
         return {Region[t.Region]: t[-1] for t in frame.itertuples(index=False)}
@@ -60,5 +64,5 @@ class RegionSectorAgeDataSource(DataSource):
 
 class WeightMatrix(DataSource):
     def load(self, reader: Reader) -> np.array:
-        frame = reader.load_csv(self.filename).set_index('Sector')
+        frame = reader.load_csv(self.filename).set_index("Sector")
         return frame.values

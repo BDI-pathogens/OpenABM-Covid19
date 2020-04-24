@@ -73,15 +73,15 @@ class Age(OrderedEnum):
 
 
 class Age10Y(OrderedEnum):
-    A0 = 'population_0_9'
-    A10 = 'population_10_19'
-    A20 = 'population_20_29'
-    A30 = 'population_30_39'
-    A40 = 'population_40_49'
-    A50 = 'population_50_59'
-    A60 = 'population_60_69'
-    A70 = 'population_70_79'
-    A80 = 'population_80'
+    A0 = "population_0_9"
+    A10 = "population_10_19"
+    A20 = "population_20_29"
+    A30 = "population_30_39"
+    A40 = "population_40_49"
+    A50 = "population_50_59"
+    A60 = "population_60_69"
+    A70 = "population_70_79"
+    A80 = "population_80"
 
 
 def age10y_to_age(age: Mapping[Age10Y, float]) -> Mapping[Age, float]:
@@ -96,31 +96,31 @@ def age10y_to_age(age: Mapping[Age10Y, float]) -> Mapping[Age, float]:
 
 
 class Occupation(OrderedEnum):
-    O11 = '11 Corporate Managers And Directors'
-    O12 = '12 Other Managers And Proprietors'
-    O21 = '21 Science, Engineering, Tech Professionals'
-    O22 = '22 Health Professionals'
-    O23 = '23 Teaching And Educational Professionals'
-    O24 = '24 Business, Media And Public Service Professionals'
-    O31 = '31 Science, Engineering ,Tech Associate Prof'
-    O32 = '32 Health And Social Care Associate Professionals'
-    O33 = '33 Protective Service Occupations'
-    O34 = '34 Culture, Media And Sports Occupations'
-    O35 = '35 Business, Public Service Associate Prof'
-    O41 = '41 Administrative Occupations'
-    O42 = '42 Secretarial And Related Occupations'
-    O51 = '51 Skilled Agricultural And Related Trades'
-    O52 = '52 Skilled Metal, Electrical, Electronic Trades'
-    O53 = '53 Skilled Construction And Building Trades'
-    O54 = '54 Textiles, Printing And Other Skilled Trades'
-    O61 = '61 Caring Personal Service Occupations'
-    O62 = '62 Leisure, Travel And Related Personal Servic'
-    O71 = '71 Sales Occupations'
-    O72 = '72 Customer Service Occupations'
-    O81 = '81 Process, Plant And Machine Operatives'
-    O82 = '82 Transport And Drivers And Operatives'
-    O91 = '91 Elementary Trades And Related Occupations'
-    O92 = '92 Elementary Administration And Service Occupations'
+    O11 = "11 Corporate Managers And Directors"
+    O12 = "12 Other Managers And Proprietors"
+    O21 = "21 Science, Engineering, Tech Professionals"
+    O22 = "22 Health Professionals"
+    O23 = "23 Teaching And Educational Professionals"
+    O24 = "24 Business, Media And Public Service Professionals"
+    O31 = "31 Science, Engineering ,Tech Associate Prof"
+    O32 = "32 Health And Social Care Associate Professionals"
+    O33 = "33 Protective Service Occupations"
+    O34 = "34 Culture, Media And Sports Occupations"
+    O35 = "35 Business, Public Service Associate Prof"
+    O41 = "41 Administrative Occupations"
+    O42 = "42 Secretarial And Related Occupations"
+    O51 = "51 Skilled Agricultural And Related Trades"
+    O52 = "52 Skilled Metal, Electrical, Electronic Trades"
+    O53 = "53 Skilled Construction And Building Trades"
+    O54 = "54 Textiles, Printing And Other Skilled Trades"
+    O61 = "61 Caring Personal Service Occupations"
+    O62 = "62 Leisure, Travel And Related Personal Servic"
+    O71 = "71 Sales Occupations"
+    O72 = "72 Customer Service Occupations"
+    O81 = "81 Process, Plant And Machine Operatives"
+    O82 = "82 Transport And Drivers And Operatives"
+    O91 = "91 Elementary Trades And Related Occupations"
+    O92 = "92 Elementary Administration And Service Occupations"
 
 
 class LabourState(OrderedEnum):
@@ -129,4 +129,3 @@ class LabourState(OrderedEnum):
     working = enum.auto()
     furloughed = enum.auto()
     unemployed = enum.auto()
-
