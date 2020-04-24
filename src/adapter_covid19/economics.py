@@ -34,7 +34,7 @@ class Economics:
             personal_model: PersonalBankruptcyModel,
     ):
         self.first_lockdown_time = 10 ** 12
-        self.lockdown_exited = False
+        self.lockdown_exited_time = 0
         self.gdp_model = gdp_model
         self.corporate_model = corporate_model
         self.personal_model = personal_model
@@ -48,12 +48,12 @@ class Economics:
     def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
         if time == START_OF_TIME and lockdown:
             raise ValueError('Economics model requires simulation to be started before lockdown')
-        if self.lockdown_exited and lockdown:
+        if self.lockdown_exited_time and lockdown:
             raise NotImplementedError('Bankruptcy/insolvency logic for toggling lockdown needs doing')
         if lockdown and time < self.first_lockdown_time:
             self.first_lockdown_time = time
-        if self.first_lockdown_time < time and not lockdown:
-            self.lockdown_exited = True
+        if not self.lockdown_exited_time and self.first_lockdown_time < time and not lockdown:
+            self.lockdown_exited_time = time
 
     def simulate(
             self,
@@ -62,7 +62,7 @@ class Economics:
             utilisations: Mapping[Tuple[Region, Sector, Age], float]
     ) -> None:
         self._pre_simulation_checks(time, lockdown)
-        self.gdp_model.simulate(time, lockdown, utilisations)
+        self.gdp_model.simulate(time, lockdown, self.lockdown_exited_time, utilisations)
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
         else:
