@@ -1,6 +1,7 @@
 import collections
 import itertools
 import functools
+import json
 import logging
 import multiprocessing
 import os
@@ -323,6 +324,8 @@ def main(
     parameters_path = click.format_filename(parameters)
     household_demographics_path = click.format_filename(household_demographics)
     econ_data_dir = click.format_filename(econ_data_dir)
+    with open(os.path.join(econ_data_dir, 'parameters.json'), 'r') as f:
+        econ_parameters = json.load(f)
 
     # Read regional population distributions in age
     populations_df = pd.read_csv(os.path.join(econ_data_dir, 'populations.csv'))
@@ -334,8 +337,10 @@ def main(
 
     # Setup economics model
     reader = Reader(econ_data_dir)
-    gdp_model = ECON_MODELS[gdp_model]()
-    econ_model = Economics(gdp_model, CorporateBankruptcyModel(), PersonalBankruptcyModel())
+    gdp_model = ECON_MODELS[gdp_model](**econ_parameters['gdp'])
+    cb_model = CorporateBankruptcyModel(**econ_parameters['corporate_bankruptcy'])
+    pb_model = PersonalBankruptcyModel(**econ_parameters['personal_insolvency'])
+    econ_model = Economics(gdp_model, cb_model, pb_model)
     econ_model.load(reader)
 
     worker = functools.partial(
