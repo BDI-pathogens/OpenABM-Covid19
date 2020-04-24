@@ -17,6 +17,7 @@ import numpy as np, pandas as pd
 import pytest
 
 import sys
+from scipy.signal.fir_filter_design import firwin2
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
 
@@ -46,12 +47,15 @@ class TestClass(object):
         
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         
-        incidence_indiv, bins = np.histogram(df_indiv[(df_indiv[indiv_var] > 0)][indiv_var], 
-            bins = np.arange(2, df_timeseries.time.max() + 1))
+        incidence_indiv = df_indiv[(df_indiv[indiv_var] > 0)].groupby([indiv_var]).size().reset_index(name="connections")    
+        incidence_indiv.rename( columns = { indiv_var:"time"}, inplace = True )
+        incidence_indiv = pd.merge( df_timeseries[ df_timeseries["time"]>1],incidence_indiv,on="time",how = "left")
+        incidence_indiv.fillna(0,inplace=True) 
+        incidence_indiv = incidence_indiv["connections"].values
         
-        incidence_timeseries = np.diff(df_timeseries[timeseries_var].values)
+        incidence_timeseries = np.diff(df_timeseries[timeseries_var].values)          
         
-        np.testing.assert_array_equal(incidence_indiv, incidence_timeseries[:-1])
+        np.testing.assert_array_equal(incidence_indiv, incidence_timeseries)
     
     def test_sum_to_total_infected(self):
         """

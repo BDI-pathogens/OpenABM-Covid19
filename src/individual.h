@@ -56,7 +56,6 @@ struct individual{
 
     int app_user;
 
-	//TODO: maybe just have pointer to current ward?
     int ward_idx;
     int ward_type;
 

@@ -10,9 +10,6 @@
 #include "constant.h"
 #include "utilities.h"
 
-//#include <gsl/gsl_rng.h>
-//#include <gsl/gsl_randist.h>
-
 /*****************************************************************************************
 *  Name:		initialize_individual
 *  Description: initializes and individual at the start of the simulation, note can
@@ -54,13 +51,10 @@ void initialize_individual(
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
 
-
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
 
-    // TOM: Assuming all individuals added to the simulation begin as not being hospitalised.
-	// Change later to account for non-COVID patients being added at the start of the simulation.
     indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
@@ -167,17 +161,16 @@ void update_random_interactions( individual *indiv, parameters* params )
         switch( indiv->hospital_state )
 		{
             case MORTUARY:		            n = 0; break;
-            case WAITING:                   n = 0; break;
+            case WAITING:                   n = params->hospitalised_daily_interactions; break;
             case GENERAL:                   n = params->hospitalised_daily_interactions; break;
             case ICU:                       n = params->hospitalised_daily_interactions; break;
-			case HOSPITALISED_RECOVERING:   n = params->hospitalised_daily_interactions; break;
 			default: 			            n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
-	}
-	else
-		n = params->quarantined_daily_interactions;
+    }
+    else
+        n = params->quarantined_daily_interactions;
 
-	indiv->random_interactions = round_random( n );
+    indiv->random_interactions = round_random( n );
 }
 
 /*****************************************************************************************
@@ -189,6 +182,8 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
+
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -200,6 +195,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -210,6 +206,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -230,6 +227,7 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -240,6 +238,7 @@ void set_critical( individual *indiv, parameters* params, int time )
 void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED_RECOVERING;
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -318,4 +317,3 @@ void destroy_individual( individual *indiv )
 {
 	free( indiv->time_event );
 };
-
