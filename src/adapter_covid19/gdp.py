@@ -37,7 +37,7 @@ class BaseGDPBackboneMixin(abc.ABC):
     beta: Mapping[Sector, float]
 
     @abc.abstractmethod
-    def load_beta(self) -> None:
+    def load(self, reader: Reader) -> None:
         pass
 
     def adjust_gdp(self,
@@ -50,31 +50,9 @@ class BaseGDPBackboneMixin(abc.ABC):
 
 
 class LinearGDPBackboneMixin(BaseGDPBackboneMixin):
-    def load_beta(self) -> None:
-        # TODO:
-        #  1) move the parameter generation process to pipelines
-        #  2) extend it to per region and per age(maybe?)
-        self.beta = {
-            Sector.I_ACCOMODATION: np.random.rand() * 0.01,
-            Sector.N_ADMINISTRATIVE: np.random.rand() * 0.01,
-            Sector.A_AGRICULTURE: np.random.rand() * 0.01,
-            Sector.R_ARTS: np.random.rand() * 0.01,
-            Sector.F_CONSTRUCTION: np.random.rand() * 0.01,
-            Sector.P_EDUCATION: np.random.rand() * 0.01,
-            Sector.D_ELECTRICITY: np.random.rand() * 0.01,
-            Sector.K_FINANCIAL: np.random.rand() * 0.01,
-            Sector.Q_HEALTH: np.random.rand() * 0.01,
-            Sector.J_COMMUNICATION: np.random.rand() * 0.01,
-            Sector.C_MANUFACTURING: np.random.rand() * 0.01,
-            Sector.B_MINING: np.random.rand() * 0.01,
-            Sector.S_OTHER: np.random.rand() * 0.01,
-            Sector.M_PROFESSIONAL: np.random.rand() * 0.01,
-            Sector.O_PUBLIC: np.random.rand() * 0.01,
-            Sector.L_REAL_ESTATE: np.random.rand() * 0.01,
-            Sector.H_TRANSPORT: np.random.rand() * 0.01,
-            Sector.E_WATER: np.random.rand() * 0.01,
-            Sector.G_TRADE: np.random.rand() * 0.01,
-        }
+    def load(self, reader: Reader) -> None:
+        super().load(reader)
+        self.beta = SectorDataSource('growth_rates').load(reader)
 
 
 class BaseGdpModel(abc.ABC):
@@ -137,6 +115,7 @@ class BaseGdpModel(abc.ABC):
                 raise NotImplementedError(f'Data checks not implemented for {v.__class__.__name__}')
 
     def load(self, reader: Reader):
+        super().load(reader)
         for k, v in self.datasources.items():
             self.__setattr__(k, v.load(reader))
         self._check_data()
@@ -199,7 +178,6 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
 
     def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
         super().__init__(lockdown_recovery_time, optimal_recovery)
-        self.load_beta()
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {
@@ -247,7 +225,6 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
     def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False, theta: float = 1.2):
         super().__init__(lockdown_recovery_time, optimal_recovery)
         self.theta = theta
-        self.load_beta()
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {

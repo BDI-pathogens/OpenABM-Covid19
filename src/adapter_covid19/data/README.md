@@ -33,6 +33,12 @@ can be found in `enums.py`
 * Age: Age banding
 * gdp: (0 to inf) GDP per region, sector, age group
 
+
+## `growth_rates.csv`
+
+* Sector: UK Sector
+* growth_rates: (0 to inf) historic peacetime growth rates per sector
+
 ## `input_output.csv`
 
 * Sector: UK Sector
