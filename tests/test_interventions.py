@@ -212,6 +212,21 @@ class TestClass(object):
                 min_age_inf = 2, 
                 min_age_sus = 2
             )
+        ],
+        "test_risk_score_days_since_contact": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 0
+                ),
+                days_since_contact = 2, 
+            )
         ]
     }
     """
@@ -614,7 +629,6 @@ class TestClass(object):
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )  
-        params.set_param("rng_seed", 1)      
         model  = utils.get_model_swig( params )
         
         # now update the risk scoring map
@@ -652,4 +666,42 @@ class TestClass(object):
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
         np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
        
+    def test_risk_score_days_since_contact(self, test_params, days_since_contact):
+        """
+        Test that if risk score quarantining is set to be 0 for days greater
+        than days since contact
+        """
+   
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        # now update the risk scoring map
+        for day in range( constant.MAX_DAILY_INTERACTIONS_KEPT ):
+            for age_inf in range( constant.N_AGE_GROUPS ):
+                for age_sus in range( constant.N_AGE_GROUPS ):
+                    if day > days_since_contact:
+                        model.set_risk_score( day, age_inf, age_sus, 0 )
+        
+        # step through 10 steps getting the individual file on steps 9 and 10
+        for time in range( test_params[ "end_time" ]  ):
+            model.one_time_step();    
+        model.write_individual_file()
+        model.write_trace_tokens()
+  
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        # find the index case for the new time_step
+        index_traced = df_trace[ ( df_trace[ "time" ] == test_params[ "end_time" ]  ) & ( df_trace[ "days_since_index" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID", "days_since_contact" ] ).size().reset_index(name="cons")    
+
+        print( index_traced.head())
+       
+        # now perform checks
+        np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
+        np.testing.assert_equal( max( index_traced[ "days_since_contact"] ) <= days_since_contact, 1,  "tracing contacts from longer ago than risk score allows" )
+       
+ 
     
