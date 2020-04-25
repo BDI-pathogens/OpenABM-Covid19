@@ -434,7 +434,7 @@ void intervention_notify_contacts(
 	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
 	{
 		n_contacts  = indiv->n_interactions[day];
-		risk_scores = params->risk_score[ day ][ indiv->age_group ];
+		risk_scores = params->risk_score[ ddx ][ indiv->age_group ];
 
 		if( n_contacts > 0 )
 		{
