@@ -75,6 +75,58 @@ void set_up_app_users( model *model )
 };
 
 /*****************************************************************************************
+*  Name:		set_up_risk_scores
+*  Description: Set up the risk scores used in calculation whether people are quarantined
+******************************************************************************************/
+void set_up_risk_scores( model *model )
+{
+	int idx, jdx, day;
+	parameters *params = model->params;
+
+	params->risk_score = calloc( MAX_DAILY_INTERACTIONS_KEPT, sizeof( double** ) );
+	for( day = 0; day < MAX_DAILY_INTERACTIONS_KEPT; day++ )
+	{
+		params->risk_score[ day] = calloc( MAX_DAILY_INTERACTIONS_KEPT, sizeof( double* ) );
+		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		{
+			params->risk_score[ day ][ idx ] = calloc( N_AGE_GROUPS, sizeof( double ) );
+			for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
+				params->risk_score[ day ][ idx ][ jdx ] = 1;
+		}
+	}
+
+	params->risk_score_household = calloc( N_AGE_GROUPS, sizeof( double* ) );
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	{
+		params->risk_score_household[ idx ] = calloc( N_AGE_GROUPS, sizeof( double ) );
+		for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
+			params->risk_score_household[ idx ][ jdx ] = 1;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		destroy_risk_scores
+*  Description: Destroy the risk scores used in calculation whether people are quarantined
+******************************************************************************************/
+void destroy_risk_scores( model *model )
+{
+	int idx, day;
+	parameters *params = model->params;
+
+	for( day = 0; day < MAX_DAILY_INTERACTIONS_KEPT; day++ )
+	{
+		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+			free( params->risk_score[ day ][ idx ] );
+		free( params->risk_score[ day ] );
+	}
+	free( params->risk_score );
+
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		free( params->risk_score_household[ idx ] );
+	free( params->risk_score_household );
+}
+
+/*****************************************************************************************
 *  Name:		set_up_trace_tokens
 *  Description: sets up the stock trace_tokens note that these get recycled once we
 *  				move to a later date
@@ -208,20 +260,25 @@ void update_intervention_policy( model *model, int time )
 *  				If they are already in quarantine then extend quarantine until that time
 *  Returns:		void
 ******************************************************************************************/
-void intervention_quarantine_until(
+int intervention_quarantine_until(
 	model *model,
 	individual *indiv,
 	int time,
 	int maxof,
 	trace_token *index_token,
-	int contact_time
+	int contact_time,
+	double risk_score
 )
 {
-	if( indiv->traced_on_this_trace )
-		return;
+	if( indiv->traced_on_this_trace >= 1 )
+		return FALSE;
+
+	indiv->traced_on_this_trace += risk_score;
+	if( indiv->traced_on_this_trace < 1 )
+		return FALSE;
 
 	if( is_in_hospital( indiv) )
-		return;
+		return FALSE;
 
 	if( index_token != NULL )
 	{
@@ -234,7 +291,6 @@ void intervention_quarantine_until(
 			indiv->trace_tokens->last = token;
 		}
 		indiv->trace_tokens = token;
-		indiv->traced_on_this_trace = TRUE;
 
 		// then add it to the index_token list
 		token->next_index = index_token->next_index;
@@ -242,7 +298,7 @@ void intervention_quarantine_until(
 	}
 
 	if( time == model->time )
-		return;
+		return FALSE;
 
 	if( indiv->quarantine_event == NULL )
 	{
@@ -253,12 +309,14 @@ void intervention_quarantine_until(
 	if( indiv->quarantine_release_event != NULL )
 	{
 		if( maxof && indiv->quarantine_release_event->time > time )
-			return;
+			return TRUE;
 
 		remove_event_from_event_list( model, indiv->quarantine_release_event );
 	}
 
 	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time );
+
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -369,12 +427,14 @@ void intervention_notify_contacts(
 	individual *contact;
 	parameters *params = model->params;
 	int idx, ddx, day, n_contacts;
+	double *risk_scores;
 
 	day = model->interaction_day_idx;
 
 	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
 	{
-		n_contacts = indiv->n_interactions[day];
+		n_contacts  = indiv->n_interactions[day];
+		risk_scores = params->risk_score[ day ][ indiv->age_group ];
 
 		if( n_contacts > 0 )
 		{
@@ -387,7 +447,7 @@ void intervention_notify_contacts(
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token );
+						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
 				}
 				inter = inter->next;
 			}
@@ -477,6 +537,7 @@ void intervention_quarantine_household(
 	individual *contact;
 	int idx, n, time_event;
 	long* members;
+	double *risk_scores = model->params->risk_score_household[ indiv->age_group ];
 
 	n          = model->household_directory->n_jdx[indiv->house_no];
 	members    = model->household_directory->val[indiv->house_no];
@@ -490,7 +551,7 @@ void intervention_quarantine_household(
 			if( contact->status == DEATH || is_in_hospital( contact ) )
 				continue;
 
-			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time );
+			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time, risk_scores[ contact->age_group ] );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
 				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
@@ -523,7 +584,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		trace_token *index_token = index_trace_token( model, indiv );
 
 		time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
+		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time, 1 );
 		indiv->traced_on_this_trace = TRUE;
 
 		if( params->quarantine_household_on_symptoms )
@@ -581,7 +642,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( !is_in_hospital( indiv ) )
 	{
 		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time );
+		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time, 1 );
 	}
 	indiv->traced_on_this_trace = TRUE;
 
@@ -627,7 +688,8 @@ void intervention_on_traced(
 	individual *indiv,
 	int contact_time,
 	int recursion_level,
-	trace_token *index_token
+	trace_token *index_token,
+	double risk_score
 )
 {
 	if( is_in_hospital( indiv ) || indiv->is_case )
@@ -637,10 +699,10 @@ void intervention_on_traced(
 
 	if( params->quarantine_on_traced )
 	{
-		int time_event = model->time + sample_transition_time( model, TRACED_QUARANTINE );
-		intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time );
+		int time_event    = contact_time + sample_transition_time( model, TRACED_QUARANTINE );
+		int quarantine    = intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time, risk_score );
 
-		if( params->quarantine_household_on_traced && recursion_level != NOT_RECURSIVE )
+		if( quarantine && params->quarantine_household_on_traced && recursion_level != NOT_RECURSIVE )
 			intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, contact_time );
 	}
 

@@ -28,6 +28,8 @@ struct trace_token{
 
 void set_up_transition_times_intervention( model* );
 void set_up_app_users( model* );
+void set_up_risk_scores( model* );
+void destroy_risk_scores( model* );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
@@ -36,7 +38,7 @@ trace_token* index_trace_token( model*, individual* );
 void remove_traced_on_this_trace( model*, individual* );
 void intervention_trace_token_release( model*, individual* );
 
-void intervention_quarantine_until( model*, individual*, int, int, trace_token*, int );
+int intervention_quarantine_until( model*, individual*, int, int, trace_token*, int, double );
 void intervention_quarantine_release( model*, individual* );
 void intervention_quarantine_household( model*, individual*, int, int, trace_token*, int );
 void intervention_test_take( model*, individual* );
@@ -47,7 +49,7 @@ void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );
 void intervention_on_critical( model*, individual* );
 void intervention_on_positive_result( model*, individual* );
-void intervention_on_traced( model*, individual*, int, int, trace_token* );
+void intervention_on_traced( model*, individual*, int, int, trace_token*, double );
 
 void intervention_smart_release( model* );
 

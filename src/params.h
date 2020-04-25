@@ -140,6 +140,9 @@ typedef struct{
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
+	double ***risk_score;  			// risk score somebody who has been traced
+	double **risk_score_household;  // risk score for household members of symptomatic person
+
 } parameters;
 
 /************************************************************************/
@@ -164,6 +167,8 @@ int get_model_param_test_order_wait(model *model);
 double get_model_param_app_users_fraction(model *model);
 int get_model_param_app_turned_on(model *model);
 int get_model_param_lockdown_on(model *model);
+double get_model_param_risk_score( model*, int, int, int );
+double get_model_param_risk_score_household( model*, int, int );
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -184,6 +189,9 @@ int set_model_param_app_users_fraction(model *model, double value);
 int set_model_param_app_turned_on(model *model, int value);
 int set_model_param_lockdown_on(model *model, int value);
 int set_model_param_lockdown_elderly_on(model *model, int value);
+
+int set_model_param_risk_score( model*, int, int, int, double );
+int set_model_param_risk_score_household( model*, int, int, double );
 
 void check_params( parameters* );
 void destroy_params( parameters* );

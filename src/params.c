@@ -374,6 +374,95 @@ int set_model_param_app_turned_on( model *model, int value )
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_risk_score
+*  Description: Gets the value of the risk score parameter
+******************************************************************************************/
+double get_model_param_risk_score(
+	model *model,
+	int day,
+	int age_infector,
+	int age_susceptible
+)
+{
+	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+		return UNKNOWN;
+
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	return model->params->risk_score[ day ][ age_infector ][ age_susceptible ];
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_risk_score_household
+*  Description: Gets the value of the risk score household parameter
+******************************************************************************************/
+double get_model_param_risk_score_household(
+	model *model,
+	int age_infector,
+	int age_susceptible
+)
+{
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	return model->params->risk_score_household[ age_infector ][ age_susceptible ];
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_risk_score
+*  Description: Sets the value of the risk score parameter
+******************************************************************************************/
+int set_model_param_risk_score(
+	model *model,
+	int day,
+	int age_infector,
+	int age_susceptible,
+	double value
+)
+{
+	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+		return FALSE;
+
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return FALSE;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return FALSE;
+
+	model->params->risk_score[ day ][ age_infector ][ age_susceptible ] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_risk_score_household
+*  Description: Sets the value of the risk score household parameter
+******************************************************************************************/
+int set_model_param_risk_score_household(
+	model *model,
+	int age_infector,
+	int age_susceptible,
+	double value
+)
+{
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return FALSE;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return FALSE;
+
+	model->params->risk_score_household[ age_infector ][ age_susceptible ] = value;
+    return TRUE;
+}
+
+
+/*****************************************************************************************
 *  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
