@@ -9,7 +9,8 @@ import sys
 sys.path.append("src/COVID19")
 
 from parameters import ParameterSet
-
+from COVID19.model import Model, Parameters, ModelParameterException
+from . import constant
 
 def turn_off_interventions(params, end_time):
     """
@@ -220,4 +221,23 @@ def set_homogeneous_random_network_only(params,connections,end_time):
     params = set_work_connections_all(params,0)
         
     return(params)
+
+def get_params_swig():
+    """
+    Gets the Swig parameters object
+    """
+    return Parameters( 
+        constant.TEST_DATA_TEMPLATE,
+        1,
+        constant.DATA_DIR_TEST, 
+        constant.TEST_HOUSEHOLD_TEMPLATE,
+    )
+
+    
+def get_model_swig( params ):
+    """
+    Gets the Swig model object
+    """
+    return Model( params )
+
 ""
