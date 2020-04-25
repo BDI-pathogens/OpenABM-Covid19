@@ -336,8 +336,9 @@ void write_time_step_hospital_data( model *model)
     FILE *time_step_hospital_file;
     int ward_type, ward_idx, doctor_idx, nurse_idx;
     int hospital_idx = 0;
-    // TODO: for each hospital
+    // TODO: update to run for each hospital
     // TODO: consider only writing to file at certain timesteps if file becomes too large (e.g., every 10 time steps)
+    // TODO: find a better way to keep track of how many hcw's are in the hospitals
 
     // Concatenate file name
     strcpy(output_file_name, model->params->output_file_dir);

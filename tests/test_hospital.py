@@ -48,36 +48,24 @@ completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 
 # Create a dataframe out of the terminal output
-# numHeader = 10
-# numFooter = 27
-# df_output = pd.read_csv(TEST_OUTPUT_FILE, 
-#     comment = "#", 
-#     sep = ",", 
-#     skiprows=numHeader, 
-#     skipfooter=numFooter, 
-#     engine='python')
+numHeader = 10
+numFooter = 27
+df_output = pd.read_csv(TEST_OUTPUT_FILE, 
+    comment = "#", 
+    sep = ",", 
+    skiprows=numHeader, 
+    skipfooter=numFooter, 
+    engine='python')
 
 
 # # Write df_output to file
-# df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
+df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
 
 
 class TestClass(object):
     """
     Test class for checking
     """
-
-    # def test_hospital_output(self):
-    #     """
-    #     Test that a dataframe of the correct size is being created
-    #     """
-        
-    #     # Assert output not empty
-    #     assert df_output.size > 1
-
-    #     # output correct size (== time limit)
-    #     r = len(df_output.index)
-    #     assert r == 200
 
 
     def test_hcw_in_population_list(self):
