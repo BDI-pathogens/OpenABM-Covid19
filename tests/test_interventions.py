@@ -196,6 +196,22 @@ class TestClass(object):
                 min_age_inf = 1, 
                 min_age_sus = 3
             )
+        ],
+        "test_risk_score_age": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 0
+                ),
+                min_age_inf = 2, 
+                min_age_sus = 2
+            )
         ]
     }
     """
@@ -544,7 +560,11 @@ class TestClass(object):
         np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" )
     
     def test_risk_score_household(self, test_params, min_age_inf, min_age_sus):
-        
+        """
+        Test that if risk score for household quarantining is set to 0 for the youngest
+        as either the index or traced that they are not quarantined
+        """
+   
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )  
@@ -579,7 +599,54 @@ class TestClass(object):
         index_traced = pd.merge( index_traced, traced_age_house, on = "traced_ID", how = "left")
             
         # now perform checks
-        np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 100 traced people, in-sufficient to test" )
+        np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
+        np.testing.assert_equal( min( index_traced[ "index_age_group"] ),  min_age_inf,  "younger people than minimum allowed are index case from which tracing has occurred" )
+        np.testing.assert_equal( min( index_traced[ "traced_age_group"] ), min_age_sus, "younger people than minimum allowed are traced" )
+        np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
+        np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
+       
+    def test_risk_score_age(self, test_params, min_age_inf, min_age_sus):
+        """
+        Test that if risk score quarantining is set to 0 for the youngest
+        as either the index or traced that they are not quarantined
+        """
+   
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        params.set_param("rng_seed", 1)      
+        model  = utils.get_model_swig( params )
+        
+        # now update the risk scoring map
+        for day in range( constant.MAX_DAILY_INTERACTIONS_KEPT ):
+            for age_inf in range( constant.N_AGE_GROUPS ):
+                for age_sus in range( constant.N_AGE_GROUPS ):
+                    if ( age_inf < min_age_inf ) | (age_sus < min_age_sus ):
+                        model.set_risk_score( day, age_inf, age_sus, 0 )
+        
+        # step through 10 steps getting the individual file on steps 9 and 10
+        for time in range( test_params[ "end_time" ]  ):
+            model.one_time_step();    
+        model.write_individual_file()
+        model.write_trace_tokens()
+  
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        # find the index case for the new time_step
+        index_traced = df_trace[ ( df_trace[ "time" ] == test_params[ "end_time" ]  ) & ( df_trace[ "days_since_index" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
+
+        # get the age and house_no
+        age_house        = df_indiv.loc[ :,["ID", "age_group", "house_no"]]
+        index_age_house  = age_house.rename( columns = { "ID":"index_ID",  "house_no":"index_house_no",  "age_group":"index_age_group"})
+        traced_age_house = age_house.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no", "age_group":"traced_age_group"})
+
+        index_traced = pd.merge( index_traced, index_age_house,  on = "index_ID",  how = "left")
+        index_traced = pd.merge( index_traced, traced_age_house, on = "traced_ID", how = "left")
+            
+        # now perform checks
+        np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( min( index_traced[ "index_age_group"] ),  min_age_inf,  "younger people than minimum allowed are index case from which tracing has occurred" )
         np.testing.assert_equal( min( index_traced[ "traced_age_group"] ), min_age_sus, "younger people than minimum allowed are traced" )
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
