@@ -52,3 +52,6 @@ sandbox/*.csv
 examples/*.csv
 examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
+
+.idea
+Cake-build-debug
