@@ -843,6 +843,7 @@ void write_ward_data( model *model)
     int ward_type, ward_idx, doctor_idx, nurse_idx;
 
     // TODO: currently only for one hospital, should loop through more hospitals when we have more
+    
     int hospital_idx = 0;
 
     // Concatenate file name
@@ -851,33 +852,31 @@ void write_ward_data( model *model)
     strcat(output_file_name, ".csv");
     ward_output_file = fopen(output_file_name, "w");
 
-    // For every ward type
     fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
-
+    
+    // For each ward type
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
-        // For every ward
+        // For each ward
         for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
         {
             int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
             int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
 
-            // For every doctor
+            // For each doctor
             for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
             {
                 int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
                 int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-
                 fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx);
             }
-            // Loop for every nurse
+            // Loop for each nurse
             for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
             {
                 int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
                 int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
                 fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx);
             }
-
         }
     }
 
