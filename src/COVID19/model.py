@@ -314,7 +314,7 @@ class Model:
             else:
                 return value
         except AttributeError:
-            raise ModelParameterException("Parameter {param} not found")
+            raise ModelParameterException(f"Parameter {name} not found")
 
     def update_running_params(self, param, value):
         """[summary]
