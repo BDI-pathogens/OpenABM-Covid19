@@ -199,6 +199,33 @@ int get_model_param_lockdown_on(model *model)
 }
 
 /*****************************************************************************************
+*  Name:        get_model_param_lockdown_house_interaction_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_house_interaction_multiplier(model *model)
+{
+	return model->params->lockdown_house_interaction_multiplier;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_lockdown_random_network_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_random_network_multiplier(model *model)
+{
+	return model->params->lockdown_random_network_multiplier;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_lockdown_work_network_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_work_network_multiplier(model *model)
+{
+	return model->params->lockdown_work_network_multiplier;
+}
+
+/*****************************************************************************************
 *  Name:        set_model_param_quarantine_days
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -458,6 +485,57 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			update_random_interactions( indiv, params );
 	}
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_house_interaction_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_house_interaction_multiplier( model *model, double value )
+{
+	model->params->lockdown_house_interaction_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_random_network_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_random_network_multiplier( model *model, double value )
+{
+	model->params->lockdown_random_network_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_work_network_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_work_network_multiplier( model *model, double value )
+{
+	model->params->lockdown_work_network_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
 
 	return TRUE;
 }
