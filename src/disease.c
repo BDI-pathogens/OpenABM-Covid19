@@ -200,19 +200,12 @@ void transmit_virus_by_type(
                     default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
                 }
 
-                //TODO: Check hazard rate is being applied correctly to interactions.
-                if(model->time - 1 - time_infected( infector ) >= MAX_INFECTIOUS_PERIOD)
-					hazard_rate = 0.0;
-				else {
-					hazard_rate = list->infectious_curve[interaction->type][ model->time - 1 - time_infected( infector) ];
-                    hazard_rate = hazard_rate * hospital_state_modifier;
-				}
-
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == UNINFECTED )
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
+                        hazard_rate *= hospital_state_modifier;
 						interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
