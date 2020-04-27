@@ -24,11 +24,9 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number;
-    int hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
-    char hospital_input_param_file[ INPUT_CHAR_LEN ];
 
 	if(argc > 1)
 	{
@@ -65,6 +63,10 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 			INPUT_CHAR_LEN );
 	}
 
+#if HOSPITAL_ON
+    int hospital_param_line_number;
+    char hospital_input_param_file[ INPUT_CHAR_LEN ];
+
     if(argc > 5)
     {
         strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN );
@@ -83,16 +85,18 @@ void read_command_line_args( parameters *params, int argc, char **argv )
         hospital_param_line_number = 1;
     }
 
+    params->hospital_param_line_number = hospital_param_line_number;
+    strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
+    params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
+
+#endif
+
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
-    params->hospital_param_line_number = hospital_param_line_number;
 	
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
 
-    strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
-    params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
-	
 	strncpy(params->input_household_file, input_household_file, 
 		sizeof(params->input_household_file) - 1);
 	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';

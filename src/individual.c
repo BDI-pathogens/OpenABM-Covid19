@@ -55,6 +55,7 @@ void initialize_individual(
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
 
+#if HOSPITAL_ON
     indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
@@ -64,6 +65,7 @@ void initialize_individual(
 	indiv->disease_progression_predicted[0] = FALSE;
 	indiv->disease_progression_predicted[1] = FALSE;
     indiv->worker_type = NOT_HEALTHCARE_WORKER;
+#endif
 }
 
 /*****************************************************************************************

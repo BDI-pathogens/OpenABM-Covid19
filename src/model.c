@@ -52,7 +52,9 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+#if HOSPITAL_ON
     set_up_healthcare_workers_and_hospitals( model_ptr );
+#endif
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
@@ -187,15 +189,16 @@ void set_up_networks( model *model )
 	model->random_network        = new_network( n_total, RANDOM );
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
-	model->household_network = new_network( n_total, HOUSEHOLD );
+    model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
-
+#if HOSPITAL_ON
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_networks( &(model->hospitals[idx]), model->params->max_hcw_daily_interactions );
+#endif
 }
 
 /*****************************************************************************************
@@ -285,7 +288,6 @@ double estimate_total_interactions( model *model )
 {
     long idx;
     double n_interactions;
-     int hospital_idx, ward_type, ward_idx;
     n_interactions = 0;
 
     n_interactions += model->household_network->n_edges;
@@ -294,6 +296,8 @@ double estimate_total_interactions( model *model )
     for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
         n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
 
+#if HOSPITAL_ON
+    int hospital_idx, ward_type, ward_idx;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
     {
         n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
@@ -306,6 +310,7 @@ double estimate_total_interactions( model *model )
             }
         }
     }
+#endif
     return n_interactions;
 }
 
