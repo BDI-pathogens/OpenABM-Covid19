@@ -180,15 +180,9 @@ class TestClass(object):
             ),
             dict( 
                 n_total = 40000,
-                child_network_adults   = 0.25,
-                elderly_network_adults = 0.25
+                child_network_adults   = 0.45,
+                elderly_network_adults = 0.45
             )
-#           Fails: not enough adults in the simulation       
-#            dict( 
-#                n_total = 40000,
-#                child_network_adults   = 0.4,
-#                elderly_network_adults = 0.4
-#            )
         ]
     }
     """
