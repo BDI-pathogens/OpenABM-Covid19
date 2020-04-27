@@ -17,7 +17,9 @@
 #include "individual.h"
 #include "network.h"
 #include "params.h"
-#include "hospital.h" //kelvin change
+#if HOSPITAL_ON
+#include "hospital.h"
+#endif
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -72,7 +74,9 @@ struct model{
 
 	long n_quarantine_days;
 
+#if HOSPITAL_ON
     hospital *hospitals;
+#endif
 };
 
 struct event{
