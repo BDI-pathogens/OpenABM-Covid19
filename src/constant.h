@@ -15,7 +15,7 @@
 #define FALSE 0
 #define TRUE 1
 
-//TODO: add hospitalised type event
+
 enum EVENT_TYPES{
 	UNINFECTED,
 	PRESYMPTOMATIC,
@@ -23,7 +23,7 @@ enum EVENT_TYPES{
 	ASYMPTOMATIC,
 	SYMPTOMATIC,
 	SYMPTOMATIC_MILD,
-    HOSPITALISED, //severe TODO: change this to hospitalisation required!! might be added to waiting list before hand
+    HOSPITALISED,
 	CRITICAL,
 	HOSPITALISED_RECOVERING,
 	RECOVERED,
@@ -34,7 +34,7 @@ enum EVENT_TYPES{
 	TEST_RESULT,
 	CASE,
 	TRACE_TOKEN_RELEASE,
-	NOT_IN_HOSPITAL, //TOM: Events for hospital states.
+	NOT_IN_HOSPITAL,
 	WAITING,
 	GENERAL,
 	ICU,
@@ -42,7 +42,7 @@ enum EVENT_TYPES{
     DISCHARGED,
 	N_EVENT_TYPES
 };
-//for transition time curves
+
 enum TRANSITIONS_TYPES{
 	ASYMPTOMATIC_RECOVERED,
 	PRESYMPTOMATIC_SYMPTOMATIC,
@@ -58,8 +58,7 @@ enum TRANSITIONS_TYPES{
 	SYMPTOMATIC_QUARANTINE,
 	TRACED_QUARANTINE,
 	TEST_RESULT_QUARANTINE,
-	HOSPITAL_TRANSITION,    //TOM: Event transitions for all hospital states.
-	N_TRANSITION_TYPES      // Added to params: mean_time_hospital transition (1), sd_time_hospital_transition (0).
+	N_TRANSITION_TYPES
 };
 
 enum AGE_GROUPS{
@@ -83,9 +82,9 @@ enum AGE_TYPES{
 };
 
 enum WORK_NETWORKS{
-    NETWORK_0_9, // healthcare workers children still in school (intervention where only key workers can have kids at school)
-    NETWORK_10_19,
-    NETWORK_20_69, // pick certain number from this network to be healthcare worker
+	NETWORK_0_9,
+	NETWORK_10_19,
+	NETWORK_20_69,
 	NETWORK_70_79,
 	NETWORK_80,
 	N_WORK_NETWORKS
@@ -98,7 +97,6 @@ enum WORK_NETWORKS_TYPES{
 	N_WORK_NETWORK_TYPES
 };
 
-//TODO: change to HOSPITAL_WORKER_TYPES
 enum WORKER_TYPES {
     DOCTOR,
     NURSE,
@@ -111,8 +109,6 @@ extern const int AGE_TYPE_MAP[N_AGE_GROUPS];
 extern const char* AGE_TEXT_MAP[N_AGE_GROUPS];
 extern const int EVENT_TYPE_TO_WARD_MAP[N_EVENT_TYPES];
 
-
-
 enum HOUSEHOLD_SIZE{
 	HH_1,
 	HH_2,
@@ -123,13 +119,11 @@ enum HOUSEHOLD_SIZE{
 	N_HOUSEHOLD_MAX
 };
 
-//DONE: Add hospital interaction type for workers and patients.
-//TODO: ALTER INFECTIVITY OF HOSPITAL INTERACTION TYPES.
 enum INTERACTION_TYPE{
 	HOUSEHOLD,
 	WORK,
 	RANDOM,
-    HOSPITAL_WORK, //Interactions between healthcare workers
+    HOSPITAL_WORK,
     HOSPITAL_DOCTOR_PATIENT_GENERAL,
     HOSPITAL_NURSE_PATIENT_GENERAL,
     HOSPITAL_DOCTOR_PATIENT_ICU,

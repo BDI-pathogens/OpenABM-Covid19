@@ -5,9 +5,10 @@
 src/*.o
 src/*.exe
 src/*.csv
-
+examples/results/*.csv
 # Python testing files
 __pycache__
+.mypy_cache/
 
 # Eclipse-related files
 .project
@@ -24,7 +25,6 @@ documentation/*synctex*
 documentation/*.log
 documentation/*.aux
 documentation/*.key
-documentation/*.pdf
 documentation/*.dvi
 documentation/*.blg
 documentation/*.bbl
@@ -47,4 +47,12 @@ venv/*
 
 src/covid19.py
 src/covid19_wrap.c
+
 *.ipynb
+sandbox/*.csv
+examples/*.csv
+examples/.ipynb_checkpoints
+sandbox/.ipynb_checkpoints
+
+.idea
+Cake-build-debug
