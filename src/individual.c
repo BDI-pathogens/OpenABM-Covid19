@@ -160,6 +160,7 @@ void update_random_interactions( individual *indiv, parameters* params )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			lockdown = max( lockdown, params->lockdown_elderly_on );
 
+#if HOSPITAL_ON
         switch( indiv->hospital_state )
 		{
             case MORTUARY:		            n = 0; break;
@@ -168,6 +169,16 @@ void update_random_interactions( individual *indiv, parameters* params )
             case ICU:                       n = params->hospitalised_daily_interactions; break;
 			default: 			            n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
 		}
+#else
+        switch( indiv->status )
+        {
+            case DEATH:			n = 0; 										 break;
+            case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
+            case CRITICAL:		n = params->hospitalised_daily_interactions; break;
+            case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break;
+            default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
+        }
+#endif
     }
     else
         n = params->quarantined_daily_interactions;
@@ -254,6 +265,7 @@ void set_case( individual *indiv, int time )
 	indiv->time_event[CASE] = time;
 }
 
+#if HOSPITAL_ON
 /*****************************************************************************************
 *  Name:		set_waiting
 *  Description: sets a person to be added to the hospital waiting list
@@ -300,7 +312,7 @@ void set_mortuary_admission( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
-*  Name:		set_mortuary_admission
+*  Name:		set_discharged
 *  Description: sets a recovered person to be discharged from the hospital.
 *  Returns:		void
 ******************************************************************************************/
@@ -310,6 +322,7 @@ void set_discharged( individual *indiv, parameters* params, int time )
     indiv->current_hospital_event = NULL;
     update_random_interactions( indiv, params );
 }
+#endif
 
 /*****************************************************************************************
 *  Name:		destroy_individual
