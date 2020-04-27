@@ -27,7 +27,7 @@ void initialize_individual(
 		print_exit( "Individuals can only be intitialized once!" );
 
 	indiv->idx         = idx;
-	indiv->status      = UNINFECTED;
+	indiv->status      = SUSCEPTIBLE;
 	indiv->quarantined = FALSE;
 	indiv->is_case     = FALSE;
 	indiv->app_user	   = FALSE;

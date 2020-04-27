@@ -461,7 +461,7 @@ void write_individual_file(model *model, parameters *params)
 		
 		/* Check the individual was infected during the simulation
 		(otherwise the "infector" attribute does not point to another individual) */
-		if(model->population[idx].status != UNINFECTED)
+		if(model->population[idx].status != SUSCEPTIBLE)
 		{
 			infector_id			   = indiv->infector->idx;
 			infector_time_infected = time_infected( indiv->infector );
@@ -720,16 +720,43 @@ void write_transmissions( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf(output_file ,"time_infected,ID,age_group,house_no,work_network,infector_network,infector_infected_time,infector_status,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file , "ID,");
+	fprintf(output_file , "age_group,");
+	fprintf(output_file , "house_no,");
+	fprintf(output_file , "work_network,");
+	fprintf(output_file , "infector_network,");
+	fprintf(output_file , "infector_infected_time,");
+	fprintf(output_file , "infector_status,");
+	fprintf(output_file , "ID_2,");
+	fprintf(output_file , "age_group_2,");
+	fprintf(output_file , "house_no_2,");
+	fprintf(output_file , "work_2,");
+	fprintf(output_file , "time_infected,");
+	fprintf(output_file , "time_presymptomatic,");
+	fprintf(output_file , "time_presymptomatic_mild,");
+	fprintf(output_file , "time_presymptomatic_severe,");
+	fprintf(output_file , "time_symptomatic,");
+	fprintf(output_file , "time_symptomatic_mild,");
+	fprintf(output_file , "time_symptomatic_severe,");
+	fprintf(output_file , "time_asymptomatic,");
+	fprintf(output_file , "time_hospitalised,");
+	fprintf(output_file , "time_critical,");
+	fprintf(output_file , "time_hospitalised_recovering,");
+	fprintf(output_file , "time_death,");
+	fprintf(output_file , "time_recovered,");
+	fprintf(output_file , "time_quarantined,");
+	fprintf(output_file , "time_susceptible,");
+	fprintf(output_file , "infector_ID,");
+	fprintf(output_file , "infector_time_infected,");
+	fprintf(output_file , "infector_status\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 		indiv = &(model->population[pdx]);
-		if( indiv->status == UNINFECTED )
+		if( indiv->status == SUSCEPTIBLE )
 			continue;
 
-		fprintf(output_file ,"%i,%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i\n",
-			time_infected(indiv),
+		fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
 			indiv->idx,
 			indiv->age_group,
 			indiv->house_no,
@@ -740,7 +767,25 @@ void write_transmissions( model *model )
 			indiv->infector->idx,
 			indiv->infector->age_group,
 			indiv->infector->house_no,
-			indiv->infector->work_network
+			indiv->infector->work_network,
+			time_infected(indiv),
+			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
+			indiv->time_event[PRESYMPTOMATIC_MILD],
+			indiv->time_event[PRESYMPTOMATIC],
+			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
+			indiv->time_event[SYMPTOMATIC_MILD],
+			indiv->time_event[SYMPTOMATIC],
+			indiv->time_event[ASYMPTOMATIC],
+			indiv->time_event[HOSPITALISED],
+			indiv->time_event[CRITICAL],
+			indiv->time_event[HOSPITALISED_RECOVERING],
+			indiv->time_event[DEATH],
+			indiv->time_event[RECOVERED],
+			indiv->time_event[QUARANTINED],
+			indiv->time_event[SUSCEPTIBLE],
+			indiv->infector->idx,
+			time_infected( indiv->infector ),
+			indiv->infector_status
 		);
 	}
 	fclose(output_file);
