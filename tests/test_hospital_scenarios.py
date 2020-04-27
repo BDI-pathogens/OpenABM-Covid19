@@ -61,13 +61,10 @@ class TestClass(object):
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "r")
         completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
 
         # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
         expected_output = int(params.get_param("n_seed_infection"))
-        
-
         output = df_individual_output["time_infected"] != -1
         output = df_individual_output[output]
         output = len(output.index)
@@ -101,9 +98,7 @@ class TestClass(object):
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-
         n_hospitalised = df_individual_output["time_hospitalised"] != -1
         n_hospitalised = df_individual_output[n_hospitalised]
         n_hospitalised = len(n_hospitalised.index)
