@@ -191,7 +191,7 @@ void transmit_virus_by_type(
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
-					if( interaction->individual->status == UNINFECTED )
+					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
 						interaction->individual->hazard -= hazard_rate;
@@ -253,17 +253,17 @@ void new_infection(
 
 	if( draw < asymp_frac )
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, ASYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, ASYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, ASYMPTOMATIC, RECOVERED, ASYMPTOMATIC_RECOVERED );
 	}
 	else if( draw < asymp_frac + mild_frac )
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC_MILD, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC_MILD, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC_MILD, SYMPTOMATIC_MILD, PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD );
 	}
 	else
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
 }
