@@ -879,7 +879,6 @@ int one_time_step( model *model )
 		// printf("\n");
 
 
-	printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
     flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
 	transition_events( model, TEST_RESULT,         &intervention_test_result,         TRUE );

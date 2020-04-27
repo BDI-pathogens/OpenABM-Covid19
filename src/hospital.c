@@ -401,10 +401,6 @@ void swap_waiting_general_and_icu_patients( model *model )
         patient_icu_list = malloc(sizeof(waiting_list));
         initialise_waiting_list( patient_general_list );
         initialise_waiting_list( patient_icu_list );
-
-        printf("Patient general list ");
-        printf(patient_general_list);
-        printf("\n");
 		
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].n_beds; patient_idx++ )
