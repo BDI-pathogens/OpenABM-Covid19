@@ -453,7 +453,7 @@ class TestClass(object):
         """  
       
         # absolute tolerance
-        tolerance = 0.1
+        tolerance = 0.01
 
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
@@ -497,10 +497,22 @@ class TestClass(object):
                                               ]
                                     )
         
+        num_adults_in_adults = len( df_indiv[
+                                                ( df_indiv["work_network"] == constant.NETWORK_20_69 ) & 
+                                                ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
+                                              ]
+                                    )
+        
         total_children_network = num_children_in_children + num_adults_in_children
-        if ( total_children_network > 0 ) :
-            np.testing.assert_allclose( num_adults_in_children / total_children_network, child_network_adults, atol = tolerance )
-
         total_elderly_network = num_elderly_in_elderly + num_adults_in_elderly
+        total = total_children_network + total_elderly_network + num_adults_in_adults
+        if ( total > 0 ):
+            np.testing.assert_equal( total, n_total )
+            
+        if ( total_children_network > 0 ) :
+            np.testing.assert_allclose( num_adults_in_children / num_children_in_children, child_network_adults, atol = tolerance )
+
         if ( total_elderly_network > 0 ) :
-            np.testing.assert_allclose( num_adults_in_elderly / total_elderly_network, elderly_network_adults, atol = tolerance )
+            np.testing.assert_allclose( num_adults_in_elderly / num_elderly_in_elderly, elderly_network_adults, atol = tolerance )
