@@ -156,6 +156,39 @@ class TestClass(object):
                 mean_work_interactions_elderly = 10,
                 daily_fraction_work            = 1.0
             )
+        ],
+        "test_work_network_proportions": [ 
+            dict( 
+                n_total = 40000,
+                child_network_adults   = 0,
+                elderly_network_adults = 0
+            ),
+            dict( 
+                n_total = 40000,
+                child_network_adults   = 0.01,
+                elderly_network_adults = 0.01
+            ),
+            dict( 
+                n_total = 40000,
+                child_network_adults   = 0.1,
+                elderly_network_adults = 0.1
+            ),
+            dict( 
+                n_total = 40000,
+                child_network_adults   = 0.2,
+                elderly_network_adults = 0.2
+            ),
+            dict( 
+                n_total = 40000,
+                child_network_adults   = 0.25,
+                elderly_network_adults = 0.25
+            )
+#           Fails: not enough adults in the simulation       
+#            dict( 
+#                n_total = 40000,
+#                child_network_adults   = 0.4,
+#                elderly_network_adults = 0.4
+#            )
         ]
     }
     """
@@ -405,3 +438,69 @@ class TestClass(object):
         corr = df_int['house_no'].corr(df_int['house_no_2'])
         if ( len( df_int ) > 1 ) :
             np.testing.assert_allclose( corr, 0, atol = tolerance )
+
+
+
+    def test_work_network_proportions( 
+            self,
+            n_total,
+            child_network_adults,
+            elderly_network_adults
+        ):
+
+        """
+        Test to check proportions of adults in work networks
+        """  
+      
+        # absolute tolerance
+        tolerance = 0.1
+
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params,1)
+        params.set_param("n_total",n_total)
+        params.set_param( "child_network_adults",   child_network_adults )
+        params.set_param( "elderly_network_adults",   elderly_network_adults )
+        params.write_params(constant.TEST_DATA_FILE)        
+
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+       
+        # get all the people, need to hand case if people having zero connections
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        
+        num_children_in_children = len( df_indiv[ 
+                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) &
+                                                ( ( df_indiv["age_group"] == constant.AGE_0_9 ) | ( df_indiv["age_group"] == constant.AGE_10_19 ) )
+                                                ]
+                                    )
+        
+        num_adults_in_children = len( df_indiv[
+                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) & 
+                                                ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
+                                              ]
+                                    )
+        
+        num_elderly_in_elderly = len( df_indiv[ 
+                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) &
+                                                ( ( df_indiv["age_group"] == constant.AGE_70_79 ) | ( df_indiv["age_group"] == constant.AGE_80 ) )
+                                                ]
+                                    )
+        
+        num_adults_in_elderly = len( df_indiv[
+                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) & 
+                                                ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
+                                                  ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
+                                              ]
+                                    )
+        
+        total_children_network = num_children_in_children + num_adults_in_children
+        if ( total_children_network > 0 ) :
+            np.testing.assert_allclose( num_adults_in_children / total_children_network, child_network_adults, atol = tolerance )
+
+        total_elderly_network = num_elderly_in_elderly + num_adults_in_elderly
+        if ( total_elderly_network > 0 ) :
+            np.testing.assert_allclose( num_adults_in_elderly / total_elderly_network, elderly_network_adults, atol = tolerance )
