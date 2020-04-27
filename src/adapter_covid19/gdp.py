@@ -182,7 +182,7 @@ class BaseGdpModel(abc.ABC):
                 ) * self.workers[key]
                 increase = min(spare_capacity, to_send_back - current_workers)
                 utilisations[key] += increase / self.workers[key]
-                if utilisations[key] > 1:
+                if utilisations[key] > 1 + 1e-6:
                     raise ValueError(f"Utilisation > 1: {key}: {utilisations[key]}")
                 current_workers += increase
         return utilisations
