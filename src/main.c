@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     printf("# Read hospital parameter file\n");
     read_hospital_param_file( &params );
 #endif
-	printf("# Start model set-up\n");
+    printf("# Start model set-up\n");
 
     model *model = new_model( &params );
 	
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	printf("# rng_seed: %li\n", params.rng_seed);
 	printf("# param_line_number: %d\n", params.param_line_number);
 	
-	printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered\n");
+	printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered, n_waiting, n_general, n_ICU, n_discharged, n_mortuary\n");
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );
-	
+
 	destroy_model( model );
 	destroy_params( &params );
 

@@ -15,8 +15,6 @@
 #define FALSE 0
 #define TRUE 1
 
-//#define HOSPITAL_ON 1
-
 enum EVENT_TYPES{
 	UNINFECTED,
 	PRESYMPTOMATIC,

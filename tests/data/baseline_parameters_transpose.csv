@@ -1,7 +1,7 @@
 parameter_name	parameter_value
 rng_seed	1
 param_id	1
-n_total	1000000
+n_total	10000
 mean_work_interactions_child	10
 mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
