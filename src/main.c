@@ -39,9 +39,10 @@ int main(int argc, char *argv[])
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
+#if HOSPITAL_ON
     printf("# Read hospital parameter file\n");
     read_hospital_param_file( &params );
-
+#endif
 	printf("# Start model set-up\n");
 
     model *model = new_model( &params );
@@ -54,7 +55,11 @@ int main(int argc, char *argv[])
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-		printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+        printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li"
+        #if HOSPITAL_ON
+                ",%li,%li,%li,%li,%li"
+        #endif
+                "\n",
 				model->time,
 				params.lockdown_on,
 				params.lockdown_elderly_on,
@@ -72,12 +77,15 @@ int main(int argc, char *argv[])
 				n_current( model, CRITICAL ),
 			    n_current( model, HOSPITALISED_RECOVERING ),
                 n_current( model, DEATH ),
-				n_current( model, RECOVERED ),
-				n_current( model, WAITING ),
+                n_current( model, RECOVERED )
+#if HOSPITAL_ON
+                ,
+                n_current( model, WAITING ),
 				n_current( model, GENERAL ),
 				n_current( model, ICU),
 				n_current( model, DISCHARGED),
 				n_current( model, MORTUARY)
+#endif
 		);
 		last_test = n_total( model, TEST_RESULT );
 	};
