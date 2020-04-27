@@ -53,6 +53,14 @@ class TestClass(object):
         params.set_param("infectious_rate", 0.0)
         params.write_params(SCENARIO_FILE)
 
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all HOSPITAL_ON=1"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
         # Construct the executable command
         EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
             f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
@@ -81,6 +89,14 @@ class TestClass(object):
         h_params.set_param("n_beds_covid_general_ward", 0.0)
         h_params.set_param("n_beds_covid_icu_ward", 0.0)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all HOSPITAL_ON=1"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
 
         # Construct the executable command
         EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
