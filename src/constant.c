@@ -51,6 +51,7 @@ const char* AGE_TEXT_MAP[N_AGE_GROUPS] = {
 	"80+ years"
 };
 
+#if HOSPITAL_ON
 const int EVENT_TYPE_TO_WARD_MAP[N_EVENT_TYPES] = {
 	NOT_IN_HOSPITAL,
 	NOT_IN_HOSPITAL,
@@ -76,5 +77,6 @@ const int EVENT_TYPE_TO_WARD_MAP[N_EVENT_TYPES] = {
 	NOT_IN_HOSPITAL,
 	NOT_IN_HOSPITAL,
 };
+#endif
 
 gsl_rng * rng;

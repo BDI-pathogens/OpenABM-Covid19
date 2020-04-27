@@ -78,11 +78,14 @@ void set_up_allocate_work_places( model *model )
     // to HOSPITAL_WORK_NETWORK (-1).
     for( pdx = 0; pdx < model->params->n_total; pdx++ )
     {
+#if HOSPITAL_ON
         if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
             model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
 		else
 			model->population[pdx].work_network = HOSPITAL_WORK_NETWORK;
-
+#else
+        model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+#endif
     }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
