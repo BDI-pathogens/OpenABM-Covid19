@@ -52,7 +52,9 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+#if HOSPITAL_ON
     set_up_healthcare_workers_and_hospitals( model_ptr );
+#endif
 	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
@@ -104,10 +106,11 @@ void destroy_model( model *model )
     free( model->household_directory->n_jdx );
     free( model->household_directory );
     free( model->trace_tokens );
+#if HOSPITAL_ON
     for( idx = 0; idx < model->params->n_hospitals; idx++)
         destroy_hospital( &(model->hospitals[idx]) );
     free( model->hospitals );
-
+#endif
     free( model );
 
     gsl_rng_free( rng );
@@ -187,15 +190,16 @@ void set_up_networks( model *model )
 	model->random_network        = new_network( n_total, RANDOM );
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
-	model->household_network = new_network( n_total, HOUSEHOLD );
+    model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
 	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
 		set_up_work_network( model, idx );
-
+#if HOSPITAL_ON
     for (idx = 0; idx < model->params->n_hospitals; idx++ )
         set_up_hospital_networks( &(model->hospitals[idx]), model->params->max_hcw_daily_interactions );
+#endif
 }
 
 /*****************************************************************************************
@@ -262,6 +266,7 @@ void set_up_population( model *model )
         initialize_individual( &(model->population[idx]), params, idx );
 }
 
+#if HOSPITAL_ON
 /*****************************************************************************************
 *  Name:        write_time_step_hospital_data
 *  Description: write data concerning the status of hospitals at each time step
@@ -331,6 +336,7 @@ void write_time_step_hospital_data( model *model)
     fclose(time_step_hospital_file);
     
 }
+#endif
 
 
 /*****************************************************************************************
@@ -356,7 +362,6 @@ double estimate_total_interactions( model *model )
 {
     long idx;
     double n_interactions;
-     int hospital_idx, ward_type, ward_idx;
     n_interactions = 0;
 
     n_interactions += model->household_network->n_edges;
@@ -365,6 +370,8 @@ double estimate_total_interactions( model *model )
     for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
         n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
 
+#if HOSPITAL_ON
+    int hospital_idx, ward_type, ward_idx;
     for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
     {
         n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
@@ -377,6 +384,7 @@ double estimate_total_interactions( model *model )
             }
         }
     }
+#endif
     return n_interactions;
 }
 
@@ -581,11 +589,16 @@ void set_up_seed_infection( model *model )
     while( idx < params->n_seed_infection )
     {
         person = gsl_rng_uniform_int( rng, params->n_total );
+#if HOSPITAL_ON
         if( model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
         {
             new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
             idx++;
         }
+#else
+        new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
+        idx++;
+#endif
     }
 }
 
@@ -692,7 +705,7 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_network( model *model )
 {
-    int idx, day, ward_idx, ward_type;
+    int idx, day;
 
     day = model->interaction_day_idx;
     for( idx = 0; idx < model->params->n_total; idx++ )
@@ -700,14 +713,17 @@ void build_daily_network( model *model )
 
     build_random_network( model );
 
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_networks( model, &(model->hospitals[idx]) );
-
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
     add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
     for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
         add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
+
+
+#if HOSPITAL_ON
+    int ward_idx, ward_type;
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
     {
@@ -723,6 +739,7 @@ void build_daily_network( model *model )
             }
         }
     }
+#endif
 };
 
 /*****************************************************************************************
@@ -757,6 +774,7 @@ void transition_events(
 }
 
 
+#if HOSPITAL_ON
 /*****************************************************************************************
 *  Name:		set_up_healthcare_workers
 *  Description: randomly pick individuals from population between ages 20 - 69 to be doctors
@@ -811,6 +829,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         idx++;
     }
 }
+#endif
 
 /*****************************************************************************************
 *  Name:		one_time_step
@@ -837,6 +856,7 @@ int one_time_step( model *model )
     transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
     transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
+#if HOSPITAL_ON
     transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
     transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 
@@ -849,7 +869,8 @@ int one_time_step( model *model )
     transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
     ///use printf below to see available beds each timestep
-    //printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+    printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+#endif
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
@@ -864,8 +885,10 @@ int one_time_step( model *model )
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
 
+#if HOSPITAL_ON
 	// Output hospital data for each time step
 	write_time_step_hospital_data( model );
+#endif
 
 	return 1;
 };
