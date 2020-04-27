@@ -188,6 +188,35 @@ trace_token* index_trace_token( model *model, individual *indiv )
 }
 
 /*****************************************************************************************
+*  Name:		remove_one_trace_token
+*  Description: removes a single trace token from an individual
+*  				returns it the stack of trace_tokens
+*  Returns:		void
+******************************************************************************************/
+void remove_one_trace_token( model *model, trace_token *token )
+{
+	individual *indiv = token->individual;
+
+	if( indiv->trace_tokens == token )
+	{
+		indiv->trace_tokens = token->next;
+		if( indiv->trace_tokens != NULL )
+			indiv->trace_tokens->last = NULL;
+	}
+	else
+	{
+		token->last->next = token->next;
+		if( token->next != NULL )
+			token->next->last = token->last;
+	}
+
+	// put the token back on the stack
+	token->next_index = model->next_trace_token;
+	model->next_trace_token = token;
+	model->n_trace_tokens_used--;
+}
+
+/*****************************************************************************************
 *  Name:		remove_traced_on_this_trace
 *  Description: add the end of a tracing event this removes the tag which
 *  				prevents us from double counting people
@@ -196,14 +225,25 @@ trace_token* index_trace_token( model *model, individual *indiv )
 void remove_traced_on_this_trace( model *model, individual *indiv )
 {
 	trace_token *token = indiv->index_trace_token;
+	trace_token *next_token;
+	individual *contact;
 
 	while( token->next_index != NULL )
 	{
-		token = token->next_index;
-		token->individual->traced_on_this_trace = FALSE;
+		next_token = token->next_index;
+		contact = next_token->individual;
+
+		if( contact->traced_on_this_trace < 1 )
+		{
+			token->next_index = next_token->next_index;
+			remove_one_trace_token( model, next_token );
+		}
+		else
+			token = next_token;
+
+		contact->traced_on_this_trace = FALSE;
 	}
 	indiv->traced_on_this_trace = FALSE;
-
 }
 
 /*****************************************************************************************
@@ -258,7 +298,8 @@ void update_intervention_policy( model *model, int time )
 *  Name:		intervention_on_quarantine_until
 *  Description: Quarantine an individual until a certain time
 *  				If they are already in quarantine then extend quarantine until that time
-*  Returns:		void
+*  Returns:		TRUE/FALSE - TRUE when quarantining for the first time on a trace
+*  							 FALSE when not quarantining
 ******************************************************************************************/
 int intervention_quarantine_until(
 	model *model,
@@ -270,17 +311,13 @@ int intervention_quarantine_until(
 	double risk_score
 )
 {
-	if( indiv->traced_on_this_trace >= 1 )
+	if( is_in_hospital( indiv ) )
 		return FALSE;
 
-	indiv->traced_on_this_trace += risk_score;
-	if( indiv->traced_on_this_trace < 1 )
+	if( indiv->traced_on_this_trace >= 1 || risk_score == 0 )
 		return FALSE;
 
-	if( is_in_hospital( indiv) )
-		return FALSE;
-
-	if( index_token != NULL )
+	if( index_token != NULL && indiv->traced_on_this_trace == 0 )
 	{
 		// add the trace token to their list
 		trace_token *token = new_trace_token( model, indiv, contact_time );
@@ -296,6 +333,10 @@ int intervention_quarantine_until(
 		token->next_index = index_token->next_index;
 		index_token->next_index = token;
 	}
+	indiv->traced_on_this_trace += risk_score;
+
+	if( indiv->traced_on_this_trace < 1 )
+		return FALSE;
 
 	if( time == model->time )
 		return FALSE;
@@ -492,31 +533,13 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	while( next_token != NULL )
 	{
 		// get the next token on the list of this person trace_token
-		token = next_token;
+		token      = next_token;
 		next_token = token->next_index;
+		contact    = token->individual;
+		remove_one_trace_token( model, token );
 
-		// remove the token from the individual and return it to the stack
-		contact = token->individual;
-		if( contact->trace_tokens == token )
-		{
-			contact->trace_tokens = token->next;
-			if( contact->trace_tokens != NULL )
-				contact->trace_tokens->last = NULL;
-			else
-			if( contact->index_trace_token == NULL )
-				intervention_quarantine_release( model, contact );
-		}
-		else
-		{
-			token->last->next = token->next;
-			if( token->next != NULL )
-				token->next->last = token->last;
-		}
-
-		// put the token back on the stack
-		token->next_index = model->next_trace_token;
-		model->next_trace_token = token;
-		model->n_trace_tokens_used--;
+		if( contact->index_trace_token == NULL )
+			intervention_quarantine_release( model, contact );
 	}
 }
 

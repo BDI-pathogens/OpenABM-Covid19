@@ -16,6 +16,7 @@ import sys
 import numpy as np, pandas as pd
 from scipy import optimize
 from math import sqrt
+from numpy.core.numeric import NaN
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -226,7 +227,54 @@ class TestClass(object):
                     app_turn_on_time = 0
                 ),
                 days_since_contact = 2, 
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 0
+                ),
+                days_since_contact = 4 
             )
+        ],
+        "test_risk_score_multiple_contact": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 0,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0
+                ),
+                days_since_contact    = 2,
+                required_interactions = 1
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 4,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    app_turn_on_time = 0,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0
+                ),
+                days_since_contact    = 3,
+                required_interactions = 2
+            ),
         ]
     }
     """
@@ -592,7 +640,7 @@ class TestClass(object):
                 if ( age_inf < min_age_inf ) | (age_sus < min_age_sus ):
                     model.set_risk_score_household( age_inf, age_sus, 0 )
         
-        # step through 10 steps getting the individual file on steps 9 and 10
+        # step through the model and write the relevant files the end
         for time in range( test_params[ "end_time" ]  ):
             model.one_time_step();    
         model.write_individual_file()
@@ -638,7 +686,7 @@ class TestClass(object):
                     if ( age_inf < min_age_inf ) | (age_sus < min_age_sus ):
                         model.set_risk_score( day, age_inf, age_sus, 0 )
         
-        # step through 10 steps getting the individual file on steps 9 and 10
+        # step through the models and write the relevant files at the end
         for time in range( test_params[ "end_time" ]  ):
             model.one_time_step();    
         model.write_individual_file()
@@ -684,24 +732,91 @@ class TestClass(object):
                     if day > days_since_contact:
                         model.set_risk_score( day, age_inf, age_sus, 0 )
         
-        # step through 10 steps getting the individual file on steps 9 and 10
+        # step through the model and write the trace tokens at the end
         for time in range( test_params[ "end_time" ]  ):
             model.one_time_step();    
-        model.write_individual_file()
         model.write_trace_tokens()
   
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "time" ] == test_params[ "end_time" ]  ) & ( df_trace[ "days_since_index" ] == 0 ) ] 
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID", "days_since_contact" ] ).size().reset_index(name="cons")    
-
-        print( index_traced.head())
        
         # now perform checks
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( max( index_traced[ "days_since_contact"] ) <= days_since_contact, 1,  "tracing contacts from longer ago than risk score allows" )
        
- 
+    def test_risk_score_multiple_contact(self, test_params, days_since_contact, required_interactions):
+        """
+        Test that if risk score quarantining is set to be 0 for days greater
+        than days since contact and per_interaction_score for days less or equal,
+        make sure we only quarantine people who have sufficient multiple contacts
+        """
+        
+        per_interaction_score = 1 / required_interactions + 0.0001
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        # now update the risk scoring map
+        for day in range( constant.MAX_DAILY_INTERACTIONS_KEPT ):
+            for age_inf in range( constant.N_AGE_GROUPS ):
+                for age_sus in range( constant.N_AGE_GROUPS ):
+                    model.set_risk_score( day, age_inf, age_sus, per_interaction_score )
+                    if day > days_since_contact:
+                        model.set_risk_score( day, age_inf, age_sus, 0 )
+        
+        # step through time until we need to start to save the interactions each day
+        for time in range( test_params[ "end_time" ] - days_since_contact - 1 ):
+            model.one_time_step();   
+       
+        # now get the interactions each day  
+        df_inter = []
+        for time in range( days_since_contact + 1 ):
+            model.one_time_step();
+            model.write_interactions_file();
+            df_temp = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_temp[ "days_since_symptoms" ] = days_since_contact - time
+            df_inter.append(df_temp)
+        df_inter = pd.concat( df_inter )
+        df_inter.rename( columns = { "ID":"index_ID", "ID_2":"traced_ID"}, inplace = True )
+
+        # get the individuals who have the app
+        model.write_individual_file()
+        df_indiv  = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        app_users = df_indiv.loc[ :,["ID", "app_user"]]
+     
+        # only consider interactions between those with the app
+        app_users = app_users.rename( columns = { "ID":"index_ID", "app_user":"index_app_user"})
+        df_inter  = pd.merge( df_inter, app_users, on = 'index_ID', how = "left" )
+        app_users = app_users.rename( columns = { "index_ID":"traced_ID", "index_app_user":"traced_app_user"})
+        df_inter  = pd.merge( df_inter, app_users, on = 'traced_ID', how = "left" )
+        df_inter  = df_inter[ ( df_inter[ "index_app_user" ] == True ) & ( df_inter[ "traced_app_user" ] == True ) ]
+                
+        # calculate the number of pairwise interactions of the relevant number of days
+        df_inter = df_inter.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="n_interactions")
+     
+        # now look at the number of people asked to quarnatine
+        model.write_trace_tokens()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        # find the index case for the new time_step
+        index_traced = df_trace[ ( df_trace[ "time" ] == test_params[ "end_time" ]  ) & ( df_trace[ "days_since_index" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
+        index_cases  = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
+
+        # now for the index cases get all the individual with with they had sufficient interactions
+        index_inter = pd.merge( index_cases, df_inter, on = "index_ID", how = "left" )
+        index_inter = index_inter[ index_inter[ "n_interactions"] >= required_interactions]
+            
+        df_all = pd.merge( index_inter, index_traced, on = [ "index_ID", "traced_ID"], how = "outer")           
+              
+        # now perform checks
+        np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
+        np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
+        np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
+
     
