@@ -29,7 +29,6 @@ TEST_HCW_FILE = TEST_DIR +"/data/ward_output.csv"
 SRC_DIR = TEST_DIR.replace("tests","") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
 
-
 # Construct the compilation command and compile
 compile_command = "make clean; make all"
 completed_compilation = subprocess.run([compile_command], 
@@ -56,7 +55,6 @@ df_output = pd.read_csv(TEST_OUTPUT_FILE,
     skipfooter=numFooter, 
     engine='python')
 
-
 # # Write df_output to file
 df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
 
@@ -70,9 +68,9 @@ class TestClass(object):
         """
         Test that healthcare worker IDs correspond to population IDs
         """
+        
         df_hcw = pd.read_csv(TEST_HCW_FILE)
         df_population = pd.read_csv(TEST_INDIVIDUAL_FILE)
-
         hcw_idx_list = df_hcw.pdx.values
         population_idx_list = df_population.ID.values
 
@@ -81,20 +79,15 @@ class TestClass(object):
 
     def test_hcw_not_in_work_network(self):
         """
-        Test that healthcare worker IDs correspond to population IDs
+        If worker type not -1, then work network must be -1
         """
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
-
-        # Worker 1
-        # If worker type not -1, then work network must be -1
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
         w1_worknetwork_condition = df_interactions['work_network'] != -1
         df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
 
         assert len(df_test_worker1.index) == 0
         
-        # Worker 2
-        # If worker type not -1, then work network must be -1
         w2_hcw_condition = df_interactions['worker_type_2'] != -1
         w2_worknetwork_condition = df_interactions['work_network_2'] != -1
         df_test_worker2 = df_interactions[w2_hcw_condition & w2_worknetwork_condition]
@@ -107,10 +100,8 @@ class TestClass(object):
         Test that healthcare workers IDs appear only once in the hcw file and therefore only belong to one ward/ hospital
         """
         df_hcw = pd.read_csv(TEST_HCW_FILE)
-
         hcw_idx_list = df_hcw.pdx.values
 
-        # Test no duplicates
         assert len(hcw_idx_list) == len(set(hcw_idx_list))
 
 
@@ -120,25 +111,9 @@ class TestClass(object):
         """
 
         df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
-
-        # Return dataframe where all elements have n_patients > n_beds
         df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
 
         assert len(df_number_beds_exceeded.index) == 0
-
-
-    def test_constant_hcw_number(self):
-        """
-        Test that the number of hcw in hospital remains constant
-        """
-        # TODO: update to test for multiple hospitals
-        
-        df_hcw = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
-
-        df_time_step = df_hcw.groupby('time_step').sum()
-
-        assert df_time_step.number_doctors.nunique() == 1
-        assert df_time_step.number_nurses.nunique() == 1
 
 
 
