@@ -145,7 +145,7 @@ typedef struct{
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    //hospital params
+    //Hospital parameters
     int n_total_doctors;
     int n_total_nurses;
     int n_hospitals;
@@ -159,10 +159,13 @@ typedef struct{
     double mean_time_hospital_transition; // mean time for movement between hospital locations
     double sd_time_hospital_transition; // sd for movement between hospital locations
 
-    //TOM: Added for infectivity dependency based on hospital location. Applied to hazard rate when transmitting the virus.
     double waiting_infectivity_modifier;
     double general_infectivity_modifier;
     double icu_infectivity_modifier;
+
+    //Modifiers for patients not receiving care when transitioning from disease states.
+    double hospitalised_waiting_mod;
+    double critical_waiting_mod;
 
 
 } parameters;
