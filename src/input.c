@@ -487,7 +487,6 @@ void write_output_files(model *model, parameters *params)
 		write_interactions( model );
 		write_transmissions( model );
 		write_trace_tokens( model );
-        write_hcw_data( model );
         write_ward_data( model );
 	}
 }	
@@ -791,33 +790,6 @@ void write_interactions( model *model )
 }
 
 
-// Dylan change
-/*****************************************************************************************
-*  Name:        write_hcw_data
-*  Description: write summary data about healthcare workers
-******************************************************************************************/
-void write_hcw_data( model *model )
-{
-    char output_file_name[INPUT_CHAR_LEN];
-    FILE *hcw_output_file;
-
-    // Concatenate file name
-    strcpy(output_file_name, model->params->output_file_dir);
-    strcat(output_file_name, "/hcw_output");
-    strcat(output_file_name, ".csv");
-    hcw_output_file = fopen(output_file_name, "w");
-
-    // Params
-    fprintf(hcw_output_file, "%s\t%d\n", "n_hospitals", model->params->n_hospitals);
-    fprintf(hcw_output_file, "%s\t%d\n", "n_total_doctors", model->params->n_total_doctors);
-    fprintf(hcw_output_file, "%s\t%d\n", "n_total_nurses",  model->params->n_total_nurses);
-    fprintf(hcw_output_file, "%s\t%li\n", "length of n_wards array",  sizeof(model->params->n_wards)/ sizeof(model->params->n_wards[0]));
-    // TODO: add rest of params
-
-    fclose(hcw_output_file);
-}
-
-// Dylan change
 /*****************************************************************************************
 *  Name:        write_ward_data
 *  Description: write data about healthcare workers in each ward
