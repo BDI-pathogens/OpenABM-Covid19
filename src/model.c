@@ -297,7 +297,7 @@ void write_time_step_hospital_data( model *model)
         {
             int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
             int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
-            int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_patients;
+            int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
             int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
 
             // For each doctor
