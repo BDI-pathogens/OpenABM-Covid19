@@ -1,8 +1,639 @@
 # Starting simulation
-# Date: 27-04-2020 10:47:06
+# Date: 27-04-2020 11:33:04
 # Read command-line args
 # Read input parameter file
 # Read household demographics file
 # Read hospital parameter file
-Failed to read parameter n_hcw_per_ward
+# Start model set-up
+# param_id: 1
+# rng_seed: 1
+# param_line_number: 1
+time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered
+available general beds: 1200 
+available icu beds: 100 
+1,0,0,1,0,0,5,0,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+2,0,0,1,0,0,5,0,2,2,0,0,1,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+3,0,0,1,0,0,6,0,3,2,0,0,1,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+4,0,0,1,0,0,7,0,4,2,0,0,1,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+5,0,0,1,0,0,8,0,5,2,0,0,1,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+6,0,0,1,0,0,9,0,4,3,0,0,2,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+7,0,0,1,0,0,11,0,3,4,0,0,4,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+8,0,0,1,0,0,13,0,2,6,0,0,5,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+9,0,0,1,0,0,16,0,5,6,0,0,5,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+10,0,0,1,0,0,18,0,6,7,0,0,5,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+11,0,0,1,0,0,21,0,8,8,0,0,5,0,0,0,0,0,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+12,0,0,1,0,0,23,0,6,9,0,0,7,0,0,0,0,1,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+13,0,0,1,0,0,29,0,10,11,0,0,7,0,0,0,0,1,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+14,0,0,1,0,0,35,0,14,11,0,0,6,0,0,0,0,4,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+15,0,0,1,0,0,39,0,15,11,0,0,9,0,0,0,0,4,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+16,0,0,1,0,0,44,0,18,11,0,0,10,0,0,0,0,5,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+17,0,0,1,0,0,50,0,20,13,0,0,10,0,0,0,0,7,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+18,0,0,1,0,0,63,0,30,15,0,0,11,0,0,0,0,7,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+19,0,0,1,0,0,76,0,38,14,0,0,14,0,0,0,0,10,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+20,0,0,1,0,0,90,0,46,16,0,0,18,0,0,0,0,10,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+21,0,0,1,0,0,107,0,54,18,0,0,22,0,0,0,0,13,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+22,0,0,1,0,0,132,0,67,22,0,0,28,0,0,0,0,15,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+23,0,0,1,0,0,154,0,79,22,0,0,36,0,0,0,0,17,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+24,0,0,1,0,0,194,0,102,26,0,0,47,0,0,0,0,19,0,0,0,0,0
+available general beds: 1200 
+available icu beds: 100 
+25,0,0,1,0,0,253,0,142,35,0,0,57,0,0,0,0,19,0,0,0,0,0
+available general beds: 1198 
+available icu beds: 100 
+26,0,0,1,0,0,298,0,168,39,0,0,67,2,0,0,0,22,0,2,0,0,0
+available general beds: 1198 
+available icu beds: 100 
+27,0,0,1,0,0,366,0,210,47,0,0,84,2,0,0,0,23,0,2,0,0,0
+available general beds: 1198 
+available icu beds: 100 
+28,0,0,1,0,0,444,0,253,60,0,0,103,2,0,0,0,26,0,2,0,0,0
+available general beds: 1196 
+available icu beds: 100 
+29,0,0,1,0,0,572,0,328,85,0,0,125,4,0,0,0,30,0,4,0,0,0
+available general beds: 1195 
+available icu beds: 100 
+30,0,0,1,0,0,702,0,382,115,0,0,164,5,0,0,0,36,0,5,0,0,0
+available general beds: 1195 
+available icu beds: 99 
+31,0,0,1,0,0,879,0,478,142,0,0,208,5,1,0,0,45,0,6,1,0,0
+available general beds: 1193 
+available icu beds: 99 
+32,0,0,1,0,0,1065,0,575,172,0,0,258,7,1,0,0,52,0,8,1,0,0
+available general beds: 1194 
+available icu beds: 99 
+33,0,0,1,0,0,1315,0,725,212,0,0,303,6,1,0,0,68,0,8,1,1,0
+available general beds: 1193 
+available icu beds: 99 
+34,0,0,1,0,0,1588,0,885,254,0,0,352,7,1,0,0,89,0,10,1,2,0
+available general beds: 1194 
+available icu beds: 99 
+35,0,0,1,0,0,1947,0,1077,305,0,0,452,6,1,0,1,105,0,11,1,3,1
+available general beds: 1192 
+available icu beds: 99 
+36,0,0,1,0,0,2383,0,1311,383,0,0,550,8,1,0,1,129,0,13,1,3,1
+available general beds: 1189 
+available icu beds: 100 
+37,0,0,1,0,0,2910,0,1564,499,0,0,679,11,0,0,2,155,0,15,1,3,2
+available general beds: 1187 
+available icu beds: 100 
+38,0,0,1,0,0,3545,0,1907,615,0,0,828,13,0,0,2,180,0,18,1,4,2
+available general beds: 1187 
+available icu beds: 100 
+39,0,0,1,0,0,4356,0,2349,754,0,0,1020,13,0,0,2,218,0,20,1,6,2
+available general beds: 1183 
+available icu beds: 99 
+40,0,0,1,0,0,5281,0,2827,914,0,0,1263,17,1,0,2,257,0,25,2,6,2
+available general beds: 1181 
+available icu beds: 98 
+41,0,0,1,0,0,6430,0,3442,1122,0,0,1525,19,2,0,2,318,0,30,3,8,2
+available general beds: 1178 
+available icu beds: 98 
+42,0,0,1,0,0,7827,0,4144,1359,0,0,1901,22,2,0,2,397,0,33,3,8,2
+available general beds: 1175 
+available icu beds: 98 
+43,0,0,1,0,0,9497,0,5030,1655,0,0,2297,25,2,0,3,485,0,41,3,12,3
+available general beds: 1171 
+available icu beds: 98 
+44,0,0,1,0,0,11466,0,6144,1962,0,0,2726,29,2,0,5,598,0,46,4,12,5
+available general beds: 1168 
+available icu beds: 98 
+45,0,0,1,0,0,13936,0,7497,2386,0,0,3289,32,2,0,7,723,0,53,5,15,7
+available general beds: 1159 
+available icu beds: 96 
+46,0,0,1,0,0,16910,0,9037,2876,0,0,4068,41,4,0,7,877,0,65,7,16,7
+available general beds: 1144 
+available icu beds: 95 
+47,0,0,1,0,0,20474,0,10915,3468,0,0,4946,56,5,0,8,1076,0,84,8,18,8
+available general beds: 1130 
+available icu beds: 93 
+48,0,0,1,0,0,24783,0,13198,4184,0,0,5996,69,7,1,11,1317,0,104,11,19,11
+available general beds: 1118 
+available icu beds: 89 
+49,0,0,1,0,0,29938,0,15862,5054,0,0,7318,81,11,1,13,1598,0,125,15,22,13
+available general beds: 1105 
+available icu beds: 82 
+50,0,0,1,0,0,36102,0,18972,6059,0,0,8969,94,18,1,17,1972,0,153,23,27,17
+available general beds: 1087 
+available icu beds: 80 
+51,0,0,1,0,0,43490,0,22845,7239,0,0,10879,112,20,1,20,2374,0,182,27,35,20
+available general beds: 1062 
+available icu beds: 76 
+52,0,0,1,0,0,52161,0,27378,8604,0,0,13097,137,24,1,23,2897,0,221,32,43,23
+available general beds: 1042 
+available icu beds: 70 
+53,0,0,1,0,0,62611,0,32828,10310,0,0,15748,156,30,2,29,3508,0,254,42,47,29
+available general beds: 1007 
+available icu beds: 64 
+54,0,0,1,0,0,74780,0,38971,12246,0,0,19011,190,36,3,33,4290,0,306,52,57,33
+available general beds: 969 
+available icu beds: 57 
+55,0,0,1,0,0,89146,0,46098,14627,0,0,22856,228,43,3,46,5245,0,373,66,73,46
+available general beds: 917 
+available icu beds: 51 
+56,0,0,1,0,0,105942,0,54465,17355,0,0,27417,278,49,5,54,6319,0,446,76,82,54
+available general beds: 867 
+available icu beds: 36 
+57,0,0,1,0,0,125195,0,63749,20444,0,0,32830,327,64,6,60,7715,0,530,93,96,60
+available general beds: 790 
+available icu beds: 26 
+58,0,0,1,0,0,147418,0,74163,24011,0,0,39314,403,74,7,71,9375,0,637,109,110,71
+available general beds: 700 
+available icu beds: 11 
+59,0,0,1,0,0,172491,0,85615,28008,0,0,46799,490,89,10,94,11386,0,776,137,131,94
+available general beds: 591 
+available icu beds: 0 
+60,0,0,1,0,0,200661,0,98060,32339,0,0,55717,593,105,11,116,13720,0,939,163,166,116
+available general beds: 431 
+available icu beds: 0 
+61,0,0,1,0,0,231606,0,110864,37272,0,0,65964,720,137,12,137,16500,0,1148,172,202,137
+available general beds: 240 
+available icu beds: 0 
+62,0,0,1,0,0,265299,0,124041,42542,0,0,77500,858,190,12,167,19989,0,1406,182,249,167
+available general beds: 35 
+available icu beds: 0 
+63,0,0,1,0,0,301248,0,137266,47987,0,0,90586,1016,237,12,204,23940,0,1666,196,281,204
+available general beds: 25 
+available icu beds: 0 
+64,0,0,1,0,0,338997,0,149829,53487,0,0,105103,1224,280,14,258,28802,243,1748,223,324,258
+available general beds: 22 
+available icu beds: 0 
+65,0,0,1,0,0,378123,0,161505,59004,0,0,121147,1441,323,14,310,34379,627,1853,245,396,310
+available general beds: 29 
+available icu beds: 0 
+66,0,0,1,0,0,417880,0,171149,64447,0,0,138743,1716,371,12,384,41058,1089,1960,272,473,384
+available general beds: 27 
+available icu beds: 0 
+67,0,0,1,0,0,457568,0,178579,69613,0,0,157448,1985,465,10,458,49010,1610,2091,297,573,458
+available general beds: 31 
+available icu beds: 0 
+68,0,0,1,0,0,496666,0,183716,74341,0,0,176870,2288,570,7,547,58327,2187,2220,325,683,547
+available general beds: 35 
+available icu beds: 0 
+69,0,0,1,0,0,534142,0,185776,78509,0,0,196995,2504,714,7,672,68965,2786,2397,360,835,672
+available general beds: 37 
+available icu beds: 0 
+70,0,0,1,0,0,569605,0,185015,81822,0,0,216953,2765,862,5,802,81381,3404,2553,395,975,802
+available general beds: 23 
+available icu beds: 0 
+71,0,0,1,0,0,603032,0,181809,84425,0,0,236440,3012,1050,3,942,95351,4042,2762,420,1162,942
+available general beds: 19 
+available icu beds: 0 
+72,0,0,1,0,0,633417,0,175381,86250,0,0,254844,3297,1192,3,1128,111322,4700,2966,466,1375,1128
+available general beds: 20 
+available icu beds: 0 
+73,0,0,1,0,0,660982,0,166805,87102,0,0,271553,3517,1337,3,1358,129307,5315,3186,511,1608,1358
+available general beds: 24 
+available icu beds: 0 
+74,0,0,1,0,0,685729,0,156958,86968,0,0,285520,3821,1478,2,1594,149388,6000,3404,553,1842,1594
+available general beds: 0 
+available icu beds: 0 
+75,0,0,1,0,0,707709,0,145912,85953,0,0,297005,4039,1584,2,1863,171351,6632,3654,596,2126,1863
+available general beds: 2 
+available icu beds: 0 
+76,0,0,1,0,0,726898,0,133639,84213,0,0,305709,4216,1676,2,2179,195264,7223,3891,645,2411,2179
+available general beds: 1 
+available icu beds: 0 
+77,0,0,1,0,0,743676,0,121017,81834,0,0,311062,4390,1767,1,2493,221112,7835,4129,689,2719,2493
+available general beds: 0 
+available icu beds: 0 
+78,0,0,1,0,0,758154,0,108513,78648,0,0,313237,4516,1782,1,2857,248600,8394,4382,734,3063,2857
+available general beds: 0 
+available icu beds: 0 
+79,0,0,1,0,0,770476,0,96280,74968,0,0,312027,4563,1775,0,3215,277648,8857,4673,784,3464,3215
+available general beds: 0 
+available icu beds: 0 
+80,0,0,1,0,0,780869,0,84684,70776,0,0,307379,4493,1794,0,3572,308171,9246,4965,833,3888,3572
+available general beds: 0 
+available icu beds: 0 
+81,0,0,1,0,0,789513,0,73809,66272,0,0,299846,4374,1806,0,3904,339502,9561,5265,883,4326,3904
+available general beds: 0 
+available icu beds: 0 
+82,0,0,1,0,0,797055,0,63993,61475,0,0,290011,4238,1734,0,4270,371334,9812,5565,940,4776,4270
+available general beds: 0 
+available icu beds: 0 
+83,0,0,1,0,0,803425,0,55258,56593,0,0,277762,4065,1662,1,4606,403478,9987,5878,986,5218,4606
+available general beds: 0 
+available icu beds: 0 
+84,0,0,1,0,0,808718,0,47303,51825,0,0,263638,3819,1568,1,4941,435623,10094,6223,1032,5720,4941
+available general beds: 0 
+available icu beds: 0 
+85,0,0,1,0,0,813160,0,40367,47214,0,0,247671,3570,1448,1,5283,467606,10132,6549,1088,6167,5283
+available general beds: 0 
+available icu beds: 0 
+86,0,0,1,0,0,816836,0,34235,42568,0,0,231209,3302,1350,1,5582,498589,10137,6858,1144,6604,5582
+available general beds: 0 
+available icu beds: 0 
+87,0,0,1,0,0,819863,0,28998,38274,0,0,213999,2963,1233,1,5863,528532,10037,7202,1191,7070,5863
+available general beds: 0 
+available icu beds: 0 
+88,0,0,1,0,0,822400,0,24370,34055,0,0,196945,2709,1081,1,6153,557086,9961,7496,1244,7457,6153
+available general beds: 0 
+available icu beds: 0 
+89,0,0,1,0,0,824486,0,20375,30053,0,0,179716,2436,924,2,6415,584565,9807,7824,1301,7855,6415
+available general beds: 0 
+available icu beds: 0 
+90,0,0,1,0,0,826217,0,17069,26339,0,0,162663,2171,808,2,6629,610536,9658,8130,1348,8226,6629
+available general beds: 0 
+available icu beds: 0 
+91,0,0,1,0,0,827701,0,14209,23081,0,0,146514,1904,688,2,6830,634473,9449,8432,1403,8560,6830
+available general beds: 0 
+available icu beds: 0 
+92,0,0,1,0,0,828884,0,11837,20153,0,0,130974,1652,590,2,6992,656684,9224,8745,1456,8889,6992
+available general beds: 0 
+available icu beds: 0 
+93,0,0,1,0,0,829924,0,9918,17508,0,0,116469,1403,513,2,7132,676979,8998,9028,1498,9174,7132
+available general beds: 0 
+available icu beds: 0 
+94,0,0,1,0,0,830719,0,8158,15106,0,0,103053,1222,424,2,7260,695494,8776,9252,1547,9395,7260
+available general beds: 95 
+available icu beds: 0 
+95,0,0,1,0,0,831376,0,6741,12995,0,0,90443,1036,357,1,7374,712429,8510,9371,1599,9603,7374
+available general beds: 220 
+available icu beds: 0 
+96,0,0,1,0,0,831883,0,5558,11153,0,0,79325,888,298,1,7461,727199,8269,9432,1654,9784,7461
+available general beds: 347 
+available icu beds: 0 
+97,0,0,1,0,0,832320,0,4570,9515,0,0,69166,747,245,1,7531,740545,8046,9483,1702,9959,7531
+available general beds: 469 
+available icu beds: 0 
+98,0,0,1,0,0,832743,0,3810,8053,0,0,60033,621,209,1,7586,752430,7843,9527,1743,10110,7586
+available general beds: 582 
+available icu beds: 0 
+99,0,0,1,0,0,833060,0,3127,6805,0,0,51705,549,168,1,7635,763070,7657,9572,1779,10221,7635
+available general beds: 707 
+available icu beds: 0 
+100,0,0,1,0,0,833320,0,2566,5720,0,0,44381,461,132,0,7684,772376,7508,9581,1824,10321,7684
+available general beds: 802 
+available icu beds: 0 
+101,0,0,1,0,0,833526,0,2114,4806,0,0,37934,390,108,0,7727,780447,7436,9583,1863,10401,7727
+available general beds: 872 
+available icu beds: 3 
+102,0,0,1,0,0,833711,0,1775,4075,0,0,32435,328,97,0,7750,787251,7382,9590,1883,10478,7750
+available general beds: 928 
+available icu beds: 14 
+103,0,0,1,0,0,833839,0,1450,3404,0,0,27499,272,86,0,7768,793360,7339,9595,1889,10545,7768
+available general beds: 958 
+available icu beds: 30 
+104,0,0,1,0,0,833970,0,1212,2892,0,0,23318,241,70,1,7789,798447,7316,9590,1895,10585,7789
+available general beds: 997 
+available icu beds: 44 
+105,0,0,1,0,0,834084,0,1005,2389,0,0,19723,202,56,1,7808,802900,7297,9584,1900,10630,7808
+available general beds: 1033 
+available icu beds: 53 
+106,0,0,1,0,0,834157,0,800,1951,0,0,16646,166,47,1,7821,806725,7283,9583,1903,10673,7821
+available general beds: 1056 
+available icu beds: 66 
+107,0,0,1,0,0,834228,0,702,1614,0,0,13894,142,34,2,7834,810006,7279,9579,1904,10705,7834
+available general beds: 1081 
+available icu beds: 71 
+108,0,0,1,0,0,834274,0,587,1346,0,0,11633,118,29,1,7840,812720,7275,9581,1904,10737,7840
+available general beds: 1099 
+available icu beds: 82 
+109,0,0,1,0,0,834315,0,484,1137,0,0,9703,99,18,2,7852,815020,7273,9573,1906,10758,7852
+available general beds: 1120 
+available icu beds: 84 
+110,0,0,1,0,0,834346,0,383,938,0,0,8108,78,16,2,7859,816962,7273,9569,1911,10777,7859
+available general beds: 1142 
+available icu beds: 85 
+111,0,0,1,0,0,834375,0,310,780,0,0,6801,56,15,2,7860,818551,7272,9569,1911,10800,7860
+available general beds: 1156 
+available icu beds: 88 
+112,0,0,1,0,0,834391,0,265,651,0,0,5645,43,12,1,7864,819910,7271,9567,1911,10815,7864
+available general beds: 1170 
+available icu beds: 89 
+113,0,0,1,0,0,834414,0,221,545,0,0,4710,29,11,1,7866,821031,7271,9565,1912,10828,7866
+available general beds: 1171 
+available icu beds: 93 
+114,0,0,1,0,0,834424,0,166,432,0,0,3912,27,7,2,7869,822009,7271,9564,1912,10832,7869
+available general beds: 1178 
+available icu beds: 95 
+115,0,0,1,0,0,834436,0,127,353,0,0,3272,19,5,3,7870,822787,7270,9563,1912,10840,7870
+available general beds: 1184 
+available icu beds: 97 
+116,0,0,1,0,0,834445,0,106,296,0,0,2681,13,3,3,7872,823471,7270,9561,1912,10846,7872
+available general beds: 1186 
+available icu beds: 97 
+117,0,0,1,0,0,834455,0,91,250,0,0,2236,11,3,3,7873,823988,7270,9560,1913,10847,7873
+available general beds: 1192 
+available icu beds: 97 
+118,0,0,1,0,0,834463,0,77,217,0,0,1849,6,3,2,7873,824436,7270,9560,1912,10853,7873
+available general beds: 1194 
+available icu beds: 99 
+119,0,0,1,0,0,834468,0,58,174,0,0,1548,3,1,3,7874,824807,7270,9559,1912,10856,7874
+available general beds: 1195 
+available icu beds: 99 
+120,0,0,1,0,0,834471,0,52,144,0,0,1288,2,1,3,7874,825107,7270,9560,1912,10858,7874
+available general beds: 1197 
+available icu beds: 99 
+121,0,0,1,0,0,834474,0,37,120,0,0,1055,2,1,1,7874,825384,7270,9561,1910,10861,7874
+available general beds: 1196 
+available icu beds: 100 
+122,0,0,1,0,0,834479,0,35,93,0,0,857,3,0,1,7875,825615,7270,9561,1910,10861,7875
+available general beds: 1196 
+available icu beds: 100 
+123,0,0,1,0,0,834480,0,29,77,0,0,699,3,0,1,7875,825796,7270,9561,1910,10861,7875
+available general beds: 1197 
+available icu beds: 100 
+124,0,0,1,0,0,834481,0,17,59,0,0,593,3,0,0,7875,825934,7270,9561,1909,10862,7875
+available general beds: 1198 
+available icu beds: 100 
+125,0,0,1,0,0,834483,0,14,41,0,0,480,2,0,0,7875,826071,7270,9561,1909,10863,7875
+available general beds: 1198 
+available icu beds: 100 
+126,0,0,1,0,0,834483,0,13,36,0,0,385,2,0,0,7875,826172,7270,9561,1909,10863,7875
+available general beds: 1198 
+available icu beds: 100 
+127,0,0,1,0,0,834484,0,9,29,0,0,326,2,0,0,7875,826243,7270,9561,1909,10863,7875
+available general beds: 1199 
+available icu beds: 100 
+128,0,0,1,0,0,834484,0,7,25,0,0,265,1,0,0,7875,826311,7270,9561,1909,10864,7875
+available general beds: 1200 
+available icu beds: 100 
+129,0,0,1,0,0,834484,0,6,18,0,0,213,0,0,0,7875,826372,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+130,0,0,1,0,0,834484,0,5,17,0,0,170,0,0,0,7875,826417,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+131,0,0,1,0,0,834485,0,5,16,0,0,137,0,0,0,7875,826452,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+132,0,0,1,0,0,834486,0,6,14,0,0,113,0,0,0,7875,826478,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+133,0,0,1,0,0,834486,0,6,12,0,0,100,0,0,0,7875,826493,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+134,0,0,1,0,0,834486,0,5,12,0,0,79,0,0,0,7875,826515,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+135,0,0,1,0,0,834486,0,5,10,0,0,63,0,0,0,7875,826533,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+136,0,0,1,0,0,834486,0,2,8,0,0,54,0,0,0,7875,826547,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+137,0,0,1,0,0,834486,0,1,7,0,0,46,0,0,0,7875,826557,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+138,0,0,1,0,0,834486,0,0,7,0,0,39,0,0,0,7875,826565,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+139,0,0,1,0,0,834486,0,0,5,0,0,30,0,0,0,7875,826576,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+140,0,0,1,0,0,834487,0,1,5,0,0,26,0,0,0,7875,826580,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+141,0,0,1,0,0,834487,0,1,5,0,0,17,0,0,0,7875,826589,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+142,0,0,1,0,0,834487,0,1,2,0,0,15,0,0,0,7875,826594,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+143,0,0,1,0,0,834487,0,1,1,0,0,12,0,0,0,7875,826598,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+144,0,0,1,0,0,834487,0,0,0,0,0,11,0,0,0,7875,826601,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+145,0,0,1,0,0,834487,0,0,0,0,0,10,0,0,0,7875,826602,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+146,0,0,1,0,0,834487,0,0,0,0,0,9,0,0,0,7875,826603,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+147,0,0,1,0,0,834487,0,0,0,0,0,6,0,0,0,7875,826606,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+148,0,0,1,0,0,834487,0,0,0,0,0,5,0,0,0,7875,826607,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+149,0,0,1,0,0,834487,0,0,0,0,0,5,0,0,0,7875,826607,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+150,0,0,1,0,0,834487,0,0,0,0,0,4,0,0,0,7875,826608,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+151,0,0,1,0,0,834487,0,0,0,0,0,3,0,0,0,7875,826609,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+152,0,0,1,0,0,834487,0,0,0,0,0,2,0,0,0,7875,826610,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+153,0,0,1,0,0,834487,0,0,0,0,0,2,0,0,0,7875,826610,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+154,0,0,1,0,0,834487,0,0,0,0,0,2,0,0,0,7875,826610,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+155,0,0,1,0,0,834487,0,0,0,0,0,2,0,0,0,7875,826610,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+156,0,0,1,0,0,834487,0,0,0,0,0,1,0,0,0,7875,826611,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+157,0,0,1,0,0,834487,0,0,0,0,0,1,0,0,0,7875,826611,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+158,0,0,1,0,0,834487,0,0,0,0,0,1,0,0,0,7875,826611,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+159,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+160,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+161,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+162,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+163,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+164,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+165,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+166,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+167,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+168,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+169,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+170,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+171,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+172,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+173,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+174,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+175,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+176,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+177,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+178,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+179,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+180,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+181,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+182,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+183,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+184,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+185,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+186,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+187,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+188,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+189,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+190,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+191,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+192,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+193,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+194,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+195,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+196,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+197,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+198,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+199,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
+available general beds: 1200 
+available icu beds: 100 
+200,0,0,1,0,0,834487,0,0,0,0,0,0,0,0,0,7875,826612,7270,9561,1909,10865,7875
 
+# End_time:                      200
+# Total population:              1000000
+# Total edges in network:        1687929
+# Total total interactions:      1258832043
+# Total infected:                834487
+# Total cases:                   0
+# Total cases   0-9 years:       0
+# Total cases 10-19 years:       0
+# Total cases 20-29 years:       0
+# Total cases 30-39 years:       0
+# Total cases 40-49 years:       0
+# Total cases 50-59 years:       0
+# Total cases 60-69 years:       0
+# Total cases 70-79 years:       0
+# Total cases   80+ years:       0
+# Total deaths:                  7875
+# Total deaths   0-9 years:      2
+# Total deaths 10-19 years:      0
+# Total deaths 20-29 years:      18
+# Total deaths 30-39 years:      58
+# Total deaths 40-49 years:      112
+# Total deaths 50-59 years:      495
+# Total deaths 60-69 years:      1354
+# Total deaths 70-79 years:      2748
+# Total deaths   80+ years:      3088
+# Total quarantined days:        0
+# Ending simulation, run time:   245.23s
