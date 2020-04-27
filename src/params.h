@@ -45,8 +45,9 @@ typedef struct{
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
 	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
 
-	double relative_transmission_by_type[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
-	double relative_transmission_by_type_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
+
+	double relative_transmission[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
+	double relative_transmission_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
 
 	double mean_time_to_symptoms;   // mean time from infection to symptoms
 	double sd_time_to_symptoms;		// sd time from infection to symptoms
@@ -64,8 +65,8 @@ typedef struct{
 	double sd_time_to_death;		// sd time to death after hospital
 
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
-	double population_group[N_AGE_GROUPS];		// ONS stratification of population (in millions)
-	double population_type[N_AGE_TYPES];		// ONS stratification of population (in millions)
+
+	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 
 	double fraction_asymptomatic[N_AGE_GROUPS]; // faction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
@@ -112,14 +113,15 @@ typedef struct{
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results
-	int test_insensititve_period;			// number of days until a test is sensitive (delay test of recent contacts)
+
+	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
 	int app_turn_on_time;   				// time after which the app is usable
-	double seasonal_flu_rate; 				// Rate of seasonal flu
+	double daily_non_cov_symptoms_rate; 				// Rate of seasonal flu
 
 	double lockdown_work_network_multiplier;		// during lockdown distancing this multiplier is applied to the fraction of work network connections made
 	double lockdown_random_network_multiplier; 		// during lockdown distancing this multiplier is applied to the fraction of random network connections made
@@ -132,30 +134,18 @@ typedef struct{
 	int lockdown_elderly_time_off;					// lockdown elderly turned off at this time
 	int lockdown_elderly_on;						// is lockdown elderly currently on
 
-	int successive_lockdown_time_on;               // successive lockdowns are turned on at this time
-	int successive_lockdown_duration;              // successive lockdowns last for this duration
-	int successive_lockdown_gap;                   // successive lockdowns will have this duration of gap between them
-	
-	int testing_symptoms_time_on;							// testing symptoms turned on at this time
+    int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int interventions_on;           // should we use interventions
 	int intervention_start_time;	// time at which interventions start
 
-	double TEMP_intervention_trigger_n_infected; // start interventions when n_infected is above a threshold
-	double TEMP_lockdown_trigger_n_infected; 	 // start lockdown when n_infected is above a threshold
-	int TEMP_lockdown_trigger_length;			 // length of lockdown after a trigger
-	int TEMP_lockdown_trigger_keep_elderly;  	 // keep elderly lockdown after the main triggered lockdown
-	int TEMP_lockdown_trigger_app_on_end;		 // start the app at the end of lockdown
-	int TEMP_lockdown_trigger_time_to_test;      // start testing symptomatic at a time after testing
-
-
 	int sys_write_individual; 		// Should an individual file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
-    int **REFERENCE_HOUSEHOLDS;		// Array of reference households
+	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    //hospital params
+    //Hospital parameters
     int n_total_doctors;
     int n_total_nurses;
     int n_hospitals;
@@ -163,17 +153,19 @@ typedef struct{
     int n_ward_beds[N_HOSPITAL_WARD_TYPES];
     int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
     int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    int max_hcw_daily_interactions; //TODO: should there be separate values for different types of healthcare workers?
+    int max_hcw_daily_interactions;
 
     //TODO: Add in finer grained transition times between wards once we have more information on them.
-    //TOM: Determines timing for hospital event transitions.
     double mean_time_hospital_transition; // mean time for movement between hospital locations
     double sd_time_hospital_transition; // sd for movement between hospital locations
 
-    //TOM: Added for time dependency based on hospital location. Applied to hazard rate when transmitting the virus.
     double waiting_infectivity_modifier;
     double general_infectivity_modifier;
     double icu_infectivity_modifier;
+
+    //Modifiers for patients not receiving care when transitioning from disease states.
+    double hospitalised_waiting_mod;
+    double critical_waiting_mod;
 
 
 } parameters;
@@ -182,43 +174,44 @@ typedef struct{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-int get_param_test_on_symptoms( model* );
-int get_param_test_on_traced( model* );
-int get_param_quarantine_on_traced( model* );
-double get_param_traceable_interaction_fraction( model* );
-int get_param_tracing_network_depth( model* );
-int get_param_allow_clinical_diagnosis( model* );
-int get_param_quarantine_household_on_positive( model* );
-int get_param_quarantine_household_on_symptoms( model* );
-int get_param_quarantine_household_on_traced( model* );
-int get_param_quarantine_household_contacts_on_positive( model* );
-int get_param_quarantine_days( model* );
-int get_param_test_order_wait( model* );
-int get_param_test_result_wait( model* );
-double get_param_self_quarantine_fraction( model* );
-int get_param_lockdown_on( model* );
-int get_param_app_turned_on( model* );
-double get_param_app_users_fraction( model* );
+int get_model_param_quarantine_days(model *model);
+double get_model_param_self_quarantine_fraction(model *model);
+int get_model_param_trace_on_symptoms(model *model);
+int get_model_param_quarantine_on_traced(model *model);
+double get_model_param_traceable_interaction_fraction(model *model);
+int get_model_param_tracing_network_depth(model *model);
+int get_model_param_allow_clinical_diagnosis(model *model);
+int get_model_param_quarantine_household_on_symptoms(model *model);
+int get_model_param_quarantine_household_on_positive(model *model);
+int get_model_param_quarantine_household_on_traced(model *model);
+int get_model_param_quarantine_household_contacts_on_positive(model *model);
+int get_model_param_test_on_symptoms(model *model);
+int get_model_param_test_on_traced(model *model);
+int get_model_param_test_result_wait(model *model);
+int get_model_param_test_order_wait(model *model);
+double get_model_param_app_users_fraction(model *model);
+int get_model_param_app_turned_on(model *model);
+int get_model_param_lockdown_on(model *model);
 
-int set_param_test_on_symptoms( model*, int );
-int set_param_test_on_traced( model*, int );
-int set_param_quarantine_on_traced( model*, int );
-int set_param_traceable_interaction_fraction( model*, double );
-int set_param_tracing_network_depth( model*, int );
-int set_param_allow_clinical_diagnosis( model*, int );
-int set_param_quarantine_household_on_positive( model*, int );
-int set_param_quarantine_household_on_symptoms( model*, int );
-int set_param_quarantine_household_on_traced( model*, int );
-int set_param_quarantine_household_contacts_on_positive( model*, int );
-int set_param_quarantine_days( model*, int );
-int set_param_test_order_wait( model*, int );
-int set_param_test_result_wait( model*, int );
-int set_param_self_quarantine_fraction( model*, double );
-int set_param_lockdown_on( model*, int );
-int set_param_lockdown_elderly_on( model*, int );
-int set_param_app_turned_on( model*, int );
-int set_param_app_users_fraction( model*, double );
-
+int set_model_param_quarantine_days(model *model, int value);
+int set_model_param_self_quarantine_fraction(model *model, double value);
+int set_model_param_trace_on_symptoms(model *model, int value);
+int set_model_param_quarantine_on_traced(model *model, int value);
+int set_model_param_traceable_interaction_fraction(model *model, double value);
+int set_model_param_tracing_network_depth(model *model, int value);
+int set_model_param_allow_clinical_diagnosis(model *model, int value);
+int set_model_param_quarantine_household_on_symptoms(model *model, int value);
+int set_model_param_quarantine_household_on_positive(model *model, int value);
+int set_model_param_quarantine_household_on_traced(model *model, int value);
+int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
+int set_model_param_test_on_symptoms(model *model, int value);
+int set_model_param_test_on_traced(model *model, int value);
+int set_model_param_test_result_wait(model *model, int value);
+int set_model_param_test_order_wait(model *model, int value);
+int set_model_param_app_users_fraction(model *model, double value);
+int set_model_param_app_turned_on(model *model, int value);
+int set_model_param_lockdown_on(model *model, int value);
+int set_model_param_lockdown_elderly_on(model *model, int value);
 
 void check_params( parameters* );
 void destroy_params( parameters* );

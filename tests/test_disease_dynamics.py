@@ -10,8 +10,9 @@ Created: March 2020
 Author: p-robot
 """
 
-import pytest, sys, subprocess, shutil, os
-from os.path import join
+import pytest
+import subprocess
+import sys
 import numpy as np, pandas as pd
 from math import sqrt
 
@@ -809,12 +810,12 @@ class TestClass(object):
         )
         N_sym = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_severe"] > 0)
             ]
         )
         N_mild = len(
             df_indiv[
-                (df_indiv["time_infected"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                (df_indiv["time_infected"] > 0) & (df_indiv["time_presymptomatic_mild"] > 0)
             ]
         )
         N = N_sym + N_asym + N_mild
@@ -840,13 +841,13 @@ class TestClass(object):
             )
             N_symp = len(
                 df_indiv[
-                    (df_indiv["time_presypmtomatic"] > 0) & (df_indiv["time_presypmtomatic_severe"] > 0)
+                    (df_indiv["time_presymptomatic"] > 0) & (df_indiv["time_presymptomatic_severe"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
             N_mild = len(
                 df_indiv[
-                    (df_indiv["time_presypmtomatic"] > 0) & (df_indiv["time_presypmtomatic_mild"] > 0)
+                    (df_indiv["time_presymptomatic"] > 0) & (df_indiv["time_presymptomatic_mild"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )   
@@ -1019,4 +1020,3 @@ class TestClass(object):
             fatality_fraction_weighted,
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
-        

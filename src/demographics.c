@@ -10,6 +10,7 @@
 #include "individual.h"
 #include "utilities.h"
 #include "constant.h"
+#include "params.h"
 #include "network.h"
 #include <math.h>
 
@@ -67,24 +68,21 @@ void set_up_allocate_work_places( model *model )
 					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
 					other         += prob[adx][ndx];
 				}
-
-                // TODO: kelvin have probability func for adults being in the hospital network??
-                // Tom - is this handled by the set hospital worker function?
 			}
 		}
 		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
 			prob[adx][AGE_WORK_MAP[adx]] = 1.0 - other;
 	}
 
-	// randomly assign a work place networks using the probability map
-	// Added: Healthcare workers are not added to workplace networks. - Tom & Kelvin.
-
-    for (pdx = 0; pdx < model->params->n_total; pdx++)
+    // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
+    // to HOSPITAL_WORK_NETWORK (-1).
+    for( pdx = 0; pdx < model->params->n_total; pdx++ )
     {
         if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
             model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
-        else
-            model->population[pdx].work_network = HOSPITAL_WORK_NETWORK;
+		else
+			model->population[pdx].work_network = HOSPITAL_WORK_NETWORK;
+
     }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
@@ -137,7 +135,7 @@ void set_up_household_distribution( model *model )
 	long *households               = calloc( model->params->n_total, sizeof(long));
 
 	// assign targets
-	copy_normalize_array( population_target, model->params->population_group, N_AGE_GROUPS );
+	copy_normalize_array( population_target, model->params->population, N_AGE_GROUPS );
 	copy_normalize_array( household_target, model->params->household_size, N_HOUSEHOLD_MAX );
 
 	// get number of people in household for each group
@@ -258,7 +256,7 @@ void set_up_household_distribution( model *model )
 *  Name:		build_household_network_from_directory
 *  Description: Builds a network of household i
 ******************************************************************************************/
-void build_household_network_from_directory(network *network, directory *directory )
+void build_household_network_from_directroy( network *network, directory *directory )
 {
 	long hdx, edge_idx, h_size;
 	int pdx, p2dx;
@@ -270,7 +268,7 @@ void build_household_network_from_directory(network *network, directory *directo
 	for( hdx = 0; hdx < directory->n_idx; hdx++ )
 	{
 		h_size   = directory->n_jdx[hdx];
-        network->n_edges += h_size  * ( h_size - 1 ) / 2; //TODO: why this func to determine edges?
+		network->n_edges += h_size  * ( h_size - 1 ) / 2;
 	}
 	network->edges = calloc( network->n_edges, sizeof( edge ) );
 

@@ -8,9 +8,9 @@
 #include "nurse.h"
 
 /*****************************************************************************************
-*  Name:		initialize_nurse
-*  Description: initializes and individual at the start of the simulation, note can
-*  				only be called once per individual
+*  Name:		initialise_nurse
+*  Description: initialises a nurse at the start of the simulation and assigns them to
+*               a hospital. Can only be called once per individual.
 *  Returns:		void
 ******************************************************************************************/
 void initialise_nurse(

@@ -20,11 +20,10 @@ typedef struct doctor doctor;
 
 struct doctor
 {
-    int hospital_idx;               //hospital index number
-    int ward_idx;                   //ward index number
+    int hospital_idx;
+    int ward_idx;
     int ward_type;
-    long pdx;                       //population index number
-    //individual *indiv; //TODO: maybe just use this instead of pop index???
+    long pdx;
 };
 
 /************************************************************************/
