@@ -56,3 +56,8 @@ sandbox/.ipynb_checkpoints
 
 .idea
 Cake-build-debug
+tests/data/test_output.csv
+tests/data/time_step_hospital_output.csv
+tests/data/transmission_Run1.csv
+tests/data/ward_output.csv
+tests/data/interactions_Run1.csv
