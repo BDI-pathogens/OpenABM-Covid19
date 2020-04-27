@@ -13,7 +13,13 @@ endif
 
 PIP_FLAGS := --upgrade
 
-OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o hospital.o doctor.o nurse.o ward.o list.o
+HOSPITAL_ON ?= 0
+
+ifeq ($(HOSPITAL_ON),1)
+	OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o hospital.o doctor.o nurse.o ward.o list.o
+else
+	OBJS = utilities.o constant.o demographics.o params.o model.o individual.o main.o input.o network.o disease.o interventions.o
+endif
 
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = $(GSLFLAGS)
@@ -26,7 +32,7 @@ INC = /usr/local/include
 LIB = /usr/local/lib
 
 # Compilation options and libraries to be used
-CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
+CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0 -D HOSPITAL_ON=$(HOSPITAL_ON)
 
 # Swig's output
 SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build

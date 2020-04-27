@@ -106,10 +106,11 @@ void destroy_model( model *model )
     free( model->household_directory->n_jdx );
     free( model->household_directory );
     free( model->trace_tokens );
+#if HOSPITAL_ON
     for( idx = 0; idx < model->params->n_hospitals; idx++)
         destroy_hospital( &(model->hospitals[idx]) );
     free( model->hospitals );
-
+#endif
     free( model );
 
     gsl_rng_free( rng );
@@ -515,11 +516,15 @@ void set_up_seed_infection( model *model )
     while( idx < params->n_seed_infection )
     {
         person = gsl_rng_uniform_int( rng, params->n_total );
+#if HOSPITAL_ON
         if( model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
         {
             new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
             idx++;
         }
+#else
+        new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
+#endif
     }
 }
 
@@ -626,7 +631,7 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_network( model *model )
 {
-    int idx, day, ward_idx, ward_type;
+    int idx, day;
 
     day = model->interaction_day_idx;
     for( idx = 0; idx < model->params->n_total; idx++ )
@@ -634,14 +639,17 @@ void build_daily_network( model *model )
 
     build_random_network( model );
 
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        build_hospital_networks( model, &(model->hospitals[idx]) );
-
     add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
     add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
     for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
         add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
+
+
+#if HOSPITAL_ON
+    int ward_idx, ward_type;
+    for( idx = 0; idx < model->params->n_hospitals; idx++ )
+        build_hospital_networks( model, &(model->hospitals[idx]) );
 
     for( idx = 0; idx < model->params->n_hospitals; idx++ )
     {
@@ -657,6 +665,7 @@ void build_daily_network( model *model )
             }
         }
     }
+#endif
 };
 
 /*****************************************************************************************
@@ -691,6 +700,7 @@ void transition_events(
 }
 
 
+#if HOSPITAL_ON
 /*****************************************************************************************
 *  Name:		set_up_healthcare_workers
 *  Description: randomly pick individuals from population between ages 20 - 69 to be doctors
@@ -745,6 +755,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         idx++;
     }
 }
+#endif
 
 /*****************************************************************************************
 *  Name:		one_time_step
@@ -771,6 +782,7 @@ int one_time_step( model *model )
     transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
     transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
+#if HOSPITAL_ON
     transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
     transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 
@@ -784,6 +796,7 @@ int one_time_step( model *model )
 
     ///use printf below to see available beds each timestep
     printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+#endif
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
