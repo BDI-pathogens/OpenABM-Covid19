@@ -13,156 +13,175 @@
 #include "individual.h"
 #include "interventions.h"
 
-
 /*****************************************************************************************
-*  Name: 		get_param_test_on_symptoms
+*  Name:        get_model_param_quarantine_days
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_test_on_symptoms( model *model )
-{
-    return model->params->test_on_symptoms;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_test_on_traced
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_test_on_traced( model *model )
-{
-    return model->params->test_on_traced;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_on_traced
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_on_traced( model *model )
-{
-    return model->params->quarantine_on_traced;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_traceable_interaction_fraction
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-double get_param_traceable_interaction_fraction( model *model )
-{
-    return model->params->traceable_interaction_fraction;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_tracing_network_depth
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_tracing_network_depth( model *model )
-{
-    return model->params->tracing_network_depth;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_allow_clinical_diagnosis
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_allow_clinical_diagnosis( model *model )
-{
-    return model->params->allow_clinical_diagnosis;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_household_on_positive(
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_household_on_positive( model *model )
-{
-    return model->params->quarantine_household_on_positive;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_household_on_symptoms
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_household_on_symptoms( model *model )
-{
-    return model->params->quarantine_household_on_symptoms;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_household_on_traced
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_household_on_traced( model *model )
-{
-    return model->params->quarantine_household_on_traced;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_household_contacts_on_positive
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_household_contacts_on_positive( model *model )
-{
-    return model->params->quarantine_household_contacts_on_positive;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_quarantine_days
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_quarantine_days( model *model )
+int get_model_param_quarantine_days(model *model)
 {
     return model->params->quarantine_days;
 }
 
 /*****************************************************************************************
-*  Name:		get_param_test_order_wait
+*  Name:		get_model_param_self_quarantine_fraction
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_test_order_wait( model *model )
-{
-    return model->params->test_order_wait;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_test_result_wait
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-int get_param_test_result_wait( model *model )
-{
-    return model->params->test_result_wait;
-}
-
-/*****************************************************************************************
-*  Name:		get_param_self_quarantine_fraction
-*  Description: Gets the value of an int parameter
-******************************************************************************************/
-double get_param_self_quarantine_fraction( model *model )
+double get_model_param_self_quarantine_fraction(model *model)
 {
     return model->params->self_quarantine_fraction;
 }
 
 /*****************************************************************************************
-*  Name:		get_param_lockdown_on
+*  Name:		get_model_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_lockdown_on( model *model )
+int get_model_param_trace_on_symptoms(model *model)
 {
-    return model->params->lockdown_on;
+    return model->params->trace_on_symptoms;
 }
 
 /*****************************************************************************************
-*  Name:		get_param_app_turned_on
+*  Name:		get_model_param_quarantine_on_traced
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_app_turned_on( model *model )
+int get_model_param_quarantine_on_traced(model *model)
+{
+    return model->params->quarantine_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_traceable_interaction_fraction
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_traceable_interaction_fraction(model *model)
+{
+    return model->params->traceable_interaction_fraction;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_tracing_network_depth
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_tracing_network_depth(model *model)
+{
+    return model->params->tracing_network_depth;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_allow_clinical_diagnosis
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_allow_clinical_diagnosis(model *model)
+{
+    return model->params->allow_clinical_diagnosis;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_on_symptoms(model *model)
+{
+    return model->params->quarantine_household_on_symptoms;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_on_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_on_positive(model *model)
+{
+    return model->params->quarantine_household_on_positive;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_on_traced
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_on_traced(model *model)
+{
+    return model->params->quarantine_household_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_contacts_on_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_contacts_on_positive(model *model)
+{
+    return model->params->quarantine_household_contacts_on_positive;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_on_symptoms(model *model)
+{
+    return model->params->test_on_symptoms;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_on_traced
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_on_traced(model *model)
+{
+    return model->params->test_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_result_wait
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_result_wait(model *model)
+{
+    return model->params->test_result_wait;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_order_wait
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_order_wait(model *model)
+{
+    return model->params->test_order_wait;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_app_users_fraction
+*  Description: Gets the value of double parameter
+******************************************************************************************/
+double get_model_param_app_users_fraction(model *model)
+{
+    int age;
+	double t_pop, frac;
+
+	t_pop = 0;
+	frac  = 0;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+	{
+		t_pop += model->params->population[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
+	}
+
+	return frac / t_pop;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_app_turned_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_app_turned_on(model *model)
 {
     return model->params->app_turned_on;
 }
 
 /*****************************************************************************************
-*  Name:		get_param_app_users_fraction
-*  Description: Gets the value of double parameter
+*  Name:		get_model_param_lockdown_on
+*  Description: Gets the value of an int parameter
 ******************************************************************************************/
-double get_param_app_users_fraction( model *model )
+int get_model_param_lockdown_on(model *model)
 {
 	int age;
 	double t_pop, frac;
@@ -171,8 +190,8 @@ double get_param_app_users_fraction( model *model )
 	frac  = 0;
 	for( age = 0; age < N_AGE_GROUPS; age++ )
 	{
-		t_pop += model->params->population_group[ age ];
-		frac  += model->params->app_users_fraction[ age ] * model->params->population_group[ age ];
+		t_pop += model->params->population[ age ];
+		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
 	}
 
 	return frac / t_pop;
@@ -189,139 +208,185 @@ int set_param_test_on_symptoms( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_param_test_on_traced
-*  Description: Sets the value of x parameter
+*  Name:        set_model_param_quarantine_days
+*  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_on_traced( model *model, int value )
-{
-    model->params->test_on_traced = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name: 		set_param_quarantine_on_traced
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_on_traced( model *model, int value )
-{
-    model->params->quarantine_on_traced = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_traceable_interaction_fractio
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_traceable_interaction_fraction( model *model, double value )
-{
-    model->params->traceable_interaction_fraction = value;
-    return TRUE;
-}
-/*****************************************************************************************
-*  Name:		set_param_tracing_network_depth
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_tracing_network_depth( model *model, int value )
-{
-    model->params->tracing_network_depth = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_allow_clinical_diagnosis
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_allow_clinical_diagnosis( model *model, int value )
-{
-    model->params->allow_clinical_diagnosis = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_quarantine_household_on_positive
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_household_on_positive( model *model, int value )
-{
-    model->params->quarantine_household_on_positive = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_quarantine_household_on_symptoms
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_household_on_symptoms( model *model, int value )
-{
-    model->params->quarantine_household_on_symptoms = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_quarantine_household_on_traced
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_household_on_traced( model *model, int value )
-{
-    model->params->quarantine_household_on_traced = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_quarantine_household_contacts_on_positive
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_household_contacts_on_positive( model *model, int value )
-{
-    model->params->quarantine_household_contacts_on_positive = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_quarantine_days
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_quarantine_days( model *model, int value )
+int set_model_param_quarantine_days(model *model, int value )
 {
     model->params->quarantine_days = value;
     return TRUE;
 }
 
 /*****************************************************************************************
-*  Name:		set_param_test_order_wait
-*  Description: Sets the value of x parameter
+*  Name:        set_model_param_self_quarantine_fraction
+*  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_order_wait( model *model, int value )
-{
-    model->params->test_order_wait = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_test_result_wait
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_test_result_wait( model *model, int value )
-{
-    model->params->test_result_wait = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_self_quarantine_fraction(model *model, double value)
+int set_model_param_self_quarantine_fraction(model *model, double value)
 {
     model->params->self_quarantine_fraction = value;
     return TRUE;
 }
 
 /*****************************************************************************************
-*  Name:		set_param_lockdown_on
+*  Name:        set_model_param_trace_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_trace_on_symptoms(model *model, int value) {
+   model->params->trace_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_model_param_quarantine_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_on_traced( model *model, int value )
+{
+    model->params->quarantine_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_traceable_interaction_fractio
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_traceable_interaction_fraction( model *model, double value )
+{
+    model->params->traceable_interaction_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_tracing_network_depth
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_tracing_network_depth( model *model, int value )
+{
+    model->params->tracing_network_depth = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_allow_clinical_diagnosis
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_allow_clinical_diagnosis( model *model, int value )
+{
+    model->params->allow_clinical_diagnosis = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_on_symptoms( model *model, int value )
+{
+    model->params->quarantine_household_on_symptoms = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_on_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_on_positive( model *model, int value )
+{
+    model->params->quarantine_household_on_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_on_traced( model *model, int value )
+{
+    model->params->quarantine_household_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_contacts_on_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_contacts_on_positive( model *model, int value )
+{
+    model->params->quarantine_household_contacts_on_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_on_symptoms(model *model, int value) {
+   model->params->test_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_on_traced( model *model, int value )
+{
+    model->params->test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_result_wait
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_result_wait( model *model, int value )
+{
+    model->params->test_result_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_order_wait
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_order_wait( model *model, int value )
+{
+    model->params->test_order_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_app_users_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_app_users_fraction( model *model, double value )
+{
+    if( value > 1 || value < 0 )
+    	return FALSE;
+
+    int age;
+    for( age = 0; age < N_AGE_GROUPS; age++ )
+        model->params->app_users_fraction[ age ] = value;
+    
+    set_up_app_users( model );
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_app_turned_on
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_app_turned_on( model *model, int value )
+{
+    model->params->app_turned_on = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_param_lockdown_on( model *model, int value )
+int set_model_param_lockdown_on( model *model, int value )
 {
 	long pdx;
 	int network;
@@ -333,8 +398,8 @@ int set_param_lockdown_on( model *model, int value )
 			params->daily_fraction_work_used[network] = params->daily_fraction_work *
 														params->lockdown_work_network_multiplier;
 
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD] *
-																params->lockdown_house_interaction_multiplier;
+
+        params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD] * params->lockdown_house_interaction_multiplier;
 	}
 	else
 	if( value == FALSE )
@@ -343,7 +408,8 @@ int set_param_lockdown_on( model *model, int value )
 			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
 				params->daily_fraction_work_used[network] = params->daily_fraction_work;
 
-		params->relative_transmission_by_type_used[HOUSEHOLD] = params->relative_transmission_by_type[HOUSEHOLD];
+
+		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD];
 	}
 	else
 		return FALSE;
@@ -358,10 +424,10 @@ int set_param_lockdown_on( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_param_lockdown_elderly_on
+*  Name:		set_model_param_lockdown_elderly_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_param_lockdown_elderly_on( model *model, int value )
+int set_model_param_lockdown_elderly_on( model *model, int value )
 {
 	long pdx;
 	int network;
@@ -408,23 +474,6 @@ int set_param_app_turned_on( model *model, int value )
 {
     model->params->app_turned_on = value;
     return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:		set_param_app_users_fraction
-*  Description: Sets the value of x parameter
-******************************************************************************************/
-int set_param_app_users_fraction( model *model, double value )
-{
-    if( value > 1 || value < 0 )
-    	return FALSE;
-
-   int age;
-   for( age = 0; age < N_AGE_GROUPS; age++ )
-	   model->params->app_users_fraction[ age ] = value;
-
-   set_up_app_users( model );
-   return TRUE;
 }
 
 /*****************************************************************************************

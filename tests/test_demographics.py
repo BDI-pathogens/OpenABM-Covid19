@@ -7,9 +7,7 @@ Usage:
 @author: anelnurtay
 """
 
-import subprocess, shutil, os
-from os.path import join
-from string import Template
+import subprocess
 import numpy as np, pandas as pd
 import pytest
 
