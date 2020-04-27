@@ -16,6 +16,7 @@
 #include "constant.h"
 #include "demographics.h"
 #include "interventions.h"
+#include "hospital.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -495,6 +496,7 @@ void write_output_files(model *model, parameters *params)
 		write_interactions( model );
 		write_transmissions( model );
 		write_trace_tokens( model );
+        write_ward_data( model );
 	}
 }	
 
@@ -764,7 +766,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"ID,age_group,house_no,work_network,type,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file ,"ID,age_group,worker_type_1,house_no,work_network,type,ID_2,age_group_2,worker_type_2,house_no_2,work_network_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -776,14 +778,16 @@ void write_interactions( model *model )
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
 
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%li,%i,%li,%i\n",
+				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
+                    indiv->worker_type,
 					indiv->house_no,
 					indiv->work_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
+                    inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->work_network
 				);
@@ -794,6 +798,58 @@ void write_interactions( model *model )
 	fclose(output_file);
 }
 
+
+/*****************************************************************************************
+*  Name:        write_ward_data
+*  Description: write data about healthcare workers in each ward
+******************************************************************************************/
+void write_ward_data( model *model)
+{
+    char output_file_name[INPUT_CHAR_LEN];
+    FILE *ward_output_file;
+    int ward_type, ward_idx, doctor_idx, nurse_idx;
+
+    // TODO: currently only for one hospital, should loop through more hospitals when we have more
+    
+    int hospital_idx = 0;
+
+    // Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/ward_output");
+    strcat(output_file_name, ".csv");
+    ward_output_file = fopen(output_file_name, "w");
+
+    fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
+    
+    // For each ward type
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        // For each ward
+        for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+        {
+            int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
+            int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
+
+            // For each doctor
+            for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+            {
+                int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
+                int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
+                fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx);
+            }
+            // Loop for each nurse
+            for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+            {
+                int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
+                int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
+                fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx);
+            }
+        }
+    }
+
+    fclose(ward_output_file);
+        
+}
 
 /*****************************************************************************************
 *  Name:		write_transmissions
