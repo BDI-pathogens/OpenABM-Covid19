@@ -35,7 +35,10 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_on",
     "app_turned_on",
     "app_users_fraction",
-    "trace_on_symptoms"
+    "trace_on_symptoms",
+    "lockdown_house_interaction_multiplier",
+    "lockdown_random_network_multiplier",
+    "lockdown_work_network_multiplier",
 ]
 
 class EVENT_TYPES(enum.Enum):
@@ -314,7 +317,7 @@ class Model:
             else:
                 return value
         except AttributeError:
-            raise ModelParameterException("Parameter {param} not found")
+            raise ModelParameterException(f"Parameter {name} not found")
 
     def update_running_params(self, param, value):
         """[summary]
