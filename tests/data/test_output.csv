@@ -1,5 +1,5 @@
 # Starting simulation
-# Date: 22-04-2020 02:32:38
+# Date: 27-04-2020 10:26:18
 # Read command-line args
 # Read input parameter file
 # Read household demographics file
@@ -9,91 +9,145 @@
 # rng_seed: 1
 # param_line_number: 1
 time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 1,0,0,1,0,0,5,0,4,1,0,0,0,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 2,0,0,1,0,0,6,0,4,1,0,0,1,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 3,0,0,1,0,0,8,0,6,1,0,0,1,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 4,0,0,1,0,0,12,0,7,4,0,0,1,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 5,0,0,1,0,0,14,0,7,4,0,0,3,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 6,0,0,1,0,0,14,0,7,4,0,0,3,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 7,0,0,1,0,0,17,0,6,6,0,0,5,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 8,0,0,1,0,0,25,0,13,7,0,0,5,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 9,0,0,1,0,0,32,0,15,9,0,0,8,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 10,0,0,1,0,0,39,0,16,10,0,0,13,0,0,0,0,0,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 11,0,0,1,0,0,44,0,18,11,0,0,14,0,0,0,0,1,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 12,0,0,1,0,0,54,0,24,10,0,0,17,0,0,0,0,3,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 13,0,0,1,0,0,63,0,28,11,0,0,21,0,0,0,0,3,0,0,0,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 14,0,0,1,0,0,80,0,39,11,0,0,24,0,0,0,0,6,0,0,0,0
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1199 
 available icu beds: 100 
 15,0,0,1,0,0,89,0,40,12,0,0,28,1,0,0,0,8,0,1,0,0
+Patient general list 
+Patient general list 
 available general beds: 1199 
 available icu beds: 100 
 16,0,0,1,0,0,113,0,51,16,0,0,35,1,0,0,0,10,0,1,0,0
+Patient general list 
+Patient general list 
 available general beds: 1199 
 available icu beds: 100 
 17,0,0,1,0,0,133,0,57,20,0,0,43,1,0,0,0,12,0,1,0,0
+Patient general list 
+Patient general list 
 DECREMENTED: ward type0 idx0 beds: 30
 INCREMENTED: ward type1 idx0 beds: 9
 available general beds: 1200 
 available icu beds: 99 
 18,0,0,1,0,0,163,0,75,25,0,0,50,0,1,0,0,12,0,1,1,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 99 
 19,0,0,1,0,0,198,0,103,28,0,0,54,0,1,0,0,12,0,1,1,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 99 
 20,0,0,1,0,0,256,0,131,42,0,0,68,0,1,0,0,14,0,1,1,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 99 
 21,0,0,1,0,0,310,0,156,53,0,0,81,0,1,0,0,19,0,1,1,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 99 
 22,0,0,1,0,0,390,0,201,64,0,0,99,0,1,0,0,25,0,1,1,0
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 99 
 23,0,0,1,0,0,508,0,263,84,0,0,129,0,1,0,0,31,0,1,1,0
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1199 
 available icu beds: 99 
 24,0,0,1,0,0,632,0,329,110,0,0,153,1,1,0,0,38,0,2,1,0
 DECREMENTED: ward type1 idx0 beds: 10
+Patient general list 
+Patient general list 
 available general beds: 1199 
 available icu beds: 100 
 25,0,0,1,0,0,760,0,387,128,0,0,198,1,0,0,1,45,0,1,1,0
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 available general beds: 1198 
 available icu beds: 100 
 26,0,0,1,0,0,959,0,507,165,0,0,236,2,0,0,1,48,0,2,1,0
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
@@ -101,12 +155,16 @@ available general beds: 1196
 available icu beds: 100 
 27,0,0,1,0,0,1199,0,635,203,0,0,300,4,0,0,2,55,0,5,1,0
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 available general beds: 1195 
 available icu beds: 100 
 28,0,0,1,0,0,1457,0,759,255,0,0,369,5,0,0,2,67,0,7,1,1
 DECREMENTED: ward type0 idx3 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx6 beds: 29
@@ -116,6 +174,8 @@ available icu beds: 100
 29,0,0,1,0,0,1739,0,869,306,0,0,466,8,0,0,2,88,0,11,1,2
 DECREMENTED: ward type0 idx2 beds: 30
 DECREMENTED: ward type0 idx7 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
@@ -130,6 +190,8 @@ available icu beds: 99
 DECREMENTED: ward type0 idx11 beds: 30
 DECREMENTED: ward type0 idx10 beds: 30
 DECREMENTED: ward type0 idx2 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 DECREMENTED: ward type0 idx3 beds: 30
@@ -142,6 +204,8 @@ available general beds: 1193
 available icu beds: 96 
 31,0,0,1,0,0,2489,0,1197,423,0,0,700,7,4,0,2,156,0,19,5,7
 DECREMENTED: ward type0 idx7 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
@@ -157,6 +221,8 @@ DECREMENTED: ward type0 idx11 beds: 30
 DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type0 idx3 beds: 30
 DECREMENTED: ward type0 idx8 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx6 beds: 29
@@ -169,6 +235,8 @@ DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type0 idx6 beds: 30
 DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type0 idx3 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
@@ -182,6 +250,8 @@ available icu beds: 92
 34,0,0,1,0,0,3889,0,1715,622,0,0,1270,7,8,0,3,264,0,32,9,15
 DECREMENTED: ward type0 idx9 beds: 30
 DECREMENTED: ward type0 idx4 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 available general beds: 1193 
@@ -189,6 +259,8 @@ available icu beds: 92
 35,0,0,1,0,0,4398,0,1866,716,0,0,1468,7,8,0,3,330,0,34,9,17
 DECREMENTED: ward type0 idx7 beds: 30
 DECREMENTED: ward type1 idx4 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx6 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
@@ -207,6 +279,8 @@ DECREMENTED: ward type0 idx9 beds: 30
 DECREMENTED: ward type0 idx8 beds: 30
 DECREMENTED: ward type1 idx0 beds: 10
 DECREMENTED: ward type0 idx1 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
@@ -231,6 +305,8 @@ DECREMENTED: ward type0 idx16 beds: 30
 DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type1 idx3 beds: 10
 DECREMENTED: ward type1 idx5 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
@@ -249,6 +325,8 @@ DECREMENTED: ward type0 idx21 beds: 30
 DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type1 idx2 beds: 10
 DECREMENTED: ward type1 idx1 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx6 beds: 29
@@ -273,6 +351,8 @@ DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type1 idx6 beds: 10
 DECREMENTED: ward type0 idx8 beds: 30
 DECREMENTED: ward type0 idx17 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
 INCREMENTED: ward type0 idx12 beds: 29
@@ -292,6 +372,8 @@ DECREMENTED: ward type0 idx6 beds: 30
 DECREMENTED: ward type0 idx3 beds: 30
 DECREMENTED: ward type0 idx17 beds: 30
 DECREMENTED: ward type0 idx15 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx6 beds: 29
 INCREMENTED: ward type0 idx9 beds: 29
@@ -323,6 +405,8 @@ DECREMENTED: ward type0 idx37 beds: 30
 DECREMENTED: ward type0 idx35 beds: 30
 DECREMENTED: ward type0 idx34 beds: 30
 DECREMENTED: ward type0 idx24 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
@@ -356,6 +440,8 @@ DECREMENTED: ward type0 idx24 beds: 30
 DECREMENTED: ward type0 idx8 beds: 30
 DECREMENTED: ward type1 idx0 beds: 10
 DECREMENTED: ward type0 idx29 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
 INCREMENTED: ward type0 idx10 beds: 29
@@ -395,6 +481,8 @@ DECREMENTED: ward type0 idx2 beds: 29
 DECREMENTED: ward type0 idx25 beds: 30
 DECREMENTED: ward type0 idx21 beds: 30
 DECREMENTED: ward type0 idx33 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx6 beds: 29
 INCREMENTED: ward type0 idx9 beds: 29
@@ -435,6 +523,8 @@ DECREMENTED: ward type0 idx11 beds: 30
 DECREMENTED: ward type1 idx7 beds: 10
 DECREMENTED: ward type0 idx18 beds: 30
 DECREMENTED: ward type0 idx7 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx11 beds: 29
 INCREMENTED: ward type0 idx12 beds: 29
@@ -467,6 +557,8 @@ DECREMENTED: ward type1 idx4 beds: 10
 DECREMENTED: ward type0 idx4 beds: 29
 DECREMENTED: ward type0 idx29 beds: 30
 DECREMENTED: ward type1 idx1 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx12 beds: 29
 INCREMENTED: ward type0 idx20 beds: 29
 INCREMENTED: ward type0 idx25 beds: 29
@@ -519,6 +611,8 @@ DECREMENTED: ward type0 idx15 beds: 30
 DECREMENTED: ward type0 idx7 beds: 29
 DECREMENTED: ward type1 idx0 beds: 9
 DECREMENTED: ward type0 idx38 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx15 beds: 29
 INCREMENTED: ward type0 idx19 beds: 29
 INCREMENTED: ward type0 idx27 beds: 29
@@ -571,6 +665,8 @@ DECREMENTED: ward type1 idx3 beds: 10
 DECREMENTED: ward type1 idx2 beds: 9
 DECREMENTED: ward type0 idx14 beds: 29
 DECREMENTED: ward type0 idx25 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx6 beds: 29
 INCREMENTED: ward type0 idx25 beds: 29
 INCREMENTED: ward type0 idx27 beds: 29
@@ -621,6 +717,8 @@ DECREMENTED: ward type0 idx25 beds: 30
 DECREMENTED: ward type1 idx0 beds: 9
 DECREMENTED: ward type1 idx6 beds: 10
 DECREMENTED: ward type0 idx22 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx16 beds: 29
 INCREMENTED: ward type0 idx20 beds: 29
@@ -648,6 +746,8 @@ DECREMENTED: ward type0 idx20 beds: 30
 DECREMENTED: ward type1 idx9 beds: 10
 DECREMENTED: ward type1 idx1 beds: 9
 DECREMENTED: ward type1 idx4 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx20 beds: 29
@@ -678,6 +778,8 @@ DECREMENTED: ward type0 idx20 beds: 30
 DECREMENTED: ward type1 idx1 beds: 9
 DECREMENTED: ward type0 idx15 beds: 29
 DECREMENTED: ward type0 idx1 beds: 29
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx19 beds: 29
@@ -720,6 +822,8 @@ DECREMENTED: ward type0 idx38 beds: 30
 DECREMENTED: ward type0 idx27 beds: 30
 DECREMENTED: ward type1 idx8 beds: 10
 DECREMENTED: ward type0 idx7 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx2 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
@@ -747,6 +851,8 @@ DECREMENTED: ward type0 idx15 beds: 30
 DECREMENTED: ward type0 idx11 beds: 30
 DECREMENTED: ward type0 idx7 beds: 30
 DECREMENTED: ward type1 idx7 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
@@ -773,6 +879,8 @@ DECREMENTED: ward type0 idx15 beds: 30
 DECREMENTED: ward type0 idx7 beds: 30
 DECREMENTED: ward type1 idx2 beds: 9
 DECREMENTED: ward type1 idx0 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx15 beds: 29
@@ -805,6 +913,8 @@ DECREMENTED: ward type1 idx5 beds: 9
 DECREMENTED: ward type1 idx3 beds: 9
 DECREMENTED: ward type1 idx0 beds: 9
 DECREMENTED: ward type1 idx8 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx19 beds: 29
 INCREMENTED: ward type0 idx20 beds: 29
@@ -824,6 +934,8 @@ DECREMENTED: ward type0 idx22 beds: 30
 DECREMENTED: ward type1 idx5 beds: 10
 DECREMENTED: ward type1 idx3 beds: 10
 DECREMENTED: ward type1 idx4 beds: 9
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx22 beds: 29
@@ -858,6 +970,8 @@ DECREMENTED: ward type1 idx6 beds: 9
 DECREMENTED: ward type1 idx9 beds: 10
 DECREMENTED: ward type1 idx1 beds: 9
 DECREMENTED: ward type0 idx19 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx10 beds: 29
 INCREMENTED: ward type0 idx14 beds: 29
 INCREMENTED: ward type0 idx19 beds: 29
@@ -887,6 +1001,8 @@ DECREMENTED: ward type0 idx33 beds: 30
 DECREMENTED: ward type0 idx20 beds: 30
 DECREMENTED: ward type1 idx6 beds: 10
 DECREMENTED: ward type0 idx5 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
@@ -910,6 +1026,8 @@ DECREMENTED: ward type0 idx10 beds: 30
 DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type1 idx4 beds: 10
 DECREMENTED: ward type0 idx14 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx5 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
@@ -928,6 +1046,8 @@ DECREMENTED: ward type0 idx30 beds: 30
 DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
 DECREMENTED: ward type1 idx3 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx1 beds: 29
 DECREMENTED: ward type1 idx5 beds: 10
@@ -940,6 +1060,8 @@ DECREMENTED: ward type0 idx3 beds: 30
 DECREMENTED: ward type0 idx2 beds: 30
 DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx2 beds: 29
@@ -960,6 +1082,8 @@ DECREMENTED: ward type1 idx8 beds: 10
 DECREMENTED: ward type1 idx7 beds: 10
 DECREMENTED: ward type1 idx2 beds: 10
 DECREMENTED: ward type1 idx9 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 INCREMENTED: ward type0 idx7 beds: 29
 INCREMENTED: ward type0 idx10 beds: 29
@@ -973,6 +1097,8 @@ DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type0 idx14 beds: 30
 DECREMENTED: ward type0 idx15 beds: 30
 DECREMENTED: ward type1 idx6 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx5 beds: 29
 available general beds: 1181 
 available icu beds: 94 
@@ -981,6 +1107,8 @@ DECREMENTED: ward type0 idx9 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
 DECREMENTED: ward type0 idx10 beds: 30
 DECREMENTED: ward type1 idx1 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx8 beds: 29
 INCREMENTED: ward type0 idx9 beds: 29
@@ -994,6 +1122,8 @@ DECREMENTED: ward type0 idx3 beds: 30
 DECREMENTED: ward type0 idx10 beds: 30
 DECREMENTED: ward type0 idx8 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx3 beds: 29
 INCREMENTED: ward type0 idx4 beds: 29
@@ -1009,6 +1139,8 @@ DECREMENTED: ward type0 idx3 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
 DECREMENTED: ward type1 idx0 beds: 10
 DECREMENTED: ward type1 idx4 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1185 
 available icu beds: 97 
@@ -1018,12 +1150,16 @@ DECREMENTED: ward type0 idx36 beds: 30
 DECREMENTED: ward type0 idx13 beds: 30
 DECREMENTED: ward type0 idx5 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1189 
 available icu beds: 97 
 67,0,0,1,0,0,8785,0,34,54,0,0,567,11,3,0,72,8044,0,282,53,246
 DECREMENTED: ward type0 idx29 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 INCREMENTED: ward type0 idx1 beds: 29
 DECREMENTED: ward type0 idx4 beds: 30
@@ -1036,416 +1172,680 @@ DECREMENTED: ward type0 idx12 beds: 30
 DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type1 idx5 beds: 10
 DECREMENTED: ward type1 idx3 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx1 beds: 29
 available general beds: 1192 
 available icu beds: 98 
 69,0,0,1,0,0,8786,0,19,35,0,0,410,8,2,0,74,8238,0,283,54,251
 DECREMENTED: ward type1 idx1 beds: 10
+Patient general list 
+Patient general list 
 available general beds: 1192 
 available icu beds: 99 
 70,0,0,1,0,0,8787,0,15,26,0,0,346,8,1,0,75,8316,0,282,54,251
+Patient general list 
+Patient general list 
 available general beds: 1192 
 available icu beds: 99 
 71,0,0,1,0,0,8787,0,12,23,0,0,292,8,1,0,75,8376,0,282,54,251
 DECREMENTED: ward type0 idx34 beds: 30
 DECREMENTED: ward type0 idx2 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1194 
 available icu beds: 99 
 72,0,0,1,0,0,8787,0,10,20,0,0,246,6,1,0,75,8429,0,283,54,254
 DECREMENTED: ward type0 idx0 beds: 30
 DECREMENTED: ward type1 idx0 beds: 10
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1194 
 available icu beds: 100 
 73,0,0,1,0,0,8787,0,8,13,0,0,202,6,0,0,76,8482,0,283,54,255
 DECREMENTED: ward type0 idx17 beds: 30
 DECREMENTED: ward type0 idx7 beds: 30
+Patient general list 
+Patient general list 
 available general beds: 1196 
 available icu beds: 100 
 74,0,0,1,0,0,8787,0,7,10,0,0,171,4,0,0,76,8519,0,283,54,257
 DECREMENTED: ward type0 idx9 beds: 30
 DECREMENTED: ward type0 idx1 beds: 30
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 available general beds: 1199 
 available icu beds: 100 
 75,0,0,1,0,0,8787,0,5,8,0,0,144,1,0,0,76,8553,0,283,54,260
 DECREMENTED: ward type0 idx11 beds: 30
+Patient general list 
+Patient general list 
 INCREMENTED: ward type0 idx0 beds: 29
 available general beds: 1199 
 available icu beds: 100 
 76,0,0,1,0,0,8787,0,4,6,0,0,121,1,0,0,76,8579,0,284,54,261
 DECREMENTED: ward type0 idx0 beds: 30
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 77,0,0,1,0,0,8787,0,3,4,0,0,102,0,0,0,76,8602,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 78,0,0,1,0,0,8787,0,3,3,0,0,81,0,0,0,76,8624,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 79,0,0,1,0,0,8787,0,2,3,0,0,65,0,0,0,76,8641,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 80,0,0,1,0,0,8787,0,2,3,0,0,56,0,0,0,76,8650,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 81,0,0,1,0,0,8787,0,1,2,0,0,50,0,0,0,76,8658,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 82,0,0,1,0,0,8787,0,1,2,0,0,40,0,0,0,76,8668,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 83,0,0,1,0,0,8787,0,0,2,0,0,34,0,0,0,76,8675,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 84,0,0,1,0,0,8787,0,0,1,0,0,29,0,0,0,76,8681,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 85,0,0,1,0,0,8787,0,0,0,0,0,22,0,0,0,76,8689,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 86,0,0,1,0,0,8787,0,0,0,0,0,16,0,0,0,76,8695,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 87,0,0,1,0,0,8787,0,0,0,0,0,14,0,0,0,76,8697,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 88,0,0,1,0,0,8787,0,0,0,0,0,13,0,0,0,76,8698,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 89,0,0,1,0,0,8787,0,0,0,0,0,9,0,0,0,76,8702,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 90,0,0,1,0,0,8787,0,0,0,0,0,7,0,0,0,76,8704,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 91,0,0,1,0,0,8787,0,0,0,0,0,5,0,0,0,76,8706,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 92,0,0,1,0,0,8787,0,0,0,0,0,4,0,0,0,76,8707,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 93,0,0,1,0,0,8787,0,0,0,0,0,4,0,0,0,76,8707,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 94,0,0,1,0,0,8787,0,0,0,0,0,4,0,0,0,76,8707,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 95,0,0,1,0,0,8787,0,0,0,0,0,4,0,0,0,76,8707,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 96,0,0,1,0,0,8787,0,0,0,0,0,4,0,0,0,76,8707,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 97,0,0,1,0,0,8787,0,0,0,0,0,2,0,0,0,76,8709,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 98,0,0,1,0,0,8787,0,0,0,0,0,1,0,0,0,76,8710,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 99,0,0,1,0,0,8787,0,0,0,0,0,1,0,0,0,76,8710,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 100,0,0,1,0,0,8787,0,0,0,0,0,1,0,0,0,76,8710,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 101,0,0,1,0,0,8787,0,0,0,0,0,1,0,0,0,76,8710,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 102,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 103,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 104,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 105,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 106,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 107,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 108,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 109,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 110,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 111,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 112,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 113,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 114,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 115,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 116,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 117,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 118,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 119,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 120,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 121,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 122,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 123,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 124,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 125,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 126,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 127,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 128,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 129,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 130,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 131,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 132,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 133,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 134,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
-breakendavailable general beds: 1200 
+breakendPatient general list 
+Patient general list 
+available general beds: 1200 
 available icu beds: 100 
 135,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 136,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 137,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 138,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 139,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 140,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 141,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 142,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 143,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 144,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 145,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 146,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 147,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 148,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 149,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 150,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 151,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 152,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 153,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 154,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 155,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 156,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 157,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 158,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 159,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 160,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 161,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 162,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 163,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 164,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 165,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 166,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 167,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 168,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 169,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 170,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 171,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 172,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 173,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 174,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 175,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 176,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 177,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 178,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 179,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 180,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 181,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 182,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 183,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 184,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 185,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 186,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 187,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 188,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 189,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 190,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 191,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 192,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 193,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 194,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 195,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 196,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 197,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 198,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 199,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
+Patient general list 
+Patient general list 
 available general beds: 1200 
 available icu beds: 100 
 200,0,0,1,0,0,8787,0,0,0,0,0,0,0,0,0,76,8711,0,284,54,262
@@ -1476,4 +1876,4 @@ available icu beds: 100
 # Total deaths 70-79 years:      38
 # Total deaths   80+ years:      5
 # Total quarantined days:        0
-# Ending simulation, run time:   1.36s
+# Ending simulation, run time:   1.54s

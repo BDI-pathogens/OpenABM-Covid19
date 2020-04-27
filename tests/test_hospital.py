@@ -46,7 +46,6 @@ EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
 file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-
 # Create a dataframe out of the terminal output
 numHeader = 10
 numFooter = 27
@@ -66,7 +65,6 @@ class TestClass(object):
     """
     Test class for checking
     """
-
 
     def test_hcw_in_population_list(self):
         """

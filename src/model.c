@@ -325,7 +325,6 @@ void set_up_healthcare_workers_and_hospitals( model *model)
     }
 }
 
-// Dylan change
 /*****************************************************************************************
 *  Name:        write_time_step_hospital_data
 *  Description: write data concerning the status of hospitals at each time step
@@ -337,8 +336,6 @@ void write_time_step_hospital_data( model *model)
     int ward_type, ward_idx, doctor_idx, nurse_idx;
     int hospital_idx = 0;
     // TODO: update to run for each hospital
-    // TODO: consider only writing to file at certain timesteps if file becomes too large (e.g., every 10 time steps)
-    // TODO: find a better way to keep track of how many hcw's are in the hospitals
 
     // Concatenate file name
     strcpy(output_file_name, model->params->output_file_dir);
@@ -372,14 +369,14 @@ void write_time_step_hospital_data( model *model)
                 int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
                 int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
 
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
             }
             // For each nurse
             for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
             {
                 int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
                 int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
             }
 
         }
