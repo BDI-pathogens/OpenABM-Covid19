@@ -395,6 +395,9 @@ int set_model_param_lockdown_on( model *model, int value )
 	else
 	if( value == FALSE )
 	{
+		if( !params->lockdown_on )
+			return TRUE;
+
 		for( network = 0; network < N_WORK_NETWORKS; network++ )
 			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
 				params->daily_fraction_work_used[network] = params->daily_fraction_work;
@@ -434,6 +437,9 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 	else
 	if( value == FALSE )
 	{
+		if( !params->lockdown_elderly_on )
+			return TRUE;
+
 		if( !params->lockdown_on )
 		{
 			for( network = 0; network < N_WORK_NETWORKS; network++ )
