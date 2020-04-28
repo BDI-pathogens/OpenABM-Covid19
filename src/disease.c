@@ -158,7 +158,6 @@ void set_up_infectious_curves( model *model )
 ******************************************************************************************/
 void transmit_virus_by_type(
 	model *model,
-	parameters *params,
 	int type
 )
 {
@@ -196,9 +195,9 @@ void transmit_virus_by_type(
                 {
                     switch( infector->hospital_state )
                     {
-                        case WAITING:       hospital_state_modifier = params->waiting_infectivity_modifier; break;
-                        case GENERAL:       hospital_state_modifier = params->general_infectivity_modifier; break;
-                        case ICU:           hospital_state_modifier = params->icu_infectivity_modifier; break;
+                        case WAITING:       hospital_state_modifier = model->params->waiting_infectivity_modifier; break;
+                        case GENERAL:       hospital_state_modifier = model->params->general_infectivity_modifier; break;
+                        case ICU:           hospital_state_modifier = model->params->icu_infectivity_modifier; break;
                         default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
                     }
                 }
@@ -236,16 +235,16 @@ void transmit_virus_by_type(
 *
 *  Returns:		void
 ******************************************************************************************/
-void transmit_virus( model *model, parameters* params )
+void transmit_virus( model *model )
 {
-    transmit_virus_by_type( model, params, PRESYMPTOMATIC );
-    transmit_virus_by_type( model, params, PRESYMPTOMATIC_MILD );
-    transmit_virus_by_type( model, params, SYMPTOMATIC );
-    transmit_virus_by_type( model, params, SYMPTOMATIC_MILD );
-    transmit_virus_by_type( model, params, ASYMPTOMATIC );
-    transmit_virus_by_type( model, params, HOSPITALISED );
-    transmit_virus_by_type( model, params, CRITICAL );
-	transmit_virus_by_type( model, params, HOSPITALISED_RECOVERING );
+    transmit_virus_by_type( model, PRESYMPTOMATIC );
+    transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
+    transmit_virus_by_type( model, SYMPTOMATIC );
+    transmit_virus_by_type( model, SYMPTOMATIC_MILD );
+    transmit_virus_by_type( model, ASYMPTOMATIC );
+    transmit_virus_by_type( model, HOSPITALISED );
+    transmit_virus_by_type( model, CRITICAL );
+    transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
 }
 
 /*****************************************************************************************

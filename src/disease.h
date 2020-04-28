@@ -20,8 +20,8 @@ void set_up_transition_times( model* );
 void set_up_infectious_curves( model* );
 
 // transmission of the virus
-void transmit_virus( model*, parameters* );
-void transmit_virus_by_type( model*, parameters*, int );
+void transmit_virus( model* );
+void transmit_virus_by_type( model*, int );
 
 // progression of the disease
 void new_infection( model*, individual*, individual* );
