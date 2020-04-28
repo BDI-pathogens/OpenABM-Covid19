@@ -96,8 +96,29 @@ def age10y_to_age(age: Mapping[Age10Y, float]) -> Mapping[Age, float]:
 
 
 class LabourState(OrderedEnum):
-    ill = enum.auto()
-    wfh = enum.auto()
-    working = enum.auto()
-    furloughed = enum.auto()
-    unemployed = enum.auto()
+    ILL = enum.auto()
+    WFH = enum.auto()
+    WORKING = enum.auto()
+    FURLOUGHED = enum.auto()
+    UNEMPLOYED = enum.auto()
+
+
+class PrimaryInput(OrderedEnum):
+    IMPORTS = "imports"
+    TAXES_PRODUCTS = "taxes on products"
+    TAXES_PRODUCTION = "taxes on production"
+    COMPENSATION = "compensation"
+    FIXED_CAPTIAL_CONSUMPTION = "fixed capital consumption"
+    NET_OPERATING_SURPLUS = "net operating surplus"
+
+
+class FinalUse(OrderedEnum):
+    C = "consumption"
+    K = "capital formation"
+    E = "exports"
+
+
+class M(OrderedEnum):
+    I = "imports"
+    L = "labour"
+    K = "capital"
