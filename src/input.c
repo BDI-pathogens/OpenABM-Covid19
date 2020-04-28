@@ -784,7 +784,7 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-                fprintf(output_file ,"%li,%i,%i%li,%i,%i,%li,%i,%i,%li,%i\n",
+                fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
                     indiv->idx,
                     indiv->age_group,
                     indiv->worker_type,
