@@ -785,29 +785,14 @@ class CobbDouglasLPSetup:
             i: p_tau * o_iot.loc[PrimaryInput.TAXES_PRODUCTION, i] / q_iot[i]
             for i in Sector
         }
-        self.objective_c = -np.sum(
-            [
-                self.indicator("xtilde", M.L, i)
-                + self.indicator("xtilde", M.K, i)
-                + self.indicator("q", i) * weight_taxes[i]
-                for i in Sector
-            ],
-            axis=0,
-        )
-        assert self.objective_c.shape[0] == len(self.variables)
         self.objective_per_sector = {
-            s: np.sum(
-                [
-                    self.indicator("xtilde", M.L, i)
-                    + self.indicator("xtilde", M.K, i)
-                    + self.indicator("q", i) * weight_taxes[i]
-                    for i in Sector
-                    if i == s
-                ],
-                axis=0,
-            )
-            for s in Sector
+            i: self.indicator("xtilde", M.L, i)
+               + self.indicator("xtilde", M.K, i)
+               + self.indicator("q", i) * weight_taxes[i]
+            for i in Sector
         }
+        self.objective_c = -np.sum(list(self.objective_per_sector.values()),axis=0)
+        assert self.objective_c.shape[0] == len(self.variables)
 
         self.c_production_function_lin(
             gamma_d_dict, gamma_x_dict, Lambda_dict, p_substitute
