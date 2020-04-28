@@ -61,23 +61,23 @@ void build_ward_networks( model *model, ward* ward )
     if (ward->patients->size > 0 )
     {
         int idx, n_hcw_working;
-        long *hc_workers;
+        long *hc_workers_doctors;
         long *hc_workers_nurse;
 
-        hc_workers = calloc(ward->n_worker[DOCTOR], sizeof (long) );
+        hc_workers_doctors = calloc(ward->n_worker[DOCTOR], sizeof (long) );
         n_hcw_working = 0;
 
+        //get list of ward's working doctors
         for( idx = 0; idx < ward->n_worker[DOCTOR]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->doctors[idx].pdx ]) ))
-                hc_workers[n_hcw_working++] = ward->doctors[idx].pdx;
+                hc_workers_doctors[n_hcw_working++] = ward->doctors[idx].pdx;
 
         //rebuild doctor -> patient network
-        build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
+        build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
 
-        //free( hc_workers );
         hc_workers_nurse = calloc( ward->n_worker[NURSE], sizeof (long));
 
-        //get list of ward's working nurse's pdxs
+        //get list of ward's working nurses
         n_hcw_working = 0;
         for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
@@ -86,7 +86,7 @@ void build_ward_networks( model *model, ward* ward )
         //rebuild nurse -> patient network
         build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
 
-        free( hc_workers );
+        free( hc_workers_doctors );
         free( hc_workers_nurse );
     }
 }
