@@ -66,3 +66,4 @@ tests/data/transmission_Run1.csv
 tests/data/time_step_hospital_output.csv
 tests/data/individual_file_Run1.csv
 tests/data/test_hospital_output.csv
+tests/data/trace_tokens_Run1.csv
