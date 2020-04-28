@@ -39,10 +39,12 @@ int main(int argc, char *argv[])
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
-#if HOSPITAL_ON
-    printf("# Read hospital parameter file\n");
-    read_hospital_param_file( &params );
-#endif
+    if( params.hospital_on )
+    {
+        printf("# Read hospital parameter file\n");
+        read_hospital_param_file( &params );
+    }
+
     printf("# Start model set-up\n");
 
     model *model = new_model( &params );
@@ -55,39 +57,59 @@ int main(int argc, char *argv[])
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-        printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li"
-        #if HOSPITAL_ON
-                ",%li,%li,%li,%li,%li"
-        #endif
-                "\n",
-				model->time,
-				params.lockdown_on,
-				params.lockdown_elderly_on,
-				params.interventions_on,
-				params.test_on_symptoms,
-				params.app_turned_on,
-				n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
-				n_total( model, CASE ),
-				n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
-				n_current( model, ASYMPTOMATIC ),
-				n_current( model, QUARANTINED ),
-			    n_total( model, TEST_RESULT ) - last_test,
-				n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
-				n_current( model, HOSPITALISED ),
-				n_current( model, CRITICAL ),
-			    n_current( model, HOSPITALISED_RECOVERING ),
-                n_current( model, DEATH ),
-                n_current( model, RECOVERED )
-#if HOSPITAL_ON
-                ,
-                n_current( model, WAITING ),
-				n_current( model, GENERAL ),
-				n_current( model, ICU),
-				n_current( model, DISCHARGED),
-				n_current( model, MORTUARY)
-#endif
-		);
-		last_test = n_total( model, TEST_RESULT );
+        if( model->params->hospital_on )
+        {
+            printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+                    model->time,
+                    params.lockdown_on,
+                    params.lockdown_elderly_on,
+                    params.interventions_on,
+                    params.test_on_symptoms,
+                    params.app_turned_on,
+                    n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
+                    n_total( model, CASE ),
+                    n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
+                    n_current( model, ASYMPTOMATIC ),
+                    n_current( model, QUARANTINED ),
+                    n_total( model, TEST_RESULT ) - last_test,
+                    n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
+                    n_current( model, HOSPITALISED ),
+                    n_current( model, CRITICAL ),
+                    n_current( model, HOSPITALISED_RECOVERING ),
+                    n_current( model, DEATH ),
+                    n_current( model, RECOVERED ),
+                    n_current( model, WAITING ),
+                    n_current( model, GENERAL ),
+                    n_current( model, ICU),
+                    n_current( model, DISCHARGED),
+                    n_current( model, MORTUARY)
+            );
+            last_test = n_total( model, TEST_RESULT );
+        }
+        else
+        {
+            printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+                    model->time,
+                    params.lockdown_on,
+                    params.lockdown_elderly_on,
+                    params.interventions_on,
+                    params.test_on_symptoms,
+                    params.app_turned_on,
+                    n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
+                    n_total( model, CASE ),
+                    n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
+                    n_current( model, ASYMPTOMATIC ),
+                    n_current( model, QUARANTINED ),
+                    n_total( model, TEST_RESULT ) - last_test,
+                    n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
+                    n_current( model, HOSPITALISED ),
+                    n_current( model, CRITICAL ),
+                    n_current( model, HOSPITALISED_RECOVERING ),
+                    n_current( model, DEATH ),
+                    n_current( model, RECOVERED )
+            );
+            last_test = n_total( model, TEST_RESULT );
+        }
 	};
 
 	printf( "\n# End_time:                      %i\n",  model->time );
