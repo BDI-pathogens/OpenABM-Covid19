@@ -112,25 +112,3 @@ class TestClass(object):
         n_hospitalised = len(n_hospitalised.index)
 
         assert n_hospitalised == 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

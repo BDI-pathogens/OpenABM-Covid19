@@ -1,5 +1,5 @@
 /*
- * hsopital.c
+ * hospital.c
  *
  *  Created on: 30 Mar 2020
  *      Author: vuurenk
@@ -57,44 +57,46 @@ void initialise_hospital(
 
 /*****************************************************************************************
 *  Name:		set_up_hospital_networks
-*  Description: calls setup functions for all networks related to the hospital instance
+*  Description: for all hospitals in simulation calls setup functions for related networks
 *  Returns:		void
 ******************************************************************************************/
-void set_up_hospital_networks( hospital* hospital, int max_hcw_daily_interactions )
+void set_up_hospital_networks( model *model )
 {
-    int idx, n_healthcare_workers;
-    int ward_idx, ward_type;
+    int hospital_idx, hcw_idx, n_healthcare_workers, ward_idx, ward_type;
     long *healthcare_workers;
+    hospital *hospital;
 
-    //Setup hospital workplace network.
-    n_healthcare_workers = 0;
-    healthcare_workers = calloc( hospital->n_workers[DOCTOR] + hospital->n_workers[NURSE], sizeof(long) );
-
-    //Setup HCW-patient networks for all wards.
-    for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
     {
-        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+        hospital = &model->hospitals[hospital_idx];
+        //Setup hospital workplace network.
+        n_healthcare_workers = 0;
+        healthcare_workers = calloc( hospital->n_workers[DOCTOR] + hospital->n_workers[NURSE], sizeof(long) );
+
+        //Setup HCW-patient networks for all wards.
+        for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
         {
-            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]; idx++ )
-                healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[idx].pdx;
+            for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+            {
+                for( hcw_idx = 0; hcw_idx < hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]; hcw_idx++ )
+                    healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].doctors[hcw_idx].pdx;
 
-            for( idx = 0; idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; idx++ )
-                healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[idx].pdx;
+                for( hcw_idx = 0; hcw_idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; hcw_idx++ )
+                    healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[hcw_idx].pdx;
 
-            set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]), max_hcw_daily_interactions );
+                set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]), model->params->max_hcw_daily_interactions );
+            }
         }
+
+        //Setup HCW workplace network.
+        hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
+        hospital->hospital_workplace_network = new_network( n_healthcare_workers, HOSPITAL_WORK );
+
+        build_watts_strogatz_network( hospital->hospital_workplace_network, n_healthcare_workers, model->params->hcw_mean_work_interactions, 0.1, TRUE );
+        relabel_network( hospital->hospital_workplace_network, healthcare_workers );
+
+        free( healthcare_workers );
     }
-
-    //Setup HCW workplace network.
-    hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
-    hospital->hospital_workplace_network = new_network( n_healthcare_workers, HOSPITAL_WORK );
-
-    //TODO: Have n_interactions set via parameter file.
-    int n_interactions = 20;
-    build_watts_strogatz_network( hospital->hospital_workplace_network, n_healthcare_workers, n_interactions, 0.1, TRUE );
-    relabel_network( hospital->hospital_workplace_network, healthcare_workers );
-
-    free( healthcare_workers );
 }
 
 /*****************************************************************************************

@@ -43,7 +43,7 @@ struct hospital
 /************************************************************************/
 
 void initialise_hospital( hospital*, parameters*, int );
-void set_up_hospital_networks(hospital* , int max_hcw_daily_interactions);
+void set_up_hospital_networks(model *model);
 void build_hospital_networks( model *model, hospital *hospital );
 int healthcare_worker_working(individual* indiv);
 void destroy_hospital( hospital* );
