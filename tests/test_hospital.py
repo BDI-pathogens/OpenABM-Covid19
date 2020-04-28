@@ -114,27 +114,3 @@ class TestClass(object):
         df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
 
         assert len(df_number_beds_exceeded.index) == 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

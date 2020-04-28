@@ -74,12 +74,12 @@ void set_up_allocate_work_places( model *model )
 			prob[adx][AGE_WORK_MAP[adx]] = 1.0 - other;
 	}
 
-    // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
-    // to HOSPITAL_WORK_NETWORK (-1).
     for( pdx = 0; pdx < model->params->n_total; pdx++ )
     {
         if( model->params->hospital_on )
         {
+            // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
+            // to HOSPITAL_WORK_NETWORK (-1).
             if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
                 model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
             else

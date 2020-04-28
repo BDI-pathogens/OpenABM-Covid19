@@ -1,5 +1,5 @@
 /*
- * hsopital.c
+ * list.c
  *
  *  Created on: 16 Apr 2020
  *      Author: vuurenk
@@ -22,7 +22,6 @@ node* initialise_node( long data )
 
 void initialise_list( list *list )
 {   
-    //waiting_list = calloc( 1, sizeof(waiting_list));
     list->head = NULL;
     list->size = 0;
 }   
@@ -153,6 +152,4 @@ void destroy_list( list* list )
         free( current );
         current = next;
     }
-
-    //free( list );
 }

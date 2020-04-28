@@ -76,9 +76,9 @@ void build_ward_networks( model *model, ward* ward )
         build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
 
         hc_workers_nurse = calloc( ward->n_worker[NURSE], sizeof (long));
+        n_hcw_working = 0;
 
         //get list of ward's working nurses
-        n_hcw_working = 0;
         for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
                 hc_workers_nurse[n_hcw_working++] = ward->nurses[idx].pdx;

@@ -37,7 +37,6 @@ swig-all:
 	# swig -outdir COVID19 -python covid19.i
 	swig -python covid19.i
 	# python3 setup.py build_ext --inplace
-
 	$(PYTHON) -m pip install $(PIP_FLAGS) .
 
 all: $(OBJS)
