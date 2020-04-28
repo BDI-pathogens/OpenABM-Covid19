@@ -146,8 +146,7 @@ typedef struct{
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
     //Hospital parameters
-    int n_total_doctors;
-    int n_total_nurses;
+    int hospital_on;
     int n_hospitals;
     int n_wards[N_HOSPITAL_WARD_TYPES];
     int n_ward_beds[N_HOSPITAL_WARD_TYPES];

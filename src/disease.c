@@ -163,8 +163,9 @@ void transmit_virus_by_type(
 )
 {
 	long idx, jdx, n_infected;
-	int day, n_interaction, t_infect;
+    int day, n_interaction, t_infect;
 	double hazard_rate;
+    float hospital_state_modifier;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
@@ -190,25 +191,25 @@ void transmit_virus_by_type(
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
 
-#if HOSPITAL_ON
-				//Determine the effect hospitalisation has on the hazard rate.
-                float hospital_state_modifier;
-                switch( infector->hospital_state )
+                //Determine the effect hospitalisation has on the hazard rate.
+                if( model->params->hospital_on )
                 {
-                    case WAITING:       hospital_state_modifier = params->waiting_infectivity_modifier; break;
-                    case GENERAL:       hospital_state_modifier = params->general_infectivity_modifier; break;
-                    case ICU:           hospital_state_modifier = params->icu_infectivity_modifier; break;
-                    default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
+                    switch( infector->hospital_state )
+                    {
+                        case WAITING:       hospital_state_modifier = params->waiting_infectivity_modifier; break;
+                        case GENERAL:       hospital_state_modifier = params->general_infectivity_modifier; break;
+                        case ICU:           hospital_state_modifier = params->icu_infectivity_modifier; break;
+                        default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
+                    }
                 }
-#endif
+
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == UNINFECTED )
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
-#if HOSPITAL_ON
-                        hazard_rate *= hospital_state_modifier;
-#endif
+                        if( model->params->hospital_on )
+                            hazard_rate *= hospital_state_modifier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
@@ -360,23 +361,24 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {	
 	set_hospitalised( indiv, model->params, model->time );
 
-#if HOSPITAL_ON
-	int assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
-	add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), COVID_GENERAL );
-#else
-    set_hospitalised( indiv, model->params, model->time );
-
-    if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+    if( model->params->hospital_on )
     {
-        if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
-            transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
-        else
-            transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
-
+        int assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
+        add_patient_to_waiting_list( indiv, &(model->hospitals[assigned_hospital_idx]), COVID_GENERAL );
     }
     else
-        transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
-#endif
+    {
+        if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+        {
+            if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
+                transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
+            else
+                transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
+
+        }
+        else
+            transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
+    }
 
     if( indiv->quarantined )
         intervention_quarantine_release( model, indiv );
@@ -393,16 +395,19 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
-#if HOSPITAL_ON
-    remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
-	add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
-#else
-
-    if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
-        transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
+    if( model->params->hospital_on )
+    {
+        remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
+        add_patient_to_waiting_list( indiv, &(model->hospitals[indiv->hospital_idx]), COVID_ICU );
+    }
     else
-        transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
-#endif
+    {
+        if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+            transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
+        else
+            transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
+    }
+
 
 	intervention_on_critical( model, indiv );
 }
@@ -414,11 +419,13 @@ void transition_to_critical( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_hospitalised_recovering( model *model, individual *indiv )
 {
-#if HOSPITAL_ON
-    remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
-	if( indiv->ward_type != COVID_GENERAL )
-		add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
-#endif
+    if( model->params->hospital_on )
+    {
+        remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
+        if( indiv->ward_type != COVID_GENERAL )
+            add_patient_to_waiting_list( indiv, &model->hospitals[indiv->hospital_idx], COVID_GENERAL );
+    }
+
     transition_one_disese_event( model, indiv, HOSPITALISED_RECOVERING, RECOVERED, HOSPITALISED_RECOVERING_RECOVERED );
     set_hospitalised_recovering( indiv, model->params, model->time );
 }
@@ -430,13 +437,15 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-#if HOSPITAL_ON
-    if( indiv->hospital_state != NOT_IN_HOSPITAL )
+    if( model->params->hospital_on )
     {
-        remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
-        transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
+        if( indiv->hospital_state != NOT_IN_HOSPITAL )
+        {
+            remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
+            transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
+        }
     }
-#endif
+
     transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
     set_recovered( indiv, model->params, model->time );
 }
@@ -448,13 +457,15 @@ void transition_to_recovered( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_death( model *model, individual *indiv )
 {
-#if HOSPITAL_ON
-    if( indiv->hospital_state != NOT_IN_HOSPITAL )
+    if( model->params->hospital_on )
     {
-        remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
-        transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
+        if( indiv->hospital_state != NOT_IN_HOSPITAL )
+        {
+            remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
+            transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );
+        }
     }
-#endif
+
 	transition_one_disese_event( model, indiv, DEATH, NO_EVENT, NO_EDGE );
 	set_dead( indiv, model->params, model->time );
 }
