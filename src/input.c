@@ -24,9 +24,10 @@
 ******************************************************************************************/
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
-	int param_line_number;
+    int param_line_number, hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
+    char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
 
 	if(argc > 1)
@@ -64,9 +65,6 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 			INPUT_CHAR_LEN );
 	}
 
-#if HOSPITAL_ON
-    int hospital_param_line_number;
-    char hospital_input_param_file[ INPUT_CHAR_LEN ];
 
     if(argc > 5)
     {
@@ -89,8 +87,6 @@ void read_command_line_args( parameters *params, int argc, char **argv )
     params->hospital_param_line_number = hospital_param_line_number;
     strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
     params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
-
-#endif
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
@@ -416,6 +412,9 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
     if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
+    check = fscanf(parameter_file, " %i ,", &(params->hospital_on));
+    if( check < 1){ print_exit("Failed to read parameter hospital_on)\n"); };
+
     fclose(parameter_file);
 }
 
@@ -500,9 +499,8 @@ void write_output_files(model *model, parameters *params)
 		write_interactions( model );
 		write_transmissions( model );
 		write_trace_tokens( model );
-#if HOSPITAL_ON
-        write_ward_data( model );
-#endif
+        if( params->hospital_on )
+            write_ward_data( model );
 	}
 }	
 
@@ -783,32 +781,19 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-
-                fprintf(output_file ,"%li,%i,"
-        #if HOSPITAL_ON
-                                     "%i,"
-        #endif
-                                     "%li,%i,%i,%li,%i,"
-        #if HOSPITAL_ON
-                                     "%i,"
-        #endif
-                                     "%li,%i\n",
-					indiv->idx,
-					indiv->age_group,
-        #if HOSPITAL_ON
+                fprintf(output_file ,"%li,%i,%i%li,%i,%i,%li,%i,%i,%li,%i\n",
+                    indiv->idx,
+                    indiv->age_group,
                     indiv->worker_type,
-        #endif
-					indiv->house_no,
-					indiv->work_network,
-					inter->type,
-					inter->individual->idx,
-					inter->individual->age_group,
-        #if HOSPITAL_ON
+                    indiv->house_no,
+                    indiv->work_network,
+                    inter->type,
+                    inter->individual->idx,
+                    inter->individual->age_group,
                     inter->individual->worker_type,
-        #endif
-					inter->individual->house_no,
-					inter->individual->work_network
-				);
+                    inter->individual->house_no,
+                    inter->individual->work_network
+                );
 				inter = inter->next;
 			}
 		}
@@ -817,7 +802,6 @@ void write_interactions( model *model )
 }
 
 
-#if HOSPITAL_ON
 /*****************************************************************************************
 *  Name:        write_ward_data
 *  Description: write data about healthcare workers in each ward
@@ -869,7 +853,6 @@ void write_ward_data( model *model)
     fclose(ward_output_file);
         
 }
-#endif
 
 /*****************************************************************************************
 *  Name:		write_transmissions

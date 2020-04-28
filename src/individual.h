@@ -56,7 +56,6 @@ struct individual{
 
     int app_user;
 
-#if HOSPITAL_ON
     int ward_idx;
     int ward_type;
 
@@ -68,7 +67,7 @@ struct individual{
 	event *next_hospital_event;
 
     int worker_type;
-#endif
+
 };
 
 struct interaction{
@@ -83,12 +82,8 @@ struct interaction{
 /************************************************************************/
 
 #define time_infected( indiv ) ( max( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ), indiv->time_event[PRESYMPTOMATIC_MILD] ) )
-
-#if HOSPITAL_ON
-#define is_in_hospital( indiv ) ( ( indiv->hospital_state == WAITING || indiv->hospital_state == GENERAL || indiv->hospital_state == ICU ) )
-#else
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
-#endif
+
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
