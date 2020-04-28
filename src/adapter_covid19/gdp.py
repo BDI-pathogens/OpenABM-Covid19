@@ -716,6 +716,8 @@ class CobbDouglasLPSetup:
         p_tau: float,
         p_substitute: float,
     ) -> None:
+        self.dtilde_iot = dtilde_iot
+        self.ytilde_iot = ytilde_iot
         self.xtilde_iot = pd.concat(
             [
                 iot_p[PrimaryInput.IMPORTS],
@@ -732,57 +734,57 @@ class CobbDouglasLPSetup:
         self.xtilde_iot.index = M
         # x~[M.K, T] == 0, so we add a small epsilon
         self.xtilde_iot = np.maximum(self.xtilde_iot, 1e-6)
-        ytilde_total_iot = ytilde_iot.sum(axis=1)
-        gamma_d = dtilde_iot.div(dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0))
-        gamma_x = self.xtilde_iot.div(
+        self.ytilde_total_iot = self.ytilde_iot.sum(axis=1)
+        self.gamma_d = dtilde_iot.div(dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0))
+        self.gamma_x = self.xtilde_iot.div(
             dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0)
         )
 
-        o_iot = iot_p[[PrimaryInput.TAXES_PRODUCTION, PrimaryInput.TAXES_PRODUCTS]].T
-        q_iot = dtilde_iot.sum(axis=0) + iot_p.sum(axis=1)
+        self.o_iot = iot_p[[PrimaryInput.TAXES_PRODUCTION, PrimaryInput.TAXES_PRODUCTS]].T
+        self.q_iot = dtilde_iot.sum(axis=0) + iot_p.sum(axis=1)
         assert np.allclose(
             (dtilde_iot.sum(axis=0) + iot_p.sum(axis=1)),
-            (dtilde_iot.sum(axis=1) + ytilde_total_iot),
+            (dtilde_iot.sum(axis=1) + self.ytilde_total_iot),
             rtol=1e-6,
         )  # errors are due to rounding and omission of household sector
         assert np.allclose(
-            (dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0) + o_iot.sum(axis=0)),
-            (dtilde_iot.sum(axis=1) + ytilde_total_iot),
+            (dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0) + self.o_iot.sum(axis=0)),
+            (dtilde_iot.sum(axis=1) + self.ytilde_total_iot),
             rtol=1e-6,
         )  # errors are due to rounding and omission of household sector
-        assert np.allclose(gamma_d.sum(axis=0) + gamma_x.sum(axis=0), 1.0, atol=1e-9)
-        assert (gamma_d >= 0).all().all()
-        assert (gamma_x >= 0).all().all()
+        assert np.allclose(self.gamma_d.sum(axis=0) + self.gamma_x.sum(axis=0), 1.0, atol=1e-9)
+        assert (self.gamma_d >= 0).all().all()
+        assert (self.gamma_x >= 0).all().all()
         # depends on p_tau
-        cd_prod_fun = dtilde_iot.pow(gamma_d).prod(axis=0) * self.xtilde_iot.pow(
-            gamma_x
+        cd_prod_fun = dtilde_iot.pow(self.gamma_d).prod(axis=0) * self.xtilde_iot.pow(
+            self.gamma_x
         ).prod(axis=0)
         min_prod_fun = pd.concat(
             [
-                dtilde_iot.multiply(1 / gamma_d).min(),
-                self.xtilde_iot.multiply(1 / gamma_x).min(),
+                dtilde_iot.multiply(1 / self.gamma_d).min(),
+                self.xtilde_iot.multiply(1 / self.gamma_x).min(),
             ],
             axis=1,
         ).min(axis=1)
         sum_prod_fun = (
-            dtilde_iot.multiply(gamma_d).sum() + self.xtilde_iot.multiply(gamma_x).sum()
+            dtilde_iot.multiply(self.gamma_d).sum() + self.xtilde_iot.multiply(self.gamma_x).sum()
         )
         lin_prod_fun = p_substitute * min_prod_fun + (1 - p_substitute) * sum_prod_fun
         prod_fun = lin_prod_fun
 
-        Lambda = (
+        self.Lambda = (
             1
-            / (1 - (o_iot.sum(axis=0) / q_iot) * p_tau)
+            / (1 - (self.o_iot.sum(axis=0) / self.q_iot) * p_tau)
             * (dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0))
             / prod_fun
         )
 
-        gamma_d_dict = {(i, j): gamma_d.loc[i, j] for i in Sector for j in Sector}
-        gamma_x_dict = {(m, j): gamma_x.loc[m, j] for m in M for j in Sector}
-        Lambda_dict = {i: Lambda[i] for i in Sector}
+        self.gamma_d_dict = {(i, j): self.gamma_d.loc[i, j] for i in Sector for j in Sector}
+        self.gamma_x_dict = {(m, j): self.gamma_x.loc[m, j] for m in M for j in Sector}
+        self.Lambda_dict = {i: self.Lambda[i] for i in Sector}
 
         weight_taxes = {
-            i: p_tau * o_iot.loc[PrimaryInput.TAXES_PRODUCTION, i] / q_iot[i]
+            i: p_tau * self.o_iot.loc[PrimaryInput.TAXES_PRODUCTION, i] / self.q_iot[i]
             for i in Sector
         }
         self.objective_per_sector = {
@@ -793,14 +795,16 @@ class CobbDouglasLPSetup:
         }
         self.objective_c = -np.sum(list(self.objective_per_sector.values()),axis=0)
         assert self.objective_c.shape[0] == len(self.variables)
+        self.max_gdp_per_sector = self.xtilde_iot.loc[M.L] + self.xtilde_iot.loc[M.K] + self.o_iot.loc[PrimaryInput.TAXES_PRODUCTION]
+        self.max_gdp = self.max_gdp_per_sector.sum()
 
         self.c_production_function_lin(
-            gamma_d_dict, gamma_x_dict, Lambda_dict, p_substitute
+            self.gamma_d_dict, self.gamma_x_dict, self.Lambda_dict, p_substitute
         )
-        self.c_input(o_iot, q_iot, p_tau)
-        self.c_output(q_iot)
+        self.c_input(self.o_iot, self.q_iot, p_tau)
+        self.c_output(self.q_iot)
         self.c_capital(p_kappa)
-        self.c_demand(p_delta, ytilde_iot)
+        self.c_demand(p_delta, self.ytilde_iot)
 
     def finalise_setup(
         self, p_lambda: pd.DataFrame, wfh_productivity: Mapping[Sector, float]
@@ -861,6 +865,8 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self.p_tau,
             self.p_substitute,
         )
+        # need to override the max_gdp value based on data loaded during setup
+        self.results.max_gdp = self.setup.max_gdp
 
     def _simulate_workers(
         self, region: Region, sector: Sector, age: Age, utilisation: float
@@ -898,10 +904,13 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         )
         if not r.success:
             raise ValueError(r.message)
+        # TODO: factor out postprocessing of model outputs
         for sector in Sector:
             gdp_for_sector = self.setup.objective_per_sector[sector].dot(
                 r.x
             )
+            # split outputs per region and age
+            # note: these are absolute values to be interpreted relative to iot data loaded in setup
             for region in Region:
                 for age in Age:
                     gdp[region, sector, age] = weight_region_age_per_sector[sector,region,age] * gdp_for_sector
