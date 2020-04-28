@@ -54,7 +54,7 @@ class TestClass(object):
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all HOSPITAL_ON=1"
+        compile_command = "make clean; make all"
         completed_compilation = subprocess.run([compile_command], 
             shell = True, 
             cwd = SRC_DIR, 
