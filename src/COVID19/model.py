@@ -335,7 +335,6 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParameterException(f"Can not update {param} during running")
-
         setter = getattr(covid19, f"set_model_param_{param}")
         if callable(setter):
             if not setter(self.c_model, value):
@@ -416,6 +415,7 @@ class Model:
         Write output files
         """
         covid19.write_output_files(self.c_model, self.c_params)
+
 
     def write_individual_file(self):
         covid19.write_individual_file(self.c_model, self.c_params)

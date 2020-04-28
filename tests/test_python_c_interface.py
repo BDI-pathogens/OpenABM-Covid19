@@ -11,6 +11,7 @@ pytest ./tests/test_step_calc.py
 Created: March 2020
 Author: Daniel Montero
 """
+
 import pytest
 import sys
 import numpy as np
@@ -174,7 +175,6 @@ class TestClass(object):
         res = model.one_time_step_results()
         for age in AgeGroupEnum:
             assert res.get(f"total_infected{age.name}", None) is not None, f"Could not get total_infected{age.name}"
-            
         assert res.get("total_infected") == sum([res.get(f"total_infected{age.name}") for age in AgeGroupEnum]), "Total infected does not equal sum of age groups"
 
     def test_set_lockdown_multiplier_params(self):

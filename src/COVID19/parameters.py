@@ -4,11 +4,13 @@ ParameterSet class definition for basic modifications of parameter files for COV
 Created: 10 March 2020
 Author: p-robot (W. Probert)
 """
+
 import copy
 import itertools
 import json
 import sys
 from collections import OrderedDict
+
 
 class ParameterSet(object):
     """
@@ -303,7 +305,6 @@ if __name__ == "__main__":
         path to input parameter file with "baseline" parameter values
 
     json_file : str
-
         path to JSON file of parameters to adjust (or vary).  JSON file has a
         key "parameters" within which there are key/value pairs of parameter
         names/values.  JSON file has an optional key of "n_replicates" with
