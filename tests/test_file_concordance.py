@@ -43,11 +43,15 @@ class TestClass(object):
         # Call the model using baseline parameters, pipe output to file, read output file
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        
+        # Import timeseries/transmission/individual files
         df_timeseries = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
         
-        incidence_indiv = df_indiv[(df_indiv[indiv_var] > 0)].groupby([indiv_var]).size().reset_index(name="connections")    
+        incidence_indiv = df_indiv[(df_indiv[indiv_var] > 0)].groupby([indiv_var]).size().reset_index(name="connections")
         incidence_indiv.rename( columns = { indiv_var:"time"}, inplace = True )
         incidence_indiv = pd.merge( df_timeseries[ df_timeseries["time"]>1],incidence_indiv,on="time",how = "left")
         incidence_indiv.fillna(0,inplace=True) 
