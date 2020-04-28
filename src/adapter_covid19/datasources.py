@@ -5,7 +5,9 @@ from typing import Tuple, Mapping, Any, Union, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-from adapter_covid19.enums import Region, Sector, Age
+from adapter_covid19.enums import Region, Sector, Age, FinalUse, PrimaryInput
+
+ALL_ENUMS = [Region, Sector, Age, FinalUse, PrimaryInput]
 
 
 class Reader:
@@ -97,6 +99,27 @@ class RegionSectorAgeDataSource(DataSource):
         if len(data) > 1:
             return data
         return next(iter(data.values()))
+
+
+class DataFrameDataSource(DataSource):
+    def load(self, reader: Reader) -> pd.DataFrame:
+        frame = reader.load_csv(self.filename)
+        frame = frame.set_index(frame.columns[0])
+        for enum in ALL_ENUMS:
+            try:
+                frame = frame.rename(index=lambda x: enum[x])
+            except KeyError:
+                pass
+            else:
+                break
+        for enum in ALL_ENUMS:
+            try:
+                frame = frame.rename(columns=lambda x: enum[x])
+            except KeyError:
+                pass
+            else:
+                break
+        return frame
 
 
 class WeightMatrix(DataSource):

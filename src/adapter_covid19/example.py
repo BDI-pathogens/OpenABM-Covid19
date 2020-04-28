@@ -1,3 +1,4 @@
+import inspect
 import itertools
 import os
 from typing import Optional
@@ -8,12 +9,18 @@ import pandas as pd
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
-from adapter_covid19.gdp import SupplyDemandGdpModel
+from adapter_covid19 import gdp as gdp_models
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age
+from adapter_covid19.enums import Region, Sector, Age, LabourState
 
 
-def lockdown_then_unlock_no_corona(data_path: Optional[str] = None):
+def lockdown_then_unlock_no_corona(
+    data_path: str = Optional[str] = None,
+    lockdown_on: int = 5,
+    lockdown_off: int = 30,
+    end_time: int = 50,
+    gdp_model: str = "SupplyDemandGdpModel",
+):
     """
     Lockdown at t=5 days, then release lockdown at t=50 days.
 
@@ -25,22 +32,28 @@ def lockdown_then_unlock_no_corona(data_path: Optional[str] = None):
             os.path.dirname(__file__), "../../tests/adapter_covid19/data"
         )
     reader = Reader(data_path)
+    gdp_model_cls = gdp_models.__dict__[gdp_model]
+    assert not inspect.isabstract(gdp_model_cls) and issubclass(
+        gdp_model_cls, gdp_models.BaseGdpModel
+    ), gdp_model
     econ = Economics(
-        SupplyDemandGdpModel(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
+        gdp_model_cls(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
     )
     econ.load(reader)
-    max_utilisations = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
-    min_utilisations = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
-    length = 100
-    for i in range(length):
-        if 5 <= i < 50:
-            econ.simulate(i, True, min_utilisations)
+    utilisations = {
+        key: 0.0 for key in itertools.product(LabourState, Region, Sector, Age)
+    }
+    for r, s, a in itertools.product(Region, Sector, Age):
+        utilisations[LabourState.WORKING, r, s, a] = 1.0
+    for i in range(end_time):
+        if lockdown_on <= i < lockdown_off:
+            econ.simulate(i, True, utilisations)
         else:
-            econ.simulate(i, False, max_utilisations)
+            econ.simulate(i, False, utilisations)
     df = (
         pd.DataFrame(
-            [econ.results.fraction_gdp_by_sector(i) for i in range(1, length)],
-            index=range(1, length),
+            [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
+            index=range(1, end_time),
         )
         .T.sort_index()
         .T.cumsum(axis=1)
@@ -89,6 +102,6 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1:
-        lockdown_then_unlock_no_corona(sys.argv[1])
+        lockdown_then_unlock_no_corona(*sys.argv[1:])
     else:
         lockdown_then_unlock_no_corona()

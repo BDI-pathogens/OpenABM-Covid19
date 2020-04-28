@@ -108,7 +108,7 @@ class PrimaryInput(OrderedEnum):
     TAXES_PRODUCTS = "taxes on products"
     TAXES_PRODUCTION = "taxes on production"
     COMPENSATION = "compensation"
-    FIXED_CAPTIAL_CONSUMPTION = "fixed capital consumption"
+    FIXED_CAPITAL_CONSUMPTION = "fixed capital consumption"
     NET_OPERATING_SURPLUS = "net operating surplus"
 
 

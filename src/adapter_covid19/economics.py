@@ -10,7 +10,7 @@ from adapter_covid19.personal_insolvency import (
     PersonalBankruptcyResults,
     PersonalBankruptcyModel,
 )
-from adapter_covid19.enums import Region, Sector, Age, PrimaryInput
+from adapter_covid19.enums import Region, Sector, Age, LabourState, PrimaryInput
 
 
 @dataclass
@@ -89,7 +89,7 @@ class Economics:
         self,
         time: int,
         lockdown: bool,
-        utilisations: Mapping[Tuple[Region, Sector, Age], float],
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
     ) -> None:
         """
         Simulate the economy

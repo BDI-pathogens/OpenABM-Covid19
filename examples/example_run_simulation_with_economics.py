@@ -18,7 +18,7 @@ from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
 from adapter_covid19.gdp import LinearGdpModel, SupplyDemandGdpModel
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, Age10Y
+from adapter_covid19.enums import Region, Sector, Age, Age10Y, LabourState
 
 logging.basicConfig(level=logging.INFO)
 
@@ -248,7 +248,7 @@ def _econ_worker(
     end_time: int,
     output_dir: str,
 ) -> Economics:
-    utilisations = {}
+    utilisations = {(l, r): 0 for l, r in itertools.product(LabourState, Region)}
     for step in range(end_time):
         lockdowns = {}
         for region, queue in queues.items():
@@ -259,13 +259,9 @@ def _econ_worker(
                 )
             lockdowns[region] = results["lockdown"]
             # total individuals is measured per region
-            out_of_action = (
-                results["n_quarantine"]
-                + results["n_hospital"]
-                + results["n_critical"]
-                + results["n_death"]
-            )
-            utilisations[region] = 1 - out_of_action / total_individuals
+            ill = results["n_hospital"] + results["n_critical"] + results["n_death"]
+            utilisations[LabourState.ILL, region] = ill / total_individuals
+            utilisations[LabourState.WORKING] = 1 - ill / total_individuals
 
         if len(set(lockdowns.values())) != 1:
             raise NotImplementedError(
