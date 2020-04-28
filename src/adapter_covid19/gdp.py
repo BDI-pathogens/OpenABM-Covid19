@@ -886,30 +886,40 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         self, utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
         gdp = {}
-        for region, age in itertools.product(Region, Age):
-            p_lambda = pd.DataFrame(
-                {
-                    l: {s: utilisations[l, region, s, age] for s in Sector}
-                    for l in LabourState
-                }
+        # TODO: get these weights from a data source
+        # invariant: for a fixed sector, summing weights over all regions and ages gives 1
+        weight_region_age_per_sector = {
+            (sector,region,age): 1/(len(Region)*len(Age))
+                for sector in Sector for region in Region for age in Age
+        }
+        p_lambda = pd.DataFrame(
+            {
+                l: {s: np.sum([weight_region_age_per_sector[s,region,age] * utilisations[l, region, s, age]
+                               for region in Region for age in Age])
+                    for s in Sector}
+                for l in LabourState
+            }
+        )
+        objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, self.wfh)
+        r = linprog(
+            c=objective,
+            A_ub=bounds[0],
+            b_ub=bounds[1],
+            A_eq=bounds[2],
+            b_eq=bounds[3],
+            bounds=lp_bounds,
+            method="interior-point",
+            options={"maxiter": 1e4, "disp": False, "autoscale": False},
+        )
+        if not r.success:
+            raise ValueError(r.message)
+        for sector in Sector:
+            gdp_for_sector = self.setup.objective_per_sector[sector].dot(
+                r.x
             )
-            objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, self.wfh)
-            r = linprog(
-                c=objective,
-                A_ub=bounds[0],
-                b_ub=bounds[1],
-                A_eq=bounds[2],
-                b_eq=bounds[3],
-                bounds=lp_bounds,
-                method="interior-point",
-                options={"maxiter": 1e4, "disp": False, "autoscale": False},
-            )
-            if not r.success:
-                raise ValueError(r.message)
-            for sector in Sector:
-                gdp[region, sector, age] = self.setup.objective_per_sector[sector].dot(
-                    r.x
-                )
+            for region in Region:
+                for age in Age:
+                    gdp[region, sector, age] = weight_region_age_per_sector[sector,region,age] * gdp_for_sector
         return gdp
 
     def simulate(
