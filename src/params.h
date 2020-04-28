@@ -166,6 +166,8 @@ typedef struct{
     double hospitalised_waiting_mod;
     double critical_waiting_mod;
 
+    //average amount of interactions healthcare workers have with each other per day
+    double hcw_mean_work_interactions;
 
 } parameters;
 

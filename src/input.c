@@ -472,10 +472,10 @@ void read_hospital_param_file( parameters *params)
     if( check < 1 ){ print_exit( "Failed to read parameter sd_time_hospital_transition\n" ); };
 
     check = fscanf( hospital_parameter_file, " %lf ,", &( params->hospitalised_waiting_mod ) );
-    if( check < 1 ){ print_exit( "Failed to read parameter mean_time_hospital_transition\n" ); };
+    if( check < 1 ){ print_exit( "Failed to read parameter hospitalised_waiting_mod\n" ); };
 
     check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
-    if( check < 1 ){ print_exit( "Failed to read parameter sd_time_hospital_transition\n" ); };
+    if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
 
     //Hardcoded until we can separate out interaction types for hospitals and the community. - Tom
     for( i = 3; i < 8; i++ )
@@ -483,6 +483,9 @@ void read_hospital_param_file( parameters *params)
         check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
         if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
     }
+
+    check = fscanf( hospital_parameter_file, " %lf ,", &( params->hcw_mean_work_interactions ) );
+    if( check < 1 ){ print_exit( "Failed to read parameter hcw_mean_work_interactions\n" ); };
 
     fclose(hospital_parameter_file);
 }

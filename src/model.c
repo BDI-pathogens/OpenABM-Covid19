@@ -198,8 +198,7 @@ void set_up_networks( model *model )
 		set_up_work_network( model, idx );
 
     if( model->params->hospital_on )
-        for (idx = 0; idx < model->params->n_hospitals; idx++ )
-            set_up_hospital_networks( &(model->hospitals[idx]), model->params->max_hcw_daily_interactions );
+        set_up_hospital_networks( model );
 }
 
 /*****************************************************************************************
@@ -836,7 +835,7 @@ int one_time_step( model *model )
 		update_event_list_counters( model, idx );
 
     build_daily_network( model );
-	transmit_virus( model, model->params );
+    transmit_virus( model );
 
     transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
