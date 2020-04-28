@@ -92,11 +92,11 @@ class PersonalBankruptcyModel:
     ] = field(default_factory=dict, init=False)
 
     def __post_init__(self):
-        self.eta[LabourState.ill] = 1
-        self.eta[LabourState.wfh] = 1
-        self.eta[LabourState.working] = 1
-        self.eta[LabourState.furloughed] = 0.8
-        self.eta[LabourState.unemployed] = 0
+        self.eta[LabourState.ILL] = 1
+        self.eta[LabourState.WFH] = 1
+        self.eta[LabourState.WORKING] = 1
+        self.eta[LabourState.FURLOUGHED] = 0.8
+        self.eta[LabourState.UNEMPLOYED] = 0
 
         if (
             self.utilization_ratio_furloughed_lockdown is None
@@ -244,35 +244,35 @@ class PersonalBankruptcyModel:
             utilization_r = {}
             utilization_r_sum = 0
             # We first lock lambda_unemployed
-            utilization_r[LabourState.unemployed] = corporate_bankruptcy[r]
-            utilization_r_sum += utilization_r[LabourState.unemployed]
+            utilization_r[LabourState.UNEMPLOYED] = corporate_bankruptcy[r]
+            utilization_r_sum += utilization_r[LabourState.UNEMPLOYED]
 
             # Next we check lambda_ill
-            utilization_r[LabourState.ill] = min(
+            utilization_r[LabourState.ILL] = min(
                 self.utilization_ratio_ill, 1 - utilization_r_sum
             )
-            utilization_r_sum += utilization_r[LabourState.ill]
+            utilization_r_sum += utilization_r[LabourState.ILL]
 
             # Next we check furloughed, wfh and working
             if lockdown:
                 utilization_r[
-                    LabourState.furloughed
+                    LabourState.FURLOUGHED
                 ] = self.utilization_ratio_furloughed_lockdown * (1 - utilization_r_sum)
-                utilization_r[LabourState.wfh] = self.utilization_ratio_wfh_lockdown * (
+                utilization_r[LabourState.WFH] = self.utilization_ratio_wfh_lockdown * (
                     1 - utilization_r_sum
                 )
                 utilization_r[
-                    LabourState.working
+                    LabourState.WORKING
                 ] = self.utilization_ratio_working_lockdown * (1 - utilization_r_sum)
             else:
                 utilization_r[
-                    LabourState.furloughed
+                    LabourState.FURLOUGHED
                 ] = self.utilization_ratio_furloughed_no_lockdown
                 utilization_r[
-                    LabourState.wfh
+                    LabourState.WFH
                 ] = self.utilization_ratio_wfh_no_lockdown * (1 - utilization_r_sum)
                 utilization_r[
-                    LabourState.working
+                    LabourState.WORKING
                 ] = self.utilization_ratio_working_no_lockdown * (1 - utilization_r_sum)
 
             utilization[r] = utilization_r
