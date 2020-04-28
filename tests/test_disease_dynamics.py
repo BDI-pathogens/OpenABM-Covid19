@@ -1020,3 +1020,4 @@ class TestClass(object):
             fatality_fraction_weighted,
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
+        
