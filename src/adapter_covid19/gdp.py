@@ -564,7 +564,7 @@ class CobbDouglasLPSetup:
         gamma_d_dict: Mapping[Tuple[Sector, Sector], float],
         gamma_x_dict: Mapping[Tuple[Sector, Sector], float],
         Lambda_dict: Mapping[Sector, float],
-        p_substitute: float,
+        substitution_rate: float,
     ):
         constr_arr = []
 
@@ -576,11 +576,11 @@ class CobbDouglasLPSetup:
                         self.indicator("q", i)
                         - Lambda_dict[i]
                         * (
-                            p_substitute
+                            (1 - substitution_rate)
                             * 1
                             / gamma_d_dict[jprime, i]
                             * self.indicator("d", jprime, i)
-                            + (1 - p_substitute)
+                            + substitution_rate
                             * (
                                 np.sum(
                                     [
@@ -606,11 +606,11 @@ class CobbDouglasLPSetup:
                         self.indicator("q", i)
                         - Lambda_dict[i]
                         * (
-                            p_substitute
+                            (1 - substitution_rate)
                             * 1
                             / gamma_x_dict[mprime, i]
                             * self.indicator("x", mprime, i)
-                            + (1 - p_substitute)
+                            + substitution_rate
                             * (
                                 np.sum(
                                     [
@@ -740,7 +740,7 @@ class CobbDouglasLPSetup:
         p_delta: pd.DataFrame,
         p_kappa: pd.Series,
         p_tau: float,
-        p_substitute: float,
+        substitution_rate: float,
     ) -> None:
         self.iot_p = iot_p
         self.dtilde_iot = dtilde_iot
@@ -796,7 +796,7 @@ class CobbDouglasLPSetup:
         sum_prod_fun = (
             dtilde_iot.multiply(self.gamma_d).sum() + self.xtilde_iot.multiply(self.gamma_x).sum()
         )
-        lin_prod_fun = p_substitute * min_prod_fun + (1 - p_substitute) * sum_prod_fun
+        lin_prod_fun = (1 - substitution_rate) * min_prod_fun + substitution_rate * sum_prod_fun
         prod_fun = lin_prod_fun
 
         self.Lambda = (
@@ -826,7 +826,7 @@ class CobbDouglasLPSetup:
         self.max_gdp = self.max_gdp_per_sector.sum()
 
         self.c_production_function_lin(
-            self.gamma_d_dict, self.gamma_x_dict, self.Lambda_dict, p_substitute
+            self.gamma_d_dict, self.gamma_x_dict, self.Lambda_dict, substitution_rate
         )
         self.c_input(self.o_iot, self.q_iot, p_tau)
         self.c_output(self.q_iot)
@@ -871,13 +871,13 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         p_kappa: float = 1.0,
         p_delta: float = 1.0,
         p_tau: float = 1.0,
-        p_substitute: float = 0.5,
+        substitution_rate: float = 0.5,
     ):
         super().__init__(lockdown_recovery_time, optimal_recovery)
         self.p_kappa = pd.Series(p_kappa, index=list(Sector))
         self.p_delta = pd.DataFrame(p_delta, index=list(Sector), columns=list(FinalUse))
         self.p_tau = p_tau
-        self.p_substitute = p_substitute
+        self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
         self.results = IoGdpResult({},{},0,0,{},{},{},{},{},{},{},{},{},{})
 
@@ -903,7 +903,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self.p_delta,
             self.p_kappa,
             self.p_tau,
-            self.p_substitute,
+            self.substitution_rate,
         )
 
     def _postprocess_model_outputs(self, time, utilisations, r):
