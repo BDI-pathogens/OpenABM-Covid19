@@ -950,13 +950,9 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.COMPENSATION,r,s,a] = labour_sector * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
             # taxes
-            o = self.p_tau / self.setup.q_iot.loc[s] * x[self.setup.V("q",s)]
-            # TODO: double-check net-subsidized sectors
-            taxes_on_production_share = self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION] / \
-                                                  (self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION] +
-                                                   self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTS])
-            taxes_production = o * taxes_on_production_share
-            taxes_products = o * taxes_on_production_share
+            o_fraction = self.p_tau * x[self.setup.V("q",s)] / self.setup.q_iot.loc[s]
+            taxes_production = o_fraction * self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION]
+            taxes_products = o_fraction * self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTS]
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.TAXES_PRODUCTION,r,s,a] = taxes_production * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 primary_inputs[PrimaryInput.TAXES_PRODUCTS, r, s, a] = taxes_products * \
@@ -964,14 +960,14 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
                                                                                       s, r, a]
             # capital
             gross_operating_surplus = x[self.setup.V("xtilde", M.K, s)]
-            if gross_operating_surplus >= 0 :
+            if gross_operating_surplus >= 0.0:
                 fixed_capital_consumption_share = self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] / \
                                                   (self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] +
                                                    self.setup.iot_p.loc[s,PrimaryInput.NET_OPERATING_SURPLUS])
                 consumption_of_fixed_capital = gross_operating_surplus * fixed_capital_consumption_share
                 net_operating_surplus = gross_operating_surplus * (1-fixed_capital_consumption_share)
             else:
-                consumption_of_fixed_capital = 0
+                consumption_of_fixed_capital = 0.0
                 net_operating_surplus = gross_operating_surplus
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.FIXED_CAPITAL_CONSUMPTION,r,s,a] = consumption_of_fixed_capital * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
