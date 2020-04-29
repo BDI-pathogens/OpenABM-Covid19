@@ -123,8 +123,9 @@ class TestClass(object):
         df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
         
         # Iterate over time steps
-        timeStep = 200
-        for t_step in range(timeStep):
+        max_time = df_hcw_time_step['time_step'].max()
+
+        for t_step in range(max_time):
 
             # Create sub df with current time step
             time_df = df_hcw_time_step['time_step'] == t_step
