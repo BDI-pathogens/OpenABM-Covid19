@@ -4,7 +4,7 @@ import itertools
 import logging
 import random
 from dataclasses import dataclass
-from typing import Tuple, Mapping, MutableMapping, Sequence, Optional, Union, List
+from typing import Tuple, Mapping, MutableMapping, Sequence, Optional, Union, List, Any
 
 import numpy as np
 import pandas as pd
@@ -262,6 +262,7 @@ class BaseGdpModel(abc.ABC):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        other_params: Optional[Mapping[str,Any]] = None
     ) -> None:
         # utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
         pass
@@ -306,6 +307,7 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        other_params: Optional[Mapping[str, Any]] = None
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -438,6 +440,7 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        other_params: Optional[Mapping[str, Any]] = None
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -670,13 +673,13 @@ class CobbDouglasLPSetup:
         A = np.multiply(A, normalization[:, None])
         self.update_constraint(Bound(None, None, A, np.zeros(A.shape[0])))
 
-    def c_capital(self, p_kappa: pd.Series):
-        const = np.array([p_kappa.loc[i] * self.xtilde_iot.loc[M.K, i] for i in Sector])
+    def c_capital(self, p_kappa: Mapping[Sector, float]):
+        const = np.array([p_kappa[i] * self.xtilde_iot.loc[M.K, i] for i in Sector])
         A = np.array([self.indicator("x", M.K, i) for i in Sector])
         normalization = np.array([1 / self.xtilde_iot.loc[M.K, i] for i in Sector])
         const = np.multiply(const, normalization)
         A = np.multiply(A, normalization[:, None])
-        self.update_constraint(Bound(None, None, A, const))
+        return Bound(None, None, A, const)
 
     def c_demand(self, p_delta: pd.DataFrame, ytilde_iot: pd.DataFrame):
         const = np.array(
@@ -738,7 +741,6 @@ class CobbDouglasLPSetup:
         dtilde_iot: pd.DataFrame,
         ytilde_iot: pd.DataFrame,
         p_delta: pd.DataFrame,
-        p_kappa: pd.Series,
         p_tau: float,
         substitution_rate: float,
     ) -> None:
@@ -830,7 +832,6 @@ class CobbDouglasLPSetup:
         )
         self.c_input(self.o_iot, self.q_iot, p_tau)
         self.c_output(self.q_iot)
-        self.c_capital(p_kappa)
         self.c_demand(p_delta, self.ytilde_iot)
 
         # TODO: get these weights from a data source
@@ -846,7 +847,10 @@ class CobbDouglasLPSetup:
 
 
     def finalise_setup(
-        self, p_lambda: pd.DataFrame, wfh_productivity: Mapping[Sector, float]
+        self,
+        p_lambda: pd.DataFrame,
+        p_kappa: Mapping[Sector, float],
+        wfh_productivity: Mapping[Sector, float]
     ):
         p_lambda_dict = {
             (i, s): p_lambda.loc[i, s] for i in Sector for s in LabourState
@@ -855,8 +859,8 @@ class CobbDouglasLPSetup:
         bounds = self.add_constraint(
             self.c_labour_quantity(p_lambda_dict, wfh_productivity), bounds
         )
-        bounds = bounds.to_array()
-        return self.objective_c, bounds, self.lp_bounds
+        bounds = self.add_constraint(self.c_capital(p_kappa=p_kappa), bounds)
+        return self.objective_c, bounds.to_array(), self.lp_bounds
 
 
 class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
@@ -901,7 +905,6 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self.input_output_intermediate,
             self.input_output_final,
             self.p_delta,
-            self.p_kappa,
             self.p_tau,
             self.substitution_rate,
         )
@@ -1020,7 +1023,8 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
     def _simulate(
         self,
         time:int,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        capital: Mapping[Sector,float],
     ) -> IoGdpResult:
 
         # preprocess parameters
@@ -1033,8 +1037,10 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             }
         )
 
+        p_kappa = capital
+
         # setup linear program
-        objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, self.wfh)
+        objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, p_kappa, self.wfh)
 
         # run linear program
         r = linprog(
@@ -1062,12 +1068,18 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        other_params: Optional[Mapping[str,Any]] = None
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
         )
 
-        result = self._simulate(time, utilisations)
+        if other_params is None or "capital" not in other_params:
+            raise ValueError("capital parameter required")
+        else:
+            capital = other_params["capital"]
+
+        result = self._simulate(time, utilisations, capital)
         # gdp adjustment disabled for now TODO: reimplement later
         # if not lockdown:
         #    gdp = self.adjust_gdp(time, gdp)
