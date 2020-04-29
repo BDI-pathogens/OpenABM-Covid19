@@ -10,7 +10,7 @@ from adapter_covid19.personal_insolvency import (
     PersonalBankruptcyResults,
     PersonalBankruptcyModel,
 )
-from adapter_covid19.enums import Region, Sector, Age
+from adapter_covid19.enums import Region, Sector, Age, PrimaryInput
 
 
 @dataclass
@@ -108,11 +108,14 @@ class Economics:
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
         else:
-            gdp_discount = self.gdp_model.results.fraction_gdp_by_sector(time - 1)
+            primary_inputs = self.gdp_model.results.primary_inputs[time - 1]
+            negative_net_operating_surplus = {s: -sum(
+                [primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] for r, a in
+                 itertools.product(Region, Age)]) for s in Sector}
             if lockdown:
-                corporates_solvent_fraction = self.corporate_model.gdp_discount_factor(
-                    time - self.first_lockdown_time, gdp_discount
-                )
+                corporates_solvent_fraction = self.corporate_model.simulate(
+                    time - self.first_lockdown_time, negative_net_operating_surplus
+                ).gdp_discount_factor
             else:
                 corporates_solvent_fraction = self.results.corporate_solvencies[
                     time - 1
