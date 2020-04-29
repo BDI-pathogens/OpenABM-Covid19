@@ -66,6 +66,8 @@ class IoGdpResult(GdpResult):
     def update(self, other):
         self.gdp.update(other.gdp)
         self.workers.update(other.workers)
+        self.max_gdp = other.max_gdp
+        self.max_workers = other.max_workers
         self.primary_inputs.update(other.primary_inputs)
         self.final_uses.update(other.final_uses)
         self.compensation_paid.update(other.compensation_paid)
