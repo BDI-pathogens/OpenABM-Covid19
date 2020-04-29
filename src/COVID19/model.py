@@ -81,6 +81,12 @@ class ChildAdultElderlyEnum(enum.Enum):
     _adult = 1
     _elderly = 2
 
+class WorkNetworkEnum(enum.Enum):
+    work_network_0_9 = 0
+    work_network_10_19 = 1
+    work_network_20_69 = 2
+    work_network_70_79 = 3
+    work_network_80 = 4
 
 class ListIndiciesEnum(enum.Enum):
     _1 = 0

@@ -120,7 +120,7 @@ typedef struct{
 	int app_turn_on_time;   				// time after which the app is usable
 	double daily_non_cov_symptoms_rate; 				// Rate of seasonal flu
 
-	double lockdown_work_network_multiplier;		// during lockdown distancing this multiplier is applied to the fraction of work network connections made
+	double lockdown_work_network_multiplier[N_WORK_NETWORKS];   // during lockdown distancing this multiplier is applied to the fraction of work network connections made
 	double lockdown_random_network_multiplier; 		// during lockdown distancing this multiplier is applied to the fraction of random network connections made
 	double lockdown_house_interaction_multiplier;  	// during lockdown this multiplier is applied to the strengin of home connections
 	int lockdown_time_on;							// lockdown turned on at this time
@@ -174,7 +174,7 @@ double get_model_param_risk_score( model*, int, int, int );
 double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *model);
 double get_model_param_lockdown_random_network_multiplier(model *model);
-double get_model_param_lockdown_work_network_multiplier(model *model);
+double get_model_param_lockdown_work_network_multiplier(model *model, int index);
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -197,12 +197,14 @@ int set_model_param_app_turned_on(model *model, int value);
 int set_model_param_lockdown_on(model *model, int value);
 int set_model_param_lockdown_house_interaction_multiplier(model *model, double value);
 int set_model_param_lockdown_random_network_multiplier(model *model, double value);
-int set_model_param_lockdown_work_network_multiplier(model *model, double value);
+int set_model_param_lockdown_work_network_multiplier(model *model, double value, int index);
 int set_model_param_lockdown_elderly_on(model *model, int value);
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
 
+void update_work_intervention_state(model *model, int value);
+void update_household_intervention_state(model *model, int value);
 void check_params( parameters* );
 void destroy_params( parameters* );
 

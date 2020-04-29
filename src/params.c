@@ -229,9 +229,10 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 *  Name:        get_model_param_lockdown_work_network_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_model_param_lockdown_work_network_multiplier(model *model)
+double get_model_param_lockdown_work_network_multiplier(model *model, int index)
 {
-	return model->params->lockdown_work_network_multiplier;
+	if ( index < N_WORK_NETWORKS)  return FALSE;
+	return model->params->lockdown_work_network_multiplier[index];
 }
 
 /*****************************************************************************************
@@ -512,36 +513,54 @@ int set_model_param_risk_score_household(
 *  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
+
+void update_work_intervention_state(model *model, int value){
+	int network;
+	parameters *params = model->params;
+
+	if (value == TRUE) {
+		// Turn intervetions on
+		for (network = 0; network < N_WORK_NETWORKS; network++ )
+		{
+			params->daily_fraction_work_used[network] = params->daily_fraction_work *
+				        					            params->lockdown_work_network_multiplier[network];
+		}
+	}
+	else {
+		for (network = 0; network < N_WORK_NETWORKS; network++ )
+		{
+			params->daily_fraction_work_used[network] = params->daily_fraction_work;
+		}
+	}
+}
+
+
+void update_household_intervention_state(model *model, int value){
+	if (value == TRUE){
+		// Turn household multipliers on
+		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD] *
+															   model->params->lockdown_house_interaction_multiplier;
+	}
+	else
+	{
+		//Set household transmission to non multiplied state
+		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD];
+	}
+}
+
 int set_model_param_lockdown_on( model *model, int value )
 {
 	long pdx;
 	int network;
 	parameters *params = model->params;
-
-	if( value == TRUE )
-	{
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
-			params->daily_fraction_work_used[network] = params->daily_fraction_work *
-														params->lockdown_work_network_multiplier;
-
-		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD] *
-																params->lockdown_house_interaction_multiplier;
-	}
-	else
-	if( value == FALSE )
-	{
-		if( !params->lockdown_on )
+	// If lockdown is off and we're setting it off again, return
+	if( value == FALSE && !params->lockdown_on ){
 			return TRUE;
-
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
-			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
-				params->daily_fraction_work_used[network] = params->daily_fraction_work;
-
-		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD];
 	}
-	else
-		return FALSE;
-
+	else {
+		update_work_intervention_state(model, value);
+		update_household_intervention_state(model, value);
+	}
 	params->lockdown_on = value;
 	set_up_infectious_curves( model );
 
@@ -567,7 +586,7 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		for( network = 0; network < N_WORK_NETWORKS; network++ )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
-															  params->lockdown_work_network_multiplier;
+															  params->lockdown_work_network_multiplier[network];
 	}
 	else
 	if( value == FALSE )
@@ -635,9 +654,10 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 *  Name:        set_model_param_lockdown_work_network_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_lockdown_work_network_multiplier( model *model, double value )
+int set_model_param_lockdown_work_network_multiplier( model *model, double value, int index )
 {
-	model->params->lockdown_work_network_multiplier = value;
+	if (index > N_WORK_NETWORKS) return FALSE;
+	model->params->lockdown_work_network_multiplier[index] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );
