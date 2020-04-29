@@ -96,12 +96,21 @@ int get_model_param_quarantine_household_on_positive(model *model)
 }
 
 /*****************************************************************************************
-*  Name:		get_model_param_quarantine_household_on_traced
+*  Name:		get_model_param_quarantine_household_on_traced_positive
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_model_param_quarantine_household_on_traced(model *model)
+int get_model_param_quarantine_household_on_traced_positive(model *model)
 {
-    return model->params->quarantine_household_on_traced;
+    return model->params->quarantine_household_on_traced_positive;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_on_traced_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_on_traced_symptoms(model *model)
+{
+    return model->params->quarantine_household_on_traced_symptoms;
 }
 
 /*****************************************************************************************
@@ -288,12 +297,22 @@ int set_model_param_quarantine_household_on_positive( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_model_param_quarantine_household_on_traced
+*  Name:		set_model_param_quarantine_household_on_traced_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_quarantine_household_on_traced( model *model, int value )
+int set_model_param_quarantine_household_on_traced_positive( model *model, int value )
 {
-    model->params->quarantine_household_on_traced = value;
+    model->params->quarantine_household_on_traced_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_on_traced_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_on_traced_symptoms( model *model, int value )
+{
+    model->params->quarantine_household_on_traced_symptoms = value;
     return TRUE;
 }
 
