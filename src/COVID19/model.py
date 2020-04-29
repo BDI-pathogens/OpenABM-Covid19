@@ -42,7 +42,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
 ]
 
 class EVENT_TYPES(enum.Enum):
-    UNINFECTED = 0
+    SUSCEPTIBLE = 0
     PRESYMPTOMATIC = 1 # Pre-symptompatic, severe disease (progressing to symptomatic severe)
     PRESYMPTOMATIC_MILD = 2 # Pre-symptompatic, mild disease (progressing to symptomatic mild)
     ASYMPTOMATIC = 3 # Asymptompatic (progressing to recovered)

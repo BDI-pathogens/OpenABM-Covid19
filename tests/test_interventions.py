@@ -219,13 +219,20 @@ class TestClass(object):
 
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
-        df_int = pd.read_csv(
-            constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True
-        )
-
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            sep = ",", comment = "#", skipinitialspace = True)
+            
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+            sep = ",", comment = "#", skipinitialspace = True)
+        
+        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True)
+        
+        # Merge columns from transmission file into individual file
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+        
         # get the people who are in quarantine and were on the previous step
         df_quar = df_indiv[
             (df_indiv["quarantined"] == 1) & (df_indiv["time_quarantined"] < end_time)
@@ -233,33 +240,45 @@ class TestClass(object):
         df_quar = df_quar.loc[:, "ID"]
 
         # get the number of interactions by type
-        df_int = df_int.groupby(["ID", "type"]).size().reset_index(name="connections")
+        df_int = df_int.groupby(["ID_1", "type"]).size().reset_index(name="connections")
 
         # check to see there are no work connections
         df_test = pd.merge(
-            df_quar, df_int[df_int["type"] == constant.WORK], on="ID", how="inner"
+            df_quar, df_int[df_int["type"] == constant.WORK], 
+            left_on = "ID", right_on = "ID_1", how="inner"
         )
+        
         np.testing.assert_equal(
             len(df_test), 0, "quarantined individual with work contacts"
         )
 
         # check to see there are are household connections
         df_test = pd.merge(
-            df_quar, df_int[df_int["type"] == constant.HOUSEHOLD], on="ID", how="inner"
+            df_quar, df_int[df_int["type"] == constant.HOUSEHOLD], 
+            left_on = "ID", right_on = "ID_1", how="inner"
         )
         np.testing.assert_equal(
             len(df_test) > 0,
             True,
             "quarantined individuals have no household connections",
         )
-
+        
         # check to whether the number of random connections are as specified
         df_test = pd.merge(
-            df_quar, df_int[df_int["type"] == constant.RANDOM], on="ID", how="left"
+            df_quar, df_int[df_int["type"] == constant.RANDOM], 
+            left_on = "ID", right_on = "ID_1", how="inner"
         )
+        
         df_test.fillna(0, inplace=True)
+        
+        # In some instances df_test has zero rows
+        if len(df_test) == 0:
+            expectation = 0
+        else:
+            expectation = df_test.loc[:, "connections"].mean()
+        
         np.testing.assert_allclose(
-            df_test.loc[:, "connections"].mean(),
+            expectation,
             float(params.get_param("quarantined_daily_interactions")),
             rtol=tolerance,
         )
@@ -283,10 +302,12 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
-        df_int = pd.read_csv(
-            constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True
-        )
-
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+        
         # get the people who are in quarantine and were on the last step
         df_quar = df_indiv[
             (df_indiv["quarantined"] == 1) & (df_indiv["time_quarantined"] == end_time)
@@ -331,6 +352,7 @@ class TestClass(object):
             np.testing.assert_equal(
                 True, False, "no test run due test_params not being testable"
             )
+    
     def test_quarantine_household_on_symptoms(self, test_params ):
         """
         Tests households are quarantine when somebody has symptoms
@@ -343,13 +365,15 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)
 
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_int = pd.read_csv( constant.TEST_INTERACTION_FILE, 
+            comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, 
+            comment="#", sep=",", skipinitialspace=True )
         
         # prepare the interaction data to get all household interations
-        df_int.rename( columns = { "ID":"index_ID", "ID_2":"traced_ID"}, inplace = True )
-        df_int[ "household" ] = ( df_int[ "house_no" ] == df_int[ "house_no_2" ] )
+        df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
+        df_int[ "household" ] = ( df_int[ "house_no_1" ] == df_int[ "house_no_2" ] )
         df_int = df_int.loc[ :, [ "index_ID", "traced_ID", "household"]]
                 
         # don't consider ones with multiple index events
@@ -445,8 +469,8 @@ class TestClass(object):
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # prepare the interaction data to get all household interations
-        df_int.rename( columns = { "ID":"index_ID", "ID_2":"traced_ID"}, inplace = True )
-        df_int[ "household" ] = ( df_int[ "house_no" ] == df_int[ "house_no_2" ] )
+        df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
+        df_int[ "household" ] = ( df_int[ "house_no_1" ] == df_int[ "house_no_2" ] )
         df_int = df_int.loc[ :, [ "index_ID", "traced_ID", "household"]]
 
         # don't consider ones with multiple index events
@@ -487,6 +511,11 @@ class TestClass(object):
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
         
         app_users  = df_indiv[ df_indiv[ "app_user" ] == 1 ].groupby( [ "age_group" ] ).size().reset_index(name="app_users")    
         all_users  = df_indiv.groupby( [ "age_group" ] ).size().reset_index(name="all")    

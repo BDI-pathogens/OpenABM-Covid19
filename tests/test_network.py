@@ -203,15 +203,15 @@ class TestClass(object):
         df_int        = pd.read_csv(constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         
-        left  = df_int.loc[ :, ['ID', 'ID_2'] ]        
-        right = df_int.loc[ :, ['ID', 'ID_2'] ]
-        right.rename( columns =  {"ID":"ID_2","ID_2":"ID"},inplace=True)
+        left  = df_int.loc[ :, ['ID_1', 'ID_2'] ]        
+        right = df_int.loc[ :, ['ID_1', 'ID_2'] ]
+        right.rename( columns =  {"ID_1":"ID_2","ID_2":"ID_1"},inplace=True)
 
         left.drop_duplicates(keep="first",inplace=True)
         right.drop_duplicates(keep="first",inplace=True)
-        join = pd.merge(left,right,on=["ID","ID_2"], how="inner")
+        join = pd.merge(left,right,on=["ID_1","ID_2"], how="inner")
         
-        N_base = len( left )        
+        N_base = len( left )
         N_join = len( join )
         
         np.testing.assert_equal( N_base, N_join )
@@ -239,13 +239,14 @@ class TestClass(object):
         # get the number of interactions per person on the housegold n
         df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == constant.HOUSEHOLD]
-        np.testing.assert_array_equal( df_int.loc[:,"house_no"], df_int.loc[:,"house_no_2"] )
+        np.testing.assert_array_equal( df_int.loc[:,"house_no_1"], df_int.loc[:,"house_no_2"] )
 
-        df_int  = df_int.groupby(["house_no"]).size().reset_index(name="connections")
+        df_int  = df_int.groupby(["house_no_1"]).size().reset_index(name="connections")
         
         # see whether that is the expected number
-        df_house = pd.merge( df_house,expectedConnections,on =[ "size" ], how = "left")
-        df_house = pd.merge( df_house,df_int, on =[ "house_no" ], how = "outer" )
+        df_house = pd.merge( df_house, expectedConnections,on =[ "size" ], how = "left")
+        df_house = pd.merge( df_house,df_int,
+            left_on =[ "house_no" ], right_on = ["house_no_1"], how = "outer" )
 
         # check single person household without connections
         N_nocon        = df_house.loc[:,["connections"]].isnull().sum().sum()
@@ -277,8 +278,10 @@ class TestClass(object):
         tolerance = 0.03
         
         # note when counting connections we count each end
-        ageTypeMap = pd.DataFrame( data={ "age_group": constant.AGES, "age_type": constant.AGE_TYPES } );
-                
+        ageTypeMap = pd.DataFrame( data={
+            "age_group": constant.AGES, 
+            "age_type": constant.AGE_TYPES } );
+        
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("mean_random_interactions_child",  mean_random_interactions_child )
@@ -292,7 +295,7 @@ class TestClass(object):
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-       
+        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,["ID","age_group"]] 
@@ -303,14 +306,14 @@ class TestClass(object):
         df_int = df_int[ df_int["type"] == constant.RANDOM ]
         
         # check the correlation is below a threshold
-        corr = df_int['house_no'].corr(df_int['house_no_2'])
+        corr = df_int['house_no_1'].corr(df_int['house_no_2'])
         if ( len( df_int ) > 1 ) :
             np.testing.assert_allclose( corr, 0, atol = tolerance )
         
-        df_int = df_int.loc[:,["ID"]] 
-        df_int = df_int.groupby(["ID"]).size().reset_index(name="connections")
-        df_int = pd.merge( df_indiv, df_int, on = "ID", how = "left" )
-        df_int.fillna(0,inplace=True)
+        df_int = df_int.loc[:,["ID_1"]] 
+        df_int = df_int.groupby(["ID_1"]).size().reset_index(name="connections")
+        df_int = pd.merge( df_indiv, df_int, left_on = "ID", right_on = "ID_1", how = "left" )
+        df_int.fillna(0, inplace = True)
         
         # check mean and 
         mean = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].mean()
@@ -338,19 +341,24 @@ class TestClass(object):
             mean_work_interactions_elderly,
             daily_fraction_work
         ):
-
         """
         Test to check that peoples work connections are on the correct network and
         that they have correct number on average
         """  
-      
+        
         # absolute tolerance
         tolerance = 0.035
         
         # note when counting connections we count each end
-        ageTypeMap         = pd.DataFrame( data={ "age_group": constant.AGES, "age_type": constant.AGE_TYPES } );
-        ageTypeMap2        = pd.DataFrame( data={ "age_group_2": constant.AGES, "age_type_2": constant.AGE_TYPES } );
-        paramByNetworkType = [ mean_work_interactions_child, mean_work_interactions_adult, mean_work_interactions_elderly ]      
+        ageTypeMap1 = pd.DataFrame( 
+            data={ "age_group_1": constant.AGES, "age_type_1": constant.AGE_TYPES } );
+        ageTypeMap2 = pd.DataFrame(
+            data={ "age_group_2": constant.AGES, "age_type_2": constant.AGE_TYPES } );
+            
+        paramByNetworkType = [ 
+            mean_work_interactions_child, 
+            mean_work_interactions_adult, 
+            mean_work_interactions_elderly ]
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
@@ -360,57 +368,60 @@ class TestClass(object):
         params.set_param( "mean_work_interactions_elderly", mean_work_interactions_elderly )
         params.set_param( "daily_fraction_work",            daily_fraction_work )
         params.set_param( "n_total",n_total)
-        params.write_params(constant.TEST_DATA_FILE)        
+        params.write_params(constant.TEST_DATA_FILE)
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
        
         # get all the people, need to hand case if people having zero connections
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
-        df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
+        df_indiv = pd.merge( df_indiv, ageTypeMap1, 
+            left_on = "age_group", right_on = "age_group_1", how = "left" )
 
         # get all the work connections
-        df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, 
+            comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == constant.WORK ]
-        df_int = pd.merge( df_int, ageTypeMap,  on = "age_group", how = "left" )
+        df_int = pd.merge( df_int, ageTypeMap1,  on = "age_group_1", how = "left" )
         df_int = pd.merge( df_int, ageTypeMap2, on = "age_group_2", how = "left" )
 
         # get the number of connections for each person
-        df_n_int = df_int.groupby( [ "ID" ] ).size().reset_index( name = "connections" )
-        df_n_int = pd.merge( df_indiv, df_n_int, on = "ID", how = "left" )
-        df_n_int.fillna( 0, inplace=True )
+        df_n_int = df_int.groupby( [ "ID_1" ] ).size().reset_index( name = "connections" )
+        df_n_int = pd.merge( df_indiv, df_n_int, left_on = "ID", right_on = "ID_1", how = "left" )
+        df_n_int.fillna( 0, inplace = True )
 
         # check there are connections for each age group
         for age in constant.AGES:
             if ( paramByNetworkType[ constant.NETWORK_TYPES[ constant.AGE_TYPES[ age ] ] ]  > 0 ) :
-                n = sum( df_int[ "age_group" ] == age )
+                n = sum( df_int[ "age_group_1" ] == age )
                 np.testing.assert_equal( n > 0, True, "there are no work connections for age_group " + str( age ) )
            
         # check the correct people are on each network 
         n = sum( 
-            ( df_int[ "age_group" ] == constant.AGE_0_9 ) & 
+            ( df_int[ "age_group_1" ] == constant.AGE_0_9 ) & 
             ( df_int[ "age_group_2" ] != constant.AGE_0_9 ) & 
             ( df_int[ "age_type_2" ] != constant.ADULT ) 
             )
         np.testing.assert_equal( n, 0, "only 0_9 and adults on the 0_9 network" )
         
         n = sum( 
-            ( df_int[ "age_group" ] == constant.AGE_10_19 ) & 
+            ( df_int[ "age_group_1" ] == constant.AGE_10_19 ) & 
             ( df_int[ "age_group_2" ] != constant.AGE_10_19 ) & 
             ( df_int[ "age_type_2" ] != constant.ADULT ) 
             )
         np.testing.assert_equal( n, 0, "only 10_19 and adults on the 10_19 network" )
         
         n = sum( 
-            ( df_int[ "age_group" ] == constant.AGE_70_79 ) & 
+            ( df_int[ "age_group_1" ] == constant.AGE_70_79 ) & 
             ( df_int[ "age_group_2" ] != constant.AGE_70_79 ) & 
             ( df_int[ "age_type_2" ] != constant.ADULT ) 
             )
         np.testing.assert_equal( n, 0, "only 70_79 and adults on the 70_79 network" )
         
         n = sum( 
-            ( df_int[ "age_group" ] == constant.AGE_80 ) & 
+            ( df_int[ "age_group_1" ] == constant.AGE_80 ) & 
             ( df_int[ "age_group_2" ] != constant.AGE_80 ) & 
             ( df_int[ "age_type_2" ] != constant.ADULT ) 
             )
@@ -429,7 +440,7 @@ class TestClass(object):
             np.testing.assert_allclose( mean, mean_work_interactions_elderly, rtol = tolerance )
       
         # check the correlation is below a threshold
-        corr = df_int['house_no'].corr(df_int['house_no_2'])
+        corr = df_int['house_no_1'].corr(df_int['house_no_2'])
         if ( len( df_int ) > 1 ) :
             np.testing.assert_allclose( corr, 0, atol = tolerance )
 

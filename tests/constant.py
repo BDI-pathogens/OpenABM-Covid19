@@ -31,7 +31,7 @@ TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
 class EVENT_TYPES(Enum):
-    UNINFECTED = 0
+    SUSCEPTIBLE = 0
     PRESYMPTOMATIC = 1
     PRESYMPTOMATIC_MILD = 2
     ASYMPTOMATIC = 3
