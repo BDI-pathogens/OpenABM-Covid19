@@ -50,6 +50,32 @@ class GdpResult:
         }
 
 
+@dataclass
+class IoGdpResult(GdpResult):
+    primary_inputs: MutableMapping[int, Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]]
+    final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
+    compensation_paid: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    compensation_received: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    compensation_subsidy: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    max_primary_inputs: Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
+    max_final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
+    max_compensation_paid: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    max_compensation_received: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    max_compensation_subsidy: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+
+    def update(self, other):
+        self.gdp.update(other.gdp)
+        self.workers.update(other.workers)
+        self.primary_inputs.update(other.primary_inputs)
+        self.final_uses.update(other.final_uses)
+        self.compensation_paid.update(other.compensation_paid)
+        self.compensation_received.update(other.compensation_received)
+        self.compensation_subsidy.update(other.compensation_subsidy)
+        self.max_compensation_paid.update(other.max_compensation_paid)
+        self.max_compensation_received.update(other.max_compensation_received)
+        self.max_compensation_subsidy.update(other.max_compensation_subsidy)
+
+
 class BaseGDPBackboneMixin(abc.ABC):
     beta: Mapping[Sector, float]
 
@@ -716,6 +742,7 @@ class CobbDouglasLPSetup:
         p_tau: float,
         p_substitute: float,
     ) -> None:
+        self.iot_p = iot_p
         self.dtilde_iot = dtilde_iot
         self.ytilde_iot = ytilde_iot
         self.xtilde_iot = pd.concat(
@@ -806,6 +833,18 @@ class CobbDouglasLPSetup:
         self.c_capital(p_kappa)
         self.c_demand(p_delta, self.ytilde_iot)
 
+        # TODO: get these weights from a data source
+        # invariant: for a fixed sector, summing weights over all regions and ages gives 1
+        self.labour_weight_region_age_per_sector_by_count = {
+            (sector,region,age): 1/(len(Region)*len(Age))
+                for sector in Sector for region in Region for age in Age
+        }
+        self.labour_weight_region_age_per_sector_by_compensation = {
+            (sector,region,age): 1/(len(Region)*len(Age))
+                for sector in Sector for region in Region for age in Age
+        }
+
+
     def finalise_setup(
         self, p_lambda: pd.DataFrame, wfh_productivity: Mapping[Sector, float]
     ):
@@ -840,6 +879,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         self.p_tau = p_tau
         self.p_substitute = p_substitute
         self.setup = CobbDouglasLPSetup()
+        self.results = IoGdpResult({},{},0,0,{},{},{},{},{},{},{},{},{},{})
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {
@@ -865,33 +905,142 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self.p_tau,
             self.p_substitute,
         )
-        # need to override the max_gdp value based on data loaded during setup
-        self.results.max_gdp = self.setup.max_gdp
 
-    def _simulate_workers(
-        self, region: Region, sector: Sector, age: Age, utilisation: float
-    ) -> float:
-        return utilisation * self.workers[region, sector, age]
-
-    def _simulate_gdp(
-        self, utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
-    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+    def _postprocess_model_outputs(self, time, utilisations, r):
+        x = pd.Series(r.x,index=self.setup.variables)
+        # gdp
+        max_gdp = self.setup.max_gdp
         gdp = {}
-        # TODO: get these weights from a data source
-        # invariant: for a fixed sector, summing weights over all regions and ages gives 1
-        weight_region_age_per_sector = {
-            (sector,region,age): 1/(len(Region)*len(Age))
-                for sector in Sector for region in Region for age in Age
+        for sector in Sector:
+            gdp_for_sector = self.setup.objective_per_sector[sector].dot(
+                r.x
+            )
+            # split outputs per region and age
+            # note: these are absolute values to be interpreted relative to iot data loaded in setup
+            for region in Region:
+                for age in Age:
+                    gdp[region, sector, age] = self.setup.labour_weight_region_age_per_sector_by_compensation[
+                                                   sector, region, age] * gdp_for_sector
+
+        # workers
+        max_workers = sum(
+            self.workers[key] for key in itertools.product(Region, Sector, Age)
+        )
+        workers = {
+            (r, s, a):  utilisations[LabourState.WORKING, r, s, a] * self.workers[r, s, a]
+            for r, s, a in itertools.product(Region, Sector, Age)
         }
+
+        # primary inputs
+        # TODO: all these loops over Region and Age pairs are terribly slow, making postprocessing take longer than
+        #       solving. these really need to be vectorized
+        max_primary_inputs = {}
+        for p, s in itertools.product(PrimaryInput, Sector):
+            primary_input_value = self.setup.iot_p.loc[s, p]
+            for r, a in itertools.product(Region, Age):
+                max_primary_inputs[p,r,s,a] = primary_input_value * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+        primary_inputs = {}
+        for s in Sector:
+            # imports
+            imports_sector = x[self.setup.V("x",M.I,s)]
+            for r, a in itertools.product(Region, Age):
+                primary_inputs[PrimaryInput.IMPORTS,r,s,a] = imports_sector * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+            # labour
+            labour_sector = x[self.setup.V("xtilde",M.L,s)]
+            for r, a in itertools.product(Region, Age):
+                primary_inputs[PrimaryInput.COMPENSATION,r,s,a] = labour_sector * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+            # taxes
+            o = self.p_tau / self.setup.q_iot.loc[s] * x[self.setup.V("q",s)]
+            # TODO: double-check net-subsidized sectors
+            taxes_on_production_share = self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION] / \
+                                                  (self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION] +
+                                                   self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTS])
+            taxes_production = o * taxes_on_production_share
+            taxes_products = o * taxes_on_production_share
+            for r, a in itertools.product(Region, Age):
+                primary_inputs[PrimaryInput.TAXES_PRODUCTION,r,s,a] = taxes_production * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                primary_inputs[PrimaryInput.TAXES_PRODUCTS, r, s, a] = taxes_products * \
+                                                                                  self.setup.labour_weight_region_age_per_sector_by_compensation[
+                                                                                      s, r, a]
+            # capital
+            gross_operating_surplus = x[self.setup.V("xtilde", M.K, s)]
+            if gross_operating_surplus >= 0 :
+                fixed_capital_consumption_share = self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] / \
+                                                  (self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] +
+                                                   self.setup.iot_p.loc[s,PrimaryInput.NET_OPERATING_SURPLUS])
+                consumption_of_fixed_capital = gross_operating_surplus * fixed_capital_consumption_share
+                net_operating_surplus = gross_operating_surplus * (1-fixed_capital_consumption_share)
+            else:
+                consumption_of_fixed_capital = 0
+                net_operating_surplus = gross_operating_surplus
+            for r, a in itertools.product(Region, Age):
+                primary_inputs[PrimaryInput.FIXED_CAPITAL_CONSUMPTION,r,s,a] = consumption_of_fixed_capital * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] = net_operating_surplus * \
+                                                                                  self.setup.labour_weight_region_age_per_sector_by_compensation[
+                                                                                      s, r, a]
+
+        # final uses
+        max_final_uses = {(u, s): self.setup.ytilde_iot.loc[s,u] for u, s in itertools.product(FinalUse, Sector)}
+        final_uses = {}
+        for s in Sector:
+            total_final_use = x[self.setup.V("y",s)]
+            for u in FinalUse:
+                final_uses[u,s] = total_final_use * (self.setup.ytilde_iot.loc[s,u]/self.setup.ytilde_total_iot.loc[s])
+
+        # compensation
+        max_compensation = {(r,s,a): max_primary_inputs[PrimaryInput.COMPENSATION,r,s,a] for r,s,a in itertools.product(Region, Sector, Age)}
+        max_compensation_paid = max_compensation
+        max_compensation_received = max_compensation
+        max_compensation_subsidy = max_compensation
+        compensation_paid = {} # Note: this is redundant, also returned from primary inputs
+        compensation_received = {}
+        compensation_subsidy = {}
+        for s in Sector:
+            compensation = x[self.setup.V("xtilde",M.L,s)]
+            for r, a in itertools.product(Region, Age):
+                received_adjustment = (utilisations[LabourState.WORKING, r, s, a] + utilisations[LabourState.WFH, r, s, a] + utilisations[LabourState.ILL, r, s, a] + 0.8 * utilisations[LabourState.FURLOUGHED, r, s, a]) / \
+                                        (utilisations[LabourState.WORKING, r, s, a] + utilisations[LabourState.WFH, r, s, a] + utilisations[LabourState.ILL, r, s, a])
+                compensation_paid[r,s,a] = compensation * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                compensation_received[r,s,a] = received_adjustment * compensation_paid[r,s,a]
+                compensation_subsidy[r,s,a] = compensation_received[r,s,a] - compensation_paid[r,s,a]
+
+
+        return IoGdpResult(gdp={time: gdp},
+                           workers={time: workers},
+                           max_gdp=max_gdp,
+                           max_workers=max_workers,
+                           primary_inputs={time: primary_inputs},
+                           final_uses={time: final_uses},
+                           compensation_paid={time: compensation_paid},
+                           compensation_received={time: compensation_received},
+                           compensation_subsidy={time: compensation_subsidy},
+                           max_primary_inputs=max_primary_inputs,
+                           max_final_uses=max_final_uses,
+                           max_compensation_paid=max_compensation_paid,
+                           max_compensation_received=max_compensation_received,
+                           max_compensation_subsidy=max_compensation_subsidy)
+
+
+    def _simulate(
+        self,
+        time:int,
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
+    ) -> IoGdpResult:
+
+        # preprocess parameters
         p_lambda = pd.DataFrame(
             {
-                l: {s: np.sum([weight_region_age_per_sector[s,region,age] * utilisations[l, region, s, age]
+                l: {s: np.sum([self.setup.labour_weight_region_age_per_sector_by_compensation[s,region,age] * utilisations[l, region, s, age]
                                for region in Region for age in Age])
                     for s in Sector}
                 for l in LabourState
             }
         )
+
+        # setup linear program
         objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, self.wfh)
+
+        # run linear program
         r = linprog(
             c=objective,
             A_ub=bounds[0],
@@ -902,19 +1051,14 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             method="interior-point",
             options={"maxiter": 1e4, "disp": False, "autoscale": False},
         )
+
+        # check result
         if not r.success:
             raise ValueError(r.message)
-        # TODO: factor out postprocessing of model outputs
-        for sector in Sector:
-            gdp_for_sector = self.setup.objective_per_sector[sector].dot(
-                r.x
-            )
-            # split outputs per region and age
-            # note: these are absolute values to be interpreted relative to iot data loaded in setup
-            for region in Region:
-                for age in Age:
-                    gdp[region, sector, age] = weight_region_age_per_sector[sector,region,age] * gdp_for_sector
-        return gdp
+
+        # postprocess model parameters
+        return self._postprocess_model_outputs(time,utilisations,r)
+
 
     def simulate(
         self,
@@ -927,14 +1071,8 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             time, lockdown, lockdown_exit_time, utilisations
         )
 
-        workers = {
-            (r, s, a): self._simulate_workers(
-                r, s, a, utilisations[LabourState.WORKING, r, s, a]
-            )
-            for r, s, a in itertools.product(Region, Sector, Age)
-        }
-        gdp = self._simulate_gdp(utilisations)
-        if not lockdown:
-            gdp = self.adjust_gdp(time, gdp)
-        self.results.gdp[time] = gdp
-        self.results.workers[time] = workers
+        result = self._simulate(time, utilisations)
+        # gdp adjustment disabled for now TODO: reimplement later
+        # if not lockdown:
+        #    gdp = self.adjust_gdp(time, gdp)
+        self.results.update(result)
