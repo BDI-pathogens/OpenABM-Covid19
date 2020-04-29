@@ -641,9 +641,10 @@ double get_param_daily_non_cov_symptoms_rate(parameters *params)
 *  Name:		get_param_lockdown_work_network_multiplier
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
-double get_param_lockdown_work_network_multiplier(parameters *params)
+double get_param_lockdown_work_network_multiplier(parameters *params, int idx)
 {
-    return params->lockdown_work_network_multiplier;
+    if (idx >= N_WORK_NETWORKS) return FALSE;
+    return params->lockdown_work_network_multiplier[idx];
 }
 
 /*****************************************************************************************
@@ -1386,9 +1387,10 @@ int set_param_daily_non_cov_symptoms_rate(parameters *params, double value)
 *  Name:		set_param_lockdown_work_network_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_work_network_multiplier(parameters *params, double value)
+int set_param_lockdown_work_network_multiplier( parameters *params, double value, int idx)
 {
-    params->lockdown_work_network_multiplier = value;
+    if (idx >= N_WORK_NETWORKS) return FALSE;
+    params->lockdown_work_network_multiplier[idx] = value;
     return TRUE;
 }
 
