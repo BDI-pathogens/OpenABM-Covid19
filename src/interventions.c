@@ -285,7 +285,7 @@ void intervention_quarantine_release( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_test_order( model *model, individual *indiv, int time )
 {
-	if( indiv->quarantine_test_result == NO_TEST && !(indiv->is_case) )
+	if( indiv->quarantine_test_result == NO_TEST && !(indiv->infection_events->is_case) )
 	{
 		add_individual_to_event_list( model, TEST_TAKE, indiv, time );
 		indiv->quarantine_test_result = TEST_ORDERED;
@@ -335,7 +335,7 @@ void intervention_test_result( model *model, individual *indiv )
 	}
 	else
 	{
-		if( indiv->is_case == FALSE )
+		if( indiv->infection_events->is_case == FALSE )
 		{
 			set_case( indiv, model->time );
 			add_individual_to_event_list( model, CASE, indiv, model->time );
@@ -630,7 +630,7 @@ void intervention_on_traced(
 	trace_token *index_token
 )
 {
-	if( is_in_hospital( indiv ) || indiv->is_case )
+	if( is_in_hospital( indiv ) || indiv->infection_events->is_case )
 		return;
 
 	parameters *params = model->params;
@@ -691,14 +691,14 @@ void intervention_smart_release( model *model )
 		if( token == NULL )
 			continue;
 
-		if( is_in_hospital( indiv ) || ( indiv->time_event[CASE] >= time_index) )
+		if( is_in_hospital( indiv ) || ( indiv->infection_events->times[CASE] >= time_index) )
 			continue;
 
 		token = token->next_index;
 		while( token != NULL )
 		{
 			contact = token->individual;
-			if( contact->time_event[SYMPTOMATIC] >= time_index )
+			if( contact->infection_events->times[SYMPTOMATIC] >= time_index )
 			{
 				n_symptoms++;
 				break;

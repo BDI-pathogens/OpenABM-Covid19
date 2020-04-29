@@ -90,3 +90,43 @@ class TestClass(object):
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
+    
+    def test_infection_count(self):
+        """
+        Test that infection_count in individual file is consistent with the number of transmission
+        events recorded in the transmission file.  
+        """
+        
+        # Call the model
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        
+        np.testing.assert_equal(df_indiv.infection_count.sum(), df_trans.shape[0])
+
+    def test_infection_count_by_age(self):
+        """
+        Test that infection_count in individual file is consistent with the number of transmission
+        events recorded in the transmission file, when stratified by age
+        """
+        
+        # Call the model
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        # Test the counts when stratified by age
+        # Sum of infection_count in individual file by age group
+        infection_count_by_age_indiv = df_indiv.groupby("age_group").infection_count.sum().values
+        
+        # Count of infection events (rows) by age group of the recipient in transmission file
+        infection_count_by_age_trans = \
+            df_trans.age_group_recipient.value_counts().sort_index().values
+        
+        np.testing.assert_array_equal(
+            infection_count_by_age_indiv,
+            infection_count_by_age_trans
+            )

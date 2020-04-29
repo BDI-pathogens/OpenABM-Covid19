@@ -410,8 +410,8 @@ void write_individual_file(model *model, parameters *params)
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
-	int infector_time_infected, infector_status;
-	long idx, infector_id;
+	int infection_count;
+	long idx;
 	
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", params->param_line_number);
@@ -434,7 +434,8 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
 	fprintf(individual_output_file,"app_user,");
-	fprintf(individual_output_file,"mean_interactions");
+	fprintf(individual_output_file,"mean_interactions,");
+	fprintf(individual_output_file,"infection_count");
 	fprintf(individual_output_file,"\n");
 	
 	// Loop through all individuals in the simulation
@@ -442,33 +443,21 @@ void write_individual_file(model *model, parameters *params)
 	{
 		indiv = &(model->population[idx]);
 		
-		/* Check the individual was infected during the simulation
-		(otherwise the "infector" attribute does not point to another individual) */
-		if(model->population[idx].status != SUSCEPTIBLE)
-		{
-			infector_id			   = indiv->infector->idx;
-			infector_time_infected = time_infected( indiv->infector );
-			infector_status        = indiv->infector_status;
-
-		}
-		else
-		{
-			infector_id            = UNKNOWN;
-			infector_time_infected = UNKNOWN;
-			infector_status        = UNKNOWN;
-		}
+		/* Count the number of times an individual has been infected */
+		infection_count = count_infection_events( indiv );
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%d,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
 			indiv->house_no,
 			indiv->quarantined,
-			indiv->time_event[QUARANTINED],
+			indiv->infection_events->times[QUARANTINED],
 			indiv->app_user,
-			indiv->random_interactions
+			indiv->random_interactions,
+			infection_count
 			);
 	}
 	fclose(individual_output_file);
@@ -527,7 +516,7 @@ void print_interactions_averages(model *model, int header)
 		int_by_age[ indiv->age_type] += n_int;
 		per_by_age[ indiv->age_type]++;
 
-		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->time_event[QUARANTINED] != model->time, 1, 0 ) );
+        cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->infection_events->times[QUARANTINED] != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
 		per_by_cqh[cqh]++;
 	}
@@ -675,6 +664,7 @@ void write_transmissions( model *model )
 	FILE *output_file;
 	long pdx;
 	individual *indiv;
+	infection_event *infection_event;
 
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", model->params->param_line_number);
@@ -716,37 +706,41 @@ void write_transmissions( model *model )
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 		indiv = &(model->population[pdx]);
-		if( indiv->status == SUSCEPTIBLE )
-			continue;
+		infection_event = indiv->infection_events;
 
-		fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
-			indiv->idx,
-			indiv->age_group,
-			indiv->house_no,
-			indiv->work_network,
-			indiv->infector_network,
-			time_infected( indiv ) - time_infected( indiv->infector ),
-			indiv->infector->idx,
-			indiv->infector->age_group,
-			indiv->infector->house_no,
-			indiv->infector->work_network,
-			time_infected( indiv->infector ),
-			indiv->infector_status,
-			time_infected(indiv),
-			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
-			indiv->time_event[PRESYMPTOMATIC_MILD],
-			indiv->time_event[PRESYMPTOMATIC],
-			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
-			indiv->time_event[SYMPTOMATIC_MILD],
-			indiv->time_event[SYMPTOMATIC],
-			indiv->time_event[ASYMPTOMATIC],
-			indiv->time_event[HOSPITALISED],
-			indiv->time_event[CRITICAL],
-			indiv->time_event[HOSPITALISED_RECOVERING],
-			indiv->time_event[DEATH],
-			indiv->time_event[RECOVERED],
-			indiv->time_event[SUSCEPTIBLE]
-		);
+		while(infection_event != NULL)
+		{
+			if( time_infected_infection_event(infection_event) != UNKNOWN )
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+					indiv->idx,
+					indiv->age_group,
+					indiv->house_no,
+					indiv->work_network,
+					infection_event->infector_network,
+					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
+					infection_event->infector->idx,
+					infection_event->infector->age_group,
+					infection_event->infector->house_no,
+					infection_event->infector->work_network,
+					infection_event->time_infected_infector,
+					infection_event->infector_status,
+					time_infected_infection_event( infection_event ),
+					max( infection_event->times[PRESYMPTOMATIC], infection_event->times[PRESYMPTOMATIC_MILD] ),
+					infection_event->times[PRESYMPTOMATIC_MILD],
+					infection_event->times[PRESYMPTOMATIC],
+					max(infection_event->times[SYMPTOMATIC], infection_event->times[SYMPTOMATIC_MILD]),
+					infection_event->times[SYMPTOMATIC_MILD],
+					infection_event->times[SYMPTOMATIC],
+					infection_event->times[ASYMPTOMATIC],
+					infection_event->times[HOSPITALISED],
+					infection_event->times[CRITICAL],
+					infection_event->times[HOSPITALISED_RECOVERING],
+					infection_event->times[DEATH],
+					infection_event->times[RECOVERED],
+					infection_event->times[SUSCEPTIBLE]
+				);
+			infection_event = infection_event->next;
+		}
 	}
 	fclose(output_file);
 }
@@ -803,7 +797,7 @@ void write_trace_tokens( model *model )
 					token->days_since_contact,
 					token->individual->idx,
 					token->individual->status,
-					ifelse( token->individual->status > 0, token->individual->infector->idx, -1 ),
+					ifelse( token->individual->status > 0, token->individual->infection_events->infector->idx, -1 ),
 					time_infected( token->individual )
 				);
 				token = token->next_index;
@@ -875,11 +869,11 @@ void write_trace_tokens_ts( model *model, int initialise )
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
-				if( (contact->status >= SYMPTOMATIC) & (contact->time_event[ASYMPTOMATIC] == UNKNOWN)  &
-					( (contact->time_event[RECOVERED] == UNKNOWN) | (contact->time_event[RECOVERED] > time_index) )
+				if( (contact->status >= SYMPTOMATIC) & (contact->infection_events->times[ASYMPTOMATIC] == UNKNOWN)  &
+				+					( (contact->infection_events->times[RECOVERED] == UNKNOWN) | (contact->infection_events->times[RECOVERED] > time_index) )
 				)
 					n_symptoms++;
-				if( indiv == contact->infector )
+				if( indiv == contact->infection_events->infector )
 					n_infected_by_index++;
 
 				token = token->next_index;
