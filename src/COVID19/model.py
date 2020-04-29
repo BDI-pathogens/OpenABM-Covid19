@@ -293,8 +293,8 @@ class Model:
         # Store the params object so it doesn't go out of scope and get freed
         self._params_obj = params_object
         # Create C parameters object
-        self.c_model = None
         self.c_params = params_object.return_param_object()
+        self.c_model = None
         self._create()
         self._is_running = False
 
@@ -371,8 +371,20 @@ class Model:
         """
         LOGGER.info("Started model creation")
         self.c_model = covid19.create_model(self.c_params)
-        LOGGER.info("Successfuly created model")
-
+        LOGGER.info("Successfuly created model")    
+    
+    def _destroy(self):
+        """
+        Call C function destroy_model and destroy_params
+        """
+        LOGGER.info("Destroying model")
+        covid19.destroy_model(self.c_model)
+    
+    def reload_params(self, new_params_object):
+        # Store the params object so it doesn't go out of scope and get freed
+        self._params_obj = new_params_object
+        self.c_params = new_params_object.return_param_object()
+        
     def one_time_step(self):
         """
         Call C function on_time_step
