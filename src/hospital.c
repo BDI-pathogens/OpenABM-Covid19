@@ -35,11 +35,13 @@ void initialise_hospital(
 
     hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
 
+    //Initialise wards based on the size of the wards and their assigned healthcare workers.
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
         hospital->n_wards[ward_type] = params->n_wards[ward_type];
         hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
 
+        //Initialise ward waiting list for each ward type - i.e. general and ICU.
         hospital->waiting_list[ward_type] = malloc( sizeof (list) );
         initialise_list( hospital->waiting_list[ward_type] );
 
@@ -129,6 +131,7 @@ void add_healthcare_worker_to_hospital( hospital *hospital, long pdx, int hcw_ty
     {
         for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
         {
+            //Breaks if the number of assigned healthcare workers is greater than the max.
             if( hospital->wards[ward_type][ward_idx].n_worker[hcw_type] < hospital->wards[ward_type][ward_idx].n_max_hcw[hcw_type] )
             {
                 hcw_allocated = TRUE;
@@ -285,11 +288,13 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
 
     assigned_hospital = &(model->hospitals[indiv->hospital_idx]); 
     assigned_ward_idx = 0;
-    
+
+    //Check for ward with the smallest number of patients.
     for( ward_idx = 1; ward_idx < assigned_hospital->n_wards[required_ward]; ward_idx++ )
         if( assigned_hospital->wards[required_ward][assigned_ward_idx].patients->size > assigned_hospital->wards[required_ward][ward_idx].patients->size )
             assigned_ward_idx = ward_idx;
 
+        // If the patient can be added to the ward, do so.
     if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
     {  
         indiv->ward_idx  = assigned_ward_idx;
@@ -322,12 +327,13 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
-		hospital = &(model->hospitals[hospital_idx]);
-
+		hospital = &( model->hospitals[hospital_idx] );
+        //Iterate backwards over waiting list.
         for( idx = hospital->waiting_list[ ward_type ]->size - 1; idx >= 0; idx-- )
         {
             indiv = &model->population[ list_element_at( hospital->waiting_list[ ward_type ], idx ) ];
-
+            //If beds are available, add the patient to the required ward and schedule the relevant transition.
+            //Otherwise, apply a waiting modifier to signify a worsening progression.
             if ( hospital_available_beds( hospital, ward_type ) - idx > 0 )
 			{
 				transition_one_hospital_event( model, indiv, indiv->hospital_state, hospital_state, NO_EDGE );
@@ -342,6 +348,7 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
                 else
                     patient_waiting_modifier = model->params->critical_waiting_mod;
 			}
+            //Predict the effect of care availability on future disease state.
 			predict_patient_disease_progression( model, indiv, patient_waiting_modifier, ward_type );
         }
 	}
@@ -362,25 +369,29 @@ void swap_waiting_general_and_icu_patients( model *model )
     patient_general_list = NULL;
     patient_icu_list     = NULL;
 
+
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
 	{
         hospital = &model->hospitals[hospital_idx];
 
+        //Create lists of patients who want to swap wards.
         patient_general_list = malloc(sizeof(list));
         patient_icu_list = malloc(sizeof(list));
         initialise_list( patient_general_list );
         initialise_list( patient_icu_list );
 
+        //Look for newly critical patients in the general ward and add them to the top of the waiting list entering the ICU.
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_GENERAL]; ward_idx++ )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_GENERAL][ward_idx].patients->size; patient_idx++ )
                 if( model->population[ list_element_at(hospital->wards[COVID_GENERAL][ward_idx].patients, patient_idx) ].status == CRITICAL )
                     list_push_back( list_element_at(hospital->wards[COVID_GENERAL][ward_idx].patients, patient_idx), patient_general_list );
 
+        //Look for newly recovering patients in the ICU and add them to the top of the waiting list of patients entering a general ward.
         for( ward_idx = 0; ward_idx < hospital->n_wards[COVID_ICU]; ward_idx++ )
             for( patient_idx = 0; patient_idx < hospital->wards[COVID_ICU][ward_idx].patients->size; patient_idx++ )
                 if( model->population[ list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx) ].status == HOSPITALISED_RECOVERING )
                     list_push_back( list_element_at(hospital->wards[COVID_ICU][ward_idx].patients, patient_idx), patient_icu_list );
-		
+
 		patient_idx = 0;
         while( patient_idx < patient_general_list->size && patient_idx < patient_icu_list->size ) 
 		{
@@ -413,6 +424,7 @@ void swap_waiting_general_and_icu_patients( model *model )
 ******************************************************************************************/
 void predict_patient_disease_progression( model *model, individual *indiv, float patient_waiting_modifier, int type )
 {
+    //Check if progression for this particular disease state has already been predicted.
 	if( indiv->disease_progression_predicted[type] == FALSE )
 	{
 		if( type == COVID_GENERAL )
