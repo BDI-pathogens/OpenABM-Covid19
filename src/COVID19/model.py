@@ -39,7 +39,15 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "trace_on_symptoms",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
-    "lockdown_work_network_multiplier",
+    "lockdown_work_network_multiplier_0_9",
+    "lockdown_work_network_multiplier_10_19",
+    "lockdown_work_network_multiplier_20_29",
+    "lockdown_work_network_multiplier_30_39",
+    "lockdown_work_network_multiplier_40_49",
+    "lockdown_work_network_multiplier_50_59",
+    "lockdown_work_network_multiplier_60_69",
+    "lockdown_work_network_multiplier_70_79",
+    "lockdown_work_network_multiplier_80",
 ]
 
 
@@ -81,12 +89,6 @@ class ChildAdultElderlyEnum(enum.Enum):
     _adult = 1
     _elderly = 2
 
-class WorkNetworkEnum(enum.Enum):
-    work_network_0_9 = 0
-    work_network_10_19 = 1
-    work_network_20_69 = 2
-    work_network_70_79 = 3
-    work_network_80 = 4
 
 class ListIndiciesEnum(enum.Enum):
     _1 = 0
@@ -101,6 +103,20 @@ class TransmissionTypeEnum(enum.Enum):
     _household = 0
     _workplace = 1
     _random = 2
+
+
+def _get_base_param_from_enum(param):
+    base_name, enum_val = None, None
+    for en in chain(
+        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
+    ):
+        LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
+        if en.name == param[-1 * len(en.name) :]:
+            base_name = param.split(en.name)[0]
+            enum_val = en.value
+            LOGGER.debug(f"Split to {base_name} and {enum_val}")
+            break
+    return base_name, enum_val
 
 
 class Parameters(object):
@@ -187,28 +203,31 @@ class Parameters(object):
         """
         if isinstance(self.household_df, pd.DataFrame):
             self.set_param("N_REFERENCE_HOUSEHOLDS", len(self.household_df))
-            LOGGER.debug(f"setting up ref household memory for {getattr(self.c_params, 'N_REFERENCE_HOUSEHOLDS')}")
+            LOGGER.debug(
+                f"setting up ref household memory for {getattr(self.c_params,'N_REFERENCE_HOUSEHOLDS')}"
+            )
             covid19.set_up_reference_household_memory(self.c_params)
             LOGGER.debug("memory set up")
-            _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7],
-                                                         t[8], t[9]) for t in self.household_df.itertuples()]
+            _ = [
+                covid19.add_household_to_ref_households(
+                    self.c_params,
+                    t[0],
+                    t[1],
+                    t[2],
+                    t[3],
+                    t[4],
+                    t[5],
+                    t[6],
+                    t[7],
+                    t[8],
+                    t[9],
+                )
+                for t in self.household_df.itertuples()
+            ]
 
     def set_param_dict(self, params):
         for k, v in params.items():
             self.set_param(k, v)
-
-    def _get_base_param_from_enum(self, param):
-        base_name, enum_val = None, None
-        for en in chain(
-                AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
-        ):
-            LOGGER.debug(f"{en.name} =={param[-1 * len(en.name):]} ")
-            if en.name == param[-1 * len(en.name):]:
-                base_name = param.split(en.name)[0]
-                enum_val = en.value
-                LOGGER.debug(f"Split to {base_name} and {enum_val}")
-                break
-        return base_name, enum_val
 
     def get_param(self, param):
         """[summary]
@@ -227,7 +246,7 @@ class Parameters(object):
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
         else:
-            param, idx = self._get_base_param_from_enum(param)
+            param, idx = _get_base_param_from_enum(param)
             LOGGER.debug(
                 f"not found full length param, trying get_param_{param} with index getter"
             )
@@ -319,9 +338,20 @@ class Model:
         Returns:
             [type] -- [value of param stored]
         """
+        value = None
         try:
             LOGGER.info(f"Getting param {name}")
-            value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
+            split_param, idx = _get_base_param_from_enum(f"get_model_param_{name}")
+            if split_param is not None:
+                if hasattr(covid19, split_param):
+                    value = getattr(covid19, split_param)(self.c_model, idx)
+                    LOGGER.info(f"Got {split_param} at index {idx} value {value}")
+                else:
+                    raise ModelParameterException(f"Parameter {name} not found")
+            elif hasattr(covid19, f"get_model_param_{name}"):
+                value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
+            else:
+                raise ModelParameterException(f"Parameter {name} not found")
             if value < 0:
                 return False
             else:
@@ -345,12 +375,23 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParameterException(f"Can not update {param} during running")
-        setter = getattr(covid19, f"set_model_param_{param}")
-        if callable(setter):
-            if not setter(self.c_model, value):
-                raise ModelParameterException(f"Setting {param} to {value} failed")
+        split_param, index = _get_base_param_from_enum(f"set_model_param_{param}")
+        if split_param:
+            setter = getattr(covid19, split_param)
+        elif hasattr(covid19, f"set_model_param_{param}"):
+            setter = getattr(covid19, f"set_model_param_{param}")
         else:
             raise ModelParameterException(f"Setting {param} to {value} failed")
+        if callable(setter):
+            if index is not None:
+                args = [self.c_model, value, index]
+            else:
+                args = [self.c_model, value]
+            LOGGER.info(
+                f"Updating running params with {args} split_param {split_param} param {split_param}"
+            )
+            if not setter(*args):
+                raise ModelParameterException(f"Setting {param} to {value} failed")
 
     def get_risk_score(self, day, age_inf, age_sus):
         value = covid19.get_model_param_risk_score(self.c_model, day, age_inf, age_sus)
@@ -412,8 +453,15 @@ class Model:
         for age in AgeGroupEnum:
             key = f"total_infected{age.name}"
             results[key] = sum(
-                [covid19.utils_n_total_age(self.c_model, ty, age.value) for ty in
-                 [covid19.PRESYMPTOMATIC, covid19.PRESYMPTOMATIC_MILD, covid19.ASYMPTOMATIC]])
+                [
+                    covid19.utils_n_total_age(self.c_model, ty, age.value)
+                    for ty in [
+                        covid19.PRESYMPTOMATIC,
+                        covid19.PRESYMPTOMATIC_MILD,
+                        covid19.ASYMPTOMATIC,
+                    ]
+                ]
+            )
         results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
         for age in AgeGroupEnum:
             key = f"total_case{age.name}"

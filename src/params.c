@@ -13,6 +13,16 @@
 #include "individual.h"
 #include "interventions.h"
 
+/*****************************************************************************************
+*  Name: 		get_param_daily_fraction_work_used
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_model_param_daily_fraction_work_used(model *model, int idx)
+{
+    if (idx >= N_WORK_NETWORKS) return -1;
+
+    return model->params->daily_fraction_work_used[idx];
+}
 
 /*****************************************************************************************
 *  Name:        get_model_param_quarantine_days
@@ -231,7 +241,7 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 ******************************************************************************************/
 double get_model_param_lockdown_work_network_multiplier(model *model, int index)
 {
-	if ( index < N_WORK_NETWORKS)  return FALSE;
+	if ( index >= N_WORK_NETWORKS)  return FALSE;
 	return model->params->lockdown_work_network_multiplier[index];
 }
 
@@ -551,7 +561,6 @@ void update_household_intervention_state(model *model, int value){
 int set_model_param_lockdown_on( model *model, int value )
 {
 	long pdx;
-	int network;
 	parameters *params = model->params;
 	// If lockdown is off and we're setting it off again, return
 	if( value == FALSE && !params->lockdown_on ){
@@ -667,6 +676,7 @@ int set_model_param_lockdown_work_network_multiplier( model *model, double value
 
 	return TRUE;
 }
+
 
 /*****************************************************************************************
 *  Name:		check_params
