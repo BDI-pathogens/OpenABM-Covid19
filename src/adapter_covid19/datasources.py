@@ -5,9 +5,9 @@ from typing import Tuple, Mapping, Any, Union, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-from adapter_covid19.enums import Region, Sector, Age, FinalUse, PrimaryInput
+from adapter_covid19.enums import Region, Sector, Age, FinalUse, PrimaryInput, Decile
 
-ALL_ENUMS = [Region, Sector, Age, FinalUse, PrimaryInput]
+ALL_ENUMS = [Region, Sector, Age, FinalUse, PrimaryInput, Decile]
 
 
 class Reader:
@@ -99,6 +99,16 @@ class RegionSectorAgeDataSource(DataSource):
         if len(data) > 1:
             return data
         return next(iter(data.values()))
+
+
+class RegionDecileSource(DataSource):
+    def load(self, reader: Reader) -> Mapping[Tuple[Region, Decile], float]:
+        frame = reader.load_csv(self.filename)
+        data = {
+            (Region[t.Region], Decile[t.Decile]): t[-1]
+            for t in frame.itertuples(index=False)
+        }
+        return data
 
 
 class DataFrameDataSource(DataSource):
