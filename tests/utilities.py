@@ -27,7 +27,8 @@ def turn_off_interventions(params, end_time):
     
     params.set_param("quarantine_household_on_positive", 0)
     params.set_param("quarantine_household_on_symptoms", 0)
-    params.set_param("quarantine_household_on_traced", 0)
+    params.set_param("quarantine_household_on_traced_positive", 0)
+    params.set_param("quarantine_household_on_traced_symptoms", 0)
     params.set_param("quarantine_household_contacts_on_positive", 0)
     params.set_param("quarantined_daily_interactions", 0)
     
@@ -67,7 +68,8 @@ def turn_off_quarantine(params):
     params.set_param("quarantine_on_traced", 0)
     params.set_param("quarantine_household_on_positive", 0)
     params.set_param("quarantine_household_on_symptoms", 0)
-    params.set_param("quarantine_household_on_traced", 0)
+    params.set_param("quarantine_household_on_traced_positive", 0)
+    params.set_param("quarantine_household_on_traced_symptoms", 0)
     params.set_param("quarantine_household_contacts_on_positive", 0)
     params.set_param("self_quarantine_fraction", 0.0)
     return(params)

@@ -17,9 +17,11 @@
 struct trace_token{
 	individual *individual;
 	trace_token *next_index;
+	trace_token *last_index;
 	trace_token *next;
 	trace_token *last;
 	int days_since_contact;
+	int index_status;
 };
 
 /************************************************************************/
@@ -36,6 +38,8 @@ void set_up_trace_tokens( model* );
 trace_token* new_trace_token( model*, individual*, int );
 trace_token* index_trace_token( model*, individual* );
 void remove_traced_on_this_trace( model*, individual* );
+void remove_one_trace_token_from_index( model*, trace_token* );
+void remove_traces_on_individual( model*, individual* );
 void intervention_trace_token_release( model*, individual* );
 
 int intervention_quarantine_until( model*, individual*, int, int, trace_token*, int, double );

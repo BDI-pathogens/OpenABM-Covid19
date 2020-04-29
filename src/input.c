@@ -291,6 +291,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->trace_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter trace_on_positive\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->retrace_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter retrace_on_positive\n"); };
+
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
 
@@ -309,8 +312,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced));
-	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_positive\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_symptoms\n"); };
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
@@ -434,7 +440,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"hazard,");
-	fprintf(individual_output_file,"mean_interactions,");
+	fprintf(individual_output_file,"is_case,");
 	fprintf(individual_output_file,"time_infected,");
 	fprintf(individual_output_file,"time_presymptomatic,");
 	fprintf(individual_output_file,"time_presymptomatic_mild,");
@@ -485,7 +491,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->quarantined,
 			indiv->app_user,
 			indiv->hazard,
-			indiv->random_interactions,
+			indiv->is_case,
 			time_infected(indiv),
 			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
 			indiv->time_event[PRESYMPTOMATIC_MILD],

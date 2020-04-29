@@ -275,6 +275,32 @@ class TestClass(object):
                 days_since_contact    = 3,
                 required_interactions = 2
             ),
+        ],
+        "test_quarantine_household_on_trace_positive_not_symptoms": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    trace_on_positive = True,
+                    test_on_symptoms = True,
+                    quarantine_on_traced = True,
+                    app_turn_on_time = 0,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_household_on_traced_positive = True,
+                    quarantine_household_on_traced_symptoms = False,
+                    quarantine_dropout_traced = 0,
+                    mean_time_to_hospital = 30
+                ),
+            )
         ]
     }
     """
@@ -819,4 +845,67 @@ class TestClass(object):
         np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
         np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
 
+    def test_quarantine_household_on_trace_positive_not_symptoms(self, test_params ):
+        """
+        Test that we quarantine people's household only on a positive test
+        and on symptoms we don't ask them to quarantine
+        
+        Note: we need to set dropout to 0 otherwise some people drop out between 
+        amber and read and their households are not quarantined
+        
+        Also, we need to set mean time to hospital to a large number, otherwise if they were 
+        hospitalised at the time the red signal went out it won't be transmitted on (however
+        the household would be quarantined anyway since they are a first order contact)
+        
+        When testing that households are not quarantined on amber we need to set a 
+        tolerance due to the fact that it is possible for 2 people in the same house
+        to be direct contacts of an index case
+        
+        """
+        
+        tol = 0.01
+         
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+           
+        # step through time until we need to start to save the interactions each day
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step();   
+       
+        # get the individuals who have the app
+        model.write_individual_file()
+        df_indiv  = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        house_no  = df_indiv.loc[ :,["ID", "house_no"]]
+        house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no"}, inplace = True )
+        total_house = house_no.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
+        is_case   = df_indiv.loc[ :,["ID", "is_case", "house_no"]]
+        is_case.rename( columns = { "ID":"index_ID"}, inplace = True )
+
+        # now look at the number of people asked to quarantine
+        model.write_trace_tokens()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        # add on house_no and case status to the transmissions and count the number of traced per house
+        df_trace = pd.merge( df_trace, house_no, on = "traced_ID", how = "left")
+        df_trace = pd.merge( df_trace, is_case, on = "index_ID", how = "left")
+        df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] ) 
+        trace_grouped = df_trace.groupby( ["index_ID", "is_case","same_house","traced_house_no"]).size().reset_index(name="n_per_house")
+      
+        # for those who are not cases, we should not have traced household members 
+        not_case =  trace_grouped[ ( trace_grouped[ "same_house"] == False ) & ( trace_grouped[ "is_case"] == 0 ) ]      
+        np.testing.assert_equal( len( not_case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
+        np.testing.assert_equal( sum( not_case[ "n_per_house"] > 1 ) / len( not_case )  < tol, 1, "traced more than one person in a household based on symptoms" )
+    
+        # for cases we we should have traced everyone in the household of the traded
+        case = trace_grouped[ trace_grouped[ "is_case"] == 1 ]
+        case = pd.merge( case, total_house, on = "traced_house_no", how = "left")
+        case[ "hh_not_q"] = case[ "total_per_house"] - case[ "n_per_house"]
+        case = case[ ( case[ "same_house"] == False ) ];
+        np.testing.assert_equal( len( case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
+        np.testing.assert_equal( sum( ( case[ "hh_not_q"] != 0 ) ), 0, "member of household of first-order contact not traced on positive" )
+                
+        
+    
     

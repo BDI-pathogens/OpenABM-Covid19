@@ -530,14 +530,22 @@ int get_param_quarantine_household_on_positive(parameters *params)
 }
 
 /*****************************************************************************************
-*  Name:		get_param_quarantine_household_on_traced
+*  Name:		get_param_quarantine_household_on_traced_positive
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_param_quarantine_household_on_traced(parameters *params)
+int get_param_quarantine_household_on_traced_positive(parameters *params)
 {
-    return params->quarantine_household_on_traced;
+    return params->quarantine_household_on_traced_positive;
 }
 
+/*****************************************************************************************
+*  Name:		get_param_quarantine_household_on_traced_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_quarantine_household_on_traced_symptoms(parameters *params)
+{
+    return params->quarantine_household_on_traced_symptoms;
+}
 /*****************************************************************************************
 *  Name:		get_param_quarantine_household_contacts_on_positive
 *  Description: Gets the value of an int parameter
@@ -1277,12 +1285,22 @@ int set_param_quarantine_household_on_positive( parameters *params, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_param_quarantine_household_on_traced
+*  Name:		set_param_quarantine_household_on_traced_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_household_on_traced( parameters *params, int value )
+int set_param_quarantine_household_on_traced_positive( parameters *params, int value )
 {
-    params->quarantine_household_on_traced = value;
+    params->quarantine_household_on_traced_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_quarantine_household_on_traced_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_quarantine_household_on_traced_symptoms( parameters *params, int value )
+{
+    params->quarantine_household_on_traced_symptoms = value;
     return TRUE;
 }
 

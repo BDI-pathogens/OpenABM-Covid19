@@ -85,8 +85,9 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
-	int trace_on_symptoms; // contract trace on symptoms
-	int trace_on_positive; // contract trace on positive result
+	int trace_on_symptoms;   // contract trace on symptoms
+	int trace_on_positive;   // contract trace on positive result
+	int retrace_on_positive; // repeat contract tracing on a positive test if already tested on symptoms
 
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
 	int quarantine_length_traced;			// max length of quarantine if contact-traced
@@ -101,9 +102,10 @@ typedef struct{
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
 
-	int quarantine_household_on_symptoms;   // quarantine other household members when someone shows symptoms
-	int quarantine_household_on_positive;   // quarantine other household members when someone tests positive
-	int quarantine_household_on_traced;		// quarantine other household members when someone is contact traced
+	int quarantine_household_on_symptoms;   	   // quarantine other household members when someone shows symptoms
+	int quarantine_household_on_positive;   	   // quarantine other household members when someone tests positive
+	int quarantine_household_on_traced_symptoms;   // quarantine other household members when someone is contact traced and index has symptoms
+	int quarantine_household_on_traced_positive;   // quarantine other household members when someone is contact traced and index is positive
 	int quarantine_household_contacts_on_positive; // quarantine the contacts of other household members when someone tests positive
 	int quarantine_household_contacts_on_symptoms; // quarantine the contacts of other household members when someone gets symptoms
 
@@ -158,7 +160,8 @@ int get_model_param_tracing_network_depth(model *model);
 int get_model_param_allow_clinical_diagnosis(model *model);
 int get_model_param_quarantine_household_on_symptoms(model *model);
 int get_model_param_quarantine_household_on_positive(model *model);
-int get_model_param_quarantine_household_on_traced(model *model);
+int get_model_param_quarantine_household_on_traced_symptoms(model *model);
+int get_model_param_quarantine_household_on_traced_positive(model *model);
 int get_model_param_quarantine_household_contacts_on_positive(model *model);
 int get_model_param_test_on_symptoms(model *model);
 int get_model_param_test_on_traced(model *model);
@@ -179,7 +182,8 @@ int set_model_param_tracing_network_depth(model *model, int value);
 int set_model_param_allow_clinical_diagnosis(model *model, int value);
 int set_model_param_quarantine_household_on_symptoms(model *model, int value);
 int set_model_param_quarantine_household_on_positive(model *model, int value);
-int set_model_param_quarantine_household_on_traced(model *model, int value);
+int set_model_param_quarantine_household_on_traced_symptoms(model *model, int value);
+int set_model_param_quarantine_household_on_traced_positive(model *model, int value);
 int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
 int set_model_param_test_on_symptoms(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
