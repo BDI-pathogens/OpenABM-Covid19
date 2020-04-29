@@ -20,7 +20,7 @@ from numpy.core.numeric import NaN
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-
+from model import AgeGroupEnum
 from . import constant
 from . import utilities as utils
 
@@ -141,7 +141,15 @@ class TestClass(object):
                     n_seed_infection = 10000,
                     end_time = 3,
                     infectious_rate = 4,
-                    lockdown_work_network_multiplier = 0.8,
+                    lockdown_work_network_multiplier_0_9 = 0.8,
+                    lockdown_work_network_multiplier_10_19 = 0.8,
+                    lockdown_work_network_multiplier_20_29 = 0.8,
+                    lockdown_work_network_multiplier_30_39 = 0.8,
+                    lockdown_work_network_multiplier_40_49 = 0.8,
+                    lockdown_work_network_multiplier_50_59 = 0.8,
+                    lockdown_work_network_multiplier_60_69 = 0.8,
+                    lockdown_work_network_multiplier_70_79 = 0.8,
+                    lockdown_work_network_multiplier_80 = 0.8,
                     lockdown_random_network_multiplier = 0.8,
                     lockdown_house_interaction_multiplier = 1.2
                 )
@@ -570,9 +578,9 @@ class TestClass(object):
         expect_household = df_without.loc[ constant.HOUSEHOLD, ["N"] ] * test_params[ "lockdown_house_interaction_multiplier" ]       
         np.testing.assert_allclose( df_with.loc[ constant.HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff, 
                                     err_msg = "lockdown not changing household transmission as expected" )
-        
-        expect_work = df_without.loc[ constant.WORK, ["N"] ] * test_params[ "lockdown_work_network_multiplier" ]       
-        np.testing.assert_allclose( df_with.loc[ constant.WORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
+        for age in AgeGroupEnum:
+            expect_work = df_without.loc[ constant.WORK, ["N"] ] * test_params[ f"lockdown_work_network_multiplier{age.name}" ]       
+            np.testing.assert_allclose( df_with.loc[ constant.WORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
                                     err_msg = "lockdown not changing work transmission as expected" )
       
       
