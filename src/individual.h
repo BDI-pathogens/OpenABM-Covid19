@@ -34,16 +34,11 @@ struct individual{
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 
-	individual *infector;
-	int infector_status;
-	int infector_network;
-
 	int status;
-	int is_case;
 	double hazard;
 	event *current_disease_event;
 	event *next_disease_event;
-	int *time_event;
+	infection_event *infection_events;
 
 	int quarantined;
 	event *quarantine_event;
@@ -64,11 +59,24 @@ struct interaction{
 	interaction *next;
 };
 
+struct infection_event{
+	int *times;
+	individual *infector;
+	int infector_status;
+	int infector_network;
+	int time_infected_infector;
+	infection_event *next;
+	int is_case;
+};
+
 /************************************************************************/
 /******************************  Macros**** *****************************/
 /************************************************************************/
 
-#define time_infected( indiv ) ( max( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ), indiv->time_event[PRESYMPTOMATIC_MILD] ) )
+#define time_infected( indiv ) ( max( max( indiv->infection_events->times[PRESYMPTOMATIC], indiv->infection_events->times[ASYMPTOMATIC ] ), indiv->infection_events->times[PRESYMPTOMATIC_MILD] ) )
+
+#define time_infected_infection_event( infection_event ) ( max( max( infection_event->times[PRESYMPTOMATIC], infection_event->times[ASYMPTOMATIC ] ), infection_event->times[PRESYMPTOMATIC_MILD] ) )
+
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
 
 /************************************************************************/
@@ -87,7 +95,7 @@ void set_critical( individual*, parameters*, int );
 void set_dead( individual*, parameters*, int );
 void set_case( individual*, int );
 void update_random_interactions( individual*, parameters* );
-
+int count_infection_events( individual * );
 void destroy_individual( individual* );
 
 
