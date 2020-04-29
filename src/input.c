@@ -357,9 +357,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_work_network_multiplier));
-	if( check < 1){ print_exit("Failed to read parameter lockdown_work_network_multiplier)\n"); };
+	for (i = 0; i<N_WORK_NETWORKS; i++){
 
+		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_work_network_multiplier[i]));
+		if( check < 1){ print_exit("Failed to read parameter lockdown_work_network_multiplier)\n"); };
+
+	}
 	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_random_network_multiplier)\n"); };
 

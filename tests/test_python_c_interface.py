@@ -17,7 +17,6 @@ import sys
 import numpy as np
 from random import randrange, uniform
 
-sys.path.append("src/COVID19")
 import covid19
 from parameters import ParameterSet
 from model import Model, Parameters, ModelParameterException, AgeGroupEnum
@@ -187,12 +186,13 @@ class TestClass(object):
         )
         model = Model(params)
         assert covid19.get_param_lockdown_on(model.c_params) == 0
+        for age in AgeGroupEnum:
+            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.4)
+            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.4
 
-        model.update_running_params("lockdown_work_network_multiplier", 0.4)
-        assert model.get_param("lockdown_work_network_multiplier") == 0.4
-
-        model.update_running_params("lockdown_random_network_multiplier", 0.8)
-        assert model.get_param("lockdown_random_network_multiplier") == 0.8
+        for age in AgeGroupEnum:
+            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.8)
+            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.8
 
         model.update_running_params("lockdown_house_interaction_multiplier", 1.2)
         assert model.get_param("lockdown_house_interaction_multiplier") == 1.2
@@ -200,8 +200,9 @@ class TestClass(object):
         model.update_running_params("lockdown_on", 1)
         assert covid19.get_param_lockdown_on(model.c_params) == 1
 
-        model.update_running_params("lockdown_work_network_multiplier", 0.5)
-        assert model.get_param("lockdown_work_network_multiplier") == 0.5
+        for age in AgeGroupEnum:
+            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.5)
+            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.5
 
         model.update_running_params("lockdown_random_network_multiplier", 0.9)
         assert model.get_param("lockdown_random_network_multiplier") == 0.9

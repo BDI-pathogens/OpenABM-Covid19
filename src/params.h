@@ -150,7 +150,7 @@ typedef struct{
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
-
+double get_model_param_daily_fraction_work_used(model *model, int idx);
 int get_model_param_quarantine_days(model *model);
 double get_model_param_self_quarantine_fraction(model *model);
 int get_model_param_trace_on_symptoms(model *model);
