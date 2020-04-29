@@ -372,14 +372,14 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
 	
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
-    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
+	if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
-    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
+	if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
-    if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
+	if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
 	fclose(parameter_file);
 }
@@ -417,8 +417,8 @@ void write_individual_file(model *model, parameters *params)
 	sprintf(param_line_number, "%d", params->param_line_number);
 	
 	// Concatenate file name
-    strcpy(output_file, params->output_file_dir);
-    strcat(output_file, "/individual_file_Run");
+	strcpy(output_file, params->output_file_dir);
+	strcat(output_file, "/individual_file_Run");
 	strcat(output_file, param_line_number);
 	strcat(output_file, ".csv");
 	
@@ -432,26 +432,9 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"work_network,");
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
-	fprintf(individual_output_file,"app_user,");
-	fprintf(individual_output_file,"hazard,");
-	fprintf(individual_output_file,"mean_interactions,");
-	fprintf(individual_output_file,"time_infected,");
-	fprintf(individual_output_file,"time_presymptomatic,");
-	fprintf(individual_output_file,"time_presymptomatic_mild,");
-	fprintf(individual_output_file,"time_presymptomatic_severe,");
-	fprintf(individual_output_file,"time_symptomatic,");
-	fprintf(individual_output_file,"time_symptomatic_mild,");
-	fprintf(individual_output_file,"time_symptomatic_severe,");
-	fprintf(individual_output_file,"time_asymptomatic,");
-	fprintf(individual_output_file,"time_hospitalised,");
-	fprintf(individual_output_file,"time_critical,");
-	fprintf(individual_output_file,"time_hospitalised_recovering,");
-	fprintf(individual_output_file,"time_death,");
-	fprintf(individual_output_file,"time_recovered,");
 	fprintf(individual_output_file,"time_quarantined,");
-	fprintf(individual_output_file,"infector_ID,");
-	fprintf(individual_output_file,"infector_time_infected,");
-	fprintf(individual_output_file,"infector_status");
+	fprintf(individual_output_file,"app_user,");
+	fprintf(individual_output_file,"mean_interactions");
 	fprintf(individual_output_file,"\n");
 	
 	// Loop through all individuals in the simulation
@@ -461,7 +444,7 @@ void write_individual_file(model *model, parameters *params)
 		
 		/* Check the individual was infected during the simulation
 		(otherwise the "infector" attribute does not point to another individual) */
-		if(model->population[idx].status != UNINFECTED)
+		if(model->population[idx].status != SUSCEPTIBLE)
 		{
 			infector_id			   = indiv->infector->idx;
 			infector_time_infected = time_infected( indiv->infector );
@@ -476,33 +459,16 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
 			indiv->house_no,
 			indiv->quarantined,
-			indiv->app_user,
-			indiv->hazard,
-			indiv->random_interactions,
-			time_infected(indiv),
-			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
-			indiv->time_event[PRESYMPTOMATIC_MILD],
-			indiv->time_event[PRESYMPTOMATIC],
-			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
-			indiv->time_event[SYMPTOMATIC_MILD],
-			indiv->time_event[SYMPTOMATIC],
-			indiv->time_event[ASYMPTOMATIC],
-			indiv->time_event[HOSPITALISED],
-			indiv->time_event[CRITICAL],
-			indiv->time_event[HOSPITALISED_RECOVERING],
-			indiv->time_event[DEATH],
-			indiv->time_event[RECOVERED],
 			indiv->time_event[QUARANTINED],
-			infector_id,
-			infector_time_infected,
-			infector_status
+			indiv->app_user,
+			indiv->random_interactions
 			);
 	}
 	fclose(individual_output_file);
@@ -658,8 +624,8 @@ void write_interactions( model *model )
 	sprintf(param_line_number, "%d", model->params->param_line_number);
 
 	// Concatenate file name
-    strcpy(output_file_name, model->params->output_file_dir);
-    strcat(output_file_name, "/interactions_Run");
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/interactions_Run");
 	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 
@@ -668,7 +634,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"ID,age_group,house_no,work_network,type,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file ,"ID_1,age_group_1,house_no_1,work_network_1,type,ID_2,age_group_2,house_no_2,work_network_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -720,27 +686,66 @@ void write_transmissions( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf(output_file ,"time_infected,ID,age_group,house_no,work_network,infector_network,infector_infected_time,infector_status,ID_2,age_group_2,house_no_2,work_2\n");
+	fprintf(output_file , "ID_recipient,");
+	fprintf(output_file , "age_group_recipient,");
+	fprintf(output_file , "house_no_recipient,");
+	fprintf(output_file , "work_network_recipient,");
+	fprintf(output_file , "infector_network,");
+	fprintf(output_file , "generation_time,");
+	fprintf(output_file , "ID_source,");
+	fprintf(output_file , "age_group_source,");
+	fprintf(output_file , "house_no_source,");
+	fprintf(output_file , "work_network_source,");
+	fprintf(output_file , "time_infected_source,");
+	fprintf(output_file , "status_source,");
+	fprintf(output_file , "time_infected,");
+	fprintf(output_file , "time_presymptomatic,");
+	fprintf(output_file , "time_presymptomatic_mild,");
+	fprintf(output_file , "time_presymptomatic_severe,");
+	fprintf(output_file , "time_symptomatic,");
+	fprintf(output_file , "time_symptomatic_mild,");
+	fprintf(output_file , "time_symptomatic_severe,");
+	fprintf(output_file , "time_asymptomatic,");
+	fprintf(output_file , "time_hospitalised,");
+	fprintf(output_file , "time_critical,");
+	fprintf(output_file , "time_hospitalised_recovering,");
+	fprintf(output_file , "time_death,");
+	fprintf(output_file , "time_recovered,");
+	fprintf(output_file , "time_susceptible\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 		indiv = &(model->population[pdx]);
-		if( indiv->status == UNINFECTED )
+		if( indiv->status == SUSCEPTIBLE )
 			continue;
 
-		fprintf(output_file ,"%i,%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i\n",
-			time_infected(indiv),
+		fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->age_group,
 			indiv->house_no,
 			indiv->work_network,
 			indiv->infector_network,
-			time_infected( indiv ) -time_infected( indiv->infector ),
-			indiv->infector_status,
+			time_infected( indiv ) - time_infected( indiv->infector ),
 			indiv->infector->idx,
 			indiv->infector->age_group,
 			indiv->infector->house_no,
-			indiv->infector->work_network
+			indiv->infector->work_network,
+			time_infected( indiv->infector ),
+			indiv->infector_status,
+			time_infected(indiv),
+			max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[PRESYMPTOMATIC_MILD] ),
+			indiv->time_event[PRESYMPTOMATIC_MILD],
+			indiv->time_event[PRESYMPTOMATIC],
+			max( indiv->time_event[SYMPTOMATIC], indiv->time_event[SYMPTOMATIC_MILD] ),
+			indiv->time_event[SYMPTOMATIC_MILD],
+			indiv->time_event[SYMPTOMATIC],
+			indiv->time_event[ASYMPTOMATIC],
+			indiv->time_event[HOSPITALISED],
+			indiv->time_event[CRITICAL],
+			indiv->time_event[HOSPITALISED_RECOVERING],
+			indiv->time_event[DEATH],
+			indiv->time_event[RECOVERED],
+			indiv->time_event[SUSCEPTIBLE]
 		);
 	}
 	fclose(output_file);
@@ -764,8 +769,8 @@ void write_trace_tokens( model *model )
 	sprintf(param_line_number, "%d", model->params->param_line_number);
 
 	// Concatenate file name
-    strcpy(output_file_name, model->params->output_file_dir);
-    strcat(output_file_name, "/trace_tokens_Run");
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/trace_tokens_Run");
 	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 
@@ -826,8 +831,8 @@ void write_trace_tokens_ts( model *model, int initialise )
 	sprintf(param_line_number, "%d", model->params->param_line_number);
 
 	// Concatenate file name
-    strcpy(output_file_name, model->params->output_file_dir);
-    strcat(output_file_name, "/trace_tokens_ts_Run");
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/trace_tokens_ts_Run");
 	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 

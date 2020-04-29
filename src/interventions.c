@@ -302,7 +302,7 @@ void intervention_test_order( model *model, individual *indiv, int time )
 ******************************************************************************************/
 void intervention_test_take( model *model, individual *indiv )
 {
-	if( indiv->status == UNINFECTED || indiv->status == RECOVERED )
+	if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
 		indiv->quarantine_test_result = FALSE;
 	else
 	{
