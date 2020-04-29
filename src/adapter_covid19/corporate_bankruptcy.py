@@ -26,10 +26,7 @@ class NaiveCorporateBankruptcyModel:
     def gdp_discount_factor(
         self,
         days_since_lockdown: int,
-        gdp_discount: Optional[Mapping[Sector, float]] = None,
-        comp_discount: Optional[Mapping[Sector, float]] = None,
-        tax_discount: Optional[Mapping[Sector, float]] = None,
-        consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
+        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> Mapping[Sector, float]:
         """
         Amount to discount GDP by due to companies
@@ -37,10 +34,7 @@ class NaiveCorporateBankruptcyModel:
         in the future
 
         :param days_since_lockdown:
-        :param gdp_discount:
-        :param comp_discount:
-        :param tax_discount:
-        :param consumption_cost_discount:
+        :param net_operating_surplus:
         :return:
         """
         return {s: 1 for s in Sector}
@@ -87,6 +81,9 @@ class CorporateBankruptcyModel:
                 + io_df.taxes_minus_subsidies
                 + io_df.capital_consumption
         )
+        self.outflows = {
+            Sector[k]: v for k, v in outflows.to_dict().items()
+        }
         gross_operating_surplus = (
                 io_df.net_operating_surplus.apply(lambda x: max(x, 0)) + io_df.capital_consumption
         )
@@ -124,10 +121,8 @@ class CorporateBankruptcyModel:
         self._init_sim()
 
     def _init_sim(self) -> None:
-        small_med = self._get_median_cash_buffer_days(False, {s: 0 for s in Sector}, {s: 1 for s in Sector},
-                                                    {s: 1 for s in Sector}, {s: 1 for s in Sector})
-        large_med = self._get_median_cash_buffer_days(True, {s: 0 for s in Sector}, {s: 1 for s in Sector},
-                                                    {s: 1 for s in Sector}, {s: 1 for s in Sector})
+        small_med = self._get_median_cash_buffer_days(False, self.outflows)
+        large_med = self._get_median_cash_buffer_days(True, self.outflows)
         self.cash_state = {
             'largecap': {s: self._sim_cash_buffer(100000, large_med[s], self.lcap_clipped_cash_buffer[s]) for s in
                          Sector},
@@ -158,24 +153,14 @@ class CorporateBankruptcyModel:
     def _get_mean_cash_buffer_days(
             self,
             lcap: bool,
-            gdp_discount: Optional[Mapping[Sector, float]],
-            comp_discount: Optional[Mapping[Sector, float]],
-            tax_discount: Optional[Mapping[Sector, float]],
-            consumption_cost_discount: Optional[Mapping[Sector, float]],
+            net_operating_surplus: Mapping[Sector, float],
     ) -> Mapping[Sector, float]:
         """
 
-        :param lcap
-        :param gdp_discount: 1.0 means no discount
-        :param comp_discount:
-        :param tax_discount:
-        :param consumption_cost_discount:
+        :param lcap:
+        :param net_operating_surplus:
         :return:
         """
-        gdp_discount = gdp_discount or {s: 1 for s in Sector}
-        comp_discount = comp_discount or {s: 1 for s in Sector}
-        tax_discount = tax_discount or copy.deepcopy(gdp_discount)
-        consumption_cost_discount = consumption_cost_discount or {s: 1 for s in Sector}
         if lcap:
             size_modifier = self.large_cap_pct
             clipped_cash_buffer = self.lcap_clipped_cash_buffer
@@ -185,30 +170,23 @@ class CorporateBankruptcyModel:
         return {
             # Added a nugget for when the denominator is 0
             s: DAYS_IN_A_YEAR
-            * clipped_cash_buffer[s]
-            / (
-                size_modifier[s]
-                * (
-                    self.employee_compensation[s] * comp_discount[s]
-                    + self.taxes_minus_subsidies[s] * tax_discount[s]
-                    + self.capital_consumption[s] * consumption_cost_discount[s]
-                    - self.value_added[s] * gdp_discount[s]
-                )
-                - 1e-6
-            )
+               * clipped_cash_buffer[s]
+               / (
+                       size_modifier[s]
+                       * net_operating_surplus[s]
+                       - 1e-6
+               )
             for s in Sector
         }
 
     def _get_median_cash_buffer_days(
             self,
             lcap: bool,
-            gdp_discount: Optional[Mapping[Sector, float]],
-            comp_discount: Optional[Mapping[Sector, float]],
-            tax_discount: Optional[Mapping[Sector, float]],
-            consumption_cost_discount: Optional[Mapping[Sector, float]],
+            net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> Mapping[Sector, float]:
         mean_cash_buffer_days = self._get_mean_cash_buffer_days(
-            lcap, gdp_discount, comp_discount, tax_discount, consumption_cost_discount
+            lcap,
+            net_operating_surplus
         )
         return {k: v * self.sinc_theta for k, v in mean_cash_buffer_days.items()}
 
@@ -222,23 +200,15 @@ class CorporateBankruptcyModel:
 
     def simulate(
             self,
-            # days_since_lockdown: int,
-            apply_stimulus: bool = False,
-            gdp_discount: Optional[Mapping[Sector, float]] = None,
-            comp_discount: Optional[Mapping[Sector, float]] = None,
-            tax_discount: Optional[Mapping[Sector, float]] = None,
-            consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
+            days_since_lockdown: int,
+            net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> CorpInsolvencyState:
         """
-        #:param days_since_lockdown:
-        :param apply_stimulus:
-        :param gdp_discount:
-        :param comp_discount:
-        :param tax_discount:
-        :param consumption_cost_discount:
+        :param days_since_lockdown:
+        :param net_operating_surplus:
         :return result:
         """
-        self._update_state(gdp_discount, comp_discount, tax_discount, consumption_cost_discount)
+        self._update_state(net_operating_surplus)
         largecap_proportion_solvent = {s: self._proportion_solvent(self.cash_state['largecap'][s]) for s in Sector}
         sme_proportion_solvent = {s: self._proportion_solvent(self.cash_state['sme'][s]) for s in Sector}
         proportion_solvent = {'largecap': largecap_proportion_solvent,
@@ -269,19 +239,11 @@ class CorporateBankruptcyModel:
 
     def _update_state(
             self,
-            gdp_discount: Optional[Mapping[Sector, float]] = None,
-            comp_discount: Optional[Mapping[Sector, float]] = None,
-            tax_discount: Optional[Mapping[Sector, float]] = None,
-            consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
+            net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> None:
 
         largecap_cash_outgoing = {s: self.large_cap_pct[s]
-                                     * (
-                                             self.employee_compensation[s] * comp_discount[s]
-                                             + self.taxes_minus_subsidies[s] * tax_discount[s]
-                                             + self.capital_consumption[s] * consumption_cost_discount[s]
-                                             - self.value_added[s] * gdp_discount[s]
-                                     )
+                                     * net_operating_surplus[s]
                                      / 100000
                                      / 365
         if self.largecap_count[s]
@@ -290,12 +252,7 @@ class CorporateBankruptcyModel:
                                   }
 
         sme_cash_outgoing = {s: (1 - self.large_cap_pct[s])
-                                * (
-                                        self.employee_compensation[s] * comp_discount[s]
-                                        + self.taxes_minus_subsidies[s] * tax_discount[s]
-                                        + self.capital_consumption[s] * consumption_cost_discount[s]
-                                        - self.value_added[s] * gdp_discount[s]
-                                )
+                                * net_operating_surplus[s]
                                 / 100000
                                 / 365
         if self.sme_count[s]
@@ -310,4 +267,3 @@ class CorporateBankruptcyModel:
             self.cash_state['sme'][s] = np.maximum(
                 np.minimum(self.cash_state['sme'][s] - sme_cash_outgoing[s], self.init_cash_state['sme'][s]), 0) * (
                                                     self.cash_state['sme'][s] > 0)
-
