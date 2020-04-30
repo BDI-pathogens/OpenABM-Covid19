@@ -100,6 +100,8 @@ def lockdown_then_unlock_no_corona(
         ]
     ).plot(figsize=(20, 10))
 
+    return econ
+
 
 if __name__ == "__main__":
     import sys
