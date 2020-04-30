@@ -1,3 +1,4 @@
+from __future__ import annotations
 import abc
 import copy
 import itertools
@@ -37,6 +38,7 @@ LOGGER = logging.getLogger(__name__)
 class GdpResult:
     gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]  # G
     workers: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]  # n
+    growth_factor: MutableMapping[int, Mapping[Sector, float]]
     max_gdp: float
     max_workers: float
 
@@ -75,9 +77,10 @@ class IoGdpResult(GdpResult):
         int, Mapping[Tuple[Region, Sector, Age], float]
     ]
 
-    def update(self, other):
+    def update(self, other: IoGdpResult):
         self.gdp.update(other.gdp)
         self.workers.update(other.workers)
+        self.growth_factor.update(other.growth_factor)
         self.max_gdp = other.max_gdp
         self.max_workers = other.max_workers
         self.primary_inputs.update(other.primary_inputs)
@@ -90,39 +93,17 @@ class IoGdpResult(GdpResult):
         self.max_compensation_subsidy.update(other.max_compensation_subsidy)
 
 
-class BaseGDPBackboneMixin(abc.ABC):
-    beta: Mapping[Sector, float]
-
-    @abc.abstractmethod
-    def load(self, reader: Reader) -> None:
-        pass
-
-    def adjust_gdp(
-        self, time: int, gdp: Mapping[Tuple[Region, Sector, Age], float],
-    ) -> Mapping[Tuple[Region, Sector, Age], float]:
-        return {
-            (r, s, a): gdp[(r, s, a)]
-            * (1 + self.beta.get(s, 0.0) * (time - START_OF_TIME) / DAYS_IN_A_YEAR)
-            for (r, s, a) in gdp.keys()
-        }
-
-
-class LinearGDPBackboneMixin(BaseGDPBackboneMixin):
-    def load(self, reader: Reader) -> None:
-        super().load(reader)
-        self.beta = SectorDataSource("growth_rates").load(reader)
-
-
 class BaseGdpModel(abc.ABC):
     gdp: Mapping[Tuple[Region, Sector, Age], float]
     workers: Mapping[Tuple[Region, Sector, Age], float]
     keyworker: Mapping[Sector, float]
+    growth_rates: Mapping[Sector, float]
 
     def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
         self.lockdown_recovery_time = lockdown_recovery_time
         self.optimal_recovery = optimal_recovery
         self.recovery_order: Sequence[Tuple[Region, Sector, Age]] = []
-        self.results = GdpResult({}, {}, 0, 0)
+        self.results = GdpResult({}, {}, {}, 0, 0)
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
             self.__setattr__(k, None)
@@ -141,6 +122,7 @@ class BaseGdpModel(abc.ABC):
         datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
+            "growth_rates": SectorDataSource,
             "keyworker": SectorDataSource,
         }
         return {k: v(k) for k, v in datasources.items()}
@@ -186,7 +168,6 @@ class BaseGdpModel(abc.ABC):
                 )
 
     def load(self, reader: Reader):
-        super().load(reader)
         for k, v in self.datasources.items():
             self.__setattr__(k, v.load(reader))
         self._check_data()
@@ -203,6 +184,28 @@ class BaseGdpModel(abc.ABC):
         )
         if not self.optimal_recovery:
             random.shuffle(self.recovery_order)
+
+    def _apply_growth_factor(
+        self, time: int, lockdown: bool, gdp: Mapping[Tuple[Region, Sector, Age], float]
+    ) -> Tuple[Mapping[Sector, float], Mapping[Tuple[Region, Sector, Age], float]]:
+        if (
+            time - 1 not in self.results.growth_factor
+            or not self.results.growth_factor[time - 1]
+        ):
+            growth_factor = {s: 1 for s in Sector}
+        elif lockdown:
+            # No growth in lockdown
+            growth_factor = copy.deepcopy(self.results.growth_factor[time - 1])
+        else:
+            growth_factor = {
+                s: self.results.growth_factor[time - 1][s]
+                * (1 + self.growth_rates.get(s, 0.0) / DAYS_IN_A_YEAR)
+                for s in Sector
+            }
+        return (
+            growth_factor,
+            {(r, s, a): gdp[(r, s, a)] * growth_factor[s] for (r, s, a) in gdp.keys()},
+        )
 
     def _apply_lockdown(
         self,
@@ -282,7 +285,7 @@ class BaseGdpModel(abc.ABC):
         pass
 
 
-class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
+class LinearGdpModel(BaseGdpModel):
     gdp: Mapping[Tuple[Region, Sector, Age], float]
     workers: Mapping[Tuple[Region, Sector, Age], float]
     wfh: Mapping[str, float]
@@ -295,6 +298,7 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
+            "growth_rates": SectorDataSource,
             "keyworker": SectorDataSource,
             "vulnerability": SectorDataSource,
             "wfh": SectorDataSource,
@@ -340,13 +344,13 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             (r, s, a): self._simulate_workers(r, s, a, u)
             for (r, s, a), u in utilisations.items()
         }
-        if not lockdown:
-            gdp = self.adjust_gdp(time, gdp)
+        growth_factor, gdp = self._apply_growth_factor(time, lockdown, gdp)
         self.results.gdp[time] = gdp
+        self.results.growth_factor[time] = growth_factor
         self.results.workers[time] = workers
 
 
-class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
+class SupplyDemandGdpModel(BaseGdpModel):
     gdp: Mapping[Tuple[Region, Sector, Age], float]
     workers: Mapping[Tuple[Region, Sector, Age], float]
     wfh: Mapping[Sector, float]
@@ -367,6 +371,7 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
+            "growth_rates": SectorDataSource,
             "keyworker": SectorDataSource,
             "vulnerability": SectorDataSource,
             "wfh": SectorDataSource,
@@ -470,9 +475,9 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for (r, s, a), u in utilisations.items()
         }
         gdp = self._simulate_gdp(utilisations)
-        if not lockdown:
-            gdp = self.adjust_gdp(time, gdp)
+        growth_factor, gdp = self._apply_growth_factor(time, lockdown, gdp)
         self.results.gdp[time] = gdp
+        self.results.growth_factor[time] = growth_factor
         self.results.workers[time] = workers
 
 
@@ -884,7 +889,7 @@ class CobbDouglasLPSetup:
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
 
-class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
+class CobbDouglasGdpModel(BaseGdpModel):
     input_output_intermediate: pd.DataFrame
     input_output_primary: pd.DataFrame
     input_output_final: pd.DataFrame
@@ -905,7 +910,9 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
-        self.results = IoGdpResult({}, {}, 0, 0, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        self.results = IoGdpResult(
+            {}, {}, {}, 0, 0, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
+        )
         self.labour_weight_region_age_per_sector_by_count: Mapping[
             Tuple[Sector, Region, Age]
         ] = {}
@@ -917,6 +924,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
+            "growth_rates": SectorDataSource,
             "keyworker": SectorDataSource,
             "vulnerability": SectorDataSource,
             "wfh": SectorDataSource,
@@ -1103,6 +1111,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         return IoGdpResult(
             gdp={time: gdp},
             workers={time: workers},
+            growth_factor={},
             max_gdp=max_gdp,
             max_workers=max_workers,
             primary_inputs={time: primary_inputs},
@@ -1191,7 +1200,8 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
                 raise ValueError("capital parameter required")
 
         result = self._simulate(time, utilisations, capital)
-        # gdp adjustment disabled for now TODO: reimplement later
-        # if not lockdown:
-        #    gdp = self.adjust_gdp(time, gdp)
+        # TODO: should this affect additional parameters to GDP?
+        result.growth_factor[time], result.gdp[time] = self._apply_growth_factor(
+            time, lockdown, result.gdp[time]
+        )
         self.results.update(result)
