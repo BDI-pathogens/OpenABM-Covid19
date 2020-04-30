@@ -104,14 +104,12 @@ class Economics:
             workforce in work
         """
         self._pre_simulation_checks(time, lockdown)
-        # TODO: use capital from previous state of corp bankruptcy model
-        capital = {s: 1.0 for s in Sector}
         self.gdp_model.simulate(
             time,
             lockdown,
             self.lockdown_exited_time,
             utilisations,
-            {"capital": capital},
+            capital=self.corporate_model.state.capital,
         )
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
