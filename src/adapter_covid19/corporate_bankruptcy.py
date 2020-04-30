@@ -1,4 +1,5 @@
 import copy
+import logging
 from typing import Optional, Mapping, Sequence
 from dataclasses import dataclass, field
 
@@ -12,6 +13,9 @@ from adapter_covid19.datasources import Reader, SectorDataSource
 from adapter_covid19.enums import Sector, BusinessSize
 
 
+LOGGER = logging.getLogger(__name__)
+
+
 @dataclass
 class CorpInsolvencyState:
     gdp_discount_factor: Mapping[Sector, float]
@@ -23,7 +27,9 @@ class CorpInsolvencyState:
 
 
 class NaiveCorporateBankruptcyModel:
-    def __init__(self):
+    def __init__(self, **kwargs):
+        if kwargs:
+            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
         self.state = CorpInsolvencyState(
             {s: 1 for s in Sector},
             {},
@@ -34,7 +40,7 @@ class NaiveCorporateBankruptcyModel:
         pass
 
     def simulate(
-        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None, **kwargs
     ) -> CorpInsolvencyState:
         """
         Amount to discount GDP by due to companies
@@ -52,9 +58,10 @@ class CorporateBankruptcyModel:
         self,
         beta: Optional[float] = None,
         large_cap_cash_surplus_months: Optional[float] = None,
+        **kwargs,
     ):
+        super().__init__(**kwargs)
         self.beta = beta or 1 + np.random.rand()
-        super().__init__()
         theta = sp.pi / self.beta
         self.sinc_theta = np.sinc(theta)
         self.large_cap_cash_surplus_months = (
@@ -208,7 +215,7 @@ class CorporateBankruptcyModel:
         return solvent
 
     def simulate(
-        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None, **kwargs,
     ) -> CorpInsolvencyState:
         """
         :param net_operating_surplus:
