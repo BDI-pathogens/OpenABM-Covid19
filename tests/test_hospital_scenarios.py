@@ -102,7 +102,7 @@ class TestClass(object):
         EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
             f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
-        # Call the model using baseline parameters, pipe output to file, read output file
+        # Call the model pipe output to file, read output file
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
