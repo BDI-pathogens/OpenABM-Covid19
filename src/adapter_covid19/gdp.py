@@ -99,10 +99,7 @@ class BaseGdpModel(abc.ABC):
     keyworker: Mapping[Sector, float]
     growth_rates: Mapping[Sector, float]
 
-    def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
-        self.lockdown_recovery_time = lockdown_recovery_time
-        self.optimal_recovery = optimal_recovery
-        self.recovery_order: Sequence[Tuple[Region, Sector, Age]] = []
+    def __init__(self):
         self.results = GdpResult({}, {}, {}, 0, 0)
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
@@ -177,13 +174,6 @@ class BaseGdpModel(abc.ABC):
         self.results.max_workers = sum(
             self.workers[key] for key in itertools.product(Region, Sector, Age)
         )
-        gdp_per_worker = {k: self.gdp[k] / self.workers[k] for k in self.gdp}
-        # Sort in terms of greatest productivity to least productivity
-        self.recovery_order = sorted(
-            gdp_per_worker, key=lambda x: gdp_per_worker[x], reverse=True
-        )
-        if not self.optimal_recovery:
-            random.shuffle(self.recovery_order)
 
     def _apply_growth_factor(
         self, time: int, lockdown: bool, gdp: Mapping[Tuple[Region, Sector, Age], float]
@@ -207,81 +197,14 @@ class BaseGdpModel(abc.ABC):
             {(r, s, a): gdp[(r, s, a)] * growth_factor[s] for (r, s, a) in gdp.keys()},
         )
 
-    def _apply_lockdown(
-        self,
-        time: int,
-        lockdown: bool,
-        lockdown_exit_time: int,
-        utilisations: MutableMapping[Tuple[LabourState, Region, Sector, Age], float],
-    ) -> Mapping[Tuple[LabourState, Region, Sector, Age], float]:
-        if not lockdown and not lockdown_exit_time:
-            return utilisations
-        # We assume all utilisations are given as WFH=0, and here we adjust for WFH
-        utilisations = copy.deepcopy(utilisations)
-        work_utilisations = {
-            (r, s, a): utilisations[LabourState.WORKING, r, s, a]
-            for r, s, a in itertools.product(Region, Sector, Age)
-        }
-        base_utilisations = {
-            (r, s, a): u * self.keyworker[s]
-            for (r, s, a), u in work_utilisations.items()
-        }
-        if lockdown:
-            work_utilisations = base_utilisations
-            wfh_utilisations = {
-                (r, s, a): utilisations[LabourState.WORKING, r, s, a]
-                - base_utilisations[r, s, a]
-                for r, s, a in itertools.product(Region, Sector, Age)
-            }
-        elif lockdown_exit_time:
-            full_utilisations = copy.deepcopy(work_utilisations)
-            full_workers = sum(
-                self.workers[k] * work_utilisations[k]
-                for k in itertools.product(Region, Sector, Age)
-            )
-            current_workers = key_workers = sum(
-                self.workers[k] * base_utilisations[k]
-                for k in itertools.product(Region, Sector, Age)
-            )
-            work_utilisations = copy.deepcopy(base_utilisations)
-            recovery_factor = min(
-                (time - lockdown_exit_time) / self.lockdown_recovery_time, 1
-            )
-            to_send_back = key_workers + (full_workers - key_workers) * recovery_factor
-            for key in self.recovery_order:
-                if current_workers >= to_send_back:
-                    break
-                spare_capacity = (
-                    full_utilisations[key] - work_utilisations[key]
-                ) * self.workers[key]
-                increase = min(spare_capacity, to_send_back - current_workers)
-                work_utilisations[key] += increase / self.workers[key]
-                if work_utilisations[key] > 1 + 1e-6:
-                    raise ValueError(
-                        f"Utilisation > 1: {key}: {work_utilisations[key]}"
-                    )
-                current_workers += increase
-            wfh_utilisations = {
-                (r, s, a): utilisations[LabourState.WORKING, r, s, a]
-                - work_utilisations[r, s, a]
-                for r, s, a in itertools.product(Region, Sector, Age)
-            }
-        for r, s, a in itertools.product(Region, Sector, Age):
-            utilisations[LabourState.WORKING, r, s, a] = work_utilisations[r, s, a]
-            utilisations[LabourState.WFH, r, s, a] = wfh_utilisations[r, s, a]
-            assert np.isclose(sum(utilisations[l, r, s, a] for l in LabourState), 1)
-        return utilisations
-
     @abc.abstractmethod
     def simulate(
         self,
         time: int,
         lockdown: bool,
-        lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
-        # utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
         pass
 
 
@@ -290,9 +213,6 @@ class LinearGdpModel(BaseGdpModel):
     workers: Mapping[Tuple[Region, Sector, Age], float]
     wfh: Mapping[str, float]
     vulnerability: Mapping[str, float]
-
-    def __init__(self, lockdown_recovery_time: int = 1, optimal_recovery: bool = False):
-        super().__init__(lockdown_recovery_time, optimal_recovery)
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {
@@ -323,13 +243,9 @@ class LinearGdpModel(BaseGdpModel):
         self,
         time: int,
         lockdown: bool,
-        lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
-        utilisations = self._apply_lockdown(
-            time, lockdown, lockdown_exit_time, utilisations
-        )
         # FIXME: hacked to work with old utilisations
         utilisations = {
             (r, s, a): utilisations[LabourState.WORKING, r, s, a]
@@ -359,12 +275,9 @@ class SupplyDemandGdpModel(BaseGdpModel):
     demand: np.array
 
     def __init__(
-        self,
-        lockdown_recovery_time: int = 1,
-        optimal_recovery: bool = False,
-        theta: float = 1.2,
+        self, theta: float = 1.2,
     ):
-        super().__init__(lockdown_recovery_time, optimal_recovery)
+        super().__init__()
         self.theta = theta
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
@@ -457,13 +370,9 @@ class SupplyDemandGdpModel(BaseGdpModel):
         self,
         time: int,
         lockdown: bool,
-        lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
-        utilisations = self._apply_lockdown(
-            time, lockdown, lockdown_exit_time, utilisations
-        )
         # FIXME: hacked to work with old utilisations
         utilisations = {
             (r, s, a): utilisations[LabourState.WORKING, r, s, a]
@@ -896,16 +805,9 @@ class CobbDouglasGdpModel(BaseGdpModel):
     wfh: pd.DataFrame
 
     def __init__(
-        self,
-        lockdown_recovery_time: int = 1,
-        optimal_recovery: bool = False,
-        p_kappa: float = 1.0,
-        p_delta: float = 1.0,
-        p_tau: float = 1.0,
-        substitution_rate: float = 0.5,
+        self, p_delta: float = 1.0, p_tau: float = 1.0, substitution_rate: float = 0.5,
     ):
-        super().__init__(lockdown_recovery_time, optimal_recovery)
-        self.p_kappa = pd.Series(p_kappa, index=list(Sector))
+        super().__init__()
         self.p_delta = pd.DataFrame(p_delta, index=list(Sector), columns=list(FinalUse))
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
@@ -1183,14 +1085,9 @@ class CobbDouglasGdpModel(BaseGdpModel):
         self,
         time: int,
         lockdown: bool,
-        lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
-        utilisations = self._apply_lockdown(
-            time, lockdown, lockdown_exit_time, utilisations
-        )
-
         try:
             capital = kwargs["capital"]
         except KeyError:
