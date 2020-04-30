@@ -322,6 +322,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         days_since_lockdown: int,
         stimulus_params: Mapping[str, int],
         net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        **kwargs,
     ) -> CorpInsolvencyState:
         """
         :param days_since_lockdown:
@@ -493,4 +494,6 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
                 stimulus_amounts + [0], breaks + [n_solvent - sum(breaks)]
             )
 
-            self.cash_state["sme"][s][self.cash_state["sme"][s] > 0] += cash_stimulus
+            self.cash_state[BusinessSize.sme][s][
+                self.cash_state[BusinessSize.sme][s] > 0
+            ] += cash_stimulus
