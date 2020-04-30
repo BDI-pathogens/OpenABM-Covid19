@@ -19,8 +19,9 @@ import pandas as pd
 from random import randrange
 
 sys.path.append("src/COVID19")
+import covid19
 from parameters import ParameterSet
-from model import Model, Parameters, ModelParameterException
+from model import Model, Parameters, ModelParameterException, AgeGroupEnum
 
 from . import constant
 from . import utilities as utils
@@ -159,4 +160,52 @@ class TestClass(object):
 
             with pytest.raises(ModelParameterException):
                 model.get_param("wrong_parameter")
-        
+
+    def test_model_total_infected_by_age(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+        )
+        params.set_param( "app_users_fraction", 0.25)
+        model = Model(params)
+        for _ in range(30):
+            model.one_time_step()
+        res = model.one_time_step_results()
+        for age in AgeGroupEnum:
+            assert res.get(f"total_infected{age.name}", None) is not None, f"Could not get total_infected{age.name}"
+        assert res.get("total_infected") == sum([res.get(f"total_infected{age.name}") for age in AgeGroupEnum]), "Total infected does not equal sum of age groups"
+
+    def test_set_lockdown_multiplier_params(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+        )
+        model = Model(params)
+        assert covid19.get_param_lockdown_on(model.c_params) == 0
+
+        model.update_running_params("lockdown_work_network_multiplier", 0.4)
+        assert model.get_param("lockdown_work_network_multiplier") == 0.4
+
+        model.update_running_params("lockdown_random_network_multiplier", 0.8)
+        assert model.get_param("lockdown_random_network_multiplier") == 0.8
+
+        model.update_running_params("lockdown_house_interaction_multiplier", 1.2)
+        assert model.get_param("lockdown_house_interaction_multiplier") == 1.2
+
+        model.update_running_params("lockdown_on", 1)
+        assert covid19.get_param_lockdown_on(model.c_params) == 1
+
+        model.update_running_params("lockdown_work_network_multiplier", 0.5)
+        assert model.get_param("lockdown_work_network_multiplier") == 0.5
+
+        model.update_running_params("lockdown_random_network_multiplier", 0.9)
+        assert model.get_param("lockdown_random_network_multiplier") == 0.9
+
+        model.update_running_params("lockdown_house_interaction_multiplier", 1.3)
+        assert model.get_param("lockdown_house_interaction_multiplier") == 1.3
+
+        assert covid19.get_param_lockdown_on(model.c_params) == 1
