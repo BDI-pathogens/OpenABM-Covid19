@@ -867,21 +867,6 @@ class CobbDouglasLPSetup:
         self.c_output(self.q_iot)
         self.c_demand(p_delta, self.ytilde_iot)
 
-        # TODO: get these weights from a data source
-        # invariant: for a fixed sector, summing weights over all regions and ages gives 1
-        self.labour_weight_region_age_per_sector_by_count = {
-            (sector, region, age): 1 / (len(Region) * len(Age))
-            for sector in Sector
-            for region in Region
-            for age in Age
-        }
-        self.labour_weight_region_age_per_sector_by_compensation = {
-            (sector, region, age): 1 / (len(Region) * len(Age))
-            for sector in Sector
-            for region in Region
-            for age in Age
-        }
-
     def finalise_setup(
         self,
         p_lambda: pd.DataFrame,
@@ -903,6 +888,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
     input_output_intermediate: pd.DataFrame
     input_output_primary: pd.DataFrame
     input_output_final: pd.DataFrame
+    wfh: pd.DataFrame
 
     def __init__(
         self,
@@ -920,6 +906,12 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
         self.results = IoGdpResult({}, {}, 0, 0, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        self.labour_weight_region_age_per_sector_by_count: Mapping[
+            Tuple[Sector, Region, Age]
+        ] = {}
+        self.labour_weight_region_age_per_sector_by_compensation: Mapping[
+            Tuple[Sector, Region, Age]
+        ] = {}
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {
@@ -944,6 +936,19 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             self.p_tau,
             self.substitution_rate,
         )
+        # invariant: for a fixed sector, summing weights over all regions and ages gives 1
+        self.labour_weight_region_age_per_sector_by_count = {
+            (s, r, a): self.workers[r, s, a]
+            / sum(
+                self.workers[rr, s, aa] for (rr, aa) in itertools.product(Region, Age)
+            )
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        self.labour_weight_region_age_per_sector_by_compensation = {
+            (s, r, a): self.gdp[r, s, a]
+            / sum(self.gdp[rr, s, aa] for (rr, aa) in itertools.product(Region, Age))
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
 
     def _postprocess_model_outputs(self, time, utilisations, r):
         x = pd.Series(r.x, index=self.setup.variables)
@@ -957,7 +962,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for region in Region:
                 for age in Age:
                     gdp[region, sector, age] = (
-                        self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        self.labour_weight_region_age_per_sector_by_compensation[
                             sector, region, age
                         ]
                         * gdp_for_sector
@@ -982,9 +987,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for r, a in itertools.product(Region, Age):
                 max_primary_inputs[p, r, s, a] = (
                     primary_input_value
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
         primary_inputs = {}
         for s in Sector:
@@ -993,18 +996,14 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.IMPORTS, r, s, a] = (
                     imports_sector
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
             # labour
             labour_sector = x[self.setup.V("xtilde", M.L, s)]
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.COMPENSATION, r, s, a] = (
                     labour_sector
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
             # taxes
             o_fraction = self.p_tau * x[self.setup.V("q", s)] / self.setup.q_iot.loc[s]
@@ -1017,15 +1016,11 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.TAXES_PRODUCTION, r, s, a] = (
                     taxes_production
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
                 primary_inputs[PrimaryInput.TAXES_PRODUCTS, r, s, a] = (
                     taxes_products
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
             # capital
             gross_operating_surplus = x[self.setup.V("xtilde", M.K, s)]
@@ -1048,15 +1043,11 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             for r, a in itertools.product(Region, Age):
                 primary_inputs[PrimaryInput.FIXED_CAPITAL_CONSUMPTION, r, s, a] = (
                     consumption_of_fixed_capital
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
                 primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] = (
                     net_operating_surplus
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
 
         # final uses
@@ -1100,9 +1091,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
                 )
                 compensation_paid[r, s, a] = (
                     compensation
-                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
-                        s, r, a
-                    ]
+                    * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
                 compensation_received[r, s, a] = (
                     received_adjustment * compensation_paid[r, s, a]
@@ -1141,7 +1130,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
                 l: {
                     s: np.sum(
                         [
-                            self.setup.labour_weight_region_age_per_sector_by_compensation[
+                            self.labour_weight_region_age_per_sector_by_compensation[
                                 s, region, age
                             ]
                             * utilisations[l, region, s, age]
