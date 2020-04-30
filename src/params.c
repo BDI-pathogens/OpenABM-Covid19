@@ -19,7 +19,7 @@
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return -1;
+    if (idx >= N_OCCUPATION_NETWORKS) return -1;
 
     return model->params->daily_fraction_work_used[idx];
 }
@@ -236,13 +236,13 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 }
 
 /*****************************************************************************************
-*  Name:        get_model_param_lockdown_work_network_multiplier
+*  Name:        get_model_param_lockdown_occupation_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_model_param_lockdown_work_network_multiplier(model *model, int index)
+double get_model_param_lockdown_occupation_multiplier(model *model, int index)
 {
-	if ( index >= N_WORK_NETWORKS)  return FALSE;
-	return model->params->lockdown_work_network_multiplier[index];
+	if ( index >= N_OCCUPATION_NETWORKS)  return FALSE;
+	return model->params->lockdown_occupation_multiplier[index];
 }
 
 /*****************************************************************************************
@@ -530,14 +530,14 @@ void update_work_intervention_state(model *model, int value){
 
 	if (value == TRUE) {
 		// Turn intervetions on
-		for (network = 0; network < N_WORK_NETWORKS; network++ )
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
 			params->daily_fraction_work_used[network] = params->daily_fraction_work *
-				        					            params->lockdown_work_network_multiplier[network];
+				        					            params->lockdown_occupation_multiplier[network];
 		}
 	}
 	else {
-		for (network = 0; network < N_WORK_NETWORKS; network++ )
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
 			params->daily_fraction_work_used[network] = params->daily_fraction_work;
 		}
@@ -592,10 +592,10 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 
 	if( value == TRUE )
 	{
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
+		for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
-															  params->lockdown_work_network_multiplier[network];
+															  params->lockdown_occupation_multiplier[network];
 	}
 	else
 	if( value == FALSE )
@@ -605,7 +605,7 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 
 		if( !params->lockdown_on )
 		{
-			for( network = 0; network < N_WORK_NETWORKS; network++ )
+			for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
 		}
 
@@ -660,13 +660,13 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_lockdown_work_network_multiplier
+*  Name:        set_model_param_lockdown_occupation_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_lockdown_work_network_multiplier( model *model, double value, int index )
+int set_model_param_lockdown_occupation_multiplier( model *model, double value, int index )
 {
-	if (index > N_WORK_NETWORKS) return FALSE;
-	model->params->lockdown_work_network_multiplier[index] = value;
+	if (index > N_OCCUPATION_NETWORKS) return FALSE;
+	model->params->lockdown_occupation_multiplier[index] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );

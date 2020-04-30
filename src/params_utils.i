@@ -85,7 +85,7 @@ int get_param_random_interaction_distribution(parameters *params)
 ******************************************************************************************/
 double get_param_mean_work_interactions(parameters *params, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return -1;
+    if (idx >= N_OCCUPATION_NETWORKS) return -1;
 
     return params->mean_work_interactions[idx];
 }
@@ -105,7 +105,7 @@ double get_param_daily_fraction_work(parameters *params)
 ******************************************************************************************/
 double get_param_daily_fraction_work_used(parameters *params, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return -1;
+    if (idx >= N_OCCUPATION_NETWORKS) return -1;
 
     return params->daily_fraction_work_used[idx];
 }
@@ -638,13 +638,13 @@ double get_param_daily_non_cov_symptoms_rate(parameters *params)
 }
 
 /*****************************************************************************************
-*  Name:		get_param_lockdown_work_network_multiplier
+*  Name:		get_param_lockdown_occupation_multiplier
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
-double get_param_lockdown_work_network_multiplier(parameters *params, int idx)
+double get_param_lockdown_occupation_multiplier(parameters *params, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return FALSE;
-    return params->lockdown_work_network_multiplier[idx];
+    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+    return params->lockdown_occupation_multiplier[idx];
 }
 
 /*****************************************************************************************
@@ -828,7 +828,7 @@ int set_param_random_interaction_distribution(parameters *params, int value)
 ******************************************************************************************/
 int set_param_mean_work_interactions(parameters *params, double value, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return FALSE;
+    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
     params->mean_work_interactions[idx] = value;
     return TRUE;
 }
@@ -1384,13 +1384,13 @@ int set_param_daily_non_cov_symptoms_rate(parameters *params, double value)
 }
 
 /*****************************************************************************************
-*  Name:		set_param_lockdown_work_network_multiplier
+*  Name:		set_param_lockdown_occupation_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_work_network_multiplier( parameters *params, double value, int idx)
+int set_param_lockdown_occupation_multiplier( parameters *params, double value, int idx)
 {
-    if (idx >= N_WORK_NETWORKS) return FALSE;
-    params->lockdown_work_network_multiplier[idx] = value;
+    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+    params->lockdown_occupation_multiplier[idx] = value;
     return TRUE;
 }
 

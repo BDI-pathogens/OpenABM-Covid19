@@ -370,13 +370,13 @@ class TestClass(object):
         np.testing.assert_equal( max( df_trans[ "generation_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
 
         # check that some people are infected across all networks
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
 
         # check hospitalised people are not transmitting on the work and household networks
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.WORK ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.WORK ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
 
         
     def test_exponential_growth_homogeneous_random(

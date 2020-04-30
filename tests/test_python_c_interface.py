@@ -19,7 +19,7 @@ from random import randrange, uniform
 
 import covid19
 from parameters import ParameterSet
-from model import Model, Parameters, ModelParameterException, AgeGroupEnum
+from model import Model, Parameters, ModelParameterException, OccupationNetworkEnum, AgeGroupEnum
 
 from . import constant
 from . import utilities as utils
@@ -186,13 +186,13 @@ class TestClass(object):
         )
         model = Model(params)
         assert covid19.get_param_lockdown_on(model.c_params) == 0
-        for age in AgeGroupEnum:
-            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.4)
-            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.4
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.4)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.4
 
-        for age in AgeGroupEnum:
-            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.8)
-            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.8
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.8)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.8
 
         model.update_running_params("lockdown_house_interaction_multiplier", 1.2)
         assert model.get_param("lockdown_house_interaction_multiplier") == 1.2
@@ -200,9 +200,9 @@ class TestClass(object):
         model.update_running_params("lockdown_on", 1)
         assert covid19.get_param_lockdown_on(model.c_params) == 1
 
-        for age in AgeGroupEnum:
-            model.update_running_params(f"lockdown_work_network_multiplier{age.name}", 0.5)
-            assert model.get_param(f"lockdown_work_network_multiplier{age.name}") == 0.5
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.5)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.5
 
         model.update_running_params("lockdown_random_network_multiplier", 0.9)
         assert model.get_param("lockdown_random_network_multiplier") == 0.9

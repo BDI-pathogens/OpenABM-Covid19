@@ -55,7 +55,7 @@ struct model{
 
 	network *random_network;
 	network *household_network;
-	network **work_network;
+	network **occupation_network;
 	directory *household_directory;
 
 	event *events;
@@ -95,7 +95,7 @@ void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
-void set_up_work_network( model*, int );
+void set_up_occupation_network( model*, int );
 void set_up_individual_hazard( model* );
 void destroy_model( model* );
 

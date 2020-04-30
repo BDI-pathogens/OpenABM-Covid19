@@ -104,7 +104,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 	
-	for( i = 0; i < N_WORK_NETWORK_TYPES; i++ )
+	for( i = 0; i < N_OCCUPATION_NETWORK_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
 		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
@@ -357,10 +357,10 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	for (i = 0; i<N_WORK_NETWORKS; i++){
+	for (i = 0; i<N_OCCUPATION_NETWORKS; i++){
 
-		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_work_network_multiplier[i]));
-		if( check < 1){ print_exit("Failed to read parameter lockdown_work_network_multiplier)\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_occupation_multiplier[i]));
+		if( check < 1){ print_exit("Failed to read parameter lockdown_occupation_multiplier)\n"); };
 
 	}
 	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
@@ -438,7 +438,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"ID,");
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
-	fprintf(individual_output_file,"work_network,");
+	fprintf(individual_output_file,"occupation_network,");
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
@@ -460,7 +460,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
-			indiv->work_network,
+			indiv->occupation_network,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -632,7 +632,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"ID_1,age_group_1,house_no_1,work_network_1,type,ID_2,age_group_2,house_no_2,work_network_2\n");
+	fprintf(output_file ,"ID_1,age_group_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,house_no_2,occupation_network_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -648,12 +648,12 @@ void write_interactions( model *model )
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
-					indiv->work_network,
+					indiv->occupation_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
 					inter->individual->house_no,
-					inter->individual->work_network
+					inter->individual->occupation_network
 				);
 				inter = inter->next;
 			}
@@ -688,13 +688,13 @@ void write_transmissions( model *model )
 	fprintf(output_file , "ID_recipient,");
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
-	fprintf(output_file , "work_network_recipient,");
+	fprintf(output_file , "occupation_network_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
-	fprintf(output_file , "work_network_source,");
+	fprintf(output_file , "occupation_network_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -725,13 +725,13 @@ void write_transmissions( model *model )
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
-					indiv->work_network,
+					indiv->occupation_network,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
-					infection_event->infector->work_network,
+					infection_event->infector->occupation_network,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),

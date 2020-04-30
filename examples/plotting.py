@@ -178,7 +178,7 @@ intervention_params = [
     "app_users_fraction_70_79",
     "app_users_fraction_80",
     "app_turn_on_time", 
-    "lockdown_work_network_multiplier",
+    "lockdown_occupation_multiplier",
     "lockdown_random_network_multiplier",
     "lockdown_house_interaction_multiplier",
     "lockdown_time_on",
