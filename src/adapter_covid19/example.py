@@ -12,6 +12,7 @@ from adapter_covid19.economics import Economics
 from adapter_covid19 import gdp as gdp_models
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
 from adapter_covid19.enums import Region, Sector, Age, LabourState
+from adapter_covid19.scenarios import Scenario
 
 
 def lockdown_then_unlock_no_corona(
@@ -22,9 +23,13 @@ def lockdown_then_unlock_no_corona(
     gdp_model: str = "SupplyDemandGdpModel",
 ):
     """
-    Lockdown at t=5 days, then release lockdown at t=50 days.
+    Lockdown at t=5 days, then release lockdown at t=30 days.
 
     :param data_path:
+    :param lockdown_on:
+    :param lockdown_off:
+    :param end_time:
+    :param gdp_model:
     :return:
     """
     if data_path is None:
@@ -36,20 +41,23 @@ def lockdown_then_unlock_no_corona(
     assert not inspect.isabstract(gdp_model_cls) and issubclass(
         gdp_model_cls, gdp_models.BaseGdpModel
     ), gdp_model
+    scenario = Scenario()
+    scenario.load(reader)
     econ = Economics(
         gdp_model_cls(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
     )
     econ.load(reader)
-    utilisations = {
-        key: 0.0 for key in itertools.product(LabourState, Region, Sector, Age)
-    }
-    for r, s, a in itertools.product(Region, Sector, Age):
-        utilisations[LabourState.WORKING, r, s, a] = 1.0
+    healthy = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
+    ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     for i in range(end_time):
         if lockdown_on <= i < lockdown_off:
-            econ.simulate(i, True, utilisations)
+            utilisations = scenario.generate(i, lockdown=True, healthy=healthy, ill=ill)
+            econ.simulate(i, lockdown=True, utilisations=utilisations)
         else:
-            econ.simulate(i, False, utilisations)
+            utilisations = scenario.generate(
+                i, lockdown=False, healthy=healthy, ill=ill
+            )
+            econ.simulate(i, lockdown=False, utilisations=utilisations)
     df = (
         pd.DataFrame(
             [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],

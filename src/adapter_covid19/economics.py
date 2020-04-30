@@ -46,8 +46,6 @@ class Economics:
         corporate_model: Model to simulate corporate bankruptcies
         personal_model: Model to simulate personal bankruptcies
         """
-        self.first_lockdown_time = 10 ** 12
-        self.lockdown_exited_time = 0
         self.gdp_model = gdp_model
         self.corporate_model = corporate_model
         self.personal_model = personal_model
@@ -67,24 +65,6 @@ class Economics:
         self.corporate_model.load(reader)
         self.personal_model.load(reader)
 
-    def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
-        if time == START_OF_TIME and lockdown:
-            raise ValueError(
-                "Economics model requires simulation to be started before lockdown"
-            )
-        if self.lockdown_exited_time and lockdown:
-            raise NotImplementedError(
-                "Bankruptcy/insolvency logic for toggling lockdown needs doing"
-            )
-        if lockdown and time < self.first_lockdown_time:
-            self.first_lockdown_time = time
-        if (
-            not self.lockdown_exited_time
-            and self.first_lockdown_time < time
-            and not lockdown
-        ):
-            self.lockdown_exited_time = time
-
     def simulate(
         self,
         time: int,
@@ -103,13 +83,8 @@ class Economics:
             between 0 and 1 describing the proportion of the
             workforce in work
         """
-        self._pre_simulation_checks(time, lockdown)
         self.gdp_model.simulate(
-            time,
-            lockdown,
-            self.lockdown_exited_time,
-            utilisations,
-            capital=self.corporate_model.state.capital,
+            time, lockdown, utilisations, capital=self.corporate_model.state.capital,
         )
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
@@ -126,7 +101,7 @@ class Economics:
             }
             if lockdown:
                 corporates_solvent_fraction = self.corporate_model.simulate(
-                    time - self.first_lockdown_time, negative_net_operating_surplus
+                    negative_net_operating_surplus
                 ).gdp_discount_factor
             else:
                 corporates_solvent_fraction = self.results.corporate_solvencies[

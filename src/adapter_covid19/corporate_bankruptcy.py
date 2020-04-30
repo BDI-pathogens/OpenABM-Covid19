@@ -34,16 +34,13 @@ class NaiveCorporateBankruptcyModel:
         pass
 
     def simulate(
-        self,
-        days_since_lockdown: int,
-        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> CorpInsolvencyState:
         """
         Amount to discount GDP by due to companies
         going insolvent on a specified number of days
         in the future
 
-        :param days_since_lockdown:
         :param net_operating_surplus:
         :return:
         """
@@ -211,12 +208,9 @@ class CorporateBankruptcyModel:
         return solvent
 
     def simulate(
-        self,
-        days_since_lockdown: int,
-        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None,
     ) -> CorpInsolvencyState:
         """
-        :param days_since_lockdown:
         :param net_operating_surplus:
         :return result:
         """
