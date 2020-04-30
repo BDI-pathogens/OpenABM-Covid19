@@ -1,6 +1,6 @@
 import copy
-from typing import Optional, Mapping, List, Sequence
-from dataclasses import dataclass
+from typing import Optional, Mapping, Sequence
+from dataclasses import dataclass, field
 
 import numpy as np
 import scipy as sp
@@ -9,25 +9,35 @@ from adapter_covid19.constants import DAYS_IN_A_YEAR
 from scipy.stats import fisk
 
 from adapter_covid19.datasources import Reader, SectorDataSource
-from adapter_covid19.enums import Sector
+from adapter_covid19.enums import Sector, BusinessSize
 
 
 @dataclass
 class CorpInsolvencyState:
-    cash_buffer: Mapping[str, Mapping[Sector, List[float]]]
     gdp_discount_factor: Mapping[Sector, float]
-    proportion_insolvent: Mapping[str, Mapping[Sector, float]]
+    cash_buffer: Mapping[BusinessSize, Mapping[Sector, Sequence[float]]]
+    proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]]
+    capital: Mapping[Sector, float] = field(
+        default_factory=lambda: {s: 1.0 for s in Sector}
+    )
 
 
 class NaiveCorporateBankruptcyModel:
+    def __init__(self):
+        self.state = CorpInsolvencyState(
+            {s: 1 for s in Sector},
+            {},
+            {b: {s: 1 for s in Sector} for b in BusinessSize},
+        )
+
     def load(self, reader: Reader) -> None:
         pass
 
-    def gdp_discount_factor(
+    def simulate(
         self,
         days_since_lockdown: int,
         net_operating_surplus: Optional[Mapping[Sector, float]] = None,
-    ) -> Mapping[Sector, float]:
+    ) -> CorpInsolvencyState:
         """
         Amount to discount GDP by due to companies
         going insolvent on a specified number of days
@@ -37,7 +47,7 @@ class NaiveCorporateBankruptcyModel:
         :param net_operating_surplus:
         :return:
         """
-        return {s: 1 for s in Sector}
+        return self.state
 
 
 class CorporateBankruptcyModel:
@@ -47,6 +57,7 @@ class CorporateBankruptcyModel:
         large_cap_cash_surplus_months: Optional[float] = None,
     ):
         self.beta = beta or 1 + np.random.rand()
+        super().__init__()
         theta = sp.pi / self.beta
         self.sinc_theta = np.sinc(theta)
         self.large_cap_cash_surplus_months = (
@@ -60,7 +71,6 @@ class CorporateBankruptcyModel:
         self.value_added: Mapping[Sector, float] = {}
         self.lcap_clipped_cash_buffer: Mapping[Sector, float] = {}
         self.sme_clipped_cash_buffer: Mapping[Sector, float] = {}
-        self.state = CorpInsolvencyState(None, None, None)
 
     def load(self, reader: Reader) -> None:
         io_df = reader.load_csv("input_output").set_index("Sector")
@@ -124,13 +134,13 @@ class CorporateBankruptcyModel:
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
         large_med = self._get_median_cash_buffer_days(True, self.outflows)
         self.cash_state = {
-            "largecap": {
+            BusinessSize.large: {
                 s: self._sim_cash_buffer(
                     100000, large_med[s], self.lcap_clipped_cash_buffer[s]
                 )
                 for s in Sector
             },
-            "sme": {
+            BusinessSize.sme: {
                 s: self._sim_cash_buffer(
                     100000, small_med[s], self.sme_clipped_cash_buffer[s]
                 )
@@ -145,7 +155,7 @@ class CorporateBankruptcyModel:
         median_solvency_days: float,
         cash_buffer: float,
         max_cash_buffer_days: Optional[float] = np.inf,
-    ) -> List[float]:
+    ) -> Sequence[float]:
         # Rejection sampling to get truncated log-logistic distribution of days till insolvency
         solvent_days = np.zeros((0,))
         while solvent_days.shape[0] < size:
@@ -212,19 +222,22 @@ class CorporateBankruptcyModel:
         """
         self._update_state(net_operating_surplus)
         largecap_proportion_solvent = {
-            s: self._proportion_solvent(self.cash_state["largecap"][s]) for s in Sector
+            s: self._proportion_solvent(self.cash_state[BusinessSize.large][s])
+            for s in Sector
         }
         sme_proportion_solvent = {
-            s: self._proportion_solvent(self.cash_state["sme"][s]) for s in Sector
+            s: self._proportion_solvent(self.cash_state[BusinessSize.sme][s])
+            for s in Sector
         }
         proportion_solvent = {
-            "largecap": largecap_proportion_solvent,
-            "sme": sme_proportion_solvent,
+            BusinessSize.large: largecap_proportion_solvent,
+            BusinessSize.sme: sme_proportion_solvent,
         }
 
+        # TODO: add capital to state
         result = CorpInsolvencyState(
-            self.cash_state,
             self._gdp_discount_factor(proportion_solvent),
+            self.cash_state,
             proportion_solvent,
         )
 
@@ -233,13 +246,13 @@ class CorporateBankruptcyModel:
         return result
 
     def _gdp_discount_factor(
-        self, proportion_solvent: Mapping[str, Mapping[Sector, float]],
+        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
 
         return {
             s: (
-                proportion_solvent["largecap"][s] * self.large_cap_pct[s]
-                + proportion_solvent["sme"][s] * (1 - self.large_cap_pct[s])
+                proportion_solvent[BusinessSize.large][s] * self.large_cap_pct[s]
+                + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
             )
             for s in Sector
         }
@@ -263,17 +276,17 @@ class CorporateBankruptcyModel:
         }
 
         for s in Sector:
-            self.cash_state["largecap"][s] = np.maximum(
+            self.cash_state[BusinessSize.large][s] = np.maximum(
                 np.minimum(
-                    self.cash_state["largecap"][s] - largecap_cash_outgoing[s],
-                    self.init_cash_state["largecap"][s],
+                    self.cash_state[BusinessSize.large][s] - largecap_cash_outgoing[s],
+                    self.init_cash_state[BusinessSize.large][s],
                 ),
                 0,
-            ) * (self.cash_state["largecap"][s] > 0)
-            self.cash_state["sme"][s] = np.maximum(
+            ) * (self.cash_state[BusinessSize.large][s] > 0)
+            self.cash_state[BusinessSize.sme][s] = np.maximum(
                 np.minimum(
-                    self.cash_state["sme"][s] - sme_cash_outgoing[s],
-                    self.init_cash_state["sme"][s],
+                    self.cash_state[BusinessSize.sme][s] - sme_cash_outgoing[s],
+                    self.init_cash_state[BusinessSize.sme][s],
                 ),
                 0,
-            ) * (self.cash_state["sme"][s] > 0)
+            ) * (self.cash_state[BusinessSize.sme][s] > 0)
