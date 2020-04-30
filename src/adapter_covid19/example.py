@@ -21,6 +21,9 @@ def lockdown_then_unlock_no_corona(
     lockdown_off: int = 30,
     furlough_on: int = 5,
     furlough_off: int = 30,
+    new_spending_day: int = 5,
+    ccff_day: int = 5,
+    loan_guarantee_day: int = 5,
     end_time: int = 50,
     gdp_model: str = "SupplyDemandGdpModel",
 ):
@@ -39,7 +42,11 @@ def lockdown_then_unlock_no_corona(
             os.path.dirname(__file__), "../../tests/adapter_covid19/data"
         )
     reader = Reader(data_path)
-    scenario = Scenario(furlough_start_time=furlough_on, furlough_end_time=furlough_off)
+    scenario = Scenario(furlough_start_time=furlough_on,
+                        furlough_end_time=furlough_off,
+                        new_spending_day=new_spending_day,
+                        ccff_day=ccff_day,
+                        loan_guarantee_day=loan_guarantee_day)
     scenario.load(reader)
     init_args = scenario.initialise()
     gdp_model_cls = gdp_models.__dict__[gdp_model]

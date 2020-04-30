@@ -43,6 +43,9 @@ class Scenario:
         lockdown_recovery_time: float = 1,
         furlough_start_time=None,
         furlough_end_time=None,
+        new_spending_day=1000,
+        ccff_day=1000,
+        loan_guarantee_day=1000
     ):
         self.datasources = {
             "gdp": RegionSectorAgeDataSource,
@@ -54,6 +57,9 @@ class Scenario:
         self.lockdown_exited_time = 0
         self.furlough_start_time = furlough_start_time
         self.furlough_end_time = furlough_end_time
+        self.new_spending_day = new_spending_day,
+        self.ccff_day = ccff_day,
+        self.loan_guarantee_day = loan_guarantee_day
         self._has_been_lockdown = False
         self._utilisations = {}  # For tracking / debugging
         for k in self.datasources:
@@ -182,7 +188,9 @@ class Scenario:
             utilisations,
             corporate_kwargs=dict(
                 stimulus_params=dict(
-                    new_spending_day=1000, ccff_day=1000, loan_guarantee_day=1000,
+                    new_spending_day=self.new_spending_day,
+                    ccff_day=self.ccff_day,
+                    loan_guarantee_day=self.loan_guarantee_day,
                 )
             ),
         )
