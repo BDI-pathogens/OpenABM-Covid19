@@ -144,11 +144,21 @@ class CorporateBankruptcyModel:
 
         self._init_sim()
 
-        self._apply_ccff()
+        self.loan_guarantee_remaining = 330e3
+        self.loan_guarantee_company_total = 5613210 + 211290 + 35585
+        self.size_loan = {0: 0.025, 10: 0.05, 50: 0.25}
+        self.sme_company_size = {s: np.repeat([0, 10, 50], [round(5613210. / self.loan_guarantee_company_total * 100000),
+                                                            round(211290. / self.loan_guarantee_company_total * 100000),
+                                                            round(35585. / self.loan_guarantee_company_total * 100000)]) for
+                                 s in Sector}
+
+        self.sme_company_received_loan = {s: np.zeros(100000) for s in Sector}
 
     def _apply_ccff(self) -> None:
-        self.cash_state['largecap'][s][
-            self.cash_state['largecap'][s] > np.quantile(self.cash_state['largecap'][s], 0.8)] = np.inf
+        for s in Sector:
+            sample = np.random.choice(np.where(self.cash_state['largecap'][s] > 0)[0], size=int(sum(self.cash_state['largecap'][s] > 0) * 0.2), replace=False)
+            self.cash_state['largecap'][s][sample] = np.inf
+            self.init_cash_state['largecap'][s][sample] = np.inf
 
     def _init_sim(self) -> None:
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
@@ -267,17 +277,25 @@ class CorporateBankruptcyModel:
         return solvent
 
     def simulate(
-        self,
-        days_since_lockdown: int,
-        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
-        **kwargs,
+            self,
+            days_since_lockdown: int,
+            stimulus_params: Mapping[str, int],
+            net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+            **kwargs,
     ) -> CorpInsolvencyState:
         """
+        :param days_since_lockdown:
+        :param stimulus_params:
         :param net_operating_surplus:
         :return result:
         """
-        if days_since_lockdown == 15:
+        if days_since_lockdown == stimulus_params['new_spending_day']:
             self._new_spending_sector_allocation()
+        if days_since_lockdown == stimulus_params['ccff_day']:
+            self._apply_ccff()
+        if (days_since_lockdown >= stimulus_params['loan_guarantee_day']) and self.loan_guarantee_remaining and (
+                days_since_lockdown % 7 == 0):
+            self._loan_guarantees()
         self._update_state(net_operating_surplus)
         largecap_proportion_solvent = {
             s: self._proportion_solvent(self.cash_state[BusinessSize.large][s])
@@ -347,8 +365,22 @@ class CorporateBankruptcyModel:
                 np.minimum(self.cash_state['sme'][s] - sme_cash_outgoing[s] - self.cash_drag['sme'][s],
                            self.init_cash_state['sme'][s]), 0) * (self.cash_state['sme'][s] > 0)
 
+    def _loan_guarantees(self):
+        for s in Sector:
+            valid_set = (1 - self.sme_company_received_loan[s]) * (self.cash_state['sme'][s] > 0)
+            sample = np.random.choice(np.where(valid_set)[0], size=int(sum(valid_set) / 5), replace=False)
+            if not len(sample):
+                return
+
+            self.cash_state['sme'][s][sample] += np.array([self.size_loan[i] for i in self.sme_company_size[s][sample]])
+            self.init_cash_state['sme'][s][sample] += np.array(
+                [self.size_loan[i] for i in self.sme_company_size[s][sample]])
+            self.sme_company_received_loan[s][sample] += 1
+            print(self.loan_guarantee_remaining)
+            self.loan_guarantee_remaining -= np.sum([self.size_loan[i] for i in self.sme_company_size[s][sample]])
+
     def _new_spending_sector_allocation(self) -> None:
-        stimulus_amounts = [0.01, 0.05, 0.25, 0.25]
+        stimulus_amounts = [0.01, 0.25]
         for s in Sector:
             try:
                 sector_turnover = self.turnover.loc[Sector(s).name, :]
@@ -357,12 +389,8 @@ class CorporateBankruptcyModel:
             if not self.sme_vulnerability[s]:
                 continue
             turnover_weights = np.array(
-                [sector_turnover[sector_turnover.min_size == 0][['num_companies', 'per_turnover']].sum(),
-                 sector_turnover[(sector_turnover.min_size > 0) & (sector_turnover.min_size < 10)][
-                     ['num_companies', 'per_turnover']].sum(),
-                 sector_turnover[(sector_turnover.min_size >= 10) & (sector_turnover.min_size < 100)][
-                     ['num_companies', 'per_turnover']].sum(),
-                 sector_turnover[(sector_turnover.min_size >= 100) & (sector_turnover.min_size < 250)][
+                [sector_turnover[(sector_turnover.min_size < 10)][['num_companies', 'per_turnover']].sum(),
+                 sector_turnover[(sector_turnover.min_size >= 10) & (sector_turnover.min_size < 250)][
                      ['num_companies', 'per_turnover']].sum()])
 
             weight_df = pd.DataFrame(turnover_weights)
@@ -373,16 +401,7 @@ class CorporateBankruptcyModel:
 
             weight_df['max_stimulus'] = weight_df['num_companies'] * weight_df['stimulus_amounts']
 
-            weight_df['allocated_stimulus'] = weight_df['per_turnover'] * (32e3 * self.sme_vulnerability[s])
-
-            weight_df['residual_stimulus'] = weight_df['allocated_stimulus'] - weight_df['max_stimulus']
-
-            resid_ind = weight_df['residual_stimulus'] > 0
-            if not all(resid_ind):
-                remaining_turnover_weight = weight_df.loc[:2, 'per_turnover']
-                resid = weight_df['residual_stimulus'][resid_ind].sum()
-                weight_df.loc[:2,
-                'allocated_stimulus'] += resid * remaining_turnover_weight / remaining_turnover_weight.sum()
+            weight_df['allocated_stimulus'] = np.array([12e3, 20e3]) * self.sme_vulnerability[s]
 
             n_solvent = sum(self.cash_state['sme'][s] > 0)
 
