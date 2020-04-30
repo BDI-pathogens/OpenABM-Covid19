@@ -96,8 +96,10 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
+    //Determine the number of interactions that all patients need.
     patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->patients->size) / n_hcw_working );
     //TODO: should there be different max interactions for doctors / nurses?
+    //Check whether the number of required interactions is greater than the max possible. If it is, set it to the max.
     patient_interactions_per_hcw = (patient_interactions_per_hcw > max_hcw_daily_interactions) ? max_hcw_daily_interactions : patient_interactions_per_hcw;
 
     n_total_interactions = patient_interactions_per_hcw * n_hcw_working;

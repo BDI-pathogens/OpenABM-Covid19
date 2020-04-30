@@ -63,7 +63,7 @@ void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int war
 
 void hospital_waiting_list_transition_scheduler( model *model, int disease_state );
 void swap_waiting_general_and_icu_patients( model *model );
-void predict_patient_disease_progression( model *model, individual *indiv, float patient_waiting_modifier, int type );
+void predict_patient_disease_progression(model *model, individual *indiv, double patient_waiting_modifier, int type );
 
 void remove_if_in_waiting_list( individual *indiv, hospital *hospital );
 int hospital_available_beds( hospital *hospital, int ward_type );
