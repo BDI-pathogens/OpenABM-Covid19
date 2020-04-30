@@ -144,6 +144,12 @@ class CorporateBankruptcyModel:
 
         self._init_sim()
 
+        self._apply_ccff()
+
+    def _apply_ccff(self) -> None:
+        self.cash_state['largecap'][s][
+            self.cash_state['largecap'][s] > np.quantile(self.cash_state['largecap'][s], 0.8)] = np.inf
+
     def _init_sim(self) -> None:
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
         large_med = self._get_median_cash_buffer_days(True, self.outflows)
@@ -341,7 +347,7 @@ class CorporateBankruptcyModel:
                 np.minimum(self.cash_state['sme'][s] - sme_cash_outgoing[s] - self.cash_drag['sme'][s],
                            self.init_cash_state['sme'][s]), 0) * (self.cash_state['sme'][s] > 0)
 
-    def _new_spending_sector_allocation(self):
+    def _new_spending_sector_allocation(self) -> None:
         stimulus_amounts = [0.01, 0.05, 0.25, 0.25]
         for s in Sector:
             try:
