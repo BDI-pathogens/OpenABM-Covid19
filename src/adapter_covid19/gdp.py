@@ -276,7 +276,7 @@ class BaseGdpModel(abc.ABC):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None,
+        **kwargs,
     ) -> None:
         # utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
         pass
@@ -321,7 +321,7 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None,
+        **kwargs,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -454,7 +454,7 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None,
+        **kwargs,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -1176,16 +1176,19 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None,
+        **kwargs,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
         )
 
-        if other_params is None or "capital" not in other_params:
-            raise ValueError("capital parameter required")
-        else:
-            capital = other_params["capital"]
+        try:
+            capital = kwargs["capital"]
+        except KeyError:
+            if time == START_OF_TIME:
+                capital = {s: 1.0 for s in Sector}
+            else:
+                raise ValueError("capital parameter required")
 
         result = self._simulate(time, utilisations, capital)
         # gdp adjustment disabled for now TODO: reimplement later

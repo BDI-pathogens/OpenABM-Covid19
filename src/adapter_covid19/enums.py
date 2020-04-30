@@ -171,3 +171,8 @@ class Decile(OrderedEnum):
     seven = "7"
     eight = "8"
     nine = "9"
+
+
+class BusinessSize(OrderedEnum):
+    large = "large-cap"
+    sme = "small-medium-enterprise"
