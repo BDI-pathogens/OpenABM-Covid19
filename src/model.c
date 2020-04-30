@@ -728,10 +728,12 @@ void build_daily_network( model *model )
 
     if( model->params->hospital_on )
     {
+        //Create work networks for healthcare workers.
         int ward_idx, ward_type;
         for( idx = 0; idx < model->params->n_hospitals; idx++ )
             build_hospital_networks( model, &(model->hospitals[idx]) );
 
+        //Create patient-healthcare interaction networks for each ward and each healthcare worker type.
         for( idx = 0; idx < model->params->n_hospitals; idx++ )
         {
             add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
