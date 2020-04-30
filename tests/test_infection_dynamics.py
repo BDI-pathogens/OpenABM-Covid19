@@ -693,7 +693,6 @@ class TestClass(object):
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
         df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        print(len(df_trans_current))
         
         # calculate the proportion of infections in each age group
         inf_cur_zeros = pd.DataFrame([0]*9, columns=['zeros'], index=range(9))
