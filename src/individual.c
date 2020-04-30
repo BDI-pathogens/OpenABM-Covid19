@@ -160,6 +160,7 @@ void update_random_interactions( individual *indiv, parameters* params )
 
         if( params->hospital_on )
         {
+            //Updates interactions when an individual is physically within a hospital.
             switch( indiv->hospital_state )
             {
                 case MORTUARY:		            n = 0; break;
