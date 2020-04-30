@@ -159,7 +159,12 @@ class Scenario:
             self.lockdown_exited_time = time
 
     def initialise(self) -> InitialiseState:
-        return InitialiseState()
+        # TODO: remove harcoded values
+        return InitialiseState(
+            personal_kwargs=dict(
+                default_th=300, max_earning_furloughed=28_000, beta=2,
+            ),
+        )
 
     def generate(
         self,
