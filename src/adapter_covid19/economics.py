@@ -139,33 +139,6 @@ class Economics:
             * corporates_solvent_fraction[s]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
-        if time == START_OF_TIME:
-            self.personal_model.init_utilization(
-                corporate_bankruptcy={s: 0 for s in Sector},
-                utilization_ill=0,
-                utilization_furloughed=0,
-                utilization_wfh=0,
-                utilization_working=1,
-            )
-            self.personal_model.simulate(time=time, **simulate_state.personal_kwargs)
-        else:
-            corporate_bankruptcy = {
-                s: 1 - self.results.corporate_solvencies[time - 1][s] for s in Sector
-            }
-            if lockdown:
-                self.personal_model.init_utilization(
-                    corporate_bankruptcy=corporate_bankruptcy,
-                    utilization_ill=0.1,
-                    utilization_furloughed=0.4,
-                    utilization_wfh=0.4,
-                    utilization_working=0.2,
-                )
-            else:
-                self.personal_model.init_utilization(
-                    corporate_bankruptcy=corporate_bankruptcy,
-                    utilization_ill=0.1,
-                    utilization_furloughed=0,
-                    utilization_wfh=0.2,
-                    utilization_working=0.8,
-                )
-            self.personal_model.simulate(time=time, **simulate_state.personal_kwargs)
+        self.personal_model.simulate(
+            time=time, utilisations=utilisations, **simulate_state.personal_kwargs
+        )
