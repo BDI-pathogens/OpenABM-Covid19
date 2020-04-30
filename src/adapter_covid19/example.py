@@ -39,7 +39,7 @@ def lockdown_then_unlock_no_corona(
             os.path.dirname(__file__), "../../tests/adapter_covid19/data"
         )
     reader = Reader(data_path)
-    scenario = Scenario(furlough_start_time=furlough_on,furlough_end_time=furlough_off)
+    scenario = Scenario(furlough_start_time=furlough_on, furlough_end_time=furlough_off)
     scenario.load(reader)
     init_args = scenario.initialise()
     gdp_model_cls = gdp_models.__dict__[gdp_model]
