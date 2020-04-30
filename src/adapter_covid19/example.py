@@ -26,6 +26,7 @@ def lockdown_then_unlock_no_corona(
     loan_guarantee_day: int = 5,
     end_time: int = 50,
     gdp_model: str = "SupplyDemandGdpModel",
+    show_plots: bool = True,
 ):
     """
     Lockdown at t=5 days, then release lockdown at t=30 days.
@@ -76,44 +77,146 @@ def lockdown_then_unlock_no_corona(
             [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
             index=range(1, end_time),
         )
-        .T.sort_index()
-        .T.cumsum(axis=1)
+            .T.sort_index()
+            .T.cumsum(axis=1)
     )
 
-    # Plot 1
-    fig, ax = plt.subplots(figsize=(20, 10))
-    ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
-    for i in range(1, df.shape[1]):
-        ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
-    ax.legend(ncol=2)
+    if show_plots:
+        # Plot 1
+        fig, ax = plt.subplots(figsize=(20, 10))
+        ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
+        for i in range(1, df.shape[1]):
+            ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
+        ax.legend(ncol=2)
 
-    # Plot 2
-    df = pd.DataFrame(
-        [
-            econ.results.corporate_solvencies[i]
-            for i in econ.results.corporate_solvencies
-        ]
-    )
-    df.plot(figsize=(20, 10))
+        # Plot 2
+        df = pd.DataFrame(
+            [
+                econ.results.corporate_solvencies[i]
+                for i in econ.results.corporate_solvencies
+            ]
+        )
+        df.plot(figsize=(20, 10))
 
-    # Plot 3
-    pd.DataFrame(
-        [
-            {
-                r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
-                for r in Region
-            }
-            for i in econ.results.personal_bankruptcy
-        ]
-    ).plot(figsize=(20, 10))
+        # Plot 3
+        pd.DataFrame(
+            [
+                {
+                    r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
+                    for r in Region
+                }
+                for i in econ.results.personal_bankruptcy
+            ]
+        ).plot(figsize=(20, 10))
 
     return econ
+
+
+def run_multiple_scenarios(data_path: str = "data",
+                           show_plots: bool = True):
+    scenario_results = {}
+    scenario_results["no furlough"] = lockdown_then_unlock_no_corona(data_path=data_path,
+                                                                     end_time=50,
+                                                                     furlough_on=None,
+                                                                     furlough_off=None,
+                                                                     new_spending_day=1000,
+                                                                     ccff_day=1000,
+                                                                     loan_guarantee_day=1000,
+                                                                     gdp_model="CobbDouglasGdpModel",
+                                                                     show_plots=show_plots)
+    scenario_results["furlough"] = lockdown_then_unlock_no_corona(data_path=data_path,
+                                                                  end_time=50,
+                                                                  furlough_on=5,
+                                                                  furlough_off=30,
+                                                                  new_spending_day=1000,
+                                                                  ccff_day=1000,
+                                                                  loan_guarantee_day=1000,
+                                                                  gdp_model="CobbDouglasGdpModel",
+                                                                  show_plots=show_plots)
+    scenario_results["furlough and corp support later"] = lockdown_then_unlock_no_corona(data_path=data_path,
+                                                                                         end_time=50,
+                                                                                         furlough_on=5,
+                                                                                         furlough_off=30,
+                                                                                         new_spending_day=15,
+                                                                                         ccff_day=15,
+                                                                                         loan_guarantee_day=15,
+                                                                                         gdp_model="CobbDouglasGdpModel",
+                                                                                         show_plots=show_plots)
+    scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(data_path=data_path,
+                                                                                   end_time=50,
+                                                                                   furlough_on=5,
+                                                                                   furlough_off=30,
+                                                                                   new_spending_day=5,
+                                                                                   ccff_day=5,
+                                                                                   loan_guarantee_day=5,
+                                                                                   gdp_model="CobbDouglasGdpModel",
+                                                                                   show_plots=show_plots)
+    scenario_results["furlough and corp spending only"] = lockdown_then_unlock_no_corona(data_path=data_path,
+                                                                                         end_time=50,
+                                                                                         furlough_on=5,
+                                                                                         furlough_off=30,
+                                                                                         new_spending_day=5,
+                                                                                         ccff_day=1000,
+                                                                                         loan_guarantee_day=1000,
+                                                                                         gdp_model="CobbDouglasGdpModel",
+                                                                                         show_plots=show_plots)
+    return scenario_results
+
+
+def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
+    skip_scenarios = [] if skip_scenarios is None else skip_scenarios
+    end_time = 50
+    _scenarios = {n: e for n, e in scenarios.items() if n not in skip_scenarios}
+    fig, axes = plt.subplots(3, len(_scenarios), sharex=True, sharey=True, figsize=(20, 10))
+    for idx, (name, econ) in enumerate(_scenarios.items()):
+        # Plot 1
+        ax = axes[0][idx]
+        df = (
+            pd.DataFrame(
+                [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
+                index=range(1, end_time),
+            )
+                .T.sort_index()
+                .T.cumsum(axis=1)
+        )
+        ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
+        for i in range(1, df.shape[1]):
+            ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
+        # ax.legend(ncol=2)
+        ax.legend().remove()
+        ax.set_title(name)
+
+        # Plot 2
+        ax = axes[1][idx]
+        df = pd.DataFrame(
+            [
+                econ.results.corporate_solvencies[i]
+                for i in econ.results.corporate_solvencies
+            ]
+        )
+        df.plot(ax=ax)
+        ax.legend().remove()
+
+        # Plot 3
+        ax = axes[2][idx]
+        pd.DataFrame(
+            [
+                {
+                    r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
+                    for r in Region
+                }
+                for i in econ.results.personal_bankruptcy
+            ]
+        ).plot(ax=ax)
+        ax.legend().remove()
+    plt.tight_layout()
 
 
 if __name__ == "__main__":
     import sys
 
     if len(sys.argv) > 1:
-        lockdown_then_unlock_no_corona(*sys.argv[1:])
+        run_multiple_scenarios(*sys.argv[1:])
     else:
-        lockdown_then_unlock_no_corona()
+        run_multiple_scenarios(show_plots=False)
+        # plot_scenarios(scenarios)
