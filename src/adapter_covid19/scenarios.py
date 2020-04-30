@@ -38,7 +38,10 @@ class Scenario:
     furloughed: Mapping[Sector, float]
     keyworker: Mapping[Sector, float]
 
-    def __init__(self, lockdown_recovery_time: float = 1):
+    def __init__(self,
+                 lockdown_recovery_time: float = 1,
+                 furlough_start_time = None,
+                 furlough_end_time = None):
         self.datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
@@ -47,6 +50,8 @@ class Scenario:
         }
         self.lockdown_recovery_time = lockdown_recovery_time
         self.lockdown_exited_time = 0
+        self.furlough_start_time = furlough_start_time
+        self.furlough_end_time = furlough_end_time
         self._has_been_lockdown = False
         self._utilisations = {}  # For tracking / debugging
         for k in self.datasources:
@@ -72,6 +77,10 @@ class Scenario:
         :param ill:
         :return:
         """
+        furlough_active = self.furlough_start_time is not None and self.furlough_end_time is not None \
+                        and self.furlough_start_time <= time < self.furlough_end_time
+        furloughed = self.furloughed  if furlough_active else {s: 0.0 for s in Sector}
+
         utilisations = {
             k: 0 for k in itertools.product(LabourState, Region, Sector, Age)
         }
@@ -87,16 +96,16 @@ class Scenario:
         }
         # Lockdown utilisations
         work_utilisations = {
-            (r, s, a): base_utilisations[r, s, a] * (1 - self.furloughed[s])
+            (r, s, a): base_utilisations[r, s, a] * (1 - furloughed[s])
             for r, s, a in itertools.product(Region, Sector, Age)
         }
         wfh_utilisations = {
             (r, s, a): (healthy[r, s, a] - base_utilisations[r, s, a])
-            * (1 - self.furloughed[s])
+            * (1 - furloughed[s])
             for r, s, a in itertools.product(Region, Sector, Age)
         }
         furlough_utilisations = {
-            (r, s, a): healthy[r, s, a] * self.furloughed[s]
+            (r, s, a): healthy[r, s, a] * furloughed[s]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
         if self.lockdown_exited_time:
