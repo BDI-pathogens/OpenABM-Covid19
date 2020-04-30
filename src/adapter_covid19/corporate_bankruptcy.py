@@ -165,12 +165,12 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
     def _apply_ccff(self) -> None:
         for s in Sector:
             sample = np.random.choice(
-                np.where(self.cash_state["largecap"][s] > 0)[0],
-                size=int(sum(self.cash_state["largecap"][s] > 0) * 0.2),
+                np.where(self.cash_state[BusinessSize.large][s] > 0)[0],
+                size=int(sum(self.cash_state[BusinessSize.large][s] > 0) * 0.2),
                 replace=False,
             )
-            self.cash_state["largecap"][s][sample] = np.inf
-            self.init_cash_state["largecap"][s][sample] = np.inf
+            self.cash_state[BusinessSize.large][s][sample] = np.inf
+            self.init_cash_state[BusinessSize.large][s][sample] = np.inf
 
     def _init_sim(self) -> None:
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
@@ -191,24 +191,25 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         }
         self.init_cash_state = copy.deepcopy(self.cash_state)
         large_cash_q5 = {
-            s: np.quantile(self.init_cash_state["largecap"][s], 0.05) / 365
+            s: np.quantile(self.init_cash_state[BusinessSize.large][s], 0.05) / 365
             for s in Sector
         }
         sme_cash_q5 = {
-            s: np.quantile(self.init_cash_state["sme"][s], 0.05) / 365 for s in Sector
+            s: np.quantile(self.init_cash_state[BusinessSize.sme][s], 0.05) / 365
+            for s in Sector
         }
         large_cash_iqr = {
             s: (
-                np.quantile(self.init_cash_state["largecap"][s], 0.75)
-                - np.quantile(self.init_cash_state["largecap"][s], 0.25)
+                np.quantile(self.init_cash_state[BusinessSize.large][s], 0.75)
+                - np.quantile(self.init_cash_state[BusinessSize.large][s], 0.25)
             )
             / 365
             for s in Sector
         }
         sme_cash_iqr = {
             s: (
-                np.quantile(self.init_cash_state["sme"][s], 0.75)
-                - np.quantile(self.init_cash_state["sme"][s], 0.25)
+                np.quantile(self.init_cash_state[BusinessSize.sme][s], 0.75)
+                - np.quantile(self.init_cash_state[BusinessSize.sme][s], 0.25)
             )
             / 365
             for s in Sector
@@ -234,7 +235,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         }
 
         self.cash_drag = {
-            "largecap": {
+            BusinessSize.large: {
                 s: norm.rvs(
                     loc=(large_cash_q5[s] - largecap_init_cash_outgoing[s]),
                     scale=1e-6,
@@ -244,7 +245,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
                 else np.zeros(100000)
                 for s in Sector
             },
-            "sme": {
+            BusinessSize.sme: {
                 s: norm.rvs(
                     loc=(sme_cash_q5[s] - sme_init_cash_outgoing[s]),
                     scale=1e-6,
