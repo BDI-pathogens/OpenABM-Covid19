@@ -1,5 +1,6 @@
 import itertools
-from typing import Mapping, Tuple
+from dataclasses import dataclass, field
+from typing import Mapping, Tuple, Any
 
 import numpy as np
 
@@ -10,6 +11,25 @@ from adapter_covid19.datasources import (
     RegionSectorAgeDataSource,
 )
 from adapter_covid19.enums import Sector, LabourState, Region, Age
+
+
+@dataclass
+class InitialiseState:
+    economics_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    gdp_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    personal_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    corporate_kwargs: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SimulateState:
+    time: int
+    lockdown: bool  # TODO: remove
+    utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
+    economics_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    gdp_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    personal_kwargs: Mapping[str, Any] = field(default_factory=dict)
+    corporate_kwargs: Mapping[str, Any] = field(default_factory=dict)
 
 
 class Scenario:
@@ -28,7 +48,7 @@ class Scenario:
         self.lockdown_recovery_time = lockdown_recovery_time
         self.lockdown_exited_time = 0
         self._has_been_lockdown = False
-        self.utilisations = []
+        self._utilisations = {}  # For tracking / debugging
         for k in self.datasources:
             self.__setattr__(k, None)
 
@@ -124,14 +144,17 @@ class Scenario:
         if not self.lockdown_exited_time and self._has_been_lockdown and not lockdown:
             self.lockdown_exited_time = time
 
+    def initialise(self) -> InitialiseState:
+        return InitialiseState()
+
     def generate(
         self,
         time: int,
         lockdown: bool,
         healthy: Mapping[Tuple[Region, Sector, Age], float],
         ill: Mapping[Tuple[Region, Sector, Age], float],
-    ) -> Mapping[Tuple[LabourState, Region, Sector, Age], float]:
+    ) -> SimulateState:
         self._pre_simulation_checks(time, lockdown)
         utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
-        self.utilisations.append(utilisations)
-        return utilisations
+        self._utilisations[time] = utilisations  # For tracking / debugging
+        return SimulateState(time, lockdown, utilisations)

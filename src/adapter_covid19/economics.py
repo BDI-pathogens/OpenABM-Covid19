@@ -1,4 +1,5 @@
 import itertools
+import logging
 from dataclasses import dataclass
 from typing import Mapping, Tuple, MutableMapping
 
@@ -11,6 +12,9 @@ from adapter_covid19.personal_insolvency import (
     PersonalBankruptcyModel,
 )
 from adapter_covid19.enums import Region, Sector, Age, LabourState, PrimaryInput
+from adapter_covid19.scenarios import SimulateState
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -36,6 +40,7 @@ class Economics:
         gdp_model: BaseGdpModel,
         corporate_model: CorporateBankruptcyModel,
         personal_model: PersonalBankruptcyModel,
+        **kwargs,
     ):
         """
         Economics simulator
@@ -46,6 +51,8 @@ class Economics:
         corporate_model: Model to simulate corporate bankruptcies
         personal_model: Model to simulate personal bankruptcies
         """
+        if kwargs:
+            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
         self.gdp_model = gdp_model
         self.corporate_model = corporate_model
         self.personal_model = personal_model
@@ -65,11 +72,22 @@ class Economics:
         self.corporate_model.load(reader)
         self.personal_model.load(reader)
 
-    def simulate(
+    def simulate(self, simulate_state: SimulateState,) -> None:
+        return self._simulate(
+            simulate_state.time,
+            simulate_state.lockdown,
+            simulate_state.utilisations,
+            simulate_state=simulate_state,
+            **simulate_state.economics_kwargs,
+        )
+
+    def _simulate(
         self,
         time: int,
         lockdown: bool,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        simulate_state: SimulateState,
+        **kwargs,
     ) -> None:
         """
         Simulate the economy
@@ -83,8 +101,16 @@ class Economics:
             between 0 and 1 describing the proportion of the
             workforce in work
         """
+        if kwargs:
+            LOGGER.warning(
+                f"Unused simulate kwargs in {self.__class__.__name__}: {kwargs}"
+            )
         self.gdp_model.simulate(
-            time, lockdown, utilisations, capital=self.corporate_model.state.capital,
+            time,
+            lockdown,
+            utilisations,
+            capital=self.corporate_model.state.capital,
+            **simulate_state.gdp_kwargs,
         )
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
@@ -101,7 +127,7 @@ class Economics:
             }
             if lockdown:
                 corporates_solvent_fraction = self.corporate_model.simulate(
-                    negative_net_operating_surplus
+                    negative_net_operating_surplus, **simulate_state.corporate_kwargs
                 ).gdp_discount_factor
             else:
                 corporates_solvent_fraction = self.results.corporate_solvencies[
@@ -121,7 +147,7 @@ class Economics:
                 utilization_wfh=0,
                 utilization_working=1,
             )
-            self.personal_model.simulate(time=time)
+            self.personal_model.simulate(time=time, **simulate_state.personal_kwargs)
         else:
             corporate_bankruptcy = {
                 s: 1 - self.results.corporate_solvencies[time - 1][s] for s in Sector
@@ -142,4 +168,4 @@ class Economics:
                     utilization_wfh=0.2,
                     utilization_working=0.8,
                 )
-            self.personal_model.simulate(time=time,)
+            self.personal_model.simulate(time=time, **simulate_state.personal_kwargs)

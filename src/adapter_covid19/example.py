@@ -11,7 +11,7 @@ from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
 from adapter_covid19 import gdp as gdp_models
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, LabourState
+from adapter_covid19.enums import Region, Sector, Age
 from adapter_covid19.scenarios import Scenario
 
 
@@ -37,27 +37,31 @@ def lockdown_then_unlock_no_corona(
             os.path.dirname(__file__), "../../tests/adapter_covid19/data"
         )
     reader = Reader(data_path)
+    scenario = Scenario()
+    scenario.load(reader)
+    init_args = scenario.initialise()
     gdp_model_cls = gdp_models.__dict__[gdp_model]
     assert not inspect.isabstract(gdp_model_cls) and issubclass(
         gdp_model_cls, gdp_models.BaseGdpModel
     ), gdp_model
-    scenario = Scenario()
-    scenario.load(reader)
-    econ = Economics(
-        gdp_model_cls(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
-    )
+    gdp_model = gdp_model_cls(**init_args.gdp_kwargs)
+    cb_model = CorporateBankruptcyModel(**init_args.corporate_kwargs)
+    pb_model = PersonalBankruptcyModel(**init_args.personal_kwargs)
+    econ = Economics(gdp_model, cb_model, pb_model, **init_args.economics_kwargs)
     econ.load(reader)
     healthy = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     for i in range(end_time):
         if lockdown_on <= i < lockdown_off:
-            utilisations = scenario.generate(i, lockdown=True, healthy=healthy, ill=ill)
-            econ.simulate(i, lockdown=True, utilisations=utilisations)
+            simulate_state = scenario.generate(
+                i, lockdown=True, healthy=healthy, ill=ill
+            )
+            econ.simulate(simulate_state)
         else:
-            utilisations = scenario.generate(
+            simulate_state = scenario.generate(
                 i, lockdown=False, healthy=healthy, ill=ill
             )
-            econ.simulate(i, lockdown=False, utilisations=utilisations)
+            econ.simulate(simulate_state)
     df = (
         pd.DataFrame(
             [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],

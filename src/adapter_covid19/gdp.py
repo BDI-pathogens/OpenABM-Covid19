@@ -99,7 +99,9 @@ class BaseGdpModel(abc.ABC):
     keyworker: Mapping[Sector, float]
     growth_rates: Mapping[Sector, float]
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        if kwargs:
+            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
         self.results = GdpResult({}, {}, {}, 0, 0)
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
@@ -274,10 +276,8 @@ class SupplyDemandGdpModel(BaseGdpModel):
     supply: np.array
     demand: np.array
 
-    def __init__(
-        self, theta: float = 1.2,
-    ):
-        super().__init__()
+    def __init__(self, theta: float = 1.2, **kwargs):
+        super().__init__(**kwargs)
         self.theta = theta
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
@@ -805,9 +805,13 @@ class CobbDouglasGdpModel(BaseGdpModel):
     wfh: pd.DataFrame
 
     def __init__(
-        self, p_delta: float = 1.0, p_tau: float = 1.0, substitution_rate: float = 0.5,
+        self,
+        p_delta: float = 1.0,
+        p_tau: float = 1.0,
+        substitution_rate: float = 0.5,
+        **kwargs,
     ):
-        super().__init__()
+        super().__init__(**kwargs)
         self.p_delta = pd.DataFrame(p_delta, index=list(Sector), columns=list(FinalUse))
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
