@@ -6,7 +6,12 @@ import pandas as pd
 import scipy.stats
 
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
-from adapter_covid19.datasources import Reader, RegionDataSource, RegionSectorAgeDataSource, RegionDecileSource
+from adapter_covid19.datasources import (
+    Reader,
+    RegionDataSource,
+    RegionSectorAgeDataSource,
+    RegionDecileSource,
+)
 from adapter_covid19.enums import LabourState, Age
 from adapter_covid19.enums import Region, Sector, Decile
 
@@ -70,14 +75,20 @@ class PersonalBankruptcyModel:
         int, MutableMapping[Region, PersonalBankruptcyResults]
     ] = field(default_factory=dict, init=False)
 
-    def load(self,
-             reader: Reader,
-             corporate_bankruptcy: Mapping[Sector, float] = None
-             ) -> None:
+    def load(
+        self, reader: Reader, corporate_bankruptcy: Mapping[Sector, float] = None
+    ) -> None:
         if self.gdp_data is None:
             self.gdp_data = RegionSectorAgeDataSource("gdp").load(reader)
 
-        df_gdp = pd.Series(self.gdp_data).to_frame().reset_index().groupby(["level_0", "level_1"])[0].sum().unstack()
+        df_gdp = (
+            pd.Series(self.gdp_data)
+            .to_frame()
+            .reset_index()
+            .groupby(["level_0", "level_1"])[0]
+            .sum()
+            .unstack()
+        )
         self._sector_region_weights = (df_gdp.T / df_gdp.T.sum(axis=0)).to_dict()
 
         if self.utilization is None:
@@ -116,13 +127,14 @@ class PersonalBankruptcyModel:
             if regions != set(Region):
                 raise ValueError(f"Inconsistent data: {regions}, {set(Region)}")
 
-    def init_utilization(self,
-                         corporate_bankruptcy: Mapping[Sector, float] = None,
-                         utilization_ill: float = None,
-                         utilization_furloughed: float = None,
-                         utilization_wfh: float = None,
-                         utilization_working: float = None,
-                         ) -> None:
+    def init_utilization(
+        self,
+        corporate_bankruptcy: Mapping[Sector, float] = None,
+        utilization_ill: float = None,
+        utilization_furloughed: float = None,
+        utilization_wfh: float = None,
+        utilization_working: float = None,
+    ) -> None:
         if corporate_bankruptcy is None:
             cb_by_region = {r: np.random.rand() for r in Region}
         else:
@@ -139,8 +151,16 @@ class PersonalBankruptcyModel:
         if utilization_ill is None:
             utilization_ill = np.random.rand()
 
-        if utilization_furloughed is None or utilization_wfh is None or utilization_working is None:
-            utilization_furloughed, utilization_wfh, utilization_working = np.random.dirichlet(([1, 1, 1]))
+        if (
+            utilization_furloughed is None
+            or utilization_wfh is None
+            or utilization_working is None
+        ):
+            (
+                utilization_furloughed,
+                utilization_wfh,
+                utilization_working,
+            ) = np.random.dirichlet(([1, 1, 1]))
 
         for r in Region:
             utilization_r = {}
@@ -154,9 +174,13 @@ class PersonalBankruptcyModel:
             utilization_r_sum += utilization_r[LabourState.ILL]
 
             # Next we check furloughed, wfh and working
-            utilization_r[LabourState.FURLOUGHED] = utilization_furloughed * (1 - utilization_r_sum)
+            utilization_r[LabourState.FURLOUGHED] = utilization_furloughed * (
+                1 - utilization_r_sum
+            )
             utilization_r[LabourState.WFH] = utilization_wfh * (1 - utilization_r_sum)
-            utilization_r[LabourState.WORKING] = utilization_working * (1 - utilization_r_sum)
+            utilization_r[LabourState.WORKING] = utilization_working * (
+                1 - utilization_r_sum
+            )
 
             self.utilization[r] = utilization_r
 
@@ -173,11 +197,9 @@ class PersonalBankruptcyModel:
         }
 
     def _init_w_decile(self) -> None:
-        self.w_decile = {r: {d: 1. / len(Decile) for d in Decile} for r in Region}
+        self.w_decile = {r: {d: 1.0 / len(Decile) for d in Decile} for r in Region}
 
-    def simulate(self,
-                 time: int,
-                 ) -> None:
+    def simulate(self, time: int,) -> None:
         self.results[time] = {}
         for r in Region:
             if time == START_OF_TIME:
@@ -185,7 +207,10 @@ class PersonalBankruptcyModel:
                 balance = {d: self.cash_reserve[(r, d)] for d in Decile}
             else:
                 delta_balance = self._calc_delta_balance(r)
-                balance = {d: self.results[time - 1][r].balance[d] + delta_balance[d] for d in Decile}
+                balance = {
+                    d: self.results[time - 1][r].balance[d] + delta_balance[d]
+                    for d in Decile
+                }
 
             spot_credit_mean = self._calc_credit_mean(self.credit_mean[r], balance)
 
@@ -201,9 +226,7 @@ class PersonalBankruptcyModel:
                 personal_bankruptcy=personal_bankruptcy,
             )
 
-    def _calc_delta_balance(self,
-                            r: Region
-                            ) -> Mapping[Decile, float]:
+    def _calc_delta_balance(self, r: Region) -> Mapping[Decile, float]:
         db = {}
         for d in Decile:
             db_d = 0
@@ -212,23 +235,27 @@ class PersonalBankruptcyModel:
                 if ls == LabourState.FURLOUGHED:
                     spot_earnings = min(spot_earnings, self.max_earning_furloughed)
 
-                db_d += self.utilization[r][ls] * (spot_earnings - self.expenses[(r, d)]) / DAYS_IN_A_YEAR
+                db_d += (
+                    self.utilization[r][ls]
+                    * (spot_earnings - self.expenses[(r, d)])
+                    / DAYS_IN_A_YEAR
+                )
 
             db[d] = db_d
         return db
 
-    def _calc_credit_mean(self,
-                          init_credit_mean: float,
-                          balance: Mapping[Decile, float],
-                          ) -> Mapping[Decile, float]:
+    def _calc_credit_mean(
+        self, init_credit_mean: float, balance: Mapping[Decile, float],
+    ) -> Mapping[Decile, float]:
         return {d: init_credit_mean + self.beta * min(balance[d], 0) for d in Decile}
 
-    def _calc_personal_bankruptcy(self,
-                                  r: Region,
-                                  spot_credit_mean: Mapping[Decile, float],
-                                  ) -> float:
+    def _calc_personal_bankruptcy(
+        self, r: Region, spot_credit_mean: Mapping[Decile, float],
+    ) -> float:
         ppb = 0
         for d in Decile:
-            ppb += self.w_decile[r][d] * scipy.stats.norm.cdf(self.default_th, spot_credit_mean[d], self.credit_std[r])
+            ppb += self.w_decile[r][d] * scipy.stats.norm.cdf(
+                self.default_th, spot_credit_mean[d], self.credit_std[r]
+            )
 
         return ppb
