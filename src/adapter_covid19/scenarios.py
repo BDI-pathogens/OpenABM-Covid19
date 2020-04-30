@@ -38,10 +38,12 @@ class Scenario:
     furloughed: Mapping[Sector, float]
     keyworker: Mapping[Sector, float]
 
-    def __init__(self,
-                 lockdown_recovery_time: float = 1,
-                 furlough_start_time = None,
-                 furlough_end_time = None):
+    def __init__(
+        self,
+        lockdown_recovery_time: float = 1,
+        furlough_start_time=None,
+        furlough_end_time=None,
+    ):
         self.datasources = {
             "gdp": RegionSectorAgeDataSource,
             "workers": RegionSectorAgeDataSource,
@@ -77,9 +79,12 @@ class Scenario:
         :param ill:
         :return:
         """
-        furlough_active = self.furlough_start_time is not None and self.furlough_end_time is not None \
-                        and self.furlough_start_time <= time < self.furlough_end_time
-        furloughed = self.furloughed  if furlough_active else {s: 0.0 for s in Sector}
+        furlough_active = (
+            self.furlough_start_time is not None
+            and self.furlough_end_time is not None
+            and self.furlough_start_time <= time < self.furlough_end_time
+        )
+        furloughed = self.furloughed if furlough_active else {s: 0.0 for s in Sector}
 
         utilisations = {
             k: 0 for k in itertools.product(LabourState, Region, Sector, Age)
