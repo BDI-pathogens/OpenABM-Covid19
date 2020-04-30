@@ -837,7 +837,7 @@ class TestClass(object):
             df_temp[ "days_since_symptoms" ] = days_since_contact - time
             df_inter.append(df_temp)
         df_inter = pd.concat( df_inter )
-        df_inter.rename( columns = { "ID":"index_ID", "ID_2":"traced_ID"}, inplace = True )
+        df_inter.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
 
         # get the individuals who have the app
         model.write_individual_file()
@@ -905,7 +905,12 @@ class TestClass(object):
        
         # get the individuals who have the app
         model.write_individual_file()
-        df_indiv  = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+                
         house_no  = df_indiv.loc[ :,["ID", "house_no"]]
         house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no"}, inplace = True )
         total_house = house_no.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
