@@ -79,17 +79,17 @@ class Economics:
         if lockdown and time < self.first_lockdown_time:
             self.first_lockdown_time = time
         if (
-            not self.lockdown_exited_time
-            and self.first_lockdown_time < time
-            and not lockdown
+                not self.lockdown_exited_time
+                and self.first_lockdown_time < time
+                and not lockdown
         ):
             self.lockdown_exited_time = time
 
     def simulate(
-        self,
-        time: int,
-        lockdown: bool,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+            self,
+            time: int,
+            lockdown: bool,
+            utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
     ) -> None:
         """
         Simulate the economy
@@ -123,25 +123,43 @@ class Economics:
             else:
                 corporates_solvent_fraction = self.results.corporate_solvencies[
                     time - 1
-                ]
+                    ]
         self.results.corporate_solvencies[time] = corporates_solvent_fraction
         self.results.gdp[time] = {
             (r, s, a): self.gdp_model.results.gdp[time][r, s, a]
-            * corporates_solvent_fraction[s]
+                       * corporates_solvent_fraction[s]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
         if time == START_OF_TIME:
-            self.personal_model.simulate(
-                time=time,
-                lockdown=lockdown,
+            self.personal_model.init_utilization(
                 corporate_bankruptcy={s: 0 for s in Sector},
+                utilization_ill=0,
+                utilization_furloughed=0,
+                utilization_wfh=0,
+                utilization_working=1,
             )
+            self.personal_model.simulate(time=time)
         else:
+            corporate_bankruptcy = {
+                s: 1 - self.results.corporate_solvencies[time - 1][s]
+                for s in Sector
+            }
+            if lockdown:
+                self.personal_model.init_utilization(
+                    corporate_bankruptcy=corporate_bankruptcy,
+                    utilization_ill=0.1,
+                    utilization_furloughed=0.4,
+                    utilization_wfh=0.4,
+                    utilization_working=0.2,
+                )
+            else:
+                self.personal_model.init_utilization(
+                    corporate_bankruptcy=corporate_bankruptcy,
+                    utilization_ill=0.1,
+                    utilization_furloughed=0,
+                    utilization_wfh=0.2,
+                    utilization_working=0.8,
+                )
             self.personal_model.simulate(
                 time=time,
-                lockdown=lockdown,
-                corporate_bankruptcy={
-                    s: 1 - self.results.corporate_solvencies[time - 1][s]
-                    for s in Sector
-                },
             )
