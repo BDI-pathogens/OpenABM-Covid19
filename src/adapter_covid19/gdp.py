@@ -52,16 +52,28 @@ class GdpResult:
 
 @dataclass
 class IoGdpResult(GdpResult):
-    primary_inputs: MutableMapping[int, Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]]
+    primary_inputs: MutableMapping[
+        int, Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
+    ]
     final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
     compensation_paid: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    compensation_received: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    compensation_subsidy: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    compensation_received: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ]
+    compensation_subsidy: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ]
     max_primary_inputs: Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
     max_final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
-    max_compensation_paid: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    max_compensation_received: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    max_compensation_subsidy: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    max_compensation_paid: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ]
+    max_compensation_received: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ]
+    max_compensation_subsidy: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ]
 
     def update(self, other):
         self.gdp.update(other.gdp)
@@ -264,7 +276,7 @@ class BaseGdpModel(abc.ABC):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str,Any]] = None
+        other_params: Optional[Mapping[str, Any]] = None,
     ) -> None:
         # utilisations = self._apply_lockdown(time, lockdown, lockdown_exit_time, utilisations)
         pass
@@ -309,7 +321,7 @@ class LinearGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None
+        other_params: Optional[Mapping[str, Any]] = None,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -442,7 +454,7 @@ class SupplyDemandGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str, Any]] = None
+        other_params: Optional[Mapping[str, Any]] = None,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
@@ -766,12 +778,16 @@ class CobbDouglasLPSetup:
         # x~[M.K, T] == 0, so we add a small epsilon
         self.xtilde_iot = np.maximum(self.xtilde_iot, 1e-6)
         self.ytilde_total_iot = self.ytilde_iot.sum(axis=1)
-        self.gamma_d = dtilde_iot.div(dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0))
+        self.gamma_d = dtilde_iot.div(
+            dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0)
+        )
         self.gamma_x = self.xtilde_iot.div(
             dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0)
         )
 
-        self.o_iot = iot_p[[PrimaryInput.TAXES_PRODUCTION, PrimaryInput.TAXES_PRODUCTS]].T
+        self.o_iot = iot_p[
+            [PrimaryInput.TAXES_PRODUCTION, PrimaryInput.TAXES_PRODUCTS]
+        ].T
         self.q_iot = dtilde_iot.sum(axis=0) + iot_p.sum(axis=1)
         assert np.allclose(
             (dtilde_iot.sum(axis=0) + iot_p.sum(axis=1)),
@@ -779,11 +795,17 @@ class CobbDouglasLPSetup:
             rtol=1e-6,
         )  # errors are due to rounding and omission of household sector
         assert np.allclose(
-            (dtilde_iot.sum(axis=0) + self.xtilde_iot.sum(axis=0) + self.o_iot.sum(axis=0)),
+            (
+                dtilde_iot.sum(axis=0)
+                + self.xtilde_iot.sum(axis=0)
+                + self.o_iot.sum(axis=0)
+            ),
             (dtilde_iot.sum(axis=1) + self.ytilde_total_iot),
             rtol=1e-6,
         )  # errors are due to rounding and omission of household sector
-        assert np.allclose(self.gamma_d.sum(axis=0) + self.gamma_x.sum(axis=0), 1.0, atol=1e-9)
+        assert np.allclose(
+            self.gamma_d.sum(axis=0) + self.gamma_x.sum(axis=0), 1.0, atol=1e-9
+        )
         assert (self.gamma_d >= 0).all().all()
         assert (self.gamma_x >= 0).all().all()
         # depends on p_tau
@@ -798,9 +820,12 @@ class CobbDouglasLPSetup:
             axis=1,
         ).min(axis=1)
         sum_prod_fun = (
-            dtilde_iot.multiply(self.gamma_d).sum() + self.xtilde_iot.multiply(self.gamma_x).sum()
+            dtilde_iot.multiply(self.gamma_d).sum()
+            + self.xtilde_iot.multiply(self.gamma_x).sum()
         )
-        lin_prod_fun = (1 - substitution_rate) * min_prod_fun + substitution_rate * sum_prod_fun
+        lin_prod_fun = (
+            1 - substitution_rate
+        ) * min_prod_fun + substitution_rate * sum_prod_fun
         prod_fun = lin_prod_fun
 
         self.Lambda = (
@@ -810,7 +835,9 @@ class CobbDouglasLPSetup:
             / prod_fun
         )
 
-        self.gamma_d_dict = {(i, j): self.gamma_d.loc[i, j] for i in Sector for j in Sector}
+        self.gamma_d_dict = {
+            (i, j): self.gamma_d.loc[i, j] for i in Sector for j in Sector
+        }
         self.gamma_x_dict = {(m, j): self.gamma_x.loc[m, j] for m in M for j in Sector}
         self.Lambda_dict = {i: self.Lambda[i] for i in Sector}
 
@@ -820,13 +847,17 @@ class CobbDouglasLPSetup:
         }
         self.objective_per_sector = {
             i: self.indicator("xtilde", M.L, i)
-               + self.indicator("xtilde", M.K, i)
-               + self.indicator("q", i) * weight_taxes[i]
+            + self.indicator("xtilde", M.K, i)
+            + self.indicator("q", i) * weight_taxes[i]
             for i in Sector
         }
-        self.objective_c = -np.sum(list(self.objective_per_sector.values()),axis=0)
+        self.objective_c = -np.sum(list(self.objective_per_sector.values()), axis=0)
         assert self.objective_c.shape[0] == len(self.variables)
-        self.max_gdp_per_sector = self.xtilde_iot.loc[M.L] + self.xtilde_iot.loc[M.K] + self.o_iot.loc[PrimaryInput.TAXES_PRODUCTION]
+        self.max_gdp_per_sector = (
+            self.xtilde_iot.loc[M.L]
+            + self.xtilde_iot.loc[M.K]
+            + self.o_iot.loc[PrimaryInput.TAXES_PRODUCTION]
+        )
         self.max_gdp = self.max_gdp_per_sector.sum()
 
         self.c_production_function_lin(
@@ -839,20 +870,23 @@ class CobbDouglasLPSetup:
         # TODO: get these weights from a data source
         # invariant: for a fixed sector, summing weights over all regions and ages gives 1
         self.labour_weight_region_age_per_sector_by_count = {
-            (sector,region,age): 1/(len(Region)*len(Age))
-                for sector in Sector for region in Region for age in Age
+            (sector, region, age): 1 / (len(Region) * len(Age))
+            for sector in Sector
+            for region in Region
+            for age in Age
         }
         self.labour_weight_region_age_per_sector_by_compensation = {
-            (sector,region,age): 1/(len(Region)*len(Age))
-                for sector in Sector for region in Region for age in Age
+            (sector, region, age): 1 / (len(Region) * len(Age))
+            for sector in Sector
+            for region in Region
+            for age in Age
         }
-
 
     def finalise_setup(
         self,
         p_lambda: pd.DataFrame,
         p_kappa: Mapping[Sector, float],
-        wfh_productivity: Mapping[Sector, float]
+        wfh_productivity: Mapping[Sector, float],
     ):
         p_lambda_dict = {
             (i, s): p_lambda.loc[i, s] for i in Sector for s in LabourState
@@ -885,7 +919,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
-        self.results = IoGdpResult({},{},0,0,{},{},{},{},{},{},{},{},{},{})
+        self.results = IoGdpResult({}, {}, 0, 0, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
 
     def _get_datasources(self) -> Mapping[str, DataSource]:
         datasources = {
@@ -912,27 +946,30 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         )
 
     def _postprocess_model_outputs(self, time, utilisations, r):
-        x = pd.Series(r.x,index=self.setup.variables)
+        x = pd.Series(r.x, index=self.setup.variables)
         # gdp
         max_gdp = self.setup.max_gdp
         gdp = {}
         for sector in Sector:
-            gdp_for_sector = self.setup.objective_per_sector[sector].dot(
-                r.x
-            )
+            gdp_for_sector = self.setup.objective_per_sector[sector].dot(r.x)
             # split outputs per region and age
             # note: these are absolute values to be interpreted relative to iot data loaded in setup
             for region in Region:
                 for age in Age:
-                    gdp[region, sector, age] = self.setup.labour_weight_region_age_per_sector_by_compensation[
-                                                   sector, region, age] * gdp_for_sector
+                    gdp[region, sector, age] = (
+                        self.setup.labour_weight_region_age_per_sector_by_compensation[
+                            sector, region, age
+                        ]
+                        * gdp_for_sector
+                    )
 
         # workers
         max_workers = sum(
             self.workers[key] for key in itertools.product(Region, Sector, Age)
         )
         workers = {
-            (r, s, a):  utilisations[LabourState.WORKING, r, s, a] * self.workers[r, s, a]
+            (r, s, a): utilisations[LabourState.WORKING, r, s, a]
+            * self.workers[r, s, a]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
 
@@ -943,98 +980,177 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         for p, s in itertools.product(PrimaryInput, Sector):
             primary_input_value = self.setup.iot_p.loc[s, p]
             for r, a in itertools.product(Region, Age):
-                max_primary_inputs[p,r,s,a] = primary_input_value * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                max_primary_inputs[p, r, s, a] = (
+                    primary_input_value
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
         primary_inputs = {}
         for s in Sector:
             # imports
-            imports_sector = x[self.setup.V("x",M.I,s)]
+            imports_sector = x[self.setup.V("x", M.I, s)]
             for r, a in itertools.product(Region, Age):
-                primary_inputs[PrimaryInput.IMPORTS,r,s,a] = imports_sector * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                primary_inputs[PrimaryInput.IMPORTS, r, s, a] = (
+                    imports_sector
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
             # labour
-            labour_sector = x[self.setup.V("xtilde",M.L,s)]
+            labour_sector = x[self.setup.V("xtilde", M.L, s)]
             for r, a in itertools.product(Region, Age):
-                primary_inputs[PrimaryInput.COMPENSATION,r,s,a] = labour_sector * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
+                primary_inputs[PrimaryInput.COMPENSATION, r, s, a] = (
+                    labour_sector
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
             # taxes
-            o_fraction = self.p_tau * x[self.setup.V("q",s)] / self.setup.q_iot.loc[s]
-            taxes_production = o_fraction * self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTION]
-            taxes_products = o_fraction * self.setup.iot_p.loc[s,PrimaryInput.TAXES_PRODUCTS]
+            o_fraction = self.p_tau * x[self.setup.V("q", s)] / self.setup.q_iot.loc[s]
+            taxes_production = (
+                o_fraction * self.setup.iot_p.loc[s, PrimaryInput.TAXES_PRODUCTION]
+            )
+            taxes_products = (
+                o_fraction * self.setup.iot_p.loc[s, PrimaryInput.TAXES_PRODUCTS]
+            )
             for r, a in itertools.product(Region, Age):
-                primary_inputs[PrimaryInput.TAXES_PRODUCTION,r,s,a] = taxes_production * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
-                primary_inputs[PrimaryInput.TAXES_PRODUCTS, r, s, a] = taxes_products * \
-                                                                                  self.setup.labour_weight_region_age_per_sector_by_compensation[
-                                                                                      s, r, a]
+                primary_inputs[PrimaryInput.TAXES_PRODUCTION, r, s, a] = (
+                    taxes_production
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
+                primary_inputs[PrimaryInput.TAXES_PRODUCTS, r, s, a] = (
+                    taxes_products
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
             # capital
             gross_operating_surplus = x[self.setup.V("xtilde", M.K, s)]
             if gross_operating_surplus >= 0.0:
-                fixed_capital_consumption_share = self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] / \
-                                                  (self.setup.iot_p.loc[s,PrimaryInput.FIXED_CAPITAL_CONSUMPTION] +
-                                                   self.setup.iot_p.loc[s,PrimaryInput.NET_OPERATING_SURPLUS])
-                consumption_of_fixed_capital = gross_operating_surplus * fixed_capital_consumption_share
-                net_operating_surplus = gross_operating_surplus * (1-fixed_capital_consumption_share)
+                fixed_capital_consumption_share = self.setup.iot_p.loc[
+                    s, PrimaryInput.FIXED_CAPITAL_CONSUMPTION
+                ] / (
+                    self.setup.iot_p.loc[s, PrimaryInput.FIXED_CAPITAL_CONSUMPTION]
+                    + self.setup.iot_p.loc[s, PrimaryInput.NET_OPERATING_SURPLUS]
+                )
+                consumption_of_fixed_capital = (
+                    gross_operating_surplus * fixed_capital_consumption_share
+                )
+                net_operating_surplus = gross_operating_surplus * (
+                    1 - fixed_capital_consumption_share
+                )
             else:
                 consumption_of_fixed_capital = 0.0
                 net_operating_surplus = gross_operating_surplus
             for r, a in itertools.product(Region, Age):
-                primary_inputs[PrimaryInput.FIXED_CAPITAL_CONSUMPTION,r,s,a] = consumption_of_fixed_capital * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
-                primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] = net_operating_surplus * \
-                                                                                  self.setup.labour_weight_region_age_per_sector_by_compensation[
-                                                                                      s, r, a]
+                primary_inputs[PrimaryInput.FIXED_CAPITAL_CONSUMPTION, r, s, a] = (
+                    consumption_of_fixed_capital
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
+                primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] = (
+                    net_operating_surplus
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
 
         # final uses
-        max_final_uses = {(u, s): self.setup.ytilde_iot.loc[s,u] for u, s in itertools.product(FinalUse, Sector)}
+        max_final_uses = {
+            (u, s): self.setup.ytilde_iot.loc[s, u]
+            for u, s in itertools.product(FinalUse, Sector)
+        }
         final_uses = {}
         for s in Sector:
-            total_final_use = x[self.setup.V("y",s)]
+            total_final_use = x[self.setup.V("y", s)]
             for u in FinalUse:
-                final_uses[u,s] = total_final_use * (self.setup.ytilde_iot.loc[s,u]/self.setup.ytilde_total_iot.loc[s])
+                final_uses[u, s] = total_final_use * (
+                    self.setup.ytilde_iot.loc[s, u] / self.setup.ytilde_total_iot.loc[s]
+                )
 
         # compensation
-        max_compensation = {(r,s,a): max_primary_inputs[PrimaryInput.COMPENSATION,r,s,a] for r,s,a in itertools.product(Region, Sector, Age)}
+        max_compensation = {
+            (r, s, a): max_primary_inputs[PrimaryInput.COMPENSATION, r, s, a]
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
         max_compensation_paid = max_compensation
         max_compensation_received = max_compensation
         max_compensation_subsidy = max_compensation
-        compensation_paid = {} # Note: this is redundant, also returned from primary inputs
+        compensation_paid = (
+            {}
+        )  # Note: this is redundant, also returned from primary inputs
         compensation_received = {}
         compensation_subsidy = {}
         for s in Sector:
-            compensation = x[self.setup.V("xtilde",M.L,s)]
+            compensation = x[self.setup.V("xtilde", M.L, s)]
             for r, a in itertools.product(Region, Age):
-                received_adjustment = (utilisations[LabourState.WORKING, r, s, a] + utilisations[LabourState.WFH, r, s, a] + utilisations[LabourState.ILL, r, s, a] + 0.8 * utilisations[LabourState.FURLOUGHED, r, s, a]) / \
-                                        (utilisations[LabourState.WORKING, r, s, a] + utilisations[LabourState.WFH, r, s, a] + utilisations[LabourState.ILL, r, s, a])
-                compensation_paid[r,s,a] = compensation * self.setup.labour_weight_region_age_per_sector_by_compensation[s, r, a]
-                compensation_received[r,s,a] = received_adjustment * compensation_paid[r,s,a]
-                compensation_subsidy[r,s,a] = compensation_received[r,s,a] - compensation_paid[r,s,a]
+                received_adjustment = (
+                    utilisations[LabourState.WORKING, r, s, a]
+                    + utilisations[LabourState.WFH, r, s, a]
+                    + utilisations[LabourState.ILL, r, s, a]
+                    + 0.8 * utilisations[LabourState.FURLOUGHED, r, s, a]
+                ) / (
+                    utilisations[LabourState.WORKING, r, s, a]
+                    + utilisations[LabourState.WFH, r, s, a]
+                    + utilisations[LabourState.ILL, r, s, a]
+                )
+                compensation_paid[r, s, a] = (
+                    compensation
+                    * self.setup.labour_weight_region_age_per_sector_by_compensation[
+                        s, r, a
+                    ]
+                )
+                compensation_received[r, s, a] = (
+                    received_adjustment * compensation_paid[r, s, a]
+                )
+                compensation_subsidy[r, s, a] = (
+                    compensation_received[r, s, a] - compensation_paid[r, s, a]
+                )
 
-
-        return IoGdpResult(gdp={time: gdp},
-                           workers={time: workers},
-                           max_gdp=max_gdp,
-                           max_workers=max_workers,
-                           primary_inputs={time: primary_inputs},
-                           final_uses={time: final_uses},
-                           compensation_paid={time: compensation_paid},
-                           compensation_received={time: compensation_received},
-                           compensation_subsidy={time: compensation_subsidy},
-                           max_primary_inputs=max_primary_inputs,
-                           max_final_uses=max_final_uses,
-                           max_compensation_paid=max_compensation_paid,
-                           max_compensation_received=max_compensation_received,
-                           max_compensation_subsidy=max_compensation_subsidy)
-
+        return IoGdpResult(
+            gdp={time: gdp},
+            workers={time: workers},
+            max_gdp=max_gdp,
+            max_workers=max_workers,
+            primary_inputs={time: primary_inputs},
+            final_uses={time: final_uses},
+            compensation_paid={time: compensation_paid},
+            compensation_received={time: compensation_received},
+            compensation_subsidy={time: compensation_subsidy},
+            max_primary_inputs=max_primary_inputs,
+            max_final_uses=max_final_uses,
+            max_compensation_paid=max_compensation_paid,
+            max_compensation_received=max_compensation_received,
+            max_compensation_subsidy=max_compensation_subsidy,
+        )
 
     def _simulate(
         self,
-        time:int,
+        time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        capital: Mapping[Sector,float],
+        capital: Mapping[Sector, float],
     ) -> IoGdpResult:
 
         # preprocess parameters
         p_lambda = pd.DataFrame(
             {
-                l: {s: np.sum([self.setup.labour_weight_region_age_per_sector_by_compensation[s,region,age] * utilisations[l, region, s, age]
-                               for region in Region for age in Age])
-                    for s in Sector}
+                l: {
+                    s: np.sum(
+                        [
+                            self.setup.labour_weight_region_age_per_sector_by_compensation[
+                                s, region, age
+                            ]
+                            * utilisations[l, region, s, age]
+                            for region in Region
+                            for age in Age
+                        ]
+                    )
+                    for s in Sector
+                }
                 for l in LabourState
             }
         )
@@ -1042,7 +1158,9 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         p_kappa = capital
 
         # setup linear program
-        objective, bounds, lp_bounds = self.setup.finalise_setup(p_lambda, p_kappa, self.wfh)
+        objective, bounds, lp_bounds = self.setup.finalise_setup(
+            p_lambda, p_kappa, self.wfh
+        )
 
         # run linear program
         r = linprog(
@@ -1061,8 +1179,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
             raise ValueError(r.message)
 
         # postprocess model parameters
-        return self._postprocess_model_outputs(time,utilisations,r)
-
+        return self._postprocess_model_outputs(time, utilisations, r)
 
     def simulate(
         self,
@@ -1070,7 +1187,7 @@ class CobbDouglasGdpModel(BaseGdpModel, LinearGDPBackboneMixin):
         lockdown: bool,
         lockdown_exit_time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        other_params: Optional[Mapping[str,Any]] = None
+        other_params: Optional[Mapping[str, Any]] = None,
     ) -> None:
         utilisations = self._apply_lockdown(
             time, lockdown, lockdown_exit_time, utilisations
