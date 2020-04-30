@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Mapping, MutableMapping, Tuple
+from typing import Mapping, MutableMapping, Tuple, Any
 
 import numpy as np
 import pandas as pd
@@ -27,6 +27,7 @@ class PersonalBankruptcyResults:
     personal_bankruptcy: float
 
 
+# FIXME: this shouldn't be a dataclass
 @dataclass
 class PersonalBankruptcyModel:
     # Threshold of credit score for default
@@ -74,6 +75,8 @@ class PersonalBankruptcyModel:
     results: MutableMapping[
         int, MutableMapping[Region, PersonalBankruptcyResults]
     ] = field(default_factory=dict, init=False)
+
+    kwargs: Mapping[str, Any] = field(default_factory=dict)
 
     def load(
         self, reader: Reader, corporate_bankruptcy: Mapping[Sector, float] = None
@@ -199,7 +202,7 @@ class PersonalBankruptcyModel:
     def _init_w_decile(self) -> None:
         self.w_decile = {r: {d: 1.0 / len(Decile) for d in Decile} for r in Region}
 
-    def simulate(self, time: int,) -> None:
+    def simulate(self, time: int, **kwargs) -> None:
         self.results[time] = {}
         for r in Region:
             if time == START_OF_TIME:
