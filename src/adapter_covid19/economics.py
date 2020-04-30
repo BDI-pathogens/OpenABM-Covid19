@@ -23,6 +23,7 @@ class EconomicsResult:
     corporate_solvencies: MutableMapping[int, Mapping[Sector, float]]
     gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
     personal_bankruptcy: MutableMapping[int, Mapping[Region, PersonalBankruptcyResults]]
+    # utilisations: MutableMapping[int, Mapping[LabourState, Region, Sector, Age]]
 
     def fraction_gdp_by_sector(self, time: int) -> Mapping[Sector, float]:
         return {
@@ -81,6 +82,45 @@ class Economics:
             **simulate_state.economics_kwargs,
         )
 
+    def add_unemployment(
+        self,
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        unemployment_per_sector: Mapping[Sector, float],
+    ) -> Mapping[Tuple[LabourState, Region, Sector, Age], float]:
+        unemployed = {
+            (LabourState.UNEMPLOYED, r, s, a): sum(
+                utilisations[l, r, s, a] * unemployment_per_sector[s]
+                for l in [LabourState.WORKING, LabourState.WFH, LabourState.FURLOUGHED]
+            )
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        working = {
+            (LabourState.WORKING, r, s, a): utilisations[LabourState.WORKING, r, s, a]
+            * (1 - unemployment_per_sector[s])
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        wfh = {
+            (LabourState.WFH, r, s, a): utilisations[LabourState.WFH, r, s, a]
+            * (1 - unemployment_per_sector[s])
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        furloughed = {
+            (LabourState.FURLOUGHED, r, s, a): utilisations[
+                LabourState.FURLOUGHED, r, s, a
+            ]
+            * (1 - unemployment_per_sector[s])
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        new_utilisations = {
+            (LabourState.ILL, r, s, a): utilisations[LabourState.ILL, r, s, a]
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+        new_utilisations.update(unemployed)
+        new_utilisations.update(working)
+        new_utilisations.update(wfh)
+        new_utilisations.update(furloughed)
+        return new_utilisations
+
     def _simulate(
         self,
         time: int,
@@ -105,6 +145,11 @@ class Economics:
             LOGGER.warning(
                 f"Unused simulate kwargs in {self.__class__.__name__}: {kwargs}"
             )
+        if time != START_OF_TIME:
+            unemployment_per_sector = {
+                s: 1 - self.corporate_model.state.gdp_discount_factor[s] for s in Sector
+            }
+            utilisations = self.add_unemployment(utilisations, unemployment_per_sector)
         self.gdp_model.simulate(
             time,
             lockdown,
