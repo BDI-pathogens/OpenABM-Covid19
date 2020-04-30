@@ -79,17 +79,17 @@ class Economics:
         if lockdown and time < self.first_lockdown_time:
             self.first_lockdown_time = time
         if (
-                not self.lockdown_exited_time
-                and self.first_lockdown_time < time
-                and not lockdown
+            not self.lockdown_exited_time
+            and self.first_lockdown_time < time
+            and not lockdown
         ):
             self.lockdown_exited_time = time
 
     def simulate(
-            self,
-            time: int,
-            lockdown: bool,
-            utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        self,
+        time: int,
+        lockdown: bool,
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
     ) -> None:
         """
         Simulate the economy
@@ -105,17 +105,27 @@ class Economics:
         """
         self._pre_simulation_checks(time, lockdown)
         # TODO: use capital from previous state of corp bankruptcy model
-        capital = {
-            s: 1.0 for s in Sector
-        }
-        self.gdp_model.simulate(time, lockdown, self.lockdown_exited_time, utilisations, {"capital": capital})
+        capital = {s: 1.0 for s in Sector}
+        self.gdp_model.simulate(
+            time,
+            lockdown,
+            self.lockdown_exited_time,
+            utilisations,
+            {"capital": capital},
+        )
         if time == START_OF_TIME:
             corporates_solvent_fraction = {s: 1 for s in Sector}
         else:
             primary_inputs = self.gdp_model.results.primary_inputs[time - 1]
-            negative_net_operating_surplus = {s: -sum(
-                [primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a] for r, a in
-                 itertools.product(Region, Age)]) for s in Sector}
+            negative_net_operating_surplus = {
+                s: -sum(
+                    [
+                        primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a]
+                        for r, a in itertools.product(Region, Age)
+                    ]
+                )
+                for s in Sector
+            }
             if lockdown:
                 corporates_solvent_fraction = self.corporate_model.simulate(
                     time - self.first_lockdown_time, negative_net_operating_surplus
@@ -123,11 +133,11 @@ class Economics:
             else:
                 corporates_solvent_fraction = self.results.corporate_solvencies[
                     time - 1
-                    ]
+                ]
         self.results.corporate_solvencies[time] = corporates_solvent_fraction
         self.results.gdp[time] = {
             (r, s, a): self.gdp_model.results.gdp[time][r, s, a]
-                       * corporates_solvent_fraction[s]
+            * corporates_solvent_fraction[s]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
         if time == START_OF_TIME:
@@ -141,8 +151,7 @@ class Economics:
             self.personal_model.simulate(time=time)
         else:
             corporate_bankruptcy = {
-                s: 1 - self.results.corporate_solvencies[time - 1][s]
-                for s in Sector
+                s: 1 - self.results.corporate_solvencies[time - 1][s] for s in Sector
             }
             if lockdown:
                 self.personal_model.init_utilization(
@@ -160,6 +169,4 @@ class Economics:
                     utilization_wfh=0.2,
                     utilization_working=0.8,
                 )
-            self.personal_model.simulate(
-                time=time,
-            )
+            self.personal_model.simulate(time=time,)
