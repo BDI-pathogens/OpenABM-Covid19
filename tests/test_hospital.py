@@ -127,24 +127,9 @@ class TestClass(object):
 
         for t_step in range(max_time):
 
-            # Create sub df with current time step
             time_df = df_hcw_time_step['time_step'] == t_step
-
-            # Create sub df with only patients
             patient_df = df_hcw_time_step['patient_type'] == 1
-
-            # Combine conditions
             test_df = df_hcw_time_step[time_df & patient_df]
-
-            # Check no duplicates over pdx column
             test_df = test_df.pdx.values
 
             assert len(test_df) == len(set(test_df))
-
-
-
-
-
-
-
-

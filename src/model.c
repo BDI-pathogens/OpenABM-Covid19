@@ -286,7 +286,7 @@ void write_time_step_hospital_data( model *model)
     if(model->time == 1)
     {
     	time_step_hospital_file = fopen(output_file_name, "w");
-    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds");
+    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected");
     }
     else
     {
@@ -308,14 +308,24 @@ void write_time_step_hospital_data( model *model)
             {
                 int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
                 int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_doctor;
+                indiv_doctor = &(model->population[doctor_pdx]);
+                int doctor_time_infected = time_infected(indiv_doctor);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected);
             }
             // For each nurse
             for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
             {
                 int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
                 int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_nurse;
+                indiv_nurse = &(model->population[nurse_pdx]);
+                int nurse_time_infected = time_infected(indiv_nurse);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected);
             }
 
             // For each patient
@@ -324,7 +334,12 @@ void write_time_step_hospital_data( model *model)
             for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
             {
                 int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_patient;
+                indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
+                int patient_time_infected = time_infected(indiv_patient);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected);
             }
 
         }
