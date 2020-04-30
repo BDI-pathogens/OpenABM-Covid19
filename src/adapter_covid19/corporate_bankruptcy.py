@@ -320,25 +320,25 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
 
     def simulate(
         self,
-        days_since_lockdown: int,
+        net_operating_surplus: Optional[Mapping[Sector, float]],
+        time: int,
         stimulus_params: Mapping[str, int],
-        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
         **kwargs,
     ) -> CorpInsolvencyState:
         """
-        :param days_since_lockdown:
+        :param time:
         :param stimulus_params:
         :param net_operating_surplus:
         :return result:
         """
-        if days_since_lockdown == stimulus_params["new_spending_day"]:
+        if time == stimulus_params["new_spending_day"]:
             self._new_spending_sector_allocation()
-        if days_since_lockdown == stimulus_params["ccff_day"]:
+        if time == stimulus_params["ccff_day"]:
             self._apply_ccff()
         if (
-            (days_since_lockdown >= stimulus_params["loan_guarantee_day"])
+            (time >= stimulus_params["loan_guarantee_day"])
             and self.loan_guarantee_remaining
-            and (days_since_lockdown % 7 == 0)
+            and (time % 7 == 0)
         ):
             self._loan_guarantees()
         self._update_state(net_operating_surplus)

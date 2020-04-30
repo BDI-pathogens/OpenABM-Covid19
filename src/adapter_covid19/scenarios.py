@@ -176,4 +176,13 @@ class Scenario:
         self._pre_simulation_checks(time, lockdown)
         utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
         self._utilisations[time] = utilisations  # For tracking / debugging
-        return SimulateState(time, lockdown, utilisations)
+        return SimulateState(
+            time,
+            lockdown,
+            utilisations,
+            corporate_kwargs=dict(
+                stimulus_params=dict(
+                    new_spending_day=1000, ccff_day=1000, loan_guarantee_day=1000,
+                )
+            ),
+        )
