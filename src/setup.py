@@ -37,7 +37,7 @@ setup(
         "COVID19/model",
         "COVID19/simulation",
     ],
-    requires=[
+    install_requires=[
         "numpy",
         "pandas",
         "tqdm",
