@@ -255,7 +255,6 @@ class TestClass(object):
         
         # check the rest are the same 
         df_house = df_house[ df_house["size"] > 1 ]
-        print( df_house.head())
         np.testing.assert_array_equal( df_house.loc[:,"connections"], df_house.loc[:,"expected"] )
     
        

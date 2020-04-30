@@ -132,9 +132,9 @@ class TestClass(object):
                 model.get_param("quarantine_household_on_symptoms"), 1
             )
 
-            model.update_running_params("quarantine_household_on_traced", 1)
+            model.update_running_params("quarantine_household_on_traced_positive", 1)
             np.testing.assert_equal(
-                model.get_param("quarantine_household_on_traced"), 1
+                model.get_param("quarantine_household_on_traced_positive"), 1
             )
 
             model.update_running_params("quarantine_household_contacts_on_positive", 1)

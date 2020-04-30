@@ -47,7 +47,7 @@ struct individual{
 	
 	trace_token *trace_tokens;
 	trace_token *index_trace_token;
-	int traced_on_this_trace;
+	double traced_on_this_trace;
 
 	int app_user;
 };
@@ -73,8 +73,8 @@ struct infection_event{
 /******************************  Macros**** *****************************/
 /************************************************************************/
 
+#define time_symptomatic( indiv ) ( max( indiv->infection_events->times[SYMPTOMATIC], indiv->infection_events->times[SYMPTOMATIC_MILD] ) )
 #define time_infected( indiv ) ( max( max( indiv->infection_events->times[PRESYMPTOMATIC], indiv->infection_events->times[ASYMPTOMATIC ] ), indiv->infection_events->times[PRESYMPTOMATIC_MILD] ) )
-
 #define time_infected_infection_event( infection_event ) ( max( max( infection_event->times[PRESYMPTOMATIC], infection_event->times[ASYMPTOMATIC ] ), infection_event->times[PRESYMPTOMATIC_MILD] ) )
 
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
