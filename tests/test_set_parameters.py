@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from COVID19.model import Parameters, Model, AgeGroupEnum
+from COVID19.model import Parameters, Model, OccupationNetworkEnum  
 
 
 class TestSetObjects:
@@ -62,18 +62,18 @@ class TestSetObjects:
         m.one_time_step()
         assert m.one_time_step_results()["time"] == 1
 
-    def test_set_params_work_network_by_age(self):
+    def test_set_params_occupation_network_by_age(self):
         p = Parameters(
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
             param_line_number=1,
         )
-        p.set_param("lockdown_work_network_multiplier_0_9", 100.0)
-        assert p.get_param("lockdown_work_network_multiplier_0_9") == 100.0
-        assert p.get_param("lockdown_work_network_multiplier_50_59") == 0.2
+        p.set_param("lockdown_occupation_multiplier_primary_network", 100.0)
+        assert p.get_param("lockdown_occupation_multiplier_primary_network") == 100.0
+        assert p.get_param("lockdown_occupation_multiplier_working_network") == 0.2
 
-    def test_set_params_work_network_by_age_check_used(self):
+    def test_set_params_occupation_network_by_age_check_used(self):
         p = Parameters(
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
@@ -83,21 +83,21 @@ class TestSetObjects:
         model = Model(p)
         non_scaled = [
             model.get_param(f"daily_fraction_work_used{age.name}")
-            for age in AgeGroupEnum
+            for age in OccupationNetworkEnum
         ]
         model.update_running_params("lockdown_on", 1)
         scaled = [
             model.get_param(f"daily_fraction_work_used{age.name}")
-            for age in AgeGroupEnum
+            for age in OccupationNetworkEnum
         ]
         for non_scaled_i, scaled_i in zip(non_scaled, scaled):
             assert non_scaled_i * 0.2 == scaled_i
-        model.update_running_params("lockdown_work_network_multiplier_0_9", 10.0)
+        model.update_running_params("lockdown_occupation_multiplier_primary_network", 10.0)
         scaled = [
             model.get_param(f"daily_fraction_work_used{age.name}")
-            for age in AgeGroupEnum
+            for age in OccupationNetworkEnum
         ]
         for non_scaled_i, scaled_i, factor in zip(
-            non_scaled, scaled, [10.0, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]
+            non_scaled, scaled, [10.0, 0.2, 0.2, 0.2, 0.2,]
         ):
             assert non_scaled_i * factor == scaled_i

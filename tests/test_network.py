@@ -120,7 +120,7 @@ class TestClass(object):
 
             ),
         ],
-        "test_work_network": [ 
+        "test_occupation_network": [ 
             dict( 
                 n_total = 40000,
                 mean_work_interactions_child   = 10,
@@ -157,7 +157,7 @@ class TestClass(object):
                 daily_fraction_work            = 1.0
             )
         ],
-        "test_work_network_proportions": [ 
+        "test_occupation_network_proportions": [ 
             dict( 
                 n_total = 40000,
                 child_network_adults   = 0,
@@ -332,7 +332,7 @@ class TestClass(object):
         if mean_random_interactions_elderly > 0:
             np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
   
-    def test_work_network( 
+    def test_occupation_network( 
             self,
             n_total,
             mean_work_interactions_child,
@@ -375,7 +375,7 @@ class TestClass(object):
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         df_indiv = pd.merge( df_indiv, ageTypeMap1, 
             left_on = "age_group", right_on = "age_group_1", how = "left" )
 
@@ -427,15 +427,15 @@ class TestClass(object):
         np.testing.assert_equal( n, 0, "only 80  adults on the 80 network" )
         
         # check the mean number of networks connections by network
-        for network in [ constant.NETWORK_0_9, constant.NETWORK_10_19 ]:
-            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+        for network in [ constant.PRIMARY_NETWORK, constant.SECONDARY_NETWORK ]:
+            mean = df_n_int[ df_n_int[ "occupation_network" ] == network ].loc[:,"connections"].mean()
             np.testing.assert_allclose( mean, mean_work_interactions_child, rtol = tolerance )
             
-        mean = df_n_int[ df_n_int[ "work_network" ] == constant.NETWORK_20_69 ].loc[:,"connections"].mean()
+        mean = df_n_int[ df_n_int[ "occupation_network" ] == constant.WORKING_NETWORK ].loc[:,"connections"].mean()
         np.testing.assert_allclose( mean, mean_work_interactions_adult, rtol = tolerance )
         
-        for network in [ constant.NETWORK_70_79, constant.NETWORK_80 ]:
-            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+        for network in [ constant.RETIRED_NETWORK, constant.ELDERLY_NETWORK ]:
+            mean = df_n_int[ df_n_int[ "occupation_network" ] == network ].loc[:,"connections"].mean()
             np.testing.assert_allclose( mean, mean_work_interactions_elderly, rtol = tolerance )
       
         # check the correlation is below a threshold
@@ -445,7 +445,7 @@ class TestClass(object):
 
 
 
-    def test_work_network_proportions( 
+    def test_occupation_network_proportions( 
             self,
             n_total,
             child_network_adults,
@@ -471,16 +471,16 @@ class TestClass(object):
        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         
         num_children_in_children = len( df_indiv[ 
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) &
+                                                ( ( df_indiv["occupation_network"] == constant.PRIMARY_NETWORK) | ( df_indiv["occupation_network"] == constant.SECONDARY_NETWORK ) ) &
                                                 ( ( df_indiv["age_group"] == constant.AGE_0_9 ) | ( df_indiv["age_group"] == constant.AGE_10_19 ) )
                                                 ]
                                     )
         
         num_adults_in_children = len( df_indiv[
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) & 
+                                                ( ( df_indiv["occupation_network"] == constant.PRIMARY_NETWORK ) | ( df_indiv["occupation_network"] == constant.SECONDARY_NETWORK ) ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
@@ -488,13 +488,13 @@ class TestClass(object):
                                     )
         
         num_elderly_in_elderly = len( df_indiv[ 
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) &
+                                                ( ( df_indiv["occupation_network"] == constant.RETIRED_NETWORK ) | ( df_indiv["occupation_network"] == constant.ELDERLY_NETWORK ) ) &
                                                 ( ( df_indiv["age_group"] == constant.AGE_70_79 ) | ( df_indiv["age_group"] == constant.AGE_80 ) )
                                                 ]
                                     )
         
         num_adults_in_elderly = len( df_indiv[
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) & 
+                                                ( ( df_indiv["occupation_network"] == constant.RETIRED_NETWORK ) | ( df_indiv["occupation_network"] == constant.ELDERLY_NETWORK ) ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
@@ -502,7 +502,7 @@ class TestClass(object):
                                     )
         
         num_adults_in_adults = len( df_indiv[
-                                                ( df_indiv["work_network"] == constant.NETWORK_20_69 ) & 
+                                                ( df_indiv["occupation_network"] == constant.WORKING_NETWORK ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )

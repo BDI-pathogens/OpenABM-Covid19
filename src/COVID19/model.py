@@ -39,15 +39,11 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "trace_on_symptoms",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
-    "lockdown_work_network_multiplier_0_9",
-    "lockdown_work_network_multiplier_10_19",
-    "lockdown_work_network_multiplier_20_29",
-    "lockdown_work_network_multiplier_30_39",
-    "lockdown_work_network_multiplier_40_49",
-    "lockdown_work_network_multiplier_50_59",
-    "lockdown_work_network_multiplier_60_69",
-    "lockdown_work_network_multiplier_70_79",
-    "lockdown_work_network_multiplier_80",
+    "lockdown_occupation_multiplier_primary_network",
+    "lockdown_occupation_multiplier_secondary_network",
+    "lockdown_occupation_multiplier_working_network",
+    "lockdown_occupation_multiplier_retired_network",
+    "lockdown_occupation_multiplier_elderly_network",
 ]
 
 
@@ -70,6 +66,15 @@ class EVENT_TYPES(enum.Enum):
     CASE = 15
     TRACE_TOKEN_RELEASE = 16
     N_EVENT_TYPES = 17
+
+
+class OccupationNetworkEnum(enum.Enum):
+    _primary_network = 0
+    _secondary_network = 1
+    _working_network = 2
+    _retired_network = 3
+    _elderly_network = 4
+
 
 
 class AgeGroupEnum(enum.Enum):
@@ -108,7 +113,7 @@ class TransmissionTypeEnum(enum.Enum):
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
     for en in chain(
-        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
+        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum
     ):
         LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
         if en.name == param[-1 * len(en.name) :]:

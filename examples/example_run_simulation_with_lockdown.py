@@ -74,7 +74,7 @@ def run_model(param_updates, n_steps=100, lockdown_at=None):
                     f'lockdown_random_network_multiplier = {params.get_param("lockdown_random_network_multiplier")}'
                 )
                 LOGGER.info(
-                    f'lockdown_work_network_multiplier = {params.get_param("lockdown_work_network_multiplier")}'
+                    f'lockdown_occupation_multiplier = {params.get_param("lockdown_occupation_multiplier")}'
                 )
     df = pd.DataFrame(m_out)
     model.write_output_files()
