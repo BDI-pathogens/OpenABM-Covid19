@@ -104,6 +104,14 @@ void geometric_max_draw_list(
 )
 {
 	int idx;
+
+	if( p == 0 )
+	{
+		for( idx = 0; idx < n; idx++ )
+			list[idx] = max;
+		return;
+	};
+
 	int day      = 0;
 	double cprob = 0;
 	double prob  = p;

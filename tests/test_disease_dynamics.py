@@ -571,6 +571,11 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # time infected until showing symptoms
         df_indiv["t_p_s"] = df_indiv["time_symptomatic"] - df_indiv["time_infected"]
@@ -801,6 +806,11 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # fraction asymptomatic vs mild+symptomatc
         N_asym = len(

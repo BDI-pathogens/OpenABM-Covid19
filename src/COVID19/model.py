@@ -26,7 +26,8 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "allow_clinical_diagnosis",
     "quarantine_household_on_positive",
     "quarantine_household_on_symptoms",
-    "quarantine_household_on_traced",
+    "quarantine_household_on_traced_positive",
+    "quarantine_household_on_traced_symptoms",
     "quarantine_household_contacts_on_positive",
     "quarantine_days",
     "test_order_wait",
@@ -35,17 +36,20 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_on",
     "app_turned_on",
     "app_users_fraction",
-    "trace_on_symptoms"
+    "trace_on_symptoms",
+    "lockdown_house_interaction_multiplier",
+    "lockdown_random_network_multiplier",
+    "lockdown_work_network_multiplier",
 ]
 
 
 class EVENT_TYPES(enum.Enum):
-    UNINFECTED = 0
-    PRESYMPTOMATIC = 1  # Pre-symptompatic, severe disease (progressing to symptomatic severe)
-    PRESYMPTOMATIC_MILD = 2  # Pre-symptompatic, mild disease (progressing to symptomatic mild)
-    ASYMPTOMATIC = 3  # Asymptompatic (progressing to recovered)
-    SYMPTOMATIC = 4  # Symptompatic, severe disease
-    SYMPTOMATIC_MILD = 5  # Symptompatic, mild disease
+    SUSCEPTIBLE = 0
+    PRESYMPTOMATIC = 1 # Pre-symptompatic, severe disease (progressing to symptomatic severe)
+    PRESYMPTOMATIC_MILD = 2 # Pre-symptompatic, mild disease (progressing to symptomatic mild)
+    ASYMPTOMATIC = 3 # Asymptompatic (progressing to recovered)
+    SYMPTOMATIC = 4 # Symptompatic, severe disease
+    SYMPTOMATIC_MILD = 5 # Symptompatic, mild disease
     HOSPITALISED = 6
     CRITICAL = 7
     HOSPITALISED_RECOVERING = 8
@@ -317,7 +321,7 @@ class Model:
             else:
                 return value
         except AttributeError:
-            raise ModelParameterException("Parameter {param} not found")
+            raise ModelParameterException(f"Parameter {name} not found")
 
     def update_running_params(self, param, value):
         """[summary]
@@ -341,6 +345,28 @@ class Model:
                 raise ModelParameterException(f"Setting {param} to {value} failed")
         else:
             raise ModelParameterException(f"Setting {param} to {value} failed")
+
+    def get_risk_score(self, day, age_inf, age_sus):
+        value = covid19.get_model_param_risk_score(self.c_model, day, age_inf, age_sus)
+        if value < 0:
+            raise  ModelParameterException( "Failed to get risk score")
+        return value
+    
+    def get_risk_score_household(self, age_inf, age_sus):
+        value = covid19.get_model_param_risk_score_household(self.c_model, age_inf, age_sus)
+        if value < 0:
+            raise  ModelParameterException( "Failed to get risk score household")
+        return value
+    
+    def set_risk_score(self, day, age_inf, age_sus, value):
+        ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
+        if ret == 0:
+            raise  ModelParameterException( "Failed to set risk score")
+    
+    def set_risk_score_household(self, age_inf, age_sus, value):
+        ret = covid19.set_model_param_risk_score_household(self.c_model, age_inf, age_sus, value)
+        if ret == 0:
+            raise  ModelParameterException( "Failed to set risk score household")
 
     def _create(self):
         """
