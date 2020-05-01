@@ -92,7 +92,7 @@ class TestClass(object):
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
-            constant.PARAM_LINE_NUMBER
+            constant.HOSPITAL_PARAM_LINE_NUMBER
         )
         params.set_param( "app_users_fraction", 0.25)
         model = Model(params)

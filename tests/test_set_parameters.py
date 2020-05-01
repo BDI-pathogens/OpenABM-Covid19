@@ -6,14 +6,14 @@ from COVID19.model import Parameters, Model
 class TestSetObjects:
     def test_set_params_classic(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
-        p = Parameters(read_param_file=True, input_households="tests/data/baseline_household_demographics.csv", input_param_file="tests/data/baseline_parameters.csv",param_line_number=1)
+        p = Parameters(read_param_file=True, input_households="tests/data/baseline_household_demographics.csv", input_param_file="tests/data/baseline_parameters.csv",param_line_number=1, hospital_input_param_file="tests/data/hospital_baseline_parameters.csv")
         for key in all_params:
             value = all_params[key][0]
             assert pytest.approx(p.get_param(key), value), f"{key} was not set properly"
 
     def test_set_params_from_python(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
-        p = Parameters(read_param_file=False, input_households="tests/data/baseline_household_demographics.csv")
+        p = Parameters(read_param_file=False, input_households="tests/data/baseline_household_demographics.csv", hospital_input_param_file="tests/data/hospital_baseline_parameters.csv")
         for key in all_params:
             value = all_params[key][0]
             try:
@@ -28,6 +28,8 @@ class TestSetObjects:
         p = Parameters(
             read_param_file=False,
             input_households="tests/data/baseline_household_demographics.csv",
+            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
+            hospital_param_line_number=1
         )
         for key in all_params:
             value = all_params[key][0]
@@ -45,6 +47,8 @@ class TestSetObjects:
         p = Parameters(
             read_param_file=False,
             input_households=household_df,
+            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
+            hospital_param_line_number=1
         )
         for key in all_params:
             value = all_params[key][0]
