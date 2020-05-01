@@ -861,7 +861,7 @@ int one_time_step( model *model )
         transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
         ///use printf below to see available beds each timestep
-        printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+        //printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
     }
 
 	flu_infections( model );
