@@ -170,6 +170,9 @@ class Scenario:
             personal_kwargs=dict(
                 default_th=300, max_earning_furloughed=28_000, beta=2,
             ),
+            corporate_kwargs=dict(
+                beta=1.4, large_cap_cash_surplus_months=6,
+            ),
         )
 
     def generate(
