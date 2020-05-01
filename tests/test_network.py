@@ -279,7 +279,7 @@ class TestClass(object):
         # note when counting connections we count each end
         ageTypeMap = pd.DataFrame( data={
             "age_group": constant.AGES, 
-            "age_type": constant.AGE_TYPES } );
+            "age_type": constant.AGE_TYPES } )
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
