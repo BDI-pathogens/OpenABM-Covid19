@@ -25,6 +25,7 @@ class PersonalBankruptcyResults:
     credit_mean: Mapping[Decile, float]
     credit_std: float
     utilisation: Mapping[LabourState, float]
+    min_expense_cut: Mapping[Decile, float]
     personal_bankruptcy: float
 
 
@@ -88,11 +89,11 @@ class PersonalBankruptcyModel:
 
         df_gdp = (
             pd.Series(self.gdp_data)
-            .to_frame()
-            .reset_index()
-            .groupby(["level_0", "level_1"])[0]
-            .sum()
-            .unstack()
+                .to_frame()
+                .reset_index()
+                .groupby(["level_0", "level_1"])[0]
+                .sum()
+                .unstack()
         )
         self._sector_region_weights = (df_gdp.T / df_gdp.T.sum(axis=0)).to_dict()
 
@@ -154,10 +155,10 @@ class PersonalBankruptcyModel:
         self.w_decile = {r: {d: 1.0 / len(Decile) for d in Decile} for r in Region}
 
     def simulate(
-        self,
-        time: int,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        **kwargs,
+            self,
+            time: int,
+            utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+            **kwargs,
     ) -> None:
         # TODO: This is inefficient
         utilisations = {
@@ -166,7 +167,7 @@ class PersonalBankruptcyModel:
                     utilisations[l, r, s, a] * self.workers_data[r, s, a]
                     for s, a in itertools.product(Sector, Age)
                 )
-                / self.workers_per_region[r]
+                   / self.workers_per_region[r]
                 for l in LabourState
             }
             for r in Region
@@ -174,7 +175,7 @@ class PersonalBankruptcyModel:
         self.results[time] = {}
         for r in Region:
             if time == START_OF_TIME:
-                delta_balance = 0
+                delta_balance = {d: 0 for d in Decile}
                 balance = {d: self.cash_reserve[(r, d)] for d in Decile}
             else:
                 delta_balance = self._calc_delta_balance(r, utilisations)
@@ -187,6 +188,8 @@ class PersonalBankruptcyModel:
 
             personal_bankruptcy = self._calc_personal_bankruptcy(r, spot_credit_mean)
 
+            min_expense_cut = self._calc_expense_min_cut(r, delta_balance)
+
             self.results[time][r] = PersonalBankruptcyResults(
                 time=time,
                 delta_balance=delta_balance,
@@ -195,10 +198,11 @@ class PersonalBankruptcyModel:
                 credit_std=self.credit_std[r],
                 utilisation=utilisations[r],
                 personal_bankruptcy=personal_bankruptcy,
+                min_expense_cut=min_expense_cut,
             )
 
     def _calc_delta_balance(
-        self, r: Region, utilisations: Mapping[Region, Mapping[LabourState, float]]
+            self, r: Region, utilisations: Mapping[Region, Mapping[LabourState, float]]
     ) -> Mapping[Decile, float]:
         db = {}
         for d in Decile:
@@ -209,21 +213,30 @@ class PersonalBankruptcyModel:
                     spot_earnings = min(spot_earnings, self.max_earning_furloughed)
 
                 db_d += (
-                    utilisations[r][ls]
-                    * (spot_earnings - self.expenses[(r, d)])
-                    / DAYS_IN_A_YEAR
+                        utilisations[r][ls]
+                        * (spot_earnings - self.expenses[(r, d)])
+                        / DAYS_IN_A_YEAR
                 )
 
             db[d] = db_d
         return db
 
+    def _calc_expense_min_cut(
+            self, r: Region, delta_balance: Mapping[Decile, float]
+    ) -> Mapping[Decile, float]:
+        min_cut = {}
+        for d in Decile:
+            gap = min(delta_balance[d], 0)
+            min_cut[d] = -gap / (self.expenses[(r, d)] / DAYS_IN_A_YEAR)
+        return min_cut
+
     def _calc_credit_mean(
-        self, init_credit_mean: float, balance: Mapping[Decile, float],
+            self, init_credit_mean: float, balance: Mapping[Decile, float],
     ) -> Mapping[Decile, float]:
         return {d: init_credit_mean + self.beta * min(balance[d], 0) for d in Decile}
 
     def _calc_personal_bankruptcy(
-        self, r: Region, spot_credit_mean: Mapping[Decile, float],
+            self, r: Region, spot_credit_mean: Mapping[Decile, float],
     ) -> float:
         ppb = 0
         for d in Decile:
