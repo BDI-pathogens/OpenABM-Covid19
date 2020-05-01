@@ -129,13 +129,15 @@ test_on_symptoms	0
 test_on_traced	0
 trace_on_symptoms	0
 trace_on_positive	0
+retrace_on_positive 0
 quarantine_on_traced	0
 traceable_interaction_fraction	0.8
 tracing_network_depth	0
 allow_clinical_diagnosis	1
 quarantine_household_on_positive	0
 quarantine_household_on_symptoms	0
-quarantine_household_on_traced	0
+quarantine_household_on_traced_positive	0
+quarantine_household_on_traced_symptoms	0
 quarantine_household_contacts_on_positive	0
 quarantine_household_contacts_on_symptoms	0
 quarantined_daily_interactions	0

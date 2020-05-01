@@ -96,12 +96,21 @@ int get_model_param_quarantine_household_on_positive(model *model)
 }
 
 /*****************************************************************************************
-*  Name:		get_model_param_quarantine_household_on_traced
+*  Name:		get_model_param_quarantine_household_on_traced_positive
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-int get_model_param_quarantine_household_on_traced(model *model)
+int get_model_param_quarantine_household_on_traced_positive(model *model)
 {
-    return model->params->quarantine_household_on_traced;
+    return model->params->quarantine_household_on_traced_positive;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_quarantine_household_on_traced_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_on_traced_symptoms(model *model)
+{
+    return model->params->quarantine_household_on_traced_symptoms;
 }
 
 /*****************************************************************************************
@@ -199,6 +208,33 @@ int get_model_param_lockdown_on(model *model)
 }
 
 /*****************************************************************************************
+*  Name:        get_model_param_lockdown_house_interaction_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_house_interaction_multiplier(model *model)
+{
+	return model->params->lockdown_house_interaction_multiplier;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_lockdown_random_network_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_random_network_multiplier(model *model)
+{
+	return model->params->lockdown_random_network_multiplier;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_lockdown_work_network_multiplier
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_model_param_lockdown_work_network_multiplier(model *model)
+{
+	return model->params->lockdown_work_network_multiplier;
+}
+
+/*****************************************************************************************
 *  Name:        set_model_param_quarantine_days
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -288,12 +324,22 @@ int set_model_param_quarantine_household_on_positive( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:		set_model_param_quarantine_household_on_traced
+*  Name:		set_model_param_quarantine_household_on_traced_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_quarantine_household_on_traced( model *model, int value )
+int set_model_param_quarantine_household_on_traced_positive( model *model, int value )
 {
-    model->params->quarantine_household_on_traced = value;
+    model->params->quarantine_household_on_traced_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_quarantine_household_on_traced_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_on_traced_symptoms( model *model, int value )
+{
+    model->params->quarantine_household_on_traced_symptoms = value;
     return TRUE;
 }
 
@@ -374,6 +420,95 @@ int set_model_param_app_turned_on( model *model, int value )
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_risk_score
+*  Description: Gets the value of the risk score parameter
+******************************************************************************************/
+double get_model_param_risk_score(
+	model *model,
+	int day,
+	int age_infector,
+	int age_susceptible
+)
+{
+	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+		return UNKNOWN;
+
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	return model->params->risk_score[ day ][ age_infector ][ age_susceptible ];
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_risk_score_household
+*  Description: Gets the value of the risk score household parameter
+******************************************************************************************/
+double get_model_param_risk_score_household(
+	model *model,
+	int age_infector,
+	int age_susceptible
+)
+{
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return UNKNOWN;
+
+	return model->params->risk_score_household[ age_infector ][ age_susceptible ];
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_risk_score
+*  Description: Sets the value of the risk score parameter
+******************************************************************************************/
+int set_model_param_risk_score(
+	model *model,
+	int day,
+	int age_infector,
+	int age_susceptible,
+	double value
+)
+{
+	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+		return FALSE;
+
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return FALSE;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return FALSE;
+
+	model->params->risk_score[ day ][ age_infector ][ age_susceptible ] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_risk_score_household
+*  Description: Sets the value of the risk score household parameter
+******************************************************************************************/
+int set_model_param_risk_score_household(
+	model *model,
+	int age_infector,
+	int age_susceptible,
+	double value
+)
+{
+	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+		return FALSE;
+
+	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+		return FALSE;
+
+	model->params->risk_score_household[ age_infector ][ age_susceptible ] = value;
+    return TRUE;
+}
+
+
+/*****************************************************************************************
 *  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
@@ -395,6 +530,9 @@ int set_model_param_lockdown_on( model *model, int value )
 	else
 	if( value == FALSE )
 	{
+		if( !params->lockdown_on )
+			return TRUE;
+
 		for( network = 0; network < N_WORK_NETWORKS; network++ )
 			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
 				params->daily_fraction_work_used[network] = params->daily_fraction_work;
@@ -434,6 +572,9 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 	else
 	if( value == FALSE )
 	{
+		if( !params->lockdown_elderly_on )
+			return TRUE;
+
 		if( !params->lockdown_on )
 		{
 			for( network = 0; network < N_WORK_NETWORKS; network++ )
@@ -452,6 +593,57 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			update_random_interactions( indiv, params );
 	}
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_house_interaction_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_house_interaction_multiplier( model *model, double value )
+{
+	model->params->lockdown_house_interaction_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_random_network_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_random_network_multiplier( model *model, double value )
+{
+	model->params->lockdown_random_network_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_lockdown_work_network_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lockdown_work_network_multiplier( model *model, double value )
+{
+	model->params->lockdown_work_network_multiplier = value;
+
+	if( model->params->lockdown_on )
+		return set_model_param_lockdown_on( model, TRUE );
+
+	if( model->params->lockdown_elderly_on )
+		return set_model_param_lockdown_elderly_on( model, TRUE );
 
 	return TRUE;
 }
