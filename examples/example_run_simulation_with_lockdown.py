@@ -7,7 +7,7 @@ and then runs for 50 days, after 50 days lock down is turned on
 """
 
 
-from COVID19.model import Parameters, Model
+from COVID19.model import Parameters, Model, OccupationNetworkEnum
 import json
 from pathlib import Path
 import covid19
@@ -51,7 +51,7 @@ def setup_params(updated_params: Dict[str, Any] = None):
     return p
 
 
-def run_model(param_updates, n_steps=100, lockdown_at=None):
+def run_model(param_updates, n_steps=200, lockdown_at=None):
     params = setup_params(param_updates)
     # Create an instance of the Model
     model = Model(params)
@@ -73,9 +73,10 @@ def run_model(param_updates, n_steps=100, lockdown_at=None):
                 LOGGER.info(
                     f'lockdown_random_network_multiplier = {params.get_param("lockdown_random_network_multiplier")}'
                 )
-                LOGGER.info(
-                    f'lockdown_occupation_multiplier = {params.get_param("lockdown_occupation_multiplier")}'
-                )
+                for oc_net in OccupationNetworkEnum:
+                    LOGGER.info(
+                        f'lockdown_occupation_multiplier{oc_net.name} = {params.get_param(f"lockdown_occupation_multiplier{oc_net.name}")}'
+                    )
     df = pd.DataFrame(m_out)
     model.write_output_files()
     return df
@@ -85,6 +86,6 @@ def run_model(param_updates, n_steps=100, lockdown_at=None):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     param_updates = {"rng_seed": randint(0, 65000)}
-    df = run_model(param_updates=param_updates, n_steps=100, lockdown_at=None)
+    df = run_model(param_updates=param_updates, n_steps=200, lockdown_at=50)
     df.to_csv("results/covid_timeseries_Run1.csv", index=False)
     print(df)
