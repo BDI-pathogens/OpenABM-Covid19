@@ -59,7 +59,13 @@ class EVENT_TYPES(enum.Enum):
     TEST_RESULT = 14
     CASE = 15
     TRACE_TOKEN_RELEASE = 16
-    N_EVENT_TYPES = 17
+    NOT_IN_HOSPITAL = 17
+    WAITING = 18
+    GENERAL = 19
+    ICU = 20
+    MORTUARY = 21
+    DISCHARGED = 22
+    N_EVENT_TYPES = 23
 
 
 class AgeGroupEnum(enum.Enum):
@@ -102,7 +108,10 @@ class Parameters(object):
         param_line_number: int = 1,
         output_file_dir: str = "./",
         input_households: Union[str, pd.DataFrame] = None,
+        hospital_input_param_file: str = None,
+        hospital_param_line_number: int = 1,
         read_param_file=True,
+        read_hospital_param_file=True,
     ):
         """[summary]
         
@@ -141,6 +150,27 @@ class Parameters(object):
             self.household_df = input_households
         elif not input_households:
             raise ParameterException("Household data must be supplied as a csv")
+        # if hospital_input_param_file:
+        #     self.c_params.hospital_input_param_file = hospital_input_param_file
+        # elif not hospital_input_param_file:
+        #     raise ParameterException("Hospital data must be supplied as a csv")
+        if hospital_param_line_number:
+            self.c_params.hospital_param_line_number = int(hospital_param_line_number)
+
+        if hospital_input_param_file and read_hospital_param_file:
+            self.c_params.hospital_input_param_file = hospital_input_param_file
+        elif not hospital_input_param_file and read_hospital_param_file:
+            raise ParameterException(
+                "Hospital param path is None and read hospital param file set to true"
+            )
+        else:
+            LOGGER.info(
+                "Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this"
+            )
+
+        if read_hospital_param_file and hospital_input_param_file != None:
+            self._read_hospital_param_file()
+
 
 
         if read_param_file and input_param_file != None:
@@ -185,6 +215,9 @@ class Parameters(object):
             covid19.set_up_reference_household_memory(self.c_params)
             LOGGER.debug("memory set up")
             _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]) for t in self.household_df.itertuples()]
+
+    def _read_hospital_param_file(self):
+        covid19.read_hospital_param_file(self.c_params)
                 
     def set_param_dict(self, params):
         for k, v in params.items():
