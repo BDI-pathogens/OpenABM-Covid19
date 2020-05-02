@@ -118,9 +118,6 @@ class Simulation:
             self.sim_started = False
             self.env.end_simulation()
 
-    def reload_params(self, new_params):
-        self.env.reload_params(new_params)
-
     def steps(self, n_steps):
         """
         Run the model for a specific number of steps, starting from the current state,
@@ -213,9 +210,6 @@ class COVID19IBM(Environment):
 
     def end_simulation(self):
         self.model._destroy()
-
-    def reload_params(self, new_params):
-        self.model.reload_params(new_params)
 
     def step(self, action):
         """
