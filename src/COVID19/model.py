@@ -383,11 +383,6 @@ class Model:
         LOGGER.info("Destroying model")
         covid19.destroy_model(self.c_model)
 
-    def reload_params(self, new_params_object):
-        # Store the params object so it doesn't go out of scope and get freed
-        self._params_obj = new_params_object
-        self.c_params = new_params_object.return_param_object()
-
     def one_time_step(self):
         """
         Call C function on_time_step
