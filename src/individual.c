@@ -246,13 +246,22 @@ void set_case( individual *indiv, int time )
 
 /*****************************************************************************************
 *  Name:		destroy_individual
-*  Description: Destroys the model structure and releases its memory
+*  Description: Destroys the individual structure and releases its memory
 ******************************************************************************************/
 void destroy_individual( individual *indiv )
 {
-	free( indiv->infection_events );
-};
+	infection_event *infection_event, *temporary_infection_event;
 
+	infection_event = indiv->infection_events;
+
+	while( infection_event != NULL )
+	{
+		temporary_infection_event = infection_event;
+		free( infection_event->times );
+		infection_event = infection_event->next;
+		free( temporary_infection_event );
+	}
+};
 
 /*****************************************************************************************
 *  Name:		count_infection_events
