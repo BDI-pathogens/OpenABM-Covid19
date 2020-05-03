@@ -30,7 +30,7 @@ SRC_DIR = TEST_DIR.replace("tests","") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
 
 # Construct the compilation command and compile
-compile_command = "make clean; make all"
+compile_command = "make clean; make all; make swig-all;"
 completed_compilation = subprocess.run([compile_command], 
     shell = True, 
     cwd = SRC_DIR, 
@@ -114,3 +114,22 @@ class TestClass(object):
         df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
 
         assert len(df_number_beds_exceeded.index) == 0
+
+    def test_ward_duplicates(self):
+        """
+        Test that patients in wards not duplicated
+        """
+
+        df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        
+        # Iterate over time steps
+        max_time = df_hcw_time_step['time_step'].max()
+
+        for t_step in range(max_time):
+
+            time_df = df_hcw_time_step['time_step'] == t_step
+            patient_df = df_hcw_time_step['patient_type'] == 1
+            test_df = df_hcw_time_step[time_df & patient_df]
+            test_df = test_df.pdx.values
+
+            assert len(test_df) == len(set(test_df))
