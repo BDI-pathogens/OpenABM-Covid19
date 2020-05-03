@@ -71,10 +71,11 @@ void build_ward_networks( model *model, ward* ward )
         for( idx = 0; idx < ward->n_worker[DOCTOR]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->doctors[idx].pdx ]) ))
                 hc_workers_doctors[n_hcw_working++] = ward->doctors[idx].pdx;
-
-        //rebuild doctor -> patient network
-        build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
-
+            
+        //if there are nurses working, rebuild doctor -> patient network
+        if( n_hcw_working > 0 )
+            build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
+        
         hc_workers_nurse = calloc( ward->n_worker[NURSE], sizeof (long));
         n_hcw_working = 0;
 
@@ -82,10 +83,12 @@ void build_ward_networks( model *model, ward* ward )
         for( idx = 0; idx < ward->n_worker[NURSE]; idx++ )
             if( healthcare_worker_working( &(model->population[ ward->nurses[idx].pdx ]) ))
                 hc_workers_nurse[n_hcw_working++] = ward->nurses[idx].pdx;
+                
 
-        //rebuild nurse -> patient network
-        build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
-
+        //if there are nurses working, rebuild nurse -> patient network
+        if( n_hcw_working > 0 )
+            build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
+        
         free( hc_workers_doctors );
         free( hc_workers_nurse );
     }
@@ -93,11 +96,13 @@ void build_ward_networks( model *model, ward* ward )
 
 void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, int n_hcw_working, int n_patient_required_interactions, int max_hcw_daily_interactions )
 {
-    int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
+    int idx, hdx, patient_interactions_per_hcw, n_total_interactions, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
+    //Determine the number of interactions that all patients need.
     patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->patients->size) / n_hcw_working );
     //TODO: should there be different max interactions for doctors / nurses?
+    //Check whether the number of required interactions is greater than the max possible. If it is, set it to the max.
     patient_interactions_per_hcw = (patient_interactions_per_hcw > max_hcw_daily_interactions) ? max_hcw_daily_interactions : patient_interactions_per_hcw;
 
     n_total_interactions = patient_interactions_per_hcw * n_hcw_working;
@@ -108,7 +113,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     network->n_edges = 0;
     network->n_vertices       = n_hcw_working + ward->patients->size;
 
-    patient = 0;
     n_pos = 0;
 
     for( int idx = 0; idx < ward->patients->size; idx++ )

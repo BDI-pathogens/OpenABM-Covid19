@@ -12,6 +12,7 @@ constants from the C code which are used in testing
 
 from os.path import join
 from enum import Enum
+import os
 
 # Directories
 IBM_DIR = "src"
@@ -20,6 +21,7 @@ DATA_DIR_TEST = "data_test"
 
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
+TEST_HOSPITAL_FILE = "./tests/data/hospital_baseline_parameters.csv"
 
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
@@ -97,9 +99,14 @@ NETWORK_ELDERLY = 2
 NETWORK_TYPES = [NETWORK_CHILD, NETWORK_ADULT, NETWORK_ELDERLY]
 
 PARAM_LINE_NUMBER = 1
+HOSPITAL_PARAM_LINE_NUMBER = 1
 
 # Construct the executable command
+# EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+#     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"+\
+#     f"{TEST_HOSPITAL_FILE} {HOSPITAL_PARAM_LINE_NUMBER}"
+
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)
