@@ -12,6 +12,7 @@ from adapter_covid19.datasources import (
     RegionDataSource,
     RegionSectorAgeDataSource,
     RegionDecileSource,
+    RegionSectorDecileSource,
 )
 from adapter_covid19.enums import LabourState, Age
 from adapter_covid19.enums import Region, Sector, Decile
@@ -60,13 +61,13 @@ class PersonalBankruptcyModel:
     credit_std: Mapping[Region, float] = field(default=None)
 
     # Earnings by region, decile
-    earnings: Mapping[Tuple[Region, Decile], float] = field(default=None)
+    earnings: Mapping[Tuple[Region, Sector, Decile], float] = field(default=None)
 
     # Minimum expenses by region, decile
     expenses: Mapping[Tuple[Region, Decile], float] = field(default=None)
 
     # Saving by region, decile
-    cash_reserve: Mapping[Tuple[Region, Decile], float] = field(default=None)
+    cash_reserve: Mapping[Tuple[Region, Sector, Decile], float] = field(default=None)
 
     # Earning ratio per labour state
     eta: MutableMapping[LabourState, float] = field(default=None)
@@ -122,7 +123,7 @@ class PersonalBankruptcyModel:
                 self.credit_std = credit_score["stdev"]
 
         if self.earnings is None:
-            self.earnings = RegionDecileSource("earnings").load(reader)
+            self.earnings = RegionSectorDecileSource("earnings").load(reader)
 
         if self.expenses is None:
             self.expenses = RegionDecileSource("expenses").load(reader)
@@ -145,7 +146,10 @@ class PersonalBankruptcyModel:
                 raise ValueError(f"Inconsistent data: {regions}, {set(Region)}")
 
     def _init_cash_reserve(self) -> None:
-        self.cash_reserve = {(r, d): 0 for r in Region for d in Decile}
+        n_month_cash_reserve = 0.
+        self.cash_reserve = {
+            (r, s, d): (self.earnings[(r, s, d)] - self.expenses[(r, d)]) * n_month_cash_reserve / 12.
+            for r, s, d in itertools.product(Region, Sector, Decile)}
 
     def _init_eta(self) -> None:
         self.eta = {
@@ -180,7 +184,7 @@ class PersonalBankruptcyModel:
             for s in Sector:
                 if time == START_OF_TIME:
                     delta_balance_rs = {d: 0 for d in Decile}
-                    balance_rs = {d: self.cash_reserve[(r, d)] for d in Decile}
+                    balance_rs = {d: self.cash_reserve[(r, s, d)] for d in Decile}
                 else:
                     delta_balance_rs = self._calc_delta_balance(r, s, utilisations_h)
                     balance_rs = {
@@ -217,7 +221,7 @@ class PersonalBankruptcyModel:
         for d in Decile:
             db_d = 0
             for ls in LabourState:
-                spot_earnings = self.eta[ls] * self.earnings[(r, d)]
+                spot_earnings = self.eta[ls] * self.earnings[(r, s, d)]
                 if ls == LabourState.FURLOUGHED:
                     spot_earnings = min(spot_earnings, self.max_earning_furloughed)
 
