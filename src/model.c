@@ -286,7 +286,7 @@ void write_time_step_hospital_data( model *model)
     if(model->time == 1)
     {
     	time_step_hospital_file = fopen(output_file_name, "w");
-    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds");
+    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected");
     }
     else
     {
@@ -308,14 +308,24 @@ void write_time_step_hospital_data( model *model)
             {
                 int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
                 int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_doctor;
+                indiv_doctor = &(model->population[doctor_pdx]);
+                int doctor_time_infected = time_infected(indiv_doctor);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected);
             }
             // For each nurse
             for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
             {
                 int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
                 int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_nurse;
+                indiv_nurse = &(model->population[nurse_pdx]);
+                int nurse_time_infected = time_infected(indiv_nurse);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected);
             }
 
             // For each patient
@@ -324,7 +334,12 @@ void write_time_step_hospital_data( model *model)
             for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
             {
                 int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds);
+                
+                individual *indiv_patient;
+                indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
+                int patient_time_infected = time_infected(indiv_patient);
+                
+                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected);
             }
 
         }
@@ -713,10 +728,12 @@ void build_daily_network( model *model )
 
     if( model->params->hospital_on )
     {
+        //Create work networks for healthcare workers.
         int ward_idx, ward_type;
         for( idx = 0; idx < model->params->n_hospitals; idx++ )
             build_hospital_networks( model, &(model->hospitals[idx]) );
 
+        //Create patient-healthcare interaction networks for each ward and each healthcare worker type.
         for( idx = 0; idx < model->params->n_hospitals; idx++ )
         {
             add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
@@ -859,7 +876,7 @@ int one_time_step( model *model )
         transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
         ///use printf below to see available beds each timestep
-        printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+        //printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
     }
 
 	flu_infections( model );
