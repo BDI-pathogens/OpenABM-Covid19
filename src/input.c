@@ -557,7 +557,12 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"time_quarantined,");
 	fprintf(individual_output_file,"infector_ID,");
 	fprintf(individual_output_file,"infector_time_infected,");
-	fprintf(individual_output_file,"infector_status");
+    fprintf(individual_output_file,"infector_status,");
+    fprintf(individual_output_file,"time_waiting,");
+    fprintf(individual_output_file,"time_general,");
+    fprintf(individual_output_file,"time_icu,");
+    fprintf(individual_output_file,"time_discharged,");
+    fprintf(individual_output_file,"time_mortuary");
 	fprintf(individual_output_file,"\n");
 	
 	// Loop through all individuals in the simulation
@@ -582,7 +587,7 @@ void write_individual_file(model *model, parameters *params)
 		}
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d\n",
+            "%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -608,7 +613,12 @@ void write_individual_file(model *model, parameters *params)
 			indiv->time_event[QUARANTINED],
 			infector_id,
 			infector_time_infected,
-			infector_status
+            infector_status,
+            indiv->time_event[WAITING],
+            indiv->time_event[GENERAL],
+            indiv->time_event[ICU],
+            indiv->time_event[DISCHARGED],
+            indiv->time_event[MORTUARY]
 			);
 	}
 	fclose(individual_output_file);
