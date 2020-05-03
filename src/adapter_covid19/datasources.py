@@ -111,6 +111,16 @@ class RegionDecileSource(DataSource):
         return data
 
 
+class RegionSectorDecileSource(DataSource):
+    def load(self, reader: Reader) -> Mapping[Tuple[Region, Sector, Decile], float]:
+        frame = reader.load_csv(self.filename)
+        data = {
+            (Region[t.Region], Sector[t.Sector], Decile[t.Decile]): t[-1]
+            for t in frame.itertuples(index=False)
+        }
+        return data
+
+
 class DataFrameDataSource(DataSource):
     def load(self, reader: Reader) -> pd.DataFrame:
         frame = reader.load_csv(self.filename)
