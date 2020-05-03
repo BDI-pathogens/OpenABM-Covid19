@@ -88,10 +88,6 @@ void build_ward_networks( model *model, ward* ward )
         //if there are nurses working, rebuild nurse -> patient network
         if( n_hcw_working > 0 )
             build_hcw_patient_network( ward, ward->nurse_patient_network,  hc_workers_nurse, n_hcw_working, model->params->n_patient_required_interactions[ward->type][NURSE], model->params->max_hcw_daily_interactions );
-        else
-        {
-            printf("NO nurses in ward%i type%i\n", ward->ward_idx, ward->type);
-        }
         
         free( hc_workers_doctors );
         free( hc_workers_nurse );
@@ -100,7 +96,7 @@ void build_ward_networks( model *model, ward* ward )
 
 void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, int n_hcw_working, int n_patient_required_interactions, int max_hcw_daily_interactions )
 {
-    int idx, hdx, patient_interactions_per_hcw, n_total_interactions, patient, n_pos;
+    int idx, hdx, patient_interactions_per_hcw, n_total_interactions, n_pos;
     long *all_required_interactions, *capped_hcw_interactions;
 
     //Determine the number of interactions that all patients need.
@@ -117,7 +113,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     network->n_edges = 0;
     network->n_vertices       = n_hcw_working + ward->patients->size;
 
-    patient = 0;
     n_pos = 0;
 
     for( int idx = 0; idx < ward->patients->size; idx++ )
