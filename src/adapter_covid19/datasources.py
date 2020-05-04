@@ -10,6 +10,13 @@ from adapter_covid19.enums import Region, Sector, Age
 
 class Reader:
     def __init__(self, data_path: str):
+        """
+        Helper class to read data from disk
+
+        Parameters
+        ----------
+        data_path: path to data
+        """
         self.data_path = data_path
 
     def _get_filepath(self, filename: str) -> str:
@@ -21,10 +28,27 @@ class Reader:
 
 class DataSource(abc.ABC):
     def __init__(self, filename: str):
+        """
+        Read and parse a dataset from disk
+        Parameters
+        ----------
+        filename: filename of dataset
+        """
         self.filename = filename
 
     @abc.abstractmethod
     def load(self, reader: Reader) -> Any:
+        """
+        Load datasource from disk
+
+        Parameters
+        ----------
+        reader: Reader class
+
+        Returns
+        -------
+        Loaded and parsed data
+        """
         raise NotImplementedError
 
 
