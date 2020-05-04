@@ -1,12 +1,11 @@
 import collections
 import itertools
 import functools
-import json
 import logging
 import multiprocessing
 import os
 import pathlib
-from typing import Mapping, Optional, Tuple, Sequence
+from typing import Mapping, Optional, Tuple, Sequence, Union
 
 import click
 import matplotlib.pyplot as plt
@@ -32,6 +31,24 @@ LOCKDOWN_PARMAETERS = {
 ECON_MODELS = {
     "linear": LinearGdpModel,
     "supplydemand": SupplyDemandGdpModel,
+}
+
+EXAMPLE_PARAMETERS = {
+    "gdp": {"lockdown_recovery_time": 1, "optimal_recovery": False},
+    "corporate_bankruptcy": {"beta": 1.5, "large_cap_cash_surplus_months": 3},
+    "personal_insolvency": {
+        "saving": 10,
+        "default_th": 100,
+        "beta": 1,
+        "gamma": 0.3,
+        "utilization_ratio_ill": 0.1,
+        "utilization_ratio_furloughed_lockdown": 0.4,
+        "utilization_ratio_wfh_lockdown": 0.5,
+        "utilization_ratio_working_lockdown": 0.1,
+        "utilization_ratio_furloughed_no_lockdown": 0.0,
+        "utilization_ratio_wfh_no_lockdown": 0.1,
+        "utilization_ratio_working_no_lockdown": 0.9,
+    },
 }
 
 LOGGER = logging.getLogger("__name__")
@@ -165,11 +182,11 @@ def plot_econ_data(
         }
     )
     # Write data
-    _write_csv(gdp.to_frame(), 'gdp', results_dir)
-    _write_csv(corporate_bankruptcies.to_frame(), 'corporate_bankruptcies', results_dir)
-    _write_csv(personal_bankruptcies.to_frame(), 'personal_bankruptcies', results_dir)
-    _write_csv(deaths.to_frame(), 'deaths', results_dir)
-    _write_csv(recoveries.to_frame(), 'recoveries', results_dir)
+    _write_csv(gdp.to_frame(), "gdp", results_dir)
+    _write_csv(corporate_bankruptcies.to_frame(), "corporate_bankruptcies", results_dir)
+    _write_csv(personal_bankruptcies.to_frame(), "personal_bankruptcies", results_dir)
+    _write_csv(deaths.to_frame(), "deaths", results_dir)
+    _write_csv(recoveries.to_frame(), "recoveries", results_dir)
     # Plot
     fig, ax = plt.subplots()
     axes.append(ax)
@@ -212,7 +229,9 @@ def plot_econ_data(
     corp_bank_df.plot(ax=ax)
 
     # Fraction personal bankruptcies, by sector
-    personal_bank_path = os.path.join(results_dir, "personal_bankruptcies_by_region.csv")
+    personal_bank_path = os.path.join(
+        results_dir, "personal_bankruptcies_by_region.csv"
+    )
     personal_bank_df = pd.read_csv(personal_bank_path)
     fig, ax = plt.subplots()
     axes.append(ax)
@@ -388,23 +407,23 @@ def _spread_worker(
     show_default=True,
 )
 @click.option(
-    '--n-workers',
+    "--n-workers",
     type=int,
     default=None,
-    help='Number of cpu cores to use (default None means all)',
+    help="Number of cpu cores to use (default None means all)",
     show_default=True,
 )
 def _main(
-        parameters,
-        household_demographics,
-        outdir,
-        total_individuals,
-        lockdown_start,
-        lockdown_end,
-        end_time,
-        econ_data_dir,
-        gdp_model,
-        n_workers,
+    parameters,
+    household_demographics,
+    outdir,
+    total_individuals,
+    lockdown_start,
+    lockdown_end,
+    end_time,
+    econ_data_dir,
+    gdp_model,
+    n_workers,
 ) -> Sequence[plt.Axes]:
     """
     Run simulations by region
@@ -424,16 +443,19 @@ def _main(
 
 
 def main(
-        parameters: str = '../tests/data/baseline_parameters.csv',
-        household_demographics: str = '../tests/data/baseline_household_demographics.csv',
-        outdir: str = './results',
-        total_individuals: int = 100_000,
-        lockdown_start: Optional[int] = None,
-        lockdown_end: Optional[int] = None,
-        end_time: int = 200,
-        econ_data_dir: str = '../src/adapter_covid19/data',
-        gdp_model: str = 'linear',
-        n_workers: Optional[int] = None,
+    parameters: str = "../tests/data/baseline_parameters.csv",
+    household_demographics: str = "../tests/data/baseline_household_demographics.csv",
+    outdir: str = "./results",
+    total_individuals: int = 100_000,
+    lockdown_start: Optional[int] = None,
+    lockdown_end: Optional[int] = None,
+    end_time: int = 200,
+    econ_data_dir: str = "../src/adapter_covid19/data",
+    gdp_model: str = "linear",
+    n_workers: Optional[int] = None,
+    example_parameters: Optional[
+        Mapping[str, Mapping[str, Union[float, int, bool, str]]]
+    ] = None,
 ) -> Sequence[plt.Axes]:
     """
     Run simulations by region
@@ -445,8 +467,8 @@ def main(
     parameters_path = click.format_filename(parameters)
     household_demographics_path = click.format_filename(household_demographics)
     econ_data_dir = click.format_filename(econ_data_dir)
-    with open(os.path.join(econ_data_dir, "parameters.json"), "r") as f:
-        econ_parameters = json.load(f)
+    if example_parameters is None:
+        example_parameters = EXAMPLE_PARAMETERS
 
     # Read regional population distributions in age
     populations_df = pd.read_csv(os.path.join(econ_data_dir, "populations.csv"))
@@ -459,9 +481,9 @@ def main(
 
     # Setup economics model
     reader = Reader(econ_data_dir)
-    gdp_model = ECON_MODELS[gdp_model](**econ_parameters["gdp"])
-    cb_model = CorporateBankruptcyModel(**econ_parameters["corporate_bankruptcy"])
-    pb_model = PersonalBankruptcyModel(**econ_parameters["personal_insolvency"])
+    gdp_model = ECON_MODELS[gdp_model](**example_parameters["gdp"])
+    cb_model = CorporateBankruptcyModel(**example_parameters["corporate_bankruptcy"])
+    pb_model = PersonalBankruptcyModel(**example_parameters["personal_insolvency"])
     econ_model = Economics(gdp_model, cb_model, pb_model)
     econ_model.load(reader)
 
@@ -485,11 +507,15 @@ def main(
     )
 
     with multiprocessing.Pool(processes=n_workers) as pool:
-        pool.map(spread_worker, [(r, populations_by_region[r], queues[r]) for r in Region])
+        pool.map(
+            spread_worker, [(r, populations_by_region[r], queues[r]) for r in Region]
+        )
 
     econ_worker(queues)
 
-    return plot_econ_data(econ_model, total_individuals, end_time, econ_data_dir, output_dir)
+    return plot_econ_data(
+        econ_model, total_individuals, end_time, econ_data_dir, output_dir
+    )
 
 
 if __name__ == "__main__":
