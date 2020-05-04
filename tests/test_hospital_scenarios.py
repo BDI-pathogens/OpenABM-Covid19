@@ -77,6 +77,7 @@ class TestClass(object):
 
         # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+
         expected_output = int(params.get_param("n_seed_infection"))
         output = df_individual_output["time_infected"] != -1
         output = df_individual_output[output]
@@ -85,9 +86,9 @@ class TestClass(object):
         np.testing.assert_equal(output, expected_output)
 
 
-    def test_zero_space(self):
+    def test_zero_beds(self):
         """
-        Set hospital space to zero
+        Set hospital beds to zero
         """
 
         # Adjust hospital baseline parameter
@@ -97,7 +98,6 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        # compile_command = "make clean; make all HOSPITAL_ON=1"
         compile_command = "make clean; make all; make swig-all;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
@@ -202,6 +202,7 @@ class TestClass(object):
         n_patient_icu = df_individual_output[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
         assert n_patient_icu == 0
+        
 
     def test_zero_hcw_patient_interactions(self):
         """
