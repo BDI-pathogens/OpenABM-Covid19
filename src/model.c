@@ -277,75 +277,78 @@ void write_time_step_hospital_data( model *model)
     int hospital_idx = 0;
     // TODO: update to run for each hospital
 
-    // Concatenate file name
-    strcpy(output_file_name, model->params->output_file_dir);
-    strcat(output_file_name, "/time_step_hospital_output");
-    strcat(output_file_name, ".csv");
-
-    // Open outputfile in different mode depending on whether this is the first time step
-    if(model->time == 1)
-    {
-    	time_step_hospital_file = fopen(output_file_name, "w");
-    	fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected");
-    }
-    else
-    {
-    	time_step_hospital_file = fopen(output_file_name, "a");
-    }
-    
-    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-    {
-        // For each ward
-        for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+    if(model->params->sys_write_individual == TRUE)
         {
-            int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
-            int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
-            int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
-            int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
+            // Concatenate file name
+            strcpy(output_file_name, model->params->output_file_dir);
+            strcat(output_file_name, "/time_step_hospital_output");
+            strcat(output_file_name, ".csv");
 
-            // For each doctor
-            for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+            // Open outputfile in different mode depending on whether this is the first time step
+            if(model->time == 1)
             {
-                int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
-                int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-                
-                individual *indiv_doctor;
-                indiv_doctor = &(model->population[doctor_pdx]);
-                int doctor_time_infected = time_infected(indiv_doctor);
-                
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected);
+                time_step_hospital_file = fopen(output_file_name, "w");
+                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected");
             }
-            // For each nurse
-            for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+            else
             {
-                int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
-                int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-                
-                individual *indiv_nurse;
-                indiv_nurse = &(model->population[nurse_pdx]);
-                int nurse_time_infected = time_infected(indiv_nurse);
-                
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected);
+                time_step_hospital_file = fopen(output_file_name, "a");
             }
-
-            // For each patient
-            hospital *hospital;
-            hospital = &model->hospitals[hospital_idx];
-            for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
+            
+            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
             {
-                int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
-                
-                individual *indiv_patient;
-                indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
-                int patient_time_infected = time_infected(indiv_patient);
-                
-                fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected);
+                // For each ward
+                for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+                {
+                    int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
+                    int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
+                    int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
+                    int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
+
+                    // For each doctor
+                    for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+                    {
+                        int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
+                        int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
+                        
+                        individual *indiv_doctor;
+                        indiv_doctor = &(model->population[doctor_pdx]);
+                        int doctor_time_infected = time_infected(indiv_doctor);
+                        
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected);
+                    }
+                    // For each nurse
+                    for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+                    {
+                        int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
+                        int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
+                        
+                        individual *indiv_nurse;
+                        indiv_nurse = &(model->population[nurse_pdx]);
+                        int nurse_time_infected = time_infected(indiv_nurse);
+                        
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected);
+                    }
+
+                    // For each patient
+                    hospital *hospital;
+                    hospital = &model->hospitals[hospital_idx];
+                    for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
+                    {
+                        int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
+                        
+                        individual *indiv_patient;
+                        indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
+                        int patient_time_infected = time_infected(indiv_patient);
+                        
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected);
+                    }
+
+                }
             }
 
-        }
-    }
-
-    fclose(time_step_hospital_file);
+            fclose(time_step_hospital_file);
+        };
     
 }
 
