@@ -409,6 +409,7 @@ class TestClass(object):
         params.set_param( "n_total", n_total ) 
         params.set_param( "rng_seed", 2 ) 
         params.set_param( "random_interaction_distribution", 0 );
+        params.set_param( "hospital_on", 0 );
 
         # Make mild and asymptomatic infections as infectious as normal ones:
         params.set_param("mild_infectious_factor", 1)
