@@ -37,6 +37,15 @@ class Economics:
         corporate_model: CorporateBankruptcyModel,
         personal_model: PersonalBankruptcyModel,
     ):
+        """
+        Economics simulator
+
+        Parameters
+        ----------
+        gdp_model: Model to simulate GDP given reduced working numbers
+        corporate_model: Model to simulate corporate bankruptcies
+        personal_model: Model to simulate personal bankruptcies
+        """
         self.first_lockdown_time = 10 ** 12
         self.lockdown_exited_time = 0
         self.gdp_model = gdp_model
@@ -46,7 +55,14 @@ class Economics:
             gdp_model.results, {}, {}, personal_model.results
         )
 
-    def load(self, reader: Reader):
+    def load(self, reader: Reader) -> None:
+        """
+        Load data required for simulation
+
+        Parameters
+        ----------
+        reader: helper class to load data
+        """
         self.gdp_model.load(reader)
         self.corporate_model.load(reader)
         self.personal_model.load(reader)
@@ -75,6 +91,18 @@ class Economics:
         lockdown: bool,
         utilisations: Mapping[Tuple[Region, Sector, Age], float],
     ) -> None:
+        """
+        Simulate the economy
+
+        Parameters
+        ----------
+        time: from 0 to inf. Must be called sequentially
+        lockdown: is a lockdown in effect?
+        utilisations:
+            Mapping from region, sector and age group to a number
+            between 0 and 1 describing the proportion of the
+            workforce in work
+        """
         self._pre_simulation_checks(time, lockdown)
         self.gdp_model.simulate(time, lockdown, self.lockdown_exited_time, utilisations)
         if time == START_OF_TIME:
