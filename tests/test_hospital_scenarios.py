@@ -76,7 +76,7 @@ class TestClass(object):
 
         # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        
+
         expected_output = int(params.get_param("n_seed_infection"))
         output = df_individual_output["time_infected"] != -1
         output = df_individual_output[output]
@@ -203,4 +203,3 @@ class TestClass(object):
         n_patient_icu = df_individual_output[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
         assert n_patient_icu == 0
-
