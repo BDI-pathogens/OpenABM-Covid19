@@ -12,6 +12,7 @@ Author: Dylan Feldner-Busztin
 
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
+from . import constant
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -41,22 +42,20 @@ completed_compilation = subprocess.run([compile_command],
 EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
+print(EXE)
+
 # Call the model using baseline parameters, pipe output to file, read output file
 file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 # Create a dataframe out of the terminal output
-numHeader = 10
-numFooter = 27
-df_output = pd.read_csv(TEST_OUTPUT_FILE, 
-    comment = "#", 
-    sep = ",", 
-    skiprows=numHeader, 
-    skipfooter=numFooter, 
-    engine='python')
+df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
 
 # # Write df_output to file
 df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
+
+# Check that the simulation ran
+assert len(df_output) != 0
 
 
 class TestClass(object):
