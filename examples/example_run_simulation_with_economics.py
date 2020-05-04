@@ -396,7 +396,7 @@ def _spread_worker(
     "--econ-data-dir",
     type=click.Path(exists=True, resolve_path=True, file_okay=False, dir_okay=True),
     help="directory containing economics data",
-    default="../src/adapter_covid19/data",
+    default="../tests/data/adapter_covid19",
     show_default=True,
 )
 @click.option(
@@ -450,7 +450,7 @@ def main(
     lockdown_start: Optional[int] = None,
     lockdown_end: Optional[int] = None,
     end_time: int = 200,
-    econ_data_dir: str = "../src/adapter_covid19/data",
+    econ_data_dir: str = "../tests/data/adapter_covid19",
     gdp_model: str = "linear",
     n_workers: Optional[int] = None,
     example_parameters: Optional[
