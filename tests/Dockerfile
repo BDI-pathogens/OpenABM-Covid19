@@ -11,13 +11,13 @@ RUN apt-get update -qqy && apt-get install -qqy \
   libgsl23 \
   libgsl-dev \
   swig
-RUN python3.7 -m pip install numpy pandas scipy pytest
+RUN python3 -m pip install --upgrade pip
 
 COPY . /OpenABM-Covid19
 
 WORKDIR /OpenABM-Covid19
 RUN python3 -m pip install -r tests/requirements.txt
-RUN cd src && make && make all && make
+RUN cd src && make clean && make all && make
 
 WORKDIR /OpenABM-Covid19
 ENTRYPOINT ["/usr/local/bin/pytest", "-s"]
