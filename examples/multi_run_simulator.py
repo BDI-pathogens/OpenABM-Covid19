@@ -7,7 +7,6 @@ Run the senario once with full output on to enable detailed knowledge of the mod
 """
 from COVID19.model import Parameters, Model
 from tqdm import tqdm, trange
-from multiprocessing.pool import ThreadPool
 from concurrent.futures import ProcessPoolExecutor
 import pandas as pd
 import random
@@ -58,15 +57,15 @@ def run_many_inline(parameter_set_list, n_threads=None, progress_bar=True):
     else:
         progress_monitor = lambda x: x
 
-    # Create a pool and evaluate models concurrently
-    with ThreadPool(processes=n_threads) as pool:
-
+    with ProcessPoolExecutor(n_threads) as ex:
         outputs = list(
             progress_monitor(
-                pool.imap(run_model, parameter_set_list), total=len(parameter_set_list), desc="Batch progress"
+                ex.map(run_model, parameter_set_list),
+                total=len(parameter_set_list),
+                desc="Batch progress"
             )
         )
-        return outputs
+    return outputs
 
 
 if __name__ == "__main__":
