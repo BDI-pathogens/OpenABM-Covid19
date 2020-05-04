@@ -128,6 +128,81 @@ class TestClass(object):
         n_patient_icu = len(n_patient_icu.index)
         assert n_patient_icu == 0
 
+    def test_zero_general_wards(self):
+        """
+        Set hospital general wards to zero
+        """
+
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("n_covid_general_wards", 0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+
+        n_patient_general = df_individual_output["time_general"] != -1
+        n_patient_general = df_individual_output[n_patient_general]
+        n_patient_general = len(n_patient_general.index)
+        assert n_patient_general == 0
+
+
+    def test_zero_icu_wards(self):
+        """
+        Set hospital icu wards to zero
+        """
+
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("n_covid_icu_wards", 0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+
+        n_patient_icu = df_individual_output["time_icu"] != -1
+        n_patient_icu = df_individual_output[n_patient_icu]
+        n_patient_icu = len(n_patient_icu.index)
+        assert n_patient_icu == 0
+
     def test_zero_hcw_patient_interactions(self):
         """
         Set patient required hcw interactions to zero
