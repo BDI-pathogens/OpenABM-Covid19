@@ -32,6 +32,7 @@ EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
 PYTHON_C_DIR = TEST_DIR.replace("tests","") + "src/COVID19"
 sys.path.append(PYTHON_C_DIR)
 from parameters import ParameterSet
+from . import constant
 
 # Files with adjusted parameters for each scenario
 SCENARIO_FILE = TEST_DIR + "/data/scenario_baseline_parameters.csv"
@@ -98,9 +99,9 @@ class TestClass(object):
         # Construct the compilation command and compile
         # compile_command = "make clean; make all HOSPITAL_ON=1"
         compile_command = "make clean; make all; make swig-all;"
-        completed_compilation = subprocess.run([compile_command], 
-            shell = True, 
-            cwd = SRC_DIR, 
+        completed_compilation = subprocess.run([compile_command],
+            shell = True,
+            cwd = SRC_DIR,
             capture_output = True
             )
 
@@ -126,3 +127,39 @@ class TestClass(object):
         n_patient_icu = df_individual_output[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
         assert n_patient_icu == 0
+
+        def test_zero_hcw_patient_interactions(self):
+
+            # Adjust hospital baseline parameter
+            h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+            h_params.set_param("n_patient_doctor_required_interactions_covid_general", 0)
+            h_params.set_param("n_patient_nurse_required_interactions_covid_general_ward", 0)
+            h_params.set_param("n_patient_doctor_required_interactions_covid_icu", 0)
+            h_params.set_param("n_patient_nurse_required_interactions_covid_icu", 0)
+            h_params.write_params(SCENARIO_HOSPITAL_FILE)
+            compile_command = "make clean; make all; make swig-all;"
+            completed_compilation = subprocess.run([compile_command],
+                                                   shell=True,
+                                                   cwd=SRC_DIR,
+                                                   capture_output=True
+                                                   )
+
+            # Construct the executable command
+            EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} " + \
+                  f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+            # Call the model pipe output to file, read output file
+            file_output = open(TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([EXE], stdout=file_output, shell=True)
+            df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE,
+                                 comment="#", sep=",", skipinitialspace=True)
+
+            df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+            df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+            df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+            df_nurse_patient_icu_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+
+            assert len(df_doctor_patient_general_interactions) == 0
+            assert len(df_nurse_patient_general_interactions)  == 0
+            assert len(df_doctor_patient_icu_interactions) == 0
+            assert len(df_nurse_patient_icu_interactions)  == 0
