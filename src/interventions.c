@@ -278,6 +278,8 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 		if( contact->traced_on_this_trace < 1 )
 		{
 			token->next_index = next_token->next_index;
+			if( token->next_index != NULL )
+				token->next_index->last_index = token;
 			remove_one_trace_token( model, next_token );
 		}
 		else
@@ -629,7 +631,7 @@ void intervention_quarantine_household(
 
 /*****************************************************************************************
 *  Name:		intervention_quarantine_household_of_traced
-*  Description: Quarantineteh household mebmers of everyone on a trace list
+*  Description: Quarantine household members of everyone on a trace list
 *  Returns:		void
 ******************************************************************************************/
 void intervention_quarantine_household_of_traced(
