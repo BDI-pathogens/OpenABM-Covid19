@@ -1,6 +1,6 @@
 import abc
 import os
-from typing import Tuple, Mapping, Any, Union
+from typing import Tuple, Mapping, Any, Union, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -22,8 +22,16 @@ class Reader:
     def _get_filepath(self, filename: str) -> str:
         return os.path.join(self.data_path, filename)
 
-    def load_csv(self, filename: str) -> pd.DataFrame:
-        return pd.read_csv(self._get_filepath(f"{filename}.csv"))
+    def load_csv(
+        self,
+        filename: str,
+        orient: str = "dataframe",
+        index_col: Optional[Union[int, Sequence[int]]] = None,
+    ) -> Union[pd.DataFrame, Mapping[str, Any]]:
+        data = pd.read_csv(self._get_filepath(f"{filename}.csv"), index_col=index_col)
+        if orient.lower() == "dataframe":
+            return data
+        return data.to_dict(orient)
 
 
 class DataSource(abc.ABC):
@@ -53,37 +61,42 @@ class DataSource(abc.ABC):
 
 
 class RegionDataSource(DataSource):
-    # TODO: the interface for all of these should be the same
     def load(
         self, reader: Reader
-    ) -> Union[Mapping[Region, float], Mapping[Region, Mapping[str, float]]]:
-        frame = reader.load_csv(self.filename)
-        n_cols = frame.shape[1]
-        if n_cols > 2:
-            return {
-                frame.columns[i]: {
-                    Region[t.Region]: t[i] for t in frame.itertuples(index=False)
-                }
-                for i in range(1, n_cols)
-            }
-        return {Region[t.Region]: t[-1] for t in frame.itertuples(index=False)}
+    ) -> Union[Mapping[Region, float], Mapping[str, Mapping[Region, float]]]:
+        data = reader.load_csv(self.filename, orient="dict", index_col=0)
+        data = {k: {Region[kk]: vv for kk, vv in v.items()} for k, v in data.items()}
+        if len(data) > 1:
+            return data
+        return next(iter(data.values()))
 
 
 class SectorDataSource(DataSource):
-    def load(self, reader: Reader) -> Mapping[Sector, float]:
-        frame = reader.load_csv(self.filename)
-        data = {Sector[t.Sector]: t[-1] for t in frame.itertuples(index=False)}
-        return data
+    def load(
+        self, reader: Reader
+    ) -> Union[Mapping[Sector, float], Mapping[str, Mapping[Sector, float]]]:
+        data = reader.load_csv(self.filename, orient="dict", index_col=0)
+        data = {k: {Sector[kk]: vv for kk, vv in v.items()} for k, v in data.items()}
+        if len(data) > 1:
+            return data
+        return next(iter(data.values()))
 
 
 class RegionSectorAgeDataSource(DataSource):
-    def load(self, reader: Reader) -> Mapping[Tuple[Region, Sector, Age], float]:
-        frame = reader.load_csv(self.filename)
+    def load(
+        self, reader: Reader
+    ) -> Union[
+        Mapping[Tuple[Region, Sector, Age], float],
+        Mapping[str, Mapping[Tuple[Region, Sector, Age], float]],
+    ]:
+        data = reader.load_csv(self.filename, orient="dict", index_col=[0, 1, 2])
         data = {
-            (Region[t.Region], Sector[t.Sector], Age[t.Age]): t[-1]
-            for t in frame.itertuples(index=False)
+            k: {(Region[kk[0]], Sector[kk[1]], Age[kk[2]]): vv for kk, vv in v.items()}
+            for k, v in data.items()
         }
-        return data
+        if len(data) > 1:
+            return data
+        return next(iter(data.values()))
 
 
 class WeightMatrix(DataSource):
