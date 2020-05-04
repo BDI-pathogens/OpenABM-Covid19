@@ -6,7 +6,7 @@ import logging
 import multiprocessing
 import os
 import pathlib
-from typing import Mapping, Optional, Tuple
+from typing import Mapping, Optional, Tuple, Sequence
 
 import click
 import matplotlib.pyplot as plt
@@ -53,13 +53,13 @@ def _output_econ_data(model: Economics, end_time: int, output_dir: str) -> None:
         )
         .T.sort_index()
         .T.cumsum(axis=1),
-        "corporate_solvencies_sector": pd.DataFrame(
+        "corporate_solvencies_by_sector": pd.DataFrame(
             [
                 model.results.corporate_solvencies[i]
                 for i in model.results.corporate_solvencies
             ]
         ),
-        "personal_bankruptcies": pd.DataFrame(
+        "personal_bankruptcies_by_region": pd.DataFrame(
             [
                 {
                     r: model.results.personal_bankruptcy[i][r].personal_bankruptcy
@@ -68,7 +68,7 @@ def _output_econ_data(model: Economics, end_time: int, output_dir: str) -> None:
                 for i in model.results.personal_bankruptcy
             ]
         ),
-        "corporate_bankruptcies_region": pd.DataFrame(
+        "corporate_bankruptcies_by_region": pd.DataFrame(
             [
                 {
                     r: model.results.personal_bankruptcy[i][r].corporate_bankruptcy
@@ -88,7 +88,8 @@ def plot_econ_data(
     end_time: int,
     data_dir: str,
     results_dir: str,
-) -> None:
+) -> Sequence[plt.Axes]:
+    axes = []
     # Time series plot of overall values
     # Load all necessary data
     reader = Reader(data_dir)
@@ -163,8 +164,15 @@ def plot_econ_data(
             for i in range(end_time)
         }
     )
+    # Write data
+    _write_csv(gdp.to_frame(), 'gdp', results_dir)
+    _write_csv(corporate_bankruptcies.to_frame(), 'corporate_bankruptcies', results_dir)
+    _write_csv(personal_bankruptcies.to_frame(), 'personal_bankruptcies', results_dir)
+    _write_csv(deaths.to_frame(), 'deaths', results_dir)
+    _write_csv(recoveries.to_frame(), 'recoveries', results_dir)
     # Plot
     fig, ax = plt.subplots()
+    axes.append(ax)
     gdp.plot(ax=ax, label="gdp")
     corporate_bankruptcies.plot(ax=ax, label="corporate_bankruptcies")
     personal_bankruptcies.plot(ax=ax, label="personal_bankruptcies")
@@ -177,6 +185,7 @@ def plot_econ_data(
     gdp_by_sector_path = os.path.join(results_dir, "gdp_by_sector.csv")
     gdp_by_sector = pd.read_csv(gdp_by_sector_path)
     fig, ax = plt.subplots()
+    axes.append(ax)
     # First sector is special - need to fill between 0 and it
     ax.fill_between(
         gdp_by_sector.index,
@@ -196,18 +205,21 @@ def plot_econ_data(
     ax.legend(ncol=2)
 
     # Affect of corporate bankruptcies on GDP, by sector
-    corp_bank_path = os.path.join(results_dir, "corporate_solvencies_sector.csv")
+    corp_bank_path = os.path.join(results_dir, "corporate_solvencies_by_sector.csv")
     corp_bank_df = pd.read_csv(corp_bank_path)
     fig, ax = plt.subplots()
+    axes.append(ax)
     corp_bank_df.plot(ax=ax)
 
     # Fraction personal bankruptcies, by sector
-    personal_bank_path = os.path.join(results_dir, "personal_bankruptcies.csv")
+    personal_bank_path = os.path.join(results_dir, "personal_bankruptcies_by_region.csv")
     personal_bank_df = pd.read_csv(personal_bank_path)
     fig, ax = plt.subplots()
+    axes.append(ax)
     personal_bank_df.plot(ax=ax)
 
     plt.show()
+    return axes
 
 
 def _econ_worker(
@@ -251,7 +263,7 @@ def _econ_worker(
     return model
 
 
-def _worker(
+def _spread_worker(
     args: Tuple[Region, Mapping[Age10Y, float], multiprocessing.Queue],
     output_dir: str,
     parameters_path: str,
@@ -363,7 +375,7 @@ def _worker(
 )
 @click.option(
     "--econ-data-dir",
-    type=click.Path(resolve_path=True, file_okay=False, dir_okay=True),
+    type=click.Path(exists=True, resolve_path=True, file_okay=False, dir_okay=True),
     help="directory containing economics data",
     default="../src/adapter_covid19/data",
     show_default=True,
@@ -372,7 +384,14 @@ def _worker(
     "--gdp-model",
     type=click.Choice(ECON_MODELS.keys(), case_sensitive=False),
     default="linear",
-    help="time to end simulation",
+    help="Type of GDP model to use",
+    show_default=True,
+)
+@click.option(
+    '--n-workers',
+    type=int,
+    default=None,
+    help='Number of cpu cores to use (default None means all)',
     show_default=True,
 )
 def main(
@@ -385,7 +404,8 @@ def main(
     end_time,
     econ_data_dir,
     gdp_model,
-) -> None:
+    n_workers,
+) -> Sequence[plt.Axes]:
     """
     Run simulations by region
     """
@@ -405,7 +425,8 @@ def main(
         Region[k]: {Age10Y[kk]: vv for kk, vv in v.items()}
         for k, v in populations_df.set_index("region").T.to_dict().items()
     }
-    queues = {r: multiprocessing.Queue() for r in Region}
+    manager = multiprocessing.Manager()
+    queues = {r: manager.Queue() for r in Region}
 
     # Setup economics model
     reader = Reader(econ_data_dir)
@@ -415,8 +436,8 @@ def main(
     econ_model = Economics(gdp_model, cb_model, pb_model)
     econ_model.load(reader)
 
-    worker = functools.partial(
-        _worker,
+    spread_worker = functools.partial(
+        _spread_worker,
         output_dir=output_dir,
         parameters_path=parameters_path,
         household_demographics_path=household_demographics_path,
@@ -434,19 +455,12 @@ def main(
         output_dir=output_dir,
     )
 
-    spread_processes = [
-        multiprocessing.Process(
-            target=worker, args=((r, populations_by_region[r], queues[r]),)
-        )
-        for r in Region
-    ]
-    for p in spread_processes:
-        p.start()
-    econ_model = econ_worker(queues)
-    for p in spread_processes:
-        p.join()
+    with multiprocessing.Pool(processes=n_workers) as pool:
+        pool.map(spread_worker, [(r, populations_by_region[r], queues[r]) for r in Region])
 
-    plot_econ_data(econ_model, total_individuals, end_time, econ_data_dir, output_dir)
+    econ_worker(queues)
+
+    return plot_econ_data(econ_model, total_individuals, end_time, econ_data_dir, output_dir)
 
 
 if __name__ == "__main__":
