@@ -46,13 +46,9 @@ file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 # Create a dataframe out of the terminal output
-numHeader = 10
-numFooter = 27
 df_output = pd.read_csv(TEST_OUTPUT_FILE, 
     comment = "#", 
     sep = ",", 
-    skiprows=numHeader, 
-    skipfooter=numFooter, 
     engine='python')
 
 # # Write df_output to file
