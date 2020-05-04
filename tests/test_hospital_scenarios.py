@@ -51,6 +51,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("infectious_rate", 0.0)
+        params.set_param("n_total", 20000)
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
@@ -90,6 +91,11 @@ class TestClass(object):
         Set hospital beds to zero
         """
 
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_beds_covid_general_ward", 0)
@@ -105,7 +111,7 @@ class TestClass(object):
             )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
             f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -134,6 +140,11 @@ class TestClass(object):
         Set hospital general wards to zero
         """
 
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_covid_general_wards", 0)
@@ -148,7 +159,7 @@ class TestClass(object):
             )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
             f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -164,6 +175,7 @@ class TestClass(object):
         n_patient_general = df_individual_output["time_general"] != -1
         n_patient_general = df_individual_output[n_patient_general]
         n_patient_general = len(n_patient_general.index)
+
         assert n_patient_general == 0
 
 
@@ -171,6 +183,11 @@ class TestClass(object):
         """
         Set hospital icu wards to zero
         """
+
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -186,7 +203,7 @@ class TestClass(object):
             )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
             f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -202,4 +219,5 @@ class TestClass(object):
         n_patient_icu = df_individual_output["time_icu"] != -1
         n_patient_icu = df_individual_output[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
+
         assert n_patient_icu == 0
