@@ -45,7 +45,7 @@ class Scenario:
         furlough_end_time=None,
         new_spending_day=1000,
         ccff_day=1000,
-        loan_guarantee_day=1000
+        loan_guarantee_day=1000,
     ):
         self.datasources = {
             "gdp": RegionSectorAgeDataSource,
@@ -57,8 +57,8 @@ class Scenario:
         self.lockdown_exited_time = 0
         self.furlough_start_time = furlough_start_time
         self.furlough_end_time = furlough_end_time
-        self.new_spending_day = new_spending_day,
-        self.ccff_day = ccff_day,
+        self.new_spending_day = (new_spending_day,)
+        self.ccff_day = (ccff_day,)
         self.loan_guarantee_day = loan_guarantee_day
         self._has_been_lockdown = False
         self._utilisations = {}  # For tracking / debugging
@@ -170,9 +170,7 @@ class Scenario:
             personal_kwargs=dict(
                 default_th=300, max_earning_furloughed=30_000, beta=100,
             ),
-            corporate_kwargs=dict(
-                beta=1.4, large_cap_cash_surplus_months=6,
-            ),
+            corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
         )
 
     def generate(
