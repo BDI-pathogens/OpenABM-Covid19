@@ -12,6 +12,7 @@ Author: Dylan Feldner-Busztin
 
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
+from . import constant
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
