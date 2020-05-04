@@ -18,7 +18,9 @@ AdaptER-Covid19 is intended to be used as part of the wider OpenABM-Covid19 mode
 [`adapter_covid19/example.py`](example.py) contains an example over how to run the economic model on its own.
 
 ```bash
-python -m adapter_covid19.example data/
+pwd
+# ...../OpenABM-Covid19
+python -m adapter_covid19.example tests/data/adapter-covid19
 ```
 
 ## LICENSE
