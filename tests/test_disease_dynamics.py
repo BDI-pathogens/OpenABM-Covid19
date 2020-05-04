@@ -15,6 +15,7 @@ import subprocess
 import sys
 import numpy as np, pandas as pd
 from math import sqrt
+import os
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -738,13 +739,11 @@ class TestClass(object):
         params.set_param( test_params )
 
         # TODO: move to constant file
-        import os
         TEST_DIR = os.path.dirname(os.path.realpath(__file__))
         hparams = ParameterSet(TEST_DIR+"/data/hospital_baseline_parameters.csv", line_number=1)
 
         hparams.set_param("hospitalised_waiting_mod", 1.0)
         hparams.set_param("critical_waiting_mod", 1.0)
-
 
         fraction_asymptomatic = [
             test_params[ "fraction_asymptomatic_0_9" ],
@@ -808,6 +807,7 @@ class TestClass(object):
 
         params.write_params(constant.TEST_DATA_FILE)
 
+        # TODO move filepath to constant file
         hparams.write_params(TEST_DIR +"/data/hospital_baseline_parameters.csv")
 
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
