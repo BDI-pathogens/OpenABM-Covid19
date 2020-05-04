@@ -1,4 +1,6 @@
 import itertools
+import os
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,13 +13,17 @@ from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
 from adapter_covid19.enums import Region, Sector, Age
 
 
-def lockdown_then_unlock_no_corona(data_path: str = "data"):
+def lockdown_then_unlock_no_corona(data_path: Optional[str] = None):
     """
     Lockdown at t=5 days, then release lockdown at t=50 days.
 
     :param data_path:
     :return:
     """
+    if data_path is None:
+        data_path = os.path.join(
+            os.path.dirname(__file__), "../../tests/adapter_covid19/data"
+        )
     reader = Reader(data_path)
     econ = Economics(
         SupplyDemandGdpModel(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
