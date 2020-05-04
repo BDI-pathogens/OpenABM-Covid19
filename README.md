@@ -33,6 +33,11 @@ To install the Python interface, first install [SWIG](http://www.swig.org/), the
 make swig-all
 ```
 
+For developers, the following installs the Python interface inplace, so modifications to the code are applied without needing to reinstall
+```bash
+make swig-develop
+```
+
 Usage
 -----
 
