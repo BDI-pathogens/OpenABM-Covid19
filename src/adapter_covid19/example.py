@@ -9,8 +9,10 @@ import pandas as pd
 try:
     from tqdm import tqdm
 except:
+
     def tqdm(x):
         return x
+
 
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
@@ -49,11 +51,13 @@ def lockdown_then_unlock_no_corona(
             os.path.dirname(__file__), "../../tests/adapter_covid19/data"
         )
     reader = Reader(data_path)
-    scenario = Scenario(furlough_start_time=furlough_on,
-                        furlough_end_time=furlough_off,
-                        new_spending_day=new_spending_day,
-                        ccff_day=ccff_day,
-                        loan_guarantee_day=loan_guarantee_day)
+    scenario = Scenario(
+        furlough_start_time=furlough_on,
+        furlough_end_time=furlough_off,
+        new_spending_day=new_spending_day,
+        ccff_day=ccff_day,
+        loan_guarantee_day=loan_guarantee_day,
+    )
     scenario.load(reader)
     init_args = scenario.initialise()
     gdp_model_cls = gdp_models.__dict__[gdp_model]
@@ -83,8 +87,8 @@ def lockdown_then_unlock_no_corona(
             [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
             index=range(1, end_time),
         )
-            .T.sort_index()
-            .T.cumsum(axis=1)
+        .T.sort_index()
+        .T.cumsum(axis=1)
     )
 
     if show_plots:
@@ -92,7 +96,9 @@ def lockdown_then_unlock_no_corona(
         fig, ax = plt.subplots(figsize=(20, 10))
         ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
         for i in range(1, df.shape[1]):
-            ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
+            ax.fill_between(
+                df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
+            )
         ax.legend(ncol=2)
 
         # Plot 2
@@ -118,54 +124,67 @@ def lockdown_then_unlock_no_corona(
     return econ
 
 
-def run_multiple_scenarios(data_path: str = "data",
-                           show_plots: bool = True):
+def run_multiple_scenarios(data_path: str = "data", show_plots: bool = True):
     scenario_results = {}
-    scenario_results["no furlough"] = lockdown_then_unlock_no_corona(data_path=data_path,
-                                                                     end_time=50,
-                                                                     furlough_on=None,
-                                                                     furlough_off=None,
-                                                                     new_spending_day=1000,
-                                                                     ccff_day=1000,
-                                                                     loan_guarantee_day=1000,
-                                                                     gdp_model="PiecewiseLinearCobbDouglasGdpModel",
-                                                                     show_plots=show_plots)
-    scenario_results["furlough"] = lockdown_then_unlock_no_corona(data_path=data_path,
-                                                                  end_time=50,
-                                                                  furlough_on=5,
-                                                                  furlough_off=30,
-                                                                  new_spending_day=1000,
-                                                                  ccff_day=1000,
-                                                                  loan_guarantee_day=1000,
-                                                                  gdp_model="PiecewiseLinearCobbDouglasGdpModel",
-                                                                  show_plots=show_plots)
-    scenario_results["furlough and corp support later"] = lockdown_then_unlock_no_corona(data_path=data_path,
-                                                                                         end_time=50,
-                                                                                         furlough_on=5,
-                                                                                         furlough_off=30,
-                                                                                         new_spending_day=15,
-                                                                                         ccff_day=15,
-                                                                                         loan_guarantee_day=15,
-                                                                                         gdp_model="PiecewiseLinearCobbDouglasGdpModel",
-                                                                                         show_plots=show_plots)
-    scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(data_path=data_path,
-                                                                                   end_time=50,
-                                                                                   furlough_on=5,
-                                                                                   furlough_off=30,
-                                                                                   new_spending_day=5,
-                                                                                   ccff_day=5,
-                                                                                   loan_guarantee_day=5,
-                                                                                   gdp_model="PiecewiseLinearCobbDouglasGdpModel",
-                                                                                   show_plots=show_plots)
-    scenario_results["furlough and corp spending only"] = lockdown_then_unlock_no_corona(data_path=data_path,
-                                                                                         end_time=50,
-                                                                                         furlough_on=5,
-                                                                                         furlough_off=30,
-                                                                                         new_spending_day=5,
-                                                                                         ccff_day=1000,
-                                                                                         loan_guarantee_day=1000,
-                                                                                         gdp_model="PiecewiseLinearCobbDouglasGdpModel",
-                                                                                         show_plots=show_plots)
+    scenario_results["no furlough"] = lockdown_then_unlock_no_corona(
+        data_path=data_path,
+        end_time=50,
+        furlough_on=None,
+        furlough_off=None,
+        new_spending_day=1000,
+        ccff_day=1000,
+        loan_guarantee_day=1000,
+        gdp_model="PiecewiseLinearCobbDouglasGdpModel",
+        show_plots=show_plots,
+    )
+    scenario_results["furlough"] = lockdown_then_unlock_no_corona(
+        data_path=data_path,
+        end_time=50,
+        furlough_on=5,
+        furlough_off=30,
+        new_spending_day=1000,
+        ccff_day=1000,
+        loan_guarantee_day=1000,
+        gdp_model="PiecewiseLinearCobbDouglasGdpModel",
+        show_plots=show_plots,
+    )
+    scenario_results[
+        "furlough and corp support later"
+    ] = lockdown_then_unlock_no_corona(
+        data_path=data_path,
+        end_time=50,
+        furlough_on=5,
+        furlough_off=30,
+        new_spending_day=15,
+        ccff_day=15,
+        loan_guarantee_day=15,
+        gdp_model="PiecewiseLinearCobbDouglasGdpModel",
+        show_plots=show_plots,
+    )
+    scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(
+        data_path=data_path,
+        end_time=50,
+        furlough_on=5,
+        furlough_off=30,
+        new_spending_day=5,
+        ccff_day=5,
+        loan_guarantee_day=5,
+        gdp_model="PiecewiseLinearCobbDouglasGdpModel",
+        show_plots=show_plots,
+    )
+    scenario_results[
+        "furlough and corp spending only"
+    ] = lockdown_then_unlock_no_corona(
+        data_path=data_path,
+        end_time=50,
+        furlough_on=5,
+        furlough_off=30,
+        new_spending_day=5,
+        ccff_day=1000,
+        loan_guarantee_day=1000,
+        gdp_model="PiecewiseLinearCobbDouglasGdpModel",
+        show_plots=show_plots,
+    )
     return scenario_results
 
 
@@ -173,7 +192,9 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
     skip_scenarios = [] if skip_scenarios is None else skip_scenarios
     end_time = 50
     _scenarios = {n: e for n, e in scenarios.items() if n not in skip_scenarios}
-    fig, axes = plt.subplots(3, len(_scenarios), sharex=True, sharey=True, figsize=(20, 10))
+    fig, axes = plt.subplots(
+        3, len(_scenarios), sharex=True, sharey=True, figsize=(20, 10)
+    )
     for idx, (name, econ) in enumerate(_scenarios.items()):
         # Plot 1
         ax = axes[0][idx]
@@ -182,12 +203,14 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
                 [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
                 index=range(1, end_time),
             )
-                .T.sort_index()
-                .T.cumsum(axis=1)
+            .T.sort_index()
+            .T.cumsum(axis=1)
         )
         ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
         for i in range(1, df.shape[1]):
-            ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
+            ax.fill_between(
+                df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
+            )
         # ax.legend(ncol=2)
         ax.legend().remove()
         ax.set_title(name)
