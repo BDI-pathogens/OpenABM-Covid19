@@ -3,49 +3,24 @@ from typing import Optional, Mapping
 
 import numpy as np
 import scipy as sp
+
+from adapter_covid19.constants import DAYS_IN_A_YEAR
 from scipy.stats import fisk
 
 from adapter_covid19.datasources import Reader, SectorDataSource
 from adapter_covid19.enums import Sector
 
 
-class NaiveCorporateBankruptcyModel:
-    def load(self, reader: Reader) -> None:
-        pass
-
-    def gdp_discount_factor(
-        self,
-        days_since_lockdown: int,
-        gdp_discount: Optional[Mapping[Sector, float]] = None,
-        comp_discount: Optional[Mapping[Sector, float]] = None,
-        tax_discount: Optional[Mapping[Sector, float]] = None,
-        consumption_cost_discount: Optional[Mapping[Sector, float]] = None,
-    ) -> Mapping[Sector, float]:
-        """
-        Amount to discount GDP by due to companies
-        going insolvent on a specified number of days
-        in the future
-
-        :param days_since_lockdown:
-        :param gdp_discount:
-        :param comp_discount:
-        :param tax_discount:
-        :param consumption_cost_discount:
-        :return:
-        """
-        return {s: 1 for s in Sector}
-
-
-class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
+class CorporateBankruptcyModel:
     def __init__(
         self,
-        beta: float = 1 + np.random.rand(),
-        large_cap_cash_surplus_months: float = np.random.rand() * 12,
+        beta: Optional[float] = None,
+        large_cap_cash_surplus_months: Optional[float] = None,
     ):
-        self.beta = beta
+        self.beta = beta or 1 + np.random.rand()
         theta = sp.pi / self.beta
-        self.sinc_theta = sp.sin(theta) / theta
-        self.large_cap_cash_surplus_months = large_cap_cash_surplus_months
+        self.sinc_theta = np.sinc(theta)
+        self.large_cap_cash_surplus_months = large_cap_cash_surplus_months or 1 + np.random.randint(12)
         self.small_cap_cash_buffer: Mapping[Sector, float] = {}
         self.large_cap_pct: Mapping[Sector, float] = {}
         self.employee_compensation: Mapping[Sector, float] = {}
@@ -85,7 +60,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         sme_factor = np.array(
             [
                 (self.small_cap_cash_buffer[s] / self.sinc_theta)
-                / 365
+                / DAYS_IN_A_YEAR
                 * (1 - self.large_cap_pct[s])
                 for s in Sector
             ]
@@ -136,7 +111,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
             clipped_cash_buffer = self.sme_clipped_cash_buffer
         return {
             # Added a nugget for when the denominator is 0
-            s: 365
+            s: DAYS_IN_A_YEAR
             * clipped_cash_buffer[s]
             / (
                 size_modifier[s]
