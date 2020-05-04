@@ -4,7 +4,7 @@ from typing import Mapping, Tuple, MutableMapping
 
 from adapter_covid19.constants import START_OF_TIME
 from adapter_covid19.datasources import Reader
-from adapter_covid19.corporate_bankruptcy import NaiveCorporateBankruptcyModel
+from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.gdp import BaseGdpModel, GdpResult
 from adapter_covid19.personal_insolvency import (
     PersonalBankruptcyResults,
@@ -34,7 +34,7 @@ class Economics:
     def __init__(
         self,
         gdp_model: BaseGdpModel,
-        corporate_model: NaiveCorporateBankruptcyModel,
+        corporate_model: CorporateBankruptcyModel,
         personal_model: PersonalBankruptcyModel,
     ):
         self.first_lockdown_time = 10 ** 12

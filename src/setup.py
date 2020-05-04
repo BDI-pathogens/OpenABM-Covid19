@@ -39,7 +39,6 @@ setup(
         'covid19',
     ],
     install_requires=[
-    requires=[
         "click",
         "matplotlib",
         "numpy",

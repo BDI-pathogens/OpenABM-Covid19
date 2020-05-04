@@ -2,7 +2,6 @@ import re
 import string
 
 # Utilities
-UPPERCASE = set(string.ascii_uppercase)
 URL_REGEX = re.compile(r"^(https?|file)://")
 
 START_OF_TIME = 0
