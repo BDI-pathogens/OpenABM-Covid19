@@ -394,17 +394,46 @@ def _spread_worker(
     help='Number of cpu cores to use (default None means all)',
     show_default=True,
 )
+def _main(
+        parameters,
+        household_demographics,
+        outdir,
+        total_individuals,
+        lockdown_start,
+        lockdown_end,
+        end_time,
+        econ_data_dir,
+        gdp_model,
+        n_workers,
+) -> Sequence[plt.Axes]:
+    """
+    Run simulations by region
+    """
+    return main(
+        parameters,
+        household_demographics,
+        outdir,
+        total_individuals,
+        lockdown_start,
+        lockdown_end,
+        end_time,
+        econ_data_dir,
+        gdp_model,
+        n_workers,
+    )
+
+
 def main(
-    parameters,
-    household_demographics,
-    outdir,
-    total_individuals,
-    lockdown_start,
-    lockdown_end,
-    end_time,
-    econ_data_dir,
-    gdp_model,
-    n_workers,
+        parameters: str = '../tests/data/baseline_parameters.csv',
+        household_demographics: str = '../tests/data/baseline_household_demographics.csv',
+        outdir: str = './results',
+        total_individuals: int = 100_000,
+        lockdown_start: Optional[int] = None,
+        lockdown_end: Optional[int] = None,
+        end_time: int = 200,
+        econ_data_dir: str = '../src/adapter_covid19/data',
+        gdp_model: str = 'linear',
+        n_workers: Optional[int] = None,
 ) -> Sequence[plt.Axes]:
     """
     Run simulations by region
@@ -464,4 +493,4 @@ def main(
 
 
 if __name__ == "__main__":
-    main()
+    _main()
