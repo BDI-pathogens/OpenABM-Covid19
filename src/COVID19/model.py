@@ -433,9 +433,8 @@ class Model:
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.SYMPTOMATIC_MILD)
-        results["n_hospital"] = covid19.utils_n_current(
-            self.c_model, covid19.HOSPITALISED
-        )
+        results["n_hospital"] = covid19.utils_n_current( self.c_model, covid19.HOSPITALISED )
+        results["n_hospitalised_recovering"] = covid19.utils_n_current( self.c_model, covid19.HOSPITALISED_RECOVERING )
         results["n_critical"] = covid19.utils_n_current(self.c_model, covid19.CRITICAL)
         results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
         results["n_recovered"] = covid19.utils_n_current(
