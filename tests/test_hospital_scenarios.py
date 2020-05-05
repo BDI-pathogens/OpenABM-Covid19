@@ -227,6 +227,9 @@ class TestClass(object):
         and check that there are no interactions between
         hcw and patients
         """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -243,7 +246,7 @@ class TestClass(object):
                                                )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} " + \
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
               f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -261,3 +264,47 @@ class TestClass(object):
         assert len(df_nurse_patient_general_interactions) == 0
         assert len(df_doctor_patient_icu_interactions) == 0
         assert len(df_nurse_patient_icu_interactions) == 0
+
+    def test_hospital_waiting_modifiers(self):
+        """
+        Set patient ward beds to zero so that all patient enter a waiting state
+        and set the waiting modifiers to zero and check that all patients recover
+        """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("hospitalised_waiting_mod", 0)
+        h_params.set_param("critical_waiting_mod", 0)
+        h_params.set_param("n_beds_covid_general_ward", 0)
+        h_params.set_param("n_beds_covid_icu_ward", 0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell=True,
+                                               cwd=SRC_DIR,
+                                               capture_output=True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout=file_output, shell=True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        n_deaths = df_individual_output["time_death"] != -1
+        n_deaths = df_individual_output[n_deaths]
+        assert len(n_deaths.index) == 0
+
+        n_infected = df_individual_output["time_infected"] != -1
+        n_recovered = df_individual_output["time_recovered"] != -1
+        assert len(df_individual_output[n_infected].index) == len(df_individual_output[n_recovered].index)
