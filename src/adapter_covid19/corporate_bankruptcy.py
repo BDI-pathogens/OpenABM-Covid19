@@ -56,6 +56,9 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         self,
         beta: Optional[float] = None,
         large_cap_cash_surplus_months: Optional[float] = None,
+        new_spending_day: int = 10 ** 6,
+        ccff_day: int = 10 ** 6,
+        loan_guarantee_day: int = 10 ** 6,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -65,6 +68,9 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         self.large_cap_cash_surplus_months = (
             large_cap_cash_surplus_months or 1 + np.random.randint(12)
         )
+        self.new_spending_day = new_spending_day
+        self.ccff_day = ccff_day
+        self.loan_guarantee_day = loan_guarantee_day
         self.small_cap_cash_buffer: Mapping[Sector, float] = {}
         self.large_cap_pct: Mapping[Sector, float] = {}
         self.employee_compensation: Mapping[Sector, float] = {}
@@ -303,9 +309,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         }
 
     def _get_median_cash_buffer_days(
-        self,
-        lcap: bool,
-        net_operating_surplus: Optional[Mapping[Sector, float]] = None,
+        self, lcap: bool, net_operating_surplus: Mapping[Sector, float] = None,
     ) -> Mapping[Sector, float]:
         mean_cash_buffer_days = self._get_mean_cash_buffer_days(
             lcap, net_operating_surplus
@@ -319,24 +323,14 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         return solvent
 
     def simulate(
-        self,
-        net_operating_surplus: Optional[Mapping[Sector, float]],
-        time: int,
-        stimulus_params: Mapping[str, int],
-        **kwargs,
+        self, net_operating_surplus: Mapping[Sector, float], time: int, **kwargs,
     ) -> CorpInsolvencyState:
-        """
-        :param time:
-        :param stimulus_params:
-        :param net_operating_surplus:
-        :return result:
-        """
-        if time == stimulus_params["new_spending_day"]:
+        if time == self.new_spending_day:
             self._new_spending_sector_allocation()
-        if time == stimulus_params["ccff_day"]:
+        if time == self.ccff_day:
             self._apply_ccff()
         if (
-            (time >= stimulus_params["loan_guarantee_day"])
+            (time >= self.loan_guarantee_day)
             and self.loan_guarantee_remaining
             and (time % 7 == 0)
         ):
@@ -378,9 +372,7 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
             for s in Sector
         }
 
-    def _update_state(
-        self, net_operating_surplus: Optional[Mapping[Sector, float]] = None,
-    ) -> None:
+    def _update_state(self, net_operating_surplus: Mapping[Sector, float],) -> None:
 
         largecap_cash_outgoing = {
             s: self.large_cap_pct[s]
