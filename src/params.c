@@ -596,9 +596,10 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
 															  params->lockdown_occupation_multiplier[network];
+			
+
 	}
-	else
-	if( value == FALSE )
+	else if( value == FALSE )
 	{
 		if( !params->lockdown_elderly_on )
 			return TRUE;
@@ -609,9 +610,9 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
 		}
 
-	}else
+	}else {
 		return FALSE;
-
+	}
 	params->lockdown_elderly_on = value;
 	set_up_infectious_curves( model );
 
@@ -665,7 +666,7 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 ******************************************************************************************/
 int set_model_param_lockdown_occupation_multiplier( model *model, double value, int index )
 {
-	if (index > N_OCCUPATION_NETWORKS) return FALSE;
+	if (index >= N_OCCUPATION_NETWORKS) return FALSE;
 	model->params->lockdown_occupation_multiplier[index] = value;
 
 	if( model->params->lockdown_on )
