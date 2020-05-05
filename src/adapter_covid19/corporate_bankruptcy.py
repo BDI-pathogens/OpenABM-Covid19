@@ -142,6 +142,8 @@ class CorporateBankruptcyModel:
     def _proportion_solvent(
         self, days_since_lockdown: int, median_cash_buffer_day: float
     ) -> float:
+        if median_cash_buffer_day == 0:
+            return 0
         solvent = fisk.sf(days_since_lockdown, self.beta, scale=median_cash_buffer_day)
         if np.isnan(solvent):
             return 0
