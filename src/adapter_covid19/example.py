@@ -24,11 +24,11 @@ from adapter_covid19.scenarios import Scenario
 
 
 def lockdown_then_unlock_no_corona(
-    data_path: str = Optional[str] = None,
+    data_path: Optional[str] = None,
     lockdown_on: int = 5,
     lockdown_off: int = 30,
-    furlough_on: int = 5,
-    furlough_off: int = 30,
+    furlough_on: Optional[int] = 5,
+    furlough_off: Optional[int] = 30,
     new_spending_day: int = 5,
     ccff_day: int = 5,
     loan_guarantee_day: int = 5,
