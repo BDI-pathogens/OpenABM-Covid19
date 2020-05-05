@@ -798,7 +798,7 @@ class CobbDouglasLPSetup:
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
 
-class CobbDouglasGdpModel(BaseGdpModel):
+class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
     input_output_intermediate: pd.DataFrame
     input_output_primary: pd.DataFrame
     input_output_final: pd.DataFrame
