@@ -310,7 +310,7 @@ class TestClass(object):
         n_recovered = df_individual_output["time_recovered"] != -1
         assert len(df_individual_output[n_infected].index) == len(df_individual_output[n_recovered].index)
 
-    def test_hospital_infectivity_modifiers(self):
+    def test_hospital_infectivity_modifiers_zero(self):
         """
         Set patient infectivity modifiers to zero and test that no healthcare
         workers are infected by a patient
@@ -355,6 +355,56 @@ class TestClass(object):
             assert infector_hospital_state != constant.EVENT_TYPES.WAITING
             assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
             assert infector_hospital_state != constant.EVENT_TYPES.ICU
+
+    def test_hospital_infectivity_modifiers_max(self):
+        """
+        Set patient infectivity modifiers to 100 and test that all healthcare
+        workers who have interacted with a patient get infected
+        """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("waiting_infectivity_modifier", 100)
+        h_params.set_param("general_infectivity_modifier", 100)
+        h_params.set_param("icu_infectivity_modifier", 100)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell=True,
+                                               cwd=SRC_DIR,
+                                               capture_output=True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout=file_output, shell=True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True)
+
+        #get all healthcare workers who have interacted with patients
+        hcw_with_patient_interaction = df_int["worker_type"] != constant.NOT_HEALTHCARE_WORKER and df_int["hospital_state_2"] >= constant.EVENT_TYPES.WAITING
+        hcw_with_patient_interaction = df_int[hcw_with_patient_interaction]
+        # get healthcare workers
+        for index, row in hcw_with_patient_interaction:
+            hcw_output = df_individual_output["ID"] == row["ID"]
+            hcw_output = df_individual_output[hcw_output]
+            assert hcw_output["time_infected"].value > -1
+
+
+
 
     def test_max_hcw_daily_interactions(self):
         """
