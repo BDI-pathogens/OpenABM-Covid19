@@ -28,13 +28,11 @@ LIB = /usr/local/lib
 CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 
 # Swig's output
-SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build
+SWIG_OUTPUT = openabm_wrap.o openabm_wrap.c openabm.py _openabm.cpython-37m-darwin.so build
 
 # To compile
 swig-all:
-	# swig -outdir COVID19 -python covid19.i
-	swig -python covid19.i
-	# python3 setup.py build_ext --inplace
+	swig -python openabm.i
 	$(PYTHON) -m pip install $(PIP_FLAGS) .
 
 all: $(OBJS)
@@ -42,7 +40,7 @@ all: $(OBJS)
 
 clean:
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
-	$(PYTHON) -m pip uninstall -y covid19
+	$(PYTHON) -m pip uninstall -y openabm
 
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@

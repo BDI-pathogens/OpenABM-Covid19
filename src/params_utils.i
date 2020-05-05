@@ -1908,6 +1908,7 @@ void set_param_array_icu_allocation(parameters *params, double *value)
 }
 %}
 
+
 %extend parameters{
     ~parameters() {
         destroy_params($self);

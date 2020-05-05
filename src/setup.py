@@ -6,10 +6,10 @@ setup.py file for SWIG example
 
 from distutils.core import setup, Extension
 
-covid19_module = Extension(
-    "_covid19",
+openabm_module = Extension(
+    "_openabm",
     sources=[
-        "covid19_wrap.c",
+        "openabm_wrap.c",
         "constant.c",
         "demographics.c",
         "disease.c",
@@ -26,13 +26,13 @@ covid19_module = Extension(
 )
 
 setup(
-    name="covid19",
+    name="openabm",
     version="0.1",
     author="SWIG Docs",
     description="""Individual-based model for modelling of a COVID-19 outbreak""",
-    ext_modules=[covid19_module],
+    ext_modules=[openabm_module],
     py_modules=[
-        "covid19",
+        "openabm",
         "COVID19/parameters",
         "COVID19/model",
         "COVID19/simulation",

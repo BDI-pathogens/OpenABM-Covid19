@@ -4,7 +4,7 @@ from itertools import chain
 from typing import Union
 import pandas as pd
 
-import covid19
+import openabm
 
 LOGGER = logging.getLogger(__name__)
 
@@ -122,7 +122,7 @@ class Parameters(object):
             ParameterException: [Warnings if parameters are not correctly set]
             Sys.exit(0): [Underlaying C code will exist if params are not viable]
         """
-        self.c_params = covid19.parameters()
+        self.c_params = openabm.parameters()
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         elif not input_param_file and read_param_file:
@@ -152,7 +152,7 @@ class Parameters(object):
         self.update_lock = False
 
     def _read_and_check_from_file(self):
-        covid19.read_param_file(self.c_params)
+        openabm.read_param_file(self.c_params)
 
     def _read_household_demographics(self):
         if self.household_df is None:
@@ -167,7 +167,7 @@ class Parameters(object):
         python and inset the line count to the params structure for initilisation
         """
         if self.get_param("N_REFERENCE_HOUSEHOLDS") != 0:
-            covid19.read_household_demographics_file(self.c_params)
+            openabm.read_household_demographics_file(self.c_params)
         else:
             n_ref_hh = -1
             with open(self.c_params.input_household_file, "r") as f:
@@ -182,9 +182,9 @@ class Parameters(object):
         if isinstance(self.household_df, pd.DataFrame):
             self.set_param("N_REFERENCE_HOUSEHOLDS", len(self.household_df))
             LOGGER.debug(f"setting up ref household memory for {getattr(self.c_params, 'N_REFERENCE_HOUSEHOLDS')}")
-            covid19.set_up_reference_household_memory(self.c_params)
+            openabm.set_up_reference_household_memory(self.c_params)
             LOGGER.debug("memory set up")
-            _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7],
+            _ = [openabm.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7],
                                                          t[8], t[9]) for t in self.household_df.itertuples()]
 
     def set_param_dict(self, params):
@@ -216,8 +216,8 @@ class Parameters(object):
         Returns:
             [type] -- [value of param]
         """
-        if hasattr(covid19, f"get_param_{param}"):
-            return getattr(covid19, f"get_param_{param}")(self.c_params)
+        if hasattr(openabm, f"get_param_{param}"):
+            return getattr(openabm, f"get_param_{param}")(self.c_params)
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
         else:
@@ -225,10 +225,10 @@ class Parameters(object):
             LOGGER.debug(
                 f"not found full length param, trying get_param_{param} with index getter"
             )
-            if hasattr(covid19, f"get_param_{param}"):
-                return getattr(covid19, f"get_param_{param}")(self.c_params, idx)
+            if hasattr(openabm, f"get_param_{param}"):
+                return getattr(openabm, f"get_param_{param}")(self.c_params, idx)
             else:
-                LOGGER.debug(f"Could not find get_param_{param} in covid19 getters")
+                LOGGER.debug(f"Could not find get_param_{param} in openabm getters")
         raise ParameterException(
             f"Can not get param {param} as it doesn't exist in parameters object"
         )
@@ -257,13 +257,13 @@ class Parameters(object):
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params, f"{param}", float(value))
         elif hasattr(
-                covid19, f"set_param_{self._get_base_param_from_enum(param)[0]}"
+                openabm, f"set_param_{self._get_base_param_from_enum(param)[0]}"
         ):
             param, idx = self._get_base_param_from_enum(param)
-            setter = getattr(covid19, f"set_param_{param}")
+            setter = getattr(openabm, f"set_param_{param}")
             setter(self.c_params, value, idx)
-        elif hasattr(covid19, f"set_param_{param}"):
-            setter = getattr(covid19, f"set_param_{param}")
+        elif hasattr(openabm, f"set_param_{param}"):
+            setter = getattr(openabm, f"set_param_{param}")
             setter(self.c_params, value)
         else:
             raise ParameterException(
@@ -277,7 +277,7 @@ class Parameters(object):
             [type] -- [description]
         """
         self._read_household_demographics()
-        covid19.check_params(self.c_params)
+        openabm.check_params(self.c_params)
         LOGGER.info(
             (
                 "Returning self.c_params into Model object, "
@@ -315,7 +315,7 @@ class Model:
         """
         try:
             LOGGER.info(f"Getting param {name}")
-            value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
+            value = getattr(openabm, f"get_model_param_{name}")(self.c_model)
             if value < 0:
                 return False
             else:
@@ -339,7 +339,7 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParameterException(f"Can not update {param} during running")
-        setter = getattr(covid19, f"set_model_param_{param}")
+        setter = getattr(openabm, f"set_model_param_{param}")
         if callable(setter):
             if not setter(self.c_model, value):
                 raise ModelParameterException(f"Setting {param} to {value} failed")
@@ -347,24 +347,24 @@ class Model:
             raise ModelParameterException(f"Setting {param} to {value} failed")
 
     def get_risk_score(self, day, age_inf, age_sus):
-        value = covid19.get_model_param_risk_score(self.c_model, day, age_inf, age_sus)
+        value = openabm.get_model_param_risk_score(self.c_model, day, age_inf, age_sus)
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score")
         return value
     
     def get_risk_score_household(self, age_inf, age_sus):
-        value = covid19.get_model_param_risk_score_household(self.c_model, age_inf, age_sus)
+        value = openabm.get_model_param_risk_score_household(self.c_model, age_inf, age_sus)
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
     
     def set_risk_score(self, day, age_inf, age_sus, value):
-        ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
+        ret = openabm.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
         if ret == 0:
             raise  ModelParameterException( "Failed to set risk score")
     
     def set_risk_score_household(self, age_inf, age_sus, value):
-        ret = covid19.set_model_param_risk_score_household(self.c_model, age_inf, age_sus, value)
+        ret = openabm.set_model_param_risk_score_household(self.c_model, age_inf, age_sus, value)
         if ret == 0:
             raise  ModelParameterException( "Failed to set risk score household")
 
@@ -373,7 +373,7 @@ class Model:
         Call C function new_model (renamed create_model)
         """
         LOGGER.info("Started model creation")
-        self.c_model = covid19.create_model(self.c_params)
+        self.c_model = openabm.create_model(self.c_params)
         LOGGER.info("Successfuly created model")
 
     def _destroy(self):
@@ -381,13 +381,13 @@ class Model:
         Call C function destroy_model and destroy_params
         """
         LOGGER.info("Destroying model")
-        covid19.destroy_model(self.c_model)
+        openabm.destroy_model(self.c_model)
 
     def one_time_step(self):
         """
         Call C function on_time_step
         """
-        covid19.one_time_step(self.c_model)
+        openabm.one_time_step(self.c_model)
 
     def one_time_step_results(self):
         """
@@ -399,47 +399,47 @@ class Model:
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = (
-                int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC))
-                + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD))
-                + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
+                int(openabm.utils_n_total(self.c_model, openabm.PRESYMPTOMATIC))
+                + int(openabm.utils_n_total(self.c_model, openabm.PRESYMPTOMATIC_MILD))
+                + int(openabm.utils_n_total(self.c_model, openabm.ASYMPTOMATIC))
         )
         for age in AgeGroupEnum:
             key = f"total_infected{age.name}"
             results[key] = sum(
-                [covid19.utils_n_total_age(self.c_model, ty, age.value) for ty in
-                 [covid19.PRESYMPTOMATIC, covid19.PRESYMPTOMATIC_MILD, covid19.ASYMPTOMATIC]])
-        results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
+                [openabm.utils_n_total_age(self.c_model, ty, age.value) for ty in
+                 [openabm.PRESYMPTOMATIC, openabm.PRESYMPTOMATIC_MILD, openabm.ASYMPTOMATIC]])
+        results["total_case"] = openabm.utils_n_total(self.c_model, openabm.CASE)
         for age in AgeGroupEnum:
             key = f"total_case{age.name}"
-            value = covid19.utils_n_total_age(self.c_model, covid19.CASE, age.value)
+            value = openabm.utils_n_total_age(self.c_model, openabm.CASE, age.value)
             results[key] = value
-        results["total_death"] = covid19.utils_n_total(self.c_model, covid19.DEATH)
+        results["total_death"] = openabm.utils_n_total(self.c_model, openabm.DEATH)
         for age in AgeGroupEnum:
             key = f"total_death{age.name}"
-            value = covid19.utils_n_total_age(self.c_model, covid19.DEATH, age.value)
+            value = openabm.utils_n_total_age(self.c_model, openabm.DEATH, age.value)
             results[key] = value
-        results["n_presymptom"] = covid19.utils_n_current(
-            self.c_model, covid19.PRESYMPTOMATIC
-        ) + covid19.utils_n_current(self.c_model, covid19.PRESYMPTOMATIC_MILD)
-        results["n_asymptom"] = covid19.utils_n_current(
-            self.c_model, covid19.ASYMPTOMATIC
+        results["n_presymptom"] = openabm.utils_n_current(
+            self.c_model, openabm.PRESYMPTOMATIC
+        ) + openabm.utils_n_current(self.c_model, openabm.PRESYMPTOMATIC_MILD)
+        results["n_asymptom"] = openabm.utils_n_current(
+            self.c_model, openabm.ASYMPTOMATIC
         )
-        results["n_quarantine"] = covid19.utils_n_current(
-            self.c_model, covid19.QUARANTINED
+        results["n_quarantine"] = openabm.utils_n_current(
+            self.c_model, openabm.QUARANTINED
         )
-        results["n_tests"] = covid19.utils_n_daily(
-            self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
+        results["n_tests"] = openabm.utils_n_daily(
+            self.c_model, openabm.TEST_RESULT, int(self.c_model.time) + 1
         )
-        results["n_symptoms"] = covid19.utils_n_current(
-            self.c_model, covid19.SYMPTOMATIC
-        ) + covid19.utils_n_current(self.c_model, covid19.SYMPTOMATIC_MILD)
-        results["n_hospital"] = covid19.utils_n_current(
-            self.c_model, covid19.HOSPITALISED
+        results["n_symptoms"] = openabm.utils_n_current(
+            self.c_model, openabm.SYMPTOMATIC
+        ) + openabm.utils_n_current(self.c_model, openabm.SYMPTOMATIC_MILD)
+        results["n_hospital"] = openabm.utils_n_current(
+            self.c_model, openabm.HOSPITALISED
         )
-        results["n_critical"] = covid19.utils_n_current(self.c_model, covid19.CRITICAL)
-        results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
-        results["n_recovered"] = covid19.utils_n_current(
-            self.c_model, covid19.RECOVERED
+        results["n_critical"] = openabm.utils_n_current(self.c_model, openabm.CRITICAL)
+        results["n_death"] = openabm.utils_n_current(self.c_model, openabm.DEATH)
+        results["n_recovered"] = openabm.utils_n_current(
+            self.c_model, openabm.RECOVERED
         )
         return results
 
@@ -447,19 +447,19 @@ class Model:
         """
         Write output files
         """
-        covid19.write_output_files(self.c_model, self.c_params)
+        openabm.write_output_files(self.c_model, self.c_params)
 
     def write_individual_file(self):
-        covid19.write_individual_file(self.c_model, self.c_params)
+        openabm.write_individual_file(self.c_model, self.c_params)
 
     def write_interactions_file(self):
-        covid19.write_interactions(self.c_model)
+        openabm.write_interactions(self.c_model)
 
     def write_trace_tokens_timeseries(self):
-        covid19.write_trace_tokens_ts(self.c_model)
+        openabm.write_trace_tokens_ts(self.c_model)
 
     def write_trace_tokens(self):
-        covid19.write_trace_tokens(self.c_model)
+        openabm.write_trace_tokens(self.c_model)
 
     def write_transmissions(self):
-        covid19.write_transmissions(self.c_model)
+        openabm.write_transmissions(self.c_model)

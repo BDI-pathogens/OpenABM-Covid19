@@ -1,5 +1,5 @@
-/* covid19.i */
-%module covid19
+/* openabm.i */
+%module openabm
 %{
 #define SWIG_FILE_WITH_INIT
 #include "model.h"

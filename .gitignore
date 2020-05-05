@@ -45,8 +45,8 @@ data_test/*
 
 venv/*
 
-src/covid19.py
-src/covid19_wrap.c
+src/openabm.py
+src/openabm_wrap.c
 
 sandbox/*.csv
 examples/*.csv
