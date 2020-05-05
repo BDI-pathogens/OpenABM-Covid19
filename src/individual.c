@@ -50,6 +50,7 @@ void initialize_individual(
 
 	indiv->infector_status  = UNKNOWN;
 	indiv->infector_network = UNKNOWN;
+    indiv->infector_hospital_state = UNKNOWN;
 
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
