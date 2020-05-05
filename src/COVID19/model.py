@@ -287,9 +287,9 @@ class Parameters(object):
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params, f"{param}", float(value))
         elif hasattr(
-                covid19, f"set_param_{self._get_base_param_from_enum(param)[0]}"
+                covid19, f"set_param_{_get_base_param_from_enum(param)[0]}"
         ):
-            param, idx = self._get_base_param_from_enum(param)
+            param, idx = _get_base_param_from_enum(param)
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value, idx)
         elif hasattr(covid19, f"set_param_{param}"):
