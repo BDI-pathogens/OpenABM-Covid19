@@ -1756,17 +1756,6 @@ void set_param_array_mean_work_interactions(parameters *params, double *value)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_array_daily_fraction_work_used
-*  Description: Sets the value of parameter
-******************************************************************************************/
-void set_param_array_daily_fraction_work_used(parameters *params, double *value)
-{
-    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
-        params->daily_fraction_work_used[idx] = value[idx];
-    }
-}
-
-/*****************************************************************************************
 *  Name:        set_param_array_relative_susceptibility
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
