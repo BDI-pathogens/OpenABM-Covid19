@@ -224,9 +224,9 @@ class TestClass(object):
         for i in range(covid19.N_AGE_TYPES):
             set_age_types[i] = uniform(FLOAT_START, FLOAT_END)
 
-        get_work_networks = covid19.doubleArray(covid19.N_WORK_NETWORKS)
-        set_work_networks = covid19.doubleArray(covid19.N_WORK_NETWORKS)
-        for i in range(covid19.N_WORK_NETWORKS):
+        get_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
+        set_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
+        for i in range(covid19.N_OCCUPATION_NETWORKS):
             set_work_networks[i] = uniform(FLOAT_START, FLOAT_END)
 
         get_interaction_types = covid19.doubleArray(covid19.N_INTERACTION_TYPES)
@@ -257,7 +257,7 @@ class TestClass(object):
 
         covid19.set_param_array_mean_work_interactions(params, set_work_networks)
         covid19.get_param_array_mean_work_interactions(params, get_work_networks)
-        for i in range(covid19.N_WORK_NETWORKS):
+        for i in range(covid19.N_OCCUPATION_NETWORKS):
             np.testing.assert_equal(set_work_networks[i], get_work_networks[i])
 
         covid19.set_param_array_relative_susceptibility(params, set_age_groups)

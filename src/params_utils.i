@@ -1562,7 +1562,7 @@ void get_param_array_sd_random_interactions(parameters *params, double *value)
 ******************************************************************************************/
 void get_param_array_mean_work_interactions(parameters *params, double *value)
 {
-    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
         value[idx] = params->mean_work_interactions[idx];
     }
 }
@@ -1573,7 +1573,7 @@ void get_param_array_mean_work_interactions(parameters *params, double *value)
 ******************************************************************************************/
 void get_param_array_daily_fraction_work_used(parameters *params, double *value)
 {
-    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
         value[idx] = params->daily_fraction_work_used[idx];
     }
 }
@@ -1750,7 +1750,7 @@ void set_param_array_sd_random_interactions(parameters *params, double *value)
 ******************************************************************************************/
 void set_param_array_mean_work_interactions(parameters *params, double *value)
 {
-    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
         params->mean_work_interactions[idx] = value[idx];
     }
 }
@@ -1761,7 +1761,7 @@ void set_param_array_mean_work_interactions(parameters *params, double *value)
 ******************************************************************************************/
 void set_param_array_daily_fraction_work_used(parameters *params, double *value)
 {
-    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
         params->daily_fraction_work_used[idx] = value[idx];
     }
 }
