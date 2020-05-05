@@ -1,11 +1,11 @@
 from __future__ import annotations
+
 import abc
 import copy
 import itertools
 import logging
-import random
-from dataclasses import dataclass
-from typing import Tuple, Mapping, MutableMapping, Sequence, Optional, Union, List, Any
+from dataclasses import dataclass, field
+from typing import Tuple, Mapping, MutableMapping, Sequence, Optional, Union, List
 
 import numpy as np
 import pandas as pd
@@ -36,11 +36,17 @@ LOGGER = logging.getLogger(__name__)
 
 @dataclass
 class GdpResult:
-    gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]  # G
-    workers: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]  # n
-    growth_factor: MutableMapping[int, Mapping[Sector, float]]
-    max_gdp: float
-    max_workers: float
+    gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]] = field(
+        default_factory=dict
+    )
+    workers: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]] = field(
+        default_factory=dict
+    )
+    growth_factor: MutableMapping[int, Mapping[Sector, float]] = field(
+        default_factory=dict
+    )
+    max_gdp: float = 0
+    max_workers: float = 0
 
     def fraction_gdp_by_sector(self, time: int) -> Mapping[Sector, float]:
         return {
@@ -56,26 +62,34 @@ class GdpResult:
 class IoGdpResult(GdpResult):
     primary_inputs: MutableMapping[
         int, Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
-    ]
-    final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
-    compensation_paid: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
+    ] = field(default_factory=dict)
+    final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]] = field(
+        default_factory=dict
+    )
+    compensation_paid: MutableMapping[
+        int, Mapping[Tuple[Region, Sector, Age], float]
+    ] = field(default_factory=dict)
     compensation_received: MutableMapping[
         int, Mapping[Tuple[Region, Sector, Age], float]
-    ]
+    ] = field(default_factory=dict)
     compensation_subsidy: MutableMapping[
         int, Mapping[Tuple[Region, Sector, Age], float]
-    ]
-    max_primary_inputs: Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
-    max_final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]]
+    ] = field(default_factory=dict)
+    max_primary_inputs: Mapping[
+        Tuple[PrimaryInput, Region, Sector, Age], float
+    ] = field(default_factory=dict)
+    max_final_uses: MutableMapping[
+        int, Mapping[Tuple[FinalUse, Sector], float]
+    ] = field(default_factory=dict)
     max_compensation_paid: MutableMapping[
         int, Mapping[Tuple[Region, Sector, Age], float]
-    ]
+    ] = field(default_factory=dict)
     max_compensation_received: MutableMapping[
         int, Mapping[Tuple[Region, Sector, Age], float]
-    ]
+    ] = field(default_factory=dict)
     max_compensation_subsidy: MutableMapping[
         int, Mapping[Tuple[Region, Sector, Age], float]
-    ]
+    ] = field(default_factory=dict)
 
     def update(self, other: IoGdpResult):
         self.gdp.update(other.gdp)
@@ -102,7 +116,7 @@ class BaseGdpModel(abc.ABC):
     def __init__(self, **kwargs):
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
-        self.results = GdpResult({}, {}, {}, 0, 0)
+        self.results = GdpResult()
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
             self.__setattr__(k, None)
@@ -816,9 +830,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
-        self.results = IoGdpResult(
-            {}, {}, {}, 0, 0, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}
-        )
+        self.results = IoGdpResult()
         self.labour_weight_region_age_per_sector_by_count: Mapping[
             Tuple[Sector, Region, Age]
         ] = {}
