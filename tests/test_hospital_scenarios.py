@@ -395,8 +395,8 @@ class TestClass(object):
         df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True)
 
         #get all healthcare workers who have interacted with patients
-        hcw_with_patient_interaction = df_int["worker_type"] != constant.NOT_HEALTHCARE_WORKER and df_int["hospital_state_2"] >= constant.EVENT_TYPES.WAITING
-        hcw_with_patient_interaction = df_int[hcw_with_patient_interaction]
+        hcw_with_patient_interaction = df_int["worker_type"] != constant.NOT_HEALTHCARE_WORKER and df_int["type"] > constant.HOSPITAL_WORK and df_int["type"] <= constant.HOSPITAL_NURSE_PATIENT_ICU
+        hcw_with_patient_interaction = set(df_int[hcw_with_patient_interaction])
         # get healthcare workers
         for index, row in hcw_with_patient_interaction:
             hcw_output = df_individual_output["ID"] == row["ID"]
