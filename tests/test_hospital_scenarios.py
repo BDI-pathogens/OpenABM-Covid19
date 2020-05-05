@@ -350,7 +350,7 @@ class TestClass(object):
         healthcare_workers = df_individual_output[healthcare_workers]
 
         # check that no healthcare workers have been infected by a patient
-        for healthcare_worker in healthcare_workers:
+        for index, healthcare_worker in healthcare_workers.iterrows():
             infector_hospital_state = healthcare_worker["infector_hospital_state"]
             assert infector_hospital_state != constant.EVENT_TYPES.WAITING
             assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
