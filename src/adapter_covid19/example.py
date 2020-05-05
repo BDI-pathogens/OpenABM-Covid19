@@ -25,7 +25,7 @@ def lockdown_then_unlock_no_corona(
     ccff_day: int = 5,
     loan_guarantee_day: int = 5,
     end_time: int = 50,
-    gdp_model: str = "SupplyDemandGdpModel",
+    gdp_model: str = "PiecewiseLinearCobbDouglasGdpModel",
     show_plots: bool = True,
 ):
     """
@@ -122,7 +122,7 @@ def run_multiple_scenarios(data_path: str = "data",
                                                                      new_spending_day=1000,
                                                                      ccff_day=1000,
                                                                      loan_guarantee_day=1000,
-                                                                     gdp_model="CobbDouglasGdpModel",
+                                                                     gdp_model="PiecewiseLinearCobbDouglasGdpModel",
                                                                      show_plots=show_plots)
     scenario_results["furlough"] = lockdown_then_unlock_no_corona(data_path=data_path,
                                                                   end_time=50,
@@ -131,7 +131,7 @@ def run_multiple_scenarios(data_path: str = "data",
                                                                   new_spending_day=1000,
                                                                   ccff_day=1000,
                                                                   loan_guarantee_day=1000,
-                                                                  gdp_model="CobbDouglasGdpModel",
+                                                                  gdp_model="PiecewiseLinearCobbDouglasGdpModel",
                                                                   show_plots=show_plots)
     scenario_results["furlough and corp support later"] = lockdown_then_unlock_no_corona(data_path=data_path,
                                                                                          end_time=50,
@@ -140,7 +140,7 @@ def run_multiple_scenarios(data_path: str = "data",
                                                                                          new_spending_day=15,
                                                                                          ccff_day=15,
                                                                                          loan_guarantee_day=15,
-                                                                                         gdp_model="CobbDouglasGdpModel",
+                                                                                         gdp_model="PiecewiseLinearCobbDouglasGdpModel",
                                                                                          show_plots=show_plots)
     scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(data_path=data_path,
                                                                                    end_time=50,
@@ -149,7 +149,7 @@ def run_multiple_scenarios(data_path: str = "data",
                                                                                    new_spending_day=5,
                                                                                    ccff_day=5,
                                                                                    loan_guarantee_day=5,
-                                                                                   gdp_model="CobbDouglasGdpModel",
+                                                                                   gdp_model="PiecewiseLinearCobbDouglasGdpModel",
                                                                                    show_plots=show_plots)
     scenario_results["furlough and corp spending only"] = lockdown_then_unlock_no_corona(data_path=data_path,
                                                                                          end_time=50,
@@ -158,7 +158,7 @@ def run_multiple_scenarios(data_path: str = "data",
                                                                                          new_spending_day=5,
                                                                                          ccff_day=1000,
                                                                                          loan_guarantee_day=1000,
-                                                                                         gdp_model="CobbDouglasGdpModel",
+                                                                                         gdp_model="PiecewiseLinearCobbDouglasGdpModel",
                                                                                          show_plots=show_plots)
     return scenario_results
 
