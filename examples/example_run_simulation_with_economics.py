@@ -396,7 +396,7 @@ def _spread_worker(
     "--econ-data-dir",
     type=click.Path(exists=True, resolve_path=True, file_okay=False, dir_okay=True),
     help="directory containing economics data",
-    default="../tests/data/adapter_covid19",
+    default="../tests/adapter_covid19/data",
     show_default=True,
 )
 @click.option(
