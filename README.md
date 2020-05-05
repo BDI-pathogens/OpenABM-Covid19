@@ -15,6 +15,9 @@ A report evaluating the efficacy of various configurations of digital contract-t
 The model was developed by the Pathogen Dynamics group, at the [Big Data Institute](https://www.bdi.ox.ac.uk/) at the University of Oxford, in conjunction with IBM UK and [Faculty](https://faculty.ai).
 More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
 
+### Economics Model
+
+adaptER-covid19, and economics model, is attached to the main OpenABM-Covid19 model so the economic effect of Covid-19 can be modelled jointly with the spread of the disease. More information is [here](src/adapter_covid19/README.md).
 
 Compilation
 -----------

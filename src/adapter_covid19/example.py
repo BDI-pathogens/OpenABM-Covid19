@@ -83,3 +83,12 @@ def lockdown_then_unlock_no_corona(data_path: Optional[str] = None):
             for i in econ.results.personal_bankruptcy
         ]
     ).plot(figsize=(20, 10))
+
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1:
+        lockdown_then_unlock_no_corona(sys.argv[1])
+    else:
+        lockdown_then_unlock_no_corona()
