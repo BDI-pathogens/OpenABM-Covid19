@@ -6,6 +6,12 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 
+try:
+    from tqdm import tqdm
+except:
+    def tqdm(x):
+        return x
+
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
@@ -61,7 +67,7 @@ def lockdown_then_unlock_no_corona(
     econ.load(reader)
     healthy = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
-    for i in range(end_time):
+    for i in tqdm(range(end_time)):
         if lockdown_on <= i < lockdown_off:
             simulate_state = scenario.generate(
                 i, lockdown=True, healthy=healthy, ill=ill
