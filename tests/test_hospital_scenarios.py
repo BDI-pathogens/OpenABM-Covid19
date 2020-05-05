@@ -355,3 +355,69 @@ class TestClass(object):
             assert infector_hospital_state != constant.EVENT_TYPES.WAITING
             assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
             assert infector_hospital_state != constant.EVENT_TYPES.ICU
+
+    def test_max_hcw_daily_interactions(self):
+        """
+        Set healthcare workers max daily interactions (with patients) to 0 and
+        check that there are no disease transition from patient to healthcare workers
+        or any interactions
+        """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("max_hcw_daily_interactions", 0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell=True,
+                                               cwd=SRC_DIR,
+                                               capture_output=True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout=file_output, shell=True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        # get healthcare workers
+        healthcare_workers = df_individual_output["worker_type"] != constant.NOT_HEALTHCARE_WORKER
+        healthcare_workers = df_individual_output[healthcare_workers]
+
+        # check that no healthcare workers have been infected by a patient
+        for index, healthcare_worker in healthcare_workers.iterrows():
+            infector_hospital_state = healthcare_worker["infector_hospital_state"]
+            assert infector_hospital_state != constant.EVENT_TYPES.WAITING
+            assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
+            assert infector_hospital_state != constant.EVENT_TYPES.ICU
+
+        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
+                                      comment="#", sep=",", skipinitialspace=True)
+
+        df_doctor_patient_general_interactions = df_interactions[
+            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+        df_nurse_patient_general_interactions = df_interactions[
+            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+        df_doctor_patient_icu_interactions = df_interactions[
+            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+        df_nurse_patient_icu_interactions = df_interactions[
+            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+
+        assert len(df_doctor_patient_general_interactions) == 0
+        assert len(df_nurse_patient_general_interactions) == 0
+        assert len(df_doctor_patient_icu_interactions) == 0
+        assert len(df_nurse_patient_icu_interactions) == 0
+
+
+
+
