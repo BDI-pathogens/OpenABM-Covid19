@@ -89,3 +89,4 @@ if __name__ == "__main__":
     df = run_model(param_updates=param_updates, n_steps=200, lockdown_at=50)
     df.to_csv("results/covid_timeseries_Run1.csv", index=False)
     print(df)
+
