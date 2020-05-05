@@ -306,11 +306,8 @@ class TestClass(object):
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
         for index, row in time_step_df.iterrows():
-            
-            waiting_status = 18
-            discharged_status = 22
 
-            if(row['hospital_state'] == waiting_status):
+            if(row['hospital_state'] == constant.WAITING):
                 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -322,8 +319,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == waiting_status
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == discharged_status
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.WAITING
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.DISCHARGED
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -372,10 +369,8 @@ class TestClass(object):
 
         for index, row in time_step_df.iterrows():
             
-            waiting_status = 18
-            discharged_status = 22
 
-            if(row['hospital_state'] == waiting_status):
+            if(row['hospital_state'] == constant.WAITING):
                 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -387,8 +382,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == waiting_status
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == discharged_status
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.WAITING
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.DISCHARGED
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -437,12 +432,8 @@ class TestClass(object):
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
         for index, row in time_step_df.iterrows():
-            
-            waiting_status = 18
-            icu_status = 20
-            mortuary_status = 21
 
-            if(row['hospital_state'] == waiting_status):
+            if(row['hospital_state'] == constant.WAITING):
                 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -454,15 +445,15 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == waiting_status
-                icu_condition = rest_time_steps_pdx_df['hospital_state'] == icu_status
-                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == mortuary_status
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.WAITING
+                icu_condition = rest_time_steps_pdx_df['hospital_state'] == constant.ICU
+                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == constant.MORTUARY
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | icu_condition | mortuary_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
 
     
-    def test_no_space_limit(self):
+    def test_no_space_limit_beds(self):
         """
         Set number of beds in each ward to the population size,
         check that nobody in waiting state
@@ -501,12 +492,108 @@ class TestClass(object):
 
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        waiting_status = 18
-
-        waiting_df = time_step_df['hospital_state'] == waiting_status
+        waiting_df = time_step_df['hospital_state'] == constant.WAITING
         waiting_df = time_step_df[waiting_df]
 
         assert len(waiting_df.index) == 0
+
+
+    def test_no_space_limit_wards(self):
+        """
+        Set number of wards in each ward to the population size,
+        check that nobody in waiting state
+        """
+
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("n_covid_general_wards", 20000)
+        h_params.set_param("n_covid_icu_wards", 20000)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+
+        waiting_df = time_step_df['hospital_state'] == constant.WAITING
+        waiting_df = time_step_df[waiting_df]
+
+        assert len(waiting_df.index) == 0
+
+
+    def test_zero_hcw(self):
+        """
+        Set number of hcw to zero,
+        assert there are no patient doctor interactions
+        """
+
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("n_doctors_covid_general_ward", 0)
+        h_params.set_param("n_nurses_covid_general_ward", 0)
+        h_params.set_param("n_doctors_covid_icu_ward", 0)
+        h_params.set_param("n_nurses_covid_icu_ward", 0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
+                             comment="#", sep=",", skipinitialspace=True)
+
+        df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+        df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+        df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+        df_nurse_patient_icu_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+
+        assert len(df_doctor_patient_general_interactions) == 0
+        assert len(df_nurse_patient_general_interactions) == 0
+        assert len(df_doctor_patient_icu_interactions) == 0
+        assert len(df_nurse_patient_icu_interactions) == 0
                     
   
 
