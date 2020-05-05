@@ -172,8 +172,8 @@ class Economics:
             }
             if lockdown:
                 corporates_solvent_fraction = self.corporate_model.simulate(
-                    negative_net_operating_surplus,
-                    time,
+                    net_operating_surplus=negative_net_operating_surplus,  # TODO: move this to state
+                    time=time,
                     **simulate_state.corporate_kwargs,
                 ).gdp_discount_factor
             else:

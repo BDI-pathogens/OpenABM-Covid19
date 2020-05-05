@@ -1,6 +1,6 @@
 import itertools
 from dataclasses import dataclass, field
-from typing import Mapping, Tuple, Any
+from typing import Mapping, Tuple, Any, Optional
 
 import numpy as np
 
@@ -40,12 +40,12 @@ class Scenario:
 
     def __init__(
         self,
-        lockdown_recovery_time: float = 1,
-        furlough_start_time=None,
-        furlough_end_time=None,
-        new_spending_day=1000,
-        ccff_day=1000,
-        loan_guarantee_day=1000,
+        lockdown_recovery_time: int = 1,
+        furlough_start_time: Optional[int] = None,
+        furlough_end_time: Optional[int] = None,
+        new_spending_day: int = 1000,
+        ccff_day: int = 1000,
+        loan_guarantee_day: int = 1000,
     ):
         self.datasources = {
             "gdp": RegionSectorAgeDataSource,
@@ -57,8 +57,8 @@ class Scenario:
         self.lockdown_exited_time = 0
         self.furlough_start_time = furlough_start_time
         self.furlough_end_time = furlough_end_time
-        self.new_spending_day = (new_spending_day,)
-        self.ccff_day = (ccff_day,)
+        self.new_spending_day = new_spending_day
+        self.ccff_day = ccff_day
         self.loan_guarantee_day = loan_guarantee_day
         self._has_been_lockdown = False
         self._utilisations = {}  # For tracking / debugging
@@ -170,7 +170,13 @@ class Scenario:
             personal_kwargs=dict(
                 default_th=300, max_earning_furloughed=30_000, beta=100,
             ),
-            corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
+            corporate_kwargs=dict(
+                beta=1.4,
+                large_cap_cash_surplus_months=6,
+                new_spending_day=self.new_spending_day,
+                ccff_day=self.ccff_day,
+                loan_guarantee_day=self.loan_guarantee_day,
+            ),
         )
 
     def generate(
@@ -183,15 +189,4 @@ class Scenario:
         self._pre_simulation_checks(time, lockdown)
         utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
         self._utilisations[time] = utilisations  # For tracking / debugging
-        return SimulateState(
-            time,
-            lockdown,
-            utilisations,
-            corporate_kwargs=dict(
-                stimulus_params=dict(
-                    new_spending_day=self.new_spending_day,
-                    ccff_day=self.ccff_day,
-                    loan_guarantee_day=self.loan_guarantee_day,
-                )
-            ),
-        )
+        return SimulateState(time, lockdown, utilisations,)
