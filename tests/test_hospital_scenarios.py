@@ -612,17 +612,17 @@ class TestClass(object):
 
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", population_size)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-        # h_params.set_param("n_covid_general_wards", n_covid_general_wards)
-        # h_params.set_param("n_covid_icu_wards", n_covid_icu_wards)
-        # h_params.set_param("n_doctors_covid_general_ward", (population_size/4)/n_covid_general_wards)
-        # h_params.set_param("n_nurses_covid_general_ward", (population_size/4)/n_covid_general_wards)
-        # h_params.set_param("n_doctors_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
-        # h_params.set_param("n_nurses_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
+        h_params.set_param("n_covid_general_wards", n_covid_general_wards)
+        h_params.set_param("n_covid_icu_wards", n_covid_icu_wards)
+        h_params.set_param("n_doctors_covid_general_ward", (population_size/4)/n_covid_general_wards)
+        h_params.set_param("n_nurses_covid_general_ward", (population_size/4)/n_covid_general_wards)
+        h_params.set_param("n_doctors_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
+        h_params.set_param("n_nurses_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
@@ -661,6 +661,68 @@ class TestClass(object):
         assert len(df_nurse_patient_general_interactions.index) > 0
         assert len(df_doctor_patient_icu_interactions.index) > 0
         assert len(df_nurse_patient_icu_interactions.index) > 0
+
+
+    def test_only_hcw_infections(self):
+        """
+        Only let infections occur in the hospital. Assert total new infections = total hospital infections.
+        """
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("infectious_rate", 0.0001)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("general_infectivity_modifier", 57500.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command], 
+            shell = True, 
+            cwd = SRC_DIR, 
+            capture_output = True
+            )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+
+        # Only keep instances where people have been infected after the zero time step
+        never_infected_condition = time_step_df["time_infected"] != -1
+        seed_infected_condition = time_step_df["time_infected"] != 0
+        infected_df = time_step_df[never_infected_condition & seed_infected_condition]
+
+        # Only keep instances where people that have been infected are hcw
+        doctor_condition = infected_df["doctor_type"] == 1
+        nurse_condition = infected_df["nurse_type"] == 1
+        hcw_condition = infected_df[doctor_condition | nurse_condition]
+
+        assert len(hcw_condition.index) == len(infected_df.index)
+
+
+
+
                     
   
 
