@@ -114,14 +114,18 @@ def lockdown_then_unlock_no_corona(
         # Plot 3
         pd.DataFrame(
             [
-                {
-                    r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
-                    for r in Region
-                }
+                econ.results.personal_bankruptcy[i].personal_bankruptcy
                 for i in econ.results.personal_bankruptcy
             ]
         ).plot(figsize=(20, 10))
 
+        # Plot 4
+        pd.DataFrame(
+            [
+                econ.results.personal_bankruptcy[i].demand_reduction
+        for i in econ.results.personal_bankruptcy
+        ]
+        ).plot(figsize=(20, 10))
     return econ
 
 
