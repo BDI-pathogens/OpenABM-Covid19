@@ -1,4 +1,5 @@
 import itertools
+import logging
 from dataclasses import dataclass, field
 from typing import Mapping, MutableMapping, Tuple, Any
 
@@ -16,18 +17,13 @@ from adapter_covid19.datasources import (
 )
 from adapter_covid19.enums import LabourState, Age
 from adapter_covid19.enums import Region, Sector, Decile
+from adapter_covid19.data_structures import (
+    SimulateState,
+    PersonalStateToDeprecate,
+    PersonalState,
+)
 
-
-@dataclass
-class PersonalBankruptcyResults:
-    time: int
-    delta_balance: Mapping[Sector, Mapping[Decile, float]]
-    balance: Mapping[Sector, Mapping[Decile, float]]
-    credit_mean: Mapping[Sector, Mapping[Decile, float]]
-    credit_std: float
-    utilisation: Mapping[Sector, Mapping[LabourState, float]]
-    min_expense_cut: Mapping[Sector, Mapping[Decile, float]]
-    personal_bankruptcy: float
+LOGGER = logging.getLogger(__name__)
 
 
 # FIXME: this shouldn't be a dataclass
@@ -81,7 +77,7 @@ class PersonalBankruptcyModel:
 
     # Results, t by region by PersonalBankruptcyResults
     results: MutableMapping[
-        int, MutableMapping[Region, PersonalBankruptcyResults]
+        int, MutableMapping[Region, PersonalStateToDeprecate]
     ] = field(default_factory=dict, init=False)
 
     kwargs: Mapping[str, Any] = field(default_factory=dict)
@@ -160,24 +156,20 @@ class PersonalBankruptcyModel:
             LabourState.UNEMPLOYED: 0,
         }
 
-    def simulate(
-        self,
-        time: int,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        **kwargs,
-    ) -> None:
+    def simulate(self, state: SimulateState) -> None:
         # TODO: This is inefficient
         utilisations_h = {
             (r, s): {
                 l: sum(
-                    utilisations[l, r, s, a] * self.workers_data[r, s, a] for a in Age
+                    state.utilisations[l, r, s, a] * self.workers_data[r, s, a]
+                    for a in Age
                 )
                 / self.workers_per_region_sector[(r, s)]
                 for l in LabourState
             }
             for r, s in itertools.product(Region, Sector)
         }
-        self.results[time] = {}
+        self.results[state.time] = {}
         for r in Region:
             delta_balance_r, balance_r, spot_credit_mean_r, min_expense_cut_r = (
                 {},
@@ -186,13 +178,14 @@ class PersonalBankruptcyModel:
                 {},
             )
             for s in Sector:
-                if time == START_OF_TIME:
+                if state.time == START_OF_TIME:
                     delta_balance_rs = {d: 0 for d in Decile}
                     balance_rs = {d: self.cash_reserve[(r, s, d)] for d in Decile}
                 else:
                     delta_balance_rs = self._calc_delta_balance(r, s, utilisations_h)
                     balance_rs = {
-                        d: self.results[time - 1][r].balance[s][d] + delta_balance_rs[d]
+                        d: self.results[state.time - 1][r].balance[s][d]
+                        + delta_balance_rs[d]
                         for d in Decile
                     }
 
@@ -211,8 +204,8 @@ class PersonalBankruptcyModel:
                 r, spot_credit_mean_r
             )
 
-            self.results[time][r] = PersonalBankruptcyResults(
-                time=time,
+            self.results[state.time][r] = PersonalStateToDeprecate(
+                time=state.time,
                 delta_balance=delta_balance_r,
                 balance=balance_r,
                 credit_mean=spot_credit_mean_r,
@@ -221,6 +214,30 @@ class PersonalBankruptcyModel:
                 personal_bankruptcy=personal_bankruptcy_r,
                 min_expense_cut=min_expense_cut_r,
             )
+        state.personal_state = PersonalState(
+            time=state.time,
+            delta_balance={
+                (r, s, d): self.results[state.time][r].delta_balance[s][d]
+                for r, s, d in itertools.product(Region, Sector, Decile)
+            },
+            balance={
+                (r, s, d): self.results[state.time][r].balance[s][d]
+                for r, s, d in itertools.product(Region, Sector, Decile)
+            },
+            credit_mean={
+                (r, s, d): self.results[state.time][r].credit_mean[s][d]
+                for r, s, d in itertools.product(Region, Sector, Decile)
+            },
+            credit_std={r: self.results[state.time][r].credit_std for r in Region},
+            utilisation=utilisations_h,
+            personal_bankruptcy={
+                r: self.results[state.time][r].personal_bankruptcy for r in Region
+            },
+            min_expense_cut={
+                (r, s, d): self.results[state.time][r].min_expense_cut[s][d]
+                for r, s, d in itertools.product(Region, Sector, Decile)
+            },
+        )
 
     def _calc_delta_balance(
         self,
