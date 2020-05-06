@@ -221,7 +221,8 @@ class BaseGdpModel(abc.ABC):
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
-        pass
+        if kwargs:
+            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
 
 
 class LinearGdpModel(BaseGdpModel):
@@ -262,6 +263,7 @@ class LinearGdpModel(BaseGdpModel):
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
+        super().simulate(time, lockdown, utilisations, **kwargs)
         # FIXME: hacked to work with old utilisations
         utilisations = {
             (r, s, a): utilisations[LabourState.WORKING, r, s, a]
@@ -387,6 +389,7 @@ class SupplyDemandGdpModel(BaseGdpModel):
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         **kwargs,
     ) -> None:
+        super().simulate(time, lockdown, utilisations, **kwargs)
         # FIXME: hacked to work with old utilisations
         utilisations = {
             (r, s, a): utilisations[LabourState.WORKING, r, s, a]
@@ -1102,11 +1105,11 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         time: int,
         lockdown: bool,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        capital: Optional[Mapping[Sector, float]] = None,
         **kwargs,
     ) -> None:
-        try:
-            capital = kwargs["capital"]
-        except KeyError:
+        super().simulate(time, lockdown, utilisations, **kwargs)
+        if capital is None:
             if time == START_OF_TIME:
                 capital = {s: 1.0 for s in Sector}
             else:
