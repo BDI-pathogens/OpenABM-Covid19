@@ -168,6 +168,19 @@ class WorkerState(OrderedEnum):
     # Dead
     DEAD = enum.auto()
 
+class WorkerStateConditional(OrderedEnum):
+    # Healthy and working
+    WFH = enum.auto()
+    FURLOUGHED = enum.auto()
+    NOT_EMPLOYED = enum.auto()
+    # Ill
+    ILL_WFO = enum.auto()
+    ILL_WFH = enum.auto()
+    ILL_FURLOUGHED = enum.auto()
+    ILL_UNEMPLOYED = enum.auto()
+    # Dead
+    DEAD = enum.auto()
+
 
 class PrimaryInput(OrderedEnum):
     IMPORTS = "imports"
