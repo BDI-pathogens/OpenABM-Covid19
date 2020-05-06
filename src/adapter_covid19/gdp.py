@@ -9,7 +9,7 @@ from typing import Tuple, Mapping, Sequence, Optional, Union, List
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import linprog
+from scipy.optimize import linprog, OptimizeResult
 
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
 from adapter_covid19.datasources import (
@@ -802,14 +802,14 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         self,
         time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        r,
+        res: OptimizeResult,
     ) -> IoGdpState:
-        x = pd.Series(r.x, index=self.setup.variables)
+        x = pd.Series(res.x, index=self.setup.variables)
         # gdp
         max_gdp = self.setup.max_gdp
         gdp = {}
         for sector in Sector:
-            gdp_for_sector = self.setup.objective_per_sector[sector].dot(r.x)
+            gdp_for_sector = self.setup.objective_per_sector[sector].dot(res.x)
             # split outputs per region and age
             # note: these are absolute values to be interpreted relative to iot data loaded in setup
             for region in Region:
@@ -969,6 +969,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             max_compensation_paid=max_compensation_paid,
             max_compensation_received=max_compensation_received,
             max_compensation_subsidy=max_compensation_subsidy,
+            _optimise_result=res,
         )
 
     def _simulate(

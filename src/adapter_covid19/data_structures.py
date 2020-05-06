@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass, field
-from typing import Mapping, Tuple, MutableMapping, Any, Optional
+from typing import Mapping, Tuple, MutableMapping, Any, Optional, Union
 
 import numpy as np
+from scipy.optimize import OptimizeResult
 
 from adapter_covid19.enums import (
     LabourState,
@@ -26,7 +27,7 @@ class SimulateState:
     utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
 
     # Internal state
-    gdp_state: Optional[GdpState] = None
+    gdp_state: Optional[Union[GdpState, IoGdpState]] = None
     corporate_state: Optional[CorporateState] = None
     personal_state: Optional[PersonalState] = None
     previous: Optional[SimulateState] = None
@@ -98,6 +99,7 @@ class IoGdpState(GdpState):
     max_compensation_subsidy: Mapping[Tuple[Region, Sector, Age], float] = field(
         default_factory=dict
     )
+    _optimise_result: Optional[OptimizeResult] = None
 
     @property
     def net_operating_surplus(self):
@@ -158,18 +160,18 @@ class IoGdpResult(GdpResult):
     max_primary_inputs: Mapping[
         Tuple[PrimaryInput, Region, Sector, Age], float
     ] = field(default_factory=dict)
-    max_final_uses: MutableMapping[
-        int, Mapping[Tuple[FinalUse, Sector], float]
-    ] = field(default_factory=dict)
-    max_compensation_paid: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    max_compensation_received: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    max_compensation_subsidy: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
+    max_final_uses: Mapping[Tuple[FinalUse, Sector], float] = field(
+        default_factory=dict
+    )
+    max_compensation_paid: Mapping[Tuple[Region, Sector, Age], float] = field(
+        default_factory=dict
+    )
+    max_compensation_received: Mapping[Tuple[Region, Sector, Age], float] = field(
+        default_factory=dict
+    )
+    max_compensation_subsidy: Mapping[Tuple[Region, Sector, Age], float] = field(
+        default_factory=dict
+    )
 
     def update(self, time: int, other: IoGdpState):
         self.gdp[time] = other.gdp
@@ -182,9 +184,11 @@ class IoGdpResult(GdpResult):
         self.compensation_paid[time] = other.compensation_paid
         self.compensation_received[time] = other.compensation_received
         self.compensation_subsidy[time] = other.compensation_subsidy
-        self.max_compensation_paid[time] = other.max_compensation_paid
-        self.max_compensation_received[time] = other.max_compensation_received
-        self.max_compensation_subsidy[time] = other.max_compensation_subsidy
+        self.max_primary_inputs = other.max_primary_inputs
+        self.max_final_uses = other.max_final_uses
+        self.max_compensation_paid = other.max_compensation_paid
+        self.max_compensation_received = other.max_compensation_received
+        self.max_compensation_subsidy = other.max_compensation_subsidy
 
 
 @dataclass
