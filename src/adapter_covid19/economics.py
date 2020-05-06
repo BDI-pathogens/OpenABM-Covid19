@@ -6,24 +6,25 @@ from typing import Mapping, Tuple, MutableMapping
 from adapter_covid19.constants import START_OF_TIME
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
-from adapter_covid19.gdp import BaseGdpModel, GdpResult
-from adapter_covid19.personal_insolvency import (
-    PersonalBankruptcyResults,
-    PersonalBankruptcyModel,
-)
+from adapter_covid19.gdp import BaseGdpModel
+from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
 from adapter_covid19.enums import Region, Sector, Age, LabourState, PrimaryInput
-from adapter_covid19.scenarios import SimulateState
+from adapter_covid19.data_structures import (
+    SimulateState,
+    GdpResult,
+    PersonalStateToDeprecate,
+)
 
 LOGGER = logging.getLogger(__name__)
 
 
+# TODO: deprecate in favour of SimulateState
 @dataclass
 class EconomicsResult:
     gdp_result: GdpResult
     corporate_solvencies: MutableMapping[int, Mapping[Sector, float]]
     gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    personal_bankruptcy: MutableMapping[int, Mapping[Region, PersonalBankruptcyResults]]
-    # utilisations: MutableMapping[int, Mapping[LabourState, Region, Sector, Age]]
+    personal_bankruptcy: MutableMapping[int, Mapping[Region, PersonalStateToDeprecate]]
 
     def fraction_gdp_by_sector(self, time: int) -> Mapping[Sector, float]:
         return {
@@ -75,11 +76,7 @@ class Economics:
 
     def simulate(self, simulate_state: SimulateState,) -> None:
         return self._simulate(
-            simulate_state.time,
-            simulate_state.lockdown,
-            simulate_state.utilisations,
-            simulate_state=simulate_state,
-            **simulate_state.economics_kwargs,
+            simulate_state, simulate_state.time, simulate_state.utilisations,
         )
 
     def add_unemployment(
@@ -123,69 +120,44 @@ class Economics:
 
     def _simulate(
         self,
+        state: SimulateState,
         time: int,
-        lockdown: bool,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        simulate_state: SimulateState,
-        **kwargs,
     ) -> None:
         """
         Simulate the economy
 
         Parameters
         ----------
+        state: state
         time: from 0 to inf. Must be called sequentially
-        lockdown: is a lockdown in effect?
         utilisations:
             Mapping from region, sector and age group to a number
             between 0 and 1 describing the proportion of the
             workforce in work
         """
-        if kwargs:
-            LOGGER.warning(
-                f"Unused simulate kwargs in {self.__class__.__name__}: {kwargs}"
-            )
+        # There shouldn't really be any logic in this method; this should solely
+        # provide the plumbing for the other three models
+        # TODO: fix and move this into GDP model
         if time != START_OF_TIME:
             unemployment_per_sector = {
-                s: 1 - self.corporate_model.state.gdp_discount_factor[s] for s in Sector
-            }
-            utilisations = self.add_unemployment(utilisations, unemployment_per_sector)
-        self.gdp_model.simulate(
-            time,
-            lockdown,
-            utilisations,
-            capital=self.corporate_model.state.capital,
-            **simulate_state.gdp_kwargs,
-        )
-        if time == START_OF_TIME:
-            corporates_solvent_fraction = {s: 1 for s in Sector}
-        else:
-            primary_inputs = self.gdp_model.results.primary_inputs[time - 1]
-            negative_net_operating_surplus = {
-                s: -sum(
-                    [
-                        primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a]
-                        for r, a in itertools.product(Region, Age)
-                    ]
-                )
+                s: 1 - state.previous.corporate_state.gdp_discount_factor[s]
                 for s in Sector
             }
-            if lockdown:
-                corporates_solvent_fraction = self.corporate_model.simulate(
-                    net_operating_surplus=negative_net_operating_surplus,  # TODO: move this to state
-                    time=time,
-                    **simulate_state.corporate_kwargs,
-                ).gdp_discount_factor
-            else:
-                corporates_solvent_fraction = self.results.corporate_solvencies[
-                    time - 1
-                ]
-        self.results.corporate_solvencies[time] = corporates_solvent_fraction
+            state.utilisations = self.add_unemployment(
+                utilisations, unemployment_per_sector
+            )
+
+        self.gdp_model.simulate(state)
+        self.corporate_model.simulate(state)
+        self.personal_model.simulate(state)
+
+        # TODO: deprecate
+        self.results.corporate_solvencies[
+            time
+        ] = state.corporate_state.gdp_discount_factor
         self.results.gdp[time] = {
             (r, s, a): self.gdp_model.results.gdp[time][r, s, a]
-            * corporates_solvent_fraction[s]
+            * state.corporate_state.gdp_discount_factor[s]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
-        self.personal_model.simulate(
-            time=time, utilisations=utilisations, **simulate_state.personal_kwargs
-        )

@@ -1,6 +1,6 @@
+import abc
 import copy
 import logging
-from dataclasses import dataclass, field
 from typing import Optional, Mapping
 
 import numpy as np
@@ -8,50 +8,43 @@ import pandas as pd
 import scipy as sp
 from scipy.stats import fisk, norm
 
-from adapter_covid19.constants import DAYS_IN_A_YEAR
+from adapter_covid19.constants import DAYS_IN_A_YEAR, START_OF_TIME
 from adapter_covid19.datasources import Reader, SectorDataSource
 from adapter_covid19.enums import Sector, BusinessSize
+from adapter_covid19.data_structures import SimulateState, CorporateState
 
 LOGGER = logging.getLogger(__name__)
 
 
-@dataclass
-class CorpInsolvencyState:
-    gdp_discount_factor: Mapping[Sector, float]
-    cash_buffer: Mapping[BusinessSize, Mapping[Sector, np.array]]
-    proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]]
-    capital: Mapping[Sector, float] = field(
-        default_factory=lambda: {s: 1.0 for s in Sector}
-    )
-
-
-class NaiveCorporateBankruptcyModel:
+class BaseCorporateBankruptcyModel:
     def __init__(self, **kwargs):
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
-        self.state = CorpInsolvencyState(
+
+    def load(self, reader: Reader) -> None:
+        pass
+
+    @abc.abstractmethod
+    def simulate(self, state: SimulateState, **kwargs) -> None:
+        """
+        :param state:
+        :return:
+        """
+        if kwargs:
+            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
+
+
+class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
+    def simulate(self, state: SimulateState, **kwargs) -> None:
+        super().simulate(state, **kwargs)
+        state.corporate_state = CorporateState(
             {s: 1 for s in Sector},
             {},
             {b: {s: 1 for s in Sector} for b in BusinessSize},
         )
 
-    def load(self, reader: Reader) -> None:
-        pass
 
-    def simulate(self, **kwargs) -> CorpInsolvencyState:
-        """
-        Amount to discount GDP by due to companies
-        going insolvent on a specified number of days
-        in the future
-        :param net_operating_surplus:
-        :return:
-        """
-        if kwargs:
-            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
-        return self.state
-
-
-class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
+class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def __init__(
         self,
         beta: Optional[float] = None,
@@ -322,17 +315,31 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
             return 1
         return solvent
 
-    def simulate(
-        self, net_operating_surplus: Mapping[Sector, float], time: int, **kwargs,
-    ) -> CorpInsolvencyState:
-        if time == self.new_spending_day:
+    def simulate(self, state: SimulateState, **kwargs,) -> None:
+        super().simulate(state, **kwargs)
+        try:
+            net_operating_surplus = state.gdp_state.net_operating_surplus
+        except AttributeError:
+            raise ValueError(
+                f"Incompatible model selection, {self.__class__.__name__}"
+                + " requires a GDP model that implements `net_operating_surplus`"
+            )
+        if state.time == START_OF_TIME:
+            naive_model = NaiveCorporateBankruptcyModel()
+            naive_model.simulate(state, **kwargs)
+            return
+        # TODO: we should be able to deal with corp bankruptcies without lockdown
+        if not state.lockdown:
+            state.corporate_state = copy.deepcopy(state.previous.corporate_state)
+            return
+        if state.time == self.new_spending_day:
             self._new_spending_sector_allocation()
-        if time == self.ccff_day:
+        if state.time == self.ccff_day:
             self._apply_ccff()
         if (
-            (time >= self.loan_guarantee_day)
+            (state.time >= self.loan_guarantee_day)
             and self.loan_guarantee_remaining
-            and (time % 7 == 0)
+            and (state.time % 7 == 0)
         ):
             self._loan_guarantees()
         self._update_state(net_operating_surplus)
@@ -350,15 +357,11 @@ class CorporateBankruptcyModel(NaiveCorporateBankruptcyModel):
         }
 
         # TODO: add capital to state
-        result = CorpInsolvencyState(
+        state.corporate_state = CorporateState(
             self._gdp_discount_factor(proportion_solvent),
             self.cash_state,
             proportion_solvent,
         )
-
-        self.state = result
-
-        return result
 
     def _gdp_discount_factor(
         self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],

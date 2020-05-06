@@ -4,8 +4,8 @@ import abc
 import copy
 import itertools
 import logging
-from dataclasses import dataclass, field
-from typing import Tuple, Mapping, MutableMapping, Sequence, Optional, Union, List
+from dataclasses import dataclass
+from typing import Tuple, Mapping, Sequence, Optional, Union, List
 
 import numpy as np
 import pandas as pd
@@ -30,81 +30,15 @@ from adapter_covid19.enums import (
     FinalUse,
     LabourState,
 )
+from adapter_covid19.data_structures import (
+    SimulateState,
+    GdpResult,
+    IoGdpResult,
+    GdpState,
+    IoGdpState,
+)
 
 LOGGER = logging.getLogger(__name__)
-
-
-@dataclass
-class GdpResult:
-    gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]] = field(
-        default_factory=dict
-    )
-    workers: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]] = field(
-        default_factory=dict
-    )
-    growth_factor: MutableMapping[int, Mapping[Sector, float]] = field(
-        default_factory=dict
-    )
-    max_gdp: float = 0
-    max_workers: float = 0
-
-    def fraction_gdp_by_sector(self, time: int) -> Mapping[Sector, float]:
-        return {
-            s: sum(
-                self.gdp[time][r, s, a] / self.max_gdp
-                for r, a in itertools.product(Region, Age)
-            )
-            for s in Sector
-        }
-
-
-@dataclass
-class IoGdpResult(GdpResult):
-    primary_inputs: MutableMapping[
-        int, Mapping[Tuple[PrimaryInput, Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    final_uses: MutableMapping[int, Mapping[Tuple[FinalUse, Sector], float]] = field(
-        default_factory=dict
-    )
-    compensation_paid: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    compensation_received: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    compensation_subsidy: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    max_primary_inputs: Mapping[
-        Tuple[PrimaryInput, Region, Sector, Age], float
-    ] = field(default_factory=dict)
-    max_final_uses: MutableMapping[
-        int, Mapping[Tuple[FinalUse, Sector], float]
-    ] = field(default_factory=dict)
-    max_compensation_paid: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    max_compensation_received: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-    max_compensation_subsidy: MutableMapping[
-        int, Mapping[Tuple[Region, Sector, Age], float]
-    ] = field(default_factory=dict)
-
-    def update(self, other: IoGdpResult):
-        self.gdp.update(other.gdp)
-        self.workers.update(other.workers)
-        self.growth_factor.update(other.growth_factor)
-        self.max_gdp = other.max_gdp
-        self.max_workers = other.max_workers
-        self.primary_inputs.update(other.primary_inputs)
-        self.final_uses.update(other.final_uses)
-        self.compensation_paid.update(other.compensation_paid)
-        self.compensation_received.update(other.compensation_received)
-        self.compensation_subsidy.update(other.compensation_subsidy)
-        self.max_compensation_paid.update(other.max_compensation_paid)
-        self.max_compensation_received.update(other.max_compensation_received)
-        self.max_compensation_subsidy.update(other.max_compensation_subsidy)
 
 
 class BaseGdpModel(abc.ABC):
@@ -117,17 +51,11 @@ class BaseGdpModel(abc.ABC):
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
         self.results = GdpResult()
+        self.max_gdp = 0
+        self.max_workers = 0
         self.datasources = self._get_datasources()
         for k, v in self.datasources.items():
             self.__setattr__(k, None)
-
-    @property
-    def max_gdp(self):
-        return self.results.max_gdp
-
-    @property
-    def max_workers(self):
-        return self.results.max_workers
 
     @abc.abstractmethod
     def _get_datasources(self) -> Mapping[str, DataSource]:
@@ -184,10 +112,10 @@ class BaseGdpModel(abc.ABC):
         for k, v in self.datasources.items():
             self.__setattr__(k, v.load(reader))
         self._check_data()
-        self.results.max_gdp = sum(
+        self.results.max_gdp = self.max_gdp = sum(
             self.gdp[key] for key in itertools.product(Region, Sector, Age)
         )
-        self.results.max_workers = sum(
+        self.results.max_workers = self.max_workers = sum(
             self.workers[key] for key in itertools.product(Region, Sector, Age)
         )
 
@@ -214,15 +142,8 @@ class BaseGdpModel(abc.ABC):
         )
 
     @abc.abstractmethod
-    def simulate(
-        self,
-        time: int,
-        lockdown: bool,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        **kwargs,
-    ) -> None:
-        if kwargs:
-            LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
+    def simulate(self, state: SimulateState) -> None:
+        pass
 
 
 class LinearGdpModel(BaseGdpModel):
@@ -256,17 +177,10 @@ class LinearGdpModel(BaseGdpModel):
     ) -> float:
         return utilisation * self.workers[region, sector, age]
 
-    def simulate(
-        self,
-        time: int,
-        lockdown: bool,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        **kwargs,
-    ) -> None:
-        super().simulate(time, lockdown, utilisations, **kwargs)
+    def simulate(self, state: SimulateState) -> None:
         # FIXME: hacked to work with old utilisations
         utilisations = {
-            (r, s, a): utilisations[LabourState.WORKING, r, s, a]
+            (r, s, a): state.utilisations[LabourState.WORKING, r, s, a]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
 
@@ -278,10 +192,16 @@ class LinearGdpModel(BaseGdpModel):
             (r, s, a): self._simulate_workers(r, s, a, u)
             for (r, s, a), u in utilisations.items()
         }
-        growth_factor, gdp = self._apply_growth_factor(time, lockdown, gdp)
-        self.results.gdp[time] = gdp
-        self.results.growth_factor[time] = growth_factor
-        self.results.workers[time] = workers
+        growth_factor, gdp = self._apply_growth_factor(state.time, state.lockdown, gdp)
+
+        state.gdp_state = GdpState(
+            gdp, workers, growth_factor, self.max_gdp, self.max_workers
+        )
+
+        # TODO: Deprecate
+        self.results.gdp[state.time] = gdp
+        self.results.growth_factor[state.time] = growth_factor
+        self.results.workers[state.time] = workers
 
 
 class SupplyDemandGdpModel(BaseGdpModel):
@@ -382,17 +302,10 @@ class SupplyDemandGdpModel(BaseGdpModel):
     ) -> float:
         return utilisation * self.workers[region, sector, age]
 
-    def simulate(
-        self,
-        time: int,
-        lockdown: bool,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        **kwargs,
-    ) -> None:
-        super().simulate(time, lockdown, utilisations, **kwargs)
+    def simulate(self, state: SimulateState) -> None:
         # FIXME: hacked to work with old utilisations
         utilisations = {
-            (r, s, a): utilisations[LabourState.WORKING, r, s, a]
+            (r, s, a): state.utilisations[LabourState.WORKING, r, s, a]
             for r, s, a in itertools.product(Region, Sector, Age)
         }
 
@@ -401,10 +314,16 @@ class SupplyDemandGdpModel(BaseGdpModel):
             for (r, s, a), u in utilisations.items()
         }
         gdp = self._simulate_gdp(utilisations)
-        growth_factor, gdp = self._apply_growth_factor(time, lockdown, gdp)
-        self.results.gdp[time] = gdp
-        self.results.growth_factor[time] = growth_factor
-        self.results.workers[time] = workers
+        growth_factor, gdp = self._apply_growth_factor(state.time, state.lockdown, gdp)
+
+        state.gdp_state = GdpState(
+            gdp, workers, growth_factor, self.max_gdp, self.max_workers
+        )
+
+        # TODO: deprecate
+        self.results.gdp[state.time] = gdp
+        self.results.growth_factor[state.time] = growth_factor
+        self.results.workers[state.time] = workers
 
 
 @dataclass
@@ -879,7 +798,12 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             for r, s, a in itertools.product(Region, Sector, Age)
         }
 
-    def _postprocess_model_outputs(self, time, utilisations, r):
+    def _postprocess_model_outputs(
+        self,
+        time: int,
+        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        r,
+    ) -> IoGdpState:
         x = pd.Series(r.x, index=self.setup.variables)
         # gdp
         max_gdp = self.setup.max_gdp
@@ -1029,17 +953,17 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                     compensation_received[r, s, a] - compensation_paid[r, s, a]
                 )
 
-        return IoGdpResult(
-            gdp={time: gdp},
-            workers={time: workers},
+        return IoGdpState(
+            gdp=gdp,
+            workers=workers,
             growth_factor={},
             max_gdp=max_gdp,
             max_workers=max_workers,
-            primary_inputs={time: primary_inputs},
-            final_uses={time: final_uses},
-            compensation_paid={time: compensation_paid},
-            compensation_received={time: compensation_received},
-            compensation_subsidy={time: compensation_subsidy},
+            primary_inputs=primary_inputs,
+            final_uses=final_uses,
+            compensation_paid=compensation_paid,
+            compensation_received=compensation_received,
+            compensation_subsidy=compensation_subsidy,
             max_primary_inputs=max_primary_inputs,
             max_final_uses=max_final_uses,
             max_compensation_paid=max_compensation_paid,
@@ -1052,7 +976,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         time: int,
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         capital: Mapping[Sector, float],
-    ) -> IoGdpResult:
+    ) -> IoGdpState:
 
         # preprocess parameters
         p_lambda = pd.DataFrame(
@@ -1100,24 +1024,26 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         # postprocess model parameters
         return self._postprocess_model_outputs(time, utilisations, r)
 
-    def simulate(
-        self,
-        time: int,
-        lockdown: bool,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
-        capital: Optional[Mapping[Sector, float]] = None,
-        **kwargs,
-    ) -> None:
-        super().simulate(time, lockdown, utilisations, **kwargs)
-        if capital is None:
-            if time == START_OF_TIME:
+    def simulate(self, state: SimulateState) -> None:
+        if (
+            state.previous is None
+            or state.previous.corporate_state is None
+            or state.previous.corporate_state.capital is None
+        ):
+            if state.time == START_OF_TIME:
                 capital = {s: 1.0 for s in Sector}
             else:
                 raise ValueError("capital parameter required")
+        else:
+            capital = state.previous.corporate_state.capital
 
-        result = self._simulate(time, utilisations, capital)
-        # TODO: should this affect additional parameters to GDP?
-        result.growth_factor[time], result.gdp[time] = self._apply_growth_factor(
-            time, lockdown, result.gdp[time]
+        result = state.gdp_state = self._simulate(
+            state.time, state.utilisations, capital
         )
-        self.results.update(result)
+        # TODO: should this affect additional parameters to GDP?
+        (result.growth_factor, result.gdp,) = self._apply_growth_factor(
+            state.time, state.lockdown, result.gdp
+        )
+
+        # TODO: deprecate
+        self.results.update(state.time, result)
