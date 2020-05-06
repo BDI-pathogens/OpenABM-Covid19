@@ -30,14 +30,18 @@ from adapter_covid19.enums import (
     FinalUse,
     LabourState,
     EmploymentState,
-    WorkerState, WorkerStateConditional)
+    WorkerState,
+    WorkerStateConditional,
+)
 from adapter_covid19.data_structures import (
     SimulateState,
     GdpResult,
     IoGdpResult,
     GdpState,
     IoGdpState,
-    Utilisations, Utilisation)
+    Utilisations,
+    Utilisation,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -869,9 +873,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         }
 
     def _postprocess_model_outputs(
-        self,
-        state: SimulateState,
-        res: OptimizeResult,
+        self, state: SimulateState, res: OptimizeResult,
     ) -> IoGdpState:
         x = pd.Series(res.x, index=self.setup.variables)
         # gdp
@@ -1002,7 +1004,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         for s in Sector:
             compensation = x[self.setup.V("xtilde", M.L, s)]
             for r, a in itertools.product(Region, Age):
-                utilisation = state.utilisations[r,s,a].to_lambdas()
+                utilisation = state.utilisations[r, s, a].to_lambdas()
                 received_adjustment = (
                     utilisation[WorkerState.HEALTHY_WFO]
                     + utilisation[WorkerState.HEALTHY_WFH]
@@ -1068,21 +1070,37 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         state.gdp_state = gdp_state
 
     def _simulate(
-        self,
-        state: SimulateState,
-        capital: Mapping[Sector, float],
+        self, state: SimulateState, capital: Mapping[Sector, float],
     ) -> IoGdpState:
 
         # preprocess parameters
-        p_labour = {}
-        for s in Sector:
-            lambdas = state.utilisations[s]
-            default_values = {
-                WorkerStateConditional.WFH: self.keyworker[s],
-                WorkerStateConditional.FURLOUGHED: 1.0,
-                WorkerStateConditional.NOT_EMPLOYED: 0.0
-            }
-            p_labour[s] = Utilisation.from_lambdas(lambdas,default_values)
+        lambda_utilisation = {s: state.utilisations[s] for s in Sector}
+        # transform new mapping to old
+        # TODO: convert model to use new WorkerStates directly
+        p_lambda_dict = {}
+        p_lambda_dict[LabourState.UNEMPLOYED] = {
+            s: lambda_utilisation[s][WorkerState.ILL_UNEMPLOYED]
+            + lambda_utilisation[s][WorkerState.HEALTHY_UNEMPLOYED]
+            + lambda_utilisation[s][WorkerState.DEAD]
+            for s in Sector
+        }
+        p_lambda_dict[LabourState.FURLOUGHED] = {
+            s: lambda_utilisation[s][WorkerState.ILL_FURLOUGHED]
+            + lambda_utilisation[s][WorkerState.HEALTHY_FURLOUGHED]
+            for s in Sector
+        }
+        p_lambda_dict[LabourState.WORKING] = {
+            s: lambda_utilisation[s][WorkerState.HEALTHY_WFO] for s in Sector
+        }
+        p_lambda_dict[LabourState.WFH] = {
+            s: lambda_utilisation[s][WorkerState.HEALTHY_WFH] for s in Sector
+        }
+        p_lambda_dict[LabourState.ILL] = {
+            s: lambda_utilisation[s][WorkerState.ILL_WFO]
+            + lambda_utilisation[s][WorkerState.ILL_WFH]
+            for s in Sector
+        }
+        p_lambda = pd.DataFrame(p_lambda_dict)
 
         p_kappa = capital
 
@@ -1113,18 +1131,24 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
     def init_utilisations(self, state: SimulateState):
         # TODO: move this into Utilisations or Scenario
         u = Utilisations(
-            utilisations={(r,s,a):Utilisation(p_dead=state.dead[r,s,a],
-                                              p_ill_wfh=state.ill[EmploymentState.WFH,r,s,a],
-                                              p_ill_wfo=state.ill[EmploymentState.WFO, r, s, a],
-                                              p_ill_furloughed=state.ill[EmploymentState.FURLOUGHED, r, s, a],
-                                              p_ill_unemployed=state.ill[EmploymentState.UNEMPLOYED, r, s, a],
-                                              p_wfh=self.keyworker[s] if state.lockdown else 0.0, # keyworker state determines who is constrained to WFH
-                                              p_furloughed=1.0 if state.furlough else 0.0, # if furloughing is available, everybody will be furloughed
-                                              p_not_employed=0.0, # this will be an output of the model and overridden accordingly
-                                              )
-                          for r,s,a in itertools.product(Region, Sector, Age)
+            utilisations={
+                (r, s, a): Utilisation(
+                    p_dead=state.dead[r, s, a],
+                    p_ill_wfh=state.ill[EmploymentState.WFH, r, s, a],
+                    p_ill_wfo=state.ill[EmploymentState.WFO, r, s, a],
+                    p_ill_furloughed=state.ill[EmploymentState.FURLOUGHED, r, s, a],
+                    p_ill_unemployed=state.ill[EmploymentState.UNEMPLOYED, r, s, a],
+                    p_wfh=self.keyworker[s]
+                    if state.lockdown
+                    else 0.0,  # keyworker state determines who is constrained to WFH
+                    p_furloughed=1.0
+                    if state.furlough
+                    else 0.0,  # if furloughing is available, everybody will be furloughed
+                    p_not_employed=0.0,  # this will be an output of the model and overridden accordingly
+                )
+                for r, s, a in itertools.product(Region, Sector, Age)
             },
-            worker_data=self.workers
+            worker_data=self.workers,
         )
         state.utilisations = u
 
@@ -1149,10 +1173,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         # use demand parameter from earnings model
         # TODO: implement
 
-        self._simulate(
-            state,
-            capital
-        )
+        result = state.gdp_state = self._simulate(state, capital)
         # TODO: should this affect additional parameters to GDP?
         (state.gdp_state.growth_factor, state.gdp_state.gdp,) = self._apply_growth_factor(
             state.time, state.lockdown, state.gdp_state.gdp

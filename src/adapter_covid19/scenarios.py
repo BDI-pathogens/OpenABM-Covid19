@@ -151,10 +151,7 @@ class Scenario:
             personal_kwargs=dict(
                 default_th=300, max_earning_furloughed=30_000, beta=100,
             ),
-            corporate_kwargs=dict(
-                beta=1.4,
-                large_cap_cash_surplus_months=6,
-            ),
+            corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
         )
 
     def generate(
@@ -166,18 +163,23 @@ class Scenario:
         furlough: bool,
         new_spending_day: int,
         ccff_day: int,
-        loan_guarantee_day: int
+        loan_guarantee_day: int,
     ) -> SimulateState:
         self._pre_simulation_checks(time, lockdown)
         simulate_state = self.simulate_states[time] = SimulateState(
             time=time,
             dead=dead,
-            ill={(e,r,s,a): ill[r,s,a] for e, r, s, a in itertools.product(EmploymentState, Region, Sector, Age)}, # here we assume illness affects all employment states equally
+            ill={
+                (e, r, s, a): ill[r, s, a]
+                for e, r, s, a in itertools.product(
+                    EmploymentState, Region, Sector, Age
+                )
+            },  # here we assume illness affects all employment states equally
             lockdown=lockdown,
             furlough=furlough,
             new_spending_day=self.new_spending_day,
             ccff_day=self.ccff_day,
             loan_guarantee_day=self.loan_guarantee_day,
-            previous=self.simulate_states.get(time - 1)
+            previous=self.simulate_states.get(time - 1),
         )
         return simulate_state

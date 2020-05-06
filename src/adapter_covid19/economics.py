@@ -13,7 +13,8 @@ from adapter_covid19.data_structures import (
     SimulateState,
     GdpResult,
     PersonalStateToDeprecate,
-    Utilisations)
+    Utilisations,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -120,10 +121,7 @@ class Economics:
         return new_utilisations
 
     def _simulate(
-        self,
-        state: SimulateState,
-        time: int,
-        utilisations: Utilisations,
+        self, state: SimulateState, time: int, utilisations: Utilisations,
     ) -> None:
         """
         Simulate the economy
@@ -145,7 +143,9 @@ class Economics:
         if time != START_OF_TIME:
             for s in Sector:
                 for r, a in itertools.product(Region, Age):
-                    state.utilisations[r,s,a].p_not_employed = 1 - state.previous.corporate_state.gdp_discount_factor[s]
+                    state.utilisations[r, s, a].p_not_employed = (
+                        1 - state.previous.corporate_state.gdp_discount_factor[s]
+                    )
 
         self.corporate_model.simulate(state)
         self.personal_model.simulate(state)
