@@ -37,6 +37,7 @@ struct individual{
 	individual *infector;
 	int infector_status;
 	int infector_network;
+    int infector_hospital_state;
 
 	int status;
 	int is_case;
