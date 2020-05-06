@@ -14,7 +14,7 @@
 
 #define FALSE 0
 #define TRUE 1
-
+#define ERROR -1
 
 enum EVENT_TYPES{
 	SUSCEPTIBLE,

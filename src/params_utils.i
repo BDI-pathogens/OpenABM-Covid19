@@ -54,7 +54,7 @@ int get_param_days_of_interactions(parameters *params)
 ******************************************************************************************/
 double get_param_mean_random_interactions(parameters *params, int idx)
 {
-    if (idx >= N_AGE_TYPES) return -1;
+    if (idx >= N_AGE_TYPES) return ERROR;
 
     return params->mean_random_interactions[idx];
 }
@@ -65,7 +65,7 @@ double get_param_mean_random_interactions(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_sd_random_interactions(parameters *params, int idx)
 {
-    if (idx >= N_AGE_TYPES) return -1;
+    if (idx >= N_AGE_TYPES) return ERROR;
 
     return params->sd_random_interactions[idx];
 }
@@ -85,7 +85,7 @@ int get_param_random_interaction_distribution(parameters *params)
 ******************************************************************************************/
 double get_param_mean_work_interactions(parameters *params, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return -1;
+    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
 
     return params->mean_work_interactions[idx];
 }
@@ -105,7 +105,7 @@ double get_param_daily_fraction_work(parameters *params)
 ******************************************************************************************/
 double get_param_daily_fraction_work_used(parameters *params, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return -1;
+    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
 
     return params->daily_fraction_work_used[idx];
 }
@@ -161,7 +161,7 @@ double get_param_infectious_rate(parameters *params)
 ******************************************************************************************/
 double get_param_relative_susceptibility(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->relative_susceptibility[idx];
 }
@@ -172,7 +172,7 @@ double get_param_relative_susceptibility(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_adjusted_susceptibility(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->adjusted_susceptibility[idx];
 }
@@ -183,7 +183,7 @@ double get_param_adjusted_susceptibility(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_relative_transmission(parameters *params, int idx)
 {
-    if (idx >= N_INTERACTION_TYPES) return -1;
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
 
     return params->relative_transmission[idx];
 }
@@ -194,7 +194,7 @@ double get_param_relative_transmission(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_relative_transmission_used(parameters *params, int idx)
 {
-    if (idx >= N_INTERACTION_TYPES) return -1;
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
 
     return params->relative_transmission_used[idx];
 }
@@ -223,7 +223,7 @@ double get_param_sd_time_to_symptoms(parameters *params)
 ******************************************************************************************/
 double get_param_hospitalised_fraction(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->hospitalised_fraction[idx];
 }
@@ -234,7 +234,7 @@ double get_param_hospitalised_fraction(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_critical_fraction(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->critical_fraction[idx];
 }
@@ -245,7 +245,7 @@ double get_param_critical_fraction(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_fatality_fraction(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->fatality_fraction[idx];
 }
@@ -310,7 +310,7 @@ double get_param_mean_sd_to_death(parameters *params)
 ******************************************************************************************/
 double get_param_household_size(parameters *params, int idx)
 {
-    if (idx >= N_HOUSEHOLD_MAX) return -1;
+    if (idx >= N_HOUSEHOLD_MAX) return ERROR;
 
     return params->household_size[idx];
 }
@@ -321,7 +321,7 @@ double get_param_household_size(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_population(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->population[idx];
 }
@@ -333,7 +333,7 @@ double get_param_population(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_fraction_asymptomatic(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->fraction_asymptomatic[idx];
 }
@@ -361,7 +361,7 @@ double get_param_mean_asymptomatic_to_recover(parameters *params)
 ******************************************************************************************/
 double get_param_mild_fraction(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->mild_fraction[idx];
 }
@@ -605,7 +605,7 @@ int get_param_test_order_wait(parameters *params)
 ******************************************************************************************/
 double get_param_app_users_fraction(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->app_users_fraction[idx];
 }
@@ -643,7 +643,7 @@ double get_param_daily_non_cov_symptoms_rate(parameters *params)
 ******************************************************************************************/
 double get_param_lockdown_occupation_multiplier(parameters *params, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
     return params->lockdown_occupation_multiplier[idx];
 }
 
@@ -744,7 +744,7 @@ int get_param_testing_symptoms_time_off(parameters *params)
 ******************************************************************************************/
 double get_param_icu_allocation(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->icu_allocation[idx];
 }
@@ -796,7 +796,7 @@ int set_param_days_of_interactions(parameters *params, double value)
 ******************************************************************************************/
 int set_param_mean_random_interactions(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_TYPES) return FALSE;
+    if (idx >= N_AGE_TYPES) return ERROR;
     params->mean_random_interactions[idx] = value;
     return TRUE;
 }
@@ -807,7 +807,7 @@ int set_param_mean_random_interactions(parameters *params, double value, int idx
 ******************************************************************************************/
 int set_param_sd_random_interactions(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_TYPES) return FALSE;
+    if (idx >= N_AGE_TYPES) return ERROR;
     params->sd_random_interactions[idx] = value;
     return TRUE;
 }
@@ -828,7 +828,7 @@ int set_param_random_interaction_distribution(parameters *params, int value)
 ******************************************************************************************/
 int set_param_mean_work_interactions(parameters *params, double value, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
     params->mean_work_interactions[idx] = value;
     return TRUE;
 }
@@ -899,7 +899,7 @@ int set_param_infectious_rate(parameters *params, int value)
 ******************************************************************************************/
 int set_param_relative_susceptibility(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->relative_susceptibility[idx] = value;
     return TRUE;
 }
@@ -910,7 +910,7 @@ int set_param_relative_susceptibility(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_adjusted_susceptibility(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->adjusted_susceptibility[idx] = value;
     return TRUE;
 }
@@ -921,7 +921,7 @@ int set_param_adjusted_susceptibility(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_relative_transmission(parameters *params, double value, int idx)
 {
-    if (idx >= N_INTERACTION_TYPES) return FALSE;
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
     params->relative_transmission[idx] = value;
     return TRUE;
 }
@@ -952,7 +952,7 @@ int set_param_sd_time_to_symptoms(parameters *params, double value)
 ******************************************************************************************/
 int set_param_hospitalised_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->hospitalised_fraction[idx] = value;
     return TRUE;
 }
@@ -963,7 +963,7 @@ int set_param_hospitalised_fraction(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_critical_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->critical_fraction[idx] = value;
     return TRUE;
 }
@@ -974,7 +974,7 @@ int set_param_critical_fraction(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_fatality_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->fatality_fraction[idx] = value;
     return TRUE;
 }
@@ -1035,7 +1035,7 @@ int set_param_mean_time_to_death(parameters *params, double value)
 ******************************************************************************************/
 int set_param_household_size(parameters *params, double value, int idx)
 {
-    if (idx >= N_HOUSEHOLD_MAX) return FALSE;
+    if (idx >= N_HOUSEHOLD_MAX) return ERROR;
     params->household_size[idx] = value;
     return TRUE;
 }
@@ -1046,7 +1046,7 @@ int set_param_household_size(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_population(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->population[idx] = value;
     return TRUE;
 }
@@ -1057,7 +1057,7 @@ int set_param_population(parameters *params, double value, int idx)
 ******************************************************************************************/
 int set_param_fraction_asymptomatic(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->fraction_asymptomatic[idx] = value;
     return TRUE;
 }
@@ -1348,7 +1348,7 @@ int set_param_test_order_wait(parameters *params, int value)
 ******************************************************************************************/
 int set_param_app_users_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->app_users_fraction[idx] = value;
     return TRUE;
 }
@@ -1389,7 +1389,7 @@ int set_param_daily_non_cov_symptoms_rate(parameters *params, double value)
 ******************************************************************************************/
 int set_param_lockdown_occupation_multiplier( parameters *params, double value, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
     params->lockdown_occupation_multiplier[idx] = value;
     return TRUE;
 }
@@ -1500,7 +1500,7 @@ int set_param_testing_symptoms_time_off(parameters *params, int value)
 ******************************************************************************************/
 double set_param_mild_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->mild_fraction[idx] = value;
     return TRUE;
 }
@@ -1511,7 +1511,7 @@ double set_param_mild_fraction(parameters *params, double value, int idx)
 ******************************************************************************************/
 double set_param_icu_allocation(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE;
+    if (idx >= N_AGE_GROUPS) return ERROR;
     params->icu_allocation[idx] = value;
     return TRUE;
 }
