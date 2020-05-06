@@ -379,7 +379,9 @@ class Utilisation:
     @classmethod
     def from_lambdas(cls,
                      lambdas: Mapping[WorkerState, float],
-                     default_values: Mapping[WorkerStateConditional, float]) -> Utilisation:
+                     default_values: Optional[Mapping[WorkerStateConditional, float]] = None) -> Utilisation:
+        default_values = {} if default_values is None else default_values
+
         p_dead = lambdas[WorkerState.DEAD]
         assert p_dead != 1.0, "conversion form lambdas only well-defined if there are survivors in the population"
 
