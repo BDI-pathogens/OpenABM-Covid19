@@ -1,35 +1,18 @@
+from __future__ import annotations
+
 import itertools
-from dataclasses import dataclass, field
-from typing import Mapping, Tuple, Any, Optional
+from typing import Mapping, Tuple, Optional, MutableMapping
 
 import numpy as np
 
 from adapter_covid19.constants import START_OF_TIME
+from adapter_covid19.data_structures import SimulateState, InitialiseState
 from adapter_covid19.datasources import (
     SectorDataSource,
     Reader,
     RegionSectorAgeDataSource,
 )
 from adapter_covid19.enums import Sector, LabourState, Region, Age
-
-
-@dataclass
-class InitialiseState:
-    economics_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    gdp_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    personal_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    corporate_kwargs: Mapping[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class SimulateState:
-    time: int
-    lockdown: bool  # TODO: remove
-    utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
-    economics_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    gdp_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    personal_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    corporate_kwargs: Mapping[str, Any] = field(default_factory=dict)
 
 
 class Scenario:
@@ -61,6 +44,7 @@ class Scenario:
         self.ccff_day = ccff_day
         self.loan_guarantee_day = loan_guarantee_day
         self._has_been_lockdown = False
+        self.simulate_states: MutableMapping[int, SimulateState] = {}
         self._utilisations = {}  # For tracking / debugging
         for k in self.datasources:
             self.__setattr__(k, None)
@@ -189,4 +173,7 @@ class Scenario:
         self._pre_simulation_checks(time, lockdown)
         utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
         self._utilisations[time] = utilisations  # For tracking / debugging
-        return SimulateState(time, lockdown, utilisations,)
+        simulate_state = self.simulate_states[time] = SimulateState(
+            time, lockdown, utilisations, previous=self.simulate_states.get(time - 1)
+        )
+        return simulate_state
