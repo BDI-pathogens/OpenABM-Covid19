@@ -3,13 +3,14 @@ Basic example testing the adaptER-covid19 GDP models
 """
 
 import sys
+import itertools
 
 import numpy as np
 import pandas as pd
 
 from adapter_covid19.data_structures import SimulateState
 from adapter_covid19.datasources import Reader
-from adapter_covid19.enums import M, PrimaryInput
+from adapter_covid19.enums import M, PrimaryInput, Region, Sector, Age, EmploymentState
 from adapter_covid19.gdp import (
     LinearGdpModel,
     SupplyDemandGdpModel,
@@ -40,7 +41,14 @@ def pytest_generate_tests(metafunc):
 class TestClass:
     def test_interface(self, gdp_model_cls, utilisations):
         reader = Reader(DATA_PATH)
-        state = SimulateState(time=0, lockdown=False, utilisations=utilisations)
+        state = SimulateState(time=0,
+                              dead={(r,s,a): 0.0 for r,s,a in itertools.product(Region,Sector,Age)},
+                              ill={(e,r,s,a): 0.0 for e,r,s,a in itertools.product(EmploymentState, Region,Sector,Age)},
+                              lockdown=False,
+                              furlough=False,
+                              new_spending_day=1000,
+                              ccff_day=1000,
+                              loan_guarantee_day=1000)
         gdp_model = gdp_model_cls()
         gdp_model.load(reader)
         gdp_model.simulate(state)
@@ -52,7 +60,14 @@ class TestClass:
         model = PiecewiseLinearCobbDouglasGdpModel()
         model.load(reader)
         setup = model.setup
-        state = SimulateState(time=0, lockdown=False, utilisations=MAX_UTILISATIONS)
+        state = SimulateState(time=0,
+                              dead={(r,s,a): 0.0 for r,s,a in itertools.product(Region,Sector,Age)},
+                              ill={(e,r,s,a): 0.0 for e,r,s,a in itertools.product(EmploymentState, Region,Sector,Age)},
+                              lockdown=False,
+                              furlough=False,
+                              new_spending_day=1000,
+                              ccff_day=1000,
+                              loan_guarantee_day=1000)
 
         def default_soln(v):
             # print(v)
