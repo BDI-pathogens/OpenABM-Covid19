@@ -541,65 +541,6 @@ class TestClass(object):
 
     #     assert len(waiting_df.index) == 0
 
-
-    def test_zero_hcw(self):
-        """
-        Set number of hcw to zero,
-        assert there are no patient doctor interactions
-        """
-
-        # Adjust baseline parameter
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", 20000)
-        params.write_params(SCENARIO_FILE)
-
-        # Adjust hospital baseline parameter
-        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-        h_params.set_param("n_doctors_covid_general_ward", 0)
-        h_params.set_param("n_nurses_covid_general_ward", 0)
-        h_params.set_param("n_doctors_covid_icu_ward", 0)
-        h_params.set_param("n_nurses_covid_icu_ward", 0)
-        h_params.write_params(SCENARIO_HOSPITAL_FILE)
-
-        # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
-        completed_compilation = subprocess.run([compile_command], 
-            shell = True, 
-            cwd = SRC_DIR, 
-            capture_output = True
-            )
-
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
-
-        # Call the model pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
-
-        # Check that the simulation ran
-        assert len(df_output) != 0
-
-        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
-                             comment="#", sep=",", skipinitialspace=True)
-
-        df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
-        df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
-        df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
-        df_nurse_patient_icu_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
-
-        df_doctor_patient_general_interactions = df_interactions[df_doctor_patient_general_interactions]
-        df_nurse_patient_general_interactions = df_interactions[df_nurse_patient_general_interactions]
-        df_doctor_patient_icu_interactions = df_interactions[df_doctor_patient_icu_interactions]
-        df_nurse_patient_icu_interactions = df_interactions[df_nurse_patient_icu_interactions]
-
-        assert len(df_doctor_patient_general_interactions.index) == 0
-        assert len(df_nurse_patient_general_interactions.index) == 0
-        assert len(df_doctor_patient_icu_interactions.index) == 0
-        assert len(df_nurse_patient_icu_interactions.index) == 0
-
-
     def test_all_hcw(self):
         """
         Set number of hcw to zero,
