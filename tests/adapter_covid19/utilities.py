@@ -1,9 +1,13 @@
 import copy
 import itertools
 
+from adapter_covid19.data_structures import SimulateState
 from adapter_covid19.enums import Region, Sector, Age, LabourState
 
 BASE_UTILISATIONS = {k: 0 for k in itertools.product(LabourState, Region, Sector, Age)}
+FLAT_UTILISATIONS = {
+    k: 1 / len(LabourState) for k in itertools.product(LabourState, Region, Sector, Age)
+}
 MAX_UTILISATIONS = copy.deepcopy(BASE_UTILISATIONS)
 MIN_UTILISATIONS = copy.deepcopy(BASE_UTILISATIONS)
 for r, s, a in itertools.product(Region, Sector, Age):
