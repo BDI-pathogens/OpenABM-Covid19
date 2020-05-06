@@ -29,10 +29,18 @@ from adapter_covid19.enums import (
 
 
 @dataclass
-class SimulateState:
-    # Necessary for simulation
+class SimulateState: # at one point in time
+    # Exogenous inputs to the economic model including
+    # - state from epidemic model
+    # - interventions
     time: int
+    # lockdown intervention
     lockdown: bool  # TODO: remove
+    # corporate solvency interventions
+    new_spending_day: int
+    ccff_day: int
+    loan_guarantee_day: int
+
     utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
 
     # Internal state
