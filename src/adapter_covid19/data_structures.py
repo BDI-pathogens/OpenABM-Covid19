@@ -265,67 +265,118 @@ class Utilisations:
 class Utilisation:
     def __init__(
         self,
-        p_ill: float,
+        p_dead: float,
+        p_ill_wfo: float,
+        p_ill_wfh: float,
+        p_ill_furloughed: float,
+        p_ill_unemployed: float,
         p_wfh: float,
         p_furloughed: float,
-        p_dead: float,
-        p_unemployed: float = 0,
+        p_not_employed: float = 0,
     ):
         """
 
-        :param p_ill:
-            Proportion of workforce who are not dead, but ill
-            (ILL_WORKING + ILL_FURLOUGHED + ILL_UNEMPLOYED) / (1 - DEAD)
-            == ILL_WORKING / (ILL_WORKING + HEALTHY_WFH + HEALTHY_WFO)
-            == ILL_FURLOUGHED / (ILL_FURLOUGHED + HEALTHY_FURLOUGHED)
-            == ILL_UNEMPLOYED / (ILL_UNEMPLOYED + HEALTHY_UNEMPLOYED)
-        :param p_wfh:
-            Proportion of working workforce who must wfh
-            (HEALTHY_WFH + ILL_WFH) / (HEALTHY_WFH + ILL_WFH + HEALTHY_WFO + ILL_WFO)
-        :param p_furloughed:
-            Proportion of not working workforce who are furloughed
-            (HEALTHY_FURLOUGHED + ILL_FURLOUGHED)
-            / (HEALTHY_FURLOUGHED + ILL_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_UNEMPLOYED)
         :param p_dead:
             Proportion of workforce who are dead
-            DEAD
-        :param p_unemployed:
+            p_dead == DEAD
+        :param p_ill_wfo:
+            Proportion of workforce who are employed and are not constrained to work from home, but have fallen ill
+            p_ill_wfo == ILL_WFO / (HEALTHY_WFO + ILL_WFO)
+        :param p_ill_wfh:
+            Proportion of workforce who are employed and are constrained to work from home, but have fallen ill
+            p_ill_wfh == ILL_WFH / (HEALTHY_WFH + ILL_WFH)
+        :param p_ill_furloughed:
+            Proportion of workforce who are furloughed, who have fallen ill
+            p_ill_furloughed == ILL_FURLOUGHED / (HEALTHY_FURLOUGHED + ILL_FURLOUGHED)
+        :param p_ill_unemployed:
+            Proportion of workforce who are unemployed, who have fallen ill
+            p_ill_unemployed == ILL_UNEMPLOYED / (HEALTHY_UNEMPLOYED + ILL_UNEMPLOYED)
+        :param p_wfh:
+            Proportion of working workforce who must wfh
+            p_wfh == (HEALTHY_WFH + ILL_WFH) / (HEALTHY_WFH + ILL_WFH + HEALTHY_WFO + ILL_WFO)
+        :param p_furloughed:
+            Proportion of not working workforce who are furloughed
+            p_furloughed == (HEALTHY_FURLOUGHED + ILL_FURLOUGHED)
+                            / (HEALTHY_FURLOUGHED + ILL_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_UNEMPLOYED)
+        :param p_not_employed:
             Proportion of workforce who are alive but not working
-            (HEALTHY_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_FURLOUGHED + ILL_UNEMPLOYED) / (1 - DEAD)
+            p_not_employed == (HEALTHY_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_FURLOUGHED + ILL_UNEMPLOYED)
+                              / (1 - DEAD)
         """
-        assert np.isclose(sum([p_ill, p_wfh, p_furloughed, p_dead, p_unemployed]), 1)
         assert all(
-            0 <= x <= 1 for x in [p_ill, p_wfh, p_furloughed, p_dead, p_unemployed]
+            0 <= x <= 1 for x in [p_ill_wfo, p_ill_wfh, p_ill_furloughed, p_ill_unemployed, p_wfh, p_furloughed, p_dead, p_not_employed]
         )
-        self.p_ill = p_ill
+        self.p_ill_wfo = p_ill_wfo
+        self.p_ill_wfh = p_ill_wfh
+        self.p_ill_furloughed = p_ill_furloughed
+        self.p_ill_unemployed = p_ill_unemployed
         self.p_wfh = p_wfh
         self.p_furloughed = p_furloughed
         self.p_dead = p_dead
-        self.p_unemployed = p_unemployed
+        self.p_not_employed = p_not_employed
 
     def to_lambdas(self):
-        p_not_dead = 1 - self.p_dead
-        p_not_working = self.p_unemployed * p_not_dead
-        p_working = 1 - p_not_dead - p_not_working
-        p_healthy_working = (1 - self.p_ill) * p_working
-        p_healthy_not_working = (1 - self.p_ill) * p_not_working
+        lambda_not_dead = 1 - self.p_dead
+        # in the below, being "not employed" implies being alive
+        lambda_not_employed = self.p_not_employed * lambda_not_dead
+        lambda_furloughed = self.p_furloughed * lambda_not_employed
+        lambda_unemployed = lambda_not_employed - lambda_furloughed
+        lambda_employed = lambda_not_dead - lambda_not_employed
+        lambda_wfh = self.p_wfh * lambda_employed
+        lambda_wfo = (1-self.p_wfh) * lambda_employed
         return {
-            WorkerState.HEALTHY_WFO: p_healthy_working * (1 - self.p_wfh),
-            WorkerState.HEALTHY_WFH: p_healthy_working * self.p_wfh,
-            WorkerState.HEALTHY_FURLOUGHED: p_healthy_not_working * self.p_furloughed,
-            WorkerState.HEALTHY_UNEMPLOYED: p_healthy_not_working
-            * (1 - self.p_furloughed),
-            WorkerState.ILL_WORKING: self.p_ill * p_working,
-            WorkerState.ILL_FURLOUGHED: self.p_ill * p_not_working * self.p_furloughed,
-            WorkerState.ILL_UNEMPLOYED: self.p_ill
-            * p_not_working
-            * (1 - self.p_furloughed),
+            WorkerState.HEALTHY_WFO: (1-self.p_ill_wfo) * lambda_wfo,
+            WorkerState.HEALTHY_WFH: (1-self.p_ill_wfh) * lambda_wfh,
+            WorkerState.HEALTHY_FURLOUGHED: (1 - self.p_ill_furloughed) * lambda_furloughed,
+            WorkerState.HEALTHY_UNEMPLOYED: (1 - self.p_ill_unemployed) * lambda_unemployed,
+            WorkerState.ILL_WFO: self.p_ill_wfo * lambda_wfo,
+            WorkerState.ILL_WFH: self.p_ill_wfh * lambda_wfh,
+            WorkerState.ILL_FURLOUGHED: self.p_ill_furloughed * lambda_furloughed,
+            WorkerState.ILL_UNEMPLOYED: self.p_ill_unemployed * lambda_unemployed,
             WorkerState.DEAD: self.p_dead,
+        }
+
+    def to_dict(self):
+        return {
+            "dead": self.p_dead,
+            "ill_wfo": self.p_ill_wfo,
+            "ill_wfh": self.p_ill_wfh,
+            "ill_furloughed": self.p_ill_furloughed,
+            "ill_unemployed": self.p_ill_unemployed,
+            "wfh": self.p_wfh,
+            "furloughed": self.p_furloughed,
+            "not_employed": self.p_not_employed
         }
 
     @classmethod
     def from_lambdas(cls, lambdas: Mapping[WorkerState, float]) -> Utilisation:
-        raise NotImplementedError
+        return Utilisation(
+            p_dead=lambdas[WorkerState.DEAD],
+            p_ill_wfo=lambdas[WorkerState.ILL_WFO] / (lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO]),
+            p_ill_wfh=lambdas[WorkerState.ILL_WFH] / (lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]),
+            p_ill_furloughed=lambdas[WorkerState.ILL_FURLOUGHED] / (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED]),
+            p_ill_unemployed=lambdas[WorkerState.ILL_UNEMPLOYED] / (lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED]),
+            p_wfh=(lambdas[WorkerState.HEALTHY_WFH]+lambdas[WorkerState.ILL_WFH]) \
+                  / (lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH] + lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO]),
+            p_furloughed=(lambdas[WorkerState.HEALTHY_FURLOUGHED]+lambdas[WorkerState.ILL_FURLOUGHED]) \
+                  / (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED] + lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED]),
+            p_not_employed = (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED] + lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED]) / (1 - lambdas[WorkerState.DEAD]),
+        )
 
     def __getitem__(self, item):
         return self.to_lambdas()[item]
+
+if __name__ == "__main__":
+    u = Utilisation(p_dead=0.0001,
+                p_ill_wfo=0.01,
+                p_ill_wfh=0.01,
+                p_ill_furloughed=0.01,
+                p_ill_unemployed=0.01,
+                p_wfh=0.7,
+                p_furloughed=0.8,
+                p_not_employed=0.5)
+    print(u.to_dict())
+    l = u.to_lambdas()
+    print(l)
+    u2 = Utilisation.from_lambdas(l)
+    print(u2.to_dict())

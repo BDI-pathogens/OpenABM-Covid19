@@ -140,6 +140,19 @@ class LabourState(OrderedEnum):
     UNEMPLOYED = enum.auto()
 
 
+class HealthState(OrderedEnum):
+    HEALTHY = enum.auto()
+    ILL = enum.auto()
+    DEAD = enum.auto()
+
+
+class EmploymentState(OrderedEnum):
+    WFO = enum.auto()
+    WFH = enum.auto()
+    FURLOUGHED = enum.auto()
+    UNEMPLOYED = enum.auto()
+
+
 class WorkerState(OrderedEnum):
     # Healthy and working
     HEALTHY_WFO = enum.auto()
@@ -148,7 +161,8 @@ class WorkerState(OrderedEnum):
     HEALTHY_FURLOUGHED = enum.auto()
     HEALTHY_UNEMPLOYED = enum.auto()
     # Ill
-    ILL_WORKING = enum.auto()
+    ILL_WFO = enum.auto()
+    ILL_WFH = enum.auto()
     ILL_FURLOUGHED = enum.auto()
     ILL_UNEMPLOYED = enum.auto()
     # Dead
