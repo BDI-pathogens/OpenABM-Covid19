@@ -140,6 +140,21 @@ class LabourState(OrderedEnum):
     UNEMPLOYED = enum.auto()
 
 
+class WorkerState(OrderedEnum):
+    # Healthy and working
+    HEALTHY_WFO = enum.auto()
+    HEALTHY_WFH = enum.auto()
+    # Healthy and not working
+    HEALTHY_FURLOUGHED = enum.auto()
+    HEALTHY_UNEMPLOYED = enum.auto()
+    # Ill
+    ILL_WORKING = enum.auto()
+    ILL_FURLOUGHED = enum.auto()
+    ILL_UNEMPLOYED = enum.auto()
+    # Dead
+    DEAD = enum.auto()
+
+
 class PrimaryInput(OrderedEnum):
     IMPORTS = "imports"
     TAXES_PRODUCTS = "taxes on products"
