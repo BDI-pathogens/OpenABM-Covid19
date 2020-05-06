@@ -132,3 +132,19 @@ class TestClass(object):
             test_df = test_df.pdx.values
 
             assert len(test_df) == len(set(test_df))
+
+    def test_patients_do_not_infect_non_hcw(self):
+        """
+        Tests that hospital patients have only been able to infect
+        hospital healthcare workers
+        """
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        non_hcw = df_individual_output["worker_type"] == constant.NOT_HEALTHCARE_WORKER
+        non_hcw = df_individual_output[non_hcw]
+        # get non_hcw who are infected at some point
+        infected_non_hcw = non_hcw["time_infected"] != -1
+        infected_non_hcw = non_hcw[infected_non_hcw]
+        # loop through infected non healthcare workers and check their infector was not a hospital patient
+        for index, row in infected_non_hcw.iterrows():
+            infector_hospital_state = int(row["infector_hospital_state"])
+            assert infector_hospital_state == -1 or infector_hospital_state == constant.EVENT_TYPES.WAITING.value
