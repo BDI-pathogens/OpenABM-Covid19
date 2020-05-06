@@ -27,8 +27,8 @@ def lockdown_then_unlock_no_corona(
     data_path: Optional[str] = None,
     lockdown_on: int = 5,
     lockdown_off: int = 30,
-    furlough_on: Optional[int] = 5,
-    furlough_off: Optional[int] = 30,
+    furlough_on: int = 5,
+    furlough_off: int = 30,
     new_spending_day: int = 5,
     ccff_day: int = 5,
     loan_guarantee_day: int = 5,
@@ -69,14 +69,18 @@ def lockdown_then_unlock_no_corona(
     pb_model = PersonalBankruptcyModel(**init_args.personal_kwargs)
     econ = Economics(gdp_model, cb_model, pb_model, **init_args.economics_kwargs)
     econ.load(reader)
-    healthy = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
+    dead = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     for i in tqdm(range(end_time)):
         simulate_state = scenario.generate(
-            i,
+            time=i,
+            dead=dead,
+            ill=ill,
             lockdown=lockdown_on <= i < lockdown_off,
-            healthy=healthy,
-            ill=ill
+            furlough=furlough_on <= i < furlough_off,
+            new_spending_day=new_spending_day,
+            ccff_day=ccff_day,
+            loan_guarantee_day=loan_guarantee_day,
         )
         econ.simulate(simulate_state)
     df = (
@@ -126,8 +130,8 @@ def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
     scenario_results["no furlough"] = lockdown_then_unlock_no_corona(
         data_path=data_path,
         end_time=50,
-        furlough_on=None,
-        furlough_off=None,
+        furlough_on=1000,
+        furlough_off=1000,
         new_spending_day=1000,
         ccff_day=1000,
         loan_guarantee_day=1000,

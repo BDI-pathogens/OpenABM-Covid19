@@ -12,7 +12,7 @@ from adapter_covid19.datasources import (
     Reader,
     RegionSectorAgeDataSource,
 )
-from adapter_covid19.enums import Sector, LabourState, Region, Age
+from adapter_covid19.enums import Sector, LabourState, Region, Age, EmploymentState
 
 
 class Scenario:
@@ -24,8 +24,8 @@ class Scenario:
     def __init__(
         self,
         lockdown_recovery_time: int = 1,
-        furlough_start_time: Optional[int] = None,
-        furlough_end_time: Optional[int] = None,
+        furlough_start_time: int = 1000,
+        furlough_end_time: int = 1000,
         new_spending_day: int = 1000,
         ccff_day: int = 1000,
         loan_guarantee_day: int = 1000,
@@ -60,6 +60,7 @@ class Scenario:
         healthy: Mapping[Tuple[Region, Sector, Age], float],
         ill: Mapping[Tuple[Region, Sector, Age], float],
     ) -> Mapping[Tuple[LabourState, Region, Sector, Age], float]:
+        # TODO: deprecated! remove in favour of Utilisation
         """
         Convert healthy/ill utilisations to working, ill, furloughed, wfh utilisations
 
@@ -69,11 +70,7 @@ class Scenario:
         :param ill:
         :return:
         """
-        furlough_active = (
-            self.furlough_start_time is not None
-            and self.furlough_end_time is not None
-            and self.furlough_start_time <= time < self.furlough_end_time
-        )
+        furlough_active = self.furlough_start_time <= time < self.furlough_end_time
         furloughed = self.furloughed if furlough_active else {s: 0.0 for s in Sector}
 
         utilisations = {
@@ -163,20 +160,24 @@ class Scenario:
     def generate(
         self,
         time: int,
-        lockdown: bool,
-        healthy: Mapping[Tuple[Region, Sector, Age], float],
+        dead: Mapping[Tuple[Region, Sector, Age], float],
         ill: Mapping[Tuple[Region, Sector, Age], float],
+        lockdown: bool,
+        furlough: bool,
+        new_spending_day: int,
+        ccff_day: int,
+        loan_guarantee_day: int
     ) -> SimulateState:
         self._pre_simulation_checks(time, lockdown)
-        utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
-        self._utilisations[time] = utilisations  # For tracking / debugging
         simulate_state = self.simulate_states[time] = SimulateState(
-            time,
-            lockdown,
+            time=time,
+            dead=dead,
+            ill={(e,r,s,a): ill[r,s,a] for e, r, s, a in itertools.product(EmploymentState, Region, Sector, Age)}, # here we assume illness affects all employment states equally
+            lockdown=lockdown,
+            furlough=furlough,
             new_spending_day=self.new_spending_day,
             ccff_day=self.ccff_day,
             loan_guarantee_day=self.loan_guarantee_day,
-            utilisations=utilisations,
             previous=self.simulate_states.get(time - 1)
         )
         return simulate_state

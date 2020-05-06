@@ -13,7 +13,7 @@ from adapter_covid19.data_structures import (
     SimulateState,
     GdpResult,
     PersonalStateToDeprecate,
-)
+    Utilisations)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -84,6 +84,7 @@ class Economics:
         utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
         unemployment_per_sector: Mapping[Sector, float],
     ) -> Mapping[Tuple[LabourState, Region, Sector, Age], float]:
+        # TODO: remove
         unemployed = {
             (LabourState.UNEMPLOYED, r, s, a): sum(
                 utilisations[l, r, s, a] * unemployment_per_sector[s]
@@ -122,7 +123,7 @@ class Economics:
         self,
         state: SimulateState,
         time: int,
-        utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float],
+        utilisations: Utilisations,
     ) -> None:
         """
         Simulate the economy
@@ -138,17 +139,14 @@ class Economics:
         """
         # There shouldn't really be any logic in this method; this should solely
         # provide the plumbing for the other three models
-        # TODO: fix and move this into GDP model
-        if time != START_OF_TIME:
-            unemployment_per_sector = {
-                s: 1 - state.previous.corporate_state.gdp_discount_factor[s]
-                for s in Sector
-            }
-            state.utilisations = self.add_unemployment(
-                utilisations, unemployment_per_sector
-            )
 
         self.gdp_model.simulate(state)
+        # TODO: fix and move this into GDP model; have corp model account for p_furlough
+        if time != START_OF_TIME:
+            for s in Sector:
+                for r, a in itertools.product(Region, Age):
+                    state.utilisations[r,s,a].p_not_employed = 1 - state.previous.corporate_state.gdp_discount_factor[s]
+
         self.corporate_model.simulate(state)
         self.personal_model.simulate(state)
 
