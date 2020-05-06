@@ -48,9 +48,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self,
         beta: Optional[float] = None,
         large_cap_cash_surplus_months: Optional[float] = None,
-        new_spending_day: int = 10 ** 6,
-        ccff_day: int = 10 ** 6,
-        loan_guarantee_day: int = 10 ** 6,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -60,9 +57,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.large_cap_cash_surplus_months = (
             large_cap_cash_surplus_months or 1 + np.random.randint(12)
         )
-        self.new_spending_day = new_spending_day
-        self.ccff_day = ccff_day
-        self.loan_guarantee_day = loan_guarantee_day
         self.small_cap_cash_buffer: Mapping[Sector, float] = {}
         self.large_cap_pct: Mapping[Sector, float] = {}
         self.employee_compensation: Mapping[Sector, float] = {}
@@ -331,12 +325,12 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         if not state.lockdown:
             state.corporate_state = copy.deepcopy(state.previous.corporate_state)
             return
-        if state.time == self.new_spending_day:
+        if state.time == state.new_spending_day:
             self._new_spending_sector_allocation()
-        if state.time == self.ccff_day:
+        if state.time == state.ccff_day:
             self._apply_ccff()
         if (
-            (state.time >= self.loan_guarantee_day)
+            (state.time >= state.loan_guarantee_day)
             and self.loan_guarantee_remaining
             and (state.time % 7 == 0)
         ):

@@ -157,9 +157,6 @@ class Scenario:
             corporate_kwargs=dict(
                 beta=1.4,
                 large_cap_cash_surplus_months=6,
-                new_spending_day=self.new_spending_day,
-                ccff_day=self.ccff_day,
-                loan_guarantee_day=self.loan_guarantee_day,
             ),
         )
 
@@ -174,6 +171,12 @@ class Scenario:
         utilisations = self._apply_lockdown(time, lockdown, healthy, ill)
         self._utilisations[time] = utilisations  # For tracking / debugging
         simulate_state = self.simulate_states[time] = SimulateState(
-            time, lockdown, utilisations, previous=self.simulate_states.get(time - 1)
+            time,
+            lockdown,
+            new_spending_day=self.new_spending_day,
+            ccff_day=self.ccff_day,
+            loan_guarantee_day=self.loan_guarantee_day,
+            utilisations=utilisations,
+            previous=self.simulate_states.get(time - 1)
         )
         return simulate_state

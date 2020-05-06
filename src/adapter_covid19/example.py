@@ -72,16 +72,13 @@ def lockdown_then_unlock_no_corona(
     healthy = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     for i in tqdm(range(end_time)):
-        if lockdown_on <= i < lockdown_off:
-            simulate_state = scenario.generate(
-                i, lockdown=True, healthy=healthy, ill=ill
-            )
-            econ.simulate(simulate_state)
-        else:
-            simulate_state = scenario.generate(
-                i, lockdown=False, healthy=healthy, ill=ill
-            )
-            econ.simulate(simulate_state)
+        simulate_state = scenario.generate(
+            i,
+            lockdown=lockdown_on <= i < lockdown_off,
+            healthy=healthy,
+            ill=ill
+        )
+        econ.simulate(simulate_state)
     df = (
         pd.DataFrame(
             [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
@@ -124,7 +121,7 @@ def lockdown_then_unlock_no_corona(
     return econ
 
 
-def run_multiple_scenarios(data_path: str = "data", show_plots: bool = True):
+def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
     scenario_results = {}
     scenario_results["no furlough"] = lockdown_then_unlock_no_corona(
         data_path=data_path,
