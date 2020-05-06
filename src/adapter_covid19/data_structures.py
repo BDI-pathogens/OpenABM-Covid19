@@ -24,6 +24,7 @@ from adapter_covid19.enums import (
     PrimaryInput,
     FinalUse,
     Decile,
+    EmploymentState,
     WorkerState,
 )
 
@@ -34,16 +35,20 @@ class SimulateState: # at one point in time
     # - state from epidemic model
     # - interventions
     time: int
+    # health state
+    dead: Mapping[Tuple[Region, Sector, Age], float]
+    ill: Mapping[Tuple[EmploymentState, Region, Sector, Age], float]
     # lockdown intervention
-    lockdown: bool  # TODO: remove
+    lockdown: bool  # TODO: should reflect more granularly who are key workers
+    # furlough intervention
+    furlough: bool
     # corporate solvency interventions
     new_spending_day: int
     ccff_day: int
     loan_guarantee_day: int
 
-    utilisations: Mapping[Tuple[LabourState, Region, Sector, Age], float]
-
-    # Internal state
+    # Internal state of the model
+    utilisations: Optional[Utilisations] = None
     gdp_state: Optional[Union[GdpState, IoGdpState]] = None
     corporate_state: Optional[CorporateState] = None
     personal_state: Optional[PersonalState] = None
@@ -236,7 +241,7 @@ class PersonalStateToDeprecate:
 class Utilisations:
     def __init__(
         self,
-        utilisations: Mapping[Tuple[Region, Sector, Age], Mapping[WorkerState, float]],
+        utilisations: Mapping[Tuple[Region, Sector, Age], Utilisation],
         worker_data: Mapping[Tuple[Region, Sector, Age], float],
     ):
         self._utilisations = utilisations
@@ -249,12 +254,12 @@ class Utilisations:
     @staticmethod
     def _sum(
         mapping: Generator[Union[Utilisation, Mapping[WorkerState, float]]]
-    ) -> Utilisation:
+    ) -> Mapping[WorkerState, float]:
         result = {w: 0 for w in WorkerState}
         for s in mapping:
             for w in WorkerState:
                 result[w] += s[w]
-        return Utilisation.from_lambdas(result)
+        return result
 
     def __getitem__(self, item):
         if isinstance(item, Sector):
@@ -266,6 +271,21 @@ class Utilisations:
                 }
                 for r, a in itertools.product(Region, Age)
             )
+        elif isinstance(item, tuple) and len(item) == 4 and isinstance(item[0], LabourState):
+            # TODO: deprecate
+            # convenience function for legacy models expecting old dictionary interface
+            l, r, s, a = item
+            u = self._utilisations[r,s,a].to_lambdas()
+            if l == LabourState.WORKING:
+                return u[WorkerState.HEALTHY_WFO]
+            elif l == LabourState.WFH:
+                return u[WorkerState.HEALTHY_WFH]
+            elif l == LabourState.ILL:
+                return u[WorkerState.ILL_WFH] + u[WorkerState.ILL_WFO]
+            elif l == LabourState.FURLOUGHED:
+                return u[WorkerState.ILL_FURLOUGHED] + u[WorkerState.HEALTHY_FURLOUGHED]
+            elif l == LabourState.UNEMPLOYED:
+                return u[WorkerState.ILL_UNEMPLOYED] + u[WorkerState.HEALTHY_UNEMPLOYED] + u[WorkerState.DEAD]
         else:
             return self._utilisations[item]
 
@@ -358,6 +378,7 @@ class Utilisation:
 
     @classmethod
     def from_lambdas(cls, lambdas: Mapping[WorkerState, float]) -> Utilisation:
+        # TODO: catch zero division errors
         return Utilisation(
             p_dead=lambdas[WorkerState.DEAD],
             p_ill_wfo=lambdas[WorkerState.ILL_WFO] / (lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO]),
