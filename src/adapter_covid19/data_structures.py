@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import itertools
 from dataclasses import dataclass, field
-from typing import Mapping, Tuple, MutableMapping, Any, Optional, Union
+from typing import (
+    Mapping,
+    Tuple,
+    MutableMapping,
+    Any,
+    Optional,
+    Union,
+    Generator,
+)
 
 import numpy as np
 from scipy.optimize import OptimizeResult
@@ -16,6 +24,7 @@ from adapter_covid19.enums import (
     PrimaryInput,
     FinalUse,
     Decile,
+    WorkerState,
 )
 
 
@@ -214,3 +223,109 @@ class PersonalStateToDeprecate:
     utilisation: Mapping[Sector, Mapping[LabourState, float]]
     min_expense_cut: Mapping[Sector, Mapping[Decile, float]]
     personal_bankruptcy: float
+
+
+class Utilisations:
+    def __init__(
+        self,
+        utilisations: Mapping[Tuple[Region, Sector, Age], Mapping[WorkerState, float]],
+        worker_data: Mapping[Tuple[Region, Sector, Age], float],
+    ):
+        self._utilisations = utilisations
+        self._workers_by_sector = {
+            (r, s, a): worker_data[r, s, a]
+            / sum(worker_data[rr, s, aa] for rr, aa in itertools.product(Region, Age))
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+
+    @staticmethod
+    def _sum(
+        mapping: Generator[Union[Utilisation, Mapping[WorkerState, float]]]
+    ) -> Utilisation:
+        result = {w: 0 for w in WorkerState}
+        for s in mapping:
+            for w in WorkerState:
+                result[w] += s[w]
+        return Utilisation.from_lambdas(result)
+
+    def __getitem__(self, item):
+        if isinstance(item, Sector):
+            return self._sum(
+                {
+                    w: self._utilisations[r, item, a][w]
+                    * self._workers_by_sector[r, item, a]
+                    for w in WorkerState
+                }
+                for r, a in itertools.product(Region, Age)
+            )
+        else:
+            return self._utilisations[item]
+
+
+class Utilisation:
+    def __init__(
+        self,
+        p_ill: float,
+        p_wfh: float,
+        p_furloughed: float,
+        p_dead: float,
+        p_unemployed: float = 0,
+    ):
+        """
+
+        :param p_ill:
+            Proportion of workforce who are not dead, but ill
+            (ILL_WORKING + ILL_FURLOUGHED + ILL_UNEMPLOYED) / (1 - DEAD)
+            == ILL_WORKING / (ILL_WORKING + HEALTHY_WFH + HEALTHY_WFO)
+            == ILL_FURLOUGHED / (ILL_FURLOUGHED + HEALTHY_FURLOUGHED)
+            == ILL_UNEMPLOYED / (ILL_UNEMPLOYED + HEALTHY_UNEMPLOYED)
+        :param p_wfh:
+            Proportion of working workforce who must wfh
+            (HEALTHY_WFH + ILL_WFH) / (HEALTHY_WFH + ILL_WFH + HEALTHY_WFO + ILL_WFO)
+        :param p_furloughed:
+            Proportion of not working workforce who are furloughed
+            (HEALTHY_FURLOUGHED + ILL_FURLOUGHED)
+            / (HEALTHY_FURLOUGHED + ILL_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_UNEMPLOYED)
+        :param p_dead:
+            Proportion of workforce who are dead
+            DEAD
+        :param p_unemployed:
+            Proportion of workforce who are alive but not working
+            (HEALTHY_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_FURLOUGHED + ILL_UNEMPLOYED) / (1 - DEAD)
+        """
+        assert np.isclose(sum([p_ill, p_wfh, p_furloughed, p_dead, p_unemployed]), 1)
+        assert all(
+            0 <= x <= 1 for x in [p_ill, p_wfh, p_furloughed, p_dead, p_unemployed]
+        )
+        self.p_ill = p_ill
+        self.p_wfh = p_wfh
+        self.p_furloughed = p_furloughed
+        self.p_dead = p_dead
+        self.p_unemployed = p_unemployed
+
+    def to_lambdas(self):
+        p_not_dead = 1 - self.p_dead
+        p_not_working = self.p_unemployed * p_not_dead
+        p_working = 1 - p_not_dead - p_not_working
+        p_healthy_working = (1 - self.p_ill) * p_working
+        p_healthy_not_working = (1 - self.p_ill) * p_not_working
+        return {
+            WorkerState.HEALTHY_WFO: p_healthy_working * (1 - self.p_wfh),
+            WorkerState.HEALTHY_WFH: p_healthy_working * self.p_wfh,
+            WorkerState.HEALTHY_FURLOUGHED: p_healthy_not_working * self.p_furloughed,
+            WorkerState.HEALTHY_UNEMPLOYED: p_healthy_not_working
+            * (1 - self.p_furloughed),
+            WorkerState.ILL_WORKING: self.p_ill * p_working,
+            WorkerState.ILL_FURLOUGHED: self.p_ill * p_not_working * self.p_furloughed,
+            WorkerState.ILL_UNEMPLOYED: self.p_ill
+            * p_not_working
+            * (1 - self.p_furloughed),
+            WorkerState.DEAD: self.p_dead,
+        }
+
+    @classmethod
+    def from_lambdas(cls, lambdas: Mapping[WorkerState, float]) -> Utilisation:
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        return self.to_lambdas()[item]
