@@ -264,6 +264,7 @@ void new_infection(
 
 	infected->infector = infector;
 	infected->infector_status = infector->status;
+    infected->infector_hospital_state = infector->hospital_state;
 
 	if( draw < asymp_frac )
 	{

@@ -516,7 +516,7 @@ void write_individual_file(model *model, parameters *params)
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
-	int infector_time_infected, infector_status;
+    int infector_time_infected, infector_status, infector_hospital_state;
 	long idx, infector_id;
 	
 	char param_line_number[10];
@@ -536,6 +536,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
 	fprintf(individual_output_file,"work_network,");
+    fprintf(individual_output_file,"worker_type,");
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"app_user,");
@@ -558,6 +559,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"infector_ID,");
 	fprintf(individual_output_file,"infector_time_infected,");
     fprintf(individual_output_file,"infector_status,");
+    fprintf(individual_output_file,"infector_hospital_state,");
     fprintf(individual_output_file,"time_waiting,");
     fprintf(individual_output_file,"time_general,");
     fprintf(individual_output_file,"time_icu,");
@@ -574,24 +576,27 @@ void write_individual_file(model *model, parameters *params)
 		(otherwise the "infector" attribute does not point to another individual) */
 		if(model->population[idx].status != UNINFECTED)
 		{
-			infector_id			   = indiv->infector->idx;
-			infector_time_infected = time_infected( indiv->infector );
-			infector_status        = indiv->infector_status;
+            infector_id			    = indiv->infector->idx;
+            infector_time_infected  = time_infected( indiv->infector );
+            infector_status         = indiv->infector_status;
+            infector_hospital_state = indiv->infector_hospital_state;
 
 		}
 		else
 		{
-			infector_id            = UNKNOWN;
-			infector_time_infected = UNKNOWN;
-			infector_status        = UNKNOWN;
+            infector_id             = UNKNOWN;
+            infector_time_infected  = UNKNOWN;
+            infector_status         = UNKNOWN;
+            infector_hospital_state = UNKNOWN;
 		}
 		
 		fprintf(individual_output_file, 
-            "%li,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d\n",
+            "%li,%d,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
+            indiv->worker_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->app_user,
@@ -614,6 +619,7 @@ void write_individual_file(model *model, parameters *params)
 			infector_id,
 			infector_time_infected,
             infector_status,
+            infector_hospital_state,
             indiv->time_event[WAITING],
             indiv->time_event[GENERAL],
             indiv->time_event[ICU],
