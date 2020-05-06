@@ -222,8 +222,8 @@ class PersonalState:
     credit_mean: Mapping[Tuple[Region, Sector, Decile], float]
     credit_std: Mapping[Region, float]
     utilisation: Mapping[Tuple[Region, Sector, Decile], float]
-    min_expense_cut: Mapping[Tuple[Region, Sector, Decile], float]
     personal_bankruptcy: Mapping[Region, float]
+    demand_reduction: Mapping[Sector, float]
 
 
 # TODO: Deprecate
