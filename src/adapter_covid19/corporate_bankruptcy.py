@@ -5,7 +5,6 @@ from typing import Optional, Mapping
 
 import numpy as np
 import pandas as pd
-import scipy as sp
 from scipy.stats import fisk, norm
 
 from adapter_covid19.constants import DAYS_IN_A_YEAR, START_OF_TIME
@@ -56,8 +55,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     ):
         super().__init__(**kwargs)
         self.beta = beta or 1 + np.random.rand()
-        theta = sp.pi / self.beta
-        self.sinc_theta = np.sinc(theta)
+        # Numpy sinc is of pi*x, not of x
+        self.sinc_theta = np.sinc(1 / self.beta)
         self.large_cap_cash_surplus_months = (
             large_cap_cash_surplus_months or 1 + np.random.randint(12)
         )
