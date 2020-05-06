@@ -26,11 +26,12 @@ from adapter_covid19.enums import (
     Decile,
     EmploymentState,
     WorkerState,
-    WorkerStateConditional)
+    WorkerStateConditional,
+)
 
 
 @dataclass
-class SimulateState: # at one point in time
+class SimulateState:  # at one point in time
     # Exogenous inputs to the economic model including
     # - state from epidemic model
     # - interventions
@@ -271,11 +272,15 @@ class Utilisations:
                 }
                 for r, a in itertools.product(Region, Age)
             )
-        elif isinstance(item, tuple) and len(item) == 4 and isinstance(item[0], LabourState):
+        elif (
+            isinstance(item, tuple)
+            and len(item) == 4
+            and isinstance(item[0], LabourState)
+        ):
             # TODO: deprecate
             # convenience function for legacy models expecting old dictionary interface
             l, r, s, a = item
-            u = self._utilisations[r,s,a].to_lambdas()
+            u = self._utilisations[r, s, a].to_lambdas()
             if l == LabourState.WORKING:
                 return u[WorkerState.HEALTHY_WFO]
             elif l == LabourState.WFH:
@@ -285,7 +290,11 @@ class Utilisations:
             elif l == LabourState.FURLOUGHED:
                 return u[WorkerState.ILL_FURLOUGHED] + u[WorkerState.HEALTHY_FURLOUGHED]
             elif l == LabourState.UNEMPLOYED:
-                return u[WorkerState.ILL_UNEMPLOYED] + u[WorkerState.HEALTHY_UNEMPLOYED] + u[WorkerState.DEAD]
+                return (
+                    u[WorkerState.ILL_UNEMPLOYED]
+                    + u[WorkerState.HEALTHY_UNEMPLOYED]
+                    + u[WorkerState.DEAD]
+                )
         else:
             return self._utilisations[item]
 
@@ -332,7 +341,17 @@ class Utilisation:
                               / (1 - DEAD)
         """
         assert all(
-            0 <= x <= 1 for x in [p_ill_wfo, p_ill_wfh, p_ill_furloughed, p_ill_unemployed, p_wfh, p_furloughed, p_dead, p_not_employed]
+            0 <= x <= 1
+            for x in [
+                p_ill_wfo,
+                p_ill_wfh,
+                p_ill_furloughed,
+                p_ill_unemployed,
+                p_wfh,
+                p_furloughed,
+                p_dead,
+                p_not_employed,
+            ]
         )
         self.p_ill_wfo = p_ill_wfo
         self.p_ill_wfh = p_ill_wfh
@@ -351,12 +370,14 @@ class Utilisation:
         lambda_unemployed = lambda_not_employed - lambda_furloughed
         lambda_employed = lambda_not_dead - lambda_not_employed
         lambda_wfh = self.p_wfh * lambda_employed
-        lambda_wfo = (1-self.p_wfh) * lambda_employed
+        lambda_wfo = (1 - self.p_wfh) * lambda_employed
         return {
-            WorkerState.HEALTHY_WFO: (1-self.p_ill_wfo) * lambda_wfo,
-            WorkerState.HEALTHY_WFH: (1-self.p_ill_wfh) * lambda_wfh,
-            WorkerState.HEALTHY_FURLOUGHED: (1 - self.p_ill_furloughed) * lambda_furloughed,
-            WorkerState.HEALTHY_UNEMPLOYED: (1 - self.p_ill_unemployed) * lambda_unemployed,
+            WorkerState.HEALTHY_WFO: (1 - self.p_ill_wfo) * lambda_wfo,
+            WorkerState.HEALTHY_WFH: (1 - self.p_ill_wfh) * lambda_wfh,
+            WorkerState.HEALTHY_FURLOUGHED: (1 - self.p_ill_furloughed)
+            * lambda_furloughed,
+            WorkerState.HEALTHY_UNEMPLOYED: (1 - self.p_ill_unemployed)
+            * lambda_unemployed,
             WorkerState.ILL_WFO: self.p_ill_wfo * lambda_wfo,
             WorkerState.ILL_WFH: self.p_ill_wfh * lambda_wfh,
             WorkerState.ILL_FURLOUGHED: self.p_ill_furloughed * lambda_furloughed,
@@ -377,51 +398,94 @@ class Utilisation:
         }
 
     @classmethod
-    def from_lambdas(cls,
-                     lambdas: Mapping[WorkerState, float],
-                     default_values: Optional[Mapping[WorkerStateConditional, float]] = None) -> Utilisation:
+    def from_lambdas(
+        cls,
+        lambdas: Mapping[WorkerState, float],
+        default_values: Optional[Mapping[WorkerStateConditional, float]] = None,
+    ) -> Utilisation:
         default_values = {} if default_values is None else default_values
 
         p_dead = lambdas[WorkerState.DEAD]
-        assert p_dead != 1.0, "conversion form lambdas only well-defined if there are survivors in the population"
+        assert (
+            p_dead != 1.0
+        ), "conversion form lambdas only well-defined if there are survivors in the population"
 
-        p_ill = (lambdas[WorkerState.ILL_WFO] + lambdas[WorkerState.ILL_WFH] + lambdas[WorkerState.ILL_FURLOUGHED] \
-                + lambdas[WorkerState.ILL_UNEMPLOYED]) / (1 - p_dead)
+        p_ill = (
+            lambdas[WorkerState.ILL_WFO]
+            + lambdas[WorkerState.ILL_WFH]
+            + lambdas[WorkerState.ILL_FURLOUGHED]
+            + lambdas[WorkerState.ILL_UNEMPLOYED]
+        ) / (1 - p_dead)
 
         try:
-            p_ill_wfo = lambdas[WorkerState.ILL_WFO] / (lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO])
+            p_ill_wfo = lambdas[WorkerState.ILL_WFO] / (
+                lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO]
+            )
         except ZeroDivisionError:
             p_ill_wfo = default_values.get(WorkerStateConditional.ILL_WFO, p_ill)
 
         try:
-            p_ill_wfh = lambdas[WorkerState.ILL_WFH] / (lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH])
+            p_ill_wfh = lambdas[WorkerState.ILL_WFH] / (
+                lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]
+            )
         except ZeroDivisionError:
             p_ill_wfh = default_values.get(WorkerStateConditional.ILL_WFH, p_ill)
 
         try:
-            p_ill_furloughed = lambdas[WorkerState.ILL_FURLOUGHED] / (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED])
+            p_ill_furloughed = lambdas[WorkerState.ILL_FURLOUGHED] / (
+                lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                + lambdas[WorkerState.ILL_FURLOUGHED]
+            )
         except ZeroDivisionError:
-            p_ill_furloughed = default_values.get(WorkerStateConditional.ILL_FURLOUGHED, p_ill)
+            p_ill_furloughed = default_values.get(
+                WorkerStateConditional.ILL_FURLOUGHED, p_ill
+            )
 
         try:
-            p_ill_unemployed = lambdas[WorkerState.ILL_UNEMPLOYED] / (lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED])
+            p_ill_unemployed = lambdas[WorkerState.ILL_UNEMPLOYED] / (
+                lambdas[WorkerState.HEALTHY_UNEMPLOYED]
+                + lambdas[WorkerState.ILL_UNEMPLOYED]
+            )
         except ZeroDivisionError:
-            p_ill_unemployed = default_values.get(WorkerStateConditional.ILL_UNEMPLOYED, p_ill)
+            p_ill_unemployed = default_values.get(
+                WorkerStateConditional.ILL_UNEMPLOYED, p_ill
+            )
 
         try:
-            p_wfh = (lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]) \
-                  / (lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH] + lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO])
+            p_wfh = (
+                lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]
+            ) / (
+                lambdas[WorkerState.HEALTHY_WFH]
+                + lambdas[WorkerState.ILL_WFH]
+                + lambdas[WorkerState.HEALTHY_WFO]
+                + lambdas[WorkerState.ILL_WFO]
+            )
         except ZeroDivisionError:
             p_wfh = default_values[WorkerStateConditional.WFH]
 
         try:
-            p_furloughed = (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED]) \
-                  / (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED] + lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED]),
+            p_furloughed = (
+                (
+                    lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                    + lambdas[WorkerState.ILL_FURLOUGHED]
+                )
+                / (
+                    lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                    + lambdas[WorkerState.ILL_FURLOUGHED]
+                    + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
+                    + lambdas[WorkerState.ILL_UNEMPLOYED]
+                ),
+            )
         except ZeroDivisionError:
             p_furloughed = default_values[WorkerStateConditional.FURLOUGHED]
 
         try:
-            p_not_employed = (lambdas[WorkerState.HEALTHY_FURLOUGHED] + lambdas[WorkerState.ILL_FURLOUGHED] + lambdas[WorkerState.HEALTHY_UNEMPLOYED] + lambdas[WorkerState.ILL_UNEMPLOYED]) / (1 - lambdas[WorkerState.DEAD])
+            p_not_employed = (
+                lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                + lambdas[WorkerState.ILL_FURLOUGHED]
+                + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
+                + lambdas[WorkerState.ILL_UNEMPLOYED]
+            ) / (1 - lambdas[WorkerState.DEAD])
         except ZeroDivisionError:
             p_not_employed = default_values[WorkerStateConditional.NOT_EMPLOYED]
 
@@ -433,21 +497,24 @@ class Utilisation:
             p_ill_unemployed=p_ill_unemployed,
             p_wfh=p_wfh,
             p_furloughed=p_furloughed,
-            p_not_employed=p_not_employed
+            p_not_employed=p_not_employed,
         )
 
     def __getitem__(self, item):
         return self.to_lambdas()[item]
 
+
 if __name__ == "__main__":
-    u = Utilisation(p_dead=0.0001,
-                p_ill_wfo=0.01,
-                p_ill_wfh=0.01,
-                p_ill_furloughed=0.01,
-                p_ill_unemployed=0.01,
-                p_wfh=0.7,
-                p_furloughed=0.8,
-                p_not_employed=0.5)
+    u = Utilisation(
+        p_dead=0.0001,
+        p_ill_wfo=0.01,
+        p_ill_wfh=0.01,
+        p_ill_furloughed=0.01,
+        p_ill_unemployed=0.01,
+        p_wfh=0.7,
+        p_furloughed=0.8,
+        p_not_employed=0.5,
+    )
     print(u.to_dict())
     l = u.to_lambdas()
     print(l)
