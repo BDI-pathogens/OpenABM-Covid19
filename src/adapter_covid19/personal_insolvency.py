@@ -12,6 +12,7 @@ from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
 from adapter_covid19.data_structures import (
     SimulateState,
     PersonalState,
+    Utilisations,
 )
 from adapter_covid19.datasources import (
     Reader,
@@ -19,7 +20,7 @@ from adapter_covid19.datasources import (
     RegionSectorAgeDataSource,
     RegionSectorDecileSource,
 )
-from adapter_covid19.enums import LabourState, Age
+from adapter_covid19.enums import Age, WorkerState
 from adapter_covid19.enums import Region, Sector, Decile
 
 LOGGER = logging.getLogger(__name__)
@@ -87,7 +88,7 @@ class PersonalBankruptcyModel:
     cash_reserve: Mapping[Tuple[Region, Sector, Decile], float] = field(default=None)
 
     # Earning ratio per labour state
-    eta: MutableMapping[LabourState, float] = field(default=None)
+    eta: MutableMapping[WorkerState, float] = field(default=None)
 
     # Sector weightings per region
     _sector_region_weights: Mapping[Region, Mapping[Sector, float]] = field(
@@ -242,27 +243,18 @@ class PersonalBankruptcyModel:
 
     def _init_eta(self) -> None:
         self.eta = {
-            LabourState.ILL: 1,
-            LabourState.WFH: 1,
-            LabourState.WORKING: 1,
-            LabourState.FURLOUGHED: 0.8,
-            LabourState.UNEMPLOYED: 0,
+            WorkerState.HEALTHY_WFO: 1,
+            WorkerState.HEALTHY_WFH: 1,
+            WorkerState.HEALTHY_FURLOUGHED: 0.8,
+            WorkerState.HEALTHY_UNEMPLOYED: 0,
+            WorkerState.ILL_WFO: 1,
+            WorkerState.ILL_WFH: 1,
+            WorkerState.ILL_FURLOUGHED: 0.8,
+            WorkerState.ILL_UNEMPLOYED: 0,
+            WorkerState.DEAD: 0,
         }
 
     def simulate(self, state: SimulateState) -> None:
-        # TODO: This is inefficient
-        utilisations_h = {
-            (r, s): {
-                l: sum(
-                    state.utilisations[l, r, s, a] * self.workers_data[r, s, a]
-                    for a in Age
-                )
-                / self.workers_per_region_sector[(r, s)]
-                for l in LabourState
-            }
-            for r, s in itertools.product(Region, Sector)
-        }
-
         personal_state = PersonalState(
             time=state.time,
             spot_earning={},
@@ -272,7 +264,6 @@ class PersonalBankruptcyModel:
             balance={},
             credit_mean={},
             credit_std={},
-            utilisation=utilisations_h,
             personal_bankruptcy={},
             demand_reduction={},
         )
@@ -291,7 +282,7 @@ class PersonalBankruptcyModel:
                     ]
 
                 spot_earning_rsd = self._calc_spot_earning(
-                    region, employed_sector, decile, utilisations_h
+                    region, employed_sector, decile, state.utilisations
                 )
                 spot_expense_by_sector_rsd = self._calc_spot_expense_by_sector(
                     region, employed_sector, decile, spot_earning_rsd
@@ -326,7 +317,6 @@ class PersonalBankruptcyModel:
                 personal_state.credit_std[
                     (region, employed_sector, decile)
                 ] = self.credit_std[region]
-                personal_state.utilisation = utilisations_h
 
             personal_state.personal_bankruptcy[region] = self._calc_personal_bankruptcy(
                 region, spot_credit_mean_r
@@ -341,19 +331,18 @@ class PersonalBankruptcyModel:
         self.results[state.time] = copy.deepcopy(personal_state)
 
     def _calc_spot_earning(
-        self,
-        r: Region,
-        s: Sector,
-        d: Decile,
-        utilisations_h: Mapping[Tuple[Region, Sector], Mapping[LabourState, float]],
+        self, r: Region, s: Sector, d: Decile, utilisations: Utilisations
     ) -> float:
         spot_earning = 0
-        for ls in LabourState:
-            spot_earning_ls = self.eta[ls] * self.earnings[(r, s, d)]
-            if ls == LabourState.FURLOUGHED:
+        for worker_state in WorkerState:
+            spot_earning_ls = self.eta[worker_state] * self.earnings[(r, s, d)]
+            if worker_state in {
+                WorkerState.HEALTHY_FURLOUGHED,
+                WorkerState.ILL_FURLOUGHED,
+            }:
                 spot_earning_ls = min(spot_earning_ls, self.max_earning_furloughed)
 
-            spot_earning += utilisations_h[(r, s)][ls] * spot_earning_ls
+            spot_earning += utilisations[r, s][worker_state] * spot_earning_ls
         return spot_earning
 
     def _calc_spot_expense_by_sector(

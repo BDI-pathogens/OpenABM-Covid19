@@ -33,7 +33,6 @@ DUMMY_PERSONAL_STATE = PersonalState(
     balance={},
     credit_mean={},
     credit_std={},
-    utilisation={},
     personal_bankruptcy={},
     demand_reduction={s: 1 for s in Sector},
 )
