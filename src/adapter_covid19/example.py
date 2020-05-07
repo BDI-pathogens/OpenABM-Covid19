@@ -6,6 +6,8 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
+
 try:
     from tqdm import tqdm
 except:
@@ -60,11 +62,7 @@ def lockdown_then_unlock_no_corona(
     )
     scenario.load(reader)
     init_args = scenario.initialise()
-    gdp_model_cls = gdp_models.__dict__[gdp_model]
-    assert not inspect.isabstract(gdp_model_cls) and issubclass(
-        gdp_model_cls, gdp_models.BaseGdpModel
-    ), gdp_model
-    gdp_model = gdp_model_cls(**init_args.gdp_kwargs)
+    gdp_model = PiecewiseLinearCobbDouglasGdpModel(**init_args.gdp_kwargs)
     cb_model = CorporateBankruptcyModel(**init_args.corporate_kwargs)
     pb_model = PersonalBankruptcyModel(**init_args.personal_kwargs)
     econ = Economics(gdp_model, cb_model, pb_model, **init_args.economics_kwargs)
