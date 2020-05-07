@@ -213,7 +213,7 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
     end_time = 50
     _scenarios = {n: e for n, e in scenarios.items() if n not in skip_scenarios}
     fig, axes = plt.subplots(
-        3, len(_scenarios), sharex=True, sharey=True, figsize=(20, 10)
+        4, len(_scenarios), sharex=True, sharey=True, figsize=(20, 12)
     )
     for idx, (name, econ) in enumerate(_scenarios.items()):
         # Plot 1
@@ -252,6 +252,19 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
             [
                 {
                     r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
+                    for r in Region
+                }
+                for i in econ.results.personal_bankruptcy
+            ]
+        ).plot(ax=ax)
+        ax.legend().remove()
+
+        # Plot 4
+        ax = axes[3][idx]
+        pd.DataFrame(
+            [
+                {
+                    r: econ.results.personal_bankruptcy[i][r].demand_reduction
                     for r in Region
                 }
                 for i in econ.results.personal_bankruptcy
