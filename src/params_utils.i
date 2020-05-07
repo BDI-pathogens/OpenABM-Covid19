@@ -1,5 +1,6 @@
 %module params_utils
-#include "params.h"
+
+%include "carrays.i"
 
 %inline %{
 /*****************************************************************************************
@@ -193,7 +194,7 @@ double get_param_relative_transmission(parameters *params, int idx)
 ******************************************************************************************/
 double get_param_relative_transmission_used(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return -1;
+    if (idx >= N_INTERACTION_TYPES) return -1;
 
     return params->relative_transmission_used[idx];
 }
@@ -361,11 +362,9 @@ double get_param_mean_asymptomatic_to_recover(parameters *params)
 double get_param_mild_fraction(parameters *params, int idx)
 {
     if (idx >= N_AGE_GROUPS) return -1;
+
     return params->mild_fraction[idx];
 }
-
-
-
 
 /*****************************************************************************************
 *  Name: 		get_param_sd_asymptomatic_to_recover
@@ -607,6 +606,7 @@ int get_param_test_order_wait(parameters *params)
 double get_param_app_users_fraction(parameters *params, int idx)
 {
     if (idx >= N_AGE_GROUPS) return -1;
+
     return params->app_users_fraction[idx];
 }
 
@@ -743,7 +743,8 @@ int get_param_testing_symptoms_time_off(parameters *params)
 ******************************************************************************************/
 double get_param_icu_allocation(parameters *params, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE; 
+    if (idx >= N_AGE_GROUPS) return FALSE;
+
     return params->icu_allocation[idx];
 }
 
@@ -842,17 +843,6 @@ int set_param_daily_fraction_work(parameters *params, double value)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_daily_fraction_work_used
-*  Description: Sets the value of parameter
-******************************************************************************************/
-int set_param_daily_fraction_work_used(parameters *params, double value, int idx)
-{
-    if (idx >= N_WORK_NETWORKS) return FALSE;
-    params->daily_fraction_work_used[idx] = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
 *  Name:        set_param_child_network_adults
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -896,7 +886,8 @@ int set_param_sd_infectious_period(parameters *params, double value)
 *  Name:        set_param_infectious_rate
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_infectious_rate(parameters *params, int value) {
+int set_param_infectious_rate(parameters *params, int value)
+{
    params->infectious_rate = value;
    return TRUE;
 }
@@ -935,21 +926,10 @@ int set_param_relative_transmission(parameters *params, double value, int idx)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_relative_transmission_used
-*  Description: Sets the value of parameter in array
-******************************************************************************************/
-int set_param_relative_transmission_used(parameters *params, double value, int idx)
-{
-    if (idx >= N_INTERACTION_TYPES) return FALSE;
-    params->relative_transmission_used[idx] = value;
-    return TRUE;
-}
-
-/*****************************************************************************************
 *  Name:		set_param_mean_time_to_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_mean_time_to_symptoms( parameters *params, double value )
+int set_param_mean_time_to_symptoms(parameters *params, double value)
 {
     params->mean_time_to_symptoms = value;
     return TRUE;
@@ -959,7 +939,7 @@ int set_param_mean_time_to_symptoms( parameters *params, double value )
 *  Name:		set_param_sd_time_to_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_sd_time_to_symptoms( parameters *params, double value )
+int set_param_sd_time_to_symptoms(parameters *params, double value)
 {
     params->sd_time_to_symptoms = value;
     return TRUE;
@@ -1002,7 +982,7 @@ int set_param_fatality_fraction(parameters *params, double value, int idx)
 *  Name:        set_param_mean_time_to_hospital
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_mean_time_to_hospital(parameters *params, double value, int idx)
+int set_param_mean_time_to_hospital(parameters *params, double value)
 {
     params->mean_time_to_hospital = value;
     return TRUE;
@@ -1012,7 +992,7 @@ int set_param_mean_time_to_hospital(parameters *params, double value, int idx)
 *  Name:        set_param_mean_time_to_critical
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_mean_time_to_critical(parameters *params, double value, int idx)
+int set_param_mean_time_to_critical(parameters *params, double value)
 {
     params->mean_time_to_critical = value;
     return TRUE;
@@ -1022,7 +1002,7 @@ int set_param_mean_time_to_critical(parameters *params, double value, int idx)
 *  Name:        set_param_mean_time_to_recover
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_mean_time_to_recover(parameters *params, double value, int idx)
+int set_param_mean_time_to_recover(parameters *params, double value)
 {
     params->mean_time_to_recover = value;
     return TRUE;
@@ -1032,7 +1012,7 @@ int set_param_mean_time_to_recover(parameters *params, double value, int idx)
 *  Name:        set_param_sd_time_to_recover
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_sd_time_to_recover(parameters *params, double value, int idx)
+int set_param_sd_time_to_recover(parameters *params, double value)
 {
     params->sd_time_to_recover = value;
     return TRUE;
@@ -1042,7 +1022,7 @@ int set_param_sd_time_to_recover(parameters *params, double value, int idx)
 *  Name:        set_param_mean_time_to_death
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_mean_time_to_death(parameters *params, double value, int idx)
+int set_param_mean_time_to_death(parameters *params, double value)
 {
     params->mean_time_to_death = value;
     return TRUE;
@@ -1070,7 +1050,6 @@ int set_param_population(parameters *params, double value, int idx)
     return TRUE;
 }
 
-
 /*****************************************************************************************
 *  Name:        set_param_fraction_asymptomatic
 *  Description: Sets the value of parameter in array
@@ -1086,7 +1065,7 @@ int set_param_fraction_asymptomatic(parameters *params, double value, int idx)
 *  Name:        set_param_asymptomatic_infectious_factor
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_asymptomatic_infectious_factor(parameters *params, double value, int idx)
+int set_param_asymptomatic_infectious_factor(parameters *params, double value)
 {
     params->asymptomatic_infectious_factor = value;
     return TRUE;
@@ -1096,7 +1075,7 @@ int set_param_asymptomatic_infectious_factor(parameters *params, double value, i
 *  Name:        set_param_mean_asymptomatic_infectious_factor
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_mean_asymptomatic_to_recovery(parameters *params, double value, int idx)
+int set_param_mean_asymptomatic_to_recovery(parameters *params, double value)
 {
     params->mean_asymptomatic_to_recovery = value;
     return TRUE;
@@ -1106,7 +1085,7 @@ int set_param_mean_asymptomatic_to_recovery(parameters *params, double value, in
 *  Name:        set_param_sd_asymptomatic_infectious_factor
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_sd_asymptomatic_to_recovery(parameters *params, double value, int idx)
+int set_param_sd_asymptomatic_to_recovery(parameters *params, double value)
 {
     params->sd_asymptomatic_to_recovery = value;
     return TRUE;
@@ -1116,7 +1095,7 @@ int set_param_sd_asymptomatic_to_recovery(parameters *params, double value, int 
 *  Name:        set_param_quarantined_daily_interactions
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_quarantined_daily_interactions(parameters *params, int value, int idx)
+int set_param_quarantined_daily_interactions(parameters *params, int value)
 {
     params->quarantined_daily_interactions = value;
     return TRUE;
@@ -1126,7 +1105,7 @@ int set_param_quarantined_daily_interactions(parameters *params, int value, int 
 *  Name:        set_param_hospitalised_daily_interactions
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
-int set_param_hospitalised_daily_interactions(parameters *params, int value, int idx)
+int set_param_hospitalised_daily_interactions(parameters *params, int value)
 {
     params->hospitalised_daily_interactions = value;
     return TRUE;
@@ -1136,7 +1115,7 @@ int set_param_hospitalised_daily_interactions(parameters *params, int value, int
 *  Name:        set_param_quarantine_days
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_days(parameters *params, int value )
+int set_param_quarantine_days(parameters *params, int value)
 {
     params->quarantine_days = value;
     return TRUE;
@@ -1156,7 +1135,8 @@ int set_param_self_quarantine_fraction(parameters *params, double value)
 *  Name:        set_param_trace_on_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_trace_on_symptoms(parameters *params, int value) {
+int set_param_trace_on_symptoms(parameters *params, int value)
+{
    params->trace_on_symptoms = value;
    return TRUE;
 }
@@ -1165,7 +1145,8 @@ int set_param_trace_on_symptoms(parameters *params, int value) {
 *  Name:        set_param_trace_on_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_trace_on_positive(parameters *params, int value) {
+int set_param_trace_on_positive(parameters *params, int value)
+{
    params->trace_on_positive = value;
    return TRUE;
 }
@@ -1174,7 +1155,8 @@ int set_param_trace_on_positive(parameters *params, int value) {
 *  Name:        set_param_quarantine_length_self
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_length_self(parameters *params, int value) {
+int set_param_quarantine_length_self(parameters *params, int value)
+{
    params->quarantine_length_self = value;
    return TRUE;
 }
@@ -1183,7 +1165,8 @@ int set_param_quarantine_length_self(parameters *params, int value) {
 *  Name:        set_param_quarantine_length_traced
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_length_traced(parameters *params, int value) {
+int set_param_quarantine_length_traced(parameters *params, int value)
+{
    params->quarantine_length_traced = value;
    return TRUE;
 }
@@ -1192,7 +1175,8 @@ int set_param_quarantine_length_traced(parameters *params, int value) {
 *  Name:        set_param_quarantine_length_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_length_positive(parameters *params, int value) {
+int set_param_quarantine_length_positive(parameters *params, int value)
+{
    params->quarantine_length_positive = value;
    return TRUE;
 }
@@ -1201,7 +1185,8 @@ int set_param_quarantine_length_positive(parameters *params, int value) {
 *  Name:        set_param_quarantine_dropout_self
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_dropout_self(parameters *params, double value) {
+int set_param_quarantine_dropout_self(parameters *params, double value)
+{
    params->quarantine_dropout_self = value;
    return TRUE;
 }
@@ -1210,7 +1195,8 @@ int set_param_quarantine_dropout_self(parameters *params, double value) {
 *  Name:        set_param_quarantine_dropout_traced
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_dropout_traced(parameters *params, double value) {
+int set_param_quarantine_dropout_traced(parameters *params, double value)
+{
    params->quarantine_dropout_traced = value;
    return TRUE;
 }
@@ -1219,7 +1205,8 @@ int set_param_quarantine_dropout_traced(parameters *params, double value) {
 *  Name:        set_param_quarantine_dropout_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_dropout_positive(parameters *params, double value) {
+int set_param_quarantine_dropout_positive(parameters *params, double value)
+{
    params->quarantine_dropout_positive = value;
    return TRUE;
 }
@@ -1228,7 +1215,7 @@ int set_param_quarantine_dropout_positive(parameters *params, double value) {
 *  Name: 		set_param_quarantine_on_traced
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_on_traced( parameters *params, int value )
+int set_param_quarantine_on_traced(parameters *params, int value)
 {
     params->quarantine_on_traced = value;
     return TRUE;
@@ -1238,7 +1225,7 @@ int set_param_quarantine_on_traced( parameters *params, int value )
 *  Name:		set_param_traceable_interaction_fractio
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_traceable_interaction_fraction( parameters *params, double value )
+int set_param_traceable_interaction_fraction(parameters *params, double value)
 {
     params->traceable_interaction_fraction = value;
     return TRUE;
@@ -1248,7 +1235,7 @@ int set_param_traceable_interaction_fraction( parameters *params, double value )
 *  Name:		set_param_tracing_network_depth
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_tracing_network_depth( parameters *params, int value )
+int set_param_tracing_network_depth(parameters *params, int value)
 {
     params->tracing_network_depth = value;
     return TRUE;
@@ -1258,7 +1245,7 @@ int set_param_tracing_network_depth( parameters *params, int value )
 *  Name:		set_param_allow_clinical_diagnosis
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_allow_clinical_diagnosis( parameters *params, int value )
+int set_param_allow_clinical_diagnosis(parameters *params, int value)
 {
     params->allow_clinical_diagnosis = value;
     return TRUE;
@@ -1268,7 +1255,7 @@ int set_param_allow_clinical_diagnosis( parameters *params, int value )
 *  Name:		set_param_quarantine_household_on_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_household_on_symptoms( parameters *params, int value )
+int set_param_quarantine_household_on_symptoms(parameters *params, int value)
 {
     params->quarantine_household_on_symptoms = value;
     return TRUE;
@@ -1278,7 +1265,7 @@ int set_param_quarantine_household_on_symptoms( parameters *params, int value )
 *  Name:		set_param_quarantine_household_on_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_household_on_positive( parameters *params, int value )
+int set_param_quarantine_household_on_positive(parameters *params, int value)
 {
     params->quarantine_household_on_positive = value;
     return TRUE;
@@ -1308,7 +1295,7 @@ int set_param_quarantine_household_on_traced_symptoms( parameters *params, int v
 *  Name:		set_param_quarantine_household_contacts_on_positive
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_quarantine_household_contacts_on_positive( parameters *params, int value )
+int set_param_quarantine_household_contacts_on_positive(parameters *params, int value)
 {
     params->quarantine_household_contacts_on_positive = value;
     return TRUE;
@@ -1318,7 +1305,8 @@ int set_param_quarantine_household_contacts_on_positive( parameters *params, int
 *  Name:		set_param_test_on_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_on_symptoms(parameters *params, int value) {
+int set_param_test_on_symptoms(parameters *params, int value)
+{
    params->test_on_symptoms = value;
    return TRUE;
 }
@@ -1327,7 +1315,7 @@ int set_param_test_on_symptoms(parameters *params, int value) {
 *  Name:		set_param_test_on_traced
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_on_traced( parameters *params, int value )
+int set_param_test_on_traced(parameters *params, int value)
 {
     params->test_on_traced = value;
     return TRUE;
@@ -1337,7 +1325,7 @@ int set_param_test_on_traced( parameters *params, int value )
 *  Name:		set_param_test_result_wait
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_result_wait( parameters *params, int value )
+int set_param_test_result_wait(parameters *params, int value)
 {
     params->test_result_wait = value;
     return TRUE;
@@ -1347,7 +1335,7 @@ int set_param_test_result_wait( parameters *params, int value )
 *  Name:		set_param_test_order_wait
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_order_wait( parameters *params, int value )
+int set_param_test_order_wait(parameters *params, int value)
 {
     params->test_order_wait = value;
     return TRUE;
@@ -1357,7 +1345,7 @@ int set_param_test_order_wait( parameters *params, int value )
 *  Name:		set_param_app_users_fraction
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_app_users_fraction( parameters *params, double value, int idx )
+int set_param_app_users_fraction(parameters *params, double value, int idx)
 {
     if (idx >= N_AGE_GROUPS) return FALSE;
     params->app_users_fraction[idx] = value;
@@ -1368,7 +1356,7 @@ int set_param_app_users_fraction( parameters *params, double value, int idx )
 *  Name:		set_param_app_turn_on_time
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_app_turn_on_time( parameters *params, int value )
+int set_param_app_turn_on_time(parameters *params, int value)
 {
     params->app_turn_on_time = value;
     return TRUE;
@@ -1378,7 +1366,7 @@ int set_param_app_turn_on_time( parameters *params, int value )
 *  Name:		set_param_app_turned_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_app_turned_on( parameters *params, int value )
+int set_param_app_turned_on(parameters *params, int value)
 {
     params->app_turned_on = value;
     return TRUE;
@@ -1388,7 +1376,7 @@ int set_param_app_turned_on( parameters *params, int value )
 *  Name:		set_param_daily_non_cov_symptoms_rate
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_daily_non_cov_symptoms_rate( parameters *params, double value )
+int set_param_daily_non_cov_symptoms_rate(parameters *params, double value)
 {
     params->daily_non_cov_symptoms_rate = value;
     return TRUE;
@@ -1398,16 +1386,17 @@ int set_param_daily_non_cov_symptoms_rate( parameters *params, double value )
 *  Name:		set_param_lockdown_work_network_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_work_network_multiplier( parameters *params, double value )
+int set_param_lockdown_work_network_multiplier(parameters *params, double value)
 {
     params->lockdown_work_network_multiplier = value;
     return TRUE;
 }
+
 /*****************************************************************************************
 *  Name:		set_param_lockdown_random_network_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_random_network_multiplier( parameters *params, double value )
+int set_param_random_network_multiplier(parameters *params, double value)
 {
     params->lockdown_random_network_multiplier = value;
     return TRUE;
@@ -1417,7 +1406,7 @@ int set_param_random_network_multiplier( parameters *params, double value )
 *  Name:		set_param_lockdown_house_interaction_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_house_interaction_multiplier( parameters *params, double value )
+int set_param_lockdown_house_interaction_multiplier(parameters *params, double value)
 {
     params->lockdown_house_interaction_multiplier = value;
     return TRUE;
@@ -1427,7 +1416,7 @@ int set_param_lockdown_house_interaction_multiplier( parameters *params, double 
 *  Name:		set_param_lockdown_time_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_time_on( parameters *params, int value )
+int set_param_lockdown_time_on(parameters *params, int value)
 {
     params->lockdown_time_on = value;
     return TRUE;
@@ -1437,7 +1426,7 @@ int set_param_lockdown_time_on( parameters *params, int value )
 *  Name:		set_param_lockdown_time_off
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_time_off( parameters *params, int value )
+int set_param_lockdown_time_off(parameters *params, int value)
 {
     params->lockdown_time_off = value;
     return TRUE;
@@ -1447,7 +1436,7 @@ int set_param_lockdown_time_off( parameters *params, int value )
 *  Name:		set_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_param_lockdown_on( parameters *params, int value )
+int set_param_lockdown_on(parameters *params, int value)
 {
     params->lockdown_on = TRUE;
     return TRUE;
@@ -1457,7 +1446,7 @@ int set_param_lockdown_on( parameters *params, int value )
 *  Name:		set_param_lockdown_elderly_time_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_elderly_time_on( parameters *params, int value )
+int set_param_lockdown_elderly_time_on(parameters *params, int value)
 {
     params->lockdown_elderly_time_on = value;
     return TRUE;
@@ -1467,7 +1456,7 @@ int set_param_lockdown_elderly_time_on( parameters *params, int value )
 *  Name:		set_param_lockdown_elderly_time_off
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_lockdown_elderly_time_off( parameters *params, int value )
+int set_param_lockdown_elderly_time_off(parameters *params, int value)
 {
     params->lockdown_elderly_time_off = value;
     return TRUE;
@@ -1477,7 +1466,7 @@ int set_param_lockdown_elderly_time_off( parameters *params, int value )
 *  Name:		set_param_lockdown_elderly_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_param_lockdown_elderly_on( parameters *params, int value )
+int set_param_lockdown_elderly_on(parameters *params, int value)
 {
     params->lockdown_elderly_on = TRUE;
     return TRUE;
@@ -1487,7 +1476,7 @@ int set_param_lockdown_elderly_on( parameters *params, int value )
 *  Name:		set_param_testing_symptoms_time_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_testing_symptoms_time_on( parameters *params, int value )
+int set_param_testing_symptoms_time_on(parameters *params, int value)
 {
     params->testing_symptoms_time_on = value;
     return TRUE;
@@ -1497,18 +1486,19 @@ int set_param_testing_symptoms_time_on( parameters *params, int value )
 *  Name:		set_param_testing_symptoms_time_off
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_testing_symptoms_time_off( parameters *params, int value )
+int set_param_testing_symptoms_time_off(parameters *params, int value)
 {
     params->testing_symptoms_time_off = value;
     return TRUE;
 }
+
 /*****************************************************************************************
 *  Name: 		set_param_mild_fraction
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double set_param_mild_fraction(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE; 
+    if (idx >= N_AGE_GROUPS) return FALSE;
     params->mild_fraction[idx] = value;
     return TRUE;
 }
@@ -1519,7 +1509,7 @@ double set_param_mild_fraction(parameters *params, double value, int idx)
 ******************************************************************************************/
 double set_param_icu_allocation(parameters *params, double value, int idx)
 {
-    if (idx >= N_AGE_GROUPS) return FALSE; 
+    if (idx >= N_AGE_GROUPS) return FALSE;
     params->icu_allocation[idx] = value;
     return TRUE;
 }
@@ -1538,9 +1528,384 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
     params->REFERENCE_HOUSEHOLDS[idx][8] = i_80;
     // return TRUE;
 }
+%}
+
+%array_class(double, doubleArray);
+%inline %{
+/*****************************************************************************************
+*  Name:        get_param_array_mean_random_interactions
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_mean_random_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_TYPES; idx++) {
+        value[idx] = params->mean_random_interactions[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_sd_random_interactions
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_sd_random_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_TYPES; idx++) {
+        value[idx] = params->sd_random_interactions[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_mean_work_interactions
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_mean_work_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+        value[idx] = params->mean_work_interactions[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_daily_fraction_work_used
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_daily_fraction_work_used(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+        value[idx] = params->daily_fraction_work_used[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_relative_susceptibility
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_relative_susceptibility(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->relative_susceptibility[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_adjusted_susceptibility
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_adjusted_susceptibility(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->adjusted_susceptibility[idx];
+    } 
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_relative_transmission
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_relative_transmission(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_INTERACTION_TYPES; idx++) {
+        value[idx] = params->relative_transmission[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_relative_transmission_used
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_relative_transmission_used(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_INTERACTION_TYPES; idx++) {
+        value[idx] = params->relative_transmission_used[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_hospitalised_fraction
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_hospitalised_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->hospitalised_fraction[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_critical_fraction
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_critical_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->critical_fraction[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_fatality_fraction
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_fatality_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->fatality_fraction[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_household_size
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_household_size(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_HOUSEHOLD_MAX; idx++) {
+        value[idx] = params->household_size[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_population
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_population(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->population[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_fraction_asymptomatic
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_fraction_asymptomatic(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->fraction_asymptomatic[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_mild_fraction
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_mild_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->mild_fraction[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_icu_allocation
+*  Description: Gets the value of an array
+******************************************************************************************/
+void get_param_array_icu_allocation(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->icu_allocation[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        get_param_array_app_users_fraction
+*  Description: Gets the value of double parameter
+******************************************************************************************/
+void get_param_array_app_users_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        value[idx] = params->app_users_fraction[idx];
+    }
+}
 
 
+/*****************************************************************************************
+*  Name:        set_param_array_mean_random_interactions
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_mean_random_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_TYPES; idx++) {
+        params->mean_random_interactions[idx] = value[idx];
+    }
+}
 
+/*****************************************************************************************
+*  Name:        set_param_array_sd_random_interactions
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_sd_random_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_TYPES; idx++) {
+        params->sd_random_interactions[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_mean_work_interactions
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_mean_work_interactions(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+        params->mean_work_interactions[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_daily_fraction_work_used
+*  Description: Sets the value of parameter
+******************************************************************************************/
+void set_param_array_daily_fraction_work_used(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_WORK_NETWORKS; idx++) {
+        params->daily_fraction_work_used[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_relative_susceptibility
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_relative_susceptibility(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->relative_susceptibility[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_adjusted_susceptibility
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_adjusted_susceptibility(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->adjusted_susceptibility[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_relative_transmission
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_relative_transmission(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_INTERACTION_TYPES; idx++) {
+        params->relative_transmission[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_relative_transmission_used
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_relative_transmission_used(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_INTERACTION_TYPES; idx++) {
+        params->relative_transmission_used[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_hospitalised_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_hospitalised_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->hospitalised_fraction[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_critical_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_critical_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->critical_fraction[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_fatality_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_fatality_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->fatality_fraction[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_household_size
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_household_size(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_HOUSEHOLD_MAX; idx++) {
+        params->household_size[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_population
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_population(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->population[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_fraction_asymptomatic
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+void set_param_array_fraction_asymptomatic(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->fraction_asymptomatic[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_mild_fraction
+*  Description: Gets the value of an array
+******************************************************************************************/
+void set_param_array_mild_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->mild_fraction[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_app_users_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+void set_param_array_app_users_fraction(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->app_users_fraction[idx] = value[idx];
+    }
+}
+
+/*****************************************************************************************
+*  Name:        set_param_array_icu_allocation
+*  Description: Gets the value of an array
+******************************************************************************************/
+void set_param_array_icu_allocation(parameters *params, double *value)
+{
+    for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
+        params->icu_allocation[idx] = value[idx];
+    }
+}
 %}
 
 %extend parameters{
