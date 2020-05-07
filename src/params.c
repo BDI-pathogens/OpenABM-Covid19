@@ -193,18 +193,7 @@ int get_model_param_app_turned_on(model *model)
 ******************************************************************************************/
 int get_model_param_lockdown_on(model *model)
 {
-	int age;
-	double t_pop, frac;
-
-	t_pop = 0;
-	frac  = 0;
-	for( age = 0; age < N_AGE_GROUPS; age++ )
-	{
-		t_pop += model->params->population[ age ];
-		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
-	}
-
-	return frac / t_pop;
+	return model->params->lockdown_on;
 }
 
 /*****************************************************************************************
