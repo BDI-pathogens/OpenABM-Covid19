@@ -3,8 +3,6 @@ from __future__ import annotations
 import itertools
 from typing import Mapping, Tuple, MutableMapping
 
-import numpy as np
-
 from adapter_covid19.constants import START_OF_TIME
 from adapter_covid19.data_structures import SimulateState, InitialiseState
 from adapter_covid19.datasources import (
@@ -12,7 +10,7 @@ from adapter_covid19.datasources import (
     Reader,
     RegionSectorAgeDataSource,
 )
-from adapter_covid19.enums import Sector, LabourState, Region, Age, EmploymentState
+from adapter_covid19.enums import Sector, Region, Age, EmploymentState
 
 
 class Scenario:
@@ -54,7 +52,6 @@ class Scenario:
         self.reader = reader
         for k, v in self.datasources.items():
             self.__setattr__(k, v(k).load(reader))
-        return utilisations
 
     def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
         if time == START_OF_TIME and lockdown:
@@ -86,9 +83,6 @@ class Scenario:
         ill: Mapping[Tuple[Region, Sector, Age], float],
         lockdown: bool,
         furlough: bool,
-        new_spending_day: int,
-        ccff_day: int,
-        loan_guarantee_day: int,
     ) -> SimulateState:
         self._pre_simulation_checks(time, lockdown)
         simulate_state = self.simulate_states[time] = SimulateState(
