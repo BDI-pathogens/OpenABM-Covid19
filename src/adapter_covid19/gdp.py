@@ -468,8 +468,6 @@ class CobbDouglasLPSetup:
         ]
         const_ub += factor_ill
         A_ub += [self.indicator("lambda", LabourState.ILL, i) for i in Sector]
-        const_ub = np.array(const_ub)
-        A_ub = np.array(A_ub)
         # equations
         const_eq = []
         A_eq = []
@@ -504,6 +502,24 @@ class CobbDouglasLPSetup:
             self.labour_conditioning_factors[LabourState.ILL, s] = f
         # note: if all constraints are non-vacuous (no zero coefficients), one of these sets of constraints is redundant,
         # which leaves one degree of freedom per sector
+        # ensure unemployment is at least as large as bound given exogenously
+        # i.e. the following constraints hold
+        for f_wfo, f_wfh, f_ill, i in zip(factor_wfo, factor_wfh, factor_ill, Sector):
+            # the value of p_not_employed on the utilisation given as *input* is taken as a *lower bound* on
+            # on the value of p_not_employed determined by the model as output
+            not_employed_lower_bound = p[WorkerStateConditional.NOT_EMPLOYED, i]
+            # self.indicator("lambda", LabourState.WORKING, i) <= (1 - not_employed_lower_bound) * f_wfo
+            const_ub.append((1 - not_employed_lower_bound) * f_wfo)
+            A_ub.append(self.indicator("lambda", LabourState.WORKING, i))
+            # self.indicator("lambda", LabourState.WFH, i) <= (1 - not_employed_lower_bound) * f_wfh
+            const_ub.append((1 - not_employed_lower_bound) * f_wfh)
+            A_ub.append(self.indicator("lambda", LabourState.WFH, i))
+            # self.indicator("lambda", LabourState.ILL, i) <= (1 - not_employed_lower_bound) * f_ill
+            const_ub.append((1 - not_employed_lower_bound) * f_ill)
+            A_ub.append(self.indicator("lambda", LabourState.ILL, i))
+        # convert to numpy arrays
+        const_ub = np.array(const_ub)
+        A_ub = np.array(A_ub)
         const_eq = np.array(const_eq)
         A_eq = np.array(A_eq)
         return Bound(A_ub, const_ub, A_eq, const_eq)
@@ -900,8 +916,19 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             # TODO: have corporate model account for p_furlough
 
         for r, s, a in itertools.product(Region, Sector, Age):
+            not_employed_lower_bound = state.utilisations[r, s, a].p_not_employed
+            if state.furlough:
+                # if an intervention makes furloughing possible
+                if p_not_employed[s] > 0.0:
+                    p_furloughed = max(p_not_employed[s] - not_employed_lower_bound, 0.0) / p_not_employed[s]
+                else:
+                    p_furloughed = 0.0
+            else:
+                p_furloughed = 0.0
             state.utilisations[r, s, a].p_not_employed = p_not_employed[s]
-            assert state.utilisations[r, s, a].p_not_employed >= 0.0
+            state.utilisations[r, s, a].p_furloughed = p_furloughed
+            assert 0 <= state.utilisations[r, s, a].p_not_employed <= 1
+            assert 0 <= state.utilisations[r, s, a].p_furloughed <= 1
 
         # update gdp state
         gdp_state = IoGdpState(
@@ -990,6 +1017,19 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             capital[s] = capital[s] * (1 + self.growth_rates[s]) ** (
                 (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
             )
+
+        # use unemployment from corporate model as *lower bound* on unemployment for gdp model
+        if (
+            state.previous is None
+            or state.previous.corporate_state is None
+            or state.previous.corporate_state.capital_discount_factor is None #TODO: use dedicated variable instead of capital discount factor
+        ):
+            # keep default value of p_not_employed as lower bound
+            pass
+        else:
+            for r,s,a in itertools.product(Region, Sector, Age):
+                state.utilisations[r,s,a].p_not_employed = min(1.0,max(0.0,1.0 - state.previous.corporate_state.capital_discount_factor[s]))
+
 
         # use demand parameter from personal model
         if (
