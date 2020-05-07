@@ -123,7 +123,7 @@ class Economics:
             for s in Sector:
                 for r, a in itertools.product(Region, Age):
                     state.utilisations[r, s, a].p_not_employed = (
-                        1 - state.previous.corporate_state.gdp_discount_factor[s]
+                        1 - state.previous.corporate_state.capital_discount_factor[s]
                     )
 
         self.corporate_model.simulate(state)

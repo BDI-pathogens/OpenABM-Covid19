@@ -66,12 +66,9 @@ class InitialiseState:
 
 @dataclass
 class CorporateState:
-    gdp_discount_factor: Mapping[Sector, float]
+    capital_discount_factor: Mapping[Sector, float]
     cash_buffer: Mapping[BusinessSize, Mapping[Sector, np.array]]
     proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]]
-    capital: Mapping[Sector, float] = field(
-        default_factory=lambda: {s: 1.0 for s in Sector}
-    )
 
 
 @dataclass

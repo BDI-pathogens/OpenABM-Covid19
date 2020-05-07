@@ -1163,14 +1163,14 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         if (
             state.previous is None
             or state.previous.corporate_state is None
-            or state.previous.corporate_state.capital is None
+            or state.previous.corporate_state.capital_discount_factor is None
         ):
             if state.time == START_OF_TIME:
                 capital = {s: 1.0 for s in Sector}
             else:
                 raise ValueError("capital parameter required")
         else:
-            capital = state.previous.corporate_state.capital
+            capital = state.previous.corporate_state.capital_discount_factor
 
         # apply assumed long-term growth rate to capital
         for s in Sector:
