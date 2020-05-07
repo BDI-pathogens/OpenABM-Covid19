@@ -172,9 +172,9 @@ class TestClass(object):
 
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
 
-        n_patient_general = df_individual_output["time_general"] != -1
-        n_patient_general = df_individual_output[n_patient_general]
-        n_patient_general = len(n_patient_general.index)
+        n_patient_icu = df_time_step["hospital_state"] == constant.EVENT_TYPES.GENERAL.value
+        n_patient_icu = df_time_step[n_patient_icu]
+        n_patient_icu = len(n_patient_icu.index)
 
         assert n_patient_general == 0
 
@@ -216,7 +216,7 @@ class TestClass(object):
 
         df_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        n_patient_icu = df_time_step["hospital_state"] == 19#constant.EVENT_TYPES.ICU.value
+        n_patient_icu = df_time_step["hospital_state"] == constant.EVENT_TYPES.ICU.value
         n_patient_icu = df_time_step[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
 
@@ -359,9 +359,9 @@ class TestClass(object):
         # check that no healthcare workers have been infected by a patient
         for index, healthcare_worker in healthcare_workers.iterrows():
             infector_hospital_state = healthcare_worker["infector_hospital_state"]
-            assert int(infector_hospital_state) != 17#constant.EVENT_TYPES.WAITING.value
-            assert int(infector_hospital_state) != 18#constant.EVENT_TYPES.GENERAL.value
-            assert int(infector_hospital_state) != 19#constant.EVENT_TYPES.ICU.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.WAITING.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.GENERAL.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.ICU.value
 
 # Dylan update for file change
     def test_hospital_infectivity_modifiers_max(self):
@@ -453,9 +453,9 @@ class TestClass(object):
         # check that no healthcare workers have been infected by a patient
         for index, healthcare_worker in healthcare_workers.iterrows():
             infector_hospital_state = healthcare_worker["infector_hospital_state"]
-            assert int(infector_hospital_state) != 17#constant.EVENT_TYPES.WAITING.value
-            assert int(infector_hospital_state) != 18#constant.EVENT_TYPES.GENERAL.value
-            assert int(infector_hospital_state) != 19#constant.EVENT_TYPES.ICU.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.WAITING.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.GENERAL.value
+            assert int(infector_hospital_state) != constant.EVENT_TYPES.ICU.value
 
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
                                       comment="#", sep=",", skipinitialspace=True)
@@ -518,7 +518,7 @@ class TestClass(object):
 
         for index, row in time_step_df.iterrows():
 
-            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
+            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -530,8 +530,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == 21#constant.EVENT_TYPES.DISCHARGED.value
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING.value
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.DISCHARGED.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -581,7 +581,7 @@ class TestClass(object):
         for index, row in time_step_df.iterrows():
 
 
-            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
+            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -593,8 +593,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == 21#constant.EVENT_TYPES.DISCHARGED.value
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING.value
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.DISCHARGED.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -644,7 +644,7 @@ class TestClass(object):
 
         for index, row in time_step_df.iterrows():
 
-            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
+            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -656,9 +656,9 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
-                icu_condition = rest_time_steps_pdx_df['hospital_state'] == 19#constant.EVENT_TYPES.ICU.value
-                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == 20#constant.EVENT_TYPES.MORTUARY.value
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING.value
+                icu_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.ICU.value
+                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.MORTUARY.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | icu_condition | mortuary_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -703,7 +703,7 @@ class TestClass(object):
 
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        waiting_df = time_step_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
+        waiting_df = time_step_df['hospital_state'] == constant.EVENT_TYPES.WAITING.value
         waiting_df = time_step_df[waiting_df]
 
         assert len(waiting_df.index) == 0
