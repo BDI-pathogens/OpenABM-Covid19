@@ -366,14 +366,14 @@ class Utilisation:
 
     def to_dict(self):
         return {
-            "dead": self.p_dead,
-            "ill_wfo": self.p_ill_wfo,
-            "ill_wfh": self.p_ill_wfh,
-            "ill_furloughed": self.p_ill_furloughed,
-            "ill_unemployed": self.p_ill_unemployed,
-            "wfh": self.p_wfh,
-            "furloughed": self.p_furloughed,
-            "not_employed": self.p_not_employed
+            WorkerStateConditional.DEAD: self.p_dead,
+            WorkerStateConditional.ILL_WFO: self.p_ill_wfo,
+            WorkerStateConditional.ILL_WFH: self.p_ill_wfh,
+            WorkerStateConditional.ILL_FURLOUGHED: self.p_ill_furloughed,
+            WorkerStateConditional.ILL_UNEMPLOYED: self.p_ill_unemployed,
+            WorkerStateConditional.WFH: self.p_wfh,
+            WorkerStateConditional.FURLOUGHED: self.p_furloughed,
+            WorkerStateConditional.NOT_EMPLOYED: self.p_not_employed
         }
 
     @classmethod

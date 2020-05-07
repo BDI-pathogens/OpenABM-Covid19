@@ -30,7 +30,7 @@ from adapter_covid19.enums import (
     FinalUse,
     LabourState,
     EmploymentState,
-    WorkerState)
+    WorkerState, WorkerStateConditional)
 from adapter_covid19.data_structures import (
     SimulateState,
     GdpResult,
@@ -358,6 +358,7 @@ class CobbDouglasLPSetup:
             + [("x", m, i) for m in M for i in Sector]
             + [("xtilde", m, i) for m in value_adds for i in Sector]
             + [("y", i) for i in Sector]
+            + [("lambda", l, i) for l in [LabourState.ILL, LabourState.WFH, LabourState.WORKING] for i in Sector ]
         )
         self.xtilde_iot = pd.DataFrame([])
         self.objective_c = np.array([])
@@ -370,6 +371,7 @@ class CobbDouglasLPSetup:
             "xtilde": 0.0,
             ("xtilde", M.K): -np.inf,
             "y": 0.0,
+            "lambda": 0.0
         }
         u_bounds = {
             "q": np.inf,
@@ -377,6 +379,7 @@ class CobbDouglasLPSetup:
             "x": np.inf,
             "xtilde": np.inf,
             "y": np.inf,
+            "lambda": 1.0
         }
         self.lp_bounds = list(
             zip(
@@ -563,42 +566,97 @@ class CobbDouglasLPSetup:
 
     def c_labour_quantity(
         self,
-        p_lambda_dict: Mapping[Tuple[Sector, LabourState], float],
         wfh_productivity: Mapping[Sector, float],
     ) -> Bound:
-        const = np.array(
+        const = np.array([0.0 for i in Sector])
+        A = np.array(
             [
-                (
-                    p_lambda_dict[i, LabourState.WORKING]
-                    + wfh_productivity[i] * p_lambda_dict[i, LabourState.WFH]
-                )
-                * self.xtilde_iot.loc[M.L, i]
+                self.indicator("x", M.L, i)
+                - (
+                    self.indicator("lambda", LabourState.WORKING, i)
+                    + wfh_productivity[i] * self.indicator("lambda", LabourState.WFH, i)
+                ) * self.xtilde_iot.loc[M.L, i]
                 for i in Sector
             ]
         )
-        A = np.array([self.indicator("x", M.L, i) for i in Sector])
         normalization = np.array([1 / self.xtilde_iot.loc[M.L, i] for i in Sector])
         const = np.multiply(const, normalization)
         A = np.multiply(A, normalization[:, None])
         return Bound(None, None, A, const)
 
-    def c_labour_compensation(self, p_lambda: pd.DataFrame) -> Bound:
-        const = np.array(
+    def c_labour_compensation(self) -> Bound:
+        const = np.array([0.0 for i in Sector])
+        A = np.array(
             [
-                (
-                    p_lambda.loc[i, LabourState.WORKING]
-                    + p_lambda.loc[i, LabourState.WFH]
-                    + p_lambda.loc[i, LabourState.ILL]
-                )
-                * self.xtilde_iot.loc[M.L, i]
+                self.indicator("xtilde", M.L, i)
+                - (
+                    self.indicator("lambda", LabourState.WORKING, i)
+                    + self.indicator("lambda", LabourState.WFH, i)
+                    + self.indicator("lambda", LabourState.ILL, i)
+                ) * self.xtilde_iot.loc[M.L, i]
                 for i in Sector
             ]
         )
-        A = np.array([self.indicator("xtilde", M.L, i) for i in Sector])
         normalization = np.array([1 / self.xtilde_iot.loc[M.L, i] for i in Sector])
         const = np.multiply(const, normalization)
         A = np.multiply(A, normalization[:, None])
         return Bound(None, None, A, const)
+
+    def c_labour_constraints(self,
+                             p: Mapping[Sector, Utilisation]):
+        p = {(w,i):v for i in Sector for w, v in p[i].to_dict().items()} # Mapping[Tuple[WorkerStateConditional,Sector], float]
+        # inequalities
+        const_ub = []
+        A_ub = []
+        # HEALTHY_WFO == WORKING == (1-p_not_employed) * (1-p_wfh) * (1-p_ill_wfo) * (1-p_dead)
+        # hence: WORKING <= (1-p_wfh) * (1-p_ill_wfo) * (1-p_dead)
+        factor_wfo = [(1 - p[WorkerStateConditional.WFH, i]) * (1 - p[WorkerStateConditional.ILL_WFO, i]) * (
+                    1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
+        const_ub +=  factor_wfo
+        A_ub += [ self.indicator("lambda", LabourState.WORKING, i) for i in Sector]
+        # HEALTHY_WFH == WFH == (1-p_not_employed) * p_wfh * (1-p_ill_wfh) * (1-p_dead)
+        # hence: WFH <= p_wfh * (1-p_ill_wfo) * (1-p_dead)
+        factor_wfh = [p[WorkerStateConditional.WFH, i] * (1 - p[WorkerStateConditional.ILL_WFH, i]) * (
+                    1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
+        const_ub += factor_wfh
+        A_ub += [self.indicator("lambda", LabourState.WFH, i) for i in Sector]
+        # ILL_WFH + ILL_WFO == ILL == (1-p_not_employed) * (p_ill_wfo + p_ill_wfh) * (1-p_dead)
+        # hence: ILL <= (p_ill_wfo + p_ill_wfh) * (1-p_dead)
+        factor_ill = [(p[WorkerStateConditional.ILL_WFO, i] + p[WorkerStateConditional.ILL_WFH, i]) * (
+                1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
+        const_ub += factor_ill
+        A_ub += [self.indicator("lambda", LabourState.ILL, i) for i in Sector]
+        const_ub = np.array(const_ub)
+        A_ub = np.array(A_ub)
+        # equations
+        const_eq = []
+        A_eq = []
+        # WFH and WFO are consistent
+        for f_wfh, f_wfo, i in  zip(factor_wfh, factor_wfo, Sector):
+            const_eq.append(0.0)
+            A_eq.append(
+                self.indicator("lambda", LabourState.WFH, i) * f_wfo
+                - self.indicator("lambda", LabourState.WORKING, i) * f_wfh
+            )
+        # WFH and ILL are consistent
+        for f_wfh, f_ill, i in  zip(factor_wfh, factor_ill, Sector):
+            const_eq.append(0.0)
+            A_eq.append(
+                self.indicator("lambda", LabourState.WFH, i) * f_ill
+                - self.indicator("lambda", LabourState.ILL, i) * f_wfh
+            )
+        # WFO and ILL are consistent
+        for f_wfo, f_ill, i in  zip(factor_wfo, factor_ill, Sector):
+            const_eq.append(0.0)
+            A_eq.append(
+                self.indicator("lambda", LabourState.WORKING, i) * f_ill
+                - self.indicator("lambda", LabourState.ILL, i) * f_wfo
+            )
+        # note: if all constraints are non-vacuous (no zero coefficients), one of these sets of constraints is redundant,
+        # which leaves one degree of freedom per sector
+        const_eq = np.array(const_eq)
+        A_eq = np.array(A_eq)
+        return Bound(A_ub,const_ub,A_eq,const_eq)
 
     def initial_setup(
         self,
@@ -720,17 +778,13 @@ class CobbDouglasLPSetup:
 
     def finalise_setup(
         self,
-        p_lambda: pd.DataFrame,
         p_kappa: Mapping[Sector, float],
+        p_labour: Mapping[Sector, Utilisation],
         wfh_productivity: Mapping[Sector, float],
     ):
-        p_lambda_dict = {
-            (i, s): p_lambda.loc[i, s] for i in Sector for s in LabourState
-        }
-        bounds = self.add_constraint(self.c_labour_compensation(p_lambda), self.bounds)
-        bounds = self.add_constraint(
-            self.c_labour_quantity(p_lambda_dict, wfh_productivity), bounds
-        )
+        bounds = self.add_constraint(self.c_labour_compensation(), self.bounds)
+        bounds = self.add_constraint(self.c_labour_quantity(wfh_productivity), bounds)
+        bounds = self.add_constraint(self.c_labour_constraints(p_labour), bounds)
         bounds = self.add_constraint(self.c_capital(p_kappa=p_kappa), bounds)
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
@@ -983,24 +1037,21 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
     ) -> IoGdpState:
 
         # preprocess parameters
-        lambda_utilisation = {
-            s: state.utilisations[s] for s in Sector
-        }
-        # transform new mapping to old
-        # TODO: convert model to use new WorkerStates directly
-        p_lambda_dict = {}
-        p_lambda_dict[LabourState.UNEMPLOYED] = {s: lambda_utilisation[s][WorkerState.ILL_UNEMPLOYED] + lambda_utilisation[s][WorkerState.HEALTHY_UNEMPLOYED] + lambda_utilisation[s][WorkerState.DEAD] for s in Sector}
-        p_lambda_dict[LabourState.FURLOUGHED] = {s: lambda_utilisation[s][WorkerState.ILL_FURLOUGHED] + lambda_utilisation[s][WorkerState.HEALTHY_FURLOUGHED] for s in Sector}
-        p_lambda_dict[LabourState.WORKING] = {s: lambda_utilisation[s][WorkerState.HEALTHY_WFO]  for s in Sector}
-        p_lambda_dict[LabourState.WFH] = {s: lambda_utilisation[s][WorkerState.HEALTHY_WFH] for s in Sector}
-        p_lambda_dict[LabourState.ILL] = {s: lambda_utilisation[s][WorkerState.ILL_WFO] + lambda_utilisation[s][WorkerState.ILL_WFH] for s in Sector}
-        p_lambda = pd.DataFrame(p_lambda_dict)
+        p_labour = {}
+        for s in Sector:
+            lambdas = state.utilisations[s]
+            default_values = {
+                WorkerStateConditional.WFH: self.keyworker[s],
+                WorkerStateConditional.FURLOUGHED: 1.0,
+                WorkerStateConditional.NOT_EMPLOYED: 0.0
+            }
+            p_labour[s] = Utilisation.from_lambdas(lambdas,default_values)
 
         p_kappa = capital
 
         # setup linear program
         objective, bounds, lp_bounds = self.setup.finalise_setup(
-            p_lambda, p_kappa, self.wfh
+            p_kappa, p_labour, self.wfh
         )
 
         # run linear program

@@ -168,6 +168,7 @@ class WorkerState(OrderedEnum):
     # Dead
     DEAD = enum.auto()
 
+
 class WorkerStateConditional(OrderedEnum):
     # Healthy and working
     WFH = enum.auto()
