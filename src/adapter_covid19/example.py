@@ -162,11 +162,15 @@ def plot_one_scenario(states,end_time,axes,legend=False):
 
 def plot_scenarios(scenarios, end_time=50):
     fig, axes = plt.subplots(
-        6, len(scenarios), sharex="col", sharey="row", figsize=(20, 60)
+        6, len(scenarios), sharex="col", sharey="row", figsize=(20, 60 / len(scenarios))
     )
-    for idx, (name, states) in enumerate(scenarios.items()):
+    for idx, (name, (econ, states)) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]
         plot_one_scenario(states,end_time,axs)
+    for ax, name in zip(axes[0], scenarios.values()):
+        ax.annotate(name, xy=(0.5, 1), xytext=(0, 5),
+                    xycoords='axes fraction', textcoords='offset points',
+                    size='large', ha='center', va='baseline')
 
 
 def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
@@ -203,28 +207,28 @@ def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
         loan_guarantee_day=15,
         show_plots=show_plots,
     )
-    scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(
-        data_path=data_path,
-        end_time=50,
-        furlough_on=5,
-        furlough_off=30,
-        new_spending_day=5,
-        ccff_day=5,
-        loan_guarantee_day=5,
-        show_plots=show_plots,
-    )
-    scenario_results[
-        "furlough and corp spending only"
-    ] = lockdown_then_unlock_no_corona(
-        data_path=data_path,
-        end_time=50,
-        furlough_on=5,
-        furlough_off=30,
-        new_spending_day=5,
-        ccff_day=1000,
-        loan_guarantee_day=1000,
-        show_plots=show_plots,
-    )
+    # scenario_results["furlough and corp support"] = lockdown_then_unlock_no_corona(
+    #     data_path=data_path,
+    #     end_time=50,
+    #     furlough_on=5,
+    #     furlough_off=30,
+    #     new_spending_day=5,
+    #     ccff_day=5,
+    #     loan_guarantee_day=5,
+    #     show_plots=show_plots,
+    # )
+    # scenario_results[
+    #     "furlough and corp spending only"
+    # ] = lockdown_then_unlock_no_corona(
+    #     data_path=data_path,
+    #     end_time=50,
+    #     furlough_on=5,
+    #     furlough_off=30,
+    #     new_spending_day=5,
+    #     ccff_day=1000,
+    #     loan_guarantee_day=1000,
+    #     show_plots=show_plots,
+    # )
     return scenario_results
 
 
