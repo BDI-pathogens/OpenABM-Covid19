@@ -379,7 +379,7 @@ class TestClass(object):
 
         # check to see there are no work connections
         df_test = pd.merge(
-            df_quar, df_int[df_int["type"] == constant.WORK], 
+            df_quar, df_int[df_int["type"] == constant.OCCUPATION], 
             left_on = "ID", right_on = "ID_1", how="inner"
         )
         
@@ -575,8 +575,8 @@ class TestClass(object):
         np.testing.assert_allclose( df_with.loc[ constant.HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff, 
                                     err_msg = "lockdown not changing household transmission as expected" )
         for oc_net in OccupationNetworkEnum:
-            expect_work = df_without.loc[ constant.WORK, ["N"] ] * test_params[ f"lockdown_occupation_multiplier{oc_net.name}" ]       
-            np.testing.assert_allclose( df_with.loc[ constant.WORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
+            expect_work = df_without.loc[ constant.OCCUPATION, ["N"] ] * test_params[ f"lockdown_occupation_multiplier{oc_net.name}" ]       
+            np.testing.assert_allclose( df_with.loc[ constant.WOCCUPATIONORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
                                     err_msg = "lockdown not changing work transmission as expected" )
       
       

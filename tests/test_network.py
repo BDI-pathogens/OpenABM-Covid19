@@ -382,7 +382,7 @@ class TestClass(object):
         # get all the work connections
         df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
-        df_int  = df_int[ df_int["type"] == constant.WORK ]
+        df_int  = df_int[ df_int["type"] == constant.OCCUPATION ]
         df_int = pd.merge( df_int, ageTypeMap1,  on = "age_group_1", how = "left" )
         df_int = pd.merge( df_int, ageTypeMap2, on = "age_group_2", how = "left" )
 
