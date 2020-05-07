@@ -35,7 +35,6 @@ def lockdown_then_unlock_no_corona(
     ccff_day: int = 5,
     loan_guarantee_day: int = 5,
     end_time: int = 50,
-    gdp_model: str = "PiecewiseLinearCobbDouglasGdpModel",
     show_plots: bool = True,
 ):
     """
