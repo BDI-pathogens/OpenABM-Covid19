@@ -1,10 +1,9 @@
 import copy
 import itertools
-from typing import Optional
 
 from adapter_covid19.data_structures import SimulateState, Utilisation, Utilisations
 from adapter_covid19.datasources import Reader
-from adapter_covid19.enums import Region, Sector, Age, LabourState, WorkerState
+from adapter_covid19.enums import Region, Sector, Age, WorkerState
 
 DATA_PATH = "tests/adapter_covid19/data"
 
@@ -70,7 +69,8 @@ def state_from_utilisation(
 ) -> SimulateState:
     reader = Reader(DATA_PATH)
     utilisations = Utilisations(
-        {k: utilisation for k in itertools.product(Region, Sector, Age)}, reader=reader,
+        {k: copy.deepcopy(utilisation) for k in itertools.product(Region, Sector, Age)},
+        reader=reader,
     )
     lambdas = utilisation.to_lambdas()
     ill = sum(v for k, v in lambdas.items() if k in ILL_STATES)
