@@ -19,7 +19,7 @@ from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, BusinessSize, WorkerState
+from adapter_covid19.enums import Region, Sector, Age, BusinessSize, WorkerStateConditional, WorkerState
 from adapter_covid19.scenarios import Scenario
 
 
@@ -79,75 +79,94 @@ def lockdown_then_unlock_no_corona(
         states.append(simulate_state)
 
     if show_plots:
-        # Plot 1 - GDP
-        df = (
-            pd.DataFrame(
-                [
-                    states[i].gdp_state.fraction_gdp_by_sector()
-                    for i in range(1, end_time)
-                ],
-                index=range(1, end_time),
-            )
-            .T.sort_index()
-            .T.cumsum(axis=1)
+        fig, axes = plt.subplots(
+            6, 1, sharex="col", sharey="row", figsize=(20, 60)
         )
-        fig, ax = plt.subplots(figsize=(20, 10))
-        ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
-        for i in range(1, df.shape[1]):
-            ax.fill_between(
-                df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
-            )
-        ax.legend(ncol=2)
-        ax.set_title("GDP")
-
-        # Plot 2a - Corporate Solvencies - Large Cap
-        df = pd.DataFrame(
-            [
-                states[i].corporate_state.proportion_solvent[BusinessSize.large]
-                for i in range(1, end_time)
-            ]
-        )
-        df.plot(figsize=(20, 10), title="Corporate Solvencies - Large Cap")
-
-        # Plot 2b - Corporate Solvencies - SME
-        df = pd.DataFrame(
-            [
-                states[i].corporate_state.proportion_solvent[BusinessSize.sme]
-                for i in range(1, end_time)
-            ]
-        )
-        df.plot(figsize=(20, 10), title="Corporate Solvencies - SME")
-
-        # Plot 3a - Personal Insolvencies
-        pd.DataFrame(
-            [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
-        ).plot(figsize=(20, 10), title="Personal Insolvencies")
-
-        # Plot 3b - Household Expenditure
-        pd.DataFrame(
-            [states[i].personal_state.demand_reduction for i in range(1, end_time)]
-        ).plot(figsize=(20, 10), title="Household Expenditure Reduction")
-
-        # Plot 4 - Unemployment
-        def unemployment_from_lambdas(d):
-            return (
-                d[WorkerState.ILL_UNEMPLOYED]
-                + d[WorkerState.HEALTHY_UNEMPLOYED]
-                + d[WorkerState.ILL_FURLOUGHED]
-                + d[WorkerState.HEALTHY_FURLOUGHED]
-            ) / (1 - d[WorkerState.DEAD])
-
-        pd.DataFrame(
-            [
-                {
-                    s: unemployment_from_lambdas(states[i].utilisations[s])
-                    for s in Sector
-                }
-                for i in range(1, end_time)
-            ]
-        ).plot(figsize=(20, 10), title="Unemployment")
+        plot_one_scenario(states,end_time,axes)
 
     return econ, states
+
+def plot_one_scenario(states,end_time,axes,legend=False):
+    # Plot 1 - GDP
+    ax=axes[0]
+    df = (
+        pd.DataFrame(
+            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
+            index=range(1, end_time),
+        )
+            .T.sort_index()
+            .T.cumsum(axis=1)
+    )
+    ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
+    for i in range(1, df.shape[1]):
+        ax.fill_between(
+            df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
+        )
+    ax.legend(ncol=2)
+    ax.set_title("GDP")
+
+    # Plot 2a - Corporate Solvencies - Large Cap
+    df = pd.DataFrame(
+        [
+            states[i].corporate_state.proportion_solvent[BusinessSize.large]
+            for i in range(1, end_time)
+        ]
+    )
+    df.plot(title="Corporate Solvencies - Large Cap",ax=axes[1])
+
+    # Plot 2b - Corporate Solvencies - SME
+    df = pd.DataFrame(
+        [
+            states[i].corporate_state.proportion_solvent[BusinessSize.sme]
+            for i in range(1, end_time)
+        ]
+    )
+    df.plot(title="Corporate Solvencies - SME",ax=axes[2])
+
+    # Plot 3a - Personal Insolvencies
+    pd.DataFrame(
+        [
+            states[i].personal_state.personal_bankruptcy
+            for i in range(1, end_time)
+        ]
+    ).plot(title="Personal Insolvencies",ax=axes[3])
+
+    # Plot 3b - Household Expenditure
+    pd.DataFrame(
+        [
+            states[i].personal_state.demand_reduction
+            for i in range(1, end_time)
+        ]
+    ).plot(title="Household Expenditure Reduction",ax=axes[4])
+
+    # Plot 4 - Unemployment
+    def unemployment_from_lambdas(d):
+        return (d[WorkerState.ILL_UNEMPLOYED] + d[WorkerState.HEALTHY_UNEMPLOYED] + d[WorkerState.ILL_FURLOUGHED] + d[
+            WorkerState.HEALTHY_FURLOUGHED]) / (1 - d[WorkerState.DEAD])
+
+    pd.DataFrame(
+        [
+            {s: unemployment_from_lambdas(states[i].utilisations[s]) for s in Sector if s != Sector.T_HOUSEHOLD}
+            for i in range(1, end_time)
+        ]
+    ).plot(title="Unemployment",ax=axes[5])
+
+    for ax in axes:
+        if legend:
+            ax.legend(ncol=2)
+        else:
+            ax.get_legend().remove()
+
+    plt.tight_layout()
+
+
+def plot_scenarios(scenarios, end_time=50):
+    fig, axes = plt.subplots(
+        6, len(scenarios), sharex="col", sharey="row", figsize=(20, 60)
+    )
+    for idx, (name, states) in enumerate(scenarios.items()):
+        axs = [row[idx] for row in axes]
+        plot_one_scenario(states,end_time,axs)
 
 
 def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
@@ -207,66 +226,6 @@ def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
         show_plots=show_plots,
     )
     return scenario_results
-
-
-def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
-    skip_scenarios = [] if skip_scenarios is None else skip_scenarios
-    end_time = 50
-    _scenarios = {n: e for n, e in scenarios.items() if n not in skip_scenarios}
-    fig, axes = plt.subplots(
-        4, len(_scenarios), sharex=True, sharey=True, figsize=(20, 12)
-    )
-    for idx, (name, econ) in enumerate(_scenarios.items()):
-        # Plot 1
-        ax = axes[0][idx]
-        df = (
-            pd.DataFrame(
-                [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
-                index=range(1, end_time),
-            )
-            .T.sort_index()
-            .T.cumsum(axis=1)
-        )
-        ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
-        for i in range(1, df.shape[1]):
-            ax.fill_between(
-                df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
-            )
-        # ax.legend(ncol=2)
-        ax.legend().remove()
-        ax.set_title(name)
-
-        # Plot 2
-        ax = axes[1][idx]
-        df = pd.DataFrame(
-            [
-                econ.results.corporate_solvencies[i]
-                for i in econ.results.corporate_solvencies
-            ]
-        )
-        df.plot(ax=ax)
-        ax.legend().remove()
-
-        # Plot 3
-        ax = axes[2][idx]
-        pd.DataFrame(
-            [
-                econ.results.personal_bankruptcy[i].personal_bankruptcy
-                for i in econ.results.personal_bankruptcy
-            ]
-        ).plot(ax=ax)
-        ax.legend().remove()
-
-        # Plot 4
-        ax = axes[3][idx]
-        pd.DataFrame(
-            [
-                econ.results.personal_bankruptcy[i].demand_reduction
-                for i in econ.results.personal_bankruptcy
-            ]
-        ).plot(ax=ax)
-        ax.legend().remove()
-    plt.tight_layout()
 
 
 if __name__ == "__main__":
