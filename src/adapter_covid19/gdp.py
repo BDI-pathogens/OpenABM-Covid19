@@ -16,9 +16,7 @@ from adapter_covid19.data_structures import (
     SimulateState,
     GdpResult,
     IoGdpResult,
-    GdpState,
     IoGdpState,
-    Utilisations,
     Utilisation,
 )
 from adapter_covid19.datasources import (
@@ -38,7 +36,6 @@ from adapter_covid19.enums import (
     PrimaryInput,
     FinalUse,
     LabourState,
-    EmploymentState,
     WorkerState,
     WorkerStateConditional,
 )
@@ -150,186 +147,6 @@ class BaseGdpModel(abc.ABC):
     @abc.abstractmethod
     def simulate(self, state: SimulateState) -> None:
         pass
-
-
-class LinearGdpModel(BaseGdpModel):
-    gdp: Mapping[Tuple[Region, Sector, Age], float]
-    workers: Mapping[Tuple[Region, Sector, Age], float]
-    wfh: Mapping[str, float]
-    vulnerability: Mapping[str, float]
-
-    def _get_datasources(self) -> Mapping[str, DataSource]:
-        datasources = {
-            "gdp": RegionSectorAgeDataSource,
-            "workers": RegionSectorAgeDataSource,
-            "growth_rates": SectorDataSource,
-            "keyworker": SectorDataSource,
-            "vulnerability": SectorDataSource,
-            "wfh": SectorDataSource,
-        }
-        return {k: v(k) for k, v in datasources.items()}
-
-    def _simulate_gdp(
-        self, region: Region, sector: Sector, age: Age, utilisation: float
-    ) -> float:
-        wfh_factor = self.wfh[sector]
-        vulnerability_factor = self.vulnerability[sector]
-        return (
-            wfh_factor + (vulnerability_factor - wfh_factor) * utilisation
-        ) * self.gdp[region, sector, age]
-
-    def _simulate_workers(
-        self, region: Region, sector: Sector, age: Age, utilisation: float
-    ) -> float:
-        return utilisation * self.workers[region, sector, age]
-
-    def simulate(self, state: SimulateState) -> None:
-        # FIXME: hacked to work with old utilisations
-        utilisations = {
-            (r, s, a): state.utilisations[LabourState.WORKING, r, s, a]
-            for r, s, a in itertools.product(Region, Sector, Age)
-        }
-
-        gdp = {
-            (r, s, a): self._simulate_gdp(r, s, a, u)
-            for (r, s, a), u in utilisations.items()
-        }
-        workers = {
-            (r, s, a): self._simulate_workers(r, s, a, u)
-            for (r, s, a), u in utilisations.items()
-        }
-        growth_factor, gdp = self._apply_growth_factor(state.time, state.lockdown, gdp)
-
-        state.gdp_state = GdpState(
-            gdp, workers, growth_factor, self.max_gdp, self.max_workers
-        )
-
-        # TODO: Deprecate
-        self.results.gdp[state.time] = gdp
-        self.results.growth_factor[state.time] = growth_factor
-        self.results.workers[state.time] = workers
-
-
-class SupplyDemandGdpModel(BaseGdpModel):
-    gdp: Mapping[Tuple[Region, Sector, Age], float]
-    workers: Mapping[Tuple[Region, Sector, Age], float]
-    wfh: Mapping[Sector, float]
-    vulnerability: Mapping[Sector, float]
-    supply: np.array
-    demand: np.array
-
-    def __init__(self, theta: float = 1.2, **kwargs):
-        super().__init__(**kwargs)
-        self.theta = theta
-
-    def _get_datasources(self) -> Mapping[str, DataSource]:
-        datasources = {
-            "gdp": RegionSectorAgeDataSource,
-            "workers": RegionSectorAgeDataSource,
-            "growth_rates": SectorDataSource,
-            "keyworker": SectorDataSource,
-            "vulnerability": SectorDataSource,
-            "wfh": SectorDataSource,
-            "supply": WeightMatrix,
-            "demand": WeightMatrix,
-        }
-        return {k: v(k) for k, v in datasources.items()}
-
-    def _simulate_gdp(
-        self, utilisations: Mapping[Tuple[Region, Sector, Age], float],
-    ) -> Mapping[Tuple[Region, Sector, Age], float]:
-        """
-        Refer to the model docs for documentation of this function
-        :param utilisations:
-        :return: GDP per region, sector, age
-        """
-        # Reforumlate the problem in terms of Region, Age, Sector (makes easier to solve)
-        gdp = {}
-        for region, age in itertools.product(Region, Age):
-            lam = np.array([utilisations[region, s, age] for s in Sector])
-            n = len(Sector)
-            c = -np.array([self.gdp[region, s, age] for s in Sector])
-            h = {s: self.wfh[s] for s in Sector}
-            H = np.array([self.wfh[s] for s in Sector])
-            WY = self.supply
-            WD = self.demand
-            bounds = [(0, 1) for _ in range(n)]
-            y_max = {
-                si: sum(WY[i, j] * (1 - h[sj]) for j, sj in enumerate(Sector))
-                for i, si in enumerate(Sector)
-            }
-            d_max = {
-                si: sum(WD[i, j] * (1 - h[sj]) for j, sj in enumerate(Sector))
-                for i, si in enumerate(Sector)
-            }
-            alpha_hat = np.array(
-                [
-                    (1 - h[s] * self.theta) / min(d_max[s], y_max[s])
-                    if h[s] != 1
-                    else 1
-                    for s in Sector
-                ]
-            )
-            alphalam = np.diag(alpha_hat * lam)
-            ialphalamwy = np.eye(n) - alphalam.dot(WY)
-            ialphalamwd = np.eye(n) - alphalam.dot(WD)
-            aub = np.vstack([ialphalamwy, ialphalamwd,])
-            bub = np.concatenate(
-                [
-                    (
-                        np.eye(n) - (1 - self.theta) * np.diag(lam) - alphalam.dot(WY)
-                    ).dot(H),
-                    (
-                        np.eye(n) - (1 - self.theta) * np.diag(lam) - alphalam.dot(WD)
-                    ).dot(H),
-                ]
-            )
-            if aub[n - 1, -1] == 0:
-                aub[n - 1, -1] = 1
-                aub[2 * n - 1, -1] = 1
-                bub[n - 1] = 1
-                bub[2 * n - 1] = 1
-            r = linprog(
-                c=c,
-                A_ub=aub,
-                b_ub=bub,
-                bounds=bounds,
-                x0=None,
-                method="revised simplex",
-            )
-            if not r.success:
-                raise ValueError(r.message)
-            for x, sector in zip(r.x, Sector):
-                gdp[region, sector, age] = x * self.gdp[region, sector, age]
-        return gdp
-
-    def _simulate_workers(
-        self, region: Region, sector: Sector, age: Age, utilisation: float
-    ) -> float:
-        return utilisation * self.workers[region, sector, age]
-
-    def simulate(self, state: SimulateState) -> None:
-        # FIXME: hacked to work with old utilisations
-        utilisations = {
-            (r, s, a): state.utilisations[LabourState.WORKING, r, s, a]
-            for r, s, a in itertools.product(Region, Sector, Age)
-        }
-
-        workers = {
-            (r, s, a): self._simulate_workers(r, s, a, u)
-            for (r, s, a), u in utilisations.items()
-        }
-        gdp = self._simulate_gdp(utilisations)
-        growth_factor, gdp = self._apply_growth_factor(state.time, state.lockdown, gdp)
-
-        state.gdp_state = GdpState(
-            gdp, workers, growth_factor, self.max_gdp, self.max_workers
-        )
-
-        # TODO: deprecate
-        self.results.gdp[state.time] = gdp
-        self.results.growth_factor[state.time] = growth_factor
-        self.results.workers[state.time] = workers
 
 
 @dataclass
