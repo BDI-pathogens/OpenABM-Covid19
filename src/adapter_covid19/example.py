@@ -74,9 +74,6 @@ def lockdown_then_unlock_no_corona(
             ill=ill,
             lockdown=lockdown_on <= i < lockdown_off,
             furlough=furlough_on <= i < furlough_off,
-            new_spending_day=new_spending_day,
-            ccff_day=ccff_day,
-            loan_guarantee_day=loan_guarantee_day,
         )
         econ.simulate(simulate_state)
         states.append(simulate_state)
