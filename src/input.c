@@ -60,9 +60,11 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	if(argc > 4)
 	{
 		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN );
+        params->sys_write_hospital = TRUE;
 	}else{
 		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
 			INPUT_CHAR_LEN );
+        params->sys_write_hospital = FALSE;
 	}
 
 
