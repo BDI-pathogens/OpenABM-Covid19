@@ -10,7 +10,15 @@ import pandas as pd
 
 from adapter_covid19.data_structures import SimulateState
 from adapter_covid19.datasources import Reader
-from adapter_covid19.enums import M, PrimaryInput, Region, Sector, Age, EmploymentState, LabourState
+from adapter_covid19.enums import (
+    M,
+    PrimaryInput,
+    Region,
+    Sector,
+    Age,
+    EmploymentState,
+    LabourState,
+)
 from adapter_covid19.gdp import (
     LinearGdpModel,
     SupplyDemandGdpModel,
@@ -41,14 +49,21 @@ def pytest_generate_tests(metafunc):
 class TestClass:
     def test_interface(self, gdp_model_cls, utilisations):
         reader = Reader(DATA_PATH)
-        state = SimulateState(time=0,
-                              dead={(r,s,a): 0.0 for r,s,a in itertools.product(Region,Sector,Age)},
-                              ill={(e,r,s,a): 0.0 for e,r,s,a in itertools.product(EmploymentState, Region,Sector,Age)},
-                              lockdown=False,
-                              furlough=False,
-                              new_spending_day=1000,
-                              ccff_day=1000,
-                              loan_guarantee_day=1000)
+        state = SimulateState(
+            time=0,
+            dead={(r, s, a): 0.0 for r, s, a in itertools.product(Region, Sector, Age)},
+            ill={
+                (e, r, s, a): 0.0
+                for e, r, s, a in itertools.product(
+                    EmploymentState, Region, Sector, Age
+                )
+            },
+            lockdown=False,
+            furlough=False,
+            new_spending_day=1000,
+            ccff_day=1000,
+            loan_guarantee_day=1000,
+        )
         gdp_model = gdp_model_cls()
         gdp_model.load(reader)
         gdp_model.simulate(state)
@@ -60,14 +75,21 @@ class TestClass:
         model = PiecewiseLinearCobbDouglasGdpModel()
         model.load(reader)
         setup = model.setup
-        state = SimulateState(time=0,
-                              dead={(r,s,a): 0.0 for r,s,a in itertools.product(Region,Sector,Age)},
-                              ill={(e,r,s,a): 0.0 for e,r,s,a in itertools.product(EmploymentState, Region,Sector,Age)},
-                              lockdown=False,
-                              furlough=False,
-                              new_spending_day=1000,
-                              ccff_day=1000,
-                              loan_guarantee_day=1000)
+        state = SimulateState(
+            time=0,
+            dead={(r, s, a): 0.0 for r, s, a in itertools.product(Region, Sector, Age)},
+            ill={
+                (e, r, s, a): 0.0
+                for e, r, s, a in itertools.product(
+                    EmploymentState, Region, Sector, Age
+                )
+            },
+            lockdown=False,
+            furlough=False,
+            new_spending_day=1000,
+            ccff_day=1000,
+            loan_guarantee_day=1000,
+        )
 
         def default_soln(v):
             # print(v)
@@ -125,18 +147,12 @@ class TestClass:
 
         # found and default gdp should be almost equal
         np.testing.assert_allclose(
-            setup.get_gdp(x).sum(),
-            setup.max_gdp,
-            rtol=1e-3,
-            atol=0,
+            setup.get_gdp(x).sum(), setup.max_gdp, rtol=1e-3, atol=0,
         )
 
         # objective function equals sum of default operating surplus
         np.testing.assert_allclose(
-            -res.fun,
-            setup.xtilde_iot.loc[M.K].sum(),
-            rtol=1e-5,
-            atol=0,
+            -res.fun, setup.xtilde_iot.loc[M.K].sum(), rtol=1e-5, atol=0,
         )
 
         pd.options.display.max_rows = 1000
@@ -146,13 +162,24 @@ class TestClass:
         # found solution matches default solution for each variable
         # note: the household sector has lots of zero values, making the optimization problem underconstrained.
         #       therefore, we ignore variables relating to the household sector in below checks
-        __df = _df[~((_df["var index 1"] == Sector.T_HOUSEHOLD) | (_df["var index 2"] == Sector.T_HOUSEHOLD))]
+        __df = _df[
+            ~(
+                (_df["var index 1"] == Sector.T_HOUSEHOLD)
+                | (_df["var index 2"] == Sector.T_HOUSEHOLD)
+            )
+        ]
         np.testing.assert_allclose(__df["found"], __df["default"], rtol=1e-4, atol=1e0)
         # all non-lambda variables are in currency, therefore large atol is acceptable
-        np.testing.assert_allclose(__df[__df["var type"] != "lambda"]["found"],
-                                   __df[__df["var type"] != "lambda"]["default"],
-                                   rtol=1e-8, atol=2e0)
+        np.testing.assert_allclose(
+            __df[__df["var type"] != "lambda"]["found"],
+            __df[__df["var type"] != "lambda"]["default"],
+            rtol=1e-8,
+            atol=2e0,
+        )
         # all lambda variables are in [0,1] therefore atol has to be small
-        np.testing.assert_allclose(__df[__df["var type"] == "lambda"]["found"],
-                                   __df[__df["var type"] == "lambda"]["default"],
-                                   rtol=1e-5, atol=1e-5)
+        np.testing.assert_allclose(
+            __df[__df["var type"] == "lambda"]["found"],
+            __df[__df["var type"] == "lambda"]["default"],
+            rtol=1e-5,
+            atol=1e-5,
+        )
