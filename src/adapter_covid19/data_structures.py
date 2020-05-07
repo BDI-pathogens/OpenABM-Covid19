@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import (
     Mapping,
     Tuple,
@@ -15,6 +15,11 @@ from typing import (
 import numpy as np
 from scipy.optimize import OptimizeResult
 
+from adapter_covid19.datasources import (
+    Reader,
+    SectorDataSource,
+    RegionSectorAgeDataSource,
+)
 from adapter_covid19.enums import (
     LabourState,
     Region,
@@ -54,6 +59,35 @@ class SimulateState:  # at one point in time
     corporate_state: Optional[CorporateState] = None
     personal_state: Optional[PersonalState] = None
     previous: Optional[SimulateState] = None
+
+    # Needed for generating utilisations if not passed in
+    reader: InitVar[Optional[Reader]] = None
+
+    def __post_init__(self, reader: Optional[Reader]):
+        if self.utilisations is not None:
+            return
+        if reader is None:
+            raise ValueError("Must provide `reader` if `utilisations` is None")
+        keyworker = SectorDataSource("keyworker").load(reader)
+        self.utilisations = Utilisations(
+            {
+                (r, s, a): Utilisation(
+                    p_dead=self.dead[r, s, a],
+                    p_ill_wfh=self.ill[EmploymentState.WFH, r, s, a],
+                    p_ill_wfo=self.ill[EmploymentState.WFO, r, s, a],
+                    p_ill_furloughed=self.ill[EmploymentState.FURLOUGHED, r, s, a],
+                    p_ill_unemployed=self.ill[EmploymentState.UNEMPLOYED, r, s, a],
+                    # keyworker state determines who is constrained to WFH
+                    p_wfh=keyworker[s] if self.lockdown else 0.0,
+                    # if furloughing is available, everybody will be furloughed
+                    p_furloughed=float(self.furlough),
+                    # this will be an output of the GDP model and overridden accordingly
+                    p_not_employed=0.0,
+                )
+                for r, s, a in itertools.product(Region, Sector, Age)
+            },
+            reader=reader,
+        )
 
 
 @dataclass
@@ -230,9 +264,14 @@ class Utilisations:
     def __init__(
         self,
         utilisations: Mapping[Tuple[Region, Sector, Age], Utilisation],
-        worker_data: Mapping[Tuple[Region, Sector, Age], float],
+        worker_data: Optional[Mapping[Tuple[Region, Sector, Age], float]] = None,
+        reader: Optional[Reader] = None,
     ):
+        if worker_data is None and reader is None:
+            raise ValueError("must supply one of `worker_data`, `reader`")
         self._utilisations = utilisations
+        if worker_data is None:
+            worker_data = RegionSectorAgeDataSource("workers").load(reader)
         self._workers_by_sector = {
             (r, s, a): worker_data[r, s, a]
             / sum(worker_data[rr, s, aa] for rr, aa in itertools.product(Region, Age))
@@ -493,21 +532,3 @@ class Utilisation:
         self_dict = self.to_dict()
         other_dict = other.to_dict()
         return all(np.isclose(self_dict[key], other_dict[key]) for key in self_dict)
-
-
-if __name__ == "__main__":
-    u = Utilisation(
-        p_dead=0.0001,
-        p_ill_wfo=0.01,
-        p_ill_wfh=0.01,
-        p_ill_furloughed=0.01,
-        p_ill_unemployed=0.01,
-        p_wfh=0.7,
-        p_furloughed=0.8,
-        p_not_employed=0.5,
-    )
-    print(u.to_dict())
-    l = u.to_lambdas()
-    print(l)
-    u2 = Utilisation.from_lambdas(l)
-    print(u2.to_dict())
