@@ -149,7 +149,11 @@ class Scenario:
         # TODO: remove harcoded values
         return InitialiseState(
             personal_kwargs=dict(
-                default_th=300, max_earning_furloughed=30_000, alpha=20, beta=400,
+                default_th=300,
+                max_earning_furloughed=30_000,
+                alpha=5,
+                beta=20,
+                min_expense_ratio=0.9,
             ),
             corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
         )

@@ -214,6 +214,8 @@ class IoGdpResult(GdpResult):
 @dataclass
 class PersonalState:
     time: int
+    spot_earning: Mapping[Tuple[Region, Sector, Decile], float]
+    spot_expense: Mapping[Tuple[Region, Sector, Decile], float]
     delta_balance: Mapping[Tuple[Region, Sector, Decile], float]
     balance: Mapping[Tuple[Region, Sector, Decile], float]
     credit_mean: Mapping[Tuple[Region, Sector, Decile], float]
