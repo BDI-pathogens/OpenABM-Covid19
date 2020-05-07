@@ -553,10 +553,10 @@ class CobbDouglasLPSetup:
         A = np.multiply(A, normalization[:, None])
         return Bound(None, None, A, const)
 
-    def c_demand(self, p_delta: pd.DataFrame, ytilde_iot: pd.DataFrame):
+    def c_demand(self, p_delta: Mapping[Tuple[Sector,FinalUse],float], ytilde_iot: pd.DataFrame):
         const = np.array(
             [
-                np.sum([p_delta.loc[i, u] * ytilde_iot.loc[i, u] for u in FinalUse])
+                np.sum([p_delta[i, u] * ytilde_iot.loc[i, u] for u in FinalUse])
                 for i in Sector
             ]
         )
@@ -566,7 +566,7 @@ class CobbDouglasLPSetup:
             const, normalization
         )  # if normalized, should all be 1 if p_delta is 1
         A = np.multiply(A, normalization[:, None])
-        self.update_constraint(Bound(A, const, None, None))
+        return Bound(A, const, None, None)
 
     def c_labour_quantity(
         self,
@@ -675,7 +675,6 @@ class CobbDouglasLPSetup:
         iot_p: pd.DataFrame,
         dtilde_iot: pd.DataFrame,
         ytilde_iot: pd.DataFrame,
-        p_delta: pd.DataFrame,
         p_tau: float,
         substitution_rate: float,
     ) -> None:
@@ -790,10 +789,10 @@ class CobbDouglasLPSetup:
         )
         self.c_input(self.o_iot, self.q_iot, p_tau)
         self.c_output(self.q_iot)
-        self.c_demand(p_delta, self.ytilde_iot)
 
     def finalise_setup(
         self,
+        p_delta: Mapping[Tuple[Sector, FinalUse], float],
         p_kappa: Mapping[Sector, float],
         p_labour: Mapping[Sector, Utilisation],
         wfh_productivity: Mapping[Sector, float],
@@ -802,6 +801,7 @@ class CobbDouglasLPSetup:
         bounds = self.add_constraint(self.c_labour_quantity(wfh_productivity), bounds)
         bounds = self.add_constraint(self.c_labour_constraints(p_labour), bounds)
         bounds = self.add_constraint(self.c_capital(p_kappa=p_kappa), bounds)
+        bounds = self.add_constraint(self.c_demand(p_delta=p_delta,ytilde_iot=self.ytilde_iot), bounds)
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
     def get_gdp(self,x):
@@ -854,7 +854,6 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             self.input_output_primary,
             self.input_output_intermediate,
             self.input_output_final,
-            self.p_delta,
             self.p_tau,
             self.substitution_rate,
         )
@@ -1070,7 +1069,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         state.gdp_state = gdp_state
 
     def _simulate(
-        self, state: SimulateState, capital: Mapping[Sector, float],
+        self, state: SimulateState, capital: Mapping[Sector, float], demand: Mapping[Tuple[Sector,FinalUse], float]
     ) -> IoGdpState:
 
         # preprocess parameters
@@ -1104,9 +1103,11 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
 
         p_kappa = capital
 
+        p_delta = demand
+
         # setup linear program
         objective, bounds, lp_bounds = self.setup.finalise_setup(
-            p_kappa, p_labour, self.wfh
+            p_delta, p_kappa, p_labour, self.wfh
         )
 
         # run linear program
@@ -1170,10 +1171,12 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         else:
             capital = state.previous.corporate_state.capital
 
-        # use demand parameter from earnings model
-        # TODO: implement
+        # TODO: get demand from state
+        demand = {
+            (i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)
+        }
 
-        result = state.gdp_state = self._simulate(state, capital)
+        self._simulate(state, capital, demand)
         # TODO: should this affect additional parameters to GDP?
         (state.gdp_state.growth_factor, state.gdp_state.gdp,) = self._apply_growth_factor(
             state.time, state.lockdown, state.gdp_state.gdp
