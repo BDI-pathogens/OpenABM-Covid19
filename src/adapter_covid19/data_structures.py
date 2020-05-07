@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import itertools
 from dataclasses import dataclass, field, InitVar
 from typing import (
@@ -248,15 +249,14 @@ class IoGdpResult(GdpResult):
 @dataclass
 class PersonalState:
     time: int
-    spot_earning: Mapping[Tuple[Region, Sector, Decile], float]
-    spot_expense: Mapping[Tuple[Region, Sector, Decile], float]
-    spot_expense_by_sector: Mapping[Tuple[Region, Sector, Decile, Sector], float]
-    delta_balance: Mapping[Tuple[Region, Sector, Decile], float]
-    balance: Mapping[Tuple[Region, Sector, Decile], float]
-    credit_mean: Mapping[Tuple[Region, Sector, Decile], float]
-    credit_std: Mapping[Region, float]
-    utilisation: Mapping[Tuple[Region, Sector, Decile], float]
-    personal_bankruptcy: Mapping[Region, float]
+    spot_earning: MutableMapping[Tuple[Region, Sector, Decile], float]
+    spot_expense: MutableMapping[Tuple[Region, Sector, Decile], float]
+    spot_expense_by_sector: MutableMapping[Tuple[Region, Sector, Decile, Sector], float]
+    delta_balance: MutableMapping[Tuple[Region, Sector, Decile], float]
+    balance: MutableMapping[Tuple[Region, Sector, Decile], float]
+    credit_mean: MutableMapping[Tuple[Region, Sector, Decile], float]
+    credit_std: MutableMapping[Region, float]
+    personal_bankruptcy: MutableMapping[Region, float]
     demand_reduction: Mapping[Sector, float]
 
 
@@ -267,11 +267,16 @@ class Utilisations:
         worker_data: Optional[Mapping[Tuple[Region, Sector, Age], float]] = None,
         reader: Optional[Reader] = None,
     ):
+        # Respect that utilisations is a Mapping, not MutableMapping - don't mutate it
         if worker_data is None and reader is None:
             raise ValueError("must supply one of `worker_data`, `reader`")
         self._utilisations = utilisations
         if worker_data is None:
             worker_data = RegionSectorAgeDataSource("workers").load(reader)
+        self._workers_by_region_sector = {
+            (r, s, a): worker_data[r, s, a] / sum(worker_data[r, s, aa] for aa in Age)
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
         self._workers_by_sector = {
             (r, s, a): worker_data[r, s, a]
             / sum(worker_data[rr, s, aa] for rr, aa in itertools.product(Region, Age))
@@ -288,6 +293,8 @@ class Utilisations:
                 result[w] += s[w]
         return result
 
+    # This is only possible because we respect Mapping and don't mutate utilisations!
+    @functools.lru_cache(maxsize=None)
     def __getitem__(self, item):
         if isinstance(item, Sector):
             return self._sum(
@@ -297,6 +304,20 @@ class Utilisations:
                     for w in WorkerState
                 }
                 for r, a in itertools.product(Region, Age)
+            )
+        elif (
+            isinstance(item, tuple)
+            and len(item) == 2
+            and isinstance(item[0], Region)
+            and isinstance(item[1], Sector)
+        ):
+            return self._sum(
+                {
+                    w: self._utilisations[item[0], item[1], a][w]
+                    * self._workers_by_region_sector[item[0], item[1], a]
+                    for w in WorkerState
+                }
+                for a in Age
             )
         elif (
             isinstance(item, tuple)
