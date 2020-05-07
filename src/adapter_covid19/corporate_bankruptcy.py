@@ -6,6 +6,7 @@ from typing import Optional, Mapping
 import numpy as np
 import pandas as pd
 from scipy.stats import fisk, norm
+from collections import Counter
 
 from adapter_covid19.constants import DAYS_IN_A_YEAR, START_OF_TIME
 from adapter_covid19.datasources import Reader, SectorDataSource
@@ -40,6 +41,7 @@ class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {s: 1 for s in Sector},
             {},
             {b: {s: 1 for s in Sector} for b in BusinessSize},
+            {s: 1 for s in Sector},
         )
 
 
@@ -73,6 +75,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.loan_guarantee_remaining: Mapping[Sector, float] = {}
         self.size_loan: Mapping[Sector, float] = {}
         self.sme_company_size: Mapping[Sector, float] = {}
+        self.large_company_size: Mapping[Sector, float] = {}
         self.sme_company_received_loan: Mapping[Sector, float] = {}
 
     def load(self, reader: Reader) -> None:
@@ -156,6 +159,33 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.largecap_count.update(
             {s: 0 for s in set(Sector) - self.largecap_count.keys()}
         )
+        sme_company_sector_counts = self.turnover[self.turnover.min_size < 250][
+            ["min_size", "num_companies"]
+        ]
+        self.sme_company_size = {
+            Sector[k]: v
+            for k, v in np.repeat(
+                sme_company_sector_counts.min_size,
+                sme_company_sector_counts.num_companies,
+            )
+            .groupby(["Sector"])
+            .apply(lambda x: np.array(x))
+            .to_dict()
+            .items()
+        }
+        large_company_sector_counts = self.turnover[self.turnover.min_size >= 250][
+            ['min_size', 'num_companies']]
+        self.large_company_size = {
+            Sector[k]: v
+            for k, v in np.repeat(
+                large_company_sector_counts.min_size,
+                large_company_sector_counts.num_companies,
+            )
+            .groupby(['Sector'])
+            .apply(lambda x: np.array(x))
+            .to_dict()
+            .items()
+        }
 
         # simulate initial cash buffers
         self._init_sim()
@@ -182,20 +212,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             50: 0.25,
             100: 0.25,
             200: 0.25,
-        }
-        sme_company_sector_counts = self.turnover[self.turnover.min_size < 250][
-            ["min_size", "num_companies"]
-        ]
-        self.sme_company_size = {
-            Sector[k]: v
-            for k, v in np.repeat(
-                sme_company_sector_counts.min_size,
-                sme_company_sector_counts.num_companies,
-            )
-            .groupby(["Sector"])
-            .apply(lambda x: np.array(x))
-            .to_dict()
-            .items()
         }
         self.sme_company_received_loan = {
             s: np.zeros(self.sme_count[s]) for s in Sector
@@ -363,6 +379,30 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             return 1
         return solvent
 
+    def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
+        large_company_solvent = pd.DataFrame(
+            {s: Counter(self.large_company_size[s][(self.cash_state[BusinessSize.large][s] > 0)])
+             for s in Sector
+             if s in self.large_company_size}).T.stack().reset_index()
+        sme_company_solvent = pd.DataFrame(
+            {s: Counter(self.sme_company_size[s][(self.cash_state[BusinessSize.sme][s] > 0)])
+             for s in Sector
+             if s in self.sme_company_size}).T.stack().reset_index()
+        company_solvent = pd.concat([large_company_solvent, sme_company_solvent])
+        company_solvent.columns = ['Sector', 'min_size', 'num_solvent_companies']
+        business_population = self.turnover.reset_index()
+        business_population.Sector = business_population.Sector.apply(lambda x: Sector[x])
+        business_population_solvent = business_population.merge(company_solvent, on=['Sector', 'min_size'], how='left')
+        business_population_solvent['num_employees_job_exists'] = business_population_solvent.num_solvent_companies\
+                                                                  / business_population_solvent.num_companies\
+                                                                  * business_population_solvent.num_employees
+        sector_employees = business_population_solvent.groupby(['Sector'])[['num_employees', 'num_employees_job_exists']].sum()
+        sector_employees['p_employees_job_exists'] = sector_employees['num_employees_job_exists']\
+                                                     / sector_employees['num_employees']
+        proportion_employees_job_exists = sector_employees['p_employees_job_exists'].to_dict()
+        proportion_employees_job_exists.update({s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()})
+        return proportion_employees_job_exists
+
     def simulate(self, state: SimulateState, **kwargs,) -> None:
         super().simulate(state, **kwargs)
         try:
@@ -404,6 +444,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             capital_discount_factor=self._capital_discount_factor(proportion_solvent),
             cash_buffer=self.cash_state,
             proportion_solvent=proportion_solvent,
+            proportion_employees_job_exists=self._proportion_employees_job_exists(),
         )
 
     def _capital_discount_factor(
