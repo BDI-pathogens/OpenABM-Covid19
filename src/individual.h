@@ -27,7 +27,7 @@ struct individual{
 	long house_no;
 	int age_group;
 	int age_type;
-	int work_network;
+	int occupation_network;
 
 	int base_random_interactions;
 	int random_interactions;

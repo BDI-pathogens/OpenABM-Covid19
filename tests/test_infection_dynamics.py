@@ -127,7 +127,7 @@ class TestClass(object):
             ),
             dict(
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
@@ -137,7 +137,7 @@ class TestClass(object):
             ),
             dict( # fluctuating list
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ],
@@ -370,13 +370,13 @@ class TestClass(object):
         np.testing.assert_equal( max( df_trans[ "generation_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
 
         # check that some people are infected across all networks
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.OCCUPATION )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
 
         # check hospitalised people are not transmitting on the work and household networks
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.WORK ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.OCCUPATION ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
 
         
     def test_exponential_growth_homogeneous_random(
@@ -479,7 +479,7 @@ class TestClass(object):
         
         # calculating the first ratio
         len_household = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.HOUSEHOLD ] )
-        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.WORK ] ) 
+        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.OCCUPATION ] ) 
         len_random = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.RANDOM ] )
         lengths = [int(len_household), int(len_work), int(len_random)]
         all_trans_current = sum(lengths)
@@ -496,7 +496,7 @@ class TestClass(object):
                 comment = "#", sep = ",", skipinitialspace = True )
             
             all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
-                        len( df_trans[ df_trans[ "infector_network" ] == constant.WORK ] ) + \
+                        len( df_trans[ df_trans[ "infector_network" ] == constant.OCCUPATION ] ) + \
                         len( df_trans[ df_trans[ "infector_network" ] == constant.RANDOM ] )
             ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans)
     
