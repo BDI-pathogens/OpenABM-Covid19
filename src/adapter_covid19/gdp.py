@@ -652,6 +652,14 @@ class CobbDouglasLPSetup:
                 self.indicator("lambda", LabourState.WORKING, i) * f_ill
                 - self.indicator("lambda", LabourState.ILL, i) * f_wfo
             )
+        # persist factors for use in post-processing
+        self.labour_conditioning_factors = {}
+        for f, s in zip(factor_wfo, Sector):
+            self.labour_conditioning_factors[LabourState.WORKING,s] = f
+        for f, s in zip(factor_wfh, Sector):
+            self.labour_conditioning_factors[LabourState.WFH,s] = f
+        for f, s in zip(factor_ill, Sector):
+            self.labour_conditioning_factors[LabourState.ILL,s] = f
         # note: if all constraints are non-vacuous (no zero coefficients), one of these sets of constraints is redundant,
         # which leaves one degree of freedom per sector
         const_eq = np.array(const_eq)
@@ -971,6 +979,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                 )
 
         # compensation
+        # TODO: review after introduction of labour variables
         max_compensation = {
             (r, s, a): max_primary_inputs[PrimaryInput.COMPENSATION, r, s, a]
             for r, s, a in itertools.product(Region, Sector, Age)
@@ -1011,7 +1020,23 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                     compensation_received[r, s, a] - compensation_paid[r, s, a]
                 )
 
-        return IoGdpState(
+        # utilisation and unemployment
+        p_not_employed = {}
+        for s in Sector:
+            quotients = [
+                (x[self.setup.V("lambda", LabourState.WORKING, s)], self.setup.labour_conditioning_factors[LabourState.WORKING, s]),
+                (x[self.setup.V("lambda", LabourState.WFH, s)], self.setup.labour_conditioning_factors[LabourState.WFH, s]),
+                (x[self.setup.V("lambda", LabourState.ILL, s)], self.setup.labour_conditioning_factors[LabourState.ILL, s]),
+            ]
+            quotients = [q for q in quotients if q[1] > 0]
+            quotients = sorted(quotients, key=lambda q: q[1], reverse=True)
+            numerator, denominator = quotients[0]
+            p_not_employed[s] = 1.0 - numerator / denominator
+        for r, s, a in itertools.product(Region, Sector, Age):
+            state.utilisations[r,s,a].p_not_employed = p_not_employed[s]
+
+        # update gdp state
+        gdp_state = IoGdpState(
             gdp=gdp,
             workers=workers,
             growth_factor={},
@@ -1029,6 +1054,8 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             max_compensation_subsidy=max_compensation_subsidy,
             _optimise_result=res,
         )
+
+        state.gdp_state = gdp_state
 
     def _simulate(
         self,
@@ -1112,14 +1139,11 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         # use demand parameter from earnings model
         # TODO: implement
 
-        result = state.gdp_state = self._simulate(
+        self._simulate(
             state,
             capital
         )
         # TODO: should this affect additional parameters to GDP?
-        (result.growth_factor, result.gdp,) = self._apply_growth_factor(
-            state.time, state.lockdown, result.gdp
+        (state.gdp_state.growth_factor, state.gdp_state.gdp,) = self._apply_growth_factor(
+            state.time, state.lockdown, state.gdp_state.gdp
         )
-
-        # TODO: deprecate
-        self.results.update(state.time, result)
