@@ -539,7 +539,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"age_group,");
 	fprintf(individual_output_file,"work_network,");
     fprintf(individual_output_file,"worker_type,");
-    fprintf(individual_output_file,"healthcare_worker_ward_type,"),
+    fprintf(individual_output_file,"assigned_worker_ward_type,"),
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"app_user,");
