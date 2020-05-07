@@ -35,7 +35,10 @@ class PersonalBankruptcyModel:
     # Maximum salary when furloughed
     max_earning_furloughed: float = np.random.rand() * 30000
 
-    # Coefficient in credit score regression
+    # Coefficient in credit score regression on spot balance delta
+    alpha: float = np.random.rand() * 10
+
+    # Coefficient in credit score regression on spot balance
     beta: float = np.random.rand() * 10
 
     # GDP per region per sector per age
@@ -100,11 +103,11 @@ class PersonalBankruptcyModel:
 
         df_gdp = (
             pd.Series(self.gdp_data)
-            .to_frame()
-            .reset_index()
-            .groupby(["level_0", "level_1"])[0]
-            .sum()
-            .unstack()
+                .to_frame()
+                .reset_index()
+                .groupby(["level_0", "level_1"])[0]
+                .sum()
+                .unstack()
         )
         self._sector_region_weights = (df_gdp.T / df_gdp.T.sum(axis=0)).to_dict()
 
@@ -187,19 +190,19 @@ class PersonalBankruptcyModel:
                 self.detailed_expenses[
                     (region, employed_sector, decile, expense_sector)
                 ] = (
-                    expenses_by_region_expense_sector_decile[
-                        (region, expense_sector, decile)
-                    ]
-                    * earnings_rd[employed_sector]
-                    / earnings_rd_avg
+                        expenses_by_region_expense_sector_decile[
+                            (region, expense_sector, decile)
+                        ]
+                        * earnings_rd[employed_sector]
+                        / earnings_rd_avg
                 )
 
     def _init_cash_reserve(self) -> None:
         n_month_cash_reserve = 0.0
         self.cash_reserve = {
             (r, s, d): (self.earnings[(r, s, d)] - self.expenses[(r, s, d)])
-            * n_month_cash_reserve
-            / 12.0
+                       * n_month_cash_reserve
+                       / 12.0
             for r, s, d in itertools.product(Region, Sector, Decile)
         }
 
@@ -220,7 +223,7 @@ class PersonalBankruptcyModel:
                     state.utilisations[l, r, s, a] * self.workers_data[r, s, a]
                     for a in Age
                 )
-                / self.workers_per_region_sector[(r, s)]
+                   / self.workers_per_region_sector[(r, s)]
                 for l in LabourState
             }
             for r, s in itertools.product(Region, Sector)
@@ -254,11 +257,13 @@ class PersonalBankruptcyModel:
                     #     delta_balance_rs = {d: 0 for d in Decile}
 
                     balance_rsd = (
-                        state.previous.personal_state.balance[r, s, d]
-                        + delta_balance_rsd
+                            state.previous.personal_state.balance[r, s, d]
+                            + delta_balance_rsd
                     )
 
-                spot_credit_mean_rsd = self._calc_credit_mean(r, balance_rsd)
+                spot_credit_mean_rsd = self._calc_credit_mean(
+                    r, delta_balance_rsd, balance_rsd
+                )
 
                 spot_credit_mean_r[(s, d)] = spot_credit_mean_rsd
 
@@ -279,11 +284,11 @@ class PersonalBankruptcyModel:
         self.results[state.time] = copy.deepcopy(personal_state)
 
     def _calc_delta_balance(
-        self,
-        r: Region,
-        s: Sector,
-        d: Decile,
-        utilisations_h: Mapping[Tuple[Region, Sector], Mapping[LabourState, float]],
+            self,
+            r: Region,
+            s: Sector,
+            d: Decile,
+            utilisations_h: Mapping[Tuple[Region, Sector], Mapping[LabourState, float]],
     ) -> float:
         delta_balance = 0
         for ls in LabourState:
@@ -292,25 +297,31 @@ class PersonalBankruptcyModel:
                 spot_earnings = min(spot_earnings, self.max_earning_furloughed)
 
             delta_balance += (
-                utilisations_h[(r, s)][ls]
-                * (spot_earnings - self.expenses[(r, s, d)])
-                / DAYS_IN_A_YEAR
+                    utilisations_h[(r, s)][ls]
+                    * (spot_earnings - self.expenses[(r, s, d)])
+                    / DAYS_IN_A_YEAR
             )
         return delta_balance
 
-    def _calc_credit_mean(self, r: Region, balance: float,) -> float:
-        return self.credit_mean[r] + self.beta * min(balance, 0)
+    def _calc_credit_mean(
+            self, r: Region, delta_balance: float, balance: float,
+    ) -> float:
+        return (
+                self.credit_mean[r]
+                + self.alpha * delta_balance
+                + self.beta * min(balance, 0)
+        )
 
     def _calc_personal_bankruptcy(
-        self, r: Region, spot_credit_mean: Mapping[Tuple[Sector, Decile], float],
+            self, r: Region, spot_credit_mean: Mapping[Tuple[Sector, Decile], float],
     ) -> float:
         ppb = 0
         decile_weight = 1.0 / len(Decile)
         for s, d in itertools.product(Sector, Decile):
             mixture_weight = (
-                decile_weight
-                * self.workers_per_region_sector[(r, s)]
-                / self.workers_per_region[r]
+                    decile_weight
+                    * self.workers_per_region_sector[(r, s)]
+                    / self.workers_per_region[r]
             )
 
             if spot_credit_mean[(s, d)] > 0:
@@ -325,7 +336,7 @@ class PersonalBankruptcyModel:
         return ppb
 
     def _calc_demand_reduction(
-        self, delta_balance: Mapping[Tuple[Region, Sector, Decile], float],
+            self, delta_balance: Mapping[Tuple[Region, Sector, Decile], float],
     ) -> Mapping[Sector, float]:
         demand_reduction = {expense_sector: 0.0 for expense_sector in Sector}
         for region in Region:
@@ -334,17 +345,17 @@ class PersonalBankruptcyModel:
                     min_cut_rsd = -min(
                         delta_balance[(region, employed_sector, decile)], 0
                     ) / (
-                        self.expenses[(region, employed_sector, decile)]
-                        / DAYS_IN_A_YEAR
-                    )
+                                          self.expenses[(region, employed_sector, decile)]
+                                          / DAYS_IN_A_YEAR
+                                  )
 
                     for expense_sector in Sector:
                         demand_reduction[expense_sector] += (
-                            min_cut_rsd
-                            * self.detailed_expenses[
-                                (region, employed_sector, decile, expense_sector)
-                            ]
-                            / self.expenses_by_expense_sector[expense_sector]
+                                min_cut_rsd
+                                * self.detailed_expenses[
+                                    (region, employed_sector, decile, expense_sector)
+                                ]
+                                / self.expenses_by_expense_sector[expense_sector]
                         )
 
         return demand_reduction
