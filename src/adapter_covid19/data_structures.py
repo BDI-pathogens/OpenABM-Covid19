@@ -503,6 +503,13 @@ class Utilisation:
     def __getitem__(self, item):
         return self.to_lambdas()[item]
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        self_dict = self.to_dict()
+        other_dict = other.to_dict()
+        return all(np.isclose(self_dict[key], other_dict[key]) for key in self_dict)
+
 
 if __name__ == "__main__":
     u = Utilisation(
