@@ -10,7 +10,7 @@ import pandas as pd
 
 from adapter_covid19.data_structures import SimulateState
 from adapter_covid19.datasources import Reader
-from adapter_covid19.enums import M, PrimaryInput, Region, Sector, Age, EmploymentState
+from adapter_covid19.enums import M, PrimaryInput, Region, Sector, Age, EmploymentState, LabourState
 from adapter_covid19.gdp import (
     LinearGdpModel,
     SupplyDemandGdpModel,
@@ -79,6 +79,13 @@ class TestClass:
                 return setup.xtilde_iot.loc[v[1], v[2]]
             elif v[0] == "y":
                 return setup.ytilde_total_iot[v[1]]
+            elif v[0] == "lambda":
+                if v[1] == LabourState.WORKING:
+                    return 1.0
+                elif v[1] == LabourState.WFH:
+                    return 0.0
+                elif v[1] == LabourState.ILL:
+                    return 0.0
 
         default_solution = [default_soln(v) for v in setup.variables]
 
@@ -135,5 +142,17 @@ class TestClass:
             atol=0,
         )
 
+        pd.options.display.max_rows = 1000
+        pd.options.display.max_columns = 10
+        _df.to_csv("_test.csv")
+
         # found solution matches default solution for each variable
-        np.testing.assert_allclose(_df["found"], _df["default"], rtol=1e-7, atol=1e0)
+        np.testing.assert_allclose(_df["found"], _df["default"], rtol=1e-4, atol=1e0)
+        # all non-lambda variables are in currency, therefore large atol is acceptable
+        np.testing.assert_allclose(_df[_df["var type"] != "lambda"]["found"],
+                                   _df[_df["var type"] != "lambda"]["default"],
+                                   rtol=1e-8, atol=2e0)
+        # all lambda variables are in [0,1] therefore atol has to be small
+        np.testing.assert_allclose(_df[_df["var type"] == "lambda"]["found"],
+                                   _df[_df["var type"] == "lambda"]["default"],
+                                   rtol=1e-5, atol=1e-5)
