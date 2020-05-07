@@ -1031,7 +1031,10 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             quotients = [q for q in quotients if q[1] > 0]
             quotients = sorted(quotients, key=lambda q: q[1], reverse=True)
             numerator, denominator = quotients[0]
-            p_not_employed[s] = 1.0 - numerator / denominator
+            assert numerator >= 0.0
+            assert denominator > 0.0
+            assert numerator / denominator <= 1.0 + 1e-2 # tolerance due to rounding errors
+            p_not_employed[s] = max(1.0 - numerator / denominator, 0.0) # ensure strict non-negativity
         for r, s, a in itertools.product(Region, Sector, Age):
             state.utilisations[r,s,a].p_not_employed = p_not_employed[s]
 
