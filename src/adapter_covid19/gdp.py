@@ -1176,10 +1176,25 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         for s in Sector:
             capital[s] = capital[s] * (1 + self.growth_rates[s]) ** ((state.time - START_OF_TIME) / DAYS_IN_A_YEAR)
 
-        # TODO: get demand from state
-        demand = {
-            (i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)
-        }
+        # use demand parameter from personal model
+        if (
+            state.previous is None
+            or state.previous.personal_state is None
+            or state.previous.personal_state.demand_reduction is None
+        ):
+            if state.time == START_OF_TIME:
+                demand = {
+                    (i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)
+                }
+            else:
+                raise ValueError("demand parameter required")
+        else:
+            demand = {}
+            for i in Sector:
+                demand[i, FinalUse.E] = 1.0
+                demand[i, FinalUse.K] = 1.0
+                # TODO: apply output from personal model to household demand only
+                demand[i, FinalUse.C] = 1.0 - np.nan_to_num(state.previous.personal_state.demand_reduction[i])
 
         # apply assumed long-term growth rate to demand
         for s, u in itertools.product(Sector, FinalUse):
