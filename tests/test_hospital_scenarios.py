@@ -730,3 +730,207 @@ class TestClass(object):
         assert len(df_nurse_patient_general_interactions.index) > 0
         assert len(df_doctor_patient_icu_interactions.index) > 0
         assert len(df_nurse_patient_icu_interactions.index) > 0
+
+    def test_transmission_doctor_general(self):
+
+        # Set general doctor-patient infectivity to be really high
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("relative_transmission_doctor_patient_general", 100.0)
+
+        # Set other transmission types in hospitals to zero.
+        h_params.set_param("relative_transmission_hospital_work", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_general", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_icu", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_icu", 0.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Set transmission types elsewhere that doctors are associated with to zero
+        # Also set the number of infections to be really high.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("relative_transmission_household", 0.0)
+        params.set_param("relative_transmission_random", 0.0)
+        params.set_param("n_seed_infection", 750000)
+        params.write_params(SCENARIO_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell = True,
+                                               cwd = SRC_DIR,
+                                               capture_output = True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+ \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        # Get all uninfected doctors working in the general ward.
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        n_doctors = df_individual_output["worker_type"] == 0
+        time_infected = df_individual_output["time_infected"] == -1
+        n_general = df_individual_output["assigned_worker_ward_type"] == 0
+        n_general_doctors = df_individual_output[n_doctors & n_general & time_infected]
+
+        # Check that all doctors assigned to the general ward end up being infected.
+        assert(len(n_general_doctors.index) == 0)
+
+    def test_transmission_nurse_general(self):
+
+        # Set general nurse-patient infectivity to be really high.
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("relative_transmission_nurse_patient_general", 100.0)
+
+        # Set other transmission types in hospitals to zero.
+        h_params.set_param("relative_transmission_hospital_work", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_general", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_icu", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_icu", 0.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Set transmission types elsewhere that nurses are associated with to zero.
+        # Also set the number of infections to be really high.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("relative_transmission_household", 0.0)
+        params.set_param("relative_transmission_random", 0.0)
+        params.set_param("n_seed_infection", 750000)
+        params.write_params(SCENARIO_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell = True,
+                                               cwd = SRC_DIR,
+                                               capture_output = True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+ \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        # Get all uninfected doctors working in the general ward.
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        n_nurses = df_individual_output["worker_type"] == 1
+        time_infected = df_individual_output["time_infected"] == -1
+        n_general = df_individual_output["assigned_worker_ward_type"] == 0
+        n_general_nurses = df_individual_output[n_nurses & n_general & time_infected]
+
+        #Check that all doctors assigned to the general ward end up being infected.
+        assert(len(n_general_nurses.index) == 0)
+
+    def test_transmission_doctor_icu(self):
+
+        # Set icu doctor-patient infectivity to be really high
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("relative_transmission_doctor_patient_icu", 100.0)
+
+        # Set other transmission types in hospitals to zero.
+        h_params.set_param("relative_transmission_hospital_work", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_general", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_general", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_icu", 0.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Set transmission types elsewhere that doctors are associated with to zero.
+        # Also set the number of infections to be really high.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("relative_transmission_household", 0.0)
+        params.set_param("relative_transmission_random", 0.0)
+        params.set_param("n_seed_infection", 750000)
+        params.write_params(SCENARIO_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell = True,
+                                               cwd = SRC_DIR,
+                                               capture_output = True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+ \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        # Get all uninfected doctors working in the general ward.
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        n_doctors = df_individual_output["worker_type"] == 0
+        time_infected = df_individual_output["time_infected"] == -1
+        n_icu = df_individual_output["assigned_worker_ward_type"] == 1
+        n_icu_doctors = df_individual_output[n_doctors & n_icu & time_infected]
+
+        #Check that all doctors assigned to the general ward end up being infected.
+        assert(len(n_icu_doctors.index) == 0)
+
+    def test_transmission_nurse_icu(self):
+
+        # Set icu nurse-patient infectivity to be really high.
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("relative_transmission_nurse_patient_icu", 100.0)
+
+        # Set other transmission types in hospitals to zero.
+        h_params.set_param("relative_transmission_hospital_work", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_general", 0.0)
+        h_params.set_param("relative_transmission_nurse_patient_general", 0.0)
+        h_params.set_param("relative_transmission_doctor_patient_icu", 0.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+
+        # Set transmission types elsewhere that doctors are associated with to zero.
+        # Also set the number of infections to be really high.
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("relative_transmission_household", 0.0)
+        params.set_param("relative_transmission_random", 0.0)
+        params.set_param("n_seed_infection", 750000)
+        params.write_params(SCENARIO_FILE)
+
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+                                               shell = True,
+                                               cwd = SRC_DIR,
+                                               capture_output = True
+                                               )
+
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+ \
+              f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+
+        # Check that the simulation ran
+        assert len(df_output) != 0
+
+        # Get all uninfected doctors working in the general ward.
+        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        n_nurses = df_individual_output["worker_type"] == 1
+        time_infected = df_individual_output["time_infected"] == -1
+        n_icu = df_individual_output["assigned_worker_ward_type"] == 1
+        n_icu_nurses = df_individual_output[n_nurses & n_icu & time_infected]
+
+        #Check that all doctors assigned to the general ward end up being infected.
+        assert(len(n_icu_nurses.index) == 0)
