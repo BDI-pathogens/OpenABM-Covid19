@@ -221,6 +221,7 @@ int set_model_param_lockdown_work_network_multiplier(model *model, double value)
 int set_model_param_lockdown_elderly_on(model *model, int value);
 
 void check_params( parameters* );
+void check_hospital_params( parameters *params );
 void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */

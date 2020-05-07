@@ -573,6 +573,33 @@ void check_params( parameters *params )
 }
 
 /*****************************************************************************************
+*  Name:		check_hospital_params
+*  Description: Carries out checks on the input parameters
+******************************************************************************************/
+void check_hospital_params( parameters *params )
+{
+    if( params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] < 1 )
+        print_exit( "BAD PARAM n_doctors_covid_general_ward cant be less than 1");
+
+    if( params->n_hcw_per_ward[COVID_GENERAL][NURSE] < 1 )
+        print_exit( "BAD PARAM n_nurses_covid_general_ward cant be less than 1");
+
+    if( params->n_hcw_per_ward[COVID_ICU][DOCTOR] < 1 )
+        print_exit( "BAD PARAM n_doctors_covid_icu_ward cant be less than 1");
+
+    if( params->n_hcw_per_ward[COVID_ICU][NURSE] < 1 )
+        print_exit( "BAD PARAM n_nurses_covid_icu_ward cant be less than 1");
+
+    int general_doctors = params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
+    int general_nurses = params->n_hcw_per_ward[COVID_GENERAL][NURSE] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
+    int icu_doctors = params->n_hcw_per_ward[COVID_ICU][DOCTOR] * params->n_wards[COVID_ICU] * params->n_hospitals;
+    int icu_nurses = params->n_hcw_per_ward[COVID_ICU][NURSE] * params->n_wards[COVID_ICU] * params->n_hospitals;
+    if( general_nurses + general_doctors + icu_nurses + icu_doctors > params->n_total - params->n_seed_infection )
+        print_exit( "BAD PARAMS number of healthcare workers is greater than the total population. Change number of wards / worker per ward" );
+}
+
+
+/*****************************************************************************************
 *  Name:		destroy_params
 *  Description: Destroy the parameters
 ******************************************************************************************/
