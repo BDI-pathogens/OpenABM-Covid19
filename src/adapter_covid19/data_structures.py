@@ -226,19 +226,6 @@ class PersonalState:
     demand_reduction: Mapping[Sector, float]
 
 
-# TODO: Deprecate
-@dataclass
-class PersonalStateToDeprecate:
-    time: int
-    delta_balance: Mapping[Sector, Mapping[Decile, float]]
-    balance: Mapping[Sector, Mapping[Decile, float]]
-    credit_mean: Mapping[Sector, Mapping[Decile, float]]
-    credit_std: float
-    utilisation: Mapping[Sector, Mapping[LabourState, float]]
-    min_expense_cut: Mapping[Sector, Mapping[Decile, float]]
-    personal_bankruptcy: float
-
-
 class Utilisations:
     def __init__(
         self,
