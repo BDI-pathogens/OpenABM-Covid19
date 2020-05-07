@@ -93,16 +93,16 @@ class TestClass:
 
         model.simulate(state)
 
-        assert len(model.results.primary_inputs) == 1
-        assert len(model.results.final_uses) == 1
-        assert len(model.results.compensation_received) == 1
-        assert len(model.results.compensation_paid) == 1
-        assert len(model.results.compensation_subsidy) == 1
-        assert len(model.results.max_primary_inputs) > 1
-        assert len(model.results.max_final_uses) > 1
-        assert len(model.results.max_compensation_paid) > 1
-        assert len(model.results.max_compensation_received) > 1
-        assert len(model.results.max_compensation_subsidy) > 1
+        assert len(state.gdp_state.primary_inputs) > 1
+        assert len(state.gdp_state.final_uses) > 1
+        assert len(state.gdp_state.compensation_received) > 1
+        assert len(state.gdp_state.compensation_paid) > 1
+        assert len(state.gdp_state.compensation_subsidy) > 1
+        assert len(state.gdp_state.max_primary_inputs) > 1
+        assert len(state.gdp_state.max_final_uses) > 1
+        assert len(state.gdp_state.max_compensation_paid) > 1
+        assert len(state.gdp_state.max_compensation_received) > 1
+        assert len(state.gdp_state.max_compensation_subsidy) > 1
 
         res = state.gdp_state._optimise_result
         x = res.x
