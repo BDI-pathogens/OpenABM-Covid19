@@ -34,16 +34,11 @@ struct individual{
 	int n_interactions[MAX_DAILY_INTERACTIONS_KEPT];
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 
-	individual *infector;
-	int infector_status;
-	int infector_network;
-
 	int status;
-	int is_case;
 	double hazard;
 	event *current_disease_event;
 	event *next_disease_event;
-	int *time_event;
+	infection_event *infection_events;
 
 	int quarantined;
 	event *quarantine_event;
@@ -52,7 +47,7 @@ struct individual{
 	
 	trace_token *trace_tokens;
 	trace_token *index_trace_token;
-	int traced_on_this_trace;
+	double traced_on_this_trace;
 
     int app_user;
 
@@ -77,11 +72,24 @@ struct interaction{
 	interaction *next;
 };
 
+struct infection_event{
+	int *times;
+	individual *infector;
+	int infector_status;
+	int infector_network;
+	int time_infected_infector;
+	infection_event *next;
+	int is_case;
+};
+
 /************************************************************************/
 /******************************  Macros**** *****************************/
 /************************************************************************/
 
-#define time_infected( indiv ) ( max( max( indiv->time_event[PRESYMPTOMATIC], indiv->time_event[ASYMPTOMATIC ] ), indiv->time_event[PRESYMPTOMATIC_MILD] ) )
+#define time_symptomatic( indiv ) ( max( indiv->infection_events->times[SYMPTOMATIC], indiv->infection_events->times[SYMPTOMATIC_MILD] ) )
+#define time_infected( indiv ) ( max( max( indiv->infection_events->times[PRESYMPTOMATIC], indiv->infection_events->times[ASYMPTOMATIC ] ), indiv->infection_events->times[PRESYMPTOMATIC_MILD] ) )
+#define time_infected_infection_event( infection_event ) ( max( max( infection_event->times[PRESYMPTOMATIC], infection_event->times[ASYMPTOMATIC ] ), infection_event->times[PRESYMPTOMATIC_MILD] ) )
+
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
 
 /************************************************************************/
@@ -105,7 +113,7 @@ void set_icu_admission( individual*, parameters*, int );
 void set_mortuary_admission( individual*, parameters*, int );
 void set_discharged( individual*, parameters*, int );
 void update_random_interactions( individual*, parameters* );
-
+int count_infection_events( individual * );
 void destroy_individual( individual* );
 
 
