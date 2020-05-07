@@ -127,6 +127,7 @@ class BaseGdpModel(abc.ABC):
     def _apply_growth_factor(
         self, time: int, lockdown: bool, gdp: Mapping[Tuple[Region, Sector, Age], float]
     ) -> Tuple[Mapping[Sector, float], Mapping[Tuple[Region, Sector, Age], float]]:
+        # TODO: remove, has been deprecated
         if (
             time - 1 not in self.results.growth_factor
             or not self.results.growth_factor[time - 1]
@@ -1171,13 +1172,17 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         else:
             capital = state.previous.corporate_state.capital
 
+        # apply assumed long-term growth rate to capital
+        for s in Sector:
+            capital[s] = capital[s] * (1 + self.growth_rates[s]) ** ((state.time - START_OF_TIME) / DAYS_IN_A_YEAR)
+
         # TODO: get demand from state
         demand = {
             (i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)
         }
 
+        # apply assumed long-term growth rate to demand
+        for s, u in itertools.product(Sector, FinalUse):
+            demand[s, u] = demand[s, u] * (1 + self.growth_rates[s]) ** ((state.time - START_OF_TIME) / DAYS_IN_A_YEAR)
+
         self._simulate(state, capital, demand)
-        # TODO: should this affect additional parameters to GDP?
-        (state.gdp_state.growth_factor, state.gdp_state.gdp,) = self._apply_growth_factor(
-            state.time, state.lockdown, state.gdp_state.gdp
-        )
