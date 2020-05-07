@@ -43,7 +43,7 @@ class TestClass(object):
     """
     Test class for checking
     """
-
+# Dylan update for file change
     def test_zero_infectivity(self):
         """
         Set infections rate to zero, total infections should be equal to seed infections
@@ -86,6 +86,7 @@ class TestClass(object):
 
         np.testing.assert_equal(output, expected_output)
 
+# Dylan update for file change 
     def test_zero_beds(self):
         """
         Set hospital beds to zero
@@ -133,6 +134,7 @@ class TestClass(object):
         n_patient_icu = len(n_patient_icu.index)
         assert n_patient_icu == 0
 
+# Dylan update for file change
     def test_zero_general_wards(self):
         """
         Set hospital general wards to zero, check there are no general patients
@@ -176,6 +178,7 @@ class TestClass(object):
 
         assert n_patient_general == 0
 
+
     def test_zero_icu_wards(self):
         """
         Set hospital icu wards to zero, check there are no icu patients
@@ -211,13 +214,14 @@ class TestClass(object):
         # Check that the simulation ran
         assert len(df_output) != 0
 
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        df_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        n_patient_icu = df_individual_output["time_icu"] != -1
-        n_patient_icu = df_individual_output[n_patient_icu]
+        n_patient_icu = df_time_step["hospital_state"] == 19#constant.EVENT_TYPES.ICU.value
+        n_patient_icu = df_time_step[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
 
         assert n_patient_icu == 0
+
 
     def test_zero_hcw_patient_interactions(self):
         """
@@ -267,6 +271,7 @@ class TestClass(object):
         assert len(df_doctor_patient_icu_interactions) == 0
         assert len(df_nurse_patient_icu_interactions) == 0
 
+
     def test_hospital_waiting_modifiers(self):
         """
         Set patient ward beds to zero so that all patient enter a waiting state
@@ -311,6 +316,7 @@ class TestClass(object):
         n_recovered = df_individual_output["time_recovered"] != -1
         assert len(df_individual_output[n_infected].index) == len(df_individual_output[n_recovered].index)
 
+# Dylan update for file change
     def test_hospital_infectivity_modifiers_zero(self):
         """
         Set patient infectivity modifiers to zero and test that no healthcare
@@ -353,10 +359,11 @@ class TestClass(object):
         # check that no healthcare workers have been infected by a patient
         for index, healthcare_worker in healthcare_workers.iterrows():
             infector_hospital_state = healthcare_worker["infector_hospital_state"]
-            assert infector_hospital_state != constant.EVENT_TYPES.WAITING
-            assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
-            assert infector_hospital_state != constant.EVENT_TYPES.ICU
+            assert int(infector_hospital_state) != 17#constant.EVENT_TYPES.WAITING.value
+            assert int(infector_hospital_state) != 18#constant.EVENT_TYPES.GENERAL.value
+            assert int(infector_hospital_state) != 19#constant.EVENT_TYPES.ICU.value
 
+# Dylan update for file change
     def test_hospital_infectivity_modifiers_max(self):
         """
         Set patient infectivity modifiers to 100 and test that all healthcare
@@ -405,8 +412,6 @@ class TestClass(object):
             assert hcw_output["time_infected"].value > -1
 
 
-
-
     def test_max_hcw_daily_interactions(self):
         """
         Set healthcare workers max daily interactions (with patients) to 0 and
@@ -448,9 +453,9 @@ class TestClass(object):
         # check that no healthcare workers have been infected by a patient
         for index, healthcare_worker in healthcare_workers.iterrows():
             infector_hospital_state = healthcare_worker["infector_hospital_state"]
-            assert infector_hospital_state != constant.EVENT_TYPES.WAITING
-            assert infector_hospital_state != constant.EVENT_TYPES.GENERAL
-            assert infector_hospital_state != constant.EVENT_TYPES.ICU
+            assert int(infector_hospital_state) != 17#constant.EVENT_TYPES.WAITING.value
+            assert int(infector_hospital_state) != 18#constant.EVENT_TYPES.GENERAL.value
+            assert int(infector_hospital_state) != 19#constant.EVENT_TYPES.ICU.value
 
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
                                       comment="#", sep=",", skipinitialspace=True)
@@ -513,7 +518,7 @@ class TestClass(object):
 
         for index, row in time_step_df.iterrows():
 
-            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING):
+            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -525,8 +530,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.DISCHARGED
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == 21#constant.EVENT_TYPES.DISCHARGED.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -576,7 +581,7 @@ class TestClass(object):
         for index, row in time_step_df.iterrows():
 
 
-            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING):
+            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -588,8 +593,8 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING
-                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == constant.DISCHARGED
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
+                discharged_condition = rest_time_steps_pdx_df['hospital_state'] == 21#constant.EVENT_TYPES.DISCHARGED.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | discharged_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -639,7 +644,7 @@ class TestClass(object):
 
         for index, row in time_step_df.iterrows():
 
-            if(row['hospital_state'] == constant.EVENT_TYPES.WAITING):
+            if(row['hospital_state'] == 17):#constant.EVENT_TYPES.WAITING.value):
 
                 ID = row['pdx']
                 current_time_step = row['time_step']
@@ -651,9 +656,9 @@ class TestClass(object):
                 rest_time_steps_pdx_df = time_step_df[rest_time_steps_condition & pdx_condition]
 
                 # Sub df with hospital_state either waiting or discharged
-                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == constant.EVENT_TYPES.WAITING
-                icu_condition = rest_time_steps_pdx_df['hospital_state'] == constant.ICU
-                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == constant.MORTUARY
+                waiting_condition = rest_time_steps_pdx_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
+                icu_condition = rest_time_steps_pdx_df['hospital_state'] == 19#constant.EVENT_TYPES.ICU.value
+                mortuary_condition = rest_time_steps_pdx_df['hospital_state'] == 20#constant.EVENT_TYPES.MORTUARY.value
                 waiting_or_discharged_df = rest_time_steps_pdx_df[waiting_condition | icu_condition | mortuary_condition]
 
                 assert len(waiting_or_discharged_df.index) == len(rest_time_steps_pdx_df.index)
@@ -698,7 +703,7 @@ class TestClass(object):
 
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        waiting_df = time_step_df['hospital_state'] == constant.EVENT_TYPES.WAITING
+        waiting_df = time_step_df['hospital_state'] == 17#constant.EVENT_TYPES.WAITING.value
         waiting_df = time_step_df[waiting_df]
 
         assert len(waiting_df.index) == 0
@@ -810,60 +815,61 @@ class TestClass(object):
         assert len(df_doctor_patient_icu_interactions.index) > 0
         assert len(df_nurse_patient_icu_interactions.index) > 0
 
+# Dylan update for file change
+    # def test_only_hcw_infections(self):
+    #     """
+    #     Only let infections occur in the hospital. Assert total new infections = total hospital infections.
+    #     """
 
-    def test_only_hcw_infections(self):
-        """
-        Only let infections occur in the hospital. Assert total new infections = total hospital infections.
-        """
-        # Adjust baseline parameter
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("infectious_rate", 0.0001)
-        params.set_param("n_total", 20000)
-        params.write_params(SCENARIO_FILE)
+    #     # Adjust baseline parameter
+    #     params = ParameterSet(TEST_DATA_FILE, line_number=1)
+    #     params.set_param("infectious_rate", 0.0001)
+    #     params.set_param("n_total", 20000)
+    #     params.write_params(SCENARIO_FILE)
 
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+    #     # Construct the executable command
+    #     EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
-        # Call the model pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+    #     # Call the model pipe output to file, read output file
+    #     file_output = open(TEST_OUTPUT_FILE, "w")
+    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-        # Adjust hospital baseline parameter
-        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-        h_params.set_param("general_infectivity_modifier", 57500.0)
-        h_params.write_params(SCENARIO_HOSPITAL_FILE)
+    #     # Adjust hospital baseline parameter
+    #     h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+    #     h_params.set_param("general_infectivity_modifier", 57500.0)
+    #     h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
-        # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
-        completed_compilation = subprocess.run([compile_command],
-            shell = True,
-            cwd = SRC_DIR,
-            capture_output = True
-            )
+    #     # Construct the compilation command and compile
+    #     compile_command = "make clean; make all; make swig-all;"
+    #     completed_compilation = subprocess.run([compile_command],
+    #         shell = True,
+    #         cwd = SRC_DIR,
+    #         capture_output = True
+    #         )
 
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+    #     # Construct the executable command
+    #     EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
-        # Call the model pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+    #     # Call the model pipe output to file, read output file
+    #     file_output = open(TEST_OUTPUT_FILE, "w")
+    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+    #     df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
 
-        # Check that the simulation ran
-        assert len(df_output) != 0
+    #     # Check that the simulation ran
+    #     assert len(df_output) != 0
 
-        time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+    #     time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        # Only keep instances where people have been infected after the zero time step
-        never_infected_condition = time_step_df["time_infected"] != -1
-        seed_infected_condition = time_step_df["time_infected"] != 0
-        infected_df = time_step_df[never_infected_condition & seed_infected_condition]
+    #     # Only keep instances where people have been infected after the zero time step
+    #     never_infected_condition = time_step_df["disease_state"] != constant.UNINFECTED
+    #     seed_infected_condition = time_step_df["time_infected"] != 0
+    #     infected_df = time_step_df[never_infected_condition & seed_infected_condition]
 
-        # Only keep instances where people that have been infected are hcw
-        doctor_condition = infected_df["doctor_type"] == 1
-        nurse_condition = infected_df["nurse_type"] == 1
-        hcw_condition = infected_df[doctor_condition | nurse_condition]
+    #     # Only keep instances where people that have been infected are hcw
+    #     doctor_condition = infected_df["doctor_type"] == 1
+    #     nurse_condition = infected_df["nurse_type"] == 1
+    #     hcw_condition = infected_df[doctor_condition | nurse_condition]
 
-        assert len(hcw_condition.index) == len(infected_df.index)
+    #     assert len(hcw_condition.index) == len(infected_df.index)
