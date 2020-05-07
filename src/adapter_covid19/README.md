@@ -29,16 +29,32 @@ import numpy as np
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
-from adapter_covid19.gdp import LinearGdpModel
+from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
+from adapter_covid19.scenarios import Scenario
 from adapter_covid19.enums import Region, Sector, Age
 
-utilisations = {k: np.random.rand() for k in itertools.product(Region, Sector, Age)}
-econ = Economics(LinearGdpModel(), CorporateBankruptcyModel(), PersonalBankruptcyModel())
+reader = Reader('tests/adapter_covid19/data')
+scenario = Scenario()
+scenario.load(reader)
+init_args = scenario.initialise()
+gdp_model = PiecewiseLinearCobbDouglasGdpModel(**init_args.gdp_kwargs)
+cb_model = CorporateBankruptcyModel(**init_args.corporate_kwargs)
+pb_model = PersonalBankruptcyModel(**init_args.personal_kwargs)
+econ = Economics(gdp_model, cb_model, pb_model, **init_args.economics_kwargs)
 econ.load(reader)
-for t in range(10):
-    econ.simulate(time=t, lockdown=False, utilisations=utilisations)
-# inspect econ.results
+dead = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+states = []
+for i in range(10):
+    simulate_state = scenario.generate(
+        time=i,
+        dead=dead,
+        ill=ill,
+    )
+    econ.simulate(simulate_state)
+    states.append(simulate_state)
+# inspect states
 ```
 
 ## Data

@@ -16,7 +16,7 @@ from COVID19.model import Model, Parameters
 from adapter_covid19.datasources import Reader, RegionSectorAgeDataSource
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
-from adapter_covid19.gdp import LinearGdpModel, SupplyDemandGdpModel
+from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
 from adapter_covid19.enums import Region, Sector, Age, Age10Y, LabourState
 
@@ -26,11 +26,6 @@ LOCKDOWN_PARMAETERS = {
     "quarantine_household_on_positive": 1,
     "quarantine_household_on_symptoms": 1,
     "self_quarantine_fraction": 0.8,
-}
-
-ECON_MODELS = {
-    "linear": LinearGdpModel,
-    "supplydemand": SupplyDemandGdpModel,
 }
 
 EXAMPLE_PARAMETERS = {
@@ -396,13 +391,6 @@ def _spread_worker(
     show_default=True,
 )
 @click.option(
-    "--gdp-model",
-    type=click.Choice(ECON_MODELS.keys(), case_sensitive=False),
-    default="linear",
-    help="Type of GDP model to use",
-    show_default=True,
-)
-@click.option(
     "--n-workers",
     type=int,
     default=None,
@@ -418,7 +406,6 @@ def _main(
     lockdown_end,
     end_time,
     econ_data_dir,
-    gdp_model,
     n_workers,
 ) -> Sequence[plt.Axes]:
     """
@@ -433,7 +420,6 @@ def _main(
         lockdown_end,
         end_time,
         econ_data_dir,
-        gdp_model,
         n_workers,
     )
 
@@ -447,7 +433,6 @@ def main(
     lockdown_end: Optional[int] = None,
     end_time: int = 200,
     econ_data_dir: str = "../tests/data/adapter_covid19",
-    gdp_model: str = "linear",
     n_workers: Optional[int] = None,
     example_parameters: Optional[
         Mapping[str, Mapping[str, Union[float, int, bool, str]]]
@@ -477,7 +462,7 @@ def main(
 
     # Setup economics model
     reader = Reader(econ_data_dir)
-    gdp_model = ECON_MODELS[gdp_model](**example_parameters["gdp"])
+    gdp_model = PiecewiseLinearCobbDouglasGdpModel(**example_parameters["gdp"])
     cb_model = CorporateBankruptcyModel(**example_parameters["corporate_bankruptcy"])
     pb_model = PersonalBankruptcyModel(**example_parameters["personal_insolvency"])
     econ_model = Economics(gdp_model, cb_model, pb_model)
