@@ -20,7 +20,7 @@ from numpy.core.numeric import NaN
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-
+from model import OccupationNetworkEnum
 from . import constant
 from . import utilities as utils
 
@@ -141,7 +141,11 @@ class TestClass(object):
                     n_seed_infection = 10000,
                     end_time = 3,
                     infectious_rate = 4,
-                    lockdown_work_network_multiplier = 0.8,
+                    lockdown_occupation_multiplier_primary_network = 0.8,
+                    lockdown_occupation_multiplier_secondary_network = 0.8,
+                    lockdown_occupation_multiplier_working_network= 0.8,
+                    lockdown_occupation_multiplier_retired_network= 0.8,
+                    lockdown_occupation_multiplier_elderly_network= 0.8,
                     lockdown_random_network_multiplier = 0.8,
                     lockdown_house_interaction_multiplier = 1.2
                 )
@@ -375,7 +379,7 @@ class TestClass(object):
 
         # check to see there are no work connections
         df_test = pd.merge(
-            df_quar, df_int[df_int["type"] == constant.WORK], 
+            df_quar, df_int[df_int["type"] == constant.OCCUPATION], 
             left_on = "ID", right_on = "ID_1", how="inner"
         )
         
@@ -570,9 +574,9 @@ class TestClass(object):
         expect_household = df_without.loc[ constant.HOUSEHOLD, ["N"] ] * test_params[ "lockdown_house_interaction_multiplier" ]       
         np.testing.assert_allclose( df_with.loc[ constant.HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff, 
                                     err_msg = "lockdown not changing household transmission as expected" )
-        
-        expect_work = df_without.loc[ constant.WORK, ["N"] ] * test_params[ "lockdown_work_network_multiplier" ]       
-        np.testing.assert_allclose( df_with.loc[ constant.WORK, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
+        for oc_net in OccupationNetworkEnum:
+            expect_work = df_without.loc[ constant.OCCUPATION, ["N"] ] * test_params[ f"lockdown_occupation_multiplier{oc_net.name}" ]       
+            np.testing.assert_allclose( df_with.loc[ constant.OCCUPATION, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
                                     err_msg = "lockdown not changing work transmission as expected" )
       
       
