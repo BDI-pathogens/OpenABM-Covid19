@@ -21,7 +21,7 @@ from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
 from adapter_covid19 import gdp as gdp_models
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age
+from adapter_covid19.enums import Region, Sector, Age, BusinessSize
 from adapter_covid19.scenarios import Scenario
 
 
@@ -68,6 +68,7 @@ def lockdown_then_unlock_no_corona(
     econ.load(reader)
     dead = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+    states = []
     for i in tqdm(range(end_time)):
         simulate_state = scenario.generate(
             time=i,
@@ -80,17 +81,18 @@ def lockdown_then_unlock_no_corona(
             loan_guarantee_day=loan_guarantee_day,
         )
         econ.simulate(simulate_state)
-    df = (
-        pd.DataFrame(
-            [econ.results.fraction_gdp_by_sector(i) for i in range(1, end_time)],
-            index=range(1, end_time),
-        )
-        .T.sort_index()
-        .T.cumsum(axis=1)
-    )
+        states.append(simulate_state)
 
     if show_plots:
-        # Plot 1
+        # Plot 1 - GDP
+        df = (
+            pd.DataFrame(
+                [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
+                index=range(1, end_time),
+            )
+                .T.sort_index()
+                .T.cumsum(axis=1)
+        )
         fig, ax = plt.subplots(figsize=(20, 10))
         ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
         for i in range(1, df.shape[1]):
@@ -98,32 +100,42 @@ def lockdown_then_unlock_no_corona(
                 df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
             )
         ax.legend(ncol=2)
+        ax.set_title("GDP")
 
-        # Plot 2
+        # Plot 2a - Corporate Solvencies - Large Cap
         df = pd.DataFrame(
             [
-                econ.results.corporate_solvencies[i]
-                for i in econ.results.corporate_solvencies
+                states[i].corporate_state.proportion_solvent[BusinessSize.large]
+                for i in range(1, end_time)
             ]
         )
-        df.plot(figsize=(20, 10))
+        df.plot(figsize=(20, 10),title="Corporate Solvencies - Large Cap")
 
-        # Plot 3
-        pd.DataFrame(
+        # Plot 2b - Corporate Solvencies - SME
+        df = pd.DataFrame(
             [
-                econ.results.personal_bankruptcy[i].personal_bankruptcy
-                for i in econ.results.personal_bankruptcy
+                states[i].corporate_state.proportion_solvent[BusinessSize.sme]
+                for i in range(1, end_time)
             ]
-        ).plot(figsize=(20, 10))
+        )
+        df.plot(figsize=(20, 10),title="Corporate Solvencies - SME")
 
-        # Plot 4
+        # Plot 3a - Personal Insolvencies
         pd.DataFrame(
             [
-                econ.results.personal_bankruptcy[i].demand_reduction
-        for i in econ.results.personal_bankruptcy
-        ]
-        ).plot(figsize=(20, 10))
-    return econ
+                states[i].personal_state.personal_bankruptcy
+                for i in range(1, end_time)
+            ]
+        ).plot(figsize=(20, 10),title="Personal Insolvencies")
+
+        # Plot 3b - Household Expenditure
+        pd.DataFrame(
+            [
+                states[i].personal_state.demand_reduction
+                for i in range(1, end_time)
+            ]
+        ).plot(figsize=(20, 10),title="Household Expenditure Reduction")
+    return econ, states
 
 
 def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
