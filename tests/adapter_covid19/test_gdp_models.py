@@ -3,32 +3,39 @@ Basic example testing the adaptER-covid19 GDP models
 """
 
 import sys
-import itertools
 
 import numpy as np
 import pandas as pd
 
-from adapter_covid19.data_structures import SimulateState
+from adapter_covid19.corporate_bankruptcy import NaiveCorporateBankruptcyModel
+from adapter_covid19.data_structures import PersonalState
 from adapter_covid19.datasources import Reader
 from adapter_covid19.enums import (
     M,
-    PrimaryInput,
-    Region,
     Sector,
-    Age,
-    EmploymentState,
     LabourState,
 )
-from adapter_covid19.gdp import (
-    LinearGdpModel,
-    SupplyDemandGdpModel,
-    PiecewiseLinearCobbDouglasGdpModel,
-)
+from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from tests.adapter_covid19.utilities import (
-    MAX_UTILISATIONS,
-    MIN_UTILISATIONS,
     DATA_PATH,
-    FLAT_UTILISATIONS,
+    ALL_UTILISATIONS,
+    state_from_utilisation,
+    UTILISATION_NO_COVID_NO_LOCKDOWN,
+    advance_state,
+)
+
+DUMMY_PERSONAL_STATE = PersonalState(
+    time=0,
+    spot_earning={},
+    spot_expense={},
+    spot_expense_by_sector={},
+    delta_balance={},
+    balance={},
+    credit_mean={},
+    credit_std={},
+    utilisation={},
+    personal_bankruptcy={},
+    demand_reduction={s: 1 for s in Sector},
 )
 
 sys.path.append("src/adapter_covid19")
@@ -37,59 +44,39 @@ sys.path.append("src/adapter_covid19")
 def pytest_generate_tests(metafunc):
     if "gdp_model_cls" in metafunc.fixturenames:
         metafunc.parametrize(
-            "gdp_model_cls",
-            [LinearGdpModel, SupplyDemandGdpModel, PiecewiseLinearCobbDouglasGdpModel],
+            "gdp_model_cls", [PiecewiseLinearCobbDouglasGdpModel],
         )
-    if "utilisations" in metafunc.fixturenames:
-        metafunc.parametrize(
-            "utilisations", [MAX_UTILISATIONS, MIN_UTILISATIONS, FLAT_UTILISATIONS]
-        )
+    if "utilisation" in metafunc.fixturenames:
+        metafunc.parametrize("utilisation", ALL_UTILISATIONS)
 
 
 class TestClass:
-    def test_interface(self, gdp_model_cls, utilisations):
+    def test_interface(self, gdp_model_cls, utilisation):
         reader = Reader(DATA_PATH)
-        state = SimulateState(
-            time=0,
-            dead={(r, s, a): 0.0 for r, s, a in itertools.product(Region, Sector, Age)},
-            ill={
-                (e, r, s, a): 0.0
-                for e, r, s, a in itertools.product(
-                    EmploymentState, Region, Sector, Age
-                )
-            },
-            lockdown=False,
-            furlough=False,
-            new_spending_day=1000,
-            ccff_day=1000,
-            loan_guarantee_day=1000,
-        )
+        state = state_from_utilisation(UTILISATION_NO_COVID_NO_LOCKDOWN)
         gdp_model = gdp_model_cls()
         gdp_model.load(reader)
         gdp_model.simulate(state)
+        if issubclass(gdp_model_cls, PiecewiseLinearCobbDouglasGdpModel):
+            # This is required because we need a `capital` param for the C-D model
+            # TODO: make cleaner
+            NaiveCorporateBankruptcyModel().simulate(state)
+        new_state = advance_state(state, utilisation)
+        new_state.previous.personal_state = DUMMY_PERSONAL_STATE
+        gdp_model.simulate(new_state)
         # Factor of 1.1 is because of the GDP backbone model
-        assert 0 <= sum(state.gdp_state.gdp.values()) <= state.gdp_state.max_gdp * 1.1
+        assert (
+            0
+            <= sum(new_state.gdp_state.gdp.values())
+            <= new_state.gdp_state.max_gdp * 1.1
+        )
 
     def test_optimiser(self):
         reader = Reader(DATA_PATH)
         model = PiecewiseLinearCobbDouglasGdpModel()
         model.load(reader)
         setup = model.setup
-        state = SimulateState(
-            time=0,
-            dead={(r, s, a): 0.0 for r, s, a in itertools.product(Region, Sector, Age)},
-            ill={
-                (e, r, s, a): 0.0
-                for e, r, s, a in itertools.product(
-                    EmploymentState, Region, Sector, Age
-                )
-            },
-            lockdown=False,
-            furlough=False,
-            new_spending_day=1000,
-            ccff_day=1000,
-            loan_guarantee_day=1000,
-        )
+        state = state_from_utilisation(UTILISATION_NO_COVID_NO_LOCKDOWN)
 
         def default_soln(v):
             # print(v)
@@ -120,11 +107,6 @@ class TestClass:
         assert len(state.gdp_state.compensation_received) > 1
         assert len(state.gdp_state.compensation_paid) > 1
         assert len(state.gdp_state.compensation_subsidy) > 1
-        assert len(state.gdp_state.max_primary_inputs) > 1
-        assert len(state.gdp_state.max_final_uses) > 1
-        assert len(state.gdp_state.max_compensation_paid) > 1
-        assert len(state.gdp_state.max_compensation_received) > 1
-        assert len(state.gdp_state.max_compensation_subsidy) > 1
 
         res = state.gdp_state._optimise_result
         x = res.x
