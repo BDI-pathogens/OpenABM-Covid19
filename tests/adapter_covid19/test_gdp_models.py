@@ -112,32 +112,29 @@ class TestClass:
         _df["diff"] = _df["found"] - _df["default"]
         _df["err %"] = _df["diff"] / _df["default"]
         _df["var type"] = [v[0] for v in _df.index]
-        _df[_df["var type"] == "xtilde"].sort_values("err %", ascending=False)
+        _df["var index 1"] = [v[1] if len(v) >= 2 else np.nan for v in _df.index]
+        _df["var index 2"] = [v[2] if len(v) >= 3 else np.nan for v in _df.index]
 
         # found and default final uses should be almost equal when aggregated
         np.testing.assert_allclose(
             _df[_df["var type"] == "y"]["found"].sum(),
             setup.ytilde_total_iot.sum(),
-            rtol=1e-5,
+            rtol=1e-3,
             atol=0,
         )
 
-        # objective function equals sum of default final uses minus imports
+        # found and default gdp should be almost equal
         np.testing.assert_allclose(
-            -res.fun,
-            setup.ytilde_total_iot.sum()
-            - setup.xtilde_iot.loc[M.I].sum()
-            - setup.o_iot.loc[PrimaryInput.TAXES_PRODUCTS].sum(),
-            rtol=1e-5,
+            setup.get_gdp(x).sum(),
+            setup.max_gdp,
+            rtol=1e-3,
             atol=0,
         )
 
-        # objective function equals sum of value adds
+        # objective function equals sum of default operating surplus
         np.testing.assert_allclose(
             -res.fun,
-            setup.xtilde_iot.loc[M.K].sum()
-            + setup.xtilde_iot.loc[M.L].sum()
-            + setup.o_iot.loc[PrimaryInput.TAXES_PRODUCTION].sum(),
+            setup.xtilde_iot.loc[M.K].sum(),
             rtol=1e-5,
             atol=0,
         )
@@ -147,12 +144,15 @@ class TestClass:
         _df.to_csv("_test.csv")
 
         # found solution matches default solution for each variable
-        np.testing.assert_allclose(_df["found"], _df["default"], rtol=1e-4, atol=1e0)
+        # note: the household sector has lots of zero values, making the optimization problem underconstrained.
+        #       therefore, we ignore variables relating to the household sector in below checks
+        __df = _df[~((_df["var index 1"] == Sector.T_HOUSEHOLD) | (_df["var index 2"] == Sector.T_HOUSEHOLD))]
+        np.testing.assert_allclose(__df["found"], __df["default"], rtol=1e-4, atol=1e0)
         # all non-lambda variables are in currency, therefore large atol is acceptable
-        np.testing.assert_allclose(_df[_df["var type"] != "lambda"]["found"],
-                                   _df[_df["var type"] != "lambda"]["default"],
+        np.testing.assert_allclose(__df[__df["var type"] != "lambda"]["found"],
+                                   __df[__df["var type"] != "lambda"]["default"],
                                    rtol=1e-8, atol=2e0)
         # all lambda variables are in [0,1] therefore atol has to be small
-        np.testing.assert_allclose(_df[_df["var type"] == "lambda"]["found"],
-                                   _df[_df["var type"] == "lambda"]["default"],
+        np.testing.assert_allclose(__df[__df["var type"] == "lambda"]["found"],
+                                   __df[__df["var type"] == "lambda"]["default"],
                                    rtol=1e-5, atol=1e-5)
