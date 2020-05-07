@@ -762,11 +762,15 @@ class CobbDouglasLPSetup:
             i: p_tau * self.o_iot.loc[PrimaryInput.TAXES_PRODUCTION, i] / self.q_iot[i]
             for i in Sector
         }
-        self.objective_per_sector = {
+        self.gdp_per_sector = {
             i: self.indicator("xtilde", M.L, i)
             + self.indicator("xtilde", M.K, i)
             + self.indicator("q", i) * weight_taxes[i]
             for i in Sector
+        }
+        self.objective_per_sector = {
+            i: self.indicator("xtilde", M.K, i)
+            for i in Sector # households don't have capital input to production
         }
         self.objective_c = -np.sum(list(self.objective_per_sector.values()), axis=0)
         assert self.objective_c.shape[0] == len(self.variables)
@@ -795,6 +799,9 @@ class CobbDouglasLPSetup:
         bounds = self.add_constraint(self.c_labour_constraints(p_labour), bounds)
         bounds = self.add_constraint(self.c_capital(p_kappa=p_kappa), bounds)
         return self.objective_c, bounds.to_array(), self.lp_bounds
+
+    def get_gdp(self,x):
+        return pd.Series([self.gdp_per_sector[s].dot(x) for s in Sector],index=Sector)
 
 
 class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
@@ -871,7 +878,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         max_gdp = self.setup.max_gdp
         gdp = {}
         for sector in Sector:
-            gdp_for_sector = self.setup.objective_per_sector[sector].dot(res.x)
+            gdp_for_sector = self.setup.gdp_per_sector[sector].dot(res.x)
             # split outputs per region and age
             # note: these are absolute values to be interpreted relative to iot data loaded in setup
             for region in Region:
