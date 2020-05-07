@@ -19,24 +19,6 @@ from adapter_covid19.data_structures import (
 LOGGER = logging.getLogger(__name__)
 
 
-# TODO: deprecate in favour of SimulateState
-@dataclass
-class EconomicsResult:
-    gdp_result: GdpResult
-    corporate_solvencies: MutableMapping[int, Mapping[Sector, float]]
-    gdp: MutableMapping[int, Mapping[Tuple[Region, Sector, Age], float]]
-    personal_bankruptcy: MutableMapping[int, Mapping[Region, PersonalStateToDeprecate]]
-
-    def fraction_gdp_by_sector(self, time: int) -> Mapping[Sector, float]:
-        return {
-            s: sum(
-                self.gdp[time][r, s, a] / self.gdp_result.max_gdp
-                for r, a in itertools.product(Region, Age)
-            )
-            for s in Sector
-        }
-
-
 class Economics:
     def __init__(
         self,
@@ -59,9 +41,6 @@ class Economics:
         self.gdp_model = gdp_model
         self.corporate_model = corporate_model
         self.personal_model = personal_model
-        self.results = EconomicsResult(
-            gdp_model.results, {}, {}, personal_model.results
-        )
 
     def load(self, reader: Reader) -> None:
         """
