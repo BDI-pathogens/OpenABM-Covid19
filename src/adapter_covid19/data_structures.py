@@ -267,7 +267,6 @@ class Utilisations:
         worker_data: Optional[Mapping[Tuple[Region, Sector, Age], float]] = None,
         reader: Optional[Reader] = None,
     ):
-        # Respect that utilisations is a Mapping, not MutableMapping - don't mutate it
         if worker_data is None and reader is None:
             raise ValueError("must supply one of `worker_data`, `reader`")
         self._utilisations = utilisations
@@ -282,6 +281,42 @@ class Utilisations:
             / sum(worker_data[rr, s, aa] for rr, aa in itertools.product(Region, Age))
             for r, s, a in itertools.product(Region, Sector, Age)
         }
+        self._utilisations_by_region_sector: Optional[
+            Mapping[Tuple[Region, Sector], Utilisation]
+        ] = None
+        self._utilisations_by_sector: Optional[Mapping[Sector, Utilisation]] = None
+        for u in utilisations.values():
+            u.set_container(self)
+
+    def invalidate(self):
+        self._utilisations_by_region_sector = None
+        self._utilisations_by_sector = None
+        self.__getitem__.cache_clear()
+
+    def _calc_utilisations_by_region_sector(self):
+        self._utilisations_by_region_sector = {
+            (r, s): self._sum(
+                {
+                    w: self._utilisations[r, s, a][w]
+                    * self._workers_by_region_sector[r, s, a]
+                    for w in WorkerState
+                }
+                for a in Age
+            )
+            for r, s in itertools.product(Region, Sector)
+        }
+
+    def _calc_utilisations_by_sector(self):
+        self._utilisations_by_sector = {
+            s: self._sum(
+                {
+                    w: self._utilisations[r, s, a][w] * self._workers_by_sector[r, s, a]
+                    for w in WorkerState
+                }
+                for r, a in itertools.product(Region, Age)
+            )
+            for s in Sector
+        }
 
     @staticmethod
     def _sum(
@@ -293,32 +328,21 @@ class Utilisations:
                 result[w] += s[w]
         return result
 
-    # This is only possible because we respect Mapping and don't mutate utilisations!
     @functools.lru_cache(maxsize=None)
     def __getitem__(self, item):
         if isinstance(item, Sector):
-            return self._sum(
-                {
-                    w: self._utilisations[r, item, a][w]
-                    * self._workers_by_sector[r, item, a]
-                    for w in WorkerState
-                }
-                for r, a in itertools.product(Region, Age)
-            )
+            if self._utilisations_by_sector is None:
+                self._calc_utilisations_by_sector()
+            return self._utilisations_by_sector[item]
         elif (
             isinstance(item, tuple)
             and len(item) == 2
             and isinstance(item[0], Region)
             and isinstance(item[1], Sector)
         ):
-            return self._sum(
-                {
-                    w: self._utilisations[item[0], item[1], a][w]
-                    * self._workers_by_region_sector[item[0], item[1], a]
-                    for w in WorkerState
-                }
-                for a in Age
-            )
+            if self._utilisations_by_region_sector is None:
+                self._calc_utilisations_by_region_sector()
+            return self._utilisations_by_region_sector[item]
         elif (
             isinstance(item, tuple)
             and len(item) == 4
@@ -387,6 +411,7 @@ class Utilisation:
             p_not_employed == (HEALTHY_FURLOUGHED + HEALTHY_UNEMPLOYED + ILL_FURLOUGHED + ILL_UNEMPLOYED)
                               / (1 - DEAD)
         """
+        # TODO: This is simply awful, make caching and cache invalidation better
         assert all(
             0 <= x <= 1
             for x in [
@@ -400,37 +425,123 @@ class Utilisation:
                 p_not_employed,
             ]
         )
-        self.p_ill_wfo = p_ill_wfo
-        self.p_ill_wfh = p_ill_wfh
-        self.p_ill_furloughed = p_ill_furloughed
-        self.p_ill_unemployed = p_ill_unemployed
-        self.p_wfh = p_wfh
-        self.p_furloughed = p_furloughed
-        self.p_dead = p_dead
-        self.p_not_employed = p_not_employed
+        self._p_ill_wfo = p_ill_wfo
+        self._p_ill_wfh = p_ill_wfh
+        self._p_ill_furloughed = p_ill_furloughed
+        self._p_ill_unemployed = p_ill_unemployed
+        self._p_wfh = p_wfh
+        self._p_furloughed = p_furloughed
+        self._p_dead = p_dead
+        self._p_not_employed = p_not_employed
+        self._lambdas = None
+        self._container = None
+
+    @property
+    def p_ill_wfo(self):
+        return self._p_ill_wfo
+
+    @property
+    def p_ill_wfh(self):
+        return self._p_ill_wfh
+
+    @property
+    def p_ill_furloughed(self):
+        return self._p_ill_furloughed
+
+    @property
+    def p_ill_unemployed(self):
+        return self._p_ill_unemployed
+
+    @property
+    def p_wfh(self):
+        return self._p_wfh
+
+    @property
+    def p_furloughed(self):
+        return self._p_furloughed
+
+    @property
+    def p_dead(self):
+        return self._p_dead
+
+    @property
+    def p_not_employed(self):
+        return self._p_not_employed
+
+    @p_ill_wfo.setter
+    def p_ill_wfo(self, x: float):
+        self._invalidate()
+        self._p_ill_wfo = x
+
+    @p_ill_wfh.setter
+    def p_ill_wfh(self, x: float):
+        self._invalidate()
+        self._p_ill_wfh = x
+
+    @p_ill_furloughed.setter
+    def p_ill_furloughed(self, x: float):
+        self._invalidate()
+        self._p_ill_furloughed = x
+
+    @p_ill_unemployed.setter
+    def p_ill_unemployed(self, x: float):
+        self._invalidate()
+        self._p_ill_unemployed = x
+
+    @p_wfh.setter
+    def p_wfh(self, x: float):
+        self._invalidate()
+        self._p_wfh = x
+
+    @p_furloughed.setter
+    def p_furloughed(self, x: float):
+        self._invalidate()
+        self._p_furloughed = x
+
+    @p_dead.setter
+    def p_dead(self, x: float):
+        self._invalidate()
+        self._p_dead = x
+
+    @p_not_employed.setter
+    def p_not_employed(self, x: float):
+        self._invalidate()
+        self._p_not_employed = x
+
+    def _invalidate(self):
+        self._lambdas = None
+        if self._container is not None:
+            self._container.invalidate()
+
+    def set_container(self, container: Utilisations):
+        if self._container is not None:
+            raise ValueError("Utilisations container already exists")
+        self._container = container
 
     def to_lambdas(self):
-        lambda_not_dead = 1 - self.p_dead
-        # in the below, being "not employed" implies being alive
-        lambda_not_employed = self.p_not_employed * lambda_not_dead
-        lambda_furloughed = self.p_furloughed * lambda_not_employed
-        lambda_unemployed = lambda_not_employed - lambda_furloughed
-        lambda_employed = lambda_not_dead - lambda_not_employed
-        lambda_wfh = self.p_wfh * lambda_employed
-        lambda_wfo = (1 - self.p_wfh) * lambda_employed
-        return {
-            WorkerState.HEALTHY_WFO: (1 - self.p_ill_wfo) * lambda_wfo,
-            WorkerState.HEALTHY_WFH: (1 - self.p_ill_wfh) * lambda_wfh,
-            WorkerState.HEALTHY_FURLOUGHED: (1 - self.p_ill_furloughed)
-            * lambda_furloughed,
-            WorkerState.HEALTHY_UNEMPLOYED: (1 - self.p_ill_unemployed)
-            * lambda_unemployed,
-            WorkerState.ILL_WFO: self.p_ill_wfo * lambda_wfo,
-            WorkerState.ILL_WFH: self.p_ill_wfh * lambda_wfh,
-            WorkerState.ILL_FURLOUGHED: self.p_ill_furloughed * lambda_furloughed,
-            WorkerState.ILL_UNEMPLOYED: self.p_ill_unemployed * lambda_unemployed,
-            WorkerState.DEAD: self.p_dead,
-        }
+        if self._lambdas is None:
+            lambda_not_dead = 1 - self.p_dead
+            # in the below, being "not employed" implies being alive
+            lambda_not_employed = self.p_not_employed * lambda_not_dead
+            lambda_furloughed = self.p_furloughed * lambda_not_employed
+            lambda_unemployed = lambda_not_employed - lambda_furloughed
+            lambda_employed = lambda_not_dead - lambda_not_employed
+            lambda_wfh = self.p_wfh * lambda_employed
+            lambda_wfo = (1 - self.p_wfh) * lambda_employed
+            self._lambdas = {
+                WorkerState.HEALTHY_WFO: (1 - self.p_ill_wfo) * lambda_wfo,
+                WorkerState.HEALTHY_WFH: (1 - self.p_ill_wfh) * lambda_wfh,
+                WorkerState.HEALTHY_FURLOUGHED: (1 - self.p_ill_furloughed)
+                * lambda_furloughed,
+                WorkerState.HEALTHY_UNEMPLOYED: (1 - self.p_ill_unemployed)
+                * lambda_unemployed,
+                WorkerState.ILL_WFO: self.p_ill_wfo * lambda_wfo,
+                WorkerState.ILL_WFH: self.p_ill_wfh * lambda_wfh,
+                WorkerState.ILL_FURLOUGHED: self.p_ill_furloughed * lambda_furloughed,
+                WorkerState.ILL_UNEMPLOYED: self.p_ill_unemployed * lambda_unemployed,
+                WorkerState.DEAD: self.p_dead,
+            }
+        return self._lambdas
 
     def to_dict(self):
         return {
