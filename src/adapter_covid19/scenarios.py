@@ -48,8 +48,10 @@ class Scenario:
         self._utilisations = {}  # For tracking / debugging
         for k in self.datasources:
             self.__setattr__(k, None)
+        self.reader: Optional[Reader] = None
 
     def load(self, reader: Reader) -> None:
+        self.reader = reader
         for k, v in self.datasources.items():
             self.__setattr__(k, v(k).load(reader))
 
@@ -181,5 +183,6 @@ class Scenario:
             ccff_day=self.ccff_day,
             loan_guarantee_day=self.loan_guarantee_day,
             previous=self.simulate_states.get(time - 1),
+            reader=self.reader,
         )
         return simulate_state
