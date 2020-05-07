@@ -288,7 +288,7 @@ void write_time_step_hospital_data( model *model)
             if(model->time == 1)
             {
                 time_step_hospital_file = fopen(output_file_name, "w");
-                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected","hospital_state");
+                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
             }
             else
             {
@@ -313,10 +313,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_doctor;
                         indiv_doctor = &(model->population[doctor_pdx]);
-                        int doctor_time_infected = time_infected(indiv_doctor);
+                        int doctor_disease_state = indiv_doctor->status;
                         int doctor_hospital_state = indiv_doctor->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected,doctor_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
                     }
                     // For each nurse
                     for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
@@ -326,10 +326,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_nurse;
                         indiv_nurse = &(model->population[nurse_pdx]);
-                        int nurse_time_infected = time_infected(indiv_nurse);
+                        int nurse_disease_state = indiv_nurse->status;
                         int nurse_hospital_state = indiv_nurse->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected,nurse_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
                     }
 
                     // For each patient
@@ -341,10 +341,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_patient;
                         indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
-                        int patient_time_infected = time_infected(indiv_patient);
+                        int patient_disease_state = indiv_patient->status;
                         int patient_hospital_state = indiv_patient->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected,patient_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
                     }
 
                 }
