@@ -1,4 +1,3 @@
-import inspect
 import itertools
 import os
 from typing import Optional
@@ -19,9 +18,8 @@ except:
 from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
 from adapter_covid19.economics import Economics
-from adapter_covid19 import gdp as gdp_models
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, BusinessSize
+from adapter_covid19.enums import Region, Sector, Age, BusinessSize, WorkerState
 from adapter_covid19.scenarios import Scenario
 
 
@@ -87,11 +85,14 @@ def lockdown_then_unlock_no_corona(
         # Plot 1 - GDP
         df = (
             pd.DataFrame(
-                [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
+                [
+                    states[i].gdp_state.fraction_gdp_by_sector()
+                    for i in range(1, end_time)
+                ],
                 index=range(1, end_time),
             )
-                .T.sort_index()
-                .T.cumsum(axis=1)
+            .T.sort_index()
+            .T.cumsum(axis=1)
         )
         fig, ax = plt.subplots(figsize=(20, 10))
         ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
@@ -109,7 +110,7 @@ def lockdown_then_unlock_no_corona(
                 for i in range(1, end_time)
             ]
         )
-        df.plot(figsize=(20, 10),title="Corporate Solvencies - Large Cap")
+        df.plot(figsize=(20, 10), title="Corporate Solvencies - Large Cap")
 
         # Plot 2b - Corporate Solvencies - SME
         df = pd.DataFrame(
@@ -118,33 +119,36 @@ def lockdown_then_unlock_no_corona(
                 for i in range(1, end_time)
             ]
         )
-        df.plot(figsize=(20, 10),title="Corporate Solvencies - SME")
+        df.plot(figsize=(20, 10), title="Corporate Solvencies - SME")
 
         # Plot 3a - Personal Insolvencies
         pd.DataFrame(
-            [
-                states[i].personal_state.personal_bankruptcy
-                for i in range(1, end_time)
-            ]
-        ).plot(figsize=(20, 10),title="Personal Insolvencies")
+            [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
+        ).plot(figsize=(20, 10), title="Personal Insolvencies")
 
         # Plot 3b - Household Expenditure
         pd.DataFrame(
-            [
-                states[i].personal_state.demand_reduction
-                for i in range(1, end_time)
-            ]
-        ).plot(figsize=(20, 10),title="Household Expenditure Reduction")
+            [states[i].personal_state.demand_reduction for i in range(1, end_time)]
+        ).plot(figsize=(20, 10), title="Household Expenditure Reduction")
 
         # Plot 4 - Unemployment
         def unemployment_from_lambdas(d):
-            return (d[WorkerState.ILL_UNEMPLOYED] + d[WorkerState.HEALTHY_UNEMPLOYED] + d[WorkerState.ILL_FURLOUGHED] + d[WorkerState.HEALTHY_FURLOUGHED]) /  (1 - d[WorkerState.DEAD])
+            return (
+                d[WorkerState.ILL_UNEMPLOYED]
+                + d[WorkerState.HEALTHY_UNEMPLOYED]
+                + d[WorkerState.ILL_FURLOUGHED]
+                + d[WorkerState.HEALTHY_FURLOUGHED]
+            ) / (1 - d[WorkerState.DEAD])
+
         pd.DataFrame(
             [
-                {s: unemployment_from_lambdas(states[i].utilisations[s]) for s in Sector}
+                {
+                    s: unemployment_from_lambdas(states[i].utilisations[s])
+                    for s in Sector
+                }
                 for i in range(1, end_time)
             ]
-        ).plot(figsize=(20, 10),title="Unemployment")
+        ).plot(figsize=(20, 10), title="Unemployment")
 
     return econ, states
 
@@ -250,10 +254,7 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
         ax = axes[2][idx]
         pd.DataFrame(
             [
-                {
-                    r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
-                    for r in Region
-                }
+                econ.results.personal_bankruptcy[i].personal_bankruptcy
                 for i in econ.results.personal_bankruptcy
             ]
         ).plot(ax=ax)
@@ -263,10 +264,7 @@ def plot_scenarios(scenarios, end_time=50, skip_scenarios=None):
         ax = axes[3][idx]
         pd.DataFrame(
             [
-                {
-                    r: econ.results.personal_bankruptcy[i][r].demand_reduction
-                    for r in Region
-                }
+                econ.results.personal_bankruptcy[i].demand_reduction
                 for i in econ.results.personal_bankruptcy
             ]
         ).plot(ax=ax)
