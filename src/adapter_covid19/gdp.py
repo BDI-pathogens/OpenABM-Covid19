@@ -1022,13 +1022,13 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         if (
             state.previous is None
             or state.previous.corporate_state is None
-            or state.previous.corporate_state.capital_discount_factor is None #TODO: use dedicated variable instead of capital discount factor
+            or state.previous.corporate_state.proportion_employees_job_exists is None
         ):
             # keep default value of p_not_employed as lower bound
             pass
         else:
             for r,s,a in itertools.product(Region, Sector, Age):
-                state.utilisations[r,s,a].p_not_employed = min(1.0,max(0.0,1.0 - state.previous.corporate_state.capital_discount_factor[s]))
+                state.utilisations[r,s,a].p_not_employed = min(1.0,max(0.0,1.0 - state.previous.corporate_state.proportion_employees_job_exists[s]))
 
 
         # use demand parameter from personal model
