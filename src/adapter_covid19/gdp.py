@@ -12,6 +12,15 @@ import pandas as pd
 from scipy.optimize import linprog, OptimizeResult
 
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
+from adapter_covid19.data_structures import (
+    SimulateState,
+    GdpResult,
+    IoGdpResult,
+    GdpState,
+    IoGdpState,
+    Utilisations,
+    Utilisation,
+)
 from adapter_covid19.datasources import (
     Reader,
     RegionSectorAgeDataSource,
@@ -32,15 +41,6 @@ from adapter_covid19.enums import (
     EmploymentState,
     WorkerState,
     WorkerStateConditional,
-)
-from adapter_covid19.data_structures import (
-    SimulateState,
-    GdpResult,
-    IoGdpResult,
-    GdpState,
-    IoGdpState,
-    Utilisations,
-    Utilisation,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -363,7 +363,11 @@ class CobbDouglasLPSetup:
             + [("x", m, i) for m in M for i in Sector]
             + [("xtilde", m, i) for m in value_adds for i in Sector]
             + [("y", i) for i in Sector]
-            + [("lambda", l, i) for l in [LabourState.ILL, LabourState.WFH, LabourState.WORKING] for i in Sector ]
+            + [
+                ("lambda", l, i)
+                for l in [LabourState.ILL, LabourState.WFH, LabourState.WORKING]
+                for i in Sector
+            ]
         )
         self.xtilde_iot = pd.DataFrame([])
         self.objective_c = np.array([])
@@ -376,7 +380,7 @@ class CobbDouglasLPSetup:
             "xtilde": 0.0,
             ("xtilde", M.K): -np.inf,
             "y": 0.0,
-            "lambda": 0.0
+            "lambda": 0.0,
         }
         u_bounds = {
             "q": np.inf,
@@ -384,7 +388,7 @@ class CobbDouglasLPSetup:
             "x": np.inf,
             "xtilde": np.inf,
             "y": np.inf,
-            "lambda": 1.0
+            "lambda": 1.0,
         }
         self.lp_bounds = list(
             zip(
@@ -554,7 +558,9 @@ class CobbDouglasLPSetup:
         A = np.multiply(A, normalization[:, None])
         return Bound(None, None, A, const)
 
-    def c_demand(self, p_delta: Mapping[Tuple[Sector,FinalUse],float], ytilde_iot: pd.DataFrame):
+    def c_demand(
+        self, p_delta: Mapping[Tuple[Sector, FinalUse], float], ytilde_iot: pd.DataFrame
+    ):
         const = np.array(
             [
                 np.sum([p_delta[i, u] * ytilde_iot.loc[i, u] for u in FinalUse])
@@ -569,10 +575,7 @@ class CobbDouglasLPSetup:
         A = np.multiply(A, normalization[:, None])
         return Bound(A, const, None, None)
 
-    def c_labour_quantity(
-        self,
-        wfh_productivity: Mapping[Sector, float],
-    ) -> Bound:
+    def c_labour_quantity(self, wfh_productivity: Mapping[Sector, float],) -> Bound:
         const = np.array([0.0 for i in Sector])
         A = np.array(
             [
@@ -580,7 +583,8 @@ class CobbDouglasLPSetup:
                 - (
                     self.indicator("lambda", LabourState.WORKING, i)
                     + wfh_productivity[i] * self.indicator("lambda", LabourState.WFH, i)
-                ) * self.xtilde_iot.loc[M.L, i]
+                )
+                * self.xtilde_iot.loc[M.L, i]
                 for i in Sector
             ]
         )
@@ -598,7 +602,8 @@ class CobbDouglasLPSetup:
                     self.indicator("lambda", LabourState.WORKING, i)
                     + self.indicator("lambda", LabourState.WFH, i)
                     + self.indicator("lambda", LabourState.ILL, i)
-                ) * self.xtilde_iot.loc[M.L, i]
+                )
+                * self.xtilde_iot.loc[M.L, i]
                 for i in Sector
             ]
         )
@@ -607,28 +612,43 @@ class CobbDouglasLPSetup:
         A = np.multiply(A, normalization[:, None])
         return Bound(None, None, A, const)
 
-    def c_labour_constraints(self,
-                             p: Mapping[Sector, Utilisation]):
-        p = {(w,i):v for i in Sector for w, v in p[i].to_dict().items()} # Mapping[Tuple[WorkerStateConditional,Sector], float]
+    def c_labour_constraints(self, p: Mapping[Sector, Utilisation]):
+        p = {
+            (w, i): v for i in Sector for w, v in p[i].to_dict().items()
+        }  # Mapping[Tuple[WorkerStateConditional,Sector], float]
         # inequalities
         const_ub = []
         A_ub = []
         # HEALTHY_WFO == WORKING == (1-p_not_employed) * (1-p_wfh) * (1-p_ill_wfo) * (1-p_dead)
         # hence: WORKING <= (1-p_wfh) * (1-p_ill_wfo) * (1-p_dead)
-        factor_wfo = [(1 - p[WorkerStateConditional.WFH, i]) * (1 - p[WorkerStateConditional.ILL_WFO, i]) * (
-                    1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
-        const_ub +=  factor_wfo
-        A_ub += [ self.indicator("lambda", LabourState.WORKING, i) for i in Sector]
+        factor_wfo = [
+            (1 - p[WorkerStateConditional.WFH, i])
+            * (1 - p[WorkerStateConditional.ILL_WFO, i])
+            * (1 - p[WorkerStateConditional.DEAD, i])
+            for i in Sector
+        ]
+        const_ub += factor_wfo
+        A_ub += [self.indicator("lambda", LabourState.WORKING, i) for i in Sector]
         # HEALTHY_WFH == WFH == (1-p_not_employed) * p_wfh * (1-p_ill_wfh) * (1-p_dead)
         # hence: WFH <= p_wfh * (1-p_ill_wfo) * (1-p_dead)
-        factor_wfh = [p[WorkerStateConditional.WFH, i] * (1 - p[WorkerStateConditional.ILL_WFH, i]) * (
-                    1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
+        factor_wfh = [
+            p[WorkerStateConditional.WFH, i]
+            * (1 - p[WorkerStateConditional.ILL_WFH, i])
+            * (1 - p[WorkerStateConditional.DEAD, i])
+            for i in Sector
+        ]
         const_ub += factor_wfh
         A_ub += [self.indicator("lambda", LabourState.WFH, i) for i in Sector]
         # ILL_WFH + ILL_WFO == ILL == (1-p_not_employed) * (p_ill_wfo + p_ill_wfh) * (1-p_dead)
         # hence: ILL <= (p_ill_wfo + p_ill_wfh) * (1-p_dead)
-        factor_ill = [(p[WorkerStateConditional.ILL_WFO, i] + p[WorkerStateConditional.ILL_WFH, i]) * (
-                1 - p[WorkerStateConditional.DEAD, i]) for i in Sector]
+        factor_ill = [
+            (
+                p[WorkerStateConditional.ILL_WFO, i]
+                + p[WorkerStateConditional.ILL_WFH, i]
+            )
+            * (1 - p[WorkerStateConditional.DEAD, i])
+            for i in Sector
+        ]
         const_ub += factor_ill
         A_ub += [self.indicator("lambda", LabourState.ILL, i) for i in Sector]
         const_ub = np.array(const_ub)
@@ -637,21 +657,21 @@ class CobbDouglasLPSetup:
         const_eq = []
         A_eq = []
         # WFH and WFO are consistent
-        for f_wfh, f_wfo, i in  zip(factor_wfh, factor_wfo, Sector):
+        for f_wfh, f_wfo, i in zip(factor_wfh, factor_wfo, Sector):
             const_eq.append(0.0)
             A_eq.append(
                 self.indicator("lambda", LabourState.WFH, i) * f_wfo
                 - self.indicator("lambda", LabourState.WORKING, i) * f_wfh
             )
         # WFH and ILL are consistent
-        for f_wfh, f_ill, i in  zip(factor_wfh, factor_ill, Sector):
+        for f_wfh, f_ill, i in zip(factor_wfh, factor_ill, Sector):
             const_eq.append(0.0)
             A_eq.append(
                 self.indicator("lambda", LabourState.WFH, i) * f_ill
                 - self.indicator("lambda", LabourState.ILL, i) * f_wfh
             )
         # WFO and ILL are consistent
-        for f_wfo, f_ill, i in  zip(factor_wfo, factor_ill, Sector):
+        for f_wfo, f_ill, i in zip(factor_wfo, factor_ill, Sector):
             const_eq.append(0.0)
             A_eq.append(
                 self.indicator("lambda", LabourState.WORKING, i) * f_ill
@@ -660,16 +680,16 @@ class CobbDouglasLPSetup:
         # persist factors for use in post-processing
         self.labour_conditioning_factors = {}
         for f, s in zip(factor_wfo, Sector):
-            self.labour_conditioning_factors[LabourState.WORKING,s] = f
+            self.labour_conditioning_factors[LabourState.WORKING, s] = f
         for f, s in zip(factor_wfh, Sector):
-            self.labour_conditioning_factors[LabourState.WFH,s] = f
+            self.labour_conditioning_factors[LabourState.WFH, s] = f
         for f, s in zip(factor_ill, Sector):
-            self.labour_conditioning_factors[LabourState.ILL,s] = f
+            self.labour_conditioning_factors[LabourState.ILL, s] = f
         # note: if all constraints are non-vacuous (no zero coefficients), one of these sets of constraints is redundant,
         # which leaves one degree of freedom per sector
         const_eq = np.array(const_eq)
         A_eq = np.array(A_eq)
-        return Bound(A_ub,const_ub,A_eq,const_eq)
+        return Bound(A_ub, const_ub, A_eq, const_eq)
 
     def initial_setup(
         self,
@@ -774,7 +794,7 @@ class CobbDouglasLPSetup:
         }
         self.objective_per_sector = {
             i: self.indicator("xtilde", M.K, i)
-            for i in Sector # households don't have capital input to production
+            for i in Sector  # households don't have capital input to production
         }
         self.objective_c = -np.sum(list(self.objective_per_sector.values()), axis=0)
         assert self.objective_c.shape[0] == len(self.variables)
@@ -802,11 +822,13 @@ class CobbDouglasLPSetup:
         bounds = self.add_constraint(self.c_labour_quantity(wfh_productivity), bounds)
         bounds = self.add_constraint(self.c_labour_constraints(p_labour), bounds)
         bounds = self.add_constraint(self.c_capital(p_kappa=p_kappa), bounds)
-        bounds = self.add_constraint(self.c_demand(p_delta=p_delta,ytilde_iot=self.ytilde_iot), bounds)
+        bounds = self.add_constraint(
+            self.c_demand(p_delta=p_delta, ytilde_iot=self.ytilde_iot), bounds
+        )
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
-    def get_gdp(self,x):
-        return pd.Series([self.gdp_per_sector[s].dot(x) for s in Sector],index=Sector)
+    def get_gdp(self, x):
+        return pd.Series([self.gdp_per_sector[s].dot(x) for s in Sector], index=Sector)
 
 
 class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
@@ -1033,9 +1055,18 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         p_not_employed = {}
         for s in Sector:
             quotients = [
-                (x[self.setup.V("lambda", LabourState.WORKING, s)], self.setup.labour_conditioning_factors[LabourState.WORKING, s]),
-                (x[self.setup.V("lambda", LabourState.WFH, s)], self.setup.labour_conditioning_factors[LabourState.WFH, s]),
-                (x[self.setup.V("lambda", LabourState.ILL, s)], self.setup.labour_conditioning_factors[LabourState.ILL, s]),
+                (
+                    x[self.setup.V("lambda", LabourState.WORKING, s)],
+                    self.setup.labour_conditioning_factors[LabourState.WORKING, s],
+                ),
+                (
+                    x[self.setup.V("lambda", LabourState.WFH, s)],
+                    self.setup.labour_conditioning_factors[LabourState.WFH, s],
+                ),
+                (
+                    x[self.setup.V("lambda", LabourState.ILL, s)],
+                    self.setup.labour_conditioning_factors[LabourState.ILL, s],
+                ),
             ]
             quotients = [q for q in quotients if q[1] > 0]
             quotients = sorted(quotients, key=lambda q: q[1], reverse=True)
@@ -1074,37 +1105,22 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         state.gdp_state = gdp_state
 
     def _simulate(
-        self, state: SimulateState, capital: Mapping[Sector, float], demand: Mapping[Tuple[Sector,FinalUse], float]
+        self,
+        state: SimulateState,
+        capital: Mapping[Sector, float],
+        demand: Mapping[Tuple[Sector, FinalUse], float],
     ) -> IoGdpState:
 
         # preprocess parameters
-        lambda_utilisation = {s: state.utilisations[s] for s in Sector}
-        # transform new mapping to old
-        # TODO: convert model to use new WorkerStates directly
-        p_lambda_dict = {}
-        p_lambda_dict[LabourState.UNEMPLOYED] = {
-            s: lambda_utilisation[s][WorkerState.ILL_UNEMPLOYED]
-            + lambda_utilisation[s][WorkerState.HEALTHY_UNEMPLOYED]
-            + lambda_utilisation[s][WorkerState.DEAD]
-            for s in Sector
-        }
-        p_lambda_dict[LabourState.FURLOUGHED] = {
-            s: lambda_utilisation[s][WorkerState.ILL_FURLOUGHED]
-            + lambda_utilisation[s][WorkerState.HEALTHY_FURLOUGHED]
-            for s in Sector
-        }
-        p_lambda_dict[LabourState.WORKING] = {
-            s: lambda_utilisation[s][WorkerState.HEALTHY_WFO] for s in Sector
-        }
-        p_lambda_dict[LabourState.WFH] = {
-            s: lambda_utilisation[s][WorkerState.HEALTHY_WFH] for s in Sector
-        }
-        p_lambda_dict[LabourState.ILL] = {
-            s: lambda_utilisation[s][WorkerState.ILL_WFO]
-            + lambda_utilisation[s][WorkerState.ILL_WFH]
-            for s in Sector
-        }
-        p_lambda = pd.DataFrame(p_lambda_dict)
+        p_labour = {}
+        for s in Sector:
+            lambdas = state.utilisations[s]
+            default_values = {
+                WorkerStateConditional.WFH: self.keyworker[s],
+                WorkerStateConditional.FURLOUGHED: 1.0,
+                WorkerStateConditional.NOT_EMPLOYED: 0.0,
+            }
+            p_labour[s] = Utilisation.from_lambdas(lambdas, default_values)
 
         p_kappa = capital
 
@@ -1178,7 +1194,9 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
 
         # apply assumed long-term growth rate to capital
         for s in Sector:
-            capital[s] = capital[s] * (1 + self.growth_rates[s]) ** ((state.time - START_OF_TIME) / DAYS_IN_A_YEAR)
+            capital[s] = capital[s] * (1 + self.growth_rates[s]) ** (
+                (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
+            )
 
         # use demand parameter from personal model
         if (
@@ -1187,9 +1205,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             or state.previous.personal_state.demand_reduction is None
         ):
             if state.time == START_OF_TIME:
-                demand = {
-                    (i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)
-                }
+                demand = {(i, u): 1.0 for i, u in itertools.product(Sector, FinalUse)}
             else:
                 raise ValueError("demand parameter required")
         else:
@@ -1198,10 +1214,14 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                 demand[i, FinalUse.E] = 1.0
                 demand[i, FinalUse.K] = 1.0
                 # TODO: apply output from personal model to household demand only
-                demand[i, FinalUse.C] = 1.0 - np.nan_to_num(state.previous.personal_state.demand_reduction[i])
+                demand[i, FinalUse.C] = 1.0 - np.nan_to_num(
+                    state.previous.personal_state.demand_reduction[i]
+                )
 
         # apply assumed long-term growth rate to demand
         for s, u in itertools.product(Sector, FinalUse):
-            demand[s, u] = demand[s, u] * (1 + self.growth_rates[s]) ** ((state.time - START_OF_TIME) / DAYS_IN_A_YEAR)
+            demand[s, u] = demand[s, u] * (1 + self.growth_rates[s]) ** (
+                (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
+            )
 
         self._simulate(state, capital, demand)
