@@ -1,20 +1,17 @@
 import itertools
 import logging
-from dataclasses import dataclass
-from typing import Mapping, Tuple, MutableMapping
+from typing import Mapping, Tuple
 
 from adapter_covid19.constants import START_OF_TIME
-from adapter_covid19.datasources import Reader
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
-from adapter_covid19.gdp import BaseGdpModel
-from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, LabourState, PrimaryInput
 from adapter_covid19.data_structures import (
     SimulateState,
-    GdpResult,
-    PersonalStateToDeprecate,
     Utilisations,
 )
+from adapter_covid19.datasources import Reader
+from adapter_covid19.enums import Region, Sector, Age, LabourState
+from adapter_covid19.gdp import BaseGdpModel
+from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -120,13 +117,3 @@ class Economics:
         self.gdp_model.simulate(state)
         self.corporate_model.simulate(state)
         self.personal_model.simulate(state)
-
-        # TODO: deprecate
-        self.results.corporate_solvencies[
-            time
-        ] = state.corporate_state.gdp_discount_factor
-        self.results.gdp[time] = {
-            (r, s, a): self.gdp_model.results.gdp[time][r, s, a]
-            * state.corporate_state.gdp_discount_factor[s]
-            for r, s, a in itertools.product(Region, Sector, Age)
-        }

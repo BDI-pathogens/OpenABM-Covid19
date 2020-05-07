@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import Mapping, Tuple, Optional, MutableMapping
+from typing import Mapping, Tuple, MutableMapping
 
 import numpy as np
 
@@ -149,10 +149,8 @@ class Scenario:
         # TODO: remove harcoded values
         return InitialiseState(
             personal_kwargs=dict(
-                default_th=300,
-                max_earning_furloughed=30_000,
-                alpha=5,
-                beta=20,
+                default_th=300, max_earning_furloughed=30_000,
+                alpha=5, beta=20,
             ),
             corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
         )

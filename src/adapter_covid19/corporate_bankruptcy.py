@@ -75,7 +75,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.sme_company_size: Mapping[Sector, float] = {}
         self.sme_company_received_loan: Mapping[Sector, float] = {}
 
-
     def load(self, reader: Reader) -> None:
         # primary inputs data
         io_df = reader.load_csv("input_output").set_index("Sector")
@@ -99,10 +98,10 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             + io_df.capital_consumption
         )
         value_added = (
-                io_df.net_operating_surplus.apply(lambda x: max(x, 0))
-                + io_df.employee_compensation
-                + io_df.taxes_minus_subsidies
-                + io_df.capital_consumption
+            io_df.net_operating_surplus.apply(lambda x: max(x, 0))
+            + io_df.employee_compensation
+            + io_df.taxes_minus_subsidies
+            + io_df.capital_consumption
         )
         self.value_added = {Sector[k]: v for k, v in value_added.to_dict().items()}
 
@@ -138,14 +137,25 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         # company demographics
         self.turnover = reader.load_csv("company_size_and_turnover").set_index("Sector")
         self.sme_count = {
-            Sector[k]: int(v) for k, v in self.turnover[self.turnover.min_size < 250].groupby(['Sector'])['num_companies'].sum().to_dict().items()
+            Sector[k]: int(v)
+            for k, v in self.turnover[self.turnover.min_size < 250]
+            .groupby(["Sector"])["num_companies"]
+            .sum()
+            .to_dict()
+            .items()
         }
         self.sme_count.update({s: 0 for s in set(Sector) - self.sme_count.keys()})
         self.largecap_count = {
-            Sector[k]: int(v) for k, v in
-            self.turnover[self.turnover.min_size >= 250].groupby(['Sector'])['num_companies'].sum().to_dict().items()
+            Sector[k]: int(v)
+            for k, v in self.turnover[self.turnover.min_size >= 250]
+            .groupby(["Sector"])["num_companies"]
+            .sum()
+            .to_dict()
+            .items()
         }
-        self.largecap_count.update({s: 0 for s in set(Sector) - self.largecap_count.keys()})
+        self.largecap_count.update(
+            {s: 0 for s in set(Sector) - self.largecap_count.keys()}
+        )
 
         # simulate initial cash buffers
         self._init_sim()
@@ -162,14 +172,34 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
         # coronavirus business interruption loan scheme (CBILS) stimulus parameters
         self.loan_guarantee_remaining = 330e3
-        self.size_loan = {0: 0.01, 1: 0.05, 2: 0.05, 5: 0.05, 10: 0.25, 20: 0.25, 50: 0.25, 100: 0.25, 200: 0.25}
-        sme_company_sector_counts = self.turnover[self.turnover.min_size < 250][['min_size', 'num_companies']]
+        self.size_loan = {
+            0: 0.01,
+            1: 0.05,
+            2: 0.05,
+            5: 0.05,
+            10: 0.25,
+            20: 0.25,
+            50: 0.25,
+            100: 0.25,
+            200: 0.25,
+        }
+        sme_company_sector_counts = self.turnover[self.turnover.min_size < 250][
+            ["min_size", "num_companies"]
+        ]
         self.sme_company_size = {
             Sector[k]: v
-            for k, v in np.repeat(sme_company_sector_counts.min_size, sme_company_sector_counts.num_companies).groupby(
-                ['Sector']).apply(lambda x: np.array(x)).to_dict().items()
+            for k, v in np.repeat(
+                sme_company_sector_counts.min_size,
+                sme_company_sector_counts.num_companies,
+            )
+            .groupby(["Sector"])
+            .apply(lambda x: np.array(x))
+            .to_dict()
+            .items()
         }
-        self.sme_company_received_loan = {s: np.zeros(self.sme_count[s]) for s in Sector}
+        self.sme_company_received_loan = {
+            s: np.zeros(self.sme_count[s]) for s in Sector
+        }
 
     def _init_sim(self) -> None:
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
@@ -177,7 +207,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.cash_state = {
             BusinessSize.large: {
                 s: self._sim_cash_buffer(
-                    self.largecap_count[s], large_med[s], self.lcap_clipped_cash_buffer[s]
+                    self.largecap_count[s],
+                    large_med[s],
+                    self.lcap_clipped_cash_buffer[s],
                 )
                 for s in Sector
             },
@@ -246,8 +278,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                     scale=1e-6,
                     size=self.largecap_count[s],
                 )
-                if s in large_cash_q5
-                and large_cash_q5[s] == large_cash_q5[s]
+                if s in large_cash_q5 and large_cash_q5[s] == large_cash_q5[s]
                 else np.zeros(self.largecap_count[s])
                 for s in Sector
             },
@@ -257,8 +288,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                     scale=1e-6,
                     size=self.sme_count[s],
                 )
-                if s in sme_cash_q5
-                and sme_cash_q5[s] == sme_cash_q5[s]
+                if s in sme_cash_q5 and sme_cash_q5[s] == sme_cash_q5[s]
                 else np.zeros(self.sme_count[s])
                 for s in Sector
             },
@@ -354,10 +384,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             self._new_spending_sector_allocation()
         if state.time == state.ccff_day:
             self._apply_ccff()
-        if (
-            (state.time >= state.loan_guarantee_day)
-            and self.loan_guarantee_remaining
-        ):
+        if (state.time >= state.loan_guarantee_day) and self.loan_guarantee_remaining:
             self._loan_guarantees()
         self._update_state(net_operating_surplus)
         largecap_proportion_solvent = {
@@ -439,7 +466,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                 self.cash_state[BusinessSize.sme][s] > 0
             )
             sample = np.random.choice(
-                np.where(valid_set)[0], size=int(min(self.sme_count[s] * 0.01, sum(valid_set))), replace=False
+                np.where(valid_set)[0],
+                size=int(min(self.sme_count[s] * 0.01, sum(valid_set))),
+                replace=False,
             )
             if not len(sample):
                 return
