@@ -5,14 +5,15 @@ import itertools
 import sys
 
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
-from adapter_covid19.data_structures import SimulateState, IoGdpState
+from adapter_covid19.data_structures import IoGdpState
 from adapter_covid19.datasources import Reader
 from adapter_covid19.enums import PrimaryInput, Region, Sector, Age
 from tests.adapter_covid19.utilities import (
     DATA_PATH,
-    MIN_UTILISATIONS,
-    MAX_UTILISATIONS,
-    FLAT_UTILISATIONS,
+    ALL_UTILISATIONS,
+    state_from_utilisation,
+    UTILISATION_NO_COVID_NO_LOCKDOWN,
+    advance_state,
 )
 
 sys.path.append("src/adapter_covid19")
@@ -28,32 +29,28 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize(
             "corporate_bankruptcy_model_cls", [CorporateBankruptcyModel]
         )
-    if "utilisations" in metafunc.fixturenames:
+    if "utilisation" in metafunc.fixturenames:
         metafunc.parametrize(
             # TODO: figure out how to test this properly
-            "utilisations",
-            [MIN_UTILISATIONS, MAX_UTILISATIONS, FLAT_UTILISATIONS],
+            "utilisation",
+            ALL_UTILISATIONS,
         )
 
 
 class TestClass:
-    def test_interface(self, corporate_bankruptcy_model_cls, utilisations):
+    def test_interface(self, corporate_bankruptcy_model_cls, utilisation):
         reader = Reader(DATA_PATH)
-        state_0 = SimulateState(
-            time=0,
-            lockdown=False,
-            utilisations=utilisations,
-            gdp_state=IoGdpState(primary_inputs=DUMMY_PRIMARY_INPUTS),
-        )
-        state_1 = SimulateState(
-            time=1,
-            lockdown=True,
-            utilisations=utilisations,
-            gdp_state=IoGdpState(primary_inputs=DUMMY_PRIMARY_INPUTS),
-        )
+        state = state_from_utilisation(UTILISATION_NO_COVID_NO_LOCKDOWN)
+        state.gdp_state = IoGdpState(primary_inputs=DUMMY_PRIMARY_INPUTS)
+        new_state = advance_state(state, utilisation)
+        new_state.gdp_state = IoGdpState(primary_inputs=DUMMY_PRIMARY_INPUTS)
         cb_model = corporate_bankruptcy_model_cls()
         cb_model.load(reader)
-        cb_model.simulate(state_0)
-        cb_model.simulate(state_1)
-        for discount in state_1.corporate_state.gdp_discount_factor.values():
-            assert 0 <= discount <= 1
+        cb_model.simulate(state)
+        cb_model.simulate(new_state)
+        for (
+            _business_size,
+            mapping,
+        ) in new_state.corporate_state.proportion_solvent.items():
+            for sector, solvent in mapping.items():
+                assert 0 <= solvent <= 1
