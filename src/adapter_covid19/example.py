@@ -135,6 +135,17 @@ def lockdown_then_unlock_no_corona(
                 for i in range(1, end_time)
             ]
         ).plot(figsize=(20, 10),title="Household Expenditure Reduction")
+
+        # Plot 4 - Unemployment
+        def unemployment_from_lambdas(d):
+            return (d[WorkerState.ILL_UNEMPLOYED] + d[WorkerState.HEALTHY_UNEMPLOYED] + d[WorkerState.ILL_FURLOUGHED] + d[WorkerState.HEALTHY_FURLOUGHED]) /  (1 - d[WorkerState.DEAD])
+        pd.DataFrame(
+            [
+                {s: unemployment_from_lambdas(states[i].utilisations[s]) for s in Sector}
+                for i in range(1, end_time)
+            ]
+        ).plot(figsize=(20, 10),title="Unemployment")
+
     return econ, states
 
 

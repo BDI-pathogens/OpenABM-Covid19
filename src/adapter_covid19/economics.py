@@ -118,14 +118,6 @@ class Economics:
         # provide the plumbing for the other three models
 
         self.gdp_model.simulate(state)
-        # TODO: fix and move this into GDP model; have corp model account for p_furlough
-        if time != START_OF_TIME:
-            for s in Sector:
-                for r, a in itertools.product(Region, Age):
-                    state.utilisations[r, s, a].p_not_employed = (
-                        1 - state.previous.corporate_state.capital_discount_factor[s]
-                    )
-
         self.corporate_model.simulate(state)
         self.personal_model.simulate(state)
 

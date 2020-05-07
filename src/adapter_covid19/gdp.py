@@ -1044,8 +1044,12 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             assert denominator > 0.0
             assert numerator / denominator <= 1.0 + 1e-2 # tolerance due to rounding errors
             p_not_employed[s] = max(1.0 - numerator / denominator, 0.0) # ensure strict non-negativity
+            assert p_not_employed[s] >= 0.0
+            # TODO: have corporate model account for p_furlough
+
         for r, s, a in itertools.product(Region, Sector, Age):
             state.utilisations[r,s,a].p_not_employed = p_not_employed[s]
+            assert state.utilisations[r,s,a].p_not_employed >= 0.0
 
         # update gdp state
         gdp_state = IoGdpState(
