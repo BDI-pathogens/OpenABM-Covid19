@@ -9,6 +9,10 @@ import pandas as pd
 import scipy.stats
 
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
+from adapter_covid19.data_structures import (
+    SimulateState,
+    PersonalState,
+)
 from adapter_covid19.datasources import (
     Reader,
     RegionDataSource,
@@ -17,11 +21,6 @@ from adapter_covid19.datasources import (
 )
 from adapter_covid19.enums import LabourState, Age
 from adapter_covid19.enums import Region, Sector, Decile
-from adapter_covid19.data_structures import (
-    SimulateState,
-    PersonalStateToDeprecate,
-    PersonalState,
-)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -364,8 +363,8 @@ class PersonalBankruptcyModel:
         decile: Decile,
         spot_earning: float,
     ) -> Mapping[Sector, float]:
-        spot_earning_ratio = (
-            spot_earning / self.earnings[(region, employed_sector, decile)]
+        spot_earning_ratio = min(
+            spot_earning / self.earnings[(region, employed_sector, decile)], 1.0
         )
         return {
             expense_sector: max(
@@ -431,7 +430,8 @@ class PersonalBankruptcyModel:
                 1
                 - expense_by_expense_sector[expense_sector]
                 / self.expenses_by_expense_sector[expense_sector]
-                if self.expenses_by_expense_sector[expense_sector] > 0 else 0.
+                if self.expenses_by_expense_sector[expense_sector] > 0
+                else 0.0
             )
             for expense_sector in Sector
         }
