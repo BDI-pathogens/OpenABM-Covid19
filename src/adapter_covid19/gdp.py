@@ -1154,35 +1154,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         # postprocess model parameters
         return self._postprocess_model_outputs(state, r)
 
-    def init_utilisations(self, state: SimulateState):
-        # TODO: move this into Utilisations or Scenario
-        u = Utilisations(
-            utilisations={
-                (r, s, a): Utilisation(
-                    p_dead=state.dead[r, s, a],
-                    p_ill_wfh=state.ill[EmploymentState.WFH, r, s, a],
-                    p_ill_wfo=state.ill[EmploymentState.WFO, r, s, a],
-                    p_ill_furloughed=state.ill[EmploymentState.FURLOUGHED, r, s, a],
-                    p_ill_unemployed=state.ill[EmploymentState.UNEMPLOYED, r, s, a],
-                    p_wfh=self.keyworker[s]
-                    if state.lockdown
-                    else 0.0,  # keyworker state determines who is constrained to WFH
-                    p_furloughed=1.0
-                    if state.furlough
-                    else 0.0,  # if furloughing is available, everybody will be furloughed
-                    p_not_employed=0.0,  # this will be an output of the model and overridden accordingly
-                )
-                for r, s, a in itertools.product(Region, Sector, Age)
-            },
-            worker_data=self.workers,
-        )
-        state.utilisations = u
-
     def simulate(self, state: SimulateState) -> None:
-        # initialise utilisations according to health status and interventions
-        # does not set unemployment
-        self.init_utilisations(state)
-
         # use capital parameter from corporate model
         if (
             state.previous is None
