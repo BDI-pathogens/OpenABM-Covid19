@@ -123,18 +123,20 @@ class TestClass(object):
         # Check that the simulation ran
         assert len(df_output) != 0
 
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        n_patient_general = df_individual_output["time_general"] != -1
-        n_patient_general = df_individual_output[n_patient_general]
+        df_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+
+        n_patient_general = df_time_step["hospital_state"] == constant.EVENT_TYPES.GENERAL.value
+        n_patient_general = df_time_step[n_patient_general]
         n_patient_general = len(n_patient_general.index)
+
         assert n_patient_general == 0
 
-        n_patient_icu = df_individual_output["time_icu"] != -1
-        n_patient_icu = df_individual_output[n_patient_icu]
+        n_patient_icu = df_time_step["hospital_state"] == constant.EVENT_TYPES.ICU.value
+        n_patient_icu = df_time_step[n_patient_icu]
         n_patient_icu = len(n_patient_icu.index)
+
         assert n_patient_icu == 0
 
-# Dylan update for file change
     def test_zero_general_wards(self):
         """
         Set hospital general wards to zero, check there are no general patients
@@ -170,11 +172,11 @@ class TestClass(object):
         # Check that the simulation ran
         assert len(df_output) != 0
 
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        df_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        n_patient_icu = df_time_step["hospital_state"] == constant.EVENT_TYPES.GENERAL.value
-        n_patient_icu = df_time_step[n_patient_icu]
-        n_patient_icu = len(n_patient_icu.index)
+        n_patient_general = df_time_step["hospital_state"] == constant.EVENT_TYPES.GENERAL.value
+        n_patient_general = df_time_step[n_patient_icu]
+        n_patient_general = len(n_patient_icu.index)
 
         assert n_patient_general == 0
 
@@ -816,60 +818,60 @@ class TestClass(object):
         assert len(df_nurse_patient_icu_interactions.index) > 0
 
 # Dylan update for file change
-    # def test_only_hcw_infections(self):
-    #     """
-    #     Only let infections occur in the hospital. Assert total new infections = total hospital infections.
-    #     """
+    def test_only_hcw_infections(self):
+        """
+        Only let infections occur in the hospital. Assert total new infections = total hospital infections.
+        """
 
-    #     # Adjust baseline parameter
-    #     params = ParameterSet(TEST_DATA_FILE, line_number=1)
-    #     params.set_param("infectious_rate", 0.0001)
-    #     params.set_param("n_total", 20000)
-    #     params.write_params(SCENARIO_FILE)
+        # Adjust baseline parameter
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("infectious_rate", 0.0001)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
 
-    #     # Construct the executable command
-    #     EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
-    #     # Call the model pipe output to file, read output file
-    #     file_output = open(TEST_OUTPUT_FILE, "w")
-    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
-    #     # Adjust hospital baseline parameter
-    #     h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-    #     h_params.set_param("general_infectivity_modifier", 57500.0)
-    #     h_params.write_params(SCENARIO_HOSPITAL_FILE)
+        # Adjust hospital baseline parameter
+        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
+        h_params.set_param("general_infectivity_modifier", 57500.0)
+        h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
-    #     # Construct the compilation command and compile
-    #     compile_command = "make clean; make all; make swig-all;"
-    #     completed_compilation = subprocess.run([compile_command],
-    #         shell = True,
-    #         cwd = SRC_DIR,
-    #         capture_output = True
-    #         )
+        # Construct the compilation command and compile
+        compile_command = "make clean; make all; make swig-all;"
+        completed_compilation = subprocess.run([compile_command],
+            shell = True,
+            cwd = SRC_DIR,
+            capture_output = True
+            )
 
-    #     # Construct the executable command
-    #     EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+        # Construct the executable command
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
+            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
-    #     # Call the model pipe output to file, read output file
-    #     file_output = open(TEST_OUTPUT_FILE, "w")
-    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-    #     df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+        # Call the model pipe output to file, read output file
+        file_output = open(TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
+        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
 
-    #     # Check that the simulation ran
-    #     assert len(df_output) != 0
+        # Check that the simulation ran
+        assert len(df_output) != 0
 
-    #     time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-    #     # Only keep instances where people have been infected after the zero time step
-    #     never_infected_condition = time_step_df["disease_state"] != constant.UNINFECTED
-    #     seed_infected_condition = time_step_df["time_infected"] != 0
-    #     infected_df = time_step_df[never_infected_condition & seed_infected_condition]
+        # Only keep instances where people have been infected after the zero time step
+        never_infected_condition = time_step_df["disease_state"] != constant.EVENT_TYPES.UNINFECTED.value
+        seed_infected_condition = time_step_df["time_infected"] != 0
+        infected_df = time_step_df[never_infected_condition & seed_infected_condition]
 
-    #     # Only keep instances where people that have been infected are hcw
-    #     doctor_condition = infected_df["doctor_type"] == 1
-    #     nurse_condition = infected_df["nurse_type"] == 1
-    #     hcw_condition = infected_df[doctor_condition | nurse_condition]
+        # Only keep instances where people that have been infected are hcw
+        doctor_condition = infected_df["doctor_type"] == 1
+        nurse_condition = infected_df["nurse_type"] == 1
+        hcw_condition = infected_df[doctor_condition | nurse_condition]
 
-    #     assert len(hcw_condition.index) == len(infected_df.index)
+        assert len(hcw_condition.index) == len(infected_df.index)
