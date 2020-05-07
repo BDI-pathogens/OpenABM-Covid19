@@ -443,22 +443,23 @@ class Utilisation:
             + lambdas[WorkerState.ILL_UNEMPLOYED]
         ) / (1 - p_dead)
 
+        # Beware np.float64s not throwing ZeroDivisionErrors
         try:
-            p_ill_wfo = lambdas[WorkerState.ILL_WFO] / (
+            p_ill_wfo = float(lambdas[WorkerState.ILL_WFO]) / float(
                 lambdas[WorkerState.HEALTHY_WFO] + lambdas[WorkerState.ILL_WFO]
             )
         except ZeroDivisionError:
             p_ill_wfo = default_values.get(WorkerStateConditional.ILL_WFO, p_ill)
 
         try:
-            p_ill_wfh = lambdas[WorkerState.ILL_WFH] / (
+            p_ill_wfh = float(lambdas[WorkerState.ILL_WFH]) / float(
                 lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]
             )
         except ZeroDivisionError:
             p_ill_wfh = default_values.get(WorkerStateConditional.ILL_WFH, p_ill)
 
         try:
-            p_ill_furloughed = lambdas[WorkerState.ILL_FURLOUGHED] / (
+            p_ill_furloughed = float(lambdas[WorkerState.ILL_FURLOUGHED]) / float(
                 lambdas[WorkerState.HEALTHY_FURLOUGHED]
                 + lambdas[WorkerState.ILL_FURLOUGHED]
             )
@@ -468,7 +469,7 @@ class Utilisation:
             )
 
         try:
-            p_ill_unemployed = lambdas[WorkerState.ILL_UNEMPLOYED] / (
+            p_ill_unemployed = float(lambdas[WorkerState.ILL_UNEMPLOYED]) / float(
                 lambdas[WorkerState.HEALTHY_UNEMPLOYED]
                 + lambdas[WorkerState.ILL_UNEMPLOYED]
             )
@@ -478,9 +479,9 @@ class Utilisation:
             )
 
         try:
-            p_wfh = (
+            p_wfh = float(
                 lambdas[WorkerState.HEALTHY_WFH] + lambdas[WorkerState.ILL_WFH]
-            ) / (
+            ) / float(
                 lambdas[WorkerState.HEALTHY_WFH]
                 + lambdas[WorkerState.ILL_WFH]
                 + lambdas[WorkerState.HEALTHY_WFO]
@@ -490,10 +491,10 @@ class Utilisation:
             p_wfh = default_values[WorkerStateConditional.WFH]
 
         try:
-            p_furloughed = (
+            p_furloughed = float(
                 lambdas[WorkerState.HEALTHY_FURLOUGHED]
                 + lambdas[WorkerState.ILL_FURLOUGHED]
-            ) / (
+            ) / float(
                 lambdas[WorkerState.HEALTHY_FURLOUGHED]
                 + lambdas[WorkerState.ILL_FURLOUGHED]
                 + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
@@ -503,12 +504,12 @@ class Utilisation:
             p_furloughed = default_values[WorkerStateConditional.FURLOUGHED]
 
         try:
-            p_not_employed = (
+            p_not_employed = float(
                 lambdas[WorkerState.HEALTHY_FURLOUGHED]
                 + lambdas[WorkerState.ILL_FURLOUGHED]
                 + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
                 + lambdas[WorkerState.ILL_UNEMPLOYED]
-            ) / (1 - lambdas[WorkerState.DEAD])
+            ) / float(1 - lambdas[WorkerState.DEAD])
         except ZeroDivisionError:
             p_not_employed = default_values[WorkerStateConditional.NOT_EMPLOYED]
 
