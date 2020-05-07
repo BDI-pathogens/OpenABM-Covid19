@@ -147,4 +147,4 @@ class TestClass(object):
         # loop through infected non healthcare workers and check their infector was not a hospital patient
         for index, row in infected_non_hcw.iterrows():
             infector_hospital_state = int(row["infector_hospital_state"])
-            assert infector_hospital_state == -1 or infector_hospital_state == constant.EVENT_TYPES.WAITING.value
+            assert infector_hospital_state == constant.EVENT_TYPES.NOT_IN_HOSPITAL.value or infector_hospital_state == constant.EVENT_TYPES.WAITING.value
