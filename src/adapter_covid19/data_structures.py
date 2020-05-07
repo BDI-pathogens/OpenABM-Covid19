@@ -452,16 +452,13 @@ class Utilisation:
 
         try:
             p_furloughed = (
-                (
-                    lambdas[WorkerState.HEALTHY_FURLOUGHED]
-                    + lambdas[WorkerState.ILL_FURLOUGHED]
-                )
-                / (
-                    lambdas[WorkerState.HEALTHY_FURLOUGHED]
-                    + lambdas[WorkerState.ILL_FURLOUGHED]
-                    + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
-                    + lambdas[WorkerState.ILL_UNEMPLOYED]
-                ),
+                lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                + lambdas[WorkerState.ILL_FURLOUGHED]
+            ) / (
+                lambdas[WorkerState.HEALTHY_FURLOUGHED]
+                + lambdas[WorkerState.ILL_FURLOUGHED]
+                + lambdas[WorkerState.HEALTHY_UNEMPLOYED]
+                + lambdas[WorkerState.ILL_UNEMPLOYED]
             )
         except ZeroDivisionError:
             p_furloughed = default_values[WorkerStateConditional.FURLOUGHED]
@@ -476,7 +473,7 @@ class Utilisation:
         except ZeroDivisionError:
             p_not_employed = default_values[WorkerStateConditional.NOT_EMPLOYED]
 
-        return Utilisation(
+        return cls(
             p_dead=p_dead,
             p_ill_wfo=p_ill_wfo,
             p_ill_wfh=p_ill_wfh,
