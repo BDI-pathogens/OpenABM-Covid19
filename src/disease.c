@@ -181,7 +181,7 @@ void transmit_virus_by_type(
 			next_event = event->next;
 			infector   = event->individual;
 
-			t_infect = model->time - time_infected( infector );
+			t_infect = model->time - time_infected_infection_event( infector->infection_events );
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
 				continue;
 
@@ -204,7 +204,7 @@ void transmit_virus_by_type(
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
-					if( interaction->individual->status == UNINFECTED )
+					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
                         if( model->params->hospital_on )
@@ -214,7 +214,7 @@ void transmit_virus_by_type(
 						if( interaction->individual->hazard < 0 )
 						{
 							new_infection( model, interaction->individual, infector );
-							interaction->individual->infector_network = interaction->type;
+							interaction->individual->infection_events->infector_network = interaction->type;
 						}
 					}
 					interaction = interaction->next;
@@ -262,24 +262,26 @@ void new_infection(
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
 
-	infected->infector = infector;
-	infected->infector_status = infector->status;
+	infected->infection_events->infector = infector;
+	infected->infection_events->infector_status = infector->status;
 
 	if( draw < asymp_frac )
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, ASYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, ASYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, ASYMPTOMATIC, RECOVERED, ASYMPTOMATIC_RECOVERED );
 	}
 	else if( draw < asymp_frac + mild_frac )
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC_MILD, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC_MILD, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC_MILD, SYMPTOMATIC_MILD, PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD );
 	}
 	else
 	{
-		transition_one_disese_event( model, infected, NO_EVENT, PRESYMPTOMATIC, NO_EDGE );
+		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
+	infected->infection_events->time_infected_infector =
+		time_infected_infection_event(infector->infection_events);
 }
 
 /*****************************************************************************************
@@ -299,7 +301,7 @@ void transition_one_disese_event(
 	indiv->status           = from;
 
 	if( from != NO_EVENT )
-		indiv->time_event[from] = model->time;
+		indiv->infection_events->times[from] = model->time;
 	if( indiv->current_disease_event != NULL )
 		remove_event_from_event_list( model, indiv->current_disease_event );
 	if( indiv->next_disease_event != NULL )
@@ -307,8 +309,8 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
+		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
 	}
 }
 

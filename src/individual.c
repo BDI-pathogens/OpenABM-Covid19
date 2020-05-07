@@ -27,9 +27,8 @@ void initialize_individual(
 		print_exit( "Individuals can only be intitialized once!" );
 
 	indiv->idx         = idx;
-	indiv->status      = UNINFECTED;
+	indiv->status      = SUSCEPTIBLE;
 	indiv->quarantined = FALSE;
-	indiv->is_case     = FALSE;
 	indiv->app_user	   = FALSE;
 
 	for( day = 0; day < params->days_of_interactions; day++ )
@@ -38,18 +37,22 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	indiv->time_event = calloc( N_EVENT_TYPES, sizeof(int) );
+	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
 	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-		indiv->time_event[jdx] = UNKNOWN;
-	
+		indiv->infection_events->times[jdx] = UNKNOWN;
+
+	indiv->infection_events->infector_status  = UNKNOWN;
+	indiv->infection_events->infector_network = UNKNOWN;
+	indiv->infection_events->time_infected_infector = UNKNOWN;
+	indiv->infection_events->next =  NULL;
+	indiv->infection_events->is_case     = FALSE;
+
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
 	indiv->current_disease_event    = NULL;
 	indiv->next_disease_event       = NULL;
 	indiv->quarantine_test_result   = NO_TEST;
-
-	indiv->infector_status  = UNKNOWN;
-	indiv->infector_network = UNKNOWN;
 
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
@@ -97,12 +100,12 @@ void set_quarantine_status(
 	if( status )
 	{
 		indiv->quarantined             = TRUE;
-		indiv->time_event[QUARANTINED] = time;
+		indiv->infection_events->times[QUARANTINED] = time;
 	}
 	else
 	{
 		indiv->quarantined              = FALSE;
-		indiv->time_event[QUARANTINED]  = UNKNOWN;
+		indiv->infection_events->times[QUARANTINED]  = UNKNOWN;
 		indiv->quarantine_event         = NULL;
 		indiv->quarantine_release_event = NULL;
 	}
@@ -263,8 +266,8 @@ void set_hospitalised_recovering( individual *indiv, parameters* params, int tim
 ******************************************************************************************/
 void set_case( individual *indiv, int time )
 {
-	indiv->is_case   = TRUE;
-	indiv->time_event[CASE] = time;
+	indiv->infection_events->is_case   = TRUE;
+	indiv->infection_events->times[CASE] = time;
 }
 
 /*****************************************************************************************
@@ -326,9 +329,39 @@ void set_discharged( individual *indiv, parameters* params, int time )
 
 /*****************************************************************************************
 *  Name:		destroy_individual
-*  Description: Destroys the model structure and releases its memory
+*  Description: Destroys the individual structure and releases its memory
 ******************************************************************************************/
 void destroy_individual( individual *indiv )
 {
-	free( indiv->time_event );
+	infection_event *infection_event, *temporary_infection_event;
+
+	infection_event = indiv->infection_events;
+
+	while( infection_event != NULL )
+	{
+		temporary_infection_event = infection_event;
+		free( infection_event->times );
+		infection_event = infection_event->next;
+		free( temporary_infection_event );
+	}
 };
+
+/*****************************************************************************************
+*  Name:		count_infection_events
+*  Description: Count number of times an individual has been infected
+******************************************************************************************/
+
+int count_infection_events( individual *indiv )
+{
+	int infection_count = 0;
+    infection_event *infection_event;
+	infection_event = indiv->infection_events;
+
+	while(infection_event != NULL){
+		if( time_infected_infection_event(infection_event) != UNKNOWN )
+			infection_count++;
+	infection_event = infection_event->next;
+	}
+
+	return infection_count;
+}

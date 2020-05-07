@@ -10,6 +10,7 @@
 #define STRUCTURE_H_
 
 typedef struct interaction interaction;
+typedef struct infection_event infection_event;
 typedef struct event event;
 typedef struct event_list event_list;
 typedef struct edge edge;

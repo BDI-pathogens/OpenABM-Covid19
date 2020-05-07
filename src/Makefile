@@ -39,6 +39,9 @@ swig-all:
 	# python3 setup.py build_ext --inplace
 	$(PYTHON) -m pip install $(PIP_FLAGS) .
 
+swig-develop: PIP_FLAGS += -e
+swig-develop: swig-all;
+
 all: $(OBJS)
 	$(C) -L$(LIB) -o $(EXE) $(OBJS) $(LFLAGS)
 
@@ -49,4 +52,4 @@ clean:
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@
 
-.PHONY: swig-all all clean
+.PHONY: swig-all swig-develop all clean
