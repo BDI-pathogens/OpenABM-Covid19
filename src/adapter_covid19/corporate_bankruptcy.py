@@ -373,14 +373,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             BusinessSize.sme: sme_proportion_solvent,
         }
 
-        # TODO: add capital to state
         state.corporate_state = CorporateState(
-            self._gdp_discount_factor(proportion_solvent),
-            self.cash_state,
-            proportion_solvent,
+            capital_discount_factor=self._capital_discount_factor(proportion_solvent),
+            cash_buffer=self.cash_state,
+            proportion_solvent=proportion_solvent,
         )
 
-    def _gdp_discount_factor(
+    def _capital_discount_factor(
         self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
 
