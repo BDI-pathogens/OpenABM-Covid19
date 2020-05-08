@@ -739,7 +739,9 @@ class TestClass(object):
         params.set_param( test_params )
 
         # TODO: move to constant file
-        TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+        TEST_DIR = os.path.dirname(os.path.realpath(__file__)
+        SCENARIO_HOSPITAL_FILE = TEST_DIR + "/data/scenario_hospital_baseline_parameters.csv"
+        
         hparams = ParameterSet(TEST_DIR+"/data/hospital_baseline_parameters.csv", line_number=1)
 
         hparams.set_param("hospitalised_waiting_mod", 1.0)
@@ -811,9 +813,8 @@ class TestClass(object):
         ]
 
         params.write_params(constant.TEST_DATA_FILE)
-
-        # TODO move filepath to constant file
-        hparams.write_params(TEST_DIR +"/data/hospital_baseline_parameters.csv")
+                                   
+        hparams.write_params(SCENARIO_HOSPITAL_FILE)
 
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
