@@ -37,6 +37,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "app_turned_on",
     "app_users_fraction",
     "trace_on_symptoms",
+    "trace_on_positive",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
     "lockdown_work_network_multiplier",
