@@ -1025,7 +1025,6 @@ class TestClass(object):
                         mean,
                         fatality_fraction[idx],
                         atol=std_error_limit * sd / sqrt(N_crit),
-                        verbose=True
                     )
 
             N_dead_tot += N_dead
