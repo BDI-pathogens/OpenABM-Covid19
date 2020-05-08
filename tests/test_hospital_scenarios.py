@@ -44,50 +44,7 @@ class TestClass(object):
     """
     Test class for checking
     """
-# Dylan update for file change
-    def test_zero_infectivity(self):
-        """
-        Set infections rate to zero, total infections should be equal to seed infections
-        """
 
-        # Adjust baseline parameter
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("infectious_rate", 0.0)
-        params.set_param("n_total", 20000)
-        params.write_params(SCENARIO_FILE)
-
-        # Construct the compilation command and compile
-        # compile_command = "make clean; make all"
-        compile_command = "make clean; make all; make swig-all;"
-        completed_compilation = subprocess.run([compile_command],
-            shell = True,
-            cwd = SRC_DIR,
-            capture_output = True
-            )
-
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
-
-        # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
-
-        # Check that the simulation ran
-        assert len(df_output) != 0
-
-        # In the individual file, time_infected should be not equal to -1 in n_seed_infection number of cases
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-
-        expected_output = int(params.get_param("n_seed_infection"))
-        output = df_individual_output["time_infected"] != -1
-        output = df_individual_output[output]
-        output = len(output.index)
-
-        np.testing.assert_equal(output, expected_output)
-
-# Dylan update for file change 
     def test_zero_beds(self):
         """
         Set hospital beds to zero
@@ -177,7 +134,7 @@ class TestClass(object):
 
         n_patient_general = df_time_step["hospital_state"] == constant.EVENT_TYPES.GENERAL.value
         n_patient_general = df_time_step[n_patient_general]
-        n_patient_general = len(n_patient_icu.index)
+        n_patient_general = len(n_patient_general.index)
 
         assert n_patient_general == 0
 
@@ -273,6 +230,7 @@ class TestClass(object):
         assert len(df_nurse_patient_general_interactions) == 0
         assert len(df_doctor_patient_icu_interactions) == 0
         assert len(df_nurse_patient_icu_interactions) == 0
+
 
 # Dylan update for file change
     def test_hospital_infectivity_modifiers_zero(self):
@@ -655,7 +613,7 @@ class TestClass(object):
 
         time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
-        waiting_df = time_step_df['hospital_state'] == constant.EVENT_TYPES.WAITING.value
+        waiting_df = time_step_df["hospital_state"] == constant.EVENT_TYPES.WAITING.value
         waiting_df = time_step_df[waiting_df]
 
         assert len(waiting_df.index) == 0
@@ -766,62 +724,3 @@ class TestClass(object):
         assert len(df_nurse_patient_general_interactions.index) > 0
         assert len(df_doctor_patient_icu_interactions.index) > 0
         assert len(df_nurse_patient_icu_interactions.index) > 0
-
-# Dylan update for file change
-    def test_only_hcw_infections(self):
-        """
-        Only let infections occur in the hospital. Assert total new infections = total hospital infections.
-        """
-
-        # Adjust baseline parameter
-        params = ParameterSet(TEST_DATA_FILE, line_number=1)
-        params.set_param("infectious_rate", 0.0001)
-        params.set_param("n_total", 20000)
-        params.write_params(SCENARIO_FILE)
-
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
-
-        # Call the model pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-
-        # Adjust hospital baseline parameter
-        h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-        h_params.set_param("general_infectivity_modifier", 57500.0)
-        h_params.write_params(SCENARIO_HOSPITAL_FILE)
-
-        # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
-        completed_compilation = subprocess.run([compile_command],
-            shell = True,
-            cwd = SRC_DIR,
-            capture_output = True
-            )
-
-        # Construct the executable command
-        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
-
-        # Call the model pipe output to file, read output file
-        file_output = open(TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-        df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
-
-        # Check that the simulation ran
-        assert len(df_output) != 0
-
-        time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
-
-        # Only keep instances where people have been infected after the zero time step
-        never_infected_condition = time_step_df["disease_state"] != constant.EVENT_TYPES.UNINFECTED.value
-        seed_infected_condition = time_step_df["time_infected"] != 0
-        infected_df = time_step_df[never_infected_condition & seed_infected_condition]
-
-        # Only keep instances where people that have been infected are hcw
-        doctor_condition = infected_df["doctor_type"] == 1
-        nurse_condition = infected_df["nurse_type"] == 1
-        hcw_condition = infected_df[doctor_condition | nurse_condition]
-
-        assert len(hcw_condition.index) == len(infected_df.index)
