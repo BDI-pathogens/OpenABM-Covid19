@@ -739,7 +739,7 @@ class TestClass(object):
         params.set_param( test_params )
 
         # TODO: move to constant file
-        TEST_DIR = os.path.dirname(os.path.realpath(__file__)
+        TEST_DIR = os.path.dirname(os.path.realpath(__file__))
         SCENARIO_HOSPITAL_FILE = TEST_DIR + "/data/scenario_hospital_baseline_parameters.csv"
         
         hparams = ParameterSet(TEST_DIR+"/data/hospital_baseline_parameters.csv", line_number=1)
