@@ -734,7 +734,7 @@ class TestClass(object):
         params.set_param("end_time", 250)
         params.set_param("infectious_rate", 4.0)
         params.set_param("mild_infectious_factor", 1.0)
-        #params.set_param( "hospital_on", 0 );
+        # params.set_param( "hospital_on", 0 );
 
         params.set_param( test_params )
 
@@ -744,6 +744,11 @@ class TestClass(object):
 
         hparams.set_param("hospitalised_waiting_mod", 1.0)
         hparams.set_param("critical_waiting_mod", 1.0)
+        hparams.set_param("relative_transmission_hospital_work", 1.0)
+        hparams.set_param("relative_transmission_doctor_patient_general", 1.0)
+        hparams.set_param("relative_transmission_nurse_patient_general", 1.0)
+        hparams.set_param("relative_transmission_doctor_patient_icu", 1.0)
+        hparams.set_param("relative_transmission_nurse_patient_icu", 1.0)
 
         fraction_asymptomatic = [
             test_params[ "fraction_asymptomatic_0_9" ],
@@ -1020,6 +1025,7 @@ class TestClass(object):
                         mean,
                         fatality_fraction[idx],
                         atol=std_error_limit * sd / sqrt(N_crit),
+                        verbose=True
                     )
 
             N_dead_tot += N_dead
