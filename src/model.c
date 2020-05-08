@@ -89,10 +89,10 @@ void destroy_model( model *model )
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
-    for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-    	destroy_network( model->work_network[idx] );
+    for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+    	destroy_network( model->occupation_network[idx] );
 
-    free( model->work_network );
+    free( model->occupation_network );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
     free( model->event_lists );
@@ -185,17 +185,17 @@ void set_up_networks( model *model )
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
-	model->work_network = calloc( N_WORK_NETWORKS, sizeof( network* ) );
-	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-		set_up_work_network( model, idx );
+	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+		set_up_occupation_network( model, idx );
 }
 
 /*****************************************************************************************
-*  Name:		set_up_work_network
+*  Name:		set_up_occupation_network
 *  Description: sets up the work network
 *  Returns:		void
 ******************************************************************************************/
-void set_up_work_network( model *model, int network )
+void set_up_occupation_network( model *model, int network )
 {
 	long idx;
 	long n_people = 0;
@@ -205,14 +205,14 @@ void set_up_work_network( model *model, int network )
 
 	people = calloc( model->params->n_total, sizeof( long ) );
 	for( idx = 0; idx < model->params->n_total; idx++ )
-		if( model->population[idx].work_network == network )
+		if( model->population[idx].occupation_network == network )
 			people[n_people++] = idx;
 
 
-	model->work_network[network] = new_network( n_people, WORK );
+	model->occupation_network[network] = new_network( n_people, OCCUPATION );
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
-	build_watts_strogatz_network( model->work_network[network], n_people, n_interactions, 0.1, TRUE );
-	relabel_network( model->work_network[network], people );
+	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
+	relabel_network( model->occupation_network[network], people );
 
 	free( people );
 }
@@ -282,8 +282,8 @@ double estimate_total_interactions( model *model )
 	n_interactions += model->household_network->n_edges;
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
-	for( idx = 0; idx < N_WORK_NETWORKS ; idx++ )
-		n_interactions += model->work_network[idx]->n_edges * model->params->daily_fraction_work;
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
+		n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
 	return n_interactions;
 }
@@ -608,8 +608,8 @@ void build_daily_newtork( model *model )
 	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
 	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
-	for( idx = 0; idx < N_WORK_NETWORKS; idx++ )
-		add_interactions_from_network( model, model->work_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+		add_interactions_from_network( model, model->occupation_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
 };
 
