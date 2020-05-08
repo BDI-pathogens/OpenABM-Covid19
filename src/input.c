@@ -597,7 +597,7 @@ void write_individual_file(model *model, parameters *params)
 		if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
 		    worker_ward_type = get_worker_ward_type( model, indiv->idx );
         else
-            worker_ward_type = -1;
+            worker_ward_type = NO_WARD;
 
 		fprintf(individual_output_file, 
             "%li,%d,%d,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d,%d\n",
