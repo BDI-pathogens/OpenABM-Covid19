@@ -40,6 +40,14 @@ int get_model_param_trace_on_symptoms(model *model)
 {
     return model->params->trace_on_symptoms;
 }
+/*****************************************************************************************
+*  Name:		get_model_param_trace_on_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_trace_on_positive(model *model)
+{
+    return model->params->trace_on_positive;
+}
 
 /*****************************************************************************************
 *  Name:		get_model_param_quarantine_on_traced
@@ -249,6 +257,15 @@ int set_model_param_self_quarantine_fraction(model *model, double value)
 ******************************************************************************************/
 int set_model_param_trace_on_symptoms(model *model, int value) {
    model->params->trace_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_trace_on_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_trace_on_positive(model *model, int value) {
+   model->params->trace_on_positive = value;
    return TRUE;
 }
 
