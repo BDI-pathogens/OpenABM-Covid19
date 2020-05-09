@@ -539,6 +539,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"age_group,");
 	fprintf(individual_output_file,"work_network,");
     fprintf(individual_output_file,"worker_type,");
+    fprintf(individual_output_file,"healthcare_worker_ward_type,"),
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"app_user,");
@@ -591,14 +592,21 @@ void write_individual_file(model *model, parameters *params)
             infector_status         = UNKNOWN;
             infector_hospital_state = UNKNOWN;
 		}
-		
+
+		int worker_ward_type;
+		if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
+		    worker_ward_type = get_worker_ward_type( model, indiv->idx );
+        else
+            worker_ward_type = NO_WARD;
+
 		fprintf(individual_output_file, 
-            "%li,%d,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d,%d\n",
+            "%li,%d,%d,%d,%d,%d,%li,%d,%d,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->work_network,
             indiv->worker_type,
+			worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->app_user,
@@ -1067,5 +1075,54 @@ void write_trace_tokens_ts( model *model, int initialise )
 		}
 	}
 	fclose(output_file);
+}
+
+/*****************************************************************************************
+*  Name:		get_worker_ward_type
+*  Description: Returns the ward type of the healthcare worker passed to this function.
+*  Returns:     int
+******************************************************************************************/
+int get_worker_ward_type( model *model, int pdx ) {
+    individual *indiv;
+    hospital *hospital;
+    ward *ward;
+
+    int indiv_ward_type;
+    indiv = &( model->population[pdx] );
+
+    // For all wards in all hospitals, check to see if any worker index matches the provided index.
+    // If yes, return the ward type of the ward they are in.
+    for( int hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ ) {
+        hospital = &( model->hospitals[ hospital_idx ] );
+
+        // Check all general wards in the hospital.
+        for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_GENERAL ]; ward_idx++ ) {
+            ward = &( hospital->wards[ COVID_GENERAL ][ ward_idx ] );
+
+            for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
+                if ( ward->doctors[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+            for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
+                if ( ward->nurses[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+        }
+
+        // Check all ICU wards in the hospital.
+        for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_ICU ]; ward_idx++ ) {
+            ward = &( hospital->wards[ COVID_ICU ][ ward_idx ] );
+
+            for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
+                if ( ward->doctors[idx].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+            for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
+                if ( ward->nurses[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+        }
+    }
+    return indiv_ward_type;
 }
 
