@@ -70,6 +70,15 @@ double get_model_param_traceable_interaction_fraction(model *model)
 }
 
 /*****************************************************************************************
+*  Name:        get_model_param_contact_tracing_fraction
+*  Description: Gets the value of parameter
+******************************************************************************************/
+double get_model_param_contact_tracing_fraction( model *model)
+{
+    return model->params->contact_tracing_fraction;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_tracing_network_depth
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -280,6 +289,16 @@ int set_model_param_quarantine_on_traced( model *model, int value )
 int set_model_param_traceable_interaction_fraction( model *model, double value )
 {
     model->params->traceable_interaction_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_contact_tracing_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_contact_tracing_fraction( model *model, double value )
+{
+    model->params->contact_tracing_fraction = value;
     return TRUE;
 }
 

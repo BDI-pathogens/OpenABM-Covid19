@@ -99,6 +99,7 @@ typedef struct{
 	int quarantine_smart_release_day;		// number of days until smart release on no contacts
 
 	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
+	double contact_tracing_fraction;  // the proportion of interactions which are traceable through normal contact tracing
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
 
@@ -156,6 +157,7 @@ double get_model_param_self_quarantine_fraction(model *model);
 int get_model_param_trace_on_symptoms(model *model);
 int get_model_param_quarantine_on_traced(model *model);
 double get_model_param_traceable_interaction_fraction(model *model);
+double get_model_param_contact_tracing_fraction(model *model);
 int get_model_param_tracing_network_depth(model *model);
 int get_model_param_allow_clinical_diagnosis(model *model);
 int get_model_param_quarantine_household_on_symptoms(model *model);
@@ -181,6 +183,7 @@ int set_model_param_self_quarantine_fraction(model *model, double value);
 int set_model_param_trace_on_symptoms(model *model, int value);
 int set_model_param_quarantine_on_traced(model *model, int value);
 int set_model_param_traceable_interaction_fraction(model *model, double value);
+int set_model_param_contact_tracing_fraction(model *model, double value);
 int set_model_param_tracing_network_depth(model *model, int value);
 int set_model_param_allow_clinical_diagnosis(model *model, int value);
 int set_model_param_quarantine_household_on_symptoms(model *model, int value);

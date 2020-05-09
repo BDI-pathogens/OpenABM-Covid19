@@ -546,6 +546,52 @@ void intervention_notify_contacts(
 }
 
 /*****************************************************************************************
+*  Name:		intervention_contact_tracing
+*  Description: If the individual is an app user then we loop over the stored contacts
+*  				and notifies them.
+*  				Start from the oldest date, so that if we have met a contact
+*  				multiple times we order the test from the first contact
+*  Returns:		void
+******************************************************************************************/
+void intervention_contact_tracing(
+	model *model,
+	individual *indiv,
+	int recursion_level,
+	trace_token *index_token
+)
+{
+
+	interaction *inter;
+	individual *contact;
+	parameters *params = model->params;
+	int idx, ddx, day, n_contacts;
+	double *risk_scores;
+
+	day = model->interaction_day_idx;
+
+	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
+	{
+		n_contacts = indiv->n_interactions[day];
+		risk_scores = params->risk_score[ ddx ][ indiv->age_group ];
+
+		if( n_contacts > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 0; idx < n_contacts; idx++ )
+			{
+				contact = inter->individual;
+				if( inter->traceable == UNKNOWN )
+					inter->traceable = gsl_ran_bernoulli( rng, params->contact_tracing_fraction );
+				if( inter->traceable )
+					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+				inter = inter->next;
+			}
+		}
+		ring_dec( day, model->params->days_of_interactions );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		intervention_trace_token_release
 *  Description: what to do when a trace_token is released
 *  Returns:		void
