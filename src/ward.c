@@ -48,7 +48,7 @@ void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->doctor_patient_network = new_network( ward->n_worker[DOCTOR], interaction_type );
     ward->doctor_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
-    interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
+    interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_NURSE_PATIENT_GENERAL : HOSPITAL_NURSE_PATIENT_ICU;
     ward->nurse_patient_network = new_network( ward->n_worker[NURSE], interaction_type );
     ward->nurse_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[NURSE], sizeof(edge) );
 }

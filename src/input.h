@@ -32,6 +32,7 @@ void write_transmissions( model* );
 void write_trace_tokens( model* );
 void write_trace_tokens_ts( model*, int );
 void write_ward_data( model* );
+int get_worker_ward_type( model *model, int pdx );
 
 void print_interactions_averages( model*, int );
 
