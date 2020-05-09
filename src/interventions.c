@@ -755,8 +755,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token, model->time );
 
 	if( params->trace_on_positive &&
-		( !index_already || params->retrace_on_positive ) &&
-		( params->quarantine_on_traced || params->test_on_traced )
+	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
+	  ( params->quarantine_on_traced || params->test_on_traced )
 	)
 		intervention_notify_contacts( model, indiv, 1, index_token );
 	else
