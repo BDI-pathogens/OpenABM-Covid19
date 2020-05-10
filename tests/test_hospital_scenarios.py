@@ -774,10 +774,13 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        n_doctors = df_individual_output["worker_type"] == 0
-        time_infected = df_individual_output["time_infected"] == -1
-        n_general = df_individual_output["assigned_worker_ward_type"] == 0
-        n_general_doctors = df_individual_output[n_doctors & n_general & time_infected]
+        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_combined_output = pd.merge(df_individual_output, df_transmission_output,
+                                      left_on = "ID", right_on = "ID_recipient", how = "left")
+        n_doctors = df_combined_output["worker_type"] == 0
+        time_infected = df_combined_output["time_infected"] == -1
+        n_general = df_combined_output["assigned_worker_ward_type"] == 0
+        n_general_doctors = df_combined_output[n_doctors & n_general & time_infected]
 
         # Check that all doctors assigned to the general ward end up being infected.
         assert(len(n_general_doctors.index) == 0)
@@ -825,10 +828,13 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        n_nurses = df_individual_output["worker_type"] == 1
-        time_infected = df_individual_output["time_infected"] == -1
-        n_general = df_individual_output["assigned_worker_ward_type"] == 0
-        n_general_nurses = df_individual_output[n_nurses & n_general & time_infected]
+        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_combined_output = pd.merge(df_individual_output, df_transmission_output,
+                                      left_on = "ID", right_on = "ID_recipient", how = "left")
+        n_nurses = df_combined_output["worker_type"] == 1
+        time_infected = df_combined_output["time_infected"] == -1
+        n_general = df_combined_output["assigned_worker_ward_type"] == 0
+        n_general_nurses = df_combined_output[n_nurses & n_general & time_infected]
 
         #Check that all doctors assigned to the general ward end up being infected.
         assert(len(n_general_nurses.index) == 0)
@@ -876,10 +882,13 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        n_doctors = df_individual_output["worker_type"] == 0
-        time_infected = df_individual_output["time_infected"] == -1
-        n_icu = df_individual_output["assigned_worker_ward_type"] == 1
-        n_icu_doctors = df_individual_output[n_doctors & n_icu & time_infected]
+        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_combined_output = pd.merge(df_individual_output, df_transmission_output,
+                                      left_on = "ID", right_on = "ID_recipient", how = "left")
+        n_doctors = df_combined_output["worker_type"] == 0
+        time_infected = df_combined_output["time_infected"] == -1
+        n_icu = df_combined_output["assigned_worker_ward_type"] == 1
+        n_icu_doctors = df_combined_output[n_doctors & n_icu & time_infected]
 
         #Check that all doctors assigned to the general ward end up being infected.
         assert(len(n_icu_doctors.index) == 0)
@@ -927,10 +936,13 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        n_nurses = df_individual_output["worker_type"] == 1
-        time_infected = df_individual_output["time_infected"] == -1
-        n_icu = df_individual_output["assigned_worker_ward_type"] == 1
-        n_icu_nurses = df_individual_output[n_nurses & n_icu & time_infected]
+        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_combined_output = pd.merge(df_individual_output, df_transmission_output,
+                                      left_on = "ID", right_on = "ID_recipient", how = "left")
+        n_nurses = df_combined_output["worker_type"] == 1
+        time_infected = df_combined_output["time_infected"] == -1
+        n_icu = df_combined_output["assigned_worker_ward_type"] == 1
+        n_icu_nurses = df_combined_output[n_nurses & n_icu & time_infected]
 
         #Check that all doctors assigned to the general ward end up being infected.
         assert(len(n_icu_nurses.index) == 0)
