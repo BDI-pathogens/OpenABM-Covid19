@@ -127,7 +127,7 @@ class TestClass(object):
             ),
             dict(
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
@@ -137,7 +137,7 @@ class TestClass(object):
             ),
             dict( # fluctuating list
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ],
@@ -349,34 +349,34 @@ class TestClass(object):
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
         # check to see whether there are transmission from all infected states
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC.value] ) > 0, True, "no transmission from presymptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from presymptomatic (mild) people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC.value] ) > 0 , True, "no transmission from symptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from symptomatic (mild) people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.ASYMPTOMATIC.value] )  > 0, True, "no transmission from asymptomatic people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED.value] )  > 0, True, "no transmission from hospitalised people" )
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_status" ] == constant.EVENT_TYPES.CRITICAL.value] )      > 0, True, "no transmission from critical people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC.value] ) > 0, True, "no transmission from presymptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from presymptomatic (mild) people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC.value] ) > 0 , True, "no transmission from symptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] ) > 0, True, "no transmission from symptomatic (mild) people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.ASYMPTOMATIC.value] )  > 0, True, "no transmission from asymptomatic people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED.value] )  > 0, True, "no transmission from hospitalised people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.CRITICAL.value] )      > 0, True, "no transmission from critical people" )
  
         # check the only people who were infected by someone after 0 time are the seed infections
-        np.testing.assert_equal( min( df_trans[ "infector_infected_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_infected_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
+        np.testing.assert_equal( min( df_trans[ "generation_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
+        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
         
         # check that some people can get infected after one time step
-        np.testing.assert_equal( len( df_trans[ df_trans[ "infector_infected_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )
 
         # check the maximum time people are stil infections
         max_sd   = 7;
         max_time = float( params.get_param( "mean_infectious_period" ) ) + max_sd * float(  params.get_param( "sd_infectious_period" ) )
-        np.testing.assert_equal( max( df_trans[ "infector_infected_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
+        np.testing.assert_equal( max( df_trans[ "generation_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
 
         # check that some people are infected across all networks
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
-        np.testing.assert_equal( sum( df_trans[ "infector_network" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.OCCUPATION )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
 
         # check hospitalised people are not transmitting on the work and household networks
-        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == constant.HOUSEHOLD ) & ( df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
-        np.testing.assert_equal( sum( ( df_trans[ "infector_network" ] == constant.WORK ) &      ( df_trans[ "infector_status" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.OCCUPATION ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
 
         
     def test_exponential_growth_homogeneous_random(
@@ -446,7 +446,6 @@ class TestClass(object):
         slope_an  = optimize.brentq( char_func, - 0.99 / theta, 1  )
 
         np.testing.assert_allclose( slope, slope_an, rtol = tolerance, err_msg = "exponential growth deviates too far from analytic approximation")
-        
     
     
     def test_monoton_relative_transmission(
@@ -481,7 +480,7 @@ class TestClass(object):
         
         # calculating the first ratio
         len_household = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.HOUSEHOLD ] )
-        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.WORK ] ) 
+        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.OCCUPATION ] ) 
         len_random = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.RANDOM ] )
         lengths = [int(len_household), int(len_work), int(len_random)]
         all_trans_current = sum(lengths)
@@ -498,7 +497,7 @@ class TestClass(object):
                 comment = "#", sep = ",", skipinitialspace = True )
             
             all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
-                        len( df_trans[ df_trans[ "infector_network" ] == constant.WORK ] ) + \
+                        len( df_trans[ df_trans[ "infector_network" ] == constant.OCCUPATION ] ) + \
                         len( df_trans[ df_trans[ "infector_network" ] == constant.RANDOM ] )
             ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans)
     
@@ -695,11 +694,10 @@ class TestClass(object):
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
         df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        print(len(df_trans_current))
         
         # calculate the proportion of infections in each age group
         inf_cur_zeros = pd.DataFrame([0]*9, columns=['zeros'], index=range(9))
-        infected_current = df_trans_current['age_group'].value_counts().sort_index(axis = 0) 
+        infected_current = df_trans_current['age_group_recipient'].value_counts().sort_index(axis=0)
         inf_cur_zeros = pd.concat([inf_cur_zeros,infected_current], ignore_index=True, axis=1)
         infected_current = inf_cur_zeros[0]+inf_cur_zeros.fillna(0)[1]
                                                
@@ -742,7 +740,7 @@ class TestClass(object):
                                             relative_susceptibility_80[idx] ]
             # calculate new number of infecteds in each age group
             inf_new_zeros = pd.DataFrame([0]*9, columns=['zeros'], index=range(9))
-            infected_new = df_trans_new['age_group'].value_counts().sort_index(axis = 0)
+            infected_new = df_trans_new['age_group_recipient'].value_counts().sort_index(axis = 0)
             inf_new_zeros = pd.concat([inf_new_zeros,infected_new], ignore_index=True, axis=1)
             infected_new = inf_new_zeros[0]+inf_new_zeros.fillna(0)[1]
             
@@ -847,7 +845,6 @@ class TestClass(object):
             total_infected_current = total_infected_new
 
 
-
     def test_ratio_presymptomatic_symptomatic( 
             self, 
             n_total,
@@ -870,6 +867,11 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # all presymptomatic vs symptomatic
         N_severe_pre = len(
