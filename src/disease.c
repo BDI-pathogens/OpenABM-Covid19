@@ -78,13 +78,13 @@ double estimate_mean_interactions_by_age( model *model, int age )
 			inter += weight[HOUSEHOLD];
 	}
 
-	for( ndx = 0; ndx < N_WORK_NETWORKS ; ndx++ )
-		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
+	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS ; ndx++ )
+		for( pdx = 0; pdx < model->occupation_network[ndx]->n_edges; pdx++ )
 		{
-			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_type == age )
-				inter += model->params->daily_fraction_work * weight[WORK];
-			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_type == age )
-				inter  += model->params->daily_fraction_work * weight[WORK];
+			if( model->population[model->occupation_network[ndx]->edges[pdx].id1].age_type == age )
+				inter += model->params->daily_fraction_work * weight[OCCUPATION];
+			if( model->population[model->occupation_network[ndx]->edges[pdx].id2].age_type == age )
+				inter  += model->params->daily_fraction_work * weight[OCCUPATION];
 		}
 
 	return 1.0 * inter / people;
