@@ -39,6 +39,11 @@ void set_up_allocate_work_places( model *model )
 		model->params->elderly_network_adults
 	};
 
+    int n_hcw_general = model->params->n_hospitals * ( (model->params->n_wards[COVID_GENERAL] * model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR])
+                                                       + (model->params->n_wards[COVID_GENERAL] * model->params->n_hcw_per_ward[COVID_GENERAL][NURSE]) );
+    int n_hcw_icu = model->params->n_hospitals * ( (model->params->n_wards[COVID_ICU] * model->params->n_hcw_per_ward[COVID_ICU][DOCTOR])
+                                                       + (model->params->n_wards[COVID_ICU] * model->params->n_hcw_per_ward[COVID_ICU][NURSE]) );
+
 	// get the raw population in each network
 	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
@@ -65,7 +70,7 @@ void set_up_allocate_work_places( model *model )
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
 				{
-					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
+                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / ( n_adult - (n_hcw_general + n_hcw_icu) );
 					other         += prob[adx][ndx];
 				}
 			}
