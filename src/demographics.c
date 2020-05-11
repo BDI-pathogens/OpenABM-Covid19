@@ -30,24 +30,24 @@ void set_up_allocate_work_places( model *model )
 {
 	int adx, ndx;
 	long pdx, n_adult;
-	long pop_net_raw[N_WORK_NETWORKS];
+	long pop_net_raw[N_OCCUPATION_NETWORKS];
 	double other;
 	double **prob = calloc( N_AGE_GROUPS, sizeof(double*));
-	double adult_prop[N_WORK_NETWORK_TYPES] = {
+	double adult_prop[N_OCCUPATION_NETWORK_TYPES] = {
 		model->params->child_network_adults,
 		1.0,
 		model->params->elderly_network_adults
 	};
 
 	// get the raw population in each network
-	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		pop_net_raw[ AGE_WORK_MAP[model->population[pdx].age_group] ]++;
+		pop_net_raw[ AGE_OCCUPATION_MAP[model->population[pdx].age_group] ]++;
 
 	// given the total adults
 	n_adult = 0;
-	for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		if( NETWORK_TYPE_MAP[ndx] == NETWORK_TYPE_ADULT )
 			n_adult += pop_net_raw[ndx];
 
@@ -55,12 +55,12 @@ void set_up_allocate_work_places( model *model )
 	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
 	{
 		other = 0.0;
-		prob[adx] = calloc( N_WORK_NETWORKS, sizeof(double));
-		for( ndx = 0; ndx < N_WORK_NETWORKS; ndx++ )
+		prob[adx] = calloc( N_OCCUPATION_NETWORKS, sizeof(double));
+		for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		{
 			prob[adx][ndx] = 0;
-			if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] != NETWORK_TYPE_ADULT )
-				prob[adx][ndx] = ( ndx == AGE_WORK_MAP[adx] );
+			if( NETWORK_TYPE_MAP[AGE_OCCUPATION_MAP[adx]] != NETWORK_TYPE_ADULT )
+				prob[adx][ndx] = ( ndx == AGE_OCCUPATION_MAP[adx] );
 			else
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
@@ -70,8 +70,8 @@ void set_up_allocate_work_places( model *model )
 				}
 			}
 		}
-		if( NETWORK_TYPE_MAP[AGE_WORK_MAP[adx]] == NETWORK_TYPE_ADULT )
-			prob[adx][AGE_WORK_MAP[adx]] = 1.0 - other;
+		if( NETWORK_TYPE_MAP[AGE_OCCUPATION_MAP[adx]] == NETWORK_TYPE_ADULT )
+			prob[adx][AGE_OCCUPATION_MAP[adx]] = 1.0 - other;
 	}
 
     for( pdx = 0; pdx < model->params->n_total; pdx++ )
@@ -81,13 +81,13 @@ void set_up_allocate_work_places( model *model )
             // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
             // to HOSPITAL_WORK_NETWORK (-1).
             if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
-                model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+                model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
             else
-                model->population[pdx].work_network = HOSPITAL_WORK_NETWORK;
+                model->population[pdx].occupation_network = HOSPITAL_WORK_NETWORK;
         }
         else
         {
-            model->population[pdx].work_network = discrete_draw( N_WORK_NETWORKS, prob[model->population[pdx].age_group]);
+            model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
         }
     }
 

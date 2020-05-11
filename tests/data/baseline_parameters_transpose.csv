@@ -158,7 +158,11 @@ app_users_fraction_60_69	0.64
 app_users_fraction_70_79	0.41
 app_users_fraction_80	0.27
 app_turn_on_time	10000
-lockdown_work_network_multiplier	0.2
+lockdown_occupation_multiplier_primary_network	0.2
+lockdown_occupation_multiplier_secondary_network	0.2
+lockdown_occupation_multiplier_working_network	0.2
+lockdown_occupation_multiplier_retired_network	0.2
+lockdown_occupation_multiplier_elderly_network	0.2
 lockdown_random_network_multiplier	0.2
 lockdown_house_interaction_multiplier	1.5
 lockdown_time_on	10000
