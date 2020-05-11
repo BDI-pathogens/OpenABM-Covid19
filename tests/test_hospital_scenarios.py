@@ -353,21 +353,18 @@ class TestClass(object):
         file_output = open(TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([EXE], stdout=file_output, shell=True)
         df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
+        df_transmissions_output = pd.read_csv(TEST_TRANSMISSION_FILE)
 
         # Check that the simulation ran
         assert len(df_output) != 0
 
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
         # get healthcare workers
-        healthcare_workers = df_individual_output["worker_type"] != constant.NOT_HEALTHCARE_WORKER
-        healthcare_workers = df_individual_output[healthcare_workers]
+        healthcare_workers = df_transmissions_output["worker_type_recipient"] != constant.NOT_HEALTHCARE_WORKER
+        healthcare_workers = df_transmissions_output[healthcare_workers]
 
         # check that no healthcare workers have been infected by a patient
-        for index, healthcare_worker in healthcare_workers.iterrows():
-            infector_hospital_state = healthcare_worker["infector_hospital_state"]
-            assert int(infector_hospital_state) != constant.EVENT_TYPES.WAITING.value
-            assert int(infector_hospital_state) != constant.EVENT_TYPES.GENERAL.value
-            assert int(infector_hospital_state) != constant.EVENT_TYPES.ICU.value
+        for index, row in healthcare_workers.iterrows():
+            assert row["hospital_state_source"] not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
 
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE,
                                       comment="#", sep=",", skipinitialspace=True)
