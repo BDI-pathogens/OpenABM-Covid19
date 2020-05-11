@@ -174,14 +174,15 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             .items()
         }
         large_company_sector_counts = self.turnover[self.turnover.min_size >= 250][
-            ['min_size', 'num_companies']]
+            ["min_size", "num_companies"]
+        ]
         self.large_company_size = {
             Sector[k]: v
             for k, v in np.repeat(
                 large_company_sector_counts.min_size,
                 large_company_sector_counts.num_companies,
             )
-            .groupby(['Sector'])
+            .groupby(["Sector"])
             .apply(lambda x: np.array(x))
             .to_dict()
             .items()
@@ -380,27 +381,63 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         return solvent
 
     def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
-        large_company_solvent = pd.DataFrame(
-            {s: Counter(self.large_company_size[s][(self.cash_state[BusinessSize.large][s] > 0)])
-             for s in Sector
-             if s in self.large_company_size}).T.stack().reset_index()
-        sme_company_solvent = pd.DataFrame(
-            {s: Counter(self.sme_company_size[s][(self.cash_state[BusinessSize.sme][s] > 0)])
-             for s in Sector
-             if s in self.sme_company_size}).T.stack().reset_index()
+        large_company_solvent = (
+            pd.DataFrame(
+                {
+                    s: Counter(
+                        self.large_company_size[s][
+                            (self.cash_state[BusinessSize.large][s] > 0)
+                        ]
+                    )
+                    for s in Sector
+                    if s in self.large_company_size
+                }
+            )
+            .T.stack()
+            .reset_index()
+        )
+        sme_company_solvent = (
+            pd.DataFrame(
+                {
+                    s: Counter(
+                        self.sme_company_size[s][
+                            (self.cash_state[BusinessSize.sme][s] > 0)
+                        ]
+                    )
+                    for s in Sector
+                    if s in self.sme_company_size
+                }
+            )
+            .T.stack()
+            .reset_index()
+        )
         company_solvent = pd.concat([large_company_solvent, sme_company_solvent])
-        company_solvent.columns = ['Sector', 'min_size', 'num_solvent_companies']
+        company_solvent.columns = ["Sector", "min_size", "num_solvent_companies"]
         business_population = self.turnover.reset_index()
-        business_population.Sector = business_population.Sector.apply(lambda x: Sector[x])
-        business_population_solvent = business_population.merge(company_solvent, on=['Sector', 'min_size'], how='left')
-        business_population_solvent['num_employees_job_exists'] = business_population_solvent.num_solvent_companies\
-                                                                  / business_population_solvent.num_companies\
-                                                                  * business_population_solvent.num_employees
-        sector_employees = business_population_solvent.groupby(['Sector'])[['num_employees', 'num_employees_job_exists']].sum()
-        sector_employees['p_employees_job_exists'] = sector_employees['num_employees_job_exists']\
-                                                     / sector_employees['num_employees']
-        proportion_employees_job_exists = sector_employees['p_employees_job_exists'].to_dict()
-        proportion_employees_job_exists.update({s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()})
+        business_population.Sector = business_population.Sector.apply(
+            lambda x: Sector[x]
+        )
+        business_population_solvent = business_population.merge(
+            company_solvent, on=["Sector", "min_size"], how="left"
+        )
+        business_population_solvent["num_employees_job_exists"] = (
+            business_population_solvent.num_solvent_companies
+            / business_population_solvent.num_companies
+            * business_population_solvent.num_employees
+        )
+        sector_employees = business_population_solvent.groupby(["Sector"])[
+            ["num_employees", "num_employees_job_exists"]
+        ].sum()
+        sector_employees["p_employees_job_exists"] = (
+            sector_employees["num_employees_job_exists"]
+            / sector_employees["num_employees"]
+        )
+        proportion_employees_job_exists = sector_employees[
+            "p_employees_job_exists"
+        ].to_dict()
+        proportion_employees_job_exists.update(
+            {s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()}
+        )
         return proportion_employees_job_exists
 
     def simulate(self, state: SimulateState, **kwargs,) -> None:
