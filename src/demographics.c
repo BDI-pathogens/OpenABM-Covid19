@@ -28,7 +28,7 @@
 ******************************************************************************************/
 void set_up_allocate_work_places( model *model )
 {
-	int adx, ndx;
+    int adx, ndx, n_healthcare_workers;
 	long pdx, n_adult;
 	long pop_net_raw[N_OCCUPATION_NETWORKS];
 	double other;
@@ -39,10 +39,12 @@ void set_up_allocate_work_places( model *model )
 		model->params->elderly_network_adults
 	};
 
-    int n_hcw_general = model->params->n_hospitals * ( (model->params->n_wards[COVID_GENERAL] * model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR])
-                                                       + (model->params->n_wards[COVID_GENERAL] * model->params->n_hcw_per_ward[COVID_GENERAL][NURSE]) );
-    int n_hcw_icu = model->params->n_hospitals * ( (model->params->n_wards[COVID_ICU] * model->params->n_hcw_per_ward[COVID_ICU][DOCTOR])
-                                                       + (model->params->n_wards[COVID_ICU] * model->params->n_hcw_per_ward[COVID_ICU][NURSE]) );
+    if( model->params->hospital_on )
+    {
+        n_healthcare_workers = model->params->n_hospitals * ( (model->params->n_wards[COVID_GENERAL] * (model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] + model->params->n_hcw_per_ward[COVID_GENERAL][NURSE]))
+                                                            + (model->params->n_wards[COVID_ICU] * (model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] + model->params->n_hcw_per_ward[COVID_ICU][NURSE])));
+    } else
+        n_healthcare_workers = 0;
 
 	// get the raw population in each network
 	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
@@ -70,7 +72,7 @@ void set_up_allocate_work_places( model *model )
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
 				{
-                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / ( n_adult - (n_hcw_general + n_hcw_icu) );
+                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / ( n_adult - n_healthcare_workers );
 					other         += prob[adx][ndx];
 				}
 			}
