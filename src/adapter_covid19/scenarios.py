@@ -1,105 +1,28 @@
 from __future__ import annotations
 
-import itertools
-from typing import Mapping, Tuple, MutableMapping
+from adapter_covid19.data_structures import Scenario, ModelParams
 
-from adapter_covid19.constants import START_OF_TIME
-from adapter_covid19.data_structures import SimulateState, InitialiseState
-from adapter_covid19.datasources import (
-    SectorDataSource,
-    Reader,
-    RegionSectorAgeDataSource,
+BASIC_MODEL_PARAMS = ModelParams(
+    economics_params={},
+    gdp_params={},
+    personal_params={
+        "default_th": 300,
+        "max_earning_furloughed": 30_000,
+        "alpha": 5,
+        "beta": 20,
+    },
+    corporate_params={"beta": 1.4, "large_cap_cash_surplus_months": 6,},
 )
-from adapter_covid19.enums import Sector, Region, Age, EmploymentState
 
-
-class Scenario:
-    gdp: Mapping[Tuple[Region, Sector, Age], float]
-    workers: Mapping[Tuple[Region, Sector, Age], float]
-    furloughed: Mapping[Sector, float]
-    keyworker: Mapping[Sector, float]
-
-    def __init__(
-        self,
-        lockdown_recovery_time: int = 1,
-        furlough_start_time: int = 1000,
-        furlough_end_time: int = 1000,
-        new_spending_day: int = 1000,
-        ccff_day: int = 1000,
-        loan_guarantee_day: int = 1000,
-    ):
-        self.datasources = {
-            "gdp": RegionSectorAgeDataSource,
-            "workers": RegionSectorAgeDataSource,
-            "furloughed": SectorDataSource,
-            "keyworker": SectorDataSource,
-        }
-        self.lockdown_recovery_time = lockdown_recovery_time
-        self.lockdown_exited_time = 0
-        self.furlough_start_time = furlough_start_time
-        self.furlough_end_time = furlough_end_time
-        self.new_spending_day = new_spending_day
-        self.ccff_day = ccff_day
-        self.loan_guarantee_day = loan_guarantee_day
-        self._has_been_lockdown = False
-        self.simulate_states: MutableMapping[int, SimulateState] = {}
-        self._utilisations = {}  # For tracking / debugging
-        for k in self.datasources:
-            self.__setattr__(k, None)
-        self.reader: Optional[Reader] = None
-
-    def load(self, reader: Reader) -> None:
-        self.reader = reader
-        for k, v in self.datasources.items():
-            self.__setattr__(k, v(k).load(reader))
-
-    def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
-        if time == START_OF_TIME and lockdown:
-            raise ValueError(
-                "Economics model requires simulation to be started before lockdown"
-            )
-        if self.lockdown_exited_time and lockdown:
-            raise NotImplementedError(
-                "Bankruptcy/insolvency logic for toggling lockdown needs doing"
-            )
-        if lockdown and not self._has_been_lockdown:
-            self._has_been_lockdown = True
-        if not self.lockdown_exited_time and self._has_been_lockdown and not lockdown:
-            self.lockdown_exited_time = time
-
-    def initialise(self) -> InitialiseState:
-        # TODO: remove harcoded values
-        return InitialiseState(
-            personal_kwargs=dict(
-                default_th=300, max_earning_furloughed=30_000, alpha=5, beta=20,
-            ),
-            corporate_kwargs=dict(beta=1.4, large_cap_cash_surplus_months=6,),
-        )
-
-    def generate(
-        self,
-        time: int,
-        dead: Mapping[Tuple[Region, Sector, Age], float],
-        ill: Mapping[Tuple[Region, Sector, Age], float],
-        lockdown: bool,
-        furlough: bool,
-    ) -> SimulateState:
-        self._pre_simulation_checks(time, lockdown)
-        simulate_state = self.simulate_states[time] = SimulateState(
-            time=time,
-            dead=dead,
-            ill={
-                (e, r, s, a): ill[r, s, a]
-                for e, r, s, a in itertools.product(
-                    EmploymentState, Region, Sector, Age
-                )
-            },  # here we assume illness affects all employment states equally
-            lockdown=lockdown,
-            furlough=furlough,
-            new_spending_day=self.new_spending_day,
-            ccff_day=self.ccff_day,
-            loan_guarantee_day=self.loan_guarantee_day,
-            previous=self.simulate_states.get(time - 1),
-            reader=self.reader,
-        )
-        return simulate_state
+BASIC_SCENARIO = Scenario(
+    lockdown_recovery_time=1,
+    lockdown_start_time=5,
+    lockdown_end_time=30,
+    furlough_start_time=5,
+    furlough_end_time=30,
+    simulation_end_time=50,
+    new_spending_day=5,
+    ccff_day=5,
+    loan_guarantee_day=5,
+    model_params=BASIC_MODEL_PARAMS,
+)
