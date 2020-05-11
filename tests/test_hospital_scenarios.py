@@ -232,12 +232,15 @@ class TestClass(object):
         assert len(df_nurse_patient_icu_interactions) == 0
 
 
-# Dylan update for file change
     def test_hospital_infectivity_modifiers_zero(self):
         """
         Set patient infectivity modifiers to zero and test that no healthcare
         workers are infected by a patient
         """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.write_params(SCENARIO_FILE)
+
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("waiting_infectivity_modifier", 0)
@@ -253,7 +256,7 @@ class TestClass(object):
                                                )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} " + \
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
               f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -264,16 +267,15 @@ class TestClass(object):
         # Check that the simulation ran
         assert len(df_output) != 0
 
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        #df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
         df_transmissions_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         # get healthcare workers
-        healthcare_workers = df_individual_output["worker_type"] != constant.NOT_HEALTHCARE_WORKER
-        healthcare_workers = df_individual_output[healthcare_workers]
+        healthcare_workers = df_transmissions_output["worker_type_recipient"] != constant.NOT_HEALTHCARE_WORKER
+        healthcare_workers = df_transmissions_output[healthcare_workers]
 
         # check that no healthcare workers have been infected by a patient
         for index, row in healthcare_workers.iterrows():
-            hcw_infected_by_patients = (df_transmissions_output["ID"] == row["ID"]) & (df_transmissions_output["time_infected"] > -1) & (df_transmissions_output["infector_network"] > constant.HOSPITAL_WORK)
-            assert len(df_transmissions_output[hcw_infected_by_patients].index) == 0
+            assert row["hospital_state_source"] not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
 
 # Dylan update for file change
     def test_hospital_infectivity_modifiers_max(self):
