@@ -454,7 +454,7 @@ class TestClass(object):
 
         """
         Test to check proportions of adults in work networks
-        """  
+        """
       
         # absolute tolerance
         tolerance = 0.01
@@ -508,10 +508,18 @@ class TestClass(object):
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
                                               ]
                                     )
+
+        num_adults_in_healthcare_worker_network = len(df_indiv[
+                                                ( df_indiv["occupation_network"] == constant.HOSPITAL_WORK_NETWORK ) &
+                                                ( ( df_indiv["age_group"] == constant.AGE_20_29) |
+                                                  ( df_indiv["age_group"] == constant.AGE_30_39) | ( df_indiv["age_group"] == constant.AGE_40_49) |
+                                                  ( df_indiv["age_group"] == constant.AGE_50_59) | ( df_indiv["age_group"] == constant.AGE_60_69) )
+                                               ]
+                                   )
         
         total_children_network = num_children_in_children + num_adults_in_children
         total_elderly_network = num_elderly_in_elderly + num_adults_in_elderly
-        total = total_children_network + total_elderly_network + num_adults_in_adults
+        total = total_children_network + total_elderly_network + num_adults_in_adults + num_adults_in_healthcare_worker_network
         if ( total > 0 ):
             np.testing.assert_equal( total, n_total )
             
