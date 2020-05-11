@@ -572,6 +572,11 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # time infected until showing symptoms
         df_indiv["t_p_s"] = df_indiv["time_symptomatic"] - df_indiv["time_infected"]
@@ -734,16 +739,12 @@ class TestClass(object):
         params.set_param("end_time", 250)
         params.set_param("infectious_rate", 4.0)
         params.set_param("mild_infectious_factor", 1.0)
-        #params.set_param( "hospital_on", 0 );
+        params.set_param("hospital_on", 0)
 
         params.set_param( test_params )
 
-        # TODO: move to constant file
-        TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-        hparams = ParameterSet(TEST_DIR+"/data/hospital_baseline_parameters.csv", line_number=1)
-
-        hparams.set_param("hospitalised_waiting_mod", 1.0)
-        hparams.set_param("critical_waiting_mod", 1.0)
+    
+       
 
         fraction_asymptomatic = [
             test_params[ "fraction_asymptomatic_0_9" ],
@@ -807,14 +808,16 @@ class TestClass(object):
 
         params.write_params(constant.TEST_DATA_FILE)
 
-        # TODO move filepath to constant file
-        hparams.write_params(TEST_DIR +"/data/hospital_baseline_parameters.csv")
-
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # fraction asymptomatic vs mild+symptomatc
         N_asym = len(

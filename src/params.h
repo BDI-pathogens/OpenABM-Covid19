@@ -32,9 +32,9 @@ typedef struct{
 	double mean_random_interactions[N_AGE_TYPES]; // mean number of random interactions each day
 	double sd_random_interactions[N_AGE_TYPES];   // sd number of random interactions each day
 	int random_interaction_distribution;          // distribution from which each person random interactions are drawn
-	double mean_work_interactions[N_WORK_NETWORKS];// mean number of regular work interactions
+	double mean_work_interactions[N_OCCUPATION_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
-	double daily_fraction_work_used[N_WORK_NETWORKS];  // fraction of daily work interactions with social-distancing
+	double daily_fraction_work_used[N_OCCUPATION_NETWORKS];  // fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
 
@@ -89,8 +89,9 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
-	int trace_on_symptoms; // contract trace on symptoms
-	int trace_on_positive; // contract trace on positive result
+	int trace_on_symptoms;   // contract trace on symptoms
+	int trace_on_positive;   // contract trace on positive result
+	int retrace_on_positive; // repeat contract tracing on a positive test if already tested on symptoms
 
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
 	int quarantine_length_traced;			// max length of quarantine if contact-traced
@@ -105,9 +106,10 @@ typedef struct{
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
 
-	int quarantine_household_on_symptoms;   // quarantine other household members when someone shows symptoms
-	int quarantine_household_on_positive;   // quarantine other household members when someone tests positive
-	int quarantine_household_on_traced;		// quarantine other household members when someone is contact traced
+	int quarantine_household_on_symptoms;   	   // quarantine other household members when someone shows symptoms
+	int quarantine_household_on_positive;   	   // quarantine other household members when someone tests positive
+	int quarantine_household_on_traced_symptoms;   // quarantine other household members when someone is contact traced and index has symptoms
+	int quarantine_household_on_traced_positive;   // quarantine other household members when someone is contact traced and index is positive
 	int quarantine_household_contacts_on_positive; // quarantine the contacts of other household members when someone tests positive
 	int quarantine_household_contacts_on_symptoms; // quarantine the contacts of other household members when someone gets symptoms
 
@@ -123,7 +125,7 @@ typedef struct{
 	int app_turn_on_time;   				// time after which the app is usable
 	double daily_non_cov_symptoms_rate; 				// Rate of seasonal flu
 
-	double lockdown_work_network_multiplier;		// during lockdown distancing this multiplier is applied to the fraction of work network connections made
+	double lockdown_occupation_multiplier[N_OCCUPATION_NETWORKS];   // during lockdown distancing this multiplier is applied to the fraction of work network connections made
 	double lockdown_random_network_multiplier; 		// during lockdown distancing this multiplier is applied to the fraction of random network connections made
 	double lockdown_house_interaction_multiplier;  	// during lockdown this multiplier is applied to the strengin of home connections
 	int lockdown_time_on;							// lockdown turned on at this time
@@ -145,6 +147,9 @@ typedef struct{
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
+
+    double ***risk_score;  			// risk score somebody who has been traced
+    double **risk_score_household;  // risk score for household members of symptomatic person
 
     //Hospital parameters
     int hospital_on;
@@ -175,17 +180,19 @@ typedef struct{
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
-
+double get_model_param_daily_fraction_work_used(model *model, int idx);
 int get_model_param_quarantine_days(model *model);
 double get_model_param_self_quarantine_fraction(model *model);
 int get_model_param_trace_on_symptoms(model *model);
+int get_model_param_trace_on_positive(model *model);
 int get_model_param_quarantine_on_traced(model *model);
 double get_model_param_traceable_interaction_fraction(model *model);
 int get_model_param_tracing_network_depth(model *model);
 int get_model_param_allow_clinical_diagnosis(model *model);
 int get_model_param_quarantine_household_on_symptoms(model *model);
 int get_model_param_quarantine_household_on_positive(model *model);
-int get_model_param_quarantine_household_on_traced(model *model);
+int get_model_param_quarantine_household_on_traced_symptoms(model *model);
+int get_model_param_quarantine_household_on_traced_positive(model *model);
 int get_model_param_quarantine_household_contacts_on_positive(model *model);
 int get_model_param_test_on_symptoms(model *model);
 int get_model_param_test_on_traced(model *model);
@@ -194,20 +201,24 @@ int get_model_param_test_order_wait(model *model);
 double get_model_param_app_users_fraction(model *model);
 int get_model_param_app_turned_on(model *model);
 int get_model_param_lockdown_on(model *model);
+double get_model_param_risk_score( model*, int, int, int );
+double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *model);
 double get_model_param_lockdown_random_network_multiplier(model *model);
-double get_model_param_lockdown_work_network_multiplier(model *model);
+double get_model_param_lockdown_occupation_multiplier(model *model, int index);
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
 int set_model_param_trace_on_symptoms(model *model, int value);
+int set_model_param_trace_on_positive(model *model, int value);
 int set_model_param_quarantine_on_traced(model *model, int value);
 int set_model_param_traceable_interaction_fraction(model *model, double value);
 int set_model_param_tracing_network_depth(model *model, int value);
 int set_model_param_allow_clinical_diagnosis(model *model, int value);
 int set_model_param_quarantine_household_on_symptoms(model *model, int value);
 int set_model_param_quarantine_household_on_positive(model *model, int value);
-int set_model_param_quarantine_household_on_traced(model *model, int value);
+int set_model_param_quarantine_household_on_traced_symptoms(model *model, int value);
+int set_model_param_quarantine_household_on_traced_positive(model *model, int value);
 int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
 int set_model_param_test_on_symptoms(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
@@ -218,10 +229,16 @@ int set_model_param_app_turned_on(model *model, int value);
 int set_model_param_lockdown_on(model *model, int value);
 int set_model_param_lockdown_house_interaction_multiplier(model *model, double value);
 int set_model_param_lockdown_random_network_multiplier(model *model, double value);
-int set_model_param_lockdown_work_network_multiplier(model *model, double value);
+int set_model_param_lockdown_occupation_multiplier(model *model, double value, int index);
 int set_model_param_lockdown_elderly_on(model *model, int value);
 
+int set_model_param_risk_score( model*, int, int, int, double );
+int set_model_param_risk_score_household( model*, int, int, double );
+
+void update_work_intervention_state(model *model, int value);
+void update_household_intervention_state(model *model, int value);
 void check_params( parameters* );
+void check_hospital_params( parameters *params );
 void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */

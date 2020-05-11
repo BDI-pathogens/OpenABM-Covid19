@@ -32,19 +32,23 @@ covid19_module = Extension(
 
 setup(
     name="covid19",
-    version="0.1",
+    version="0.2",
     author="SWIG Docs",
     description="""Individual-based model for modelling of a COVID-19 outbreak""",
     ext_modules=[covid19_module],
-    py_modules=[
-        "covid19",
-        "COVID19/parameters",
-        "COVID19/model",
-        "COVID19/simulation",
+    packages=[
+        'COVID19',
+        'adapter_covid19',
     ],
-    requires=[
+    py_modules=[
+        'covid19',
+    ],
+    install_requires=[
+        "click",
+        "matplotlib",
         "numpy",
         "pandas",
+        "scipy",
         "tqdm",
     ]
 )
