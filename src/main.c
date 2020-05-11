@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     {
         printf("# Read hospital parameter file\n");
         read_hospital_param_file( &params );
+        check_hospital_params( &params );
     }
 
     printf("# Start model set-up\n");
