@@ -727,6 +727,10 @@ class TestClass(object):
         assert len(df_nurse_patient_icu_interactions.index) > 0
 
     def test_transmission_doctor_general(self):
+        '''
+        When general doctor-patient transmission is very high and no other forms of tranmission can occur for doctors,
+        check that all doctors become infected when the general ward is overloaded with patients.
+        '''
 
         # Set general doctor-patient infectivity to be really high
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -781,6 +785,10 @@ class TestClass(object):
         assert(len(n_general_doctors.index) == 0)
 
     def test_transmission_nurse_general(self):
+        '''
+        When general nurse-patient transmission is very high and no other forms of tranmission can occur for doctors,
+        check that all nurses become infected when the general ward is overloaded with patients.
+        '''
 
         # Set general nurse-patient infectivity to be really high.
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -835,6 +843,10 @@ class TestClass(object):
         assert(len(n_general_nurses.index) == 0)
 
     def test_transmission_doctor_icu(self):
+        '''
+        When icu doctor-patient transmission is very high and no other forms of tranmission can occur for doctors,
+        check that all doctors become infected when the icu ward is overloaded with patients.
+        '''
 
         # Set icu doctor-patient infectivity to be really high
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -889,6 +901,10 @@ class TestClass(object):
         assert(len(n_icu_doctors.index) == 0)
 
     def test_transmission_nurse_icu(self):
+        '''
+        When icu nurse-patient transmission is very high and no other forms of tranmission can occur for nurses,
+        check that all nurses become infected when the icu ward is overloaded with patients.
+        '''
 
         # Set icu nurse-patient infectivity to be really high.
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
