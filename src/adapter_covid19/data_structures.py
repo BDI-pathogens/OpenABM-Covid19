@@ -4,22 +4,21 @@ import functools
 import itertools
 from dataclasses import dataclass, field, InitVar
 from typing import (
-    Mapping,
-    Tuple,
-    MutableMapping,
     Any,
-    Optional,
     Union,
     Generator,
 )
+from typing import Mapping, Tuple, MutableMapping, Optional
 
 import numpy as np
 from scipy.optimize import OptimizeResult
 
+from adapter_covid19.constants import START_OF_TIME
 from adapter_covid19.datasources import (
     Reader,
     SectorDataSource,
     RegionSectorAgeDataSource,
+    DataSource,
 )
 from adapter_covid19.enums import (
     LabourState,
@@ -34,6 +33,104 @@ from adapter_covid19.enums import (
     WorkerState,
     WorkerStateConditional,
 )
+
+
+@dataclass
+class ModelParams:
+    economics_params: Mapping[str, Any] = field(default_factory=dict)
+    gdp_params: Mapping[str, Any] = field(default_factory=dict)
+    personal_params: Mapping[str, Any] = field(default_factory=dict)
+    corporate_params: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class Scenario:
+    lockdown_recovery_time: int = 1
+    lockdown_exited_time: int = field(default=0, init=False)
+    lockdown_start_time: int = 1000
+    lockdown_end_time: int = 1000
+    furlough_start_time: int = 1000
+    furlough_end_time: int = 1000
+    simulation_end_time: int = 2000
+    new_spending_day: int = 1000
+    ccff_day: int = 1000
+    loan_guarantee_day: int = 1000
+    model_params: ModelParams = ModelParams()
+
+    simulate_states: MutableMapping[int, SimulateState] = field(
+        default_factory=dict, init=False
+    )
+
+    datasources: Mapping[str, DataSource] = field(default_factory=dict)
+    gdp: Mapping[Tuple[Region, Sector, Age], float] = field(default=None, init=False)
+    workers: Mapping[Tuple[Region, Sector, Age], float] = field(
+        default=None, init=False
+    )
+    furloughed: Mapping[Sector, float] = field(default=None, init=False)
+    keyworker: Mapping[Sector, float] = field(default=None, init=False)
+
+    _has_been_lockdown: bool = False
+    _utilisations: Mapping = field(
+        default_factory=dict, init=False
+    )  # For tracking / debugging
+    is_loaded: bool = False
+
+    def __post_init__(self):
+        self.datasources = {
+            "gdp": RegionSectorAgeDataSource,
+            "workers": RegionSectorAgeDataSource,
+            "furloughed": SectorDataSource,
+            "keyworker": SectorDataSource,
+        }
+
+    def load(self, reader: Reader) -> None:
+        for k, v in self.datasources.items():
+            self.__setattr__(k, v(k).load(reader))
+
+        self.is_loaded = True
+
+    def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
+        if time == START_OF_TIME and lockdown:
+            raise ValueError(
+                "Economics model requires simulation to be started before lockdown"
+            )
+        if self.lockdown_exited_time and lockdown:
+            raise NotImplementedError(
+                "Bankruptcy/insolvency logic for toggling lockdown needs doing"
+            )
+        if lockdown and not self._has_been_lockdown:
+            self._has_been_lockdown = True
+        if not self.lockdown_exited_time and self._has_been_lockdown and not lockdown:
+            self.lockdown_exited_time = time
+
+    def generate(
+        self,
+        time: int,
+        dead: Mapping[Tuple[Region, Sector, Age], float],
+        ill: Mapping[Tuple[Region, Sector, Age], float],
+        lockdown: bool,
+        furlough: bool,
+        reader: Reader,
+    ) -> SimulateState:
+        self._pre_simulation_checks(time, lockdown)
+        simulate_state = self.simulate_states[time] = SimulateState(
+            time=time,
+            dead=dead,
+            ill={
+                (e, r, s, a): ill[r, s, a]
+                for e, r, s, a in itertools.product(
+                    EmploymentState, Region, Sector, Age
+                )
+            },  # here we assume illness affects all employment states equally
+            lockdown=lockdown,
+            furlough=furlough,
+            new_spending_day=self.new_spending_day,
+            ccff_day=self.ccff_day,
+            loan_guarantee_day=self.loan_guarantee_day,
+            previous=self.simulate_states.get(time - 1),
+            reader=reader,
+        )
+        return simulate_state
 
 
 @dataclass
@@ -89,14 +186,6 @@ class SimulateState:  # at one point in time
             },
             reader=reader,
         )
-
-
-@dataclass
-class InitialiseState:
-    economics_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    gdp_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    personal_kwargs: Mapping[str, Any] = field(default_factory=dict)
-    corporate_kwargs: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass

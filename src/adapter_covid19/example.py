@@ -5,8 +5,6 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
-
 try:
     from tqdm import tqdm
 except:
@@ -16,11 +14,19 @@ except:
 
 
 from adapter_covid19.datasources import Reader
+from adapter_covid19.data_structures import Scenario
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
+from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from adapter_covid19.economics import Economics
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age, BusinessSize, WorkerStateConditional, WorkerState
-from adapter_covid19.scenarios import Scenario
+from adapter_covid19.enums import (
+    Region,
+    Sector,
+    Age,
+    BusinessSize,
+    WorkerState,
+)
+from adapter_covid19.scenarios import BASIC_MODEL_PARAMS
 
 
 def lockdown_then_unlock_no_corona(
@@ -51,18 +57,23 @@ def lockdown_then_unlock_no_corona(
         )
     reader = Reader(data_path)
     scenario = Scenario(
+        lockdown_start_time=lockdown_on,
+        lockdown_end_time=lockdown_off,
         furlough_start_time=furlough_on,
         furlough_end_time=furlough_off,
+        simulation_end_time=end_time,
         new_spending_day=new_spending_day,
         ccff_day=ccff_day,
         loan_guarantee_day=loan_guarantee_day,
+        model_params=BASIC_MODEL_PARAMS,
     )
     scenario.load(reader)
-    init_args = scenario.initialise()
-    gdp_model = PiecewiseLinearCobbDouglasGdpModel(**init_args.gdp_kwargs)
-    cb_model = CorporateBankruptcyModel(**init_args.corporate_kwargs)
-    pb_model = PersonalBankruptcyModel(**init_args.personal_kwargs)
-    econ = Economics(gdp_model, cb_model, pb_model, **init_args.economics_kwargs)
+    gdp_model = PiecewiseLinearCobbDouglasGdpModel(**scenario.model_params.gdp_params)
+    cb_model = CorporateBankruptcyModel(**scenario.model_params.corporate_params)
+    pb_model = PersonalBankruptcyModel(**scenario.model_params.personal_params)
+    econ = Economics(
+        gdp_model, cb_model, pb_model, **scenario.model_params.economics_params
+    )
     econ.load(reader)
     dead = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
     ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
@@ -74,34 +85,32 @@ def lockdown_then_unlock_no_corona(
             ill=ill,
             lockdown=lockdown_on <= i < lockdown_off,
             furlough=furlough_on <= i < furlough_off,
+            reader=reader,
         )
         econ.simulate(simulate_state)
         states.append(simulate_state)
 
     if show_plots:
-        fig, axes = plt.subplots(
-            6, 1, sharex="col", sharey="row", figsize=(20, 60)
-        )
-        plot_one_scenario(states,end_time,axes)
+        fig, axes = plt.subplots(6, 1, sharex="col", sharey="row", figsize=(20, 60))
+        plot_one_scenario(states, end_time, axes)
 
     return econ, states
 
-def plot_one_scenario(states,end_time,axes,legend=False):
+
+def plot_one_scenario(states, end_time, axes, legend=False):
     # Plot 1 - GDP
-    ax=axes[0]
+    ax = axes[0]
     df = (
         pd.DataFrame(
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
             index=range(1, end_time),
         )
-            .T.sort_index()
-            .T.cumsum(axis=1)
+        .T.sort_index()
+        .T.cumsum(axis=1)
     )
     ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
     for i in range(1, df.shape[1]):
-        ax.fill_between(
-            df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i]
-        )
+        ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
     ax.legend(ncol=2)
     ax.set_title("GDP")
 
@@ -112,7 +121,7 @@ def plot_one_scenario(states,end_time,axes,legend=False):
             for i in range(1, end_time)
         ]
     )
-    df.plot(title="Corporate Solvencies - Large Cap",ax=axes[1])
+    df.plot(title="Corporate Solvencies - Large Cap", ax=axes[1])
 
     # Plot 2b - Corporate Solvencies - SME
     df = pd.DataFrame(
@@ -121,35 +130,37 @@ def plot_one_scenario(states,end_time,axes,legend=False):
             for i in range(1, end_time)
         ]
     )
-    df.plot(title="Corporate Solvencies - SME",ax=axes[2])
+    df.plot(title="Corporate Solvencies - SME", ax=axes[2])
 
     # Plot 3a - Personal Insolvencies
     pd.DataFrame(
-        [
-            states[i].personal_state.personal_bankruptcy
-            for i in range(1, end_time)
-        ]
-    ).plot(title="Personal Insolvencies",ax=axes[3])
+        [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
+    ).plot(title="Personal Insolvencies", ax=axes[3])
 
     # Plot 3b - Household Expenditure
     pd.DataFrame(
-        [
-            states[i].personal_state.demand_reduction
-            for i in range(1, end_time)
-        ]
-    ).plot(title="Household Expenditure Reduction",ax=axes[4])
+        [states[i].personal_state.demand_reduction for i in range(1, end_time)]
+    ).plot(title="Household Expenditure Reduction", ax=axes[4])
 
     # Plot 4 - Unemployment
     def unemployment_from_lambdas(d):
-        return (d[WorkerState.ILL_UNEMPLOYED] + d[WorkerState.HEALTHY_UNEMPLOYED] + d[WorkerState.ILL_FURLOUGHED] + d[
-            WorkerState.HEALTHY_FURLOUGHED]) / (1 - d[WorkerState.DEAD])
+        return (
+            d[WorkerState.ILL_UNEMPLOYED]
+            + d[WorkerState.HEALTHY_UNEMPLOYED]
+            + d[WorkerState.ILL_FURLOUGHED]
+            + d[WorkerState.HEALTHY_FURLOUGHED]
+        ) / (1 - d[WorkerState.DEAD])
 
     pd.DataFrame(
         [
-            {s: unemployment_from_lambdas(states[i].utilisations[s]) for s in Sector if s != Sector.T_HOUSEHOLD}
+            {
+                s: unemployment_from_lambdas(states[i].utilisations[s])
+                for s in Sector
+                if s != Sector.T_HOUSEHOLD
+            }
             for i in range(1, end_time)
         ]
-    ).plot(title="Unemployment",ax=axes[5])
+    ).plot(title="Unemployment", ax=axes[5])
 
     for ax in axes:
         if legend:
@@ -166,11 +177,18 @@ def plot_scenarios(scenarios, end_time=50):
     )
     for idx, (name, (econ, states)) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]
-        plot_one_scenario(states,end_time,axs)
+        plot_one_scenario(states, end_time, axs)
     for ax, name in zip(axes[0], scenarios.values()):
-        ax.annotate(name, xy=(0.5, 1), xytext=(0, 5),
-                    xycoords='axes fraction', textcoords='offset points',
-                    size='large', ha='center', va='baseline')
+        ax.annotate(
+            name,
+            xy=(0.5, 1),
+            xytext=(0, 5),
+            xycoords="axes fraction",
+            textcoords="offset points",
+            size="large",
+            ha="center",
+            va="baseline",
+        )
 
 
 def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
