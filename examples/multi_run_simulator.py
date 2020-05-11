@@ -78,7 +78,7 @@ if __name__ == "__main__":
         for _ in range(100)
     ]
 
-    results_dataframes = run_many_inline(params_list, n_threads=None)
+    results_dataframes = run_many_inline(params_list, n_threads=4)
 
     # Ouput individual dataframes as CSVs
     for p, df in zip(params_list, results_dataframes):
