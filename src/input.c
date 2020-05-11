@@ -861,6 +861,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
     fprintf(output_file , "worker_type_recipient,");
+    fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
@@ -868,6 +869,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
     fprintf(output_file , "worker_type_source,");
+    fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -894,12 +896,13 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%li,%i,%li,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
                     indiv->worker_type,
+                    indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
@@ -907,6 +910,7 @@ void write_transmissions( model *model )
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
                     infection_event->infector->worker_type,
+                    infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
