@@ -23,6 +23,7 @@ TEST_OUTPUT_FILE = TEST_DIR + "/data/test_output.csv"
 TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR + "/data/test_hospital_output.csv"
 TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR + "/data/time_step_hospital_output.csv"
 TEST_INTERACTIONS_FILE = TEST_DIR + "/data/interactions_Run1.csv"
+TEST_TRANSMISSION_FILE = TEST_DIR + "/data/transmission_Run1.csv"
 TEST_INDIVIDUAL_FILE = TEST_DIR + "/data/individual_file_Run1.csv"
 TEST_HCW_FILE = TEST_DIR + "/data/ward_output.csv"
 TEST_TRANSMISSION_FILE = TEST_DIR + "/data/transmission_Run1.csv"
@@ -768,7 +769,7 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         df_combined_output = pd.merge(df_individual_output, df_transmission_output,
                                       left_on = "ID", right_on = "ID_recipient", how = "left")
         n_doctors = df_combined_output["worker_type"] == 0
@@ -822,7 +823,7 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         df_combined_output = pd.merge(df_individual_output, df_transmission_output,
                                       left_on = "ID", right_on = "ID_recipient", how = "left")
         n_nurses = df_combined_output["worker_type"] == 1
@@ -876,7 +877,7 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         df_combined_output = pd.merge(df_individual_output, df_transmission_output,
                                       left_on = "ID", right_on = "ID_recipient", how = "left")
         n_doctors = df_combined_output["worker_type"] == 0
@@ -930,7 +931,7 @@ class TestClass(object):
 
         # Get all uninfected doctors working in the general ward.
         df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         df_combined_output = pd.merge(df_individual_output, df_transmission_output,
                                       left_on = "ID", right_on = "ID_recipient", how = "left")
         n_nurses = df_combined_output["worker_type"] == 1
