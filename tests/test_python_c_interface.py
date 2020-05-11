@@ -15,19 +15,19 @@ Author: Daniel Montero
 import pytest
 import sys
 import numpy as np
-import pandas as pd
-from random import randrange
+from random import randrange, uniform
 
-sys.path.append("src/COVID19")
 import covid19
 from parameters import ParameterSet
-from model import Model, Parameters, ModelParameterException, AgeGroupEnum
+from model import Model, Parameters, ModelParameterException, OccupationNetworkEnum, AgeGroupEnum
 
 from . import constant
 from . import utilities as utils
 
 # STEPS > 0
 STEPS = randrange(1, 10)
+FLOAT_START = 1
+FLOAT_END = 20
 
 
 class TestClass(object):
@@ -134,9 +134,9 @@ class TestClass(object):
                 model.get_param("quarantine_household_on_symptoms"), 1
             )
 
-            model.update_running_params("quarantine_household_on_traced", 1)
+            model.update_running_params("quarantine_household_on_traced_positive", 1)
             np.testing.assert_equal(
-                model.get_param("quarantine_household_on_traced"), 1
+                model.get_param("quarantine_household_on_traced_positive"), 1
             )
 
             model.update_running_params("quarantine_household_contacts_on_positive", 1)
@@ -192,12 +192,13 @@ class TestClass(object):
         )
         model = Model(params)
         assert covid19.get_param_lockdown_on(model.c_params) == 0
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.4)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.4
 
-        model.update_running_params("lockdown_work_network_multiplier", 0.4)
-        assert model.get_param("lockdown_work_network_multiplier") == 0.4
-
-        model.update_running_params("lockdown_random_network_multiplier", 0.8)
-        assert model.get_param("lockdown_random_network_multiplier") == 0.8
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.8)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.8
 
         model.update_running_params("lockdown_house_interaction_multiplier", 1.2)
         assert model.get_param("lockdown_house_interaction_multiplier") == 1.2
@@ -205,8 +206,9 @@ class TestClass(object):
         model.update_running_params("lockdown_on", 1)
         assert covid19.get_param_lockdown_on(model.c_params) == 1
 
-        model.update_running_params("lockdown_work_network_multiplier", 0.5)
-        assert model.get_param("lockdown_work_network_multiplier") == 0.5
+        for oc_net in OccupationNetworkEnum:
+            model.update_running_params(f"lockdown_occupation_multiplier{oc_net.name}", 0.5)
+            assert model.get_param(f"lockdown_occupation_multiplier{oc_net.name}") == 0.5
 
         model.update_running_params("lockdown_random_network_multiplier", 0.9)
         assert model.get_param("lockdown_random_network_multiplier") == 0.9
@@ -215,3 +217,111 @@ class TestClass(object):
         assert model.get_param("lockdown_house_interaction_multiplier") == 1.3
 
         assert covid19.get_param_lockdown_on(model.c_params) == 1
+
+    def test_set_get_array_parameters(self):
+        """
+        Test that an array parameter inside the C parameters structure can be changed
+        """
+        params = covid19.parameters()
+
+        # Define arrays
+        get_age_types = covid19.doubleArray(covid19.N_AGE_TYPES)
+        set_age_types = covid19.doubleArray(covid19.N_AGE_TYPES)
+        for i in range(covid19.N_AGE_TYPES):
+            set_age_types[i] = uniform(FLOAT_START, FLOAT_END)
+
+        get_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
+        set_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
+        for i in range(covid19.N_OCCUPATION_NETWORKS):
+            set_work_networks[i] = uniform(FLOAT_START, FLOAT_END)
+
+        get_interaction_types = covid19.doubleArray(covid19.N_INTERACTION_TYPES)
+        set_interaction_types = covid19.doubleArray(covid19.N_INTERACTION_TYPES)
+        for i in range(covid19.N_INTERACTION_TYPES):
+            set_interaction_types[i] = uniform(FLOAT_START, FLOAT_END)
+
+        get_age_groups = covid19.doubleArray(covid19.N_AGE_GROUPS)
+        set_age_groups = covid19.doubleArray(covid19.N_AGE_GROUPS)
+        for i in range(covid19.N_AGE_GROUPS):
+            set_age_groups[i] = uniform(FLOAT_START, FLOAT_END)
+
+        get_household_max = covid19.doubleArray(covid19.N_HOUSEHOLD_MAX)
+        set_household_max = covid19.doubleArray(covid19.N_HOUSEHOLD_MAX)
+        for i in range(covid19.N_HOUSEHOLD_MAX):
+            set_household_max[i] = uniform(FLOAT_START, FLOAT_END)
+
+        # Test set/get functions
+        covid19.set_param_array_mean_random_interactions(params, set_age_types)
+        covid19.get_param_array_mean_random_interactions(params, get_age_types)
+        for i in range(covid19.N_AGE_TYPES):
+            np.testing.assert_equal(set_age_types[i], get_age_types[i])
+
+        covid19.set_param_array_sd_random_interactions(params, set_age_types)
+        covid19.get_param_array_sd_random_interactions(params, get_age_types)
+        for i in range(covid19.N_AGE_TYPES):
+            np.testing.assert_equal(set_age_types[i], get_age_types[i])
+
+        covid19.set_param_array_mean_work_interactions(params, set_work_networks)
+        covid19.get_param_array_mean_work_interactions(params, get_work_networks)
+        for i in range(covid19.N_OCCUPATION_NETWORKS):
+            np.testing.assert_equal(set_work_networks[i], get_work_networks[i])
+
+        covid19.set_param_array_relative_susceptibility(params, set_age_groups)
+        covid19.get_param_array_relative_susceptibility(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_adjusted_susceptibility(params, set_age_groups)
+        covid19.get_param_array_adjusted_susceptibility(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_relative_transmission(params, set_interaction_types)
+        covid19.get_param_array_relative_transmission(params, get_interaction_types)
+        for i in range(covid19.N_INTERACTION_TYPES):
+            np.testing.assert_equal(set_interaction_types[i], get_interaction_types[i])
+
+        covid19.set_param_array_hospitalised_fraction(params, set_age_groups)
+        covid19.get_param_array_hospitalised_fraction(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_critical_fraction(params, set_age_groups)
+        covid19.get_param_array_critical_fraction(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_fatality_fraction(params, set_age_groups)
+        covid19.get_param_array_fatality_fraction(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_household_size(params, set_household_max)
+        covid19.get_param_array_household_size(params, get_household_max)
+        for i in range(covid19.N_HOUSEHOLD_MAX):
+            np.testing.assert_equal(set_household_max[i], get_household_max[i])
+
+        covid19.set_param_array_population(params, set_age_groups)
+        covid19.get_param_array_population(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_fraction_asymptomatic(params, set_age_groups)
+        covid19.get_param_array_fraction_asymptomatic(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_mild_fraction(params, set_age_groups)
+        covid19.get_param_array_mild_fraction(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_icu_allocation(params, set_age_groups)
+        covid19.get_param_array_icu_allocation(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+        covid19.set_param_array_app_users_fraction(params, set_age_groups)
+        covid19.get_param_array_app_users_fraction(params, get_age_groups)
+        for i in range(covid19.N_AGE_GROUPS):
+            np.testing.assert_equal(set_age_groups[i], get_age_groups[i])

@@ -2,19 +2,28 @@
 .DS_Store
 
 # File associated with compilation/linking
-src/*.o
-src/*.exe
-src/*.csv
+src/**/*.o
+src/**/*.exe
+src/**/*.csv
+!src/adapter_covid19/data/*.csv
+src/**/*.so
 examples/results/*.csv
 # Python testing files
 __pycache__
 .mypy_cache/
+**/*.egg-info
 
 # Eclipse-related files
 .project
 .cproject
 .settings
 .pydevproject
+
+# Other editor-related files
+*.swo
+*.swp
+.idea
+**/.tags*
 
 # temp copies
 *~
@@ -53,18 +62,4 @@ sandbox/*.csv
 examples/*.csv
 examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
-
-.idea
-Cake-build-debug
-
-# Output files
-tests/data/test_output.csv
-tests/data/time_step_hospital_output.csv
-tests/data/ward_output.csv
-tests/data/interactions_Run1.csv
-tests/data/transmission_Run1.csv
-tests/data/time_step_hospital_output.csv
-tests/data/individual_file_Run1.csv
-tests/data/test_hospital_output.csv
-tests/data/trace_tokens_Run1.csv
-*.csv
+/Debug/

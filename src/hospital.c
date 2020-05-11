@@ -182,7 +182,7 @@ void transition_one_hospital_event(
 {
     indiv->hospital_state = from;
     if( from != NO_EVENT )
-        indiv->time_event[from] = model->time;
+        indiv->infection_events->times[from] = model->time;
     if( indiv->current_hospital_event != NULL )
         remove_event_from_event_list( model, indiv->current_hospital_event );
     if( indiv->next_hospital_event != NULL )
@@ -190,8 +190,8 @@ void transition_one_hospital_event(
 
     if( to != NO_EVENT )
     {
-        indiv->time_event[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-        indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->time_event[to] );
+        indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+        indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
     }
 }
 
