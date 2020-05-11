@@ -26,6 +26,7 @@ TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR +"/data/test_hospital_output.csv"
 TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR +"/data/time_step_hospital_output.csv"
 TEST_INTERACTIONS_FILE = TEST_DIR +"/data/interactions_Run1.csv"
 TEST_INDIVIDUAL_FILE = TEST_DIR +"/data/individual_file_Run1.csv"
+TEST_TRANSMISSION_FILE = TEST_DIR + "/data/transmission_Run1.csv"
 TEST_HCW_FILE = TEST_DIR +"/data/ward_output.csv"
 SRC_DIR = TEST_DIR.replace("tests","") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
@@ -42,17 +43,12 @@ completed_compilation = subprocess.run([compile_command],
 EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
-print(EXE)
-
 # Call the model using baseline parameters, pipe output to file, read output file
 file_output = open(TEST_OUTPUT_FILE, "w")
 completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
 
 # Create a dataframe out of the terminal output
 df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-
-# # Write df_output to file
-df_output.to_csv(TEST_OUTPUT_FILE_HOSPITAL, index = False)
 
 # Check that the simulation ran
 assert len(df_output) != 0
@@ -82,13 +78,13 @@ class TestClass(object):
         """
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
-        w1_worknetwork_condition = df_interactions['work_network'] != -1
+        w1_worknetwork_condition = df_interactions['occupation_network_1'] != -1
         df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
 
         assert len(df_test_worker1.index) == 0
         
         w2_hcw_condition = df_interactions['worker_type_2'] != -1
-        w2_worknetwork_condition = df_interactions['work_network_2'] != -1
+        w2_worknetwork_condition = df_interactions['occupation_network_2'] != -1
         df_test_worker2 = df_interactions[w2_hcw_condition & w2_worknetwork_condition]
 
         assert len(df_test_worker2.index) == 0
@@ -138,13 +134,13 @@ class TestClass(object):
         Tests that hospital patients have only been able to infect
         hospital healthcare workers
         """
-        df_individual_output = pd.read_csv(TEST_INDIVIDUAL_FILE)
-        non_hcw = df_individual_output["worker_type"] == constant.NOT_HEALTHCARE_WORKER
-        non_hcw = df_individual_output[non_hcw]
+        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
+        infected_non_hcw = df_transmission_output["worker_type_recipient"] == constant.NOT_HEALTHCARE_WORKER
+        infected_non_hcw = df_transmission_output[infected_non_hcw]
         # get non_hcw who are infected at some point
-        infected_non_hcw = non_hcw["time_infected"] != -1
-        infected_non_hcw = non_hcw[infected_non_hcw]
+        # infected_non_hcw = non_hcw["time_infected"] != -1
+        # infected_non_hcw = non_hcw[infected_non_hcw]
         # loop through infected non healthcare workers and check their infector was not a hospital patient
         for index, row in infected_non_hcw.iterrows():
-            infector_hospital_state = int(row["infector_hospital_state"])
-            assert infector_hospital_state == constant.EVENT_TYPES.NOT_IN_HOSPITAL.value or infector_hospital_state == constant.EVENT_TYPES.WAITING.value
+            infector_hospital_state = int(row["hospital_state_source"])
+            assert infector_hospital_state not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
