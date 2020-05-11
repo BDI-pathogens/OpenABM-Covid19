@@ -920,7 +920,10 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             if state.furlough:
                 # if an intervention makes furloughing possible
                 if p_not_employed[s] > 0.0:
-                    p_furloughed = max(p_not_employed[s] - not_employed_lower_bound, 0.0) / p_not_employed[s]
+                    p_furloughed = (
+                        max(p_not_employed[s] - not_employed_lower_bound, 0.0)
+                        / p_not_employed[s]
+                    )
                 else:
                     p_furloughed = 0.0
             else:
@@ -1027,9 +1030,17 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             # keep default value of p_not_employed as lower bound
             pass
         else:
-            for r,s,a in itertools.product(Region, Sector, Age):
-                state.utilisations[r,s,a].p_not_employed = min(1.0,max(0.0,1.0 - state.previous.corporate_state.proportion_employees_job_exists[s]))
-
+            for r, s, a in itertools.product(Region, Sector, Age):
+                state.utilisations[r, s, a].p_not_employed = min(
+                    1.0,
+                    max(
+                        0.0,
+                        1.0
+                        - state.previous.corporate_state.proportion_employees_job_exists[
+                            s
+                        ],
+                    ),
+                )
 
         # use demand parameter from personal model
         if (
