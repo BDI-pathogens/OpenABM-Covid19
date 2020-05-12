@@ -226,7 +226,6 @@ void set_up_occupation_network( model *model, int network )
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->occupation_network[network], people );
-    printf("num people %li in network %i\n", n_people, network);
 	free( people );
 }
 
