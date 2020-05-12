@@ -444,7 +444,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         try:
             # in the GDP model, net operating surplus is positive if corp is running profit
             # in the Corp model, net operting surplus is negative if corp is running profit
-            net_operating_surplus = {k:-v for k,v in state.gdp_state.net_operating_surplus.items()}
+            net_operating_surplus = {
+                k: -v for k, v in state.gdp_state.net_operating_surplus.items()
+            }
         except AttributeError:
             raise ValueError(
                 f"Incompatible model selection, {self.__class__.__name__}"

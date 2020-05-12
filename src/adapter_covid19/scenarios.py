@@ -174,5 +174,3 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     loan_guarantee_day=10000,
     model_params=BASIC_MODEL_PARAMS,
 )
-
-
