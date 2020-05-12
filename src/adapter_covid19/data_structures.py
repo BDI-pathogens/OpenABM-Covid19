@@ -191,7 +191,6 @@ class SimulateState:  # at one point in time
 @dataclass
 class CorporateState:
     capital_discount_factor: Mapping[Sector, float]
-    cash_buffer: Mapping[BusinessSize, Mapping[Sector, np.array]]
     proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]]
     proportion_employees_job_exists: Mapping[Sector, float]
 

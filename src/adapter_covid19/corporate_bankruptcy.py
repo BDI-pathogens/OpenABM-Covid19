@@ -39,7 +39,6 @@ class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         super().simulate(state, **kwargs)
         state.corporate_state = CorporateState(
             {s: 1 for s in Sector},
-            {},
             {b: {s: 1 for s in Sector} for b in BusinessSize},
             {s: 1 for s in Sector},
         )
@@ -481,7 +480,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
         state.corporate_state = CorporateState(
             capital_discount_factor=self._capital_discount_factor(proportion_solvent),
-            cash_buffer=self.cash_state,
             proportion_solvent=proportion_solvent,
             proportion_employees_job_exists=self._proportion_employees_job_exists(),
         )
