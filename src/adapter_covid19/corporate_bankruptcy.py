@@ -1,7 +1,6 @@
 import abc
 import copy
 import logging
-import time
 from collections import Counter
 from typing import Optional, Mapping
 
@@ -381,7 +380,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         return solvent
 
     def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
-        ts = time.perf_counter()
         large_company_solvent = (
             pd.DataFrame(
                 {
@@ -397,9 +395,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             .T.stack()
             .reset_index()
         )
-        print(f"Corporate model | checkpoint 8.1 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         sme_company_solvent = (
             pd.DataFrame(
                 {
@@ -415,18 +411,14 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             .T.stack()
             .reset_index()
         )
-        print(f"Corporate model | checkpoint 8.2 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         company_solvent = pd.concat([large_company_solvent, sme_company_solvent])
         company_solvent.columns = ["Sector", "min_size", "num_solvent_companies"]
         business_population = self.turnover.reset_index()
         business_population.Sector = business_population.Sector.apply(
             lambda x: Sector[x]
         )
-        print(f"Corporate model | checkpoint 8.3 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         business_population_solvent = business_population.merge(
             company_solvent, on=["Sector", "min_size"], how="left"
         )
@@ -445,18 +437,14 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         proportion_employees_job_exists = sector_employees[
             "p_employees_job_exists"
         ].to_dict()
-        print(f"Corporate model | checkpoint 8.4 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         proportion_employees_job_exists.update(
             {s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()}
         )
-        print(f"Corporate model | checkpoint 8.5 {time.perf_counter() - ts:.3f}s")
 
         return proportion_employees_job_exists
 
     def simulate(self, state: SimulateState, **kwargs,) -> None:
-        ts = time.perf_counter()
         super().simulate(state, **kwargs)
         try:
             # in the GDP model, net operating surplus is positive if corp is running profit
@@ -474,55 +462,38 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             naive_model.simulate(state, **kwargs)
             return
         # TODO: we should be able to deal with corp bankruptcies without lockdown
-        print(f"Corporate model | checkpoint 0 {time.perf_counter() - ts:.3f}s")
 
         if not state.lockdown:
-            ts = time.perf_counter()
             state.corporate_state = copy.deepcopy(state.previous.corporate_state)
-            print(f"Corporate model | checkpoint 1 {time.perf_counter() - ts:.3f}s")
             return
         if state.time == state.new_spending_day:
-            ts = time.perf_counter()
             self._new_spending_sector_allocation()
-            print(f"Corporate model | checkpoint 2 {time.perf_counter() - ts:.3f}s")
         if state.time == state.ccff_day:
-            ts = time.perf_counter()
             self._apply_ccff()
-            print(f"Corporate model | checkpoint 3 {time.perf_counter() - ts:.3f}s")
         if (state.time >= state.loan_guarantee_day) and self.loan_guarantee_remaining:
-            ts = time.perf_counter()
             self._loan_guarantees()
-            print(f"Corporate model | checkpoint 4 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         self._update_state(net_operating_surplus)
         largecap_proportion_solvent = {
             s: self._proportion_solvent(self.cash_state[BusinessSize.large][s])
             for s in Sector
         }
-        print(f"Corporate model | checkpoint 5 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         sme_proportion_solvent = {
             s: self._proportion_solvent(self.cash_state[BusinessSize.sme][s])
             for s in Sector
         }
-        print(f"Corporate model | checkpoint 6 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         proportion_solvent = {
             BusinessSize.large: largecap_proportion_solvent,
             BusinessSize.sme: sme_proportion_solvent,
         }
-        print(f"Corporate model | checkpoint 7 {time.perf_counter() - ts:.3f}s")
 
-        ts = time.perf_counter()
         state.corporate_state = CorporateState(
             capital_discount_factor=self._capital_discount_factor(proportion_solvent),
             proportion_solvent=proportion_solvent,
             proportion_employees_job_exists=self._proportion_employees_job_exists(),
         )
-        print(f"Corporate model | checkpoint 8 {time.perf_counter() - ts:.3f}s")
 
     def _capital_discount_factor(
         self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
@@ -579,33 +550,18 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             ) * (self.cash_state[BusinessSize.sme][s] > 0)
 
     def _loan_guarantees(self):
-        _cp_1 = 0.0
-        _cp_2 = 0.0
-        _cp_3 = 0.0
         for s in Sector:
-            ts = time.perf_counter()
             valid_set = 1 - self.sme_company_received_loan[s] * (
                 self.cash_state[BusinessSize.sme][s] > 0
             )
-            _cp_1 += time.perf_counter() - ts
 
-            ts = time.perf_counter()
-            # sample = np.random.choice(
-            #     np.where(valid_set)[0],
-            #     size=int(min(self.sme_count[s] * 0.01, sum(valid_set))),
-            #     replace=False,
-            # )
             sample = np.where(valid_set)[0][
                 : int(min(self.sme_count[s] * 0.01, sum(valid_set)))
             ]
-            _cp_2 += time.perf_counter() - ts
 
             if not len(sample):
-                print(f"Corporate model | checkpoint 4.1 {_cp_1:.3f}s")
-                print(f"Corporate model | checkpoint 4.2 {_cp_2:.3f}s")
                 return
 
-            ts = time.perf_counter()
             self.cash_state[BusinessSize.sme][s][sample] += np.array(
                 [self.size_loan[i] for i in self.sme_company_size[s][sample]]
             )
@@ -616,10 +572,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             self.loan_guarantee_remaining -= np.sum(
                 [self.size_loan[i] for i in self.sme_company_size[s][sample]]
             )
-            _cp_3 += time.perf_counter() - ts
-        print(f"Corporate model | checkpoint 4.1 {_cp_1:.3f}s")
-        print(f"Corporate model | checkpoint 4.2 {_cp_2:.3f}s")
-        print(f"Corporate model | checkpoint 4.3 {_cp_3:.3f}s")
 
     def _new_spending_sector_allocation(self) -> None:
         stimulus_amounts = [0.01, 0.25]
