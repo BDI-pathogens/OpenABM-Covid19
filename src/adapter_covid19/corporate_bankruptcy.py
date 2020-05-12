@@ -380,33 +380,32 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         return solvent
 
     def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
+        sector_large_counts = {}
+        for s in Sector:
+            if s in self.large_company_size:
+                large_counts = {}
+                for i in self.large_company_size[s][(self.cash_state[BusinessSize.large][s] > 0)]:
+                    large_counts[i] = large_counts.get(i, 0) + 1
+                sector_large_counts[s] = large_counts
+
         large_company_solvent = (
             pd.DataFrame(
-                {
-                    s: Counter(
-                        self.large_company_size[s][
-                            (self.cash_state[BusinessSize.large][s] > 0)
-                        ]
-                    )
-                    for s in Sector
-                    if s in self.large_company_size
-                }
+                sector_large_counts
             )
             .T.stack()
             .reset_index()
         )
+        sector_sme_counts = {}
+        for s in Sector:
+            if s in self.sme_company_size:
+                sme_counts = {}
+                for i in self.sme_company_size[s][(self.cash_state[BusinessSize.sme][s] > 0)]:
+                    sme_counts[i] = sme_counts.get(i, 0) + 1
+                sector_sme_counts[s] = sme_counts
 
         sme_company_solvent = (
             pd.DataFrame(
-                {
-                    s: Counter(
-                        self.sme_company_size[s][
-                            (self.cash_state[BusinessSize.sme][s] > 0)
-                        ]
-                    )
-                    for s in Sector
-                    if s in self.sme_company_size
-                }
+                sector_sme_counts
             )
             .T.stack()
             .reset_index()
@@ -554,11 +553,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             valid_set = 1 - self.sme_company_received_loan[s] * (
                 self.cash_state[BusinessSize.sme][s] > 0
             )
-
-            sample = np.where(valid_set)[0][
-                : int(min(self.sme_count[s] * 0.01, sum(valid_set)))
-            ]
-
+            sample = np.where(valid_set)[0][int(min(self.sme_count[s] * 0.01, sum(valid_set)))]
             if not len(sample):
                 return
 
