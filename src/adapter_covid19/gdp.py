@@ -629,7 +629,7 @@ class CobbDouglasLPSetup:
             i: self.indicator("xtilde", M.K, i)
             for i in Sector  # households don't have capital input to production
         }
-        self.objective_c = -np.sum(list(self.gdp_per_sector.values()), axis=0)
+        self.objective_c = -np.sum(list(self.gdp_per_sector.values()), axis=0) - np.sum(list(self.surplus_per_sector.values()), axis=0)
         assert self.objective_c.shape[0] == len(self.variables)
         self.max_gdp_per_sector = (
             self.xtilde_iot.loc[M.L]
