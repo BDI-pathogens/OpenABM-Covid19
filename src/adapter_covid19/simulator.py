@@ -135,10 +135,8 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False, ret
         )
         .T.sort_index().T
     )
-    df = df.div(df.sum(axis=1),axis=0).cumsum(axis=1)
-    ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
-    for i in range(1, df.shape[1]):
-        ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
+    df = df.div(df.sum(axis=1),axis=0)
+    df.plot.area(stacked=True,ax=ax)
     ax.legend(ncol=2)
     ax.set_title(title_prefix + "GDP Composition")
     dfs.append(df)
