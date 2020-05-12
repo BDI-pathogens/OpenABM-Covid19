@@ -346,6 +346,8 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
+	// Not the greatest solution, but store daily and total number of individuals
+	// admitted to hospital in the event list
 	model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
 	model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
