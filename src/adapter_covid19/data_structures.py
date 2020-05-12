@@ -176,7 +176,7 @@ class SimulateState:  # at one point in time
                     p_ill_furloughed=self.ill[EmploymentState.FURLOUGHED, r, s, a],
                     p_ill_unemployed=self.ill[EmploymentState.UNEMPLOYED, r, s, a],
                     # keyworker state determines who is constrained to WFH
-                    p_wfh=keyworker[s] if self.lockdown else 0.0,
+                    p_wfh=1.0-keyworker[s] if self.lockdown else 0.0,
                     # if furloughing is available, everybody will be furloughed
                     p_furloughed=float(self.furlough),
                     # this will be an output of the GDP model and overridden accordingly
