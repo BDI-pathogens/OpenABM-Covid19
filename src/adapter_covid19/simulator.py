@@ -134,7 +134,7 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False, ret
             index=range(1, end_time),
         )
         .T.sort_index().T
-    )
+    ).clip_lower(0.0)
     df = df.div(df.sum(axis=1),axis=0)
     df.plot.area(stacked=True,ax=ax)
     ax.legend(ncol=2)
