@@ -1,8 +1,9 @@
 import copy
 import itertools
 import logging
+import time
 from dataclasses import dataclass, field
-from typing import Mapping, MutableMapping, Tuple, Any
+from typing import Mapping, MutableMapping, Tuple, Dict
 
 import numpy as np
 import pandas as pd
@@ -47,22 +48,19 @@ class PersonalBankruptcyModel:
     # Workers per region per sector per age
     workers_data: Mapping[Tuple[Region, Sector, Age], float] = field(default=None)
 
-    # Workers per region
-    workers_per_region: Mapping[Region, float] = field(default=None)
-
-    # Workers per region, sector
-    workers_per_region_sector: Mapping[Tuple[Region, Sector], float] = field(
-        default=None
-    )
-
     # Credit mean by region
     credit_mean: Mapping[Region, float] = field(default=None)
 
     # Credit std
     credit_std: Mapping[Region, float] = field(default=None)
 
-    # Daily earnings by region, decile
+    # Daily earnings by region, sector, decile
     earnings: Mapping[Tuple[Region, Sector, Decile], float] = field(default=None)
+
+    # Daily earnings by region, sector, decile, worker state
+    _earnings_by_worker_state: Mapping[
+        Tuple[Region, Sector, Decile, WorkerState], float
+    ] = field(default=None, init=False)
 
     # Daily detailed expenses by region, employed sector, decile, spending sector
     detailed_expenses: Mapping[Tuple[Region, Sector, Decile, Sector], float] = field(
@@ -90,17 +88,18 @@ class PersonalBankruptcyModel:
     # Earning ratio per labour state
     eta: MutableMapping[WorkerState, float] = field(default=None)
 
+    # Mixture weights per  region, sector
+    _mixture_weights: Mapping[Tuple[Region, Sector, Decile], float] = field(
+        default=None, init=False
+    )
+
+    # CFD cache to make computation faster
+    _cdf_cache: Dict[float, float] = field(default_factory=dict, init=False)
+
     # Sector weightings per region
     _sector_region_weights: Mapping[Region, Mapping[Sector, float]] = field(
         default=None, init=False
     )
-
-    # Results, t by region by PersonalBankruptcyResults
-    results: MutableMapping[int, PersonalState] = field(
-        default_factory=dict, init=False
-    )
-
-    kwargs: Mapping[str, Any] = field(default_factory=dict)
 
     def load(self, reader: Reader) -> None:
         if self.gdp_data is None:
@@ -119,13 +118,21 @@ class PersonalBankruptcyModel:
         if self.workers_data is None:
             self.workers_data = RegionSectorAgeDataSource("workers").load(reader)
 
-        self.workers_per_region_sector = {
+        _workers_per_region_sector = {
             (r, s): sum(self.workers_data[r, s, a] for a in Age)
             for r, s in itertools.product(Region, Sector)
         }
 
-        self.workers_per_region = {
-            r: sum(self.workers_per_region_sector[r, s] for s in Sector) for r in Region
+        _workers_per_region = {
+            r: sum(_workers_per_region_sector[r, s] for s in Sector) for r in Region
+        }
+
+        _decile_weight = 1.0 / len(Decile)
+        self._mixture_weights = {
+            (r, s, d): _decile_weight
+            * _workers_per_region_sector[(r, s)]
+            / _workers_per_region[r]
+            for r, s, d in itertools.product(Region, Sector, Decile)
         }
 
         if self.credit_mean is None or self.credit_std is None:
@@ -169,6 +176,16 @@ class PersonalBankruptcyModel:
 
         if self.eta is None:
             self._init_eta()
+
+        self._earnings_by_worker_state = {}
+        for r, s, d, ws in itertools.product(Region, Sector, Decile, WorkerState):
+            _earnings = self.eta[ws] * self.earnings[(r, s, d)]
+            if ws in {
+                WorkerState.HEALTHY_FURLOUGHED,
+                WorkerState.ILL_FURLOUGHED,
+            }:
+                _earnings = min(_earnings, self.max_earning_furloughed)
+            self._earnings_by_worker_state[(r, s, d, ws)] = _earnings
 
         self._check_data()
 
@@ -267,30 +284,46 @@ class PersonalBankruptcyModel:
             personal_bankruptcy={},
             demand_reduction={},
         )
-
+        cp_0 = 0.0
+        cp_1 = 0.0
+        cp_2 = 0.0
+        cp_3 = 0.0
+        cp_4 = 0.0
+        cp_5 = 0.0
+        cp_6 = 0.0
         for region in Region:
             spot_credit_mean_r = {}
             for employed_sector, decile in itertools.product(Sector, Decile):
+                ts = time.perf_counter()
                 if state.time == START_OF_TIME:
                     starting_balance_rsd = self.cash_reserve[
                         (region, employed_sector, decile)
                     ]
-
                 else:
                     starting_balance_rsd = state.previous.personal_state.balance[
                         (region, employed_sector, decile)
                     ]
+                cp_0 += time.perf_counter() - ts
 
+                ts = time.perf_counter()
                 spot_earning_rsd = self._calc_spot_earning(
                     region, employed_sector, decile, state.utilisations
                 )
+                cp_1 += time.perf_counter() - ts
+
+                ts = time.perf_counter()
                 spot_expense_by_sector_rsd = self._calc_spot_expense_by_sector(
                     region, employed_sector, decile, spot_earning_rsd
                 )
+                cp_2 += time.perf_counter() - ts
+
+                ts = time.perf_counter()
                 spot_expense_rsd = sum(spot_expense_by_sector_rsd.values())
                 delta_balance_rsd = spot_earning_rsd - spot_expense_rsd
                 balance_rsd = starting_balance_rsd + delta_balance_rsd
+                cp_3 += time.perf_counter() - ts
 
+                ts = time.perf_counter()
                 spot_credit_mean_rsd = self._calc_credit_mean(
                     region, delta_balance_rsd, balance_rsd
                 )
@@ -300,10 +333,14 @@ class PersonalBankruptcyModel:
                 personal_state.spot_earning[
                     (region, employed_sector, decile)
                 ] = spot_earning_rsd
+                cp_4 += time.perf_counter() - ts
+
+                ts = time.perf_counter()
                 for expense_sector in Sector:
                     personal_state.spot_expense_by_sector[
                         (region, employed_sector, decile, expense_sector)
                     ] = spot_expense_by_sector_rsd[expense_sector]
+
                 personal_state.spot_expense[
                     (region, employed_sector, decile)
                 ] = spot_expense_rsd
@@ -317,32 +354,45 @@ class PersonalBankruptcyModel:
                 personal_state.credit_std[
                     (region, employed_sector, decile)
                 ] = self.credit_std[region]
+                cp_5 += time.perf_counter() - ts
 
+            ts = time.perf_counter()
             personal_state.personal_bankruptcy[region] = self._calc_personal_bankruptcy(
                 region, spot_credit_mean_r
             )
+            cp_6 += time.perf_counter() - ts
+        print(f"Personal model | checkpoint 0 take {cp_0:.3f}s")
+        print(f"Personal model | checkpoint 1 take {cp_1:.3f}s")
+        print(f"Personal model | checkpoint 2 take {cp_2:.3f}s")
+        print(f"Personal model | checkpoint 3 take {cp_3:.3f}s")
+        print(f"Personal model | checkpoint 4 take {cp_4:.3f}s")
+        print(f"Personal model | checkpoint 5 take {cp_5:.3f}s")
+        print(f"Personal model | checkpoint 6 take {cp_6:.3f}s")
 
+        ts = time.perf_counter()
         demand_reduction = self._calc_demand_reduction(
             personal_state.spot_expense_by_sector
         )
         personal_state.demand_reduction = demand_reduction
+        print(
+            f"Personal model | demand reduction takes {time.perf_counter() - ts:.3f}s"
+        )
 
+        ts = time.perf_counter()
         state.personal_state = copy.deepcopy(personal_state)
-        self.results[state.time] = copy.deepcopy(personal_state)
+        print(f"Personal model | copy takes {time.perf_counter() - ts:.3f}s")
+
+        # self.results[state.time] = copy.deepcopy(personal_state)
 
     def _calc_spot_earning(
         self, r: Region, s: Sector, d: Decile, utilisations: Utilisations
     ) -> float:
         spot_earning = 0
         for worker_state in WorkerState:
-            spot_earning_ls = self.eta[worker_state] * self.earnings[(r, s, d)]
-            if worker_state in {
-                WorkerState.HEALTHY_FURLOUGHED,
-                WorkerState.ILL_FURLOUGHED,
-            }:
-                spot_earning_ls = min(spot_earning_ls, self.max_earning_furloughed)
-
-            spot_earning += utilisations[r, s][worker_state] * spot_earning_ls
+            spot_earning += (
+                utilisations[r, s][worker_state]
+                * self._earnings_by_worker_state[(r, s, d, worker_state)]
+            )
         return spot_earning
 
     def _calc_spot_expense_by_sector(
@@ -381,24 +431,21 @@ class PersonalBankruptcyModel:
         self, r: Region, spot_credit_mean: Mapping[Tuple[Sector, Decile], float],
     ) -> float:
         ppb = 0
-        decile_weight = 1.0 / len(Decile)
         for s, d in itertools.product(Sector, Decile):
-            mixture_weight = (
-                decile_weight
-                * self.workers_per_region_sector[(r, s)]
-                / self.workers_per_region[r]
+            ppb += self._mixture_weights[(r, s, d)] * self._get_cdf(
+                self.default_th, spot_credit_mean[(s, d)], self.credit_std[r]
             )
 
-            if spot_credit_mean[(s, d)] > 0:
-                cdf_per_mixture_sd = scipy.stats.norm.cdf(
-                    self.default_th, spot_credit_mean[(s, d)], self.credit_std[r]
-                )
-            else:
-                cdf_per_mixture_sd = 1.0
-
-            ppb += mixture_weight * cdf_per_mixture_sd
-
         return ppb
+
+    def _get_cdf(self, v: float, mu: float, std: float) -> float:
+        z_score = max(min(round_to_half_int(v - mu / std), 3), -3)
+        try:
+            return self._cdf_cache[z_score]
+        except KeyError:
+            cdf = scipy.stats.norm.cdf(v, mu, std)
+            self._cdf_cache[z_score] = cdf
+            return cdf
 
     def _calc_demand_reduction(
         self,
@@ -426,3 +473,9 @@ class PersonalBankruptcyModel:
         }
 
         return demand_reduction
+
+
+def round_to_half_int(number: float):
+    """Round a number to the closest half integer."""
+
+    return round(number * 2) / 2
