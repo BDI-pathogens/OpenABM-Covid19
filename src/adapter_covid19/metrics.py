@@ -10,13 +10,12 @@ from adapter_covid19.economics import Economics
 GDP_REDUCTION_EST = {
     date(2020, 3, 31): 0.97,
     date(2020, 6, 30): 0.75,
-    date(2020, 9, 30): np.nan,
-    date(2020, 12, 31): 0.86,
+    date(2020, 9, 30): 0.82,
+    date(2020, 12, 31): 0.90, # whole year: 0.86
 }
 
 DEMAND_REDUCTION_EST = {
-    date(2020, 3, 31): 0.7,
-    date(2020, 6, 30): 0.55,
+    date(2020, 6, 30): 0.60,
 }
 
 
