@@ -52,9 +52,9 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+	set_up_allocate_work_places( model_ptr );
     if( params->hospital_on )
         set_up_healthcare_workers_and_hospitals( model_ptr );
-	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 
@@ -226,7 +226,7 @@ void set_up_occupation_network( model *model, int network )
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->occupation_network[network], people );
-
+    printf("num people %li in network %i\n", n_people, network);
 	free( people );
 }
 
@@ -388,22 +388,22 @@ double estimate_total_interactions( model *model )
     for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
         n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
-    if( model->params->hospital_on )
-    {
-        int hospital_idx, ward_type, ward_idx;
-        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
-        {
-            n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
-            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-            {
-                for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
-                {
-                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
-                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
-                }
-            }
-        }
-    }
+//    if( model->params->hospital_on )
+//    {
+//        int hospital_idx, ward_type, ward_idx;
+//        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
+//        {
+//            n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
+//            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+//            {
+//                for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
+//                {
+//                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
+//                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
+//                }
+//            }
+//        }
+//    }
     return n_interactions;
 }
 
@@ -816,10 +816,11 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
                 continue;
 
         indiv->worker_type = DOCTOR;
+        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
         add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
         idx++;
     }
@@ -834,10 +835,11 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
                 continue;
 
         indiv->worker_type = NURSE;
+        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
         add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
         idx++;
     }
