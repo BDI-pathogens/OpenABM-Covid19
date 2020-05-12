@@ -3,8 +3,8 @@ import itertools
 import logging
 import os
 from typing import Optional, Mapping, Tuple, List, Dict
-
 import matplotlib.pyplot as plt
+import time
 import pandas as pd
 
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
@@ -58,10 +58,12 @@ class Simulator:
         pb_model = PersonalBankruptcyModel(**model_params.personal_params)
         econ = Economics(gdp_model, cb_model, pb_model, **model_params.economics_params)
         econ.load(self.reader)
-        dead = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
-        ill = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+
         states = []
         for i in tqdm(range(scenario.simulation_end_time)):
+            ill = scenario.get_ill_ratio_dict(i)
+            dead = scenario.get_dead_ratio_dict(i)
+
             simulate_state = scenario.generate(
                 time=i,
                 dead=dead,
@@ -136,10 +138,11 @@ def plot_one_scenario(
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
             index=range(1, end_time),
         )
-        .T.sort_index().T
-    ).clip_lower(0.0)
-    df = df.div(df.sum(axis=1),axis=0)
-    df.plot.area(stacked=True,ax=ax)
+        .T.sort_index()
+        .T
+    ).clip(lower=0.0)
+    df = df.div(df.sum(axis=1), axis=0)
+    df.plot.area(stacked=True, ax=ax)
     ax.legend(ncol=2)
     ax.set_title(title_prefix + "GDP Composition")
     dfs.append(df)
