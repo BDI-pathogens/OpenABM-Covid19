@@ -107,7 +107,9 @@ class Simulator:
         return result
 
 
-def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False, return_dfs=False):
+def plot_one_scenario(
+    states, end_time, axes, title_prefix="", legend=False, return_dfs=False
+):
     dfs = []
 
     # Plot 1a - Total GDP
@@ -118,7 +120,8 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False, ret
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
             index=range(1, end_time),
         )
-        .T.sort_index().T.sum(axis=1)
+        .T.sort_index()
+        .T.sum(axis=1)
     )
     df.plot(ax=ax)
     ax.legend(ncol=2)
