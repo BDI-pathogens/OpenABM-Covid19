@@ -388,22 +388,22 @@ double estimate_total_interactions( model *model )
     for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
         n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
-//    if( model->params->hospital_on )
-//    {
-//        int hospital_idx, ward_type, ward_idx;
-//        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
-//        {
-//            n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
-//            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-//            {
-//                for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
-//                {
-//                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
-//                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
-//                }
-//            }
-//        }
-//    }
+    if( model->params->hospital_on )
+    {
+        int hospital_idx, ward_type, ward_idx;
+        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
+        {
+            n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
+            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+            {
+                for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
+                {
+                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
+                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
+                }
+            }
+        }
+    }
     return n_interactions;
 }
 
