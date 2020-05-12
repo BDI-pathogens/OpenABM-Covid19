@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import itertools
+import warnings
 from dataclasses import dataclass, field, InitVar
 from typing import (
     Any,
@@ -56,6 +57,9 @@ class Scenario:
     ccff_day: int = 1000
     loan_guarantee_day: int = 1000
     model_params: ModelParams = ModelParams()
+    # T * percentage. TODO: extend to per sector, region, age
+    ill_ratio: Mapping[int, float] = field(default_factory=dict,)
+    dead_ratio: Mapping[int, float] = field(default_factory=dict)
 
     simulate_states: MutableMapping[int, SimulateState] = field(
         default_factory=dict, init=False
@@ -131,6 +135,30 @@ class Scenario:
             reader=reader,
         )
         return simulate_state
+
+    def get_ill_ratio_dict(
+        self, time: int
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        try:
+            return {
+                key: self.ill_ratio[time]
+                for key in itertools.product(Region, Sector, Age)
+            }
+        except KeyError:
+            warnings.warn(f"Ill ratio at time {time} is not provided. Returning 0.0")
+            return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+
+    def get_dead_ratio_dict(
+        self, time: int
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        try:
+            return {
+                key: self.dead_ratio[time]
+                for key in itertools.product(Region, Sector, Age)
+            }
+        except KeyError:
+            warnings.warn(f"Dead ratio at time {time} is not provided. Returning 0.0")
+            return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
 
 
 @dataclass
