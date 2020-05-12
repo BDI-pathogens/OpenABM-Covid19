@@ -1,7 +1,6 @@
 import copy
 import itertools
 import logging
-import time
 from dataclasses import dataclass, field
 from typing import Mapping, MutableMapping, Tuple, Dict
 
@@ -284,17 +283,9 @@ class PersonalBankruptcyModel:
             personal_bankruptcy={},
             demand_reduction={},
         )
-        cp_0 = 0.0
-        cp_1 = 0.0
-        cp_2 = 0.0
-        cp_3 = 0.0
-        cp_4 = 0.0
-        cp_5 = 0.0
-        cp_6 = 0.0
         for region in Region:
             spot_credit_mean_r = {}
             for employed_sector, decile in itertools.product(Sector, Decile):
-                ts = time.perf_counter()
                 if state.time == START_OF_TIME:
                     starting_balance_rsd = self.cash_reserve[
                         (region, employed_sector, decile)
@@ -303,27 +294,19 @@ class PersonalBankruptcyModel:
                     starting_balance_rsd = state.previous.personal_state.balance[
                         (region, employed_sector, decile)
                     ]
-                cp_0 += time.perf_counter() - ts
 
-                ts = time.perf_counter()
                 spot_earning_rsd = self._calc_spot_earning(
                     region, employed_sector, decile, state.utilisations
                 )
-                cp_1 += time.perf_counter() - ts
 
-                ts = time.perf_counter()
                 spot_expense_by_sector_rsd = self._calc_spot_expense_by_sector(
                     region, employed_sector, decile, spot_earning_rsd
                 )
-                cp_2 += time.perf_counter() - ts
 
-                ts = time.perf_counter()
                 spot_expense_rsd = sum(spot_expense_by_sector_rsd.values())
                 delta_balance_rsd = spot_earning_rsd - spot_expense_rsd
                 balance_rsd = starting_balance_rsd + delta_balance_rsd
-                cp_3 += time.perf_counter() - ts
 
-                ts = time.perf_counter()
                 spot_credit_mean_rsd = self._calc_credit_mean(
                     region, delta_balance_rsd, balance_rsd
                 )
@@ -333,9 +316,7 @@ class PersonalBankruptcyModel:
                 personal_state.spot_earning[
                     (region, employed_sector, decile)
                 ] = spot_earning_rsd
-                cp_4 += time.perf_counter() - ts
 
-                ts = time.perf_counter()
                 for expense_sector in Sector:
                     personal_state.spot_expense_by_sector[
                         (region, employed_sector, decile, expense_sector)
@@ -354,33 +335,17 @@ class PersonalBankruptcyModel:
                 personal_state.credit_std[
                     (region, employed_sector, decile)
                 ] = self.credit_std[region]
-                cp_5 += time.perf_counter() - ts
 
-            ts = time.perf_counter()
             personal_state.personal_bankruptcy[region] = self._calc_personal_bankruptcy(
                 region, spot_credit_mean_r
             )
-            cp_6 += time.perf_counter() - ts
-        print(f"Personal model | checkpoint 0 take {cp_0:.3f}s")
-        print(f"Personal model | checkpoint 1 take {cp_1:.3f}s")
-        print(f"Personal model | checkpoint 2 take {cp_2:.3f}s")
-        print(f"Personal model | checkpoint 3 take {cp_3:.3f}s")
-        print(f"Personal model | checkpoint 4 take {cp_4:.3f}s")
-        print(f"Personal model | checkpoint 5 take {cp_5:.3f}s")
-        print(f"Personal model | checkpoint 6 take {cp_6:.3f}s")
 
-        ts = time.perf_counter()
         demand_reduction = self._calc_demand_reduction(
             personal_state.spot_expense_by_sector
         )
         personal_state.demand_reduction = demand_reduction
-        print(
-            f"Personal model | demand reduction takes {time.perf_counter() - ts:.3f}s"
-        )
 
-        ts = time.perf_counter()
         state.personal_state = copy.deepcopy(personal_state)
-        print(f"Personal model | copy takes {time.perf_counter() - ts:.3f}s")
 
         # self.results[state.time] = copy.deepcopy(personal_state)
 
