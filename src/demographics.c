@@ -39,18 +39,21 @@ void set_up_allocate_work_places( model *model )
 		model->params->elderly_network_adults
 	};
 
-    if( model->params->hospital_on )
-    {
-        n_healthcare_workers = model->params->n_hospitals * ( (model->params->n_wards[COVID_GENERAL] * (model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] + model->params->n_hcw_per_ward[COVID_GENERAL][NURSE]))
-                                                            + (model->params->n_wards[COVID_ICU] * (model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] + model->params->n_hcw_per_ward[COVID_ICU][NURSE])));
-    } else
-        n_healthcare_workers = 0;
+//    if( model->params->hospital_on )
+//    {
+//        n_healthcare_workers = model->params->n_hospitals * ( (model->params->n_wards[COVID_GENERAL] * (model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] + model->params->n_hcw_per_ward[COVID_GENERAL][NURSE]))
+//                                                            + (model->params->n_wards[COVID_ICU] * (model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] + model->params->n_hcw_per_ward[COVID_ICU][NURSE])));
+//    } else
+//        n_healthcare_workers = 0;
 
 	// get the raw population in each network
 	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		pop_net_raw[ AGE_OCCUPATION_MAP[model->population[pdx].age_group] ]++;
+    {
+//        if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
+            pop_net_raw[ AGE_OCCUPATION_MAP[model->population[pdx].age_group] ]++;
+    }
 
 	// given the total adults
 	n_adult = 0;
@@ -72,7 +75,7 @@ void set_up_allocate_work_places( model *model )
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
 				{
-                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / ( n_adult - n_healthcare_workers );
+                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / ( n_adult/* - n_healthcare_workers */);
 					other         += prob[adx][ndx];
 				}
 			}
@@ -83,19 +86,19 @@ void set_up_allocate_work_places( model *model )
 
     for( pdx = 0; pdx < model->params->n_total; pdx++ )
     {
-        if( model->params->hospital_on )
-        {
-            // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
-            // to HOSPITAL_WORK_NETWORK (-1).
-            if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
-                model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
-            else
-                model->population[pdx].occupation_network = HOSPITAL_WORK_NETWORK;
-        }
-        else
-        {
+//        if( model->params->hospital_on )
+//        {
+//            // randomly assign a work place networks using the probability map if not healthcare worker. Otherwise, sets work network
+//            // to HOSPITAL_WORK_NETWORK (-1).
+//            if( model->population[pdx].worker_type != NURSE && model->population[pdx].worker_type != DOCTOR)
+//                model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
+//            else
+//                model->population[pdx].occupation_network = HOSPITAL_WORK_NETWORK;
+//        }
+//        else
+//        {
             model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
-        }
+//        }
     }
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
