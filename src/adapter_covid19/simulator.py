@@ -74,7 +74,7 @@ class Simulator:
             states.append(simulate_state)
 
         if show_plots:
-            fig, axes = plt.subplots(6, 1, sharex="col", sharey="row", figsize=figsize)
+            fig, axes = plt.subplots(7, 1, sharex="col", sharey="row", figsize=figsize)
             plot_one_scenario(
                 states, scenario.simulation_end_time, axes, title_prefix=scenario_name
             )
@@ -107,58 +107,82 @@ class Simulator:
         return result
 
 
-def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False):
-    # Plot 1 - GDP
-    logger.debug("Plotting chat 1")
+def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False, return_dfs=False):
+    dfs = []
+
+    # Plot 1a - Total GDP
+    logger.debug("Plotting chart 1a")
     ax = axes[0]
     df = (
         pd.DataFrame(
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
             index=range(1, end_time),
         )
-        .T.sort_index()
-        .T.cumsum(axis=1)
+        .T.sort_index().T.sum(axis=1)
     )
+    df.plot(ax=ax)
+    ax.legend(ncol=2)
+    ax.set_title(title_prefix + "Total GDP")
+    dfs.append(df)
+
+    # Plot 1b - GDP Composition
+    logger.debug("Plotting chart 1b")
+    ax = axes[1]
+    df = (
+        pd.DataFrame(
+            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
+            index=range(1, end_time),
+        )
+        .T.sort_index().T
+    )
+    df = df.div(df.sum(axis=1),axis=0).cumsum(axis=1)
     ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
     for i in range(1, df.shape[1]):
         ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
     ax.legend(ncol=2)
-    ax.set_title(title_prefix + "GDP")
+    ax.set_title(title_prefix + "GDP Composition")
+    dfs.append(df)
 
     # Plot 2a - Corporate Solvencies - Large Cap
-    logger.debug("Plotting chat 2a")
+    logger.debug("Plotting chart 2a")
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.large]
             for i in range(1, end_time)
         ]
     )
-    df.plot(title=title_prefix + "Corporate Solvencies - Large Cap", ax=axes[1])
+    df.plot(title=title_prefix + "Corporate Solvencies - Large Cap", ax=axes[2])
+    dfs.append(df)
 
     # Plot 2b - Corporate Solvencies - SME
-    logger.debug("Plotting chat 2b")
+    logger.debug("Plotting chart 2b")
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.sme]
             for i in range(1, end_time)
         ]
     )
-    df.plot(title=title_prefix + "Corporate Solvencies - SME", ax=axes[2])
+    df.plot(title=title_prefix + "Corporate Solvencies - SME", ax=axes[3])
+    dfs.append(df)
 
     # Plot 3a - Personal Insolvencies
-    logger.debug("Plotting chat 3a")
-    pd.DataFrame(
+    logger.debug("Plotting chart 3a")
+    df = pd.DataFrame(
         [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
-    ).plot(title=title_prefix + "Personal Insolvencies", ax=axes[3])
+    )
+    df.plot(title=title_prefix + "Personal Insolvencies", ax=axes[4])
+    dfs.append(df)
 
     # Plot 3b - Household Expenditure
-    logger.debug("Plotting chat 3b")
-    pd.DataFrame(
+    logger.debug("Plotting chart 3b")
+    df = pd.DataFrame(
         [states[i].personal_state.demand_reduction for i in range(1, end_time)]
-    ).plot(title=title_prefix + "Household Expenditure Reduction", ax=axes[4])
+    )
+    df.plot(title=title_prefix + "Household Expenditure Reduction", ax=axes[5])
+    dfs.append(df)
 
     # Plot 4 - Unemployment
-    logger.debug("Plotting chat 4")
+    logger.debug("Plotting chart 4")
 
     def unemployment_from_lambdas(d):
         return (
@@ -168,7 +192,7 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False):
             + d[WorkerState.HEALTHY_FURLOUGHED]
         ) / (1 - d[WorkerState.DEAD])
 
-    pd.DataFrame(
+    df = pd.DataFrame(
         [
             {
                 s: unemployment_from_lambdas(states[i].utilisations[s])
@@ -177,7 +201,9 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False):
             }
             for i in range(1, end_time)
         ]
-    ).plot(title=title_prefix + "Unemployment", ax=axes[5])
+    )
+    df.plot(title=title_prefix + "Unemployment", ax=axes[6])
+    dfs.append(df)
 
     for ax in axes:
         if legend:
@@ -186,3 +212,6 @@ def plot_one_scenario(states, end_time, axes, title_prefix="", legend=False):
             ax.get_legend().remove()
 
     plt.tight_layout()
+
+    if return_dfs:
+        return dfs
