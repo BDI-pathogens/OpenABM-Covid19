@@ -1013,7 +1013,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             else:
                 raise ValueError("capital parameter required")
         else:
-            capital = state.previous.corporate_state.capital_discount_factor
+            capital = copy.deepcopy(state.previous.corporate_state.capital_discount_factor)
 
         # apply assumed long-term growth rate to capital
         for s in Sector:
