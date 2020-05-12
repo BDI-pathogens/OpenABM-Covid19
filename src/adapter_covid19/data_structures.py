@@ -249,7 +249,7 @@ class IoGdpState(GdpState):
     @property
     def net_operating_surplus(self):
         return {
-            s: -sum(
+            s: sum(
                 [
                     self.primary_inputs[PrimaryInput.NET_OPERATING_SURPLUS, r, s, a]
                     for r, a in itertools.product(Region, Age)
