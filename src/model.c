@@ -537,7 +537,6 @@ void build_random_network( model *model )
 *  Description: Adds the daily interactions to all individual from a network
 ******************************************************************************************/
 void add_interactions_from_network(
-
 	model *model,
 	network *network,
 	int skip_hospitalised,

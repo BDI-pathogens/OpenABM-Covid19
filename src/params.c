@@ -12,6 +12,7 @@
 #include "disease.h"
 #include "individual.h"
 #include "interventions.h"
+#include "demographics.h"
 
 /*****************************************************************************************
 *  Name: 		initialize_params
@@ -20,6 +21,70 @@
 void initialize_params( parameters *params )
 {
 	params->demo_house = NULL;
+}
+
+/*****************************************************************************************
+*  Name: 		set_up_demographic_house_table
+*  Description: sets ups a clean demographic house table
+******************************************************************************************/
+int set_up_demographic_house_table( parameters* params, long n_total, long n_households )
+{
+	if( params->demo_house != NULL )
+	{
+		free( params->demo_house->idx );
+		free( params->demo_house->age_group );
+		free( params->demo_house->house_no );
+		free( params->demo_house );
+	}
+	params->demo_house = calloc( 1, sizeof( demographic_household_table ) );
+
+	if( n_total != params->n_total )
+	{
+		print_now( "Total number of people must be the same as n_total in params" );
+		return FALSE;
+	}
+
+	params->demo_house->n_total      = n_total;
+	params->demo_house->n_households = n_households;
+	params->demo_house->age_group    = calloc( n_total, sizeof( int ) );
+	params->demo_house->idx          = calloc( n_total, sizeof( long ) );
+	params->demo_house->house_no     = calloc( n_total, sizeof( long ) );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_indiv_demographic_house_table
+*  Description: sets the values for an individual in the demo_house table
+******************************************************************************************/
+int set_indiv_demographic_house_table( parameters* params, long pdx, int age, long house_no )
+{
+	if( params->demo_house == NULL )
+	{
+		print_now( "Cannot update demo_house until it has been initialized (call set_up_demographic_house_table)" );
+		return FALSE;
+	}
+	if( pdx < 0 | pdx >= params->n_total )
+	{
+		print_now( "The person index must be between 0 and n_total -1" );
+		return FALSE;
+	}
+	if( age < 0 | age >= N_AGE_GROUPS )
+	{
+		print_now( "The person's age must be between 0 and N_AGE_GROUPS-1" );
+		return FALSE;
+	}
+	if( house_no < 0 | house_no >= params->demo_house->n_households )
+	{
+		print_now( "The person's nouse_no must be between 0 and n_households" );
+		return FALSE;
+	}
+
+	params->demo_house->idx[ pdx ]       = pdx;
+	params->demo_house->age_group[ pdx ] = age;
+	params->demo_house->house_no[ pdx ]  = house_no;
+
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -719,4 +784,12 @@ void destroy_params( parameters *params )
 	for( idx = 0; idx < params->N_REFERENCE_HOUSEHOLDS; idx++ )
 		free( params->REFERENCE_HOUSEHOLDS[idx] );
 	free( params->REFERENCE_HOUSEHOLDS );
+
+	if( params->demo_house != NULL )
+	{
+		free( params->demo_house->age_group );
+		free( params->demo_house->house_no );
+		free( params->demo_house->idx );
+	}
+
 }

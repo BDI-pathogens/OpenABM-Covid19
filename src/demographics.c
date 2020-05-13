@@ -108,14 +108,16 @@ void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLD
 void assign_household_distribution( model *model, demographic_household_table *demo_house )
 {
 	long hdx, pdx;
-	int housesize, idx, jdx, age;
-	int this_house[ N_HOUSEHOLD_MAX ];
+	int housesize, age, idx;
 	directory *dir;
 	individual *indiv;
 
 	// check to see that demo_house has the correct number of people
 	if( demo_house->n_total != model->params->n_total )
+	{
+		printf( "demo_house n_tota = %li", demo_house->n_total);
 		print_exit( "The demographic-household table has a different n_total to the parameters");
+	}
 
 	// now allocate people to households and set up the household directory
 	dir = calloc( 1, sizeof( directory ) );
@@ -132,10 +134,12 @@ void assign_household_distribution( model *model, demographic_household_table *d
 			print_exit( "Demographic_household idx column must be 0 to n_total-1 in order" );
 
 		if( demo_house->house_no[ pdx ] != hdx )
+		{
+			printf( "pdx = %li; hdx = %li; demo_house_no = %li\n", pdx, hdx, demo_house->house_no[ pdx ]);
 			print_exit( "Demographic_household house_no column must contains ordered values 0 to n_household-1 (repeated for some household)" );
+		}
 
 		housesize = 0;
-		idx       = 0;
 		while( demo_house->house_no[ pdx ] == hdx )
 		{
 			// check the house column is correct
@@ -147,31 +151,26 @@ void assign_household_distribution( model *model, demographic_household_table *d
 			indiv = &(model->population[pdx]);
 			set_age_group( indiv, model->params, age );
 			set_house_no( indiv, hdx );
-			this_house[ idx++ ] = pdx;
 
+			housesize++;
 			pdx++;
 			if( pdx == demo_house->n_total )
 				break;
 		};
 
 		// update the household directory
-		dir->n_jdx[hdx] = idx;
-		dir->val[hdx] = calloc( idx, sizeof( long ) );
-		for( jdx = 0; jdx < idx; jdx++ )
-			dir->val[hdx][jdx] = this_house[ jdx ];
+		dir->n_jdx[hdx] = housesize;
+		dir->val[hdx] = calloc( housesize, sizeof( long ) );
+		for( idx = 0; idx < housesize; idx++ )
+			dir->val[hdx][idx] = pdx - housesize + idx;
 
 		// check the final values are correct
 		hdx++;
 		if( hdx == demo_house->n_households & pdx != demo_house->n_total )
-		{
-			printf( "hdx = %li; pdx = %li; n_households = %li; n_total = %li ", hdx, pdx, demo_house->n_households, demo_house->n_total );
 			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
-		}
+
 		if( hdx != demo_house->n_households & pdx == demo_house->n_total )
-		{
-			printf( "hdx = %li; pdx = %li; n_households = %li; n_total = %li ", hdx, pdx, demo_house->n_households, demo_house->n_total );
 			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
-		}
 	}
 
 }
@@ -186,19 +185,11 @@ void assign_household_distribution( model *model, demographic_household_table *d
 ******************************************************************************************/
 void set_up_household_distribution( model *model )
 {
-	demographic_household_table demo_house;
-
 	if( model->params->demo_house == NULL )
-		demo_house = generate_household_distribution( model );
-	else
-		demo_house = *(model->params->demo_house);
+		generate_household_distribution( model );
 
 	// now set to the individuals and create the household directory
-	assign_household_distribution( model, &demo_house );
-
-	free( demo_house.idx );
-	free( demo_house.age_group );
-	free( demo_house.house_no );
+	assign_household_distribution( model, model->params->demo_house );
 }
 
 /*****************************************************************************************
@@ -214,12 +205,12 @@ void set_up_household_distribution( model *model )
 *
 *  Returns:		demographic_household_table
 ******************************************************************************************/
-demographic_household_table generate_household_distribution( model *model )
+void generate_household_distribution( model *model )
 {
 	int idx, housesize, age;
 	long hdx, n_households, pdx, sample;
 	double error, last_error, acceptance;
-	demographic_household_table demo_house;
+	demographic_household_table *demo_house = calloc( 1, sizeof( demographic_household_table ) );
 	double *population_target      = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_total       = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_trial       = calloc( N_AGE_GROUPS, sizeof(double));
@@ -309,10 +300,10 @@ demographic_household_table generate_household_distribution( model *model )
 		print_exit( "Household rejection sampling failed to accurately converge" );
 
 	// now generate the demographic household table
-	demo_house.idx          = calloc( model->params->n_total, sizeof( long ) );
-	demo_house.age_group    = calloc( model->params->n_total, sizeof( int ) );
-	demo_house.house_no     = calloc( model->params->n_total, sizeof( long ) );
-	demo_house.n_total      = model->params->n_total;
+	demo_house->idx          = calloc( model->params->n_total, sizeof( long ) );
+	demo_house->age_group    = calloc( model->params->n_total, sizeof( int ) );
+	demo_house->house_no     = calloc( model->params->n_total, sizeof( long ) );
+	demo_house->n_total      = model->params->n_total;
 
 	pdx = 0;
 	for( hdx = 0; hdx < n_households; hdx++ )
@@ -322,9 +313,9 @@ demographic_household_table generate_household_distribution( model *model )
 		{
 			for( idx = 0; idx < model->params->REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )
 			{
-				demo_house.idx[pdx]       = pdx;
-				demo_house.age_group[pdx] = age;
-				demo_house.house_no[pdx]  = hdx;
+				demo_house->idx[pdx]       = pdx;
+				demo_house->age_group[pdx] = age;
+				demo_house->house_no[pdx]  = hdx;
 				pdx++;
 
 				if( pdx == model->params->n_total )
@@ -336,12 +327,11 @@ demographic_household_table generate_household_distribution( model *model )
 		if( pdx == model->params->n_total )
 			break;
 	}
-	demo_house.n_households = hdx + 1;
+	demo_house->n_households = hdx + 1;
+	model->params->demo_house = demo_house;
 
 	free( households );
 	free( REFERENCE_HOUSEHOLD_SIZE );
-
-	return demo_house;
 }
 
 /*****************************************************************************************
