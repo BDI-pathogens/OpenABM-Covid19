@@ -1,6 +1,7 @@
 import abc
 import os
 from typing import Tuple, Mapping, Any, Union, Optional, Sequence
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -35,6 +36,13 @@ class Reader:
             return data
         return data.to_dict(orient)
 
+    def load_pkl(
+        self,
+        filename: str,
+    ) -> pd.DataFrame:
+        with open(self._get_filepath(f"{filename}.pkl"),"rb") as f:
+            df = pickle.load(f)
+        return df
 
 class DataSource(abc.ABC):
     def __init__(self, filename: str):
