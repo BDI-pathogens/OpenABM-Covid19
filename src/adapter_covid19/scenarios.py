@@ -189,8 +189,8 @@ TEST_SCENARIO = Scenario(
     loan_guarantee_day=2,
     model_params=BASIC_MODEL_PARAMS,
     epidemic_active=False,
-    ill_ratio={t:0 for t in range(203)},
-    dead_ratio={t:0 for t in range(203)},
+    ill_ratio={t: 0 for t in range(203)},
+    dead_ratio={t: 0 for t in range(203)},
 )
 
 SCENARIOS = {
@@ -199,5 +199,5 @@ SCENARIOS = {
     "no_corp_support": BASIC_NO_CORP_SUPPORT_SCENARIO,
     "no_furlough_no_corp_support": BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO,
     "no_lockdown": BASIC_NO_LOCKDOWN_SCENARIO,
-    "test": TEST_SCENARIO
+    "test": TEST_SCENARIO,
 }
