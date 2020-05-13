@@ -17,5 +17,6 @@ typedef struct edge edge;
 typedef struct model model;
 typedef struct directory directory;
 typedef struct trace_token trace_token;
+typedef struct demographic_household_table demographic_household_table;
 
 #endif /* STRUCTURE_H_ */

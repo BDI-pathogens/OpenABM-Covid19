@@ -150,6 +150,7 @@ class Parameters(object):
             Sys.exit(0): [Underlaying C code will exist if params are not viable]
         """
         self.c_params = covid19.parameters()
+        covid19.initialize_params( self.c_params );
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         elif not input_param_file and read_param_file:

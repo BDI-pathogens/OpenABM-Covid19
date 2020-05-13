@@ -139,8 +139,9 @@ typedef struct{
 
 	int sys_write_individual; 		// Should an individual file be written to output?
 	
-	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
-	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
+	long N_REFERENCE_HOUSEHOLDS;			 // Number of households in the household demographics file
+	int **REFERENCE_HOUSEHOLDS;				 // Array of reference households
+	demographic_household_table *demo_house; // Pointer to a table of demographic and house numbers (if user specified)
 
 	double ***risk_score;  			// risk score somebody who has been traced
 	double **risk_score_household;  // risk score for household members of symptomatic person
@@ -205,6 +206,7 @@ int set_model_param_risk_score_household( model*, int, int, double );
 
 void update_work_intervention_state(model *model, int value);
 void update_household_intervention_state(model *model, int value);
+void initialize_params( parameters* );
 void check_params( parameters* );
 void destroy_params( parameters* );
 

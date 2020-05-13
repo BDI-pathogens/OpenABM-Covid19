@@ -12,8 +12,6 @@
 /****************************** Structures  *****************************/
 /************************************************************************/
 
-typedef struct demographic_household_table demographic_household_table;
-
 struct demographic_household_table{
 	long n_households;
 	long n_total;

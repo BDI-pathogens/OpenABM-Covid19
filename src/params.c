@@ -14,6 +14,15 @@
 #include "interventions.h"
 
 /*****************************************************************************************
+*  Name: 		initialize_params
+*  Description: initializes the params structure
+******************************************************************************************/
+void initialize_params( parameters *params )
+{
+	params->demo_house = NULL;
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/

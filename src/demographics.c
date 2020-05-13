@@ -187,7 +187,11 @@ void assign_household_distribution( model *model, demographic_household_table *d
 void set_up_household_distribution( model *model )
 {
 	demographic_household_table demo_house;
-	demo_house = generate_household_distribution( model );
+
+	if( model->params->demo_house == NULL )
+		demo_house = generate_household_distribution( model );
+	else
+		demo_house = *(model->params->demo_house);
 
 	// now set to the individuals and create the household directory
 	assign_household_distribution( model, &demo_house );
