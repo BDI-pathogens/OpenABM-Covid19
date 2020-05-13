@@ -8,6 +8,7 @@ from typing import (
     Any,
     Union,
     Generator,
+    Type,
 )
 from typing import Mapping, Tuple, MutableMapping, Optional
 
@@ -66,7 +67,7 @@ class Scenario:
         default_factory=dict, init=False
     )
 
-    datasources: Mapping[str, DataSource] = field(default_factory=dict)
+    datasources: Mapping[str, Type[DataSource]] = field(default_factory=dict)
     gdp: Mapping[Tuple[Region, Sector, Age], float] = field(default=None, init=False)
     workers: Mapping[Tuple[Region, Sector, Age], float] = field(
         default=None, init=False
