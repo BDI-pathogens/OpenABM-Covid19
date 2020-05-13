@@ -100,7 +100,9 @@ void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLD
 
 /*****************************************************************************************
 *  Name:		assign_household_distribution
-*  Description:
+*  Description: Given a table of individuals with ages and house numbers, assigns
+*  				them to the objects in the model and generates the household lookup
+*  				directroy.
 *  Returns:		void
 ******************************************************************************************/
 void assign_household_distribution( model *model, demographic_household_table *demo_house )
@@ -176,6 +178,27 @@ void assign_household_distribution( model *model, demographic_household_table *d
 
 /*****************************************************************************************
 *  Name:		set_up_household_distribution
+*  Description: Either generates the household and age of everybody in the model OR
+*  				use a pre-calculated table.
+*  				Assigns the households to the individuals.
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_household_distribution( model *model )
+{
+	demographic_household_table demo_house;
+	demo_house = generate_household_distribution( model );
+
+	// now set to the individuals and create the household directory
+	assign_household_distribution( model, &demo_house );
+
+	free( demo_house.idx );
+	free( demo_house.age_group );
+	free( demo_house.house_no );
+}
+
+/*****************************************************************************************
+*  Name:		generate_household_distribution
 *  Description: sets up the initial household distribution and allocates people to them
 *  				method matches both population structure and household structure using
 *  				a rejection sampling method.
@@ -185,9 +208,9 @@ void assign_household_distribution( model *model, demographic_household_table *d
 *  				  is below a threshold
 *  			   3. Alter the acceptance threshold dynamically to get better and better fits
 *
-*  Returns:		void
+*  Returns:		demographic_household_table
 ******************************************************************************************/
-void set_up_household_distribution( model *model )
+demographic_household_table generate_household_distribution( model *model )
 {
 	int idx, housesize, age;
 	long hdx, n_households, pdx, sample;
@@ -314,8 +337,7 @@ void set_up_household_distribution( model *model )
 	free( households );
 	free( REFERENCE_HOUSEHOLD_SIZE );
 
-	// now set to the individuals and create the household directory
-	assign_household_distribution( model, &demo_house );
+	return demo_house;
 }
 
 /*****************************************************************************************

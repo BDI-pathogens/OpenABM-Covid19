@@ -26,7 +26,7 @@ struct demographic_household_table{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void generate_household_distribution( model* );
+demographic_household_table generate_household_distribution( model* );
 void assign_household_distribution( model*, demographic_household_table* );
 void set_up_household_distribution( model* );
 void set_up_allocate_work_places( model* );
