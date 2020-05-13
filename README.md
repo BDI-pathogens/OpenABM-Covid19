@@ -33,12 +33,12 @@ make all
 To install the Python interface, first install [SWIG](http://www.swig.org/), then:
 
 ```bash
-make swig-all
+make install
 ```
 
 For developers, the following installs the Python interface inplace, so modifications to the code are applied without needing to reinstall
 ```bash
-make swig-develop
+make dev
 ```
 
 Usage

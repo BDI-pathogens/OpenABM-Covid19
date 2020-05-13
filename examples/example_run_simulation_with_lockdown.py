@@ -10,7 +10,6 @@ and then runs for 50 days, after 50 days lock down is turned on
 from COVID19.model import Parameters, Model, OccupationNetworkEnum
 import json
 from pathlib import Path
-import covid19
 from random import randint
 from tqdm import trange
 from typing import Dict, Any
