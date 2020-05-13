@@ -76,6 +76,8 @@ class TestSetObjects:
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
+            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
+            hospital_param_line_number=1,
             param_line_number=1,
         )
         p.set_param("lockdown_occupation_multiplier_primary_network", 100.0)
@@ -87,6 +89,8 @@ class TestSetObjects:
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
+            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
+            hospital_param_line_number=1,
             param_line_number=1,
         )
         model = Model(p)
