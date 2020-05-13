@@ -8,7 +8,7 @@ import time
 import pandas as pd
 
 from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
-from adapter_covid19.data_structures import Scenario, SimulateState
+from adapter_covid19.data_structures import Scenario, SimulateState, ModelParams
 from adapter_covid19.datasources import Reader
 from adapter_covid19.economics import Economics
 from adapter_covid19.enums import (
@@ -109,14 +109,13 @@ class Simulator:
         return result
 
 
-def plot_one_scenario(
-    states, end_time, axes, title_prefix="", legend=False, return_dfs=False
+def summarize_one_scenario(
+    states, end_time,
 ):
-    dfs = []
+    dfs = {}
 
-    # Plot 1a - Total GDP
-    logger.debug("Plotting chart 1a")
-    ax = axes[0]
+    #
+    # Table 1a - Total GDP
     df = (
         pd.DataFrame(
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
@@ -125,14 +124,9 @@ def plot_one_scenario(
         .T.sort_index()
         .T.sum(axis=1)
     )
-    df.plot(ax=ax)
-    ax.legend(ncol=2)
-    ax.set_title(title_prefix + "Total GDP")
-    dfs.append(df)
+    dfs["Total GDP"] = df
 
-    # Plot 1b - GDP Composition
-    logger.debug("Plotting chart 1b")
-    ax = axes[1]
+    # Table 1b - GDP Composition
     df = (
         pd.DataFrame(
             [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
@@ -142,52 +136,39 @@ def plot_one_scenario(
         .T
     ).clip(lower=0.0)
     df = df.div(df.sum(axis=1), axis=0)
-    df.plot.area(stacked=True, ax=ax)
-    ax.legend(ncol=2)
-    ax.set_title(title_prefix + "GDP Composition")
-    dfs.append(df)
+    dfs["GDP Composition"] = df
 
-    # Plot 2a - Corporate Solvencies - Large Cap
-    logger.debug("Plotting chart 2a")
+    # Table 2a - Corporate Solvencies - Large Cap
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.large]
             for i in range(1, end_time)
         ]
     )
-    df.plot(title=title_prefix + "Corporate Solvencies - Large Cap", ax=axes[2])
-    dfs.append(df)
+    dfs["Corporate Solvencies - Large Cap"] = df
 
-    # Plot 2b - Corporate Solvencies - SME
-    logger.debug("Plotting chart 2b")
+    # Table 2b - Corporate Solvencies - SME
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.sme]
             for i in range(1, end_time)
         ]
     )
-    df.plot(title=title_prefix + "Corporate Solvencies - SME", ax=axes[3])
-    dfs.append(df)
+    dfs["Corporate Solvencies - SME"] = df
 
-    # Plot 3a - Personal Insolvencies
-    logger.debug("Plotting chart 3a")
+    # Table 3a - Personal Insolvencies
     df = pd.DataFrame(
         [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
     )
-    df.plot(title=title_prefix + "Personal Insolvencies", ax=axes[4])
-    dfs.append(df)
+    dfs["Personal Insolvencies"] = df
 
-    # Plot 3b - Household Expenditure
-    logger.debug("Plotting chart 3b")
+    # Table 3b - Household Expenditure
     df = pd.DataFrame(
         [states[i].personal_state.demand_reduction for i in range(1, end_time)]
     )
-    df.plot(title=title_prefix + "Household Expenditure Reduction", ax=axes[5])
-    dfs.append(df)
+    dfs["Household Expenditure Reduction"] = df
 
-    # Plot 4 - Unemployment
-    logger.debug("Plotting chart 4")
-
+    # Table 4 - Unemployment & Furloughing
     def unemployment_from_lambdas(d):
         return (
             d[WorkerState.ILL_UNEMPLOYED]
@@ -206,14 +187,63 @@ def plot_one_scenario(
             for i in range(1, end_time)
         ]
     )
-    df.plot(title=title_prefix + "Unemployment", ax=axes[6])
-    dfs.append(df)
+    dfs["Unemployment & Furloughing"] = df
+
+    return dfs
+
+
+def plot_one_scenario(
+    dfs, axes, title_prefix="", legend=False
+):
+    # Plot 1a - Total GDP
+    chart_name = "Total GDP"
+    logger.debug("Plotting chart 1a")
+    df = dfs[chart_name]
+    df.plot(ax=axes[0],title=title_prefix + chart_name)
+
+    # Plot 1b - GDP Composition
+    logger.debug("Plotting chart 1b")
+    chart_name = "GDP Composition"
+    df = dfs[chart_name]
+    df.plot.area(stacked=True, ax=axes[1], title=title_prefix + "GDP Composition")
+
+    # Plot 2a - Corporate Solvencies - Large Cap
+    logger.debug("Plotting chart 2a")
+    chart_name = "Corporate Solvencies - Large Cap"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[2])
+
+    # Plot 2b - Corporate Solvencies - SME
+    logger.debug("Plotting chart 2b")
+    chart_name = "Corporate Solvencies - SME"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[3])
+
+    # Plot 3a - Personal Insolvencies
+    logger.debug("Plotting chart 3a")
+    chart_name = "Personal Insolvencies"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[4])
+
+    # Plot 3b - Household Expenditure
+    logger.debug("Plotting chart 3b")
+    chart_name = "Household Expenditure Reduction"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[5])
+
+    # Plot 4 - Unemployment & Furloughing
+    logger.debug("Plotting chart 4")
+    chart_name = "Unemployment & Furloughing"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[6])
 
     for ax in axes:
         if legend:
             ax.legend(ncol=2)
         else:
-            ax.get_legend().remove()
+            l = ax.get_legend()
+            if l is not None:
+                l.remove()
 
     plt.tight_layout()
 
