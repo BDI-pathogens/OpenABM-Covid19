@@ -345,9 +345,7 @@ class PersonalBankruptcyModel:
         )
         personal_state.demand_reduction = demand_reduction
 
-        state.personal_state = copy.deepcopy(personal_state)
-
-        # self.results[state.time] = copy.deepcopy(personal_state)
+        state.personal_state = personal_state
 
     def _calc_spot_earning(
         self, r: Region, s: Sector, d: Decile, utilisations: Utilisations
