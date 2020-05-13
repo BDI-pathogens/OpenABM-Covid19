@@ -276,7 +276,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         for s in Sector:
             sample = np.random.choice(
                 np.where(self.solvent_bool[BusinessSize.large][s])[0],
-                size=int(sum(self.solvent_bool[BusinessSize.large][s]) * 0.2),
+                size=int(self.solvent_bool[BusinessSize.large][s].sum() * 0.2),
                 replace=False,
             )
             self.cash_state[BusinessSize.large][s][sample] = np.inf
@@ -297,7 +297,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             solvent_days = np.concatenate((solvent_days, accepted), axis=0)
         solvent_days = solvent_days[:size]
 
-        total_solvent_days = sum(solvent_days)
+        total_solvent_days = solvent_days.sum()
 
         corp_cash_buffer = np.array(
             [days / total_solvent_days * cash_buffer for days in solvent_days]
@@ -470,7 +470,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                 self.surplus_weight[BusinessSize.large][s]
                 * self.net_operating_surplus[s]
                 + (net_operating_surplus[s] - self.net_operating_surplus[s])
-                / sum(self.solvent_bool[BusinessSize.large][s])
+                / self.solvent_bool[BusinessSize.large][s].sum()
             )
             / DAYS_IN_A_YEAR
             for s in Sector
@@ -480,7 +480,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             * (
                 self.surplus_weight[BusinessSize.sme][s] * self.net_operating_surplus[s]
                 + (net_operating_surplus[s] - self.net_operating_surplus[s])
-                / sum(self.solvent_bool[BusinessSize.sme][s])
+                / self.solvent_bool[BusinessSize.sme][s].sum()
             )
             / DAYS_IN_A_YEAR
             for s in Sector
@@ -526,7 +526,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             )
 
             sample = np.where(valid_set)[0][
-                : int(min(self.sme_count[s] * 0.01, sum(valid_set)))
+                : int(min(self.sme_count[s] * 0.01, valid_set.sum()))
             ]
 
             if not len(sample):
@@ -578,7 +578,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                 np.array([12e3, 20e3]) * self.sme_vulnerability[s]
             )
 
-            n_solvent = sum(self.solvent_bool[BusinessSize.sme][s])
+            n_solvent = self.solvent_bool[BusinessSize.sme][s].sum()
 
             breaks = list(
                 np.floor(
