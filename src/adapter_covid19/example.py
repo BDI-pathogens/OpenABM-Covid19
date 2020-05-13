@@ -1,6 +1,8 @@
 import itertools
 import os
 from typing import Optional
+import logging
+import pickle
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -26,8 +28,10 @@ from adapter_covid19.enums import (
     BusinessSize,
     WorkerState,
 )
-from adapter_covid19.scenarios import BASIC_MODEL_PARAMS
+from adapter_covid19.scenarios import *
+from adapter_covid19.simulator import Simulator
 
+logger = logging.getLogger(__file__)
 
 def lockdown_then_unlock_no_corona(
     data_path: Optional[str] = None,
@@ -251,10 +255,31 @@ def run_multiple_scenarios(data_path: str = None, show_plots: bool = True):
 
 
 if __name__ == "__main__":
+    # uses simulator.py instead of the above logic
+    # the above is deprecated
+
+    logging.basicConfig(level=logging.INFO)
+
     import sys
 
     if len(sys.argv) > 1:
-        run_multiple_scenarios(*sys.argv[1:])
+        scenario_names = sys.argv[1:]
     else:
-        run_multiple_scenarios(show_plots=False)
-        # plot_scenarios(scenarios)
+        scenario_names = SCENARIOS.keys()
+
+    unknown_scenarios = [n for n in scenario_names if n not in SCENARIOS.keys()]
+    if len(unknown_scenarios) > 0:
+        logger.error(f"Unkown scenarios! {unknown_scenarios}")
+        exit(1)
+
+    s = Simulator()
+
+    for scenario_name in scenario_names:
+        logger.info(f"Running scenario {scenario_name}")
+        scenario = SCENARIOS[scenario_name]
+        result = s.simulate(scenario=scenario,show_plots=False,scenario_name=scenario_name)
+        file_name = f'scenario_{scenario_name}.pkl'
+        logger.info(f"Writing file {file_name}")
+        with open(file_name, "wb") as f:
+            pickle.dump((scenario_name, scenario, result), f)
+        logger.info(f"Finished writing")
