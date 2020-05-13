@@ -295,5 +295,22 @@ def plot_one_scenario(
 
     plt.tight_layout()
 
-    if return_dfs:
-        return dfs
+
+def plot_scenarios(scenarios, end_time=50):
+    fig, axes = plt.subplots(
+        9, len(scenarios), sharex="col", sharey="row", figsize=(3.5 * len(scenarios),2 * 9)
+    )
+    for idx, (name, dfs) in enumerate(scenarios.items()):
+        axs = [row[idx] for row in axes]
+        plot_one_scenario(dfs, axs)
+    for ax, name in zip(axes[0], [k for k in scenarios.keys()]):
+        ax.annotate(
+            name,
+            xy=(0.5, 1),
+            xytext=(0, 5),
+            xycoords="axes fraction",
+            textcoords="offset points",
+            size="large",
+            ha="center",
+            va="baseline",
+        )
