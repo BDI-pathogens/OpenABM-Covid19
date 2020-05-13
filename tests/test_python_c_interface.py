@@ -97,7 +97,6 @@ class TestClass(object):
         params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
 
-        STEPS = 2
         # Run steps
         for step in range(0, STEPS):
             model.one_time_step()
