@@ -69,6 +69,8 @@ TODO:
     * Deceased individuals no longer contribute to demand
     * Reduced consumer confidence even when lockdown is lifted (possibly correlated with trajectory of epidemic)
     * Increased savings rate
+* Corporate bankruptcies
+    * No longer tie bankruptcy simulation to lockdown variable
 
 """
 
@@ -174,3 +176,28 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     loan_guarantee_day=10000,
     model_params=BASIC_MODEL_PARAMS,
 )
+
+TEST_SCENARIO = Scenario(
+    lockdown_recovery_time=1,
+    lockdown_start_time=2,
+    lockdown_end_time=50,
+    furlough_start_time=2,
+    furlough_end_time=50,
+    simulation_end_time=5,
+    new_spending_day=2,
+    ccff_day=2,
+    loan_guarantee_day=2,
+    model_params=BASIC_MODEL_PARAMS,
+    epidemic_active=False,
+    ill_ratio={t:0 for t in range(203)},
+    dead_ratio={t:0 for t in range(203)},
+)
+
+SCENARIOS = {
+    "basic": BASIC_SCENARIO,
+    "no_furlough": BASIC_NO_FURLOUGH_SCENARIO,
+    "no_corp_support": BASIC_NO_CORP_SUPPORT_SCENARIO,
+    "no_furlough_no_corp_support": BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO,
+    "no_lockdown": BASIC_NO_LOCKDOWN_SCENARIO,
+    "test": TEST_SCENARIO
+}
