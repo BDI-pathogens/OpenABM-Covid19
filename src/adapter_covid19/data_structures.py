@@ -57,6 +57,7 @@ class Scenario:
     ccff_day: int = 1000
     loan_guarantee_day: int = 1000
     model_params: ModelParams = ModelParams()
+    epidemic_active: bool = True
     # T * percentage. TODO: extend to per sector, region, age
     ill_ratio: Mapping[int, float] = field(default_factory=dict,)
     dead_ratio: Mapping[int, float] = field(default_factory=dict)
@@ -90,6 +91,19 @@ class Scenario:
     def load(self, reader: Reader) -> None:
         for k, v in self.datasources.items():
             self.__setattr__(k, v(k).load(reader))
+
+        if self.epidemic_active:
+            if len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0:
+                if self.lockdown_start_time >= 1000:
+                    lockdown_start = lockdown_end = 0
+                else:
+                    lockdown_start = self.lockdown_start_time
+                    lockdown_end = self.lockdown_end_time
+                end = self.simulation_end_time + 1
+                file_name = f'spread_model_cache_{lockdown_start}_{lockdown_end}_{end}'
+                df = reader.load_pkl(file_name)
+                self.ill_ratio = df["ill ratio"]
+                self.dead_ratio = df["dead ratio"]
 
         self.is_loaded = True
 
