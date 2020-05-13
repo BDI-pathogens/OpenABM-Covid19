@@ -424,7 +424,7 @@ class TestClass(object):
             ( df_int[ "age_group_2" ] != constant.AGE_80 ) & 
             ( df_int[ "age_type_2" ] != constant.ADULT ) 
             )
-        np.testing.assert_equal( n, 0, "only 80  adults on the 80 network" )
+        np.testing.assert_equal( n, 0, "only 80 adults on the 80 network" )
         
         # check the mean number of networks connections by network
         for network in [ constant.PRIMARY_NETWORK, constant.SECONDARY_NETWORK ]:
