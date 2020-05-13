@@ -121,29 +121,6 @@ class BaseGdpModel(abc.ABC):
             self.workers[key] for key in itertools.product(Region, Sector, Age)
         )
 
-    def _apply_growth_factor(
-        self, time: int, lockdown: bool, gdp: Mapping[Tuple[Region, Sector, Age], float]
-    ) -> Tuple[Mapping[Sector, float], Mapping[Tuple[Region, Sector, Age], float]]:
-        # TODO: remove, has been deprecated
-        if (
-            time - 1 not in self.results.growth_factor
-            or not self.results.growth_factor[time - 1]
-        ):
-            growth_factor = {s: 1 for s in Sector}
-        elif lockdown:
-            # No growth in lockdown
-            growth_factor = copy.deepcopy(self.results.growth_factor[time - 1])
-        else:
-            growth_factor = {
-                s: self.results.growth_factor[time - 1][s]
-                * (1 + self.growth_rates.get(s, 0.0) / DAYS_IN_A_YEAR)
-                for s in Sector
-            }
-        return (
-            growth_factor,
-            {(r, s, a): gdp[(r, s, a)] * growth_factor[s] for (r, s, a) in gdp.keys()},
-        )
-
     @abc.abstractmethod
     def simulate(self, state: SimulateState) -> None:
         pass
