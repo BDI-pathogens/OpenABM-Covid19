@@ -254,6 +254,9 @@ class GdpState:
             for s in Sector
         }
 
+    def workers_in_sector(self, s: Sector):
+        return np.sum([self.workers[r,s,a] for r, a in itertools.product(Region, Age)])
+
 
 @dataclass
 class IoGdpState(GdpState):
