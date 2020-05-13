@@ -114,7 +114,43 @@ def summarize_one_scenario(
 ):
     dfs = {}
 
-    #
+    # Table 0a - Death
+    # TODO: connect this to deaths from the epidemic simulation rather than utilisation
+    df = pd.DataFrame(
+        [
+            {
+                s: states[i].utilisations[s][WorkerState.DEAD] * states[i].gdp_state.workers_in_sector(s)
+                for s in Sector
+            }
+            for i in range(1, end_time)
+        ],
+        index=range(1, end_time),
+    ).sum(axis=1) / pd.Series([states[i].gdp_state.max_workers
+                               for i in range(1, end_time)],index=range(1,end_time))
+    dfs["Deaths"] = df
+
+    # Table 0b - Illness
+    # TODO: connect this to deaths from the epidemic simulation rather than utilisation
+    def illness_from_lambdas(d):
+        return (
+                d[WorkerState.ILL_UNEMPLOYED]
+                + d[WorkerState.ILL_FURLOUGHED]
+                + d[WorkerState.ILL_WFH]
+                + d[WorkerState.ILL_WFO]
+        )
+    df = pd.DataFrame(
+        [
+            {
+                s: illness_from_lambdas(states[i].utilisations[s]) * states[i].gdp_state.workers_in_sector(s)
+                for s in Sector
+            }
+            for i in range(1, end_time)
+        ],
+        index=range(1, end_time),
+    ).sum(axis=1) / pd.Series([states[i].gdp_state.max_workers
+                               for i in range(1, end_time)],index=range(1,end_time))
+    dfs["People Ill"] = df
+
     # Table 1a - Total GDP
     df = (
         pd.DataFrame(
@@ -195,47 +231,59 @@ def summarize_one_scenario(
 def plot_one_scenario(
     dfs, axes, title_prefix="", legend=False
 ):
-    # Plot 1a - Total GDP
-    chart_name = "Total GDP"
-    logger.debug("Plotting chart 1a")
+    # Plot 0a - Deaths
+    logger.debug("Plotting chart 0a")
+    chart_name = "Deaths"
     df = dfs[chart_name]
     df.plot(ax=axes[0],title=title_prefix + chart_name)
+
+    # Plot 0b - Illness
+    logger.debug("Plotting chart 0b")
+    chart_name = "People Ill"
+    df = dfs[chart_name]
+    df.plot(ax=axes[1],title=title_prefix + chart_name)
+
+    # Plot 1a - Total GDP
+    logger.debug("Plotting chart 1a")
+    chart_name = "Total GDP"
+    df = dfs[chart_name]
+    df.plot(ax=axes[2],title=title_prefix + chart_name)
 
     # Plot 1b - GDP Composition
     logger.debug("Plotting chart 1b")
     chart_name = "GDP Composition"
     df = dfs[chart_name]
-    df.plot.area(stacked=True, ax=axes[1], title=title_prefix + "GDP Composition")
+    df.plot.area(stacked=True, ax=axes[3], title=title_prefix + "GDP Composition")
 
     # Plot 2a - Corporate Solvencies - Large Cap
     logger.debug("Plotting chart 2a")
     chart_name = "Corporate Solvencies - Large Cap"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[2])
+    df.plot(title=title_prefix + chart_name, ax=axes[4])
 
     # Plot 2b - Corporate Solvencies - SME
     logger.debug("Plotting chart 2b")
     chart_name = "Corporate Solvencies - SME"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[3])
+    df.plot(title=title_prefix + chart_name, ax=axes[5])
 
     # Plot 3a - Personal Insolvencies
     logger.debug("Plotting chart 3a")
     chart_name = "Personal Insolvencies"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[4])
+    df.plot(title=title_prefix + chart_name, ax=axes[6])
 
     # Plot 3b - Household Expenditure
     logger.debug("Plotting chart 3b")
     chart_name = "Household Expenditure Reduction"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[5])
+    df.plot(title=title_prefix + chart_name, ax=axes[7])
 
     # Plot 4 - Unemployment & Furloughing
     logger.debug("Plotting chart 4")
     chart_name = "Unemployment & Furloughing"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[6])
+    df.plot(title=title_prefix + chart_name, ax=axes[8])
 
     for ax in axes:
         if legend:
