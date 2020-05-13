@@ -11,7 +11,7 @@ GDP_REDUCTION_EST = {
     date(2020, 3, 31): 0.97,
     date(2020, 6, 30): 0.75,
     date(2020, 9, 30): 0.82,
-    date(2020, 12, 31): 0.90, # whole year: 0.86
+    date(2020, 12, 31): 0.90,  # whole year: 0.86
 }
 
 DEMAND_REDUCTION_EST = {
@@ -20,7 +20,7 @@ DEMAND_REDUCTION_EST = {
 
 
 def get_quarterly_gdp_decline(
-        starting_date: date, states: List[SimulateState],
+    starting_date: date, states: List[SimulateState],
 ) -> pd.DataFrame:
     s_gdp_decline_simu = pd.DataFrame(
         [state.gdp_state.fraction_gdp_by_sector() for state in states],
@@ -37,7 +37,7 @@ def get_quarterly_gdp_decline(
 
 
 def get_quarterly_demand_decline(
-        starting_date: date, econ: Economics, states: List[SimulateState],
+    starting_date: date, econ: Economics, states: List[SimulateState],
 ) -> pd.DataFrame:
     s_demand_decline_simu_by_sector = pd.DataFrame(
         [state.personal_state.demand_reduction for state in states],
@@ -62,8 +62,8 @@ def get_quarterly_demand_decline(
     return pd.concat(
         [
             s_demand_decline_simu.resample("1Q")
-                .last()
-                .rename("Demand decline simulation"),
+            .last()
+            .rename("Demand decline simulation"),
             pd.Series(DEMAND_REDUCTION_EST).rename("Demand decline estimates"),
         ],
         axis=1,

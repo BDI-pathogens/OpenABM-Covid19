@@ -33,6 +33,7 @@ from adapter_covid19.simulator import Simulator
 
 logger = logging.getLogger(__file__)
 
+
 def lockdown_then_unlock_no_corona(
     data_path: Optional[str] = None,
     lockdown_on: int = 5,
@@ -277,8 +278,10 @@ if __name__ == "__main__":
     for scenario_name in scenario_names:
         logger.info(f"Running scenario {scenario_name}")
         scenario = SCENARIOS[scenario_name]
-        result = s.simulate(scenario=scenario,show_plots=False,scenario_name=scenario_name)
-        file_name = f'scenario_{scenario_name}.pkl'
+        result = s.simulate(
+            scenario=scenario, show_plots=False, scenario_name=scenario_name
+        )
+        file_name = f"scenario_{scenario_name}.pkl"
         logger.info(f"Writing file {file_name}")
         with open(file_name, "wb") as f:
             pickle.dump((scenario_name, scenario, result), f)
