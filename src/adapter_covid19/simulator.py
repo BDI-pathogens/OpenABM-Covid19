@@ -119,36 +119,43 @@ def summarize_one_scenario(
     df = pd.DataFrame(
         [
             {
-                s: states[i].utilisations[s][WorkerState.DEAD] * states[i].gdp_state.workers_in_sector(s)
+                s: states[i].utilisations[s][WorkerState.DEAD]
+                * states[i].gdp_state.workers_in_sector(s)
                 for s in Sector
             }
             for i in range(1, end_time)
         ],
         index=range(1, end_time),
-    ).sum(axis=1) / pd.Series([states[i].gdp_state.max_workers
-                               for i in range(1, end_time)],index=range(1,end_time))
+    ).sum(axis=1) / pd.Series(
+        [states[i].gdp_state.max_workers for i in range(1, end_time)],
+        index=range(1, end_time),
+    )
     dfs["Deaths"] = df
 
     # Table 0b - Illness
     # TODO: connect this to deaths from the epidemic simulation rather than utilisation
     def illness_from_lambdas(d):
         return (
-                d[WorkerState.ILL_UNEMPLOYED]
-                + d[WorkerState.ILL_FURLOUGHED]
-                + d[WorkerState.ILL_WFH]
-                + d[WorkerState.ILL_WFO]
+            d[WorkerState.ILL_UNEMPLOYED]
+            + d[WorkerState.ILL_FURLOUGHED]
+            + d[WorkerState.ILL_WFH]
+            + d[WorkerState.ILL_WFO]
         )
+
     df = pd.DataFrame(
         [
             {
-                s: illness_from_lambdas(states[i].utilisations[s]) * states[i].gdp_state.workers_in_sector(s)
+                s: illness_from_lambdas(states[i].utilisations[s])
+                * states[i].gdp_state.workers_in_sector(s)
                 for s in Sector
             }
             for i in range(1, end_time)
         ],
         index=range(1, end_time),
-    ).sum(axis=1) / pd.Series([states[i].gdp_state.max_workers
-                               for i in range(1, end_time)],index=range(1,end_time))
+    ).sum(axis=1) / pd.Series(
+        [states[i].gdp_state.max_workers for i in range(1, end_time)],
+        index=range(1, end_time),
+    )
     dfs["People Ill"] = df
 
     # Table 1a - Total GDP
@@ -228,26 +235,24 @@ def summarize_one_scenario(
     return dfs
 
 
-def plot_one_scenario(
-    dfs, axes, title_prefix="", legend=False
-):
+def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     # Plot 0a - Deaths
     logger.debug("Plotting chart 0a")
     chart_name = "Deaths"
     df = dfs[chart_name]
-    df.plot(ax=axes[0],title=title_prefix + chart_name)
+    df.plot(ax=axes[0], title=title_prefix + chart_name)
 
     # Plot 0b - Illness
     logger.debug("Plotting chart 0b")
     chart_name = "People Ill"
     df = dfs[chart_name]
-    df.plot(ax=axes[1],title=title_prefix + chart_name)
+    df.plot(ax=axes[1], title=title_prefix + chart_name)
 
     # Plot 1a - Total GDP
     logger.debug("Plotting chart 1a")
     chart_name = "Total GDP"
     df = dfs[chart_name]
-    df.plot(ax=axes[2],title=title_prefix + chart_name)
+    df.plot(ax=axes[2], title=title_prefix + chart_name)
 
     # Plot 1b - GDP Composition
     logger.debug("Plotting chart 1b")
@@ -298,7 +303,11 @@ def plot_one_scenario(
 
 def plot_scenarios(scenarios, end_time=50):
     fig, axes = plt.subplots(
-        9, len(scenarios), sharex="col", sharey="row", figsize=(3.5 * len(scenarios),2 * 9)
+        9,
+        len(scenarios),
+        sharex="col",
+        sharey="row",
+        figsize=(3.5 * len(scenarios), 2 * 9),
     )
     for idx, (name, dfs) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]

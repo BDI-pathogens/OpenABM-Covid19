@@ -100,7 +100,7 @@ class Scenario:
                     lockdown_start = self.lockdown_start_time
                     lockdown_end = self.lockdown_end_time
                 end = self.simulation_end_time + 1
-                file_name = f'spread_model_cache_{lockdown_start}_{lockdown_end}_{end}'
+                file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}"
                 df = reader.load_pkl(file_name)
                 self.ill_ratio = df["ill ratio"]
                 self.dead_ratio = df["dead ratio"]
@@ -255,7 +255,9 @@ class GdpState:
         }
 
     def workers_in_sector(self, s: Sector):
-        return np.sum([self.workers[r,s,a] for r, a in itertools.product(Region, Age)])
+        return np.sum(
+            [self.workers[r, s, a] for r, a in itertools.product(Region, Age)]
+        )
 
 
 @dataclass
