@@ -1,7 +1,5 @@
 %module model_utils
 
-#include "model.h"
-
 %inline %{
 int utils_n_current( model *model, int type ) {
     return model->event_lists[type].n_current;
