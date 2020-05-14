@@ -103,6 +103,10 @@ BASIC_SCENARIO = Scenario(
     ccff_day=10,
     loan_guarantee_day=10,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
 )
 
 # Basic No Furlough Scenario
@@ -121,6 +125,10 @@ BASIC_NO_FURLOUGH_SCENARIO = Scenario(
     ccff_day=10,
     loan_guarantee_day=10,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
 )
 
 # Basic No Corp Support Scenario
@@ -139,6 +147,10 @@ BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
     ccff_day=10000,
     loan_guarantee_day=10000,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
 )
 
 # Basic No Furlough No Corp Support Scenario
@@ -157,6 +169,10 @@ BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
     ccff_day=10000,
     loan_guarantee_day=10000,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
 )
 
 # Basic No Lockdown Scenario
@@ -175,6 +191,10 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     ccff_day=10000,
     loan_guarantee_day=10000,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
 )
 
 TEST_SCENARIO = Scenario(
@@ -188,6 +208,10 @@ TEST_SCENARIO = Scenario(
     ccff_day=2,
     loan_guarantee_day=2,
     model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=3.0,
+    fear_factor_coef_dead=50.0,
     epidemic_active=False,
     ill_ratio={t: 0 for t in range(203)},
     dead_ratio={t: 0 for t in range(203)},
