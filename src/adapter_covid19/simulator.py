@@ -30,6 +30,7 @@ except:
     def tqdm(x):
         return x
 
+N_PLOTS = 12
 
 logger = logging.getLogger(__file__)
 
@@ -421,7 +422,7 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
 
 
 def plot_scenarios(scenarios, end_time=50):
-    n_charts = 12
+    n_charts = N_PLOTS
     fig, axes = plt.subplots(
         n_charts,
         len(scenarios),
