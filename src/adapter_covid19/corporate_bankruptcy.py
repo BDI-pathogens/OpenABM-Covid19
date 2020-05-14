@@ -406,10 +406,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def simulate(self, state: SimulateState, **kwargs,) -> None:
         super().simulate(state, **kwargs)
         try:
-            # in the GDP model, net operating surplus is positive if corp is running profit
-            # in the Corp model, net operting surplus is negative if corp is running profit
             net_operating_surplus = {
-                k: -v for k, v in state.gdp_state.net_operating_surplus.items()
+                k: v for k, v in state.gdp_state.net_operating_surplus.items()
             }
         except AttributeError:
             raise ValueError(
@@ -491,17 +489,11 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         for s in Sector:
             # update cash state
             self.cash_state[BusinessSize.large][s] = np.maximum(
-                np.minimum(
-                    self.cash_state[BusinessSize.large][s] - largecap_cash_outgoing[s],
-                    self.init_cash_state[BusinessSize.large][s],
-                ),
+                self.cash_state[BusinessSize.large][s] + largecap_cash_outgoing[s],
                 0,
             ) * self.solvent_bool[BusinessSize.large][s]
             self.cash_state[BusinessSize.sme][s] = np.maximum(
-                np.minimum(
-                    self.cash_state[BusinessSize.sme][s] - sme_cash_outgoing[s],
-                    self.init_cash_state[BusinessSize.sme][s],
-                ),
+                self.cash_state[BusinessSize.sme][s] + sme_cash_outgoing[s],
                 0,
             ) * self.solvent_bool[BusinessSize.sme][s]
             # update solvency Boolean
