@@ -300,7 +300,11 @@ class PersonalBankruptcyModel:
                 )
 
                 spot_expense_by_sector_rsd = self._calc_spot_expense_by_sector(
-                    region, employed_sector, decile, spot_earning_rsd
+                    region,
+                    employed_sector,
+                    decile,
+                    spot_earning_rsd,
+                    state.utilisations,
                 )
 
                 spot_expense_rsd = sum(spot_expense_by_sector_rsd.values())
@@ -364,6 +368,7 @@ class PersonalBankruptcyModel:
         employed_sector: Sector,
         decile: Decile,
         spot_earning: float,
+        utilisations: Utilisations,
     ) -> Mapping[Sector, float]:
         spot_earning_ratio = min(
             spot_earning / self.earnings[(region, employed_sector, decile)], 1.0
@@ -378,6 +383,7 @@ class PersonalBankruptcyModel:
                     (region, employed_sector, decile, expense_sector)
                 ],
             )
+            * (1 - utilisations[region, employed_sector][WorkerState.DEAD])
             for expense_sector in Sector
         }
 
