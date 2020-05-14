@@ -60,9 +60,11 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	if(argc > 4)
 	{
 		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN );
+        params->sys_write_hospital = TRUE;
 	}else{
 		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
 			INPUT_CHAR_LEN );
+        params->sys_write_hospital = FALSE;
 	}
 
 
@@ -525,6 +527,7 @@ void write_individual_file(model *model, parameters *params)
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
+
 	int infection_count;
 	long idx;
 	
@@ -544,7 +547,9 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"ID,");
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
-	fprintf(individual_output_file,"occupation_network,");
+    fprintf(individual_output_file,"occupation_network,");
+    fprintf(individual_output_file,"worker_type,");
+    fprintf(individual_output_file,"assigned_worker_ward_type,"),
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
@@ -558,15 +563,23 @@ void write_individual_file(model *model, parameters *params)
 	{
 		indiv = &(model->population[idx]);
 		
+        int worker_ward_type;
+        if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
+            worker_ward_type = get_worker_ward_type( model, indiv->idx );
+        else
+            worker_ward_type = NO_WARD;
+
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
 		
 		fprintf(individual_output_file, 
-			"%li,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
+            "%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->occupation_network,
+            indiv->worker_type,
+            worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -847,12 +860,16 @@ void write_transmissions( model *model )
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
+    fprintf(output_file , "worker_type_recipient,");
+    fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
+    fprintf(output_file , "worker_type_source,");
+    fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -879,17 +896,21 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
+                    indiv->worker_type,
+                    indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
+                    infection_event->infector->worker_type,
+                    infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
@@ -1059,5 +1080,54 @@ void write_trace_tokens_ts( model *model, int initialise )
 		}
 	}
 	fclose(output_file);
+}
+
+/*****************************************************************************************
+*  Name:		get_worker_ward_type
+*  Description: Returns the ward type of the healthcare worker passed to this function.
+*  Returns:     int
+******************************************************************************************/
+int get_worker_ward_type( model *model, int pdx ) {
+    individual *indiv;
+    hospital *hospital;
+    ward *ward;
+
+    int indiv_ward_type;
+    indiv = &( model->population[pdx] );
+
+    // For all wards in all hospitals, check to see if any worker index matches the provided index.
+    // If yes, return the ward type of the ward they are in.
+    for( int hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ ) {
+        hospital = &( model->hospitals[ hospital_idx ] );
+
+        // Check all general wards in the hospital.
+        for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_GENERAL ]; ward_idx++ ) {
+            ward = &( hospital->wards[ COVID_GENERAL ][ ward_idx ] );
+
+            for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
+                if ( ward->doctors[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+            for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
+                if ( ward->nurses[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+        }
+
+        // Check all ICU wards in the hospital.
+        for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_ICU ]; ward_idx++ ) {
+            ward = &( hospital->wards[ COVID_ICU ][ ward_idx ] );
+
+            for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
+                if ( ward->doctors[idx].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+            for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
+                if ( ward->nurses[ idx ].pdx == indiv->idx )
+                    indiv_ward_type = ward->type;
+            }
+        }
+    }
+    return indiv_ward_type;
 }
 
