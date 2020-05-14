@@ -14,8 +14,6 @@ from scipy.optimize import linprog, OptimizeResult
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
 from adapter_covid19.data_structures import (
     SimulateState,
-    GdpResult,
-    IoGdpResult,
     IoGdpState,
     Utilisation,
 )
@@ -52,7 +50,6 @@ class BaseGdpModel(abc.ABC):
     def __init__(self, **kwargs):
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
-        self.results = GdpResult()
         self.max_gdp = 0
         self.max_workers = 0
         self.datasources = self._get_datasources()
@@ -114,12 +111,6 @@ class BaseGdpModel(abc.ABC):
         for k, v in self.datasources.items():
             self.__setattr__(k, v.load(reader))
         self._check_data()
-        self.results.max_gdp = self.max_gdp = sum(
-            self.gdp[key] for key in itertools.product(Region, Sector, Age)
-        )
-        self.results.max_workers = self.max_workers = sum(
-            self.workers[key] for key in itertools.product(Region, Sector, Age)
-        )
 
     @abc.abstractmethod
     def simulate(self, state: SimulateState) -> None:
@@ -661,7 +652,6 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         self.p_tau = p_tau
         self.substitution_rate = substitution_rate
         self.setup = CobbDouglasLPSetup()
-        self.results = IoGdpResult()
         self.labour_weight_region_age_per_sector_by_count: Mapping[
             Tuple[Sector, Region, Age]
         ] = {}
