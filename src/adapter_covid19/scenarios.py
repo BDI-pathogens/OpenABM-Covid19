@@ -101,7 +101,6 @@ BASIC_MODEL_PARAMS = ModelParams(
 # * Corporate Support
 
 BASIC_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=10,
     lockdown_end_time=59,
     furlough_start_time=10,
@@ -123,7 +122,6 @@ BASIC_SCENARIO = Scenario(
 # * Corporate Support
 
 BASIC_NO_FURLOUGH_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=10,
     lockdown_end_time=59,
     furlough_start_time=10000,
@@ -145,7 +143,6 @@ BASIC_NO_FURLOUGH_SCENARIO = Scenario(
 # * No Corporate Support
 
 BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=10,
     lockdown_end_time=59,
     furlough_start_time=10,
@@ -167,7 +164,6 @@ BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
 # * No Corporate Support
 
 BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=10,
     lockdown_end_time=59,
     furlough_start_time=10000,
@@ -189,7 +185,6 @@ BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
 # * No Corporate Support
 
 BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=10000,
     lockdown_end_time=10000,
     furlough_start_time=10000,
@@ -206,7 +201,6 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
 )
 
 TEST_SCENARIO = Scenario(
-    lockdown_recovery_time=1,
     lockdown_start_time=2,
     lockdown_end_time=50,
     furlough_start_time=2,

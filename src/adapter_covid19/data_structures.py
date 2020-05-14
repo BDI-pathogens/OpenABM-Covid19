@@ -48,7 +48,6 @@ class ModelParams:
 
 @dataclass
 class Scenario:
-    lockdown_recovery_time: int = 1
     lockdown_exited_time: int = field(default=0, init=False)
     lockdown_start_time: int = 1000
     lockdown_end_time: int = 1000

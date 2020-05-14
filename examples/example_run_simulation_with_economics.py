@@ -29,7 +29,7 @@ LOCKDOWN_PARMAETERS = {
 }
 
 EXAMPLE_PARAMETERS = {
-    "gdp": {"lockdown_recovery_time": 1, "optimal_recovery": False},
+    "gdp": {},
     "corporate_bankruptcy": {"beta": 1.5, "large_cap_cash_surplus_months": 3},
     "personal_insolvency": {
         "saving": 10,
