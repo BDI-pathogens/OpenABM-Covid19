@@ -945,7 +945,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         for s in Sector:
             lambdas = state.utilisations[s]
             default_values = {
-                WorkerStateConditional.WFH: self.keyworker[s],
+                WorkerStateConditional.WFH: 1.0 - self.keyworker[s],
                 WorkerStateConditional.FURLOUGHED: 1.0,
                 WorkerStateConditional.NOT_EMPLOYED: 0.0,
             }
