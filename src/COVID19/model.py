@@ -507,6 +507,12 @@ class Model:
         results["hospital_admissions_total"]  = covid19.utils_n_total(
             self.c_model, covid19.TRANSITION_TO_HOSPITAL
         )
+        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
+        )
+        results["hospital_to_critical_total"] = covid19.utils_n_total(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL
+        )
         return results
 
     def write_output_files(self):
