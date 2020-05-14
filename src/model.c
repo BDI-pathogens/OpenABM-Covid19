@@ -36,8 +36,9 @@ model* new_model( parameters *params )
 	if( model_ptr == NULL )
 	    print_exit("calloc to model failed\n");
 	
-	model_ptr->params = params;
-	model_ptr->time   = 0;
+	model_ptr->params       = params;
+	model_ptr->time         = 0;
+	model_ptr->user_network = NULL;
 
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
@@ -96,6 +97,7 @@ void destroy_model( model *model )
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
     	destroy_event_list( model, idx );
     free( model->event_lists );
+
     for( idx = 0; idx < model->household_directory->n_idx; idx++ )
     	free( model->household_directory->val[idx] );
     free( model->household_directory->val );
@@ -610,6 +612,8 @@ void build_daily_newtork( model *model )
 	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->occupation_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
+	if( model->user_network != NULL)
+		add_interactions_from_network( model, model->user_network, TRUE, TRUE, 0 );
 };
 
 /*****************************************************************************************
@@ -682,3 +686,44 @@ int one_time_step( model *model )
 
 	return 1;
 };
+
+/*****************************************************************************************
+*  Name:		add_user_network
+*  Description: Creates a new user user network (destroy an old one if it exists)
+*  Returns:		void
+******************************************************************************************/
+int add_user_network( model *model, int type, long n_edges, long *edgeStart, long *edgeEnd  )
+{
+	long idx;
+	long n_total = model->params->n_total;
+
+	// check to see that the edges all make sense
+	for( idx = 0; idx < n_edges; idx++ )
+	{
+		if( edgeStart[ idx ] < 0 | edgeEnd[ idx ] < 0 | edgeStart[ idx ] >= n_total | edgeEnd[ idx ] >= n_total )
+		{
+			print_now( "edgeStart and edgeEnd can only contain indices between 0 and n_total" );
+			return FALSE;
+		}
+		if( edgeStart[ idx ] == edgeEnd[ idx ] )
+		{
+			print_now( "edgeStart and edgeEnd can't connect the same person " );
+			return FALSE;
+		}
+	}
+
+	if( model->user_network != NULL )
+		destroy_network( model->user_network );
+
+	model->user_network = new_network( model->params->n_total, type );
+	model->user_network->edges = calloc(n_edges, sizeof(edge));
+	model->user_network->n_edges = n_edges;
+
+	for( idx = 0; idx < n_edges; idx++ )
+	{
+		model->user_network->edges[idx].id1 = edgeStart[ idx ];
+		model->user_network->edges[idx].id2 = edgeEnd[ idx ];
+	}
+	return TRUE;
+}
+

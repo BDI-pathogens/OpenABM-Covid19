@@ -56,6 +56,7 @@ struct model{
 	network *random_network;
 	network *household_network;
 	network **occupation_network;
+	network *user_network;
 	directory *household_directory;
 
 	event *events;
@@ -113,5 +114,6 @@ void transition_events( model*, int, void( model*, individual* ), int );
 void add_interactions_from_network( model*, network*, int, int, double );
 void build_daily_newtork( model* );
 void build_random_network( model * );
+int add_user_network( model*, int, long, long*, long* );
 
 #endif /* MODEL_H_ */
