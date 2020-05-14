@@ -44,6 +44,7 @@ void initialize_individual(
 
 	indiv->infection_events->infector_status  = UNKNOWN;
 	indiv->infection_events->infector_network = UNKNOWN;
+    indiv->infection_events->infector_hospital_state = UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
 	indiv->infection_events->next =  NULL;
 	indiv->infection_events->is_case     = FALSE;

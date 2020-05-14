@@ -52,9 +52,9 @@ model* new_model( parameters *params )
 
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
+	set_up_allocate_work_places( model_ptr );
     if( params->hospital_on )
         set_up_healthcare_workers_and_hospitals( model_ptr );
-	set_up_allocate_work_places( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 
@@ -226,7 +226,6 @@ void set_up_occupation_network( model *model, int network )
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
 	relabel_network( model->occupation_network[network], people );
-
 	free( people );
 }
 
@@ -279,7 +278,7 @@ void write_time_step_hospital_data( model *model)
     int hospital_idx = 0;
     // TODO: update to run for each hospital
 
-    if(model->params->sys_write_individual == TRUE)
+    if(model->params->sys_write_hospital == TRUE)
         {
             // Concatenate file name
             strcpy(output_file_name, model->params->output_file_dir);
@@ -290,7 +289,7 @@ void write_time_step_hospital_data( model *model)
             if(model->time == 1)
             {
                 time_step_hospital_file = fopen(output_file_name, "w");
-                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","time_infected");
+                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
             }
             else
             {
@@ -315,9 +314,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_doctor;
                         indiv_doctor = &(model->population[doctor_pdx]);
-                        int doctor_time_infected = time_infected(indiv_doctor);
+                        int doctor_disease_state = indiv_doctor->status;
+                        int doctor_hospital_state = indiv_doctor->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_time_infected);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
                     }
                     // For each nurse
                     for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
@@ -327,9 +327,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_nurse;
                         indiv_nurse = &(model->population[nurse_pdx]);
-                        int nurse_time_infected = time_infected(indiv_nurse);
+                        int nurse_disease_state = indiv_nurse->status;
+                        int nurse_hospital_state = indiv_nurse->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_time_infected);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
                     }
 
                     // For each patient
@@ -341,9 +342,10 @@ void write_time_step_hospital_data( model *model)
                         
                         individual *indiv_patient;
                         indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
-                        int patient_time_infected = time_infected(indiv_patient);
+                        int patient_disease_state = indiv_patient->status;
+                        int patient_hospital_state = indiv_patient->hospital_state;
                         
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_time_infected);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
                     }
 
                 }
@@ -813,10 +815,11 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
                 continue;
 
         indiv->worker_type = DOCTOR;
+        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
         add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
         idx++;
     }
@@ -831,10 +834,11 @@ void set_up_healthcare_workers_and_hospitals( model *model)
         pdx = gsl_rng_uniform_int( rng, model->params->n_total );
         indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79) )
+        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
                 continue;
 
         indiv->worker_type = NURSE;
+        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
         add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
         idx++;
     }
