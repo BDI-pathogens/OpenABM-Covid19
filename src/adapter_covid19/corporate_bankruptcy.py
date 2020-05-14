@@ -42,6 +42,7 @@ class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {s: 1 for s in Sector},
             {b: {s: 1 for s in Sector} for b in BusinessSize},
             {s: 1 for s in Sector},
+            {s: 1 for s in Sector},
         )
 
 
@@ -73,6 +74,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.outflows: Mapping[Sector, float] = {}
         self.turnover: pd.DataFrame = pd.DataFrame()
         self.growth_rates: Mapping[Sector, float] = {}
+        self.exhuberance_factor: Mapping[Sector, float] = {}
         self.sme_vulnerability: Mapping[Sector, float] = {}
         self.loan_guarantee_remaining: Mapping[Sector, float] = {}
         self.size_loan: Mapping[Sector, float] = {}
@@ -197,6 +199,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         }
 
         self.growth_rates = SectorDataSource("growth_rates").load(reader)
+
+        self.exhuberance_factor = {s: 1.0 for s in Sector}
 
         # simulate initial cash buffers
         self._init_sim()
@@ -343,19 +347,27 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             return 1
         return solvent
 
+    def _update_exhuberance_factor(self, state: SimulateState) -> None:
+        for s in Sector:
+            self.exhuberance_factor[s] *= (1
+                                           + (self.growth_rates[s]
+                                              + ((1 - state.gdp_state.final_use_shortfall_vs_demand[s])
+                                                 * (1 - min(state.get_fear_factor() * 10, 1.0))
+                                                 * 0.1)
+                                              )
+                                           / DAYS_IN_A_YEAR
+                                           )
+
     def _apply_growth_rates(self,
                             factor_map: Mapping[Sector, float],
-                            state: SimulateState
                             ) -> Mapping[Sector, float]:
         return {s:
                 factor_map[s]
-                * (1 + self.growth_rates[s]) ** (
-                        (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
-                )
+                * self.exhuberance_factor[s]
                 for s in Sector
                 }
 
-    def _proportion_employees_job_exists(self, state: SimulateState) -> Mapping[Sector, float]:
+    def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
         large_company_solvent = (
             pd.DataFrame(
                 {
@@ -416,13 +428,12 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()}
         )
 
-        proportion_employees_job_exists = self._apply_growth_rates(proportion_employees_job_exists,
-                                                                   state)
+        proportion_employees_job_exists = self._apply_growth_rates(proportion_employees_job_exists)
 
         return proportion_employees_job_exists
 
     def _capital_discount_factor(
-        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]], state: SimulateState,
+        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
 
         return self._apply_growth_rates(
@@ -432,8 +443,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                     + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
                 )
                 for s in Sector
-            },
-            state
+            }
         )
 
     def simulate(self, state: SimulateState, **kwargs,) -> None:
@@ -476,10 +486,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             BusinessSize.sme: sme_proportion_solvent,
         }
 
+        self._update_exhuberance_factor(state)
+
         state.corporate_state = CorporateState(
-            capital_discount_factor=self._capital_discount_factor(proportion_solvent, state),
+            capital_discount_factor=self._capital_discount_factor(proportion_solvent),
             proportion_solvent=proportion_solvent,
-            proportion_employees_job_exists=self._proportion_employees_job_exists(state),
+            proportion_employees_job_exists=self._proportion_employees_job_exists(),
+            exhuberance_factor=self.exhuberance_factor,
         )
 
     def _update_state(self, net_operating_surplus: Mapping[Sector, float],) -> None:
