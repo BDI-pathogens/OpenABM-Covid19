@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import itertools
+import math
 import warnings
 from dataclasses import dataclass, field, InitVar
 from typing import (
@@ -60,8 +61,19 @@ class Scenario:
     model_params: ModelParams = ModelParams()
     epidemic_active: bool = True
     # T * percentage. TODO: extend to per sector, region, age
-    ill_ratio: Mapping[int, float] = field(default_factory=dict,)
+    ill_ratio: Mapping[int, float] = field(default_factory=dict)
     dead_ratio: Mapping[int, float] = field(default_factory=dict)
+    # Multiplier factor on time to load the spread data. It can also be set to be below 1.
+    # Eg, if spread_model_time_factor = 5, and current time=2, the model will load ill and dead ratio from
+    # the spread model at time=10.
+    # Eg2, if spread_model_time_factor = 0.5, and current time=5, the model will load ill and dead ratio from
+    # the spread model at time=int(5*0.5)=2.
+    spread_model_time_factor: float = 1.0
+
+    # Coefs creating fear factor
+    fear_factor_coef_lockdown: float = 1.0
+    fear_factor_coef_ill: float = 1.0
+    fear_factor_coef_dead: float = 1.0
 
     simulate_states: MutableMapping[int, SimulateState] = field(
         default_factory=dict, init=False
@@ -148,31 +160,40 @@ class Scenario:
             loan_guarantee_day=self.loan_guarantee_day,
             previous=self.simulate_states.get(time - 1),
             reader=reader,
+            fear_factor_coef_lockdown=self.fear_factor_coef_lockdown,
+            fear_factor_coef_ill=self.fear_factor_coef_ill,
+            fear_factor_coef_dead=self.fear_factor_coef_dead,
         )
         return simulate_state
 
     def get_ill_ratio_dict(
         self, time: int
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        time_in_spread_model = int(time * self.spread_model_time_factor)
         try:
             return {
-                key: self.ill_ratio[time]
+                key: self.ill_ratio[time_in_spread_model]
                 for key in itertools.product(Region, Sector, Age)
             }
         except KeyError:
-            warnings.warn(f"Ill ratio at time {time} is not provided. Returning 0.0")
+            warnings.warn(
+                f"Ill ratio at time {time_in_spread_model} is not provided. Returning 0.0"
+            )
             return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
 
     def get_dead_ratio_dict(
         self, time: int
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        time_in_spread_model = int(time * self.spread_model_time_factor)
         try:
             return {
-                key: self.dead_ratio[time]
+                key: self.dead_ratio[time_in_spread_model]
                 for key in itertools.product(Region, Sector, Age)
             }
         except KeyError:
-            warnings.warn(f"Dead ratio at time {time} is not provided. Returning 0.0")
+            warnings.warn(
+                f"Dead ratio at time {time_in_spread_model} is not provided. Returning 0.0"
+            )
             return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
 
 
@@ -193,6 +214,11 @@ class SimulateState:  # at one point in time
     new_spending_day: int
     ccff_day: int
     loan_guarantee_day: int
+
+    # Coefs creating fear factor
+    fear_factor_coef_lockdown: float
+    fear_factor_coef_ill: float
+    fear_factor_coef_dead: float
 
     # Internal state of the model
     utilisations: Optional[Utilisations] = None
@@ -229,6 +255,20 @@ class SimulateState:  # at one point in time
             },
             reader=reader,
         )
+
+    def get_fear_factor(self) -> float:
+        # TODO: maybe there's a more efficient way to do this?
+        avg_ill = np.mean(list(self.ill.values()))
+        avg_dead = np.mean(list(self.dead.values()))
+        logistic_input = (
+            self.fear_factor_coef_lockdown * float(self.lockdown)
+            + self.fear_factor_coef_ill * avg_ill
+            + self.fear_factor_coef_dead * avg_dead
+        )
+        logistic_output = 1 / (1 + math.exp(-logistic_input))
+
+        fear_factor = max(logistic_output - 0.5, 0) * 2
+        return fear_factor
 
 
 @dataclass

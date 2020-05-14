@@ -304,6 +304,7 @@ class PersonalBankruptcyModel:
                     employed_sector,
                     decile,
                     spot_earning_rsd,
+                    state.get_fear_factor(),
                     state.utilisations,
                 )
 
@@ -368,24 +369,30 @@ class PersonalBankruptcyModel:
         employed_sector: Sector,
         decile: Decile,
         spot_earning: float,
+        fear_factor: float,
         utilisations: Utilisations,
     ) -> Mapping[Sector, float]:
         spot_earning_ratio = min(
             spot_earning / self.earnings[(region, employed_sector, decile)], 1.0
         )
-        return {
-            expense_sector: max(
+        expense_dict = {}
+        for expense_sector in Sector:
+            expense = (
                 self.detailed_expenses[
                     (region, employed_sector, decile, expense_sector)
                 ]
-                * spot_earning_ratio,
+                * spot_earning_ratio
+                * (1 - fear_factor)
+            )
+            expense = max(
+                expense,
                 self.detailed_min_expenses[
                     (region, employed_sector, decile, expense_sector)
                 ],
-            )
-            * (1 - utilisations[region, employed_sector][WorkerState.DEAD])
-            for expense_sector in Sector
-        }
+            ) * (1 - utilisations[region, employed_sector][WorkerState.DEAD])
+            expense_dict[expense_sector] = expense
+
+        return expense_dict
 
     def _calc_credit_mean(
         self, r: Region, delta_balance: float, balance: float,
