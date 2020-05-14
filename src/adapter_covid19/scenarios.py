@@ -14,16 +14,16 @@ consistently.)
 
 Key events on the timeline are
 
-* 13 March - Time 0 - Start of Simulation
-* 23 March - Time 10 
+* 12 February - Time 0 - Start of Simulation
+* 23 March - Time 40 
     - Start of Lockdown (inclusive)
     - Start of `CCFF <https://www.bankofengland.co.uk/news/2020/march/the-covid-corporate-financing-facility>`_. 
-* 31 March - Time 18 - Last day of Q1
-* 1 April - Time 19 - First day of Q2
-* 11 May - Time 59 - End of Lockdown (exclusive)
-* 30 June - Time 109 - Last day of Q2
-* 1 July - Time 110 - First day of Q3
-* 30 September - Time 201 - Last day of Q3
+* 31 March - Time 48 - Last day of Q1
+* 1 April - Time 49 - First day of Q2
+* 11 May - Time 89 - End of Lockdown (exclusive)
+* 30 June - Time 139 - Last day of Q2
+* 1 July - Time 140 - First day of Q3
+* 30 September - Time 231 - Last day of Q3
 
 TODO:
 * Confirm start date for furlough scheme
