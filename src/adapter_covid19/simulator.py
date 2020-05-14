@@ -17,7 +17,7 @@ from adapter_covid19.enums import (
     Age,
     BusinessSize,
     WorkerState,
-    FinalUse
+    FinalUse,
 )
 from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
@@ -211,7 +211,10 @@ def summarize_one_scenario(
         [states[i].personal_state.demand_reduction for i in range(1, end_time)]
     )
     dfs["Household Expenditure Reduction"] = df
-    dfs["Household Expenditure Reduction (Total)"] = df.multiply(econ.gdp_model.setup.ytilde_iot[FinalUse.C]).sum(axis=1) / econ.gdp_model.setup.ytilde_iot[FinalUse.C].sum()
+    dfs["Household Expenditure Reduction (Total)"] = (
+        df.multiply(econ.gdp_model.setup.ytilde_iot[FinalUse.C]).sum(axis=1)
+        / econ.gdp_model.setup.ytilde_iot[FinalUse.C].sum()
+    )
 
     # Table 4a - Unemployment & Furloughing (by Sector)
     # TODO: Leverage utilisations class for the below computations instead
@@ -222,16 +225,16 @@ def summarize_one_scenario(
             + d[WorkerState.ILL_FURLOUGHED]
             + d[WorkerState.HEALTHY_FURLOUGHED]
         ) / (1 - d[WorkerState.DEAD])
+
     def unemployment_from_lambdas(d):
-        return (
-            d[WorkerState.ILL_UNEMPLOYED]
-            + d[WorkerState.HEALTHY_UNEMPLOYED]
-        ) / (1 - d[WorkerState.DEAD])
+        return (d[WorkerState.ILL_UNEMPLOYED] + d[WorkerState.HEALTHY_UNEMPLOYED]) / (
+            1 - d[WorkerState.DEAD]
+        )
+
     def furloughing_from_lambdas(d):
-        return (
-            + d[WorkerState.ILL_FURLOUGHED]
-            + d[WorkerState.HEALTHY_FURLOUGHED]
-        ) / (1 - d[WorkerState.DEAD])
+        return (+d[WorkerState.ILL_FURLOUGHED] + d[WorkerState.HEALTHY_FURLOUGHED]) / (
+            1 - d[WorkerState.DEAD]
+        )
 
     df = pd.DataFrame(
         [
@@ -246,42 +249,53 @@ def summarize_one_scenario(
     dfs["Unemployed + Furloughed by Sector"] = df
 
     # Table 4b - Unemployment & Furloughing (by Unemployed / Furloughed)
-    max_workers_by_sector = {s: sum(econ.gdp_model.workers[r, s, a] for r, a in itertools.product(Region, Age)) for s in
-                             Sector}
+    max_workers_by_sector = {
+        s: sum(
+            econ.gdp_model.workers[r, s, a] for r, a in itertools.product(Region, Age)
+        )
+        for s in Sector
+    }
     df_workers_alive = pd.DataFrame(
         [
             {
-                s: (1 - states[i].utilisations[s][WorkerState.DEAD]) * max_workers_by_sector[s]
+                s: (1 - states[i].utilisations[s][WorkerState.DEAD])
+                * max_workers_by_sector[s]
                 for s in Sector
             }
             for i in range(1, end_time)
         ],
-        index=range(1, end_time)
+        index=range(1, end_time),
     )
 
     df_u = pd.DataFrame(
         [
             {
-                s: unemployment_from_lambdas(states[i].utilisations[s]) * df_workers_alive.loc[i, s]
+                s: unemployment_from_lambdas(states[i].utilisations[s])
+                * df_workers_alive.loc[i, s]
                 for s in Sector
             }
             for i in range(1, end_time)
         ],
-        index=range(1, end_time)
+        index=range(1, end_time),
     )
 
     df_f = pd.DataFrame(
         [
             {
-                s: furloughing_from_lambdas(states[i].utilisations[s]) * df_workers_alive.loc[i, s]
+                s: furloughing_from_lambdas(states[i].utilisations[s])
+                * df_workers_alive.loc[i, s]
                 for s in Sector
             }
             for i in range(1, end_time)
         ],
-        index=range(1, end_time)
+        index=range(1, end_time),
     )
-    df = pd.DataFrame({"unemployed":df_u.sum(axis=1) / df_workers_alive.sum(axis=1),
-                       "furloughed":df_f.sum(axis=1) / df_workers_alive.sum(axis=1)})
+    df = pd.DataFrame(
+        {
+            "unemployed": df_u.sum(axis=1) / df_workers_alive.sum(axis=1),
+            "furloughed": df_f.sum(axis=1) / df_workers_alive.sum(axis=1),
+        }
+    )
     dfs["Unemployed vs Furloughed"] = df
 
     return dfs
@@ -347,7 +361,7 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     logger.debug("Plotting chart 4b")
     chart_name = "Unemployed vs Furloughed"
     df = dfs[chart_name]
-    df.plot.area(stacked=True,title=title_prefix + chart_name, ax=axes[8])
+    df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[8])
 
     # Plot 4a - Unemployment & Furloughing by Sector
     logger.debug("Plotting chart 4a")
