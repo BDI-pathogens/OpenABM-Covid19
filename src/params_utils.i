@@ -1533,6 +1533,8 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
 %}
 
 %array_class(double, doubleArray);
+%array_class(int, intArray);
+%array_class(long, longArray);
 %inline %{
 /*****************************************************************************************
 *  Name:        get_param_array_mean_random_interactions
