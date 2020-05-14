@@ -375,7 +375,8 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-
+	model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
+	model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
