@@ -30,7 +30,7 @@ from . import constant
 
 
 # # Construct the compilation command and compile
-# compile_command = "make clean; make all; make swig-all;"
+# compile_command = "make clean; make all; make;"
 # completed_compilation = subprocess.run([compile_command], 
 #     shell = True, 
 #     cwd = SRC_DIR, 
