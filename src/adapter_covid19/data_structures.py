@@ -262,9 +262,9 @@ class SimulateState:  # at one point in time
         if self.previous is None:
             delta_avg_dead = 0.0
         else:
-            delta_avg_dead = np.mean(
-                list(self.dead.values())
-            )- np.mean(list(self.previous.dead.values()))
+            delta_avg_dead = np.mean(list(self.dead.values())) - np.mean(
+                list(self.previous.dead.values())
+            )
         logistic_input = (
             self.fear_factor_coef_lockdown * float(self.lockdown)
             + self.fear_factor_coef_ill * avg_ill
@@ -658,7 +658,7 @@ class Utilisation:
             WorkerStateConditional.ILL_UNEMPLOYED: self.p_ill_unemployed,
             WorkerStateConditional.WFH: self.p_wfh,
             WorkerStateConditional.FURLOUGHED: self.p_furloughed,
-            WorkerStateConditional.NOT_EMPLOYED: self.p_not_employed
+            WorkerStateConditional.NOT_EMPLOYED: self.p_not_employed,
         }
 
     @classmethod
