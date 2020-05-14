@@ -995,12 +995,6 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                 state.previous.corporate_state.capital_discount_factor
             )
 
-        # apply assumed long-term growth rate to capital
-        for s in Sector:
-            capital[s] = capital[s] * (1 + self.growth_rates[s]) ** (
-                (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
-            )
-
         # use unemployment from corporate model as *lower bound* on unemployment for gdp model
         if (
             state.previous is None

@@ -72,6 +72,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.largecap_count: Mapping[Sector, float] = {}
         self.outflows: Mapping[Sector, float] = {}
         self.turnover: pd.DataFrame = pd.DataFrame()
+        self.growth_rates: Mapping[Sector, float] = {}
         self.sme_vulnerability: Mapping[Sector, float] = {}
         self.loan_guarantee_remaining: Mapping[Sector, float] = {}
         self.size_loan: Mapping[Sector, float] = {}
@@ -194,6 +195,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             .to_dict()
             .items()
         }
+
+        self.growth_rates = SectorDataSource("growth_rates").load(reader)
 
         # simulate initial cash buffers
         self._init_sim()
@@ -444,19 +447,22 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         }
 
         state.corporate_state = CorporateState(
-            capital_discount_factor=self._capital_discount_factor(proportion_solvent),
+            capital_discount_factor=self._capital_discount_factor(proportion_solvent, state),
             proportion_solvent=proportion_solvent,
             proportion_employees_job_exists=self._proportion_employees_job_exists(),
         )
 
     def _capital_discount_factor(
-        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
+        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]], state: SimulateState,
     ) -> Mapping[Sector, float]:
 
         return {
             s: (
                 proportion_solvent[BusinessSize.large][s] * self.large_cap_pct[s]
                 + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
+            )
+            * (1 + self.growth_rates[s]) ** (
+                (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
             )
             for s in Sector
         }
