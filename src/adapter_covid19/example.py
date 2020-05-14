@@ -1,9 +1,11 @@
 import logging
+import multiprocessing
 import pickle
+import sys
 
 try:
     from tqdm import tqdm
-except:
+except ModuleNotFoundError:
 
     def tqdm(x):
         return x
@@ -15,9 +17,8 @@ from adapter_covid19.simulator import Simulator
 logger = logging.getLogger(__file__)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
 
-    import sys
+    logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) > 1:
         scenario_names = sys.argv[1:]
@@ -29,9 +30,8 @@ if __name__ == "__main__":
         logger.error(f"Unkown scenarios! {unknown_scenarios}")
         exit(1)
 
-    s = Simulator()
-
-    for scenario_name in scenario_names:
+    def _run_scenario(scenario_name):
+        s = Simulator()
         logger.info(f"Running scenario {scenario_name}")
         scenario = SCENARIOS[scenario_name]
         result = s.simulate(
@@ -42,3 +42,6 @@ if __name__ == "__main__":
         with open(file_name, "wb") as f:
             pickle.dump((scenario_name, scenario, result), f)
         logger.info(f"Finished writing")
+
+    with multiprocessing.Pool() as pool:
+        pool.map(_run_scenario, scenario_names)

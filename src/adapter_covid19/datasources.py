@@ -36,10 +36,10 @@ class Reader:
             return data
         return data.to_dict(orient)
 
-    def load_pkl(self, filename: str,) -> pd.DataFrame:
+    def load_pkl(self, filename: str,) -> Any:
         with open(self._get_filepath(f"{filename}.pkl"), "rb") as f:
-            df = pickle.load(f)
-        return df
+            data = pickle.load(f)
+        return data
 
 
 class DataSource(abc.ABC):
