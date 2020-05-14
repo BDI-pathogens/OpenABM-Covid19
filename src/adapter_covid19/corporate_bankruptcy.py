@@ -354,7 +354,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                                            + (self.growth_rates[s]
                                               + ((1 - state.gdp_state.final_use_shortfall_vs_demand[s])
                                                  * (1 - min(fear_factor * 10, 1.0))
-                                                 * 0.1)
+                                                 * 0.4)
                                               )
                                            / DAYS_IN_A_YEAR
                                            )
