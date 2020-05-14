@@ -10,10 +10,13 @@ Created: April 2020
 Author: Dylan Feldner-Busztin
 """
 
+from parameters import ParameterSet
+from tests import constant
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = TEST_DIR.replace("hospital", "")
 TEST_HOSPITAL_FILE = TEST_DIR + "/data/hospital_baseline_parameters.csv"
 TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"
 PARAM_LINE_NUMBER = 1
@@ -29,16 +32,13 @@ TEST_TRANSMISSION_FILE = TEST_DIR + "/data/transmission_Run1.csv"
 SRC_DIR = TEST_DIR.replace("tests", "") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
 
-# Use parameter file from Python C interface to adjust parameters
-PYTHON_C_DIR = TEST_DIR.replace("tests","") + "src/COVID19"
-sys.path.append(PYTHON_C_DIR)
-from parameters import ParameterSet
-from . import constant
-
 # Files with adjusted parameters for each scenario
 SCENARIO_FILE = TEST_DIR + "/data/scenario_baseline_parameters.csv"
 SCENARIO_HOSPITAL_FILE = TEST_DIR + "/data/scenario_hospital_baseline_parameters.csv"
 
+# Use parameter file from Python C interface to adjust parameters
+PYTHON_C_DIR = TEST_DIR.replace("tests","") + "src/COVID19"
+sys.path.append(PYTHON_C_DIR)
 
 class TestClass(object):
     """
@@ -62,7 +62,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -111,7 +111,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -155,7 +155,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -200,7 +200,7 @@ class TestClass(object):
         h_params.set_param("n_patient_doctor_required_interactions_covid_icu_ward", 0)
         h_params.set_param("n_patient_nurse_required_interactions_covid_icu_ward", 0)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell=True,
                                                cwd=SRC_DIR,
@@ -248,7 +248,7 @@ class TestClass(object):
         h_params.set_param("icu_infectivity_modifier", 0)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell=True,
                                                cwd=SRC_DIR,
@@ -290,7 +290,7 @@ class TestClass(object):
         h_params.set_param("icu_infectivity_modifier", 100)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell=True,
                                                cwd=SRC_DIR,
@@ -338,7 +338,7 @@ class TestClass(object):
         h_params.set_param("max_hcw_daily_interactions", 0)
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell=True,
                                                cwd=SRC_DIR,
@@ -404,7 +404,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -466,7 +466,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -530,7 +530,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -591,7 +591,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -636,7 +636,7 @@ class TestClass(object):
     #     h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
     #     # Construct the compilation command and compile
-    #     compile_command = "make clean; make all; make swig-all;"
+    #     compile_command = "make clean; make all; make;"
     #     completed_compilation = subprocess.run([compile_command],
     #         shell = True,
     #         cwd = SRC_DIR,
@@ -688,7 +688,7 @@ class TestClass(object):
         h_params.write_params(SCENARIO_HOSPITAL_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
             shell = True,
             cwd = SRC_DIR,
@@ -750,7 +750,7 @@ class TestClass(object):
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell = True,
                                                cwd = SRC_DIR,
@@ -808,7 +808,7 @@ class TestClass(object):
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell = True,
                                                cwd = SRC_DIR,
@@ -866,7 +866,7 @@ class TestClass(object):
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell = True,
                                                cwd = SRC_DIR,
@@ -924,7 +924,7 @@ class TestClass(object):
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
-        compile_command = "make clean; make all; make swig-all;"
+        compile_command = "make clean; make all; make;"
         completed_compilation = subprocess.run([compile_command],
                                                shell = True,
                                                cwd = SRC_DIR,

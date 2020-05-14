@@ -12,10 +12,11 @@ Author: Dylan Feldner-Busztin
 
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
-from . import constant
+from tests import constant
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DIR = TEST_DIR.replace("hospital","")
 TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"
 PARAM_LINE_NUMBER = 1
 DATA_DIR_TEST = TEST_DIR + "/data"
@@ -32,7 +33,7 @@ SRC_DIR = TEST_DIR.replace("tests","") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
 
 # Construct the compilation command and compile
-compile_command = "make clean; make all; make swig-all;"
+compile_command = "make clean; make all; make"
 completed_compilation = subprocess.run([compile_command], 
     shell = True, 
     cwd = SRC_DIR, 
@@ -76,6 +77,7 @@ class TestClass(object):
         """
         If worker type not -1, then work network must be -1
         """
+        
         df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
         w1_worknetwork_condition = df_interactions['occupation_network_1'] != -1
@@ -94,6 +96,7 @@ class TestClass(object):
         """
         Test that healthcare workers IDs appear only once in the hcw file and therefore only belong to one ward/ hospital
         """
+
         df_hcw = pd.read_csv(TEST_HCW_FILE)
         hcw_idx_list = df_hcw.pdx.values
 
@@ -134,12 +137,11 @@ class TestClass(object):
         Tests that hospital patients have only been able to infect
         hospital healthcare workers
         """
+
         df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
         infected_non_hcw = df_transmission_output["worker_type_recipient"] == constant.NOT_HEALTHCARE_WORKER
         infected_non_hcw = df_transmission_output[infected_non_hcw]
-        # get non_hcw who are infected at some point
-        # infected_non_hcw = non_hcw["time_infected"] != -1
-        # infected_non_hcw = non_hcw[infected_non_hcw]
+ 
         # loop through infected non healthcare workers and check their infector was not a hospital patient
         for index, row in infected_non_hcw.iterrows():
             infector_hospital_state = int(row["hospital_state_source"])
