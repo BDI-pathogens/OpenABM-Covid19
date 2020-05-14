@@ -697,7 +697,10 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         }
 
     def _postprocess_model_outputs(
-        self, state: SimulateState, res: OptimizeResult, p_delta: Mapping[Tuple[Sector, FinalUse], float],
+        self,
+        state: SimulateState,
+        res: OptimizeResult,
+        p_delta: Mapping[Tuple[Sector, FinalUse], float],
     ) -> IoGdpState:
         x = pd.Series(res.x, index=self.setup.variables)
         # gdp
@@ -807,7 +810,9 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         final_use_shortfall_vs_demand = {}
         for s in Sector:
             total_final_use = x[self.setup.V("y", s)]
-            total_final_use_bound = np.sum([p_delta[s, u] * self.setup.ytilde_iot.loc[s, u] for u in FinalUse])
+            total_final_use_bound = np.sum(
+                [p_delta[s, u] * self.setup.ytilde_iot.loc[s, u] for u in FinalUse]
+            )
             final_use_shortfall_vs_demand[s] = total_final_use / total_final_use_bound
             for u in FinalUse:
                 final_uses[u, s] = total_final_use * (
