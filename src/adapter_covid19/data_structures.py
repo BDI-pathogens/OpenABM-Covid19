@@ -259,11 +259,16 @@ class SimulateState:  # at one point in time
     def get_fear_factor(self) -> float:
         # TODO: maybe there's a more efficient way to do this?
         avg_ill = np.mean(list(self.ill.values()))
-        avg_dead = np.mean(list(self.dead.values()))
+        if self.previous is None:
+            delta_avg_dead = 0.0
+        else:
+            delta_avg_dead = np.mean(
+                list(self.dead.values())
+            )- np.mean(list(self.previous.dead.values()))
         logistic_input = (
             self.fear_factor_coef_lockdown * float(self.lockdown)
             + self.fear_factor_coef_ill * avg_ill
-            + self.fear_factor_coef_dead * avg_dead
+            + self.fear_factor_coef_dead * delta_avg_dead
         )
         logistic_output = 1 / (1 + math.exp(-logistic_input))
 
