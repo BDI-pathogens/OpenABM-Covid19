@@ -281,6 +281,7 @@ class CorporateState:
     capital_discount_factor: Mapping[Sector, float]
     proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]]
     proportion_employees_job_exists: Mapping[Sector, float]
+    exhuberance_factor: Mapping[Sector, float]
 
 
 @dataclass
