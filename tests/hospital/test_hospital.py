@@ -13,24 +13,28 @@ Author: Dylan Feldner-Busztin
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
 from tests import constant
+from parameters import ParameterSet
 
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DIR = TEST_DIR.replace("hospital","")
-TEST_DATA_FILE = TEST_DIR + "/data/baseline_parameters.csv"
+TEST_DATA_FILE = TEST_DIR + "data/baseline_parameters.csv"
 PARAM_LINE_NUMBER = 1
-DATA_DIR_TEST = TEST_DIR + "/data"
-TEST_HOUSEHOLD_FILE = TEST_DIR + "/data/baseline_household_demographics.csv"
-TEST_HOSPITAL_FILE = TEST_DIR +"/data/hospital_baseline_parameters.csv"
-TEST_OUTPUT_FILE = TEST_DIR +"/data/test_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR +"/data/test_hospital_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR +"/data/time_step_hospital_output.csv"
-TEST_INTERACTIONS_FILE = TEST_DIR +"/data/interactions_Run1.csv"
-TEST_INDIVIDUAL_FILE = TEST_DIR +"/data/individual_file_Run1.csv"
-TEST_TRANSMISSION_FILE = TEST_DIR + "/data/transmission_Run1.csv"
-TEST_HCW_FILE = TEST_DIR +"/data/ward_output.csv"
+DATA_DIR_TEST = TEST_DIR + "data"
+TEST_HOUSEHOLD_FILE = TEST_DIR + "data/baseline_household_demographics.csv"
+TEST_HOSPITAL_FILE = TEST_DIR +"data/hospital_baseline_parameters.csv"
+TEST_OUTPUT_FILE = TEST_DIR +"data/test_output.csv"
+TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR +"data/test_hospital_output.csv"
+TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR +"data/time_step_hospital_output.csv"
+TEST_INTERACTIONS_FILE = TEST_DIR +"data/interactions_Run1.csv"
+TEST_INDIVIDUAL_FILE = TEST_DIR +"data/individual_file_Run1.csv"
+TEST_TRANSMISSION_FILE = TEST_DIR + "data/transmission_Run1.csv"
+TEST_HCW_FILE = TEST_DIR +"data/ward_output.csv"
 SRC_DIR = TEST_DIR.replace("tests","") + "src"
 EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
+
+# Files with adjusted parameters for each scenario
+SCENARIO_FILE = TEST_DIR + "/data/scenario_baseline_parameters.csv"
 
 # Construct the compilation command and compile
 compile_command = "make clean; make all; make"
@@ -40,8 +44,13 @@ completed_compilation = subprocess.run([compile_command],
     capture_output = True
     )
 
+# Adjust baseline parameter
+params = ParameterSet(TEST_DATA_FILE, line_number=1)
+params.set_param("n_total", 20000)
+params.write_params(SCENARIO_FILE)
+
 # Construct the executable command
-EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
 # Call the model using baseline parameters, pipe output to file, read output file
