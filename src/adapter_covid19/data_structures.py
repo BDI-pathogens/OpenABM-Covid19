@@ -312,6 +312,7 @@ class IoGdpState(GdpState):
         default_factory=dict
     )
     final_uses: Mapping[Tuple[FinalUse, Sector], float] = field(default_factory=dict)
+    final_use_shortfall_vs_demand: Mapping[Sector, float] = field(default_factory=dict)
     compensation_paid: Mapping[Tuple[Region, Sector, Age], float] = field(
         default_factory=dict
     )

@@ -707,7 +707,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         }
 
     def _postprocess_model_outputs(
-        self, state: SimulateState, res: OptimizeResult,
+        self, state: SimulateState, res: OptimizeResult, p_delta: Mapping[Tuple[Sector, FinalUse], float],
     ) -> IoGdpState:
         x = pd.Series(res.x, index=self.setup.variables)
         # gdp
@@ -808,14 +808,17 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
                     * self.labour_weight_region_age_per_sector_by_compensation[s, r, a]
                 )
 
-        # final uses
+        # final uses and excess demand
         max_final_uses = {
             (u, s): self.setup.ytilde_iot.loc[s, u]
             for u, s in itertools.product(FinalUse, Sector)
         }
         final_uses = {}
+        final_use_shortfall_vs_demand = {}
         for s in Sector:
             total_final_use = x[self.setup.V("y", s)]
+            total_final_use_bound = np.sum([p_delta[s, u] * self.setup.ytilde_iot.loc[s, u] for u in FinalUse])
+            final_use_shortfall_vs_demand[s] = total_final_use / total_final_use_bound
             for u in FinalUse:
                 final_uses[u, s] = total_final_use * (
                     self.setup.ytilde_iot.loc[s, u] / self.setup.ytilde_total_iot.loc[s]
@@ -921,6 +924,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             max_workers=max_workers,
             primary_inputs=primary_inputs,
             final_uses=final_uses,
+            final_use_shortfall_vs_demand=final_use_shortfall_vs_demand,
             compensation_paid=compensation_paid,
             compensation_received=compensation_received,
             compensation_subsidy=compensation_subsidy,
@@ -978,7 +982,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
             raise ValueError(r.message)
 
         # postprocess model parameters
-        return self._postprocess_model_outputs(state, r)
+        return self._postprocess_model_outputs(state, r, p_delta)
 
     def simulate(self, state: SimulateState) -> None:
         # use capital parameter from corporate model
