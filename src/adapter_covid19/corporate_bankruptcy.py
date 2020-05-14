@@ -343,7 +343,19 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             return 1
         return solvent
 
-    def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
+    def _apply_growth_rates(self,
+                            factor_map: Mapping[Sector, float],
+                            state: SimulateState
+                            ) -> Mapping[Sector, float]:
+        return {s:
+                factor_map[s]
+                * (1 + self.growth_rates[s]) ** (
+                        (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
+                )
+                for s in Sector
+                }
+
+    def _proportion_employees_job_exists(self, state: SimulateState) -> Mapping[Sector, float]:
         large_company_solvent = (
             pd.DataFrame(
                 {
@@ -404,7 +416,25 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()}
         )
 
+        proportion_employees_job_exists = self._apply_growth_rates(proportion_employees_job_exists,
+                                                                   state)
+
         return proportion_employees_job_exists
+
+    def _capital_discount_factor(
+        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]], state: SimulateState,
+    ) -> Mapping[Sector, float]:
+
+        return self._apply_growth_rates(
+            {
+                s: (
+                    proportion_solvent[BusinessSize.large][s] * self.large_cap_pct[s]
+                    + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
+                )
+                for s in Sector
+            },
+            state
+        )
 
     def simulate(self, state: SimulateState, **kwargs,) -> None:
         super().simulate(state, **kwargs)
@@ -449,23 +479,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         state.corporate_state = CorporateState(
             capital_discount_factor=self._capital_discount_factor(proportion_solvent, state),
             proportion_solvent=proportion_solvent,
-            proportion_employees_job_exists=self._proportion_employees_job_exists(),
+            proportion_employees_job_exists=self._proportion_employees_job_exists(state),
         )
-
-    def _capital_discount_factor(
-        self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]], state: SimulateState,
-    ) -> Mapping[Sector, float]:
-
-        return {
-            s: (
-                proportion_solvent[BusinessSize.large][s] * self.large_cap_pct[s]
-                + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
-            )
-            * (1 + self.growth_rates[s]) ** (
-                (state.time - START_OF_TIME) / DAYS_IN_A_YEAR
-            )
-            for s in Sector
-        }
 
     def _update_state(self, net_operating_surplus: Mapping[Sector, float],) -> None:
         largecap_cash_outgoing = {
