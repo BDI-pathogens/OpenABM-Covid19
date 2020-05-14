@@ -26,6 +26,7 @@ Key events on the timeline are
 * 30 September - Time 231 - Last day of Q3
 
 TODO:
+* Implement timeline with lockdown at 40 below
 * Confirm start date for furlough scheme
 * Confirm start date for new spending
 * Confirm start date for loan guarantees
@@ -62,15 +63,9 @@ TODO:
 * Demand modelling
     * Reduction in business investment
     * Waterfall of demand reduction (reduce expenditure on discretionary items first)
-    * Changes of demand imposed by lockdown
-        - Constraints imposed by lockdown (e.g. can't go to restaurant) 
+    * Changes of demand imposed by lockdown 
         - Substitution of demand (e.g. more communication) 
     * Shift demand of ill individuals toward healthcare
-    * Deceased individuals no longer contribute to demand
-    * Reduced consumer confidence even when lockdown is lifted (possibly correlated with trajectory of epidemic)
-    * Increased savings rate
-* Corporate bankruptcies
-    * No longer tie bankruptcy simulation to lockdown variable
 
 """
 
