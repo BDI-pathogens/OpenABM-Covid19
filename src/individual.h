@@ -76,6 +76,7 @@ struct infection_event{
 	int *times;
 	individual *infector;
 	int infector_status;
+    int infector_hospital_state;
 	int infector_network;
 	int time_infected_infector;
 	infection_event *next;

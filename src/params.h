@@ -143,6 +143,7 @@ typedef struct{
 	int intervention_start_time;	// time at which interventions start
 
 	int sys_write_individual; 		// Should an individual file be written to output?
+	int sys_write_hospital; 		// Should a hospital file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
