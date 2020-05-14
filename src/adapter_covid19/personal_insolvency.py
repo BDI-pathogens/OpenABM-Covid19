@@ -283,6 +283,7 @@ class PersonalBankruptcyModel:
             personal_bankruptcy={},
             demand_reduction={},
         )
+        fear_factor = state.get_fear_factor()
         for region in Region:
             spot_credit_mean_r = {}
             for employed_sector, decile in itertools.product(Sector, Decile):
@@ -304,7 +305,7 @@ class PersonalBankruptcyModel:
                     employed_sector,
                     decile,
                     spot_earning_rsd,
-                    state.get_fear_factor(),
+                    fear_factor,
                     state.utilisations,
                 )
 
