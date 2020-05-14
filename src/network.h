@@ -28,10 +28,12 @@ struct edge{
 };
 
 typedef struct{
-	edge *edges;	  // array of edges
-	long n_edges;	  // number of edges in the network
-	long n_vertices;  // number of vertices
-	int type;		  // the type of network
+	edge *edges;	  		// array of edges
+	long n_edges;	  		// number of edges in the network
+	long n_vertices;  		// number of vertices
+	int type;		  		// the type of network
+	int skip_hospitalised;	// include the network for hospitalised people
+	int skip_quarantined;	// include the network for quarantined people
 } network;
 
 /************************************************************************/
