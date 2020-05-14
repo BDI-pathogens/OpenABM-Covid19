@@ -348,11 +348,12 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         return solvent
 
     def _update_exhuberance_factor(self, state: SimulateState) -> None:
+        fear_factor = state.get_fear_factor()
         for s in Sector:
             self.exhuberance_factor[s] *= (1
                                            + (self.growth_rates[s]
                                               + ((1 - state.gdp_state.final_use_shortfall_vs_demand[s])
-                                                 * (1 - min(state.get_fear_factor() * 10, 1.0))
+                                                 * (1 - min(fear_factor * 10, 1.0))
                                                  * 0.1)
                                               )
                                            / DAYS_IN_A_YEAR
