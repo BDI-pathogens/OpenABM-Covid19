@@ -61,8 +61,9 @@ class Scenario:
     model_params: ModelParams = ModelParams()
     epidemic_active: bool = True
     # T * percentage. TODO: extend to per sector, region, age
-    ill_ratio: Mapping[int, float] = field(default_factory=dict)
-    dead_ratio: Mapping[int, float] = field(default_factory=dict)
+    ill_ratio: Mapping[int, Mapping[Region, float]] = field(default_factory=dict)
+    dead_ratio: Mapping[int, Mapping[Region, float]] = field(default_factory=dict)
+    quarantine_ratio: Mapping[int, Mapping[Region, float]] = field(default_factory=dict)
     # Multiplier factor on time to load the spread data. It can also be set to be below 1.
     # Eg, if spread_model_time_factor = 5, and current time=2, the model will load ill and dead ratio from
     # the spread model at time=10.
@@ -114,9 +115,10 @@ class Scenario:
                     lockdown_end = self.lockdown_end_time
                 end = self.simulation_end_time + 1
                 file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}"
-                df = reader.load_pkl(file_name)
-                self.ill_ratio = df["ill ratio"]
-                self.dead_ratio = df["dead ratio"]
+                data = reader.load_pkl(file_name)
+                self.ill_ratio = data["ill_ratio"]
+                self.dead_ratio = data["dead_ratio"]
+                self.quarantine_ratio = data["quarantine_ratio"]
 
         self.is_loaded = True
 
@@ -139,6 +141,7 @@ class Scenario:
         time: int,
         dead: Mapping[Tuple[Region, Sector, Age], float],
         ill: Mapping[Tuple[Region, Sector, Age], float],
+        quarantine: Mapping[Tuple[Region, Sector, Age], float],
         lockdown: bool,
         furlough: bool,
         reader: Reader,
@@ -153,6 +156,7 @@ class Scenario:
                     EmploymentState, Region, Sector, Age
                 )
             },  # here we assume illness affects all employment states equally
+            quarantine=quarantine,
             lockdown=lockdown,
             furlough=furlough,
             new_spending_day=self.new_spending_day,
@@ -166,35 +170,40 @@ class Scenario:
         )
         return simulate_state
 
-    def get_ill_ratio_dict(
-        self, time: int
+    def _get_ratio_dict(
+        self, ratio_type: str, time: int,
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        ratio = {
+            "ill": self.ill_ratio,
+            "dead": self.dead_ratio,
+            "quarantine": self.quarantine_ratio,
+        }[ratio_type.lower()]
         time_in_spread_model = int(time * self.spread_model_time_factor)
         try:
             return {
-                key: self.ill_ratio[time_in_spread_model]
-                for key in itertools.product(Region, Sector, Age)
+                (r, s, a): ratio[time_in_spread_model][r]
+                for r, s, a in itertools.product(Region, Sector, Age)
             }
         except KeyError:
             warnings.warn(
-                f"Ill ratio at time {time_in_spread_model} is not provided. Returning 0.0"
+                f"{ratio_type} ratio at time {time_in_spread_model} is not provided. Returning 0.0"
             )
             return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+
+    def get_ill_ratio_dict(
+        self, time: int
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        return self._get_ratio_dict("Ill", time)
 
     def get_dead_ratio_dict(
         self, time: int
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
-        time_in_spread_model = int(time * self.spread_model_time_factor)
-        try:
-            return {
-                key: self.dead_ratio[time_in_spread_model]
-                for key in itertools.product(Region, Sector, Age)
-            }
-        except KeyError:
-            warnings.warn(
-                f"Dead ratio at time {time_in_spread_model} is not provided. Returning 0.0"
-            )
-            return {key: 0.0 for key in itertools.product(Region, Sector, Age)}
+        return self._get_ratio_dict("Dead", time)
+
+    def get_quarantine_ratio_dict(
+        self, time: int
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        return self._get_ratio_dict("Quarantine", time)
 
 
 @dataclass
@@ -206,6 +215,7 @@ class SimulateState:  # at one point in time
     # health state
     dead: Mapping[Tuple[Region, Sector, Age], float]
     ill: Mapping[Tuple[EmploymentState, Region, Sector, Age], float]
+    quarantine: Mapping[Tuple[Region, Sector, Age], float]
     # lockdown intervention
     lockdown: bool  # TODO: should reflect more granularly who are key workers
     # furlough intervention

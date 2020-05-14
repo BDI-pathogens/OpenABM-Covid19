@@ -67,11 +67,13 @@ class Simulator:
         for i in tqdm(range(scenario.simulation_end_time)):
             ill = scenario.get_ill_ratio_dict(i)
             dead = scenario.get_dead_ratio_dict(i)
+            quarantine = scenario.get_quarantine_ratio_dict(i)
 
             simulate_state = scenario.generate(
                 time=i,
                 dead=dead,
                 ill=ill,
+                quarantine=quarantine,
                 lockdown=scenario.lockdown_start_time <= i < scenario.lockdown_end_time,
                 furlough=scenario.furlough_start_time <= i < scenario.furlough_end_time,
                 reader=self.reader,
