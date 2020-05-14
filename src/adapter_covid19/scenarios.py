@@ -1,6 +1,19 @@
 from __future__ import annotations
 
+from adapter_covid19.enums import Region
+
 from adapter_covid19.data_structures import Scenario, ModelParams
+
+__all__ = (
+    "BASIC_MODEL_PARAMS",
+    "BASIC_SCENARIO",
+    "BASIC_NO_FURLOUGH_SCENARIO",
+    "BASIC_NO_CORP_SUPPORT_SCENARIO",
+    "BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO",
+    "BASIC_NO_LOCKDOWN_SCENARIO",
+    "TEST_SCENARIO",
+    "SCENARIOS",
+)
 
 """
 ========
@@ -208,8 +221,9 @@ TEST_SCENARIO = Scenario(
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
     epidemic_active=False,
-    ill_ratio={t: 0 for t in range(203)},
-    dead_ratio={t: 0 for t in range(203)},
+    ill_ratio={t: {r: 0 for r in Region} for t in range(203)},
+    dead_ratio={t: {r: 0 for r in Region} for t in range(203)},
+    quarantine_ratio={t: {r: 0 for r in Region} for t in range(203)},
 )
 
 SCENARIOS = {
