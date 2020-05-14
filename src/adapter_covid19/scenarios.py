@@ -84,7 +84,7 @@ BASIC_MODEL_PARAMS = ModelParams(
         "alpha": 5,
         "beta": 20,
     },
-    corporate_params={"beta": 1.4, "large_cap_cash_surplus_months": 6,},
+    corporate_params={"beta": 1.4, "large_cap_cash_surplus_months": 18,},
 )
 
 # Basic Scenario (aligned with actual interventions)

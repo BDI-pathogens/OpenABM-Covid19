@@ -469,8 +469,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             * (
                 self.surplus_weight[BusinessSize.large][s]
                 * self.net_operating_surplus[s]
-                + (net_operating_surplus[s] - self.net_operating_surplus[s])
-                / self.solvent_bool[BusinessSize.large][s].sum()
+                + ((net_operating_surplus[s] - self.net_operating_surplus[s])
+                / self.solvent_bool[BusinessSize.large][s].sum())
+                * (self.solvent_bool[BusinessSize.large][s])
             )
             / DAYS_IN_A_YEAR
             for s in Sector
@@ -479,8 +480,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             s: (1 - self.large_cap_pct[s])
             * (
                 self.surplus_weight[BusinessSize.sme][s] * self.net_operating_surplus[s]
-                + (net_operating_surplus[s] - self.net_operating_surplus[s])
-                / self.solvent_bool[BusinessSize.sme][s].sum()
+                + ((net_operating_surplus[s] - self.net_operating_surplus[s])
+                / self.solvent_bool[BusinessSize.sme][s].sum())
+                * (self.solvent_bool[BusinessSize.sme][s])
             )
             / DAYS_IN_A_YEAR
             for s in Sector
@@ -494,14 +496,14 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                     self.init_cash_state[BusinessSize.large][s],
                 ),
                 0,
-            )
+            ) * self.solvent_bool[BusinessSize.large][s]
             self.cash_state[BusinessSize.sme][s] = np.maximum(
                 np.minimum(
                     self.cash_state[BusinessSize.sme][s] - sme_cash_outgoing[s],
                     self.init_cash_state[BusinessSize.sme][s],
                 ),
                 0,
-            )
+            ) * self.solvent_bool[BusinessSize.sme][s]
             # update solvency Boolean
             self.solvent_bool[BusinessSize.large][s] = (
                 self.cash_state[BusinessSize.large][s] > 0
