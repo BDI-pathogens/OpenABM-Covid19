@@ -186,11 +186,15 @@ void set_up_networks( model *model )
 	model->random_network->skip_hospitalised = FALSE;
 	model->random_network->skip_quarantined  = FALSE;
 	model->random_network->daily_fraction    = 1.0;
+	model->random_network->network_id        = RANDOM_NETWORK;
+	strcpy( model->random_network->name, DEFAULT_NETWORKS_NAMES[RANDOM_NETWORK] );
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	model->household_network->skip_hospitalised = TRUE;
 	model->household_network->skip_quarantined  = FALSE;
 	model->household_network->daily_fraction    = 1.0;
+	model->household_network->network_id         = HOUSEHOLD_NETWORK;
+	strcpy( model->household_network->name, DEFAULT_NETWORKS_NAMES[HOUSEHOLD_NETWORK] );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
 	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
@@ -220,6 +224,8 @@ void set_up_occupation_network( model *model, int network )
 	model->occupation_network[network]->skip_hospitalised = TRUE;
 	model->occupation_network[network]->skip_quarantined  = TRUE;
 	model->occupation_network[network]->daily_fraction    = model->params->daily_fraction_work;
+	model->occupation_network[network]->network_id        = OCCUPATION_DEFAULT_MAP[network];
+	strcpy( model->occupation_network[network]->name, DEFAULT_NETWORKS_NAMES[OCCUPATION_DEFAULT_MAP[network]] );
 
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
@@ -709,11 +715,13 @@ int add_user_network(
 	double daily_fraction,
 	long n_edges,
 	long *edgeStart,
-	long *edgeEnd
+	long *edgeEnd,
+	char *name
 )
 {
 	long idx;
-	long n_total = model->params->n_total;
+	long n_total   = model->params->n_total;
+	int network_id = N_OCCUPATION_NETWORKS + 2;
 
 	// check to see that the edges all make sense
 	for( idx = 0; idx < n_edges; idx++ )
@@ -739,12 +747,14 @@ int add_user_network(
 	model->user_network->skip_hospitalised = skip_hospitalised;
 	model->user_network->skip_quarantined  = skip_quarantined;
 	model->user_network->daily_fraction    = daily_fraction;
+	model->user_network->network_id		   = network_id;
+	strcpy( model->user_network->name, name );
 
 	for( idx = 0; idx < n_edges; idx++ )
 	{
 		model->user_network->edges[idx].id1 = edgeStart[ idx ];
 		model->user_network->edges[idx].id2 = edgeEnd[ idx ];
 	}
-	return TRUE;
+	return network_id;
 }
 

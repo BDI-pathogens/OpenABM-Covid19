@@ -88,7 +88,7 @@ int set_indiv_demographic_house_table( parameters* params, long pdx, int age, lo
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_daily_fraction_work_used
+*  Name: 		get_model_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)

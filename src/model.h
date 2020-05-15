@@ -114,6 +114,6 @@ void transition_events( model*, int, void( model*, individual* ), int );
 void add_interactions_from_network( model*, network* );
 void build_daily_newtork( model* );
 void build_random_network( model * );
-int add_user_network( model*, int, int, int, double, long, long*, long* );
+int add_user_network( model*, int, int, int, double, long, long*, long*, char* );
 
 #endif /* MODEL_H_ */

@@ -22,20 +22,25 @@
 /****************************** Structures  *****************************/
 /************************************************************************/
 
+typedef struct network network;
+
 struct edge{
 	long id1;
 	long id2;
 };
 
-typedef struct{
-	edge *edges;	  		// array of edges
-	long n_edges;	  		// number of edges in the network
-	long n_vertices;  		// number of vertices
-	int type;		  		// the type of network
-	int skip_hospitalised;	// include the network for hospitalised people
-	int skip_quarantined;	// include the network for quarantined people
-	double daily_fraction;  // fraction of the daily network sampled
-} network;
+struct network{
+	edge *edges;	  			// array of edges
+	long n_edges;	  			// number of edges in the network
+	long n_vertices;  			// number of vertices
+	int type;		  			// the type of network
+	int skip_hospitalised;		// include the network for hospitalised people
+	int skip_quarantined;		// include the network for quarantined people
+	double daily_fraction;  	// fraction of the daily network sampled
+	int network_id;				// unique network ID
+	char name[INPUT_CHAR_LEN]; 	// unique name of the network
+	network *next_network;		// pointer to the next network
+};
 
 /************************************************************************/
 /******************************  Functions  *****************************/
