@@ -77,6 +77,7 @@ model* new_model( parameters *params )
 void destroy_model( model *model )
 {
 	long idx;
+	network *network, *next_network;
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
@@ -92,6 +93,13 @@ void destroy_model( model *model )
     destroy_network( model->household_network );
     for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
     	destroy_network( model->occupation_network[idx] );
+    next_network = model->user_network;
+    while( next_network != NULL )
+    {
+    	network = next_network;
+    	next_network = network->next_network;
+    	destroy_network(network);
+    }
 
     free( model->occupation_network );
     for( idx = 0; idx < N_EVENT_TYPES; idx++ )
@@ -615,6 +623,7 @@ void add_interactions_from_network(
 void build_daily_newtork( model *model )
 {
 	int idx, day;
+	network *user_network;
 
 	day = model->interaction_day_idx;
 	for( idx = 0; idx < model->params->n_total; idx++ )
@@ -627,8 +636,12 @@ void build_daily_newtork( model *model )
 	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->occupation_network[idx] );
 
-	if( model->user_network != NULL)
-		add_interactions_from_network( model, model->user_network );
+	user_network = model->user_network;
+	while( user_network != NULL )
+	{
+		add_interactions_from_network( model, user_network );
+		user_network = user_network->next_network;
+	}
 };
 
 /*****************************************************************************************
@@ -721,7 +734,8 @@ int add_user_network(
 {
 	long idx;
 	long n_total   = model->params->n_total;
-	int network_id = N_OCCUPATION_NETWORKS + 2;
+	int network_id;
+	network *user_network;
 
 	// check to see that the edges all make sense
 	for( idx = 0; idx < n_edges; idx++ )
@@ -738,23 +752,34 @@ int add_user_network(
 		}
 	}
 
-	if( model->user_network != NULL )
-		destroy_network( model->user_network );
+	// get the next free network_id
+	network_id = N_OCCUPATION_NETWORKS + 1;
+	user_network = model->user_network;
+	while( user_network != NULL )
+	{
+		network_id   = max( network_id, user_network->network_id );
+		user_network = user_network->next_network;
+	}
+	network_id++;
 
-	model->user_network = new_network( model->params->n_total, type );
-	model->user_network->edges = calloc(n_edges, sizeof(edge));
-	model->user_network->n_edges = n_edges;
-	model->user_network->skip_hospitalised = skip_hospitalised;
-	model->user_network->skip_quarantined  = skip_quarantined;
-	model->user_network->daily_fraction    = daily_fraction;
-	model->user_network->network_id		   = network_id;
-	strcpy( model->user_network->name, name );
+	user_network = new_network( model->params->n_total, type );
+	user_network->edges = calloc(n_edges, sizeof(edge));
+	user_network->n_edges = n_edges;
+	user_network->skip_hospitalised = skip_hospitalised;
+	user_network->skip_quarantined  = skip_quarantined;
+	user_network->daily_fraction    = daily_fraction;
+	user_network->network_id		= network_id;
+	strcpy( user_network->name, name );
 
 	for( idx = 0; idx < n_edges; idx++ )
 	{
-		model->user_network->edges[idx].id1 = edgeStart[ idx ];
-		model->user_network->edges[idx].id2 = edgeEnd[ idx ];
+		user_network->edges[idx].id1 = edgeStart[ idx ];
+		user_network->edges[idx].id2 = edgeEnd[ idx ];
 	}
+
+	user_network->next_network = model->user_network;
+	model->user_network        = user_network;
+
 	return network_id;
 }
 
