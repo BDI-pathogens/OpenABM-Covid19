@@ -1,17 +1,18 @@
 from __future__ import annotations
 
-from adapter_covid19.enums import Region
+from adapter_covid19.enums import Region, BackToWork
 
 from adapter_covid19.data_structures import Scenario, ModelParams
 
 __all__ = (
     "BASIC_MODEL_PARAMS",
     "BASIC_SCENARIO",
-    "BASIC_SLOW_UNLOCK_SCENARIO",
     "BASIC_NO_FURLOUGH_SCENARIO",
     "BASIC_NO_CORP_SUPPORT_SCENARIO",
     "BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO",
     "BASIC_NO_LOCKDOWN_SCENARIO",
+    "BASIC_SLOW_UNLOCK_SCENARIO",
+    "BASIC_SLOW_UNLOCK_GREEDY_SCENARIO",
     "TEST_SCENARIO",
     "SCENARIOS",
 )
@@ -205,11 +206,40 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
 # * Lockdown
 # * Furlough
 # * Corporate Support
+# * Slow release of lockdown
+# * Naively send people back to work
 
 BASIC_SLOW_UNLOCK_SCENARIO = Scenario(
     lockdown_start_time=10,
     lockdown_end_time=59,
     slow_unlock=True,
+    back_to_work_strategy=BackToWork.naive,
+    furlough_start_time=10,
+    furlough_end_time=202,
+    simulation_end_time=202,
+    new_spending_day=10,
+    ccff_day=10,
+    loan_guarantee_day=10,
+    model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=4.0,
+    fear_factor_coef_dead=1000.0,
+)
+
+
+# Basic Scenario (aligned with actual interventions)
+# * Lockdown
+# * Furlough
+# * Corporate Support
+# * Slow release of lockdown
+# * Send people back to work in order of productivity
+
+BASIC_SLOW_UNLOCK_GREEDY_SCENARIO = Scenario(
+    lockdown_start_time=10,
+    lockdown_end_time=59,
+    slow_unlock=True,
+    back_to_work_strategy=BackToWork.greedy,
     furlough_start_time=10,
     furlough_end_time=202,
     simulation_end_time=202,
@@ -246,6 +276,7 @@ TEST_SCENARIO = Scenario(
 SCENARIOS = {
     "basic": BASIC_SCENARIO,
     "slow_unlock": BASIC_SLOW_UNLOCK_SCENARIO,
+    "slow_unlock_greedy": BASIC_SLOW_UNLOCK_GREEDY_SCENARIO,
     "no_furlough": BASIC_NO_FURLOUGH_SCENARIO,
     "no_corp_support": BASIC_NO_CORP_SUPPORT_SCENARIO,
     "no_furlough_no_corp_support": BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO,

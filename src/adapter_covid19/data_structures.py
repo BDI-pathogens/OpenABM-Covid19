@@ -10,6 +10,7 @@ from typing import (
     Union,
     Generator,
     Type,
+    List,
 )
 from typing import Mapping, Tuple, MutableMapping, Optional
 
@@ -35,8 +36,9 @@ from adapter_covid19.enums import (
     EmploymentState,
     WorkerState,
     WorkerStateConditional,
+    BackToWork,
 )
-from adapter_covid19.lockdown import get_lockdown_factor
+from adapter_covid19.lockdown import get_lockdown_factor, get_working_factor
 
 
 @dataclass
@@ -53,6 +55,7 @@ class Scenario:
     lockdown_start_time: int = 1000
     lockdown_end_time: int = 1000
     slow_unlock: bool = False
+    back_to_work_strategy: Optional[BackToWork] = None
     furlough_start_time: int = 1000
     furlough_end_time: int = 1000
     simulation_end_time: int = 2000
@@ -88,11 +91,14 @@ class Scenario:
     )
     furloughed: Mapping[Sector, float] = field(default=None, init=False)
     keyworker: Mapping[Sector, float] = field(default=None, init=False)
+    greedy_order: List[Region, Sector, Age] = field(default=None, init=False)
 
     _has_been_lockdown: bool = False
     _utilisations: Mapping = field(
         default_factory=dict, init=False
     )  # For tracking / debugging
+    # Ugh this is a hack
+    _data_path: str = field(default=None, init=False)
     is_loaded: bool = False
 
     def __post_init__(self):
@@ -102,10 +108,25 @@ class Scenario:
             "furloughed": SectorDataSource,
             "keyworker": SectorDataSource,
         }
+        if self.back_to_work_strategy is None:
+            if self.slow_unlock:
+                raise ValueError(
+                    "Must specify a `back_to_work` strategy if slowly unlocking economy"
+                )
+            else:
+                self.back_to_work_strategy = BackToWork.naive
 
     def load(self, reader: Reader) -> None:
         for k, v in self.datasources.items():
             self.__setattr__(k, v(k).load(reader))
+        gdp_per_worker = {
+            k: self.gdp[k] / self.workers[k]
+            for k in itertools.product(Region, Sector, Age)
+        }
+        self.greedy_order = sorted(
+            gdp_per_worker, key=lambda x: gdp_per_worker[x], reverse=True
+        )
+        self._data_path = reader.data_path
 
         if self.epidemic_active:
             if len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0:
@@ -137,6 +158,40 @@ class Scenario:
         if not self.lockdown_exited_time and self._has_been_lockdown and not lockdown:
             self.lockdown_exited_time = time
 
+    def _naive_optimise_wfh(
+        self, lockdown_factor: float
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        return {
+            (r, s, a): (1 - self.keyworker[s]) * lockdown_factor
+            for r, s, a in itertools.product(Region, Sector, Age)
+        }
+
+    def _greedy_optimise_wfh(
+        self, lockdown_factor: float,
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        proportion_workers = get_working_factor(self._data_path, lockdown_factor)
+        desired_workers = proportion_workers * sum(self.workers.values())
+        wfh = self._naive_optimise_wfh(lockdown_factor=1)
+        workers = sum(self.workers.values()) - sum(
+            self.workers[k] * wfh[k] for k in itertools.product(Region, Sector, Age)
+        )
+        for key in self.greedy_order:
+            if workers <= desired_workers:
+                break
+            new_workers = min(workers - desired_workers, self.workers[key] * wfh[key])
+            wfh[key] -= new_workers / self.workers[key]
+            workers -= new_workers
+        return wfh
+
+    def _optimise_wfh(
+        self, lockdown_factor: float,
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        if self.back_to_work_strategy == BackToWork.naive:
+            return self._naive_optimise_wfh(lockdown_factor)
+        if self.back_to_work_strategy == BackToWork.greedy:
+            return self._greedy_optimise_wfh(lockdown_factor)
+        raise NotImplementedError(self.back_to_work_strategy)
+
     def generate(
         self,
         time: int,
@@ -151,6 +206,7 @@ class Scenario:
         lockdown_factor = get_lockdown_factor(
             lockdown, self.slow_unlock, self.lockdown_exited_time, time,
         )
+        p_wfh = self._optimise_wfh(lockdown_factor)
         simulate_state = self.simulate_states[time] = SimulateState(
             time=time,
             dead=dead,
@@ -161,6 +217,7 @@ class Scenario:
                 )
             },  # here we assume illness affects all employment states equally
             quarantine=quarantine,
+            p_wfh=p_wfh,
             lockdown=lockdown_factor,
             furlough=furlough,
             new_spending_day=self.new_spending_day,
@@ -220,7 +277,9 @@ class SimulateState:  # at one point in time
     dead: Mapping[Tuple[Region, Sector, Age], float]
     ill: Mapping[Tuple[EmploymentState, Region, Sector, Age], float]
     quarantine: Mapping[Tuple[Region, Sector, Age], float]
-    # lockdown intervention
+    # proportion wfh
+    p_wfh: Mapping[Tuple[Region, Sector, Age], float]
+    # lockdown intervention - how much are we locked down
     lockdown: float
     # furlough intervention
     furlough: bool
@@ -243,13 +302,17 @@ class SimulateState:  # at one point in time
 
     # Needed for generating utilisations if not passed in
     reader: InitVar[Optional[Reader]] = None
+    back_to_work_strategy: InitVar[Optional[BackToWork]] = None
 
-    def __post_init__(self, reader: Optional[Reader]):
+    def __post_init__(
+        self,
+        reader: Optional[Reader],
+        back_to_work_strategy: Optional[BackToWork] = None,
+    ):
         if self.utilisations is not None:
             return
         if reader is None:
             raise ValueError("Must provide `reader` if `utilisations` is None")
-        keyworker = SectorDataSource("keyworker").load(reader)
         self.utilisations = Utilisations(
             {
                 (r, s, a): Utilisation(
@@ -258,9 +321,7 @@ class SimulateState:  # at one point in time
                     p_ill_wfo=self.ill[EmploymentState.WFO, r, s, a],
                     p_ill_furloughed=self.ill[EmploymentState.FURLOUGHED, r, s, a],
                     p_ill_unemployed=self.ill[EmploymentState.UNEMPLOYED, r, s, a],
-                    # keyworker state determines who is constrained to WFH
-                    # TODO: let this be optimised
-                    p_wfh=(1.0 - keyworker[s]) * self.lockdown,
+                    p_wfh=self.p_wfh[r, s, a],
                     # if furloughing is available, everybody will be furloughed
                     p_furloughed=float(self.furlough),
                     # this will be an output of the GDP model and overridden accordingly
