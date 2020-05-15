@@ -32,7 +32,6 @@ typedef struct{
 	int random_interaction_distribution;          // distribution from which each person random interactions are drawn
 	double mean_work_interactions[N_OCCUPATION_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
-	double daily_fraction_work_used[N_OCCUPATION_NETWORKS];  // fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
 
