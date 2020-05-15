@@ -496,7 +496,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             capital_discount_factor=self._capital_discount_factor(proportion_solvent),
             proportion_solvent=proportion_solvent,
             proportion_employees_job_exists=self._proportion_employees_job_exists(),
-            exhuberance_factor=self.exhuberance_factor,
+            exhuberance_factor=copy.deepcopy(self.exhuberance_factor),
         )
 
     def _update_state(self, net_operating_surplus: Mapping[Sector, float],) -> None:
