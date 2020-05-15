@@ -43,5 +43,9 @@ if __name__ == "__main__":
             pickle.dump((scenario_name, scenario, result), f)
         logger.info(f"Finished writing")
 
-    with multiprocessing.Pool() as pool:
-        pool.map(_run_scenario, scenario_names)
+    if len(scenario_names) == 1:
+        # Makes debugging a little easier
+        _run_scenario(scenario_names[0])
+    else:
+        with multiprocessing.Pool() as pool:
+            pool.map(_run_scenario, scenario_names)
