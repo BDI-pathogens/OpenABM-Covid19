@@ -185,10 +185,12 @@ void set_up_networks( model *model )
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 	model->random_network->skip_hospitalised = FALSE;
 	model->random_network->skip_quarantined  = FALSE;
+	model->random_network->daily_fraction    = 1.0;
 
 	model->household_network = new_network( n_total, HOUSEHOLD );
 	model->household_network->skip_hospitalised = TRUE;
 	model->household_network->skip_quarantined  = FALSE;
+	model->household_network->daily_fraction    = 1.0;
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
 	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
@@ -214,10 +216,10 @@ void set_up_occupation_network( model *model, int network )
 		if( model->population[idx].occupation_network == network )
 			people[n_people++] = idx;
 
-
 	model->occupation_network[network] = new_network( n_people, OCCUPATION );
 	model->occupation_network[network]->skip_hospitalised = TRUE;
 	model->occupation_network[network]->skip_quarantined  = TRUE;
+	model->occupation_network[network]->daily_fraction    = model->params->daily_fraction_work;
 
 	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
@@ -547,8 +549,7 @@ void build_random_network( model *model )
 ******************************************************************************************/
 void add_interactions_from_network(
 	model *model,
-	network *network,
-	double prob_drop
+	network *network
 )
 {
 	long idx              = 0;
@@ -556,6 +557,7 @@ void add_interactions_from_network(
 	int day               = model->interaction_day_idx;
 	int skip_hospitalised = network->skip_hospitalised;
 	int skip_quarantined  = network->skip_quarantined;
+	double prob_drop      = 1.0 - network->daily_fraction;
 
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
@@ -613,14 +615,14 @@ void build_daily_newtork( model *model )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
 	build_random_network( model );
-	add_interactions_from_network( model, model->random_network, 0 );
-	add_interactions_from_network( model, model->household_network, 0 );
+	add_interactions_from_network( model, model->random_network );
+	add_interactions_from_network( model, model->household_network );
 
 	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
-		add_interactions_from_network( model, model->occupation_network[idx], 1.0 - model->params->daily_fraction_work_used[idx] );
+		add_interactions_from_network( model, model->occupation_network[idx] );
 
 	if( model->user_network != NULL)
-		add_interactions_from_network( model, model->user_network, 0 );
+		add_interactions_from_network( model, model->user_network );
 };
 
 /*****************************************************************************************
@@ -704,6 +706,7 @@ int add_user_network(
 	int type,
 	int skip_hospitalised,
 	int skip_quarantined,
+	double daily_fraction,
 	long n_edges,
 	long *edgeStart,
 	long *edgeEnd
@@ -735,6 +738,7 @@ int add_user_network(
 	model->user_network->n_edges = n_edges;
 	model->user_network->skip_hospitalised = skip_hospitalised;
 	model->user_network->skip_quarantined  = skip_quarantined;
+	model->user_network->daily_fraction    = daily_fraction;
 
 	for( idx = 0; idx < n_edges; idx++ )
 	{

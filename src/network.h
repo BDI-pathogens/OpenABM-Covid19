@@ -34,6 +34,7 @@ typedef struct{
 	int type;		  		// the type of network
 	int skip_hospitalised;	// include the network for hospitalised people
 	int skip_quarantined;	// include the network for quarantined people
+	double daily_fraction;  // fraction of the daily network sampled
 } network;
 
 /************************************************************************/
