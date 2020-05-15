@@ -8,6 +8,7 @@ except:
     def tqdm(x):
         return x
 
+
 from adapter_covid19.scenarios import *
 from adapter_covid19.simulator import Simulator
 
