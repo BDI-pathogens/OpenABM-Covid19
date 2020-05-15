@@ -350,23 +350,23 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _update_exhuberance_factor(self, state: SimulateState) -> None:
         fear_factor = state.get_fear_factor()
         for s in Sector:
-            self.exhuberance_factor[s] *= (1
-                                           + (self.growth_rates[s]
-                                              + ((1 - state.gdp_state.final_use_shortfall_vs_demand[s])
-                                                 * (1 - min(fear_factor * 10, 1.0))
-                                                 * 0.4)
-                                              )
-                                           / DAYS_IN_A_YEAR
-                                           )
+            self.exhuberance_factor[s] *= (
+                1
+                + (
+                    self.growth_rates[s]
+                    + (
+                        (1 - state.gdp_state.final_use_shortfall_vs_demand[s])
+                        * (1 - min(fear_factor * 10, 1.0))
+                        * 0.4
+                    )
+                )
+                / DAYS_IN_A_YEAR
+            )
 
-    def _apply_growth_rates(self,
-                            factor_map: Mapping[Sector, float],
-                            ) -> Mapping[Sector, float]:
-        return {s:
-                factor_map[s]
-                * self.exhuberance_factor[s]
-                for s in Sector
-                }
+    def _apply_growth_rates(
+        self, factor_map: Mapping[Sector, float],
+    ) -> Mapping[Sector, float]:
+        return {s: factor_map[s] * self.exhuberance_factor[s] for s in Sector}
 
     def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
         large_company_solvent = (
@@ -429,7 +429,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {s: 1.0 for s in set(Sector) - proportion_employees_job_exists.keys()}
         )
 
-        proportion_employees_job_exists = self._apply_growth_rates(proportion_employees_job_exists)
+        proportion_employees_job_exists = self._apply_growth_rates(
+            proportion_employees_job_exists
+        )
 
         return proportion_employees_job_exists
 
@@ -441,7 +443,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             {
                 s: (
                     proportion_solvent[BusinessSize.large][s] * self.large_cap_pct[s]
-                    + proportion_solvent[BusinessSize.sme][s] * (1 - self.large_cap_pct[s])
+                    + proportion_solvent[BusinessSize.sme][s]
+                    * (1 - self.large_cap_pct[s])
                 )
                 for s in Sector
             }

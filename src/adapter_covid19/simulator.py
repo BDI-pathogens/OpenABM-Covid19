@@ -30,6 +30,7 @@ except:
     def tqdm(x):
         return x
 
+
 N_PLOTS = 12
 
 logger = logging.getLogger(__file__)
@@ -238,9 +239,7 @@ def summarize_one_scenario(
     )
 
     # Table 3c - Fear Factor
-    df = pd.DataFrame([
-        states[i].get_fear_factor()
-        for i in range(len(states))])
+    df = pd.DataFrame([states[i].get_fear_factor() for i in range(len(states))])
     dfs["Fear Factor"] = df
 
     # Table 4a - Unemployment & Furloughing (by Sector)
