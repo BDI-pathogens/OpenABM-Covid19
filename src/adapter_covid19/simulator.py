@@ -33,6 +33,23 @@ except:
 
 N_PLOTS = 14
 
+CHART_NAMES = [
+    "Deaths",
+    "People Ill",
+    "Total GDP",
+    "GDP Composition",
+    "Capital Stock",
+    "Investment",
+    "Corporate Solvencies - Large Cap",
+    "Corporate Solvencies - SME",
+    "Household Expenditure Reduction (Total)",
+    "Household Expenditure Reduction by Sector",
+    "Fear Factor",
+    "Opportunity Gap",
+    "Unemployed + Furloughed by Sector",
+    "Unemployed vs Furloughed",
+]
+
 logger = logging.getLogger(__file__)
 
 
@@ -243,7 +260,12 @@ def summarize_one_scenario(econ, states, end_time, start_date=None):
     dfs["Fear Factor"] = df
 
     # Table 3d - Opportunity Gap
-    df = -pd.DataFrame([state.gdp_state.final_use_shortfall_vs_demand for state in states]) + 1.0
+    df = (
+        -pd.DataFrame(
+            [state.gdp_state.final_use_shortfall_vs_demand for state in states]
+        )
+        + 1.0
+    )
     dfs["Opportunity Gap"] = df
 
     # Table 4a - Unemployment & Furloughing (by Sector)
@@ -412,98 +434,15 @@ def metrics_scenarios(scenarios):
     return pd.concat(mdfs, axis=1)
 
 
-def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
-    # Plot 0a - Deaths
-    logger.debug("Plotting chart 0a")
-    chart_name = "Deaths"
-    df = dfs[chart_name]
-    df.plot(ax=axes[0], title=title_prefix + chart_name)
-
-    # Plot 0b - Illness
-    logger.debug("Plotting chart 0b")
-    chart_name = "People Ill"
-    df = dfs[chart_name]
-    df.plot(ax=axes[1], title=title_prefix + chart_name)
-
-    # Plot 1a - Total GDP
-    logger.debug("Plotting chart 1a")
-    chart_name = "Total GDP"
-    df = dfs[chart_name]
-    df.plot(ax=axes[2], title=title_prefix + chart_name)
-
-    # Plot 1b - GDP Composition
-    logger.debug("Plotting chart 1b")
-    chart_name = "GDP Composition"
-    df = dfs[chart_name]
-    df.plot.area(stacked=True, ax=axes[3], title=title_prefix + "GDP Composition")
-
-    # Plot 2c - Capital Stock
-    logger.debug("Plotting chart 2c")
-    chart_name = "Capital Stock"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[4])
-
-    # Plot 2d - Investment
-    logger.debug("Plotting chart 2d")
-    chart_name = "Investment"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[5])
-
-    # Plot 2a - Corporate Solvencies - Large Cap
-    logger.debug("Plotting chart 2a")
-    chart_name = "Corporate Solvencies - Large Cap"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[6])
-
-    # Plot 2b - Corporate Solvencies - SME
-    logger.debug("Plotting chart 2b")
-    chart_name = "Corporate Solvencies - SME"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[7])
-
-    # disabling as no longer informative
-    # # Plot 3a - Personal Insolvencies
-    # logger.debug("Plotting chart 3a")
-    # chart_name = "Personal Insolvencies"
-    # df = dfs[chart_name]
-    # df.plot(title=title_prefix + chart_name, ax=axes[6])
-
-    # Plot 3b.1 - Household Expenditure - Total
-    logger.debug("Plotting chart 3b1")
-    chart_name = "Household Expenditure Reduction (Total)"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[8])
-
-    # Plot 3b.2 - Household Expenditure - By Sector
-    logger.debug("Plotting chart 3b2")
-    chart_name = "Household Expenditure Reduction by Sector"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[9])
-
-    # Plot 3c - Fear Factor
-    logger.debug("Plotting chart 3c")
-    chart_name = "Fear Factor"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[10])
-
-    # Plot 3d - Opportunity Gap
-    logger.debug("Plotting chart 3d")
-    chart_name = "Opportunity Gap"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[11])
-
-    # Plot 4b - Unemployment vs Furloughing
-    logger.debug("Plotting chart 4b")
-    chart_name = "Unemployed vs Furloughed"
-    df = dfs[chart_name]
-    # df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
-    df.plot(title=title_prefix + chart_name, ax=axes[12])
-
-    # Plot 4a - Unemployment & Furloughing by Sector
-    logger.debug("Plotting chart 4a")
-    chart_name = "Unemployed + Furloughed by Sector"
-    df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[13])
+def plot_one_scenario(dfs, axes, title_prefix="", legend=False, title=True):
+    for i, chart_name in enumerate(CHART_NAMES):
+        logger.debug(f"Plotting chart {chart_name}")
+        df = dfs[chart_name]
+        title = title_prefix + chart_name if title else ""
+        if chart_name == "GDP Composition":
+            df.plot.area(stacked=True, ax=axes[i], title=title)
+        else:
+            df.plot(ax=axes[i], title=title)
 
     for ax in axes:
         if legend:
@@ -527,7 +466,7 @@ def plot_scenarios(scenarios, end_time=50):
     )
     for idx, (name, dfs) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]
-        plot_one_scenario(dfs, axs)
+        plot_one_scenario(dfs, axs, title=False)
     for ax, name in zip(axes[0], [k for k in scenarios.keys()]):
         ax.annotate(
             name,
@@ -538,4 +477,15 @@ def plot_scenarios(scenarios, end_time=50):
             size="large",
             ha="center",
             va="baseline",
+        )
+    for ax, chart_name in zip(axes[:, 0], CHART_NAMES):
+        ax.annotate(
+            chart_name,
+            xy=(0, 0.5),
+            xytext=(-ax.yaxis.labelpad - 5, 0),
+            xycoords=ax.yaxis.label,
+            textcoords="offset points",
+            size="large",
+            ha="right",
+            va="center",
         )
