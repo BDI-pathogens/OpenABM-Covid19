@@ -115,9 +115,7 @@ class Simulator:
         return result
 
 
-def summarize_one_scenario(
-    econ, states, end_time, start_date=None
-):
+def summarize_one_scenario(econ, states, end_time, start_date=None):
     dfs = {}
 
     # Table 0a - Death
@@ -321,10 +319,89 @@ def summarize_one_scenario(
 
     if start_date is not None:
         for df in dfs.values():
-            idx = pd.date_range(start_date,periods=len(df))
+            idx = pd.date_range(start_date, periods=len(df))
             df.index = idx
 
     return dfs
+
+
+def metrics_one_scenario(dfs, scenario_name="Scenario"):
+    _metric_dfs = []
+
+    table_name = "Total GDP"
+    _df = dfs[table_name].resample("1Q").mean().iloc[1:].to_frame(name=scenario_name)
+    _df = _df.reset_index().rename(columns={"index": "Period"})
+    _df["Metric"] = table_name
+    _df["Period"] = _df["Period"].replace(
+        to_replace={
+            pd.to_datetime("2020-06-30"): "Q2",
+            pd.to_datetime("2020-09-30"): "Q3",
+        }
+    )
+    _df = _df.set_index(["Metric", "Period"])
+    _metric_dfs.append(_df)
+
+    table_name = "Household Expenditure Reduction (Total)"
+    _df = dfs[table_name].resample("1Q").mean().iloc[1:].to_frame(name=scenario_name)
+    _df = _df.reset_index().rename(columns={"index": "Period"})
+    _df["Metric"] = table_name
+    _df["Period"] = _df["Period"].replace(
+        to_replace={
+            pd.to_datetime("2020-06-30"): "Q2",
+            pd.to_datetime("2020-09-30"): "Q3",
+        }
+    )
+    _df = _df.set_index(["Metric", "Period"])
+    _metric_dfs.append(_df)
+
+    table_name = "Capital Stock"
+    _df = dfs[table_name].resample("1Q").mean().iloc[1:].to_frame(name=scenario_name)
+    _df = _df.reset_index().rename(columns={"index": "Period"})
+    _df["Metric"] = table_name
+    _df["Period"] = _df["Period"].replace(
+        to_replace={
+            pd.to_datetime("2020-06-30"): "Q2",
+            pd.to_datetime("2020-09-30"): "Q3",
+        }
+    )
+    _df = _df.set_index(["Metric", "Period"])
+    _metric_dfs.append(_df)
+
+    table_name = "Unemployed vs Furloughed"
+    _mdf = dfs[table_name].resample("1Q").mean().iloc[1:]
+
+    _df = _mdf["unemployed"].to_frame(name=scenario_name)
+    _df = _df.reset_index().rename(columns={"index": "Period"})
+    _df["Metric"] = "Unemployed"
+    _df["Period"] = _df["Period"].replace(
+        to_replace={
+            pd.to_datetime("2020-06-30"): "Q2",
+            pd.to_datetime("2020-09-30"): "Q3",
+        }
+    )
+    _df = _df.set_index(["Metric", "Period"])
+    _metric_dfs.append(_df)
+
+    _df = _mdf["furloughed"].to_frame(name=scenario_name)
+    _df = _df.reset_index().rename(columns={"index": "Period"})
+    _df["Metric"] = "Furloughed"
+    _df["Period"] = _df["Period"].replace(
+        to_replace={
+            pd.to_datetime("2020-06-30"): "Q2",
+            pd.to_datetime("2020-09-30"): "Q3",
+        }
+    )
+    _df = _df.set_index(["Metric", "Period"])
+    _metric_dfs.append(_df)
+
+    metrics_df = pd.concat(_metric_dfs)
+
+    return metrics_df
+
+
+def metrics_scenarios(scenarios):
+    mdfs = [metrics_one_scenario(dfs, name) for name, dfs in scenarios.items()]
+    return pd.concat(mdfs, axis=1)
 
 
 def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
@@ -401,7 +478,8 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     logger.debug("Plotting chart 4b")
     chart_name = "Unemployed vs Furloughed"
     df = dfs[chart_name]
-    df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
+    #df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
+    df.plot(title=title_prefix + chart_name, ax=axes[10])
 
     # Plot 4a - Unemployment & Furloughing by Sector
     logger.debug("Plotting chart 4a")
@@ -427,7 +505,7 @@ def plot_scenarios(scenarios, end_time=50):
         len(scenarios),
         sharex="col",
         sharey="row",
-        figsize=(3.5 * len(scenarios), 2 * n_charts),
+        figsize=(7 * len(scenarios), 4 * n_charts),
     )
     for idx, (name, dfs) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]
