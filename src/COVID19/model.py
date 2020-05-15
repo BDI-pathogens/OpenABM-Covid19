@@ -66,7 +66,8 @@ class EVENT_TYPES(enum.Enum):
     TEST_RESULT = 14
     CASE = 15
     TRACE_TOKEN_RELEASE = 16
-    N_EVENT_TYPES = 17
+    TRANSITION_TO_HOSPITAL = 17
+    N_EVENT_TYPES = 18
 
 
 class OccupationNetworkEnum(enum.Enum):
@@ -499,6 +500,18 @@ class Model:
         results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
         results["n_recovered"] = covid19.utils_n_current(
             self.c_model, covid19.RECOVERED
+        )
+        results["hospital_admissions"]  = covid19.utils_n_daily(
+            self.c_model, covid19.TRANSITION_TO_HOSPITAL, self.c_model.time
+        )
+        results["hospital_admissions_total"]  = covid19.utils_n_total(
+            self.c_model, covid19.TRANSITION_TO_HOSPITAL
+        )
+        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
+        )
+        results["hospital_to_critical_total"] = covid19.utils_n_total(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL
         )
         return results
 
