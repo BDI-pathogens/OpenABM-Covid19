@@ -31,7 +31,7 @@ except:
         return x
 
 
-N_PLOTS = 12
+N_PLOTS = 14
 
 logger = logging.getLogger(__file__)
 
@@ -218,6 +218,10 @@ def summarize_one_scenario(econ, states, end_time, start_date=None):
     )
     dfs["Capital Stock"] = df
 
+    # Table 2d - Investment
+    df = pd.DataFrame([state.corporate_state.exhuberance_factor for state in states])
+    dfs["Investment"] = df
+
     # Table 3a - Personal Insolvencies
     df = pd.DataFrame(
         [states[i].personal_state.personal_bankruptcy for i in range(end_time)],
@@ -237,6 +241,10 @@ def summarize_one_scenario(econ, states, end_time, start_date=None):
     # Table 3c - Fear Factor
     df = pd.DataFrame([states[i].get_fear_factor() for i in range(len(states))])
     dfs["Fear Factor"] = df
+
+    # Table 3d - Opportunity Gap
+    df = -pd.DataFrame([state.gdp_state.final_use_shortfall_vs_demand for state in states]) + 1.0
+    dfs["Opportunity Gap"] = df
 
     # Table 4a - Unemployment & Furloughing (by Sector)
     # TODO: Leverage utilisations class for the below computations instead
@@ -435,17 +443,23 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     df = dfs[chart_name]
     df.plot(title=title_prefix + chart_name, ax=axes[4])
 
+    # Plot 2d - Investment
+    logger.debug("Plotting chart 2d")
+    chart_name = "Investment"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[5])
+
     # Plot 2a - Corporate Solvencies - Large Cap
     logger.debug("Plotting chart 2a")
     chart_name = "Corporate Solvencies - Large Cap"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[5])
+    df.plot(title=title_prefix + chart_name, ax=axes[6])
 
     # Plot 2b - Corporate Solvencies - SME
     logger.debug("Plotting chart 2b")
     chart_name = "Corporate Solvencies - SME"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[6])
+    df.plot(title=title_prefix + chart_name, ax=axes[7])
 
     # disabling as no longer informative
     # # Plot 3a - Personal Insolvencies
@@ -458,34 +472,38 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     logger.debug("Plotting chart 3b1")
     chart_name = "Household Expenditure Reduction (Total)"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[7])
+    df.plot(title=title_prefix + chart_name, ax=axes[8])
 
     # Plot 3b.2 - Household Expenditure - By Sector
     logger.debug("Plotting chart 3b2")
     chart_name = "Household Expenditure Reduction by Sector"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[8])
+    df.plot(title=title_prefix + chart_name, ax=axes[9])
 
     # Plot 3c - Fear Factor
     logger.debug("Plotting chart 3c")
     chart_name = "Fear Factor"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[9])
+    df.plot(title=title_prefix + chart_name, ax=axes[10])
 
-    # Plot 4d
+    # Plot 3d - Opportunity Gap
+    logger.debug("Plotting chart 3d")
+    chart_name = "Opportunity Gap"
+    df = dfs[chart_name]
+    df.plot(title=title_prefix + chart_name, ax=axes[11])
 
     # Plot 4b - Unemployment vs Furloughing
     logger.debug("Plotting chart 4b")
     chart_name = "Unemployed vs Furloughed"
     df = dfs[chart_name]
     # df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
-    df.plot(title=title_prefix + chart_name, ax=axes[10])
+    df.plot(title=title_prefix + chart_name, ax=axes[12])
 
     # Plot 4a - Unemployment & Furloughing by Sector
     logger.debug("Plotting chart 4a")
     chart_name = "Unemployed + Furloughed by Sector"
     df = dfs[chart_name]
-    df.plot(title=title_prefix + chart_name, ax=axes[11])
+    df.plot(title=title_prefix + chart_name, ax=axes[13])
 
     for ax in axes:
         if legend:
