@@ -116,7 +116,7 @@ class Simulator:
 
 
 def summarize_one_scenario(
-    econ, states, end_time,
+    econ, states, end_time, start_date=None
 ):
     dfs = {}
 
@@ -155,20 +155,17 @@ def summarize_one_scenario(
                 * states[i].gdp_state.workers_in_sector(s)
                 for s in Sector
             }
-            for i in range(1, end_time)
-        ],
-        index=range(1, end_time),
+            for i in range(end_time)
+        ]
     ).sum(axis=1) / pd.Series(
-        [states[i].gdp_state.max_workers for i in range(1, end_time)],
-        index=range(1, end_time),
+        [states[i].gdp_state.max_workers for i in range(end_time)]
     )
     dfs["People Ill"] = df
 
     # Table 1a - Total GDP
     df = (
         pd.DataFrame(
-            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
-            index=range(1, end_time),
+            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(end_time)],
         )
         .T.sort_index()
         .T.sum(axis=1)
@@ -178,8 +175,7 @@ def summarize_one_scenario(
     # Table 1b - GDP Composition
     df = (
         pd.DataFrame(
-            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(1, end_time)],
-            index=range(1, end_time),
+            [states[i].gdp_state.fraction_gdp_by_sector() for i in range(end_time)],
         )
         .T.sort_index()
         .T
@@ -191,8 +187,8 @@ def summarize_one_scenario(
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.large]
-            for i in range(1, end_time)
-        ]
+            for i in range(end_time)
+        ],
     )
     dfs["Corporate Solvencies - Large Cap"] = df
 
@@ -200,8 +196,8 @@ def summarize_one_scenario(
     df = pd.DataFrame(
         [
             states[i].corporate_state.proportion_solvent[BusinessSize.sme]
-            for i in range(1, end_time)
-        ]
+            for i in range(end_time)
+        ],
     )
     dfs["Corporate Solvencies - SME"] = df
 
@@ -210,8 +206,8 @@ def summarize_one_scenario(
         pd.DataFrame(
             [
                 states[i].corporate_state.capital_discount_factor
-                for i in range(1, end_time)
-            ]
+                for i in range(end_time)
+            ],
         )
         .multiply(
             (
@@ -226,13 +222,13 @@ def summarize_one_scenario(
 
     # Table 3a - Personal Insolvencies
     df = pd.DataFrame(
-        [states[i].personal_state.personal_bankruptcy for i in range(1, end_time)]
+        [states[i].personal_state.personal_bankruptcy for i in range(end_time)],
     )
     dfs["Personal Insolvencies"] = df
 
     # Table 3b - Household Expenditure
     df = pd.DataFrame(
-        [states[i].personal_state.demand_reduction for i in range(1, end_time)]
+        [states[i].personal_state.demand_reduction for i in range(end_time)],
     )
     dfs["Household Expenditure Reduction by Sector"] = df
     dfs["Household Expenditure Reduction (Total)"] = (
@@ -271,8 +267,8 @@ def summarize_one_scenario(
                 for s in Sector
                 if s != Sector.T_HOUSEHOLD
             }
-            for i in range(1, end_time)
-        ]
+            for i in range(end_time)
+        ],
     )
     dfs["Unemployed + Furloughed by Sector"] = df
 
@@ -290,9 +286,8 @@ def summarize_one_scenario(
                 * max_workers_by_sector[s]
                 for s in Sector
             }
-            for i in range(1, end_time)
+            for i in range(end_time)
         ],
-        index=range(1, end_time),
     )
 
     df_u = pd.DataFrame(
@@ -302,9 +297,8 @@ def summarize_one_scenario(
                 * df_workers_alive.loc[i, s]
                 for s in Sector
             }
-            for i in range(1, end_time)
+            for i in range(end_time)
         ],
-        index=range(1, end_time),
     )
 
     df_f = pd.DataFrame(
@@ -314,9 +308,8 @@ def summarize_one_scenario(
                 * df_workers_alive.loc[i, s]
                 for s in Sector
             }
-            for i in range(1, end_time)
+            for i in range(end_time)
         ],
-        index=range(1, end_time),
     )
     df = pd.DataFrame(
         {
@@ -325,6 +318,11 @@ def summarize_one_scenario(
         }
     )
     dfs["Unemployed vs Furloughed"] = df
+
+    if start_date is not None:
+        for df in dfs.values():
+            idx = pd.date_range(start_date,periods=len(df))
+            df.index = idx
 
     return dfs
 
