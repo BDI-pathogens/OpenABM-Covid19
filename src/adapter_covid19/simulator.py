@@ -478,7 +478,7 @@ def plot_one_scenario(dfs, axes, title_prefix="", legend=False):
     logger.debug("Plotting chart 4b")
     chart_name = "Unemployed vs Furloughed"
     df = dfs[chart_name]
-    #df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
+    # df.plot.area(stacked=True, title=title_prefix + chart_name, ax=axes[10])
     df.plot(title=title_prefix + chart_name, ax=axes[10])
 
     # Plot 4a - Unemployment & Furloughing by Sector
