@@ -318,3 +318,23 @@ class TestClass(object):
         covid19.get_param_array_app_users_fraction(params, get_age_groups)
         for i in range(covid19.N_AGE_GROUPS):
             np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
+
+
+    def test_hostpital_admissions(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+        )
+        model = Model(params)
+        daily_hospitalisations = []
+        daily_critical = []
+        for step in range(10):
+            model.one_time_step()
+            daily_h = model.one_time_step_results()["hospital_admissions"]
+            daily_c = model.one_time_step_results()["hospital_to_critical_daily"]
+            daily_hospitalisations.append(daily_h)
+            daily_critical.append(daily_c)
+            assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"] 
+            assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"] 

@@ -346,7 +346,10 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
-
+	// Not the greatest solution, but store daily and total number of individuals
+	// admitted to hospital in the event list
+	model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
+	model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 	{
 		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
@@ -372,7 +375,8 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-
+	model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
+	model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
