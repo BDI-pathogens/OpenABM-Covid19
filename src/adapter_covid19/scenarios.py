@@ -7,6 +7,7 @@ from adapter_covid19.data_structures import Scenario, ModelParams
 __all__ = (
     "BASIC_MODEL_PARAMS",
     "BASIC_SCENARIO",
+    "BASIC_SLOW_UNLOCK_SCENARIO",
     "BASIC_NO_FURLOUGH_SCENARIO",
     "BASIC_NO_CORP_SUPPORT_SCENARIO",
     "BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO",
@@ -200,6 +201,28 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     fear_factor_coef_dead=1000.0,
 )
 
+# Basic Scenario (aligned with actual interventions)
+# * Lockdown
+# * Furlough
+# * Corporate Support
+
+BASIC_SLOW_UNLOCK_SCENARIO = Scenario(
+    lockdown_start_time=10,
+    lockdown_end_time=59,
+    slow_unlock=True,
+    furlough_start_time=10,
+    furlough_end_time=202,
+    simulation_end_time=202,
+    new_spending_day=10,
+    ccff_day=10,
+    loan_guarantee_day=10,
+    model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=4.0,
+    fear_factor_coef_dead=1000.0,
+)
+
 TEST_SCENARIO = Scenario(
     lockdown_start_time=2,
     lockdown_end_time=50,
@@ -222,6 +245,7 @@ TEST_SCENARIO = Scenario(
 
 SCENARIOS = {
     "basic": BASIC_SCENARIO,
+    "slow_unlock": BASIC_SLOW_UNLOCK_SCENARIO,
     "no_furlough": BASIC_NO_FURLOUGH_SCENARIO,
     "no_corp_support": BASIC_NO_CORP_SUPPORT_SCENARIO,
     "no_furlough_no_corp_support": BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO,

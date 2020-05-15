@@ -36,6 +36,7 @@ from adapter_covid19.enums import (
     WorkerState,
     WorkerStateConditional,
 )
+from adapter_covid19.lockdown import get_lockdown_factor
 
 
 @dataclass
@@ -51,6 +52,7 @@ class Scenario:
     lockdown_exited_time: int = field(default=0, init=False)
     lockdown_start_time: int = 1000
     lockdown_end_time: int = 1000
+    slow_unlock: bool = False
     furlough_start_time: int = 1000
     furlough_end_time: int = 1000
     simulation_end_time: int = 2000
@@ -113,7 +115,7 @@ class Scenario:
                     lockdown_start = self.lockdown_start_time
                     lockdown_end = self.lockdown_end_time
                 end = self.simulation_end_time + 1
-                file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}"
+                file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}_{self.slow_unlock}"
                 data = reader.load_pkl(file_name)
                 self.ill_ratio = data["ill_ratio"]
                 self.dead_ratio = data["dead_ratio"]
@@ -146,6 +148,9 @@ class Scenario:
         reader: Reader,
     ) -> SimulateState:
         self._pre_simulation_checks(time, lockdown)
+        lockdown_factor = get_lockdown_factor(
+            lockdown, self.slow_unlock, self.lockdown_exited_time, time,
+        )
         simulate_state = self.simulate_states[time] = SimulateState(
             time=time,
             dead=dead,
@@ -156,7 +161,7 @@ class Scenario:
                 )
             },  # here we assume illness affects all employment states equally
             quarantine=quarantine,
-            lockdown=lockdown,
+            lockdown=lockdown_factor,
             furlough=furlough,
             new_spending_day=self.new_spending_day,
             ccff_day=self.ccff_day,
@@ -216,7 +221,7 @@ class SimulateState:  # at one point in time
     ill: Mapping[Tuple[EmploymentState, Region, Sector, Age], float]
     quarantine: Mapping[Tuple[Region, Sector, Age], float]
     # lockdown intervention
-    lockdown: bool  # TODO: should reflect more granularly who are key workers
+    lockdown: float
     # furlough intervention
     furlough: bool
     # corporate solvency interventions
@@ -254,7 +259,8 @@ class SimulateState:  # at one point in time
                     p_ill_furloughed=self.ill[EmploymentState.FURLOUGHED, r, s, a],
                     p_ill_unemployed=self.ill[EmploymentState.UNEMPLOYED, r, s, a],
                     # keyworker state determines who is constrained to WFH
-                    p_wfh=1.0 - keyworker[s] if self.lockdown else 0.0,
+                    # TODO: let this be optimised
+                    p_wfh=(1.0 - keyworker[s]) * self.lockdown,
                     # if furloughing is available, everybody will be furloughed
                     p_furloughed=float(self.furlough),
                     # this will be an output of the GDP model and overridden accordingly
@@ -276,7 +282,7 @@ class SimulateState:  # at one point in time
             ).mean()
             delta_avg_dead = avg_dead - avg_prev_dead
         logistic_input = (
-            self.fear_factor_coef_lockdown * float(self.lockdown)
+            self.fear_factor_coef_lockdown * self.lockdown
             + self.fear_factor_coef_ill * avg_ill
             + self.fear_factor_coef_dead * delta_avg_dead
         )
