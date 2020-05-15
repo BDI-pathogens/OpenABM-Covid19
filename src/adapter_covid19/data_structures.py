@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import itertools
+import logging
 import math
 import warnings
 from dataclasses import dataclass, field, InitVar
@@ -39,6 +40,8 @@ from adapter_covid19.enums import (
     BackToWork,
 )
 from adapter_covid19.lockdown import get_lockdown_factor, get_working_factor
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -91,6 +94,8 @@ class Scenario:
     )
     furloughed: Mapping[Sector, float] = field(default=None, init=False)
     keyworker: Mapping[Sector, float] = field(default=None, init=False)
+    wfh: Mapping[Sector, float] = field(default=None, init=False)
+    workers_per_sector: Mapping[Sector, float] = field(default=None, init=False)
     greedy_order: List[Region, Sector, Age] = field(default=None, init=False)
 
     _has_been_lockdown: bool = False
@@ -107,6 +112,7 @@ class Scenario:
             "workers": RegionSectorAgeDataSource,
             "furloughed": SectorDataSource,
             "keyworker": SectorDataSource,
+            "wfh": SectorDataSource,
         }
         if self.back_to_work_strategy is None:
             if self.slow_unlock:
@@ -126,6 +132,10 @@ class Scenario:
         self.greedy_order = sorted(
             gdp_per_worker, key=lambda x: gdp_per_worker[x], reverse=True
         )
+        self.workers_per_sector = {
+            s: sum(self.workers[r, s, a] for r, a in itertools.product(Region, Age))
+            for s in Sector
+        }
         self._data_path = reader.data_path
 
         if self.epidemic_active:
@@ -158,6 +168,94 @@ class Scenario:
         if not self.lockdown_exited_time and self._has_been_lockdown and not lockdown:
             self.lockdown_exited_time = time
 
+    def _constrained_optimise_wfh(
+        self, lockdown_factor: float, time: int
+    ) -> Mapping[Tuple[Region, Sector, Age], float]:
+        # There's so much potentioal for things to go wrong here...
+        if time == 0:
+            # We shouldn't be locked down at timestep 0
+            assert np.isclose(lockdown_factor, 0), lockdown_factor
+            return {key: 0 for key in itertools.product(Region, Sector, Age)}
+        if np.isclose(lockdown_factor, 1) or np.isclose(lockdown_factor, 0):
+            # If we're fully locked down/unlocked, we there's no difference between models
+            return self._naive_optimise_wfh(lockdown_factor)
+        proportion_workers = get_working_factor(self._data_path, lockdown_factor)
+        total_workers = sum(self.workers_per_sector.values())
+        desired_workers_total = proportion_workers * total_workers
+        LOGGER.debug(f"time={time}, desired_workers={desired_workers_total}")
+        previous = self.simulate_states[time - 1]
+        # This code assumes we never lock down gradually more once we start unlocking
+        assert lockdown_factor <= previous.lockdown, (
+            lockdown_factor,
+            previous.lockdown,
+        )
+        # Previous p_wfh per sector
+        previous_p_wfh_s = {
+            s: sum(
+                previous.p_wfh[r, s, a] * self.workers[r, s, a]
+                for r, a in itertools.product(Region, Age)
+            )
+            / self.workers_per_sector[s]
+            for s in Sector
+        }
+        assert all(0 <= v <= 1 for v in previous_p_wfh_s.values()), previous_p_wfh_s
+        # Lengthy derivation exis
+        spare_capacity = {
+            s: min(
+                (1 - previous.gdp_state.final_use_shortfall_vs_demand[s])
+                * ((1 - previous_p_wfh_s[s]) + previous_p_wfh_s[s] * self.wfh[s])
+                / (
+                    previous.gdp_state.final_use_shortfall_vs_demand[s]
+                    * (1 - self.wfh[s])
+                ),
+                self.workers_per_sector[s] * previous_p_wfh_s[s],
+            )
+            for s in Sector
+        }
+        assert all(v >= 0 for v in spare_capacity.values()), spare_capacity
+        spare_capacity_total = sum(spare_capacity.values())
+        LOGGER.debug(f"time={time}, spare_capacity={spare_capacity_total}")
+        current_workers = {
+            key: (1 - previous.p_wfh[key]) * self.workers[key]
+            for key in itertools.product(Region, Sector, Age)
+        }
+        current_workers_total = sum(current_workers.values())
+        LOGGER.debug(f"time={time}, current_workers={current_workers_total}")
+        desired_excess = desired_workers_total - current_workers_total
+        assert desired_excess >= -1e-6, desired_excess
+        desired_excess = max(desired_excess, 0)
+        LOGGER.debug(f"time={time}, desired_excess={desired_excess}")
+        # Not using copy.deepcopy to save time/space
+        wfh_s = previous_p_wfh_s
+        # Ensure we're not going to use previous_p_wfh_s any more
+        del previous_p_wfh_s
+        if spare_capacity_total >= desired_excess:
+            factor = desired_excess / spare_capacity_total
+            assert 0 <= factor <= 1, factor
+            LOGGER.debug(f"time={time}, factor={factor}")
+        else:
+            factor = 1
+        for sector in Sector:
+            wfh_s[sector] -= (
+                factor * spare_capacity[sector] / self.workers_per_sector[sector]
+            )
+        if spare_capacity_total < desired_excess:
+            # Still need to allocate remaining workers
+            super_excess = desired_excess - spare_capacity_total
+            LOGGER.debug(f"time={time}, super_excess={super_excess}")
+            free_workers = {s: self.workers_per_sector[s] * wfh_s[s] for s in Sector}
+            assert all(v >= 0 for v in free_workers.values()), free_workers
+            free_workers_total = sum(free_workers.values())
+            for sector in Sector:
+                wfh_s[sector] -= (free_workers[sector] / free_workers_total) * (
+                    super_excess / self.workers_per_sector[sector]
+                )
+        assert all(-1e-6 <= v <= 1 for v in wfh_s.values()), wfh_s
+        wfh_s = {k: max(0, v) for k, v in wfh_s.items()}
+        return {
+            (r, s, a): wfh_s[s] for r, s, a in itertools.product(Region, Sector, Age)
+        }
+
     def _naive_optimise_wfh(
         self, lockdown_factor: float
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
@@ -184,12 +282,14 @@ class Scenario:
         return wfh
 
     def _optimise_wfh(
-        self, lockdown_factor: float,
+        self, lockdown_factor: float, time: int
     ) -> Mapping[Tuple[Region, Sector, Age], float]:
         if self.back_to_work_strategy == BackToWork.naive:
             return self._naive_optimise_wfh(lockdown_factor)
         if self.back_to_work_strategy == BackToWork.greedy:
             return self._greedy_optimise_wfh(lockdown_factor)
+        if self.back_to_work_strategy == BackToWork.constrained:
+            return self._constrained_optimise_wfh(lockdown_factor, time)
         raise NotImplementedError(self.back_to_work_strategy)
 
     def generate(
@@ -206,7 +306,7 @@ class Scenario:
         lockdown_factor = get_lockdown_factor(
             lockdown, self.slow_unlock, self.lockdown_exited_time, time,
         )
-        p_wfh = self._optimise_wfh(lockdown_factor)
+        p_wfh = self._optimise_wfh(lockdown_factor, time)
         simulate_state = self.simulate_states[time] = SimulateState(
             time=time,
             dead=dead,
@@ -302,12 +402,9 @@ class SimulateState:  # at one point in time
 
     # Needed for generating utilisations if not passed in
     reader: InitVar[Optional[Reader]] = None
-    back_to_work_strategy: InitVar[Optional[BackToWork]] = None
 
     def __post_init__(
-        self,
-        reader: Optional[Reader],
-        back_to_work_strategy: Optional[BackToWork] = None,
+        self, reader: Optional[Reader],
     ):
         if self.utilisations is not None:
             return

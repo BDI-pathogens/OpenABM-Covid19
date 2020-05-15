@@ -13,6 +13,7 @@ __all__ = (
     "BASIC_NO_LOCKDOWN_SCENARIO",
     "BASIC_SLOW_UNLOCK_SCENARIO",
     "BASIC_SLOW_UNLOCK_GREEDY_SCENARIO",
+    "BASIC_SLOW_UNLOCK_CONSTRAINED_SCENARIO",
     "TEST_SCENARIO",
     "SCENARIOS",
 )
@@ -253,12 +254,40 @@ BASIC_SLOW_UNLOCK_GREEDY_SCENARIO = Scenario(
     fear_factor_coef_dead=1000.0,
 )
 
+
+# Basic Scenario (aligned with actual interventions)
+# * Lockdown
+# * Furlough
+# * Corporate Support
+# * Slow release of lockdown
+# * Send people back to work taking into account supply/demand
+
+BASIC_SLOW_UNLOCK_CONSTRAINED_SCENARIO = Scenario(
+    lockdown_start_time=10,
+    lockdown_end_time=59,
+    slow_unlock=True,
+    back_to_work_strategy=BackToWork.constrained,
+    furlough_start_time=10,
+    furlough_end_time=202,
+    simulation_end_time=202,
+    new_spending_day=10,
+    ccff_day=10,
+    loan_guarantee_day=10,
+    model_params=BASIC_MODEL_PARAMS,
+    spread_model_time_factor=1.0,
+    fear_factor_coef_lockdown=0.3,
+    fear_factor_coef_ill=4.0,
+    fear_factor_coef_dead=1000.0,
+)
+
 TEST_SCENARIO = Scenario(
     lockdown_start_time=2,
-    lockdown_end_time=50,
+    lockdown_end_time=5,
     furlough_start_time=2,
-    furlough_end_time=50,
-    simulation_end_time=5,
+    furlough_end_time=5,
+    simulation_end_time=20,
+    slow_unlock=True,
+    back_to_work_strategy=BackToWork.constrained,
     new_spending_day=2,
     ccff_day=2,
     loan_guarantee_day=2,
@@ -277,6 +306,7 @@ SCENARIOS = {
     "basic": BASIC_SCENARIO,
     "slow_unlock": BASIC_SLOW_UNLOCK_SCENARIO,
     "slow_unlock_greedy": BASIC_SLOW_UNLOCK_GREEDY_SCENARIO,
+    "slow_unlock_constrained": BASIC_SLOW_UNLOCK_CONSTRAINED_SCENARIO,
     "no_furlough": BASIC_NO_FURLOUGH_SCENARIO,
     "no_corp_support": BASIC_NO_CORP_SUPPORT_SCENARIO,
     "no_furlough_no_corp_support": BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO,
