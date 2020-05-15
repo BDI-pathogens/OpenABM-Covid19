@@ -219,3 +219,9 @@ class Decile(OrderedEnum):
 class BusinessSize(OrderedEnum):
     large = "large-cap"
     sme = "small-medium-enterprise"
+
+
+class BackToWork(OrderedEnum):
+    naive = enum.auto()
+    greedy = enum.auto()
+    constrained = enum.auto()
