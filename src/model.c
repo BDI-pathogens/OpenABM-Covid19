@@ -202,16 +202,17 @@ void set_up_occupation_network( model *model, int network )
 	long *people;
 	double n_interactions;
 	int age = NETWORK_TYPE_MAP[network];
+	parameters *params = model->params;
 
-	people = calloc( model->params->n_total, sizeof( long ) );
-	for( idx = 0; idx < model->params->n_total; idx++ )
+	people = calloc( params->n_total, sizeof( long ) );
+	for( idx = 0; idx < params->n_total; idx++ )
 		if( model->population[idx].occupation_network == network )
 			people[n_people++] = idx;
 
 
 	model->occupation_network[network] = new_network( n_people, OCCUPATION );
-	n_interactions =  model->params->mean_work_interactions[age] / model->params->daily_fraction_work;
-	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, 0.1, TRUE );
+	n_interactions =  params->mean_work_interactions[age] / params->daily_fraction_work;
+	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, params->work_network_rewire, TRUE );
 	relabel_network( model->occupation_network[network], people );
 
 	free( people );
