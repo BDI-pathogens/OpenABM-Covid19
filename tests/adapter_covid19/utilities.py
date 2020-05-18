@@ -75,15 +75,26 @@ def state_from_utilisation(
     lambdas = utilisation.to_lambdas()
     ill = sum(v for k, v in lambdas.items() if k in ILL_STATES)
     dead = lambdas[WorkerState.DEAD]
+    # Placeholder until quarantine is integrated from the covid model
+    quarantine = 0
+    ill, dead, quarantine, p_wfh = [
+        {k: x for k in itertools.product(Region, Sector, Age)}
+        for x in [ill, dead, quarantine, utilisation.p_wfh]
+    ]
     state = SimulateState(
         time=0,
         dead=dead,
         ill=ill,
-        lockdown=utilisation.p_wfh > 0,
+        quarantine=quarantine,
+        p_wfh=p_wfh,
+        lockdown=float(utilisation.p_wfh > 0),
         furlough=utilisation.p_furloughed > 0,
         new_spending_day=new_spending_day,
         ccff_day=ccff_day,
         loan_guarantee_day=loan_guarantee_day,
+        fear_factor_coef_lockdown=1.0,
+        fear_factor_coef_ill=1.0,
+        fear_factor_coef_dead=1.0,
         utilisations=utilisations,
     )
     return state
