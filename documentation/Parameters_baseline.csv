@@ -142,7 +142,7 @@ relative_susceptibility_70_79,1.45,"Relative susceptibility to infection, aged 7
 relative_susceptibility_80,1.66,"Relative susceptibility to infection, aged 80+",covid-19 assumption,,"Derivation in documentation, normalised by population size",,
 relative_transmission_household,2,Relative infectious rate of household interaction,covid-19 assumption,-,,,
 relative_transmission_random,1,Relative infectious rate of random interaction,covid-19 assumption,-,,,
-relative_transmission_workplace,1,Relative infectious rate of workplace interaction,covid-19 assumption,-,,,
+relative_transmission_occupation,1,Relative infectious rate of workplace interaction,covid-19 assumption,-,,,
 rng_seed,1,Random starting seed,IBM setup,-,,,
 sd_asymptomatic_to_recovery,5,Standard deviation from infection to recovery for an asymptomatic individual (days),covid-19 assumption,Yang et al 2020,,,
 sd_infectious_period,2.5,Standard deviation (days) of infectious period,covid-19 assumption,"Ma et al, 2020",Ganyani et al. 2020,Ferretti & Wymant et al. 2020,Intermediate value between these sources

@@ -188,6 +188,9 @@ void set_up_networks( model *model )
 	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
 	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
 		set_up_occupation_network( model, idx );
+
+	for( idx =0; idx < N_AGE_TYPES; idx++ )
+		model->mean_interactions[idx] = estimate_mean_interactions_by_age( model, idx );
 }
 
 /*****************************************************************************************
