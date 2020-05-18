@@ -474,7 +474,7 @@ class TestClass(object):
         leads to corresponding change (increase, decrease, or equal) in counts of transmissions in the NETWORK.
         
         """
-        relative_transmissions = [ "relative_transmission_household", "relative_transmission_workplace", "relative_transmission_random" ]
+        relative_transmissions = [ "relative_transmission_household", "relative_transmission_occupation", "relative_transmission_random" ]
         relative_transmission = relative_transmissions[transmission_NETWORK]
         
         # calculate the transmission proportions for the first entry in the relative_transmission_values
@@ -483,7 +483,7 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "relative_transmission_household", 1 )
-        params.set_param( "relative_transmission_workplace", 1 )
+        params.set_param( "relative_transmission_occupation", 1 )
         params.set_param( "relative_transmission_random", 1 )
         params.set_param( relative_transmission , rel_trans_value_current )
         params.write_params(constant.TEST_DATA_FILE)     
@@ -1009,9 +1009,5 @@ class TestClass(object):
         actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
        
-                    
-       
-
-    
     
       
