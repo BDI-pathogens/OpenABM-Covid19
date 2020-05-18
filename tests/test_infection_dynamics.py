@@ -13,7 +13,7 @@ Author: p-robot
 import pytest, sys, subprocess, shutil, os
 import numpy as np, pandas as pd
 from scipy import optimize
-from math import exp, log
+from math import exp, log, fabs
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -127,7 +127,7 @@ class TestClass(object):
             ),
             dict(
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
@@ -137,7 +137,7 @@ class TestClass(object):
             ),
             dict( # fluctuating list
                 end_time = 250,
-                transmission_NETWORK = constant.WORK,
+                transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ],
@@ -306,7 +306,23 @@ class TestClass(object):
                 n_total = 100000,
                 n_seed_infection = 10000,
                 end_time = 1
-            )
+            ),
+        ],
+        "test_relative_transmission_update": [
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 100,
+                    infectious_rate = 6.0,
+                    relative_transmission_household = 1,
+                    relative_transmission_occupation = 1,
+                    relative_transmission_random = 1,          
+                    end_time = 20
+                ),
+                update_relative_transmission_household = 0.9,
+                update_relative_transmission_occupation = 0.8,
+                update_relative_transmission_random = 0.8,          
+            ),
         ]
     }
     """
@@ -370,13 +386,13 @@ class TestClass(object):
         np.testing.assert_equal( max( df_trans[ "generation_time" ] ) < max_time, True, "someone is infectious at a time greater than mean + 7 * std. dev. of the infectious curve " )
 
         # check that some people are infected across all networks
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.WORK )      > 0, True, "no transmission on the work network" )
-        np.testing.assert_equal( sum( df_trans[ "work_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) > 0, True, "no transmission on the household network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.OCCUPATION )      > 0, True, "no transmission on the work network" )
+        np.testing.assert_equal( sum( df_trans[ "occupation_network_source" ] == constant.RANDOM )    > 0, True, "no transmission on the random network" )
 
         # check hospitalised people are not transmitting on the work and household networks
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
-        np.testing.assert_equal( sum( ( df_trans[ "work_network_source" ] == constant.WORK ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.HOUSEHOLD ) & ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the household network" )
+        np.testing.assert_equal( sum( ( df_trans[ "occupation_network_source" ] == constant.OCCUPATION ) &      ( df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED ) ), 0, "hospitalised people transmitting on the work network" )    
 
         
     def test_exponential_growth_homogeneous_random(
@@ -458,7 +474,7 @@ class TestClass(object):
         leads to corresponding change (increase, decrease, or equal) in counts of transmissions in the NETWORK.
         
         """
-        relative_transmissions = [ "relative_transmission_household", "relative_transmission_workplace", "relative_transmission_random" ]
+        relative_transmissions = [ "relative_transmission_household", "relative_transmission_occupation", "relative_transmission_random" ]
         relative_transmission = relative_transmissions[transmission_NETWORK]
         
         # calculate the transmission proportions for the first entry in the relative_transmission_values
@@ -467,7 +483,7 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "relative_transmission_household", 1 )
-        params.set_param( "relative_transmission_workplace", 1 )
+        params.set_param( "relative_transmission_occupation", 1 )
         params.set_param( "relative_transmission_random", 1 )
         params.set_param( relative_transmission , rel_trans_value_current )
         params.write_params(constant.TEST_DATA_FILE)     
@@ -479,7 +495,7 @@ class TestClass(object):
         
         # calculating the first ratio
         len_household = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.HOUSEHOLD ] )
-        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.WORK ] ) 
+        len_work = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.OCCUPATION ] ) 
         len_random = len( df_trans_current[ df_trans_current[ "infector_network" ] == constant.RANDOM ] )
         lengths = [int(len_household), int(len_work), int(len_random)]
         all_trans_current = sum(lengths)
@@ -496,7 +512,7 @@ class TestClass(object):
                 comment = "#", sep = ",", skipinitialspace = True )
             
             all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
-                        len( df_trans[ df_trans[ "infector_network" ] == constant.WORK ] ) + \
+                        len( df_trans[ df_trans[ "infector_network" ] == constant.OCCUPATION ] ) + \
                         len( df_trans[ df_trans[ "infector_network" ] == constant.RANDOM ] )
             ratio_new = float( df_trans[ df_trans[ "infector_network" ] == transmission_NETWORK ].shape[0] ) / float(all_trans)
     
@@ -935,4 +951,63 @@ class TestClass(object):
                 N_pre, N_sym, atol = tolerance
             )
             
+        
+    def test_relative_transmission_update(self, test_params, update_relative_transmission_household, update_relative_transmission_occupation, update_relative_transmission_random ):
+        """
+           Check to that if we change the relative transmission parameters after day 1 we get 
+           the same result as if we started with the same values
+        """
+        tol      = 0.05
+        max_time = test_params["end_time"]+1;
+
+        # run the baseline parameters
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        for time in range(max_time):
+            model.one_time_step()
+        model.write_transmissions()
+        df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        df_base = df_base[ df_base["time_infected"] == max_time ]
+        df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
+        
+        del model
+        del params
+            
+        # run the baseline parameters then at base-line update one
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        for time in range(test_params["end_time"]):
+            model.one_time_step()
+        model.update_running_params( "relative_transmission_household",  update_relative_transmission_household )
+        model.update_running_params( "relative_transmission_occupation", update_relative_transmission_occupation )
+        model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
+        model.one_time_step()   
+        model.write_transmissions()
+        df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_update = df_update[ df_update["time_infected"] == max_time ]
+        df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
+        
+        # check the change in values is in tolerance - wide tolerance bands due to saturation effects
+        base     = df_base.loc[0,{"n_infections"}]["n_infections"] 
+        expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
+        actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+                
+        base     = df_base.loc[1,{"n_infections"}]["n_infections"] 
+        expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
+        actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+        
+        base     = df_base.loc[2,{"n_infections"}]["n_infections"] 
+        expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
+        actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+       
+    
       

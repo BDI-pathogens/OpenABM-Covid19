@@ -2,19 +2,28 @@
 .DS_Store
 
 # File associated with compilation/linking
-src/*.o
-src/*.exe
-src/*.csv
+src/**/*.o
+src/**/*.exe
+src/**/*.csv
+!src/adapter_covid19/data/*.csv
+src/**/*.so
 examples/results/*.csv
 # Python testing files
 __pycache__
 .mypy_cache/
+**/*.egg-info
 
 # Eclipse-related files
 .project
 .cproject
 .settings
 .pydevproject
+
+# Other editor-related files
+*.swo
+*.swp
+.idea
+**/.tags*
 
 # temp copies
 *~

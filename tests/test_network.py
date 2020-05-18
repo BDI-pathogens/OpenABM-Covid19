@@ -120,7 +120,7 @@ class TestClass(object):
 
             ),
         ],
-        "test_work_network": [ 
+        "test_occupation_network": [ 
             dict( 
                 n_total = 40000,
                 mean_work_interactions_child   = 10,
@@ -157,7 +157,7 @@ class TestClass(object):
                 daily_fraction_work            = 1.0
             )
         ],
-        "test_work_network_proportions": [ 
+        "test_occupation_network_proportions": [ 
             dict( 
                 n_total = 40000,
                 child_network_adults   = 0,
@@ -182,6 +182,41 @@ class TestClass(object):
                 n_total = 40000,
                 child_network_adults   = 0.45,
                 elderly_network_adults = 0.45
+            )
+        ],
+        "test_occupation_network_recurrence": [ 
+            dict( 
+                test_params = dict( 
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 10,
+                    mean_work_interactions_adult   = 7,
+                    mean_work_interactions_elderly = 3,
+                    daily_fraction_work            = 0.5,
+                    work_network_rewire            = 0.1
+                )
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 10,
+                    mean_work_interactions_adult   = 7,
+                    mean_work_interactions_elderly = 3,
+                    daily_fraction_work            = 0.75,
+                    work_network_rewire            = 0.2
+                ),
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 10,
+                    mean_work_interactions_adult   = 7,
+                    mean_work_interactions_elderly = 3,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
             )
         ]
     }
@@ -279,7 +314,7 @@ class TestClass(object):
         # note when counting connections we count each end
         ageTypeMap = pd.DataFrame( data={
             "age_group": constant.AGES, 
-            "age_type": constant.AGE_TYPES } );
+            "age_type": constant.AGE_TYPES } )
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
@@ -332,7 +367,7 @@ class TestClass(object):
         if mean_random_interactions_elderly > 0:
             np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
   
-    def test_work_network( 
+    def test_occupation_network( 
             self,
             n_total,
             mean_work_interactions_child,
@@ -375,14 +410,14 @@ class TestClass(object):
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         df_indiv = pd.merge( df_indiv, ageTypeMap1, 
             left_on = "age_group", right_on = "age_group_1", how = "left" )
 
         # get all the work connections
         df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
-        df_int  = df_int[ df_int["type"] == constant.WORK ]
+        df_int  = df_int[ df_int["type"] == constant.OCCUPATION ]
         df_int = pd.merge( df_int, ageTypeMap1,  on = "age_group_1", how = "left" )
         df_int = pd.merge( df_int, ageTypeMap2, on = "age_group_2", how = "left" )
 
@@ -427,15 +462,15 @@ class TestClass(object):
         np.testing.assert_equal( n, 0, "only 80  adults on the 80 network" )
         
         # check the mean number of networks connections by network
-        for network in [ constant.NETWORK_0_9, constant.NETWORK_10_19 ]:
-            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+        for network in [ constant.PRIMARY_NETWORK, constant.SECONDARY_NETWORK ]:
+            mean = df_n_int[ df_n_int[ "occupation_network" ] == network ].loc[:,"connections"].mean()
             np.testing.assert_allclose( mean, mean_work_interactions_child, rtol = tolerance )
             
-        mean = df_n_int[ df_n_int[ "work_network" ] == constant.NETWORK_20_69 ].loc[:,"connections"].mean()
+        mean = df_n_int[ df_n_int[ "occupation_network" ] == constant.WORKING_NETWORK ].loc[:,"connections"].mean()
         np.testing.assert_allclose( mean, mean_work_interactions_adult, rtol = tolerance )
         
-        for network in [ constant.NETWORK_70_79, constant.NETWORK_80 ]:
-            mean = df_n_int[ df_n_int[ "work_network" ] == network ].loc[:,"connections"].mean()
+        for network in [ constant.RETIRED_NETWORK, constant.ELDERLY_NETWORK ]:
+            mean = df_n_int[ df_n_int[ "occupation_network" ] == network ].loc[:,"connections"].mean()
             np.testing.assert_allclose( mean, mean_work_interactions_elderly, rtol = tolerance )
       
         # check the correlation is below a threshold
@@ -445,7 +480,7 @@ class TestClass(object):
 
 
 
-    def test_work_network_proportions( 
+    def test_occupation_network_proportions( 
             self,
             n_total,
             child_network_adults,
@@ -471,16 +506,16 @@ class TestClass(object):
        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
-        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "work_network" ] ] 
+        df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         
         num_children_in_children = len( df_indiv[ 
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) &
+                                                ( ( df_indiv["occupation_network"] == constant.PRIMARY_NETWORK) | ( df_indiv["occupation_network"] == constant.SECONDARY_NETWORK ) ) &
                                                 ( ( df_indiv["age_group"] == constant.AGE_0_9 ) | ( df_indiv["age_group"] == constant.AGE_10_19 ) )
                                                 ]
                                     )
         
         num_adults_in_children = len( df_indiv[
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_0_9 ) | ( df_indiv["work_network"] == constant.NETWORK_10_19 ) ) & 
+                                                ( ( df_indiv["occupation_network"] == constant.PRIMARY_NETWORK ) | ( df_indiv["occupation_network"] == constant.SECONDARY_NETWORK ) ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
@@ -488,13 +523,13 @@ class TestClass(object):
                                     )
         
         num_elderly_in_elderly = len( df_indiv[ 
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) &
+                                                ( ( df_indiv["occupation_network"] == constant.RETIRED_NETWORK ) | ( df_indiv["occupation_network"] == constant.ELDERLY_NETWORK ) ) &
                                                 ( ( df_indiv["age_group"] == constant.AGE_70_79 ) | ( df_indiv["age_group"] == constant.AGE_80 ) )
                                                 ]
                                     )
         
         num_adults_in_elderly = len( df_indiv[
-                                                ( ( df_indiv["work_network"] == constant.NETWORK_70_79 ) | ( df_indiv["work_network"] == constant.NETWORK_80 ) ) & 
+                                                ( ( df_indiv["occupation_network"] == constant.RETIRED_NETWORK ) | ( df_indiv["occupation_network"] == constant.ELDERLY_NETWORK ) ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
@@ -502,7 +537,7 @@ class TestClass(object):
                                     )
         
         num_adults_in_adults = len( df_indiv[
-                                                ( df_indiv["work_network"] == constant.NETWORK_20_69 ) & 
+                                                ( df_indiv["occupation_network"] == constant.WORKING_NETWORK ) & 
                                                 ( ( df_indiv["age_group"] == constant.AGE_20_29 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_30_39 ) | ( df_indiv["age_group"] == constant.AGE_40_49 ) | 
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
@@ -520,3 +555,55 @@ class TestClass(object):
 
         if ( total_elderly_network > 0 ) :
             np.testing.assert_allclose( num_adults_in_elderly / num_elderly_in_elderly, elderly_network_adults, atol = tolerance )
+    
+    def test_occupation_network_recurrence(self, test_params ):
+        """
+           Check to see that people only meet with the same person
+           once per day on the occupational network
+           
+           Check to see that when you look over multiple days that 
+           the mean number of unique contacts is mean_daily/daily_fraction
+        """
+        
+        tol = 0.02
+         
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+           
+        # step through time until we need to start to save the interactions each day
+        model.one_time_step();   
+        model.write_interactions_file()
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter[ "time" ] = 0
+
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step();   
+            model.write_interactions_file()
+            df = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df[ "time" ] = time + 1
+            df_inter = df_inter.append( df )
+  
+        df_inter = df_inter[ df_inter[ "type" ] == constant.OCCUPATION ]
+  
+        # check to see there are sufficient daily connections and only one per set of contacts a day
+        df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N");
+        min_size = (test_params["end_time"]+1) * test_params[ "n_total"] *  min( 1,test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"] )
+
+        np.testing.assert_equal(sum(df_unique_daily["N"]==1)>min_size, True, "Less contacts than expected on the occuaptional networks" )
+        np.testing.assert_equal(sum(df_unique_daily["N"]!=1), 0, "Repeat connections on same day on the occupational networks" )
+
+        # check the mean unique connections over multiple days is mean/daily fraction
+        df_unique = df_inter.groupby(["occupation_network_1","ID_1","ID_2"]).size().reset_index(name="N_unique")
+        df_unique = df_unique.groupby(["occupation_network_1","ID_1"]).size().reset_index(name="N_conn")
+        df_unique = df_unique.groupby(["occupation_network_1"]).mean()
+    
+        mean_by_type = [ test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"]]
+        
+        for network in constant.NETWORKS:
+            actual   = df_unique.loc[network,{"N_conn"}]["N_conn"]
+            expected = mean_by_type[constant.NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"]
+            np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
+           
+        

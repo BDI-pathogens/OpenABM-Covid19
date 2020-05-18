@@ -6,6 +6,7 @@ mean_work_interactions_child	10
 mean_work_interactions_adult	7
 mean_work_interactions_elderly	3
 daily_fraction_work	0.5
+work_network_rewire 0.1
 mean_random_interactions_child	2
 sd_random_interactions_child	2
 mean_random_interactions_adult	4
@@ -77,7 +78,7 @@ relative_susceptibility_60_69	1.26
 relative_susceptibility_70_79	1.45
 relative_susceptibility_80	1.66
 relative_transmission_household	2
-relative_transmission_workplace	1
+relative_transmission_occupation	1
 relative_transmission_random	1
 hospitalised_fraction_0_9	0.01
 hospitalised_fraction_10_19	0.0267
@@ -158,7 +159,11 @@ app_users_fraction_60_69	0.64
 app_users_fraction_70_79	0.41
 app_users_fraction_80	0.27
 app_turn_on_time	10000
-lockdown_work_network_multiplier	0.2
+lockdown_occupation_multiplier_primary_network	0.2
+lockdown_occupation_multiplier_secondary_network	0.2
+lockdown_occupation_multiplier_working_network	0.2
+lockdown_occupation_multiplier_retired_network	0.2
+lockdown_occupation_multiplier_elderly_network	0.2
 lockdown_random_network_multiplier	0.2
 lockdown_house_interaction_multiplier	1.5
 lockdown_time_on	10000
