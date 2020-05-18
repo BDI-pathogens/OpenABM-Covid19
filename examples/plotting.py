@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Plotting functions for output from the COVID19-IBM
+Plotting functions for files output from the OpenABM-Covid19 model
 
 Created: 30 March 2020
 Author: p-robot
 """
 
-import os, re
 from os.path import join
 
 import numpy as np, pandas as pd
@@ -17,10 +16,13 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+# Colours for plotting the household, work, and random networks
 network_colours = ['#009E73', '#0072B2', '#D55E00']
 
+# Nicely printed labels of event types from the EVENT_TYPES enum 
+# as defined in OpenABM-Covid19/src/constant.h
 EVENT_TYPE_STRING = {
-    0: "Uninfected",
+    0: "Susceptible",
     1: "Presymptomatic (severe)",
     2: "Presymptomatic (mild)",
     3: "Asymptomatic",
@@ -37,8 +39,10 @@ EVENT_TYPE_STRING = {
     14: "Test result",
     15: "Case", 
     16: "Trace token release",
-    17: "N event types"
-    }
+    17: "Transition to hospital",
+    18: "Transition to critical",
+    19: "N event types"
+}
 
 key_params = [
     "n_seed_infection", 
@@ -142,53 +146,6 @@ population_cols = [
     "population_60_69", "population_70_79", 
     "population_80"]
 
-intervention_params = [
-    "self_quarantine_fraction", 
-    "quarantine_length_self", 
-    "quarantine_length_traced", 
-    "quarantine_length_positive", 
-    "quarantine_dropout_self", 
-    "quarantine_dropout_traced", 
-    "quarantine_dropout_positive", 
-    "test_on_symptoms", 
-    "test_on_traced", 
-    "quarantine_on_traced", 
-    "traceable_interaction_fraction", 
-    "tracing_network_depth", 
-    "allow_clinical_diagnosis", 
-    "quarantine_household_on_positive", 
-    "quarantine_household_on_symptoms", 
-    "quarantine_household_on_traced_symptoms", 
-    "quarantine_household_on_traced_traced", 
-    "quarantine_household_contacts_on_positive", 
-    "quarantined_daily_interactions", 
-    "quarantine_days", 
-    "hospitalised_daily_interactions", 
-    "test_insensitive_period", 
-    "test_order_wait", 
-    "test_result_wait", 
-    "self_quarantine_fraction", 
-    "app_users_fraction_0_9", 
-    "app_users_fraction_10_19",
-    "app_users_fraction_20_29",
-    "app_users_fraction_30_39",
-    "app_users_fraction_40_49",
-    "app_users_fraction_50_59", 
-    "app_users_fraction_60_69",
-    "app_users_fraction_70_79",
-    "app_users_fraction_80",
-    "app_turn_on_time", 
-    "lockdown_occupation_multiplier",
-    "lockdown_random_network_multiplier",
-    "lockdown_house_interaction_multiplier",
-    "lockdown_time_on",
-    "lockdown_time_off",
-    "lockdown_elderly_time_on",
-    "lockdown_elderly_time_off",
-    "testing_symptoms_time_on",
-    "testing_symptoms_time_off",
-    "intervention_start_time"]
-
 
 def gamma_params(mn, sd):
     """
@@ -219,149 +176,41 @@ def overlapping_bins(start, stop, window, by):
 def get_discrete_viridis_colours(n):
     """
     Generate n colours from the viridis colour map
+    
+    Arguments
+    ---------
+    n : int
+        Number of colours to generate on the viridis colour map
+    
+    Returns
+    -------
+    List of length n where each elements is an RGBA list defining a colour
     """
     colourmap = cm.get_cmap('viridis', n)
     colours = [colourmap.colors[n - i - 1] for i in range(n)]
     return(colours)
 
 
-def ProportionTransmissionsThroughTime(df_trans, groupvar, groups, infectiontimevar,
-    nonsymptomatic_status, symptomatic_status, event_types_label_dict, 
-    start = 1, stop = 100, window = 5, ylims = None):
+def plot_parameter_assumptions(df_parameters, xlimits = [0, 30], lw = 3):
     """
-    Plot proportion of transmissions through time according to disease state
-    data are binned into a window of size 'window'
-    
-    
-    Arguments
-    ---------
-    
-    df_trans : pandas.DataFrame
-        DataFrame of the transmission file output from COVID19-IBM
-    groupvar : str
-        Variable name specifying disease state of the infector, typically 'infector_status'
-    groups : list
-        List of disease states
-    infectiontimevar : str
-        Variable name specifying time of infection (default -1 if never infected)
-    nonsymptomatic_status : list
-        Values of column `groupvar` that code for nonsymptomatic disease status 
-    symptomatic_status
-        Values of column `groupvar` that code for symptomatic disease status 
-    start : int
-        Time at which to start plotting
-    stop : int
-        Time at which to stop plotting
-    window : int
-        Size of the rolling window over which to summarise transmissions
-    
-    Returns
-    -------
-    fig, ax : figure and axis handles to the generated figure using matplotlib.pyplot
-    """
-    
-    cat_type = CategoricalDtype(categories = groups, ordered = False)
-    df_trans[groupvar] = df_trans[groupvar].astype(cat_type)
-    
-    bins = overlapping_bins(start = start, stop = stop + window, window = window, by = 1)
-    
-    # Find proportion of transmissions from each "infector_status" through a sliding window
-    output = []
-    for b in bins:
-        # Subset to window of interest
-        condition1 = (df_trans[infectiontimevar] >= b[0])
-        condition2 = (df_trans.time_infected < b[1])
-        df_sub = df_trans[ condition1 & condition2 ]
-        
-        df_output = df_sub[groupvar].value_counts().reset_index()
-        df_output.columns = [groupvar, "freq"]
-        
-        # Calculation proportion in each disease state
-        df_output["proportion"] = df_output.freq/df_output.freq.sum()
-        df_output["time"] = b[0]
-        output.append(df_output)
-    
-    df = pd.concat(output)
-    
-    fig, ax = plt.subplots(nrows = 3)
-    
-    df_total = df.groupby("time")["freq"].sum().reset_index()
-    
-    ax[0].plot(df_total.time, df_total.freq, label = "Total incidence", lw = 3, c = "red")
-    ax[0].set_xlim([start, stop])
-    
-    ax[0].set_xlabel(""); ax[0].set_ylabel(""); 
-    ax[0].legend(prop = {'size':12})
-    ax[0].spines["top"].set_visible(False)
-    ax[0].spines["right"].set_visible(False)
-    
-    for tick in ax[0].xaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    for tick in ax[0].yaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    
-    non = df[df[groupvar].isin(nonsymptomatic_status)]
-    df_non = non.groupby("time")["proportion"].sum().reset_index()
-    ax[1].plot(df_non.time, 100*df_non.proportion, 
-        label = "Non-symptomatic (total)", lw = 3, c = "#E69F00")
-    
-    sym = df[df[groupvar].isin(symptomatic_status)]
-    df_sym = sym.groupby("time")["proportion"].sum().reset_index()
-    ax[1].plot(df_sym.time, 100*df_sym.proportion, 
-        label = "Symptomatic (total)", lw = 3, c = "#D55E00")
-    
-    ax[1].set_xlabel(""); 
-    ax[1].set_ylabel("Percent incidence\nover next 5 days\n", size = 16)
-    ax[1].legend(prop = {'size':12})
-    ax[1].spines["top"].set_visible(False)
-    ax[1].spines["right"].set_visible(False)
-    
-    for tick in ax[1].xaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    for tick in ax[1].yaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    
-    ax[1].set_xlim([start, stop])
-    
-    if ylims:
-        ax[1].set_ylim(ylims)
-    
-    # Subset to those with non-zero counts
-    non_zero_status = [s for s in groups if df[df[groupvar] == s].freq.sum() > 0]
-    
-    for status in non_zero_status:
-        df_plot = df[df[groupvar] == status]
-        ax[2].plot(df_plot.time, 100*df_plot.proportion, 
-            label = event_types_label_dict[status], 
-            lw = 3)
-    
-    ax[2].spines["top"].set_visible(False)
-    ax[2].spines["right"].set_visible(False)
-    ax[2].set_xlabel("Day since infection seeded", size = 20)
-    ax[2].set_ylabel("Percent incidence\nover next 5 days\n", size = 16)
-    ax[2].legend(prop = {'size':12})
-    
-    for tick in ax[2].xaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    for tick in ax[2].yaxis.get_major_ticks():
-        tick.label.set_fontsize(14)
-    
-    ax[2].set_xlim([start, stop])
-    
-    if ylims:
-        ax[2].set_ylim(ylims)
-    
-    return(fig, ax)
-
-
-def ParameterAssumptions(df_parameters, xlimits = [0, 30], lw = 3):
-    """
-    Plot distributions of mean transition times between comparments in the parameters
+    Plot distributions of mean transition times between compartments in the parameters of the 
+    OpenABM-Covid19 model
     
     Arguments
     ---------
     df_parameters : pandas.DataFrame
-        DataFrame of parameter values as input first input argument to the COVID19-IBM model
+        DataFrame of parameter values as input first input argument to the OpenABM-Covid19 model
+        This plotting scripts expects the following columns within this dataframe: 
+            mean_time_to_hospital
+            mean_time_to_critical
+            mean_time_to_symptoms, sd_time_to_symptoms
+            mean_infectious_period, sd_infectious_period
+            mean_time_to_recover, sd_time_to_recover
+            mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery
+            mean_time_hospitalised_recovery, sd_time_hospitalised_recovery
+            mean_time_to_death, sd_time_to_death
+            mean_time_critical_survive, sd_time_critical_survive
+    
     xlimits : list of ints
         Limits of x axis of gamma distributions showing mean transition times
     lw : float
@@ -531,15 +380,15 @@ def ParameterAssumptions(df_parameters, xlimits = [0, 30], lw = 3):
     return(fig, ax)
 
 
-def EpidemicCurves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
+def plot_timeseries_curves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
     """
     Plot population-level metrics of COVID19 outbreak through time
     
     By default, a figure with four subplots is returned, each with the following plotted:
-    1. Cumulative infected with SARS-CoV-2, cumulative recovered
+    1. Cumulative infected with SARS-CoV-2, cumulative recovered, number quarantined
     2. Current number asymptomatic, pre-symptomatic, symtompatic, incident cases
     3. Current number of deaths, hospitalisations, ICU cases
-    4. Current number in quarantine, number of daily tests used
+    4. Current number of daily tests used
     
     Arguments
     ---------
@@ -549,20 +398,23 @@ def EpidemicCurves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
         Limits of the x-axis (time)
     lw : float
         Line with used in the plots
+    timevar : str
+        Column name within df_timeseries that defines the x-axis
     
     Returns
     -------
     fig, ax : figure and axis handles to the generated figure using matplotlib.pyplot
     """
     
-    df = df_timeseries # for brevity, keeping arg as-is - more descriptive
+    df = df_timeseries # for brevity, keeping input argument as-is since it's more descriptive
     
     df["daily_incidence"] = np.insert(0, 0, np.diff(df.total_infected.values))
     
     # List of dictionaries of what to plot in each panel of the plot
     data = [{
             "total_infected": {"label": "Total infected", "c": "red", "linestyle": "solid"},
-            "n_recovered": {"label": "Total recovered", "c": "#009E73", "linestyle": "solid"}
+            "n_recovered": {"label": "Total recovered", "c": "#009E73", "linestyle": "solid"},
+            "n_quarantine": {"label": "Number in quarantine", "c":  "grey", "linestyle": "solid"}
         },
         {
             "n_asymptom":  {"label": "Asymptomatic", "c": "#E69F00", "linestyle": "solid"},
@@ -576,7 +428,6 @@ def EpidemicCurves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
             "n_critical": {"label": "ICU cases", "c": "#0072B2", "linestyle": "solid"}
         },
         {
-            "n_quarantine": {"label": "Number in quarantine", "c":  "grey", "linestyle": "solid"},
             "n_tests": {"label": "Tests used", "c": "black", "linestyle": "solid"}
         }]
     
@@ -619,13 +470,11 @@ def EpidemicCurves(df_timeseries, xlimits = None, lw = 3, timevar = "time"):
     return(fig, ax)
 
 
-
-
-def BarByGroup(df, groupvar, binvar, bins = None, groups = None, group_labels = None, 
-    group_colours = None, xlimits = None, density = False, title = "", xvar = None,
-    xlabel = None, ylabel = None, legend_title = "", xticklabels = None):
+def plot_hist_by_group(df, groupvar, binvar, bins = None, groups = None, 
+    group_labels = None, group_colours = None, xlimits = None, density = False, 
+    title = "", xlabel = "", ylabel = "", legend_title = "", xticklabels = None):
     """
-    Bar plot with multiple groups, with bars plotted side-by-side
+    Histogram with multiple groups, with histogram bars plotted side-by-side for each group
     
     Arguments
     ---------
@@ -636,11 +485,22 @@ def BarByGroup(df, groupvar, binvar, bins = None, groups = None, group_labels = 
     binvar : str
         Column name of `df` over which values will be binned 
     bin : int or list
-        Either number of bins or list of bins to use
+        Either a number of bins or list of bins to use
     groups : list
         Subset of categories in `group` column to plot (defaults to unique values in `groupvar` col)
     group_labels : list
         Labels to use for `groups` categories (defaults to `groups` list)
+    group_colours : list
+        Colours to use for the different `groups` categories (defaults to using the viridis 
+        colour map with n_groups)
+    xlimits : float
+        Limit of the x-axis
+    density : boolean
+        Should histogram be normalised (passed to density arg in np.histogram)
+    title, xlabel, ylabel, legend_title : str
+        Title, X-axis label, Y-axis label, and legend title respectively
+     xticklabels : list of str
+        Labels to use for x-ticks
     
     Returns
     -------
@@ -706,93 +566,39 @@ def BarByGroup(df, groupvar, binvar, bins = None, groups = None, group_labels = 
     return(fig, ax)
 
 
-
-def BarByGroupByPanel(df, groupvar, binvar, panelvar, panels = None, panel_labels = None, 
-    groups = None, group_labels = None, NBINS = None, 
-    group_colours = None, xlimits = None, density = False, title = "", 
-    xlabel = "", ylabel = "", legend_title = "", xticklabels = None):
+def add_heatmap_to_axes(ax, x, y, bin_list, normalise = False):
+    """
+    Plot heatmap of 2D histogram.
+    
+    Used for 2D histograms of transmission events across two grouping variables (e.g. age)
+    
+    Arguments
+    ---------
+    ax : object of matplotlib class `Axes`
+        Axis object of where to add a heatmap
+    x : np.array
+        Array of the x values with which to create a histogram
+    y : np.array
+        Array of the y values with which to create a histogram
+    bin_list : list
+        List of bins to use in the histogram
+    normalise : boolean
+        Should the histogram be normalized by columns?
+    
+    Returns
+    -------
+    (ax, im)
+    ax : object of matplotlib class `Axes`
+        updated Axes object
+    im : matplotlib.image.AxesImage
+        AxesImage object returned from matplotlib.pyplot.imshow
     """
     
-    """
-    
-    if not panels: 
-        panels = df[panelvar].unique()
-    n_panels = len(panels)
-    
-    if not panel_labels:
-        panel_labels = panels
-    
-    if not groups: 
-        groups = df[groupvar].unique()
-    n_groups = len(groups)
-    
-    print(groups)
-    
-    if not group_colours:
-        group_colours = get_discrete_viridis_colours(n_groups)
-    
-    if not group_labels:
-        group_labels = groups
-    
-    bins = np.arange(NBINS)
-    width = np.diff(bins)[0]/(n_groups + 1)
-    
-    fig, ax = plt.subplots(ncols = n_panels)
-    
-    for j, p in enumerate(panels):
-        ax[j].grid(which = 'major', axis = 'y', alpha = 0.7, zorder = 0)
-        
-        for i, g in enumerate(groups):
-            
-            df_sub = df.loc[(df[groupvar] == g)&(df[panelvar] == p)]
-            print(df_sub.head())
-            heights, b = np.histogram(df_sub[binvar], bins)
-            
-            
-            ax[j].bar(bins[:-1] + width*i, heights, width = width, 
-                facecolor = group_colours[i], label = group_labels[i], 
-                edgecolor = "#0d1a26", linewidth = 0.5, zorder = 3)
-        
-        ax[j].set_xlim([0, np.max(bins)])
-        
-        ax[j].spines["top"].set_visible(False)
-        ax[j].spines["right"].set_visible(False)
-        
-        ax[j].set_xlabel(xlabel, size = 16)
-        ax[j].set_ylabel("", size = 16)
-        ax[j].set_title(panel_labels[j], size = 20)
-        
-        if xlimits is not None:
-            ax[j].set_xlim(xlimits)
-            
-        if xticklabels is not None:
-            ax[j].set_xticklabels(xticklabels, size = 12)
-    
-    
-    legend = ax[j].legend(loc = 'right', borderaxespad = 0, frameon = False, 
-        prop = {'size': 16}, fontsize = "x-large")
-    legend.set_title(legend_title, prop = {'size':18})
-    
-    return(fig, ax)
-
-
-def add_heatmap_to_axes(ax, df, 
-        group1var, group2var, bin_list, normalise = False
-    ):
-    """
-    Plot heatmap of transmission events across two grouping variables
-    
-    
-    """
-    
-    array, xbins, ybins = np.histogram2d(df[group1var].values, df[group2var].values, bin_list)
+    array, xbins, ybins = np.histogram2d(x, y, bin_list)
     
     if normalise:
-        
         norm = array/array.sum(axis = 0)
-        
         array = norm
-        
     
     im = ax.imshow(array, origin = "lower", aspect = "equal")
     
@@ -801,6 +607,23 @@ def add_heatmap_to_axes(ax, df,
 
 def adjust_ticks(ax, xtick_fontsize = 12, ytick_fontsize = 12, 
     xticklabels = None, yticklabels = None):
+    """
+    Adjust tick font size and ticklabels in a matplotlib.Axes object
+    
+    Arguments
+    ---------
+    ax : object of matplotlib class `Axes`
+        Axis object of where to adjust tick fonts/labels
+    xtick_fontsize, ytick_fontsize : int
+        Font size of x-ticks and y-ticks
+    xticklabels, yticklabels : list of str
+        List of x and y axis tick labels to change
+    
+    Returns
+    -------
+    ax : object of matplotlib class `Axes`
+        Returns the modified axis object
+    """
     
     for tick in ax.xaxis.get_major_ticks():
         tick.label.set_fontsize(xtick_fontsize)
@@ -819,19 +642,17 @@ def adjust_ticks(ax, xtick_fontsize = 12, ytick_fontsize = 12,
     return(ax)
 
 
-def transmission_heatmap_by_age(df, 
-        group1var, group2var,
-        bins = None,
-        group_labels = None,
-        xlabel = "",
-        ylabel = "", title = "",
-        legend_title = "", legend_loc = "right",
-        xticklabels = None, yticklabels = None,
-        normalise = False
-    ):
+def plot_transmission_heatmap_by_age(df, group1var, group2var, bins = None, 
+    group_labels = None, xlabel = "", ylabel = "", title = "", legend_title = "", 
+    legend_loc = "right", xticklabels = None, yticklabels = None, normalise = False):
     """
-    Plot heatmap of transmission events across two grouping variables
+    Plot 2D histogram (as a heatmap) of transmission events by two grouping variables
+    (for instance, age group)
     
+    
+    Returns
+    -------
+    fig, ax : figure and axis handles to the generated figure using matplotlib.pyplot
     
     """
     if not isinstance(bins, list):
@@ -839,10 +660,11 @@ def transmission_heatmap_by_age(df,
     
     fig, ax = plt.subplots()
     
-    ax, im = add_heatmap_to_axes(ax, df, group1var, group2var, bin_list, normalise)
+    ax, im = add_heatmap_to_axes(ax, df[group1var].values, df[group2var].values, 
+        bin_list, normalise)
     
-    ax = adjust_ticks(ax, xtick_fontsize = 16, ytick_fontsize = 16, xticklabels = xticklabels, 
-        yticklabels = yticklabels)
+    ax = adjust_ticks(ax, xtick_fontsize = 16, ytick_fontsize = 16, 
+        xticklabels = xticklabels, yticklabels = yticklabels)
     
     ax.set_xlabel(xlabel, size = 20)
     ax.set_ylabel(ylabel, size = 20)
@@ -855,13 +677,13 @@ def transmission_heatmap_by_age(df,
     return(fig, ax)
 
 
-def PlotInteractionsByAge(df_interact, groupvar, group_labels, 
+def plot_interactions_by_age(df_interact, groupvar, group_labels, 
     xlabel = "", ylabel = "", legend_title  = "", title = "", nbins = 40):
     """
     """
     
     # Aggregate by age group and ID
-    df_agg = df_interact.groupby([groupvar, "ID"]).size().reset_index(name = "counts")
+    df_agg = df_interact.groupby([groupvar, "ID_1"]).size().reset_index(name = "counts")
     
     # Define age groups, size of bins
     groups = np.unique(df_agg[groupvar])
@@ -899,17 +721,17 @@ def PlotInteractionsByAge(df_interact, groupvar, group_labels,
     for tick in ax.yaxis.get_major_ticks():
         tick.label.set_fontsize(16)
     
-    
     return(fig, ax)
 
 
 def PlotHistIFRByAge(df, 
         numerator_var, denominator_var,
+        age_group_var = "age_group",
         NBINS = None,
         group_labels = None,
         xlabel = "",
         xticklabels = None,
-        density = False
+        density = False,
     ):
     """
     Plot IFR by age.  
@@ -917,12 +739,14 @@ def PlotHistIFRByAge(df,
     
     a = 1.0
     bins = np.arange(0, NBINS + 1) - 0.1
-    n_age = len(np.unique(df["age_group"]))
+    n_age = len(np.unique(df[age_group_var]))
     
     fig, ax = plt.subplots()
     
-    height_n, bins_n = np.histogram(df[df[numerator_var] > 0]["age_group"], bins, density = False)
-    height_d, bins_d = np.histogram(df[df[denominator_var] > 0]["age_group"], bins, density = False)
+    height_n, bins_n = np.histogram(df[df[numerator_var] > 0][age_group_var], 
+        bins, density = False)
+    height_d, bins_d = np.histogram(df[df[denominator_var] > 0][age_group_var], 
+        bins, density = False)
     
     heights = np.divide(height_n, height_d)
     
@@ -956,6 +780,7 @@ def PlotHistIFRByAge(df,
 
 def PlotHistByAge(df, 
         groupvars, 
+        age_group_var = "age_group",
         NBINS = None,
         group_labels = None,
         xlabel = "",
@@ -979,7 +804,7 @@ def PlotHistByAge(df,
     fig, ax = plt.subplots(nrows = n_groups)
     
     for axi, var in enumerate(groupvars):
-        height, bins, objs = ax[axi].hist(df[df[var] > 0]["age_group"], bins, width = 0.8, 
+        height, bins, objs = ax[axi].hist(df[df[var] > 0][age_group_var], bins, width = 0.8, 
             alpha = a, color = "#0072B2", edgecolor = "#0d1a26", linewidth = 0.5, 
             zorder = 3, density = density)
         
@@ -1013,7 +838,7 @@ def PlotHistByAge(df,
 
 
 
-def PlotStackedHistByGroup(df, 
+def plot_stacked_hist_by_group(df, 
         groupvar, binvar,
         NBINS = None,
         groups = None,
