@@ -57,6 +57,10 @@ class Simulator:
     def __init__(
         self, data_path: Optional[str] = None,
     ):
+        """
+        Simulator for adapter covid19
+        :param data_path: path of data
+        """
         if data_path is None:
             data_path = os.path.join(
                 os.path.dirname(__file__), "../../tests/adapter_covid19/data"
@@ -70,22 +74,42 @@ class Simulator:
         figsize: Tuple = (20, 60),
         scenario_name: str = "",
     ) -> Tuple[Economics, List[SimulateState]]:
+        """
+        Run simulation for a given scenario
+        :param scenario: Scenario to run the simulation
+        :type scenario: Scenario
+        :param show_plots: Show the plots using matplotlib if set to be True
+        :type show_plots: bool
+        :param figsize: Size of the figure to be plotted. This parameter is only used when show_plots is set to be True
+        :type figsize: Tuple
+        :param scenario_name: Name of the scenario. Used in plotting
+        :type scenario_name: str
+        :return: Tuple[Economics, List[SimulateState]]
+        """
+        # Load data for the scenario object if not done yet
         if not scenario.is_loaded:
             scenario.load(self.reader)
 
+        # Initialize various models given the model parameters specified in the Scenario
         model_params = scenario.model_params
         gdp_model = PiecewiseLinearCobbDouglasGdpModel(**model_params.gdp_params)
         cb_model = CorporateBankruptcyModel(**model_params.corporate_params)
         pb_model = PersonalBankruptcyModel(**model_params.personal_params)
         econ = Economics(gdp_model, cb_model, pb_model, **model_params.economics_params)
+
+        # Load data for Economy
         econ.load(self.reader)
 
         states = []
         for i in tqdm(range(scenario.simulation_end_time)):
+            # Load ill and dead ratio from scenario
             ill = scenario.get_ill_ratio_dict(i)
             dead = scenario.get_dead_ratio_dict(i)
+
+            # Load quarantine information
             quarantine = scenario.get_quarantine_ratio_dict(i)
 
+            # Initialize  a SimulateState object
             simulate_state = scenario.generate(
                 time=i,
                 dead=dead,
@@ -95,9 +119,14 @@ class Simulator:
                 furlough=scenario.furlough_start_time <= i < scenario.furlough_end_time,
                 reader=self.reader,
             )
+
+            # Pass SimulateState to Economy
             econ.simulate(simulate_state)
+
+            # Keep a record of the current SimulateState
             states.append(simulate_state)
 
+        # Plots
         if show_plots:
             fig, axes = plt.subplots(7, 1, sharex="col", sharey="row", figsize=figsize)
             plot_one_scenario(
@@ -112,6 +141,16 @@ class Simulator:
         show_plots: bool = True,
         figsize: Tuple = (20, 60),
     ) -> Dict[str, Tuple[Economics, List[SimulateState]]]:
+        """
+        Run simulation for multiple given scenarios in sequence
+        :param scenarios: Dictionary of Scenarios to run the simulation
+        :type scenarios: Mapping[str, Scenario]
+        :param show_plots: Show the plots using matplotlib if set to be True
+        :type show_plots: bool
+        :param figsize: Size of the figure to be plotted. This parameter is only used when show_plots is set to be True
+        :type figsize: Tuple
+        :return: Dict[str, Tuple[Economics, List[SimulateState]]]
+        """
         result = {}
         nl = "\n"
         for scenario_name, scenario in scenarios.items():
