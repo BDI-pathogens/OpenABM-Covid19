@@ -34,13 +34,23 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "self_quarantine_fraction",
     "lockdown_on",
+    "lockdown_elderly_on",
     "app_turned_on",
     "app_users_fraction",
     "trace_on_symptoms",
+    "trace_on_positive",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
-    "lockdown_work_network_multiplier",
+    "lockdown_occupation_multiplier_primary_network",
+    "lockdown_occupation_multiplier_secondary_network",
+    "lockdown_occupation_multiplier_working_network",
+    "lockdown_occupation_multiplier_retired_network",
+    "lockdown_occupation_multiplier_elderly_network",
+    "relative_transmission_household",
+    "relative_transmission_occupation",
+    "relative_transmission_random",
 ]
+
 
 class EVENT_TYPES(enum.Enum):
     SUSCEPTIBLE = 0
@@ -60,7 +70,17 @@ class EVENT_TYPES(enum.Enum):
     TEST_RESULT = 14
     CASE = 15
     TRACE_TOKEN_RELEASE = 16
-    N_EVENT_TYPES = 17
+    TRANSITION_TO_HOSPITAL = 17
+    N_EVENT_TYPES = 18
+
+
+class OccupationNetworkEnum(enum.Enum):
+    _primary_network = 0
+    _secondary_network = 1
+    _working_network = 2
+    _retired_network = 3
+    _elderly_network = 4
+
 
 
 class AgeGroupEnum(enum.Enum):
@@ -92,18 +112,32 @@ class ListIndiciesEnum(enum.Enum):
 
 class TransmissionTypeEnum(enum.Enum):
     _household = 0
-    _workplace = 1
+    _occupation = 1
     _random = 2
+
+
+def _get_base_param_from_enum(param):
+    base_name, enum_val = None, None
+    for en in chain(
+        AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum, OccupationNetworkEnum
+    ):
+        LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
+        if en.name == param[-1 * len(en.name) :]:
+            base_name = param.split(en.name)[0]
+            enum_val = en.value
+            LOGGER.debug(f"Split to {base_name} and {enum_val}")
+            break
+    return base_name, enum_val
 
 
 class Parameters(object):
     def __init__(
-        self,
-        input_param_file: str = None,
-        param_line_number: int = 1,
-        output_file_dir: str = "./",
-        input_households: Union[str, pd.DataFrame] = None,
-        read_param_file=True,
+            self,
+            input_param_file: str = None,
+            param_line_number: int = 1,
+            output_file_dir: str = "./",
+            input_households: Union[str, pd.DataFrame] = None,
+            read_param_file=True,
     ):
         """[summary]
         
@@ -143,14 +177,12 @@ class Parameters(object):
         elif not input_households:
             raise ParameterException("Household data must be supplied as a csv")
 
-
         if read_param_file and input_param_file != None:
             self._read_and_check_from_file()
 
         if output_file_dir:
             self.c_params.sys_write_individual = 1
         self.update_lock = False
-
 
     def _read_and_check_from_file(self):
         covid19.read_param_file(self.c_params)
@@ -182,27 +214,31 @@ class Parameters(object):
         """
         if isinstance(self.household_df, pd.DataFrame):
             self.set_param("N_REFERENCE_HOUSEHOLDS", len(self.household_df))
-            LOGGER.debug(f"setting up ref household memory for {getattr(self.c_params,'N_REFERENCE_HOUSEHOLDS')}")
+            LOGGER.debug(
+                f"setting up ref household memory for {getattr(self.c_params,'N_REFERENCE_HOUSEHOLDS')}"
+            )
             covid19.set_up_reference_household_memory(self.c_params)
             LOGGER.debug("memory set up")
-            _ = [covid19.add_household_to_ref_households(self.c_params, t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8], t[9]) for t in self.household_df.itertuples()]
-                
+            _ = [
+                covid19.add_household_to_ref_households(
+                    self.c_params,
+                    t[0],
+                    t[1],
+                    t[2],
+                    t[3],
+                    t[4],
+                    t[5],
+                    t[6],
+                    t[7],
+                    t[8],
+                    t[9],
+                )
+                for t in self.household_df.itertuples()
+            ]
+
     def set_param_dict(self, params):
         for k, v in params.items():
             self.set_param(k, v)
-
-    def _get_base_param_from_enum(self, param):
-        base_name, enum_val = None, None
-        for en in chain(
-            AgeGroupEnum, ChildAdultElderlyEnum, ListIndiciesEnum, TransmissionTypeEnum
-        ):
-            LOGGER.debug(f"{en.name} =={param[-1 * len(en.name) :]} ")
-            if en.name == param[-1 * len(en.name) :]:
-                base_name = param.split(en.name)[0]
-                enum_val = en.value
-                LOGGER.debug(f"Split to {base_name} and {enum_val}")
-                break
-        return base_name, enum_val
 
     def get_param(self, param):
         """[summary]
@@ -221,7 +257,7 @@ class Parameters(object):
         elif hasattr(self.c_params, f"{param}"):
             return getattr(self.c_params, f"{param}")
         else:
-            param, idx = self._get_base_param_from_enum(param)
+            param, idx = _get_base_param_from_enum(param)
             LOGGER.debug(
                 f"not found full length param, trying get_param_{param} with index getter"
             )
@@ -257,9 +293,9 @@ class Parameters(object):
             if isinstance(getattr(self.c_params, f"{param}"), float):
                 setattr(self.c_params, f"{param}", float(value))
         elif hasattr(
-            covid19, f"set_param_{self._get_base_param_from_enum(param)[0]}"
+                covid19, f"set_param_{_get_base_param_from_enum(param)[0]}"
         ):
-            param, idx = self._get_base_param_from_enum(param)
+            param, idx = _get_base_param_from_enum(param)
             setter = getattr(covid19, f"set_param_{param}")
             setter(self.c_params, value, idx)
         elif hasattr(covid19, f"set_param_{param}"):
@@ -293,10 +329,13 @@ class Model:
         # Store the params object so it doesn't go out of scope and get freed
         self._params_obj = params_object
         # Create C parameters object
-        self.c_model = None
         self.c_params = params_object.return_param_object()
+        self.c_model = None
         self._create()
         self._is_running = False
+
+    def __del__(self):
+        self._destroy()
 
     def get_param(self, name):
         """[summary]
@@ -310,9 +349,20 @@ class Model:
         Returns:
             [type] -- [value of param stored]
         """
+        value = None
         try:
             LOGGER.info(f"Getting param {name}")
-            value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
+            split_param, idx = _get_base_param_from_enum(f"get_model_param_{name}")
+            if split_param is not None:
+                if hasattr(covid19, split_param):
+                    value = getattr(covid19, split_param)(self.c_model, idx)
+                    LOGGER.info(f"Got {split_param} at index {idx} value {value}")
+                else:
+                    raise ModelParameterException(f"Parameter {name} not found")
+            elif hasattr(covid19, f"get_model_param_{name}"):
+                value = getattr(covid19, f"get_model_param_{name}")(self.c_model)
+            else:
+                raise ModelParameterException(f"Parameter {name} not found")
             if value < 0:
                 return False
             else:
@@ -336,12 +386,23 @@ class Model:
         """
         if param not in PYTHON_SAFE_UPDATE_PARAMS:
             raise ModelParameterException(f"Can not update {param} during running")
-        setter = getattr(covid19, f"set_model_param_{param}")
-        if callable(setter):
-            if not setter(self.c_model, value):
-                raise ModelParameterException(f"Setting {param} to {value} failed")
+        split_param, index = _get_base_param_from_enum(f"set_model_param_{param}")
+        if split_param:
+            setter = getattr(covid19, split_param)
+        elif hasattr(covid19, f"set_model_param_{param}"):
+            setter = getattr(covid19, f"set_model_param_{param}")
         else:
             raise ModelParameterException(f"Setting {param} to {value} failed")
+        if callable(setter):
+            if index is not None:
+                args = [self.c_model, value, index]
+            else:
+                args = [self.c_model, value]
+            LOGGER.info(
+                f"Updating running params with {args} split_param {split_param} param {split_param}"
+            )
+            if not setter(*args):
+                raise ModelParameterException(f"Setting {param} to {value} failed")
 
     def get_risk_score(self, day, age_inf, age_sus):
         value = covid19.get_model_param_risk_score(self.c_model, day, age_inf, age_sus)
@@ -373,6 +434,13 @@ class Model:
         self.c_model = covid19.create_model(self.c_params)
         LOGGER.info("Successfuly created model")
 
+    def _destroy(self):
+        """
+        Call C function destroy_model and destroy_params
+        """
+        LOGGER.info("Destroying model")
+        covid19.destroy_model(self.c_model)
+
     def one_time_step(self):
         """
         Call C function on_time_step
@@ -389,15 +457,22 @@ class Model:
         results["test_on_symptoms"] = self.c_params.test_on_symptoms
         results["app_turned_on"] = self.c_params.app_turned_on
         results["total_infected"] = (
-            int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC))
-            + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD))
-            + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
+                int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC))
+                + int(covid19.utils_n_total(self.c_model, covid19.PRESYMPTOMATIC_MILD))
+                + int(covid19.utils_n_total(self.c_model, covid19.ASYMPTOMATIC))
         )
         for age in AgeGroupEnum:
             key = f"total_infected{age.name}"
             results[key] = sum(
-                [covid19.utils_n_total_age(self.c_model, ty,  age.value) for ty in 
-                [covid19.PRESYMPTOMATIC, covid19.PRESYMPTOMATIC_MILD, covid19.ASYMPTOMATIC]])
+                [
+                    covid19.utils_n_total_age(self.c_model, ty, age.value)
+                    for ty in [
+                        covid19.PRESYMPTOMATIC,
+                        covid19.PRESYMPTOMATIC_MILD,
+                        covid19.ASYMPTOMATIC,
+                    ]
+                ]
+            )
         results["total_case"] = covid19.utils_n_total(self.c_model, covid19.CASE)
         for age in AgeGroupEnum:
             key = f"total_case{age.name}"
@@ -423,13 +498,24 @@ class Model:
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.SYMPTOMATIC_MILD)
-        results["n_hospital"] = covid19.utils_n_current(
-            self.c_model, covid19.HOSPITALISED
-        )
+        results["n_hospital"] = covid19.utils_n_current( self.c_model, covid19.HOSPITALISED )
+        results["n_hospitalised_recovering"] = covid19.utils_n_current( self.c_model, covid19.HOSPITALISED_RECOVERING )
         results["n_critical"] = covid19.utils_n_current(self.c_model, covid19.CRITICAL)
         results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
         results["n_recovered"] = covid19.utils_n_current(
             self.c_model, covid19.RECOVERED
+        )
+        results["hospital_admissions"]  = covid19.utils_n_daily(
+            self.c_model, covid19.TRANSITION_TO_HOSPITAL, self.c_model.time
+        )
+        results["hospital_admissions_total"]  = covid19.utils_n_total(
+            self.c_model, covid19.TRANSITION_TO_HOSPITAL
+        )
+        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
+        )
+        results["hospital_to_critical_total"] = covid19.utils_n_total(
+            self.c_model, covid19.TRANSITION_TO_CRITICAL
         )
         return results
 
@@ -438,7 +524,6 @@ class Model:
         Write output files
         """
         covid19.write_output_files(self.c_model, self.c_params)
-
 
     def write_individual_file(self):
         covid19.write_individual_file(self.c_model, self.c_params)

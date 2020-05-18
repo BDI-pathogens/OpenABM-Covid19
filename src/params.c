@@ -13,6 +13,16 @@
 #include "individual.h"
 #include "interventions.h"
 
+/*****************************************************************************************
+*  Name: 		get_param_daily_fraction_work_used
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_model_param_daily_fraction_work_used(model *model, int idx)
+{
+    if (idx >= N_OCCUPATION_NETWORKS) return -1;
+
+    return model->params->daily_fraction_work_used[idx];
+}
 
 /*****************************************************************************************
 *  Name:        get_model_param_quarantine_days
@@ -39,6 +49,14 @@ double get_model_param_self_quarantine_fraction(model *model)
 int get_model_param_trace_on_symptoms(model *model)
 {
     return model->params->trace_on_symptoms;
+}
+/*****************************************************************************************
+*  Name:		get_model_param_trace_on_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_trace_on_positive(model *model)
+{
+    return model->params->trace_on_positive;
 }
 
 /*****************************************************************************************
@@ -193,18 +211,7 @@ int get_model_param_app_turned_on(model *model)
 ******************************************************************************************/
 int get_model_param_lockdown_on(model *model)
 {
-	int age;
-	double t_pop, frac;
-
-	t_pop = 0;
-	frac  = 0;
-	for( age = 0; age < N_AGE_GROUPS; age++ )
-	{
-		t_pop += model->params->population[ age ];
-		frac  += model->params->app_users_fraction[ age ] * model->params->population[ age ];
-	}
-
-	return frac / t_pop;
+	return model->params->lockdown_on;
 }
 
 /*****************************************************************************************
@@ -226,12 +233,13 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 }
 
 /*****************************************************************************************
-*  Name:        get_model_param_lockdown_work_network_multiplier
+*  Name:        get_model_param_lockdown_occupation_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_model_param_lockdown_work_network_multiplier(model *model)
+double get_model_param_lockdown_occupation_multiplier(model *model, int index)
 {
-	return model->params->lockdown_work_network_multiplier;
+	if ( index >= N_OCCUPATION_NETWORKS)  return FALSE;
+	return model->params->lockdown_occupation_multiplier[index];
 }
 
 /*****************************************************************************************
@@ -260,6 +268,15 @@ int set_model_param_self_quarantine_fraction(model *model, double value)
 ******************************************************************************************/
 int set_model_param_trace_on_symptoms(model *model, int value) {
    model->params->trace_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_trace_on_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_trace_on_positive(model *model, int value) {
+   model->params->trace_on_positive = value;
    return TRUE;
 }
 
@@ -410,6 +427,29 @@ int set_model_param_app_users_fraction( model *model, double value )
 }
 
 /*****************************************************************************************
+*  Name:		set_model_param_relative_transmission
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_relative_transmission( model *model, double value, int type )
+{
+	double old = model->params->relative_transmission[ type ];
+
+	// ignore very small changes
+	if( fabs( old - value ) < 1e-8 )
+		return TRUE;
+
+	model->params->relative_transmission[ type ]      = value;
+	model->params->relative_transmission_used[ type ] = value;
+
+	if( type == HOUSEHOLD && model->params->lockdown_on )
+		model->params->relative_transmission_used[ type ] = value * model->params->lockdown_house_interaction_multiplier;
+
+	set_up_infectious_curves( model );
+	return TRUE;
+}
+
+
+/*****************************************************************************************
 *  Name:		set_model_param_app_turned_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -512,36 +552,62 @@ int set_model_param_risk_score_household(
 *  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-int set_model_param_lockdown_on( model *model, int value )
-{
-	long pdx;
+
+void update_work_intervention_state(model *model, int value){
 	int network;
 	parameters *params = model->params;
 
-	if( value == TRUE )
-	{
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
+	if (value == TRUE) {
+		// Turn intervetions on
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
+		{
 			params->daily_fraction_work_used[network] = params->daily_fraction_work *
-														params->lockdown_work_network_multiplier;
-
-		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD] *
-																params->lockdown_house_interaction_multiplier;
+				        					            params->lockdown_occupation_multiplier[network];
+		}
 	}
-	else
-	if( value == FALSE )
+	else {
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
+		{
+			params->daily_fraction_work_used[network] = params->daily_fraction_work;
+		}
+	}
+}
+
+/*****************************************************************************************
+*  Name:		update_household_intervention_stat
+*  Description: updates the
+******************************************************************************************/
+void update_household_intervention_state(model *model, int value)
+{
+	if (value == TRUE)
 	{
-		if( !params->lockdown_on )
-			return TRUE;
-
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
-			if( !( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY && params->lockdown_elderly_on ) )
-				params->daily_fraction_work_used[network] = params->daily_fraction_work;
-
-		params->relative_transmission_used[HOUSEHOLD] = params->relative_transmission[HOUSEHOLD];
+		// Turn household multipliers on
+		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD] *
+															   model->params->lockdown_house_interaction_multiplier;
 	}
 	else
-		return FALSE;
+	{
+		//Set household transmission to non multiplied state
+		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD];
+	}
+}
 
+/*****************************************************************************************
+*  Name:		set_model_param_lockdown_on
+*  Description: turns lockdown on and off
+******************************************************************************************/
+int set_model_param_lockdown_on( model *model, int value )
+{
+	long pdx;
+	parameters *params = model->params;
+	// If lockdown is off and we're setting it off again, return
+	if( value == FALSE && !params->lockdown_on ){
+			return TRUE;
+	}
+	else {
+		update_work_intervention_state(model, value);
+		update_household_intervention_state(model, value);
+	}
 	params->lockdown_on = value;
 	set_up_infectious_curves( model );
 
@@ -564,26 +630,27 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 
 	if( value == TRUE )
 	{
-		for( network = 0; network < N_WORK_NETWORKS; network++ )
+		for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
-															  params->lockdown_work_network_multiplier;
+															  params->lockdown_occupation_multiplier[network];
+			
+
 	}
-	else
-	if( value == FALSE )
+	else if( value == FALSE )
 	{
 		if( !params->lockdown_elderly_on )
 			return TRUE;
 
 		if( !params->lockdown_on )
 		{
-			for( network = 0; network < N_WORK_NETWORKS; network++ )
+			for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
 		}
 
-	}else
+	}else {
 		return FALSE;
-
+	}
 	params->lockdown_elderly_on = value;
 	set_up_infectious_curves( model );
 
@@ -632,12 +699,13 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_lockdown_work_network_multiplier
+*  Name:        set_model_param_lockdown_occupation_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_lockdown_work_network_multiplier( model *model, double value )
+int set_model_param_lockdown_occupation_multiplier( model *model, double value, int index )
 {
-	model->params->lockdown_work_network_multiplier = value;
+	if (index >= N_OCCUPATION_NETWORKS) return FALSE;
+	model->params->lockdown_occupation_multiplier[index] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );
@@ -647,6 +715,7 @@ int set_model_param_lockdown_work_network_multiplier( model *model, double value
 
 	return TRUE;
 }
+
 
 /*****************************************************************************************
 *  Name:		check_params

@@ -28,23 +28,25 @@ LIB = /usr/local/lib
 CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 
 # Swig's output
-SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build
+SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
 
 # To compile
-swig-all:
-	# swig -outdir COVID19 -python covid19.i
+install: $(OBJS)
+install: all;
 	swig -python covid19.i
-	# python3 setup.py build_ext --inplace
 	$(PYTHON) -m pip install $(PIP_FLAGS) .
+
+dev: PIP_FLAGS += -e
+dev: install;
 
 all: $(OBJS)
 	$(C) -L$(LIB) -o $(EXE) $(OBJS) $(LFLAGS)
 
 clean:
-	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
 	$(PYTHON) -m pip uninstall -y covid19
+	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
 
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@
 
-.PHONY: swig-all all clean
+.PHONY: install dev all clean

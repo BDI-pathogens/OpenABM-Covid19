@@ -13,11 +13,13 @@ RUN apt-get update -qqy && apt-get install -qqy \
   swig
 RUN python3.7 -m pip install numpy pandas scipy pytest
 
+COPY tests/requirements.txt /requirements.txt
+RUN python3 -m pip install -r /requirements.txt
+
 COPY . /OpenABM-Covid19
 
 WORKDIR /OpenABM-Covid19
-RUN python3 -m pip install -r tests/requirements.txt
-RUN cd src && make && make all && make
+RUN cd src && make clean && make install
 
 WORKDIR /OpenABM-Covid19
 ENTRYPOINT ["/usr/local/bin/pytest", "-s"]

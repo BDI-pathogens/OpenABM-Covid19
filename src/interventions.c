@@ -278,6 +278,8 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 		if( contact->traced_on_this_trace < 1 )
 		{
 			token->next_index = next_token->next_index;
+			if( token->next_index != NULL )
+				token->next_index->last_index = token;
 			remove_one_trace_token( model, next_token );
 		}
 		else
@@ -302,7 +304,7 @@ void update_intervention_policy( model *model, int time )
 		params->app_turned_on       = FALSE;
 		params->lockdown_on	        = FALSE;
 		params->lockdown_elderly_on	= FALSE;
-		for( type = 0; type < N_WORK_NETWORKS; type++ )
+		for( type = 0; type < N_OCCUPATION_NETWORKS; type++ )
 			params->daily_fraction_work_used[type] = params->daily_fraction_work;
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
@@ -629,7 +631,7 @@ void intervention_quarantine_household(
 
 /*****************************************************************************************
 *  Name:		intervention_quarantine_household_of_traced
-*  Description: Quarantineteh household mebmers of everyone on a trace list
+*  Description: Quarantine household members of everyone on a trace list
 *  Returns:		void
 ******************************************************************************************/
 void intervention_quarantine_household_of_traced(
@@ -753,8 +755,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token, model->time );
 
 	if( params->trace_on_positive &&
-		( !index_already || params->retrace_on_positive ) &&
-		( params->quarantine_on_traced || params->test_on_traced )
+	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
+	  ( params->quarantine_on_traced || params->test_on_traced )
 	)
 		intervention_notify_contacts( model, indiv, 1, index_token );
 	else

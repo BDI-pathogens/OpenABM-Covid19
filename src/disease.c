@@ -71,6 +71,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 			people++;
 			inter += model->population[pdx].base_random_interactions * weight[RANDOM];
 		}
+
 	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
 	{
 		if( model->population[model->household_network->edges[pdx].id1].age_type == age )
@@ -79,13 +80,13 @@ double estimate_mean_interactions_by_age( model *model, int age )
 			inter += weight[HOUSEHOLD];
 	}
 
-	for( ndx = 0; ndx < N_WORK_NETWORKS ; ndx++ )
-		for( pdx = 0; pdx < model->work_network[ndx]->n_edges; pdx++ )
+	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS ; ndx++ )
+		for( pdx = 0; pdx < model->occupation_network[ndx]->n_edges; pdx++ )
 		{
-			if( model->population[model->work_network[ndx]->edges[pdx].id1].age_type == age )
-				inter += model->params->daily_fraction_work * weight[WORK];
-			if( model->population[model->work_network[ndx]->edges[pdx].id2].age_type == age )
-				inter  += model->params->daily_fraction_work * weight[WORK];
+			if( model->population[model->occupation_network[ndx]->edges[pdx].id1].age_type == age )
+				inter += model->params->daily_fraction_work * weight[OCCUPATION];
+			if( model->population[model->occupation_network[ndx]->edges[pdx].id2].age_type == age )
+				inter  += model->params->daily_fraction_work * weight[OCCUPATION];
 		}
 
 	return 1.0 * inter / people;
@@ -109,17 +110,12 @@ void set_up_infectious_curves( model *model )
 {
 	parameters *params = model->params;
 	double infectious_rate, type_factor;
-	double mean_interactions[N_AGE_TYPES];
 	int type, group;
 
-	mean_interactions[AGE_TYPE_CHILD]   = estimate_mean_interactions_by_age( model, AGE_TYPE_CHILD );
-	mean_interactions[AGE_TYPE_ADULT]   = estimate_mean_interactions_by_age( model, AGE_TYPE_ADULT );
-	mean_interactions[AGE_TYPE_ELDERLY] = estimate_mean_interactions_by_age( model, AGE_TYPE_ELDERLY );
-
-	infectious_rate   = params->infectious_rate / mean_interactions[AGE_TYPE_ADULT];
+	infectious_rate   = params->infectious_rate / model->mean_interactions[AGE_TYPE_ADULT];
 
 	for( group = 0; group < N_AGE_GROUPS; group++ )
-		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * mean_interactions[AGE_TYPE_ADULT] / mean_interactions[AGE_TYPE_MAP[group]];
+		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions[AGE_TYPE_ADULT] / model->mean_interactions[AGE_TYPE_MAP[group]];
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
@@ -346,7 +342,10 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
-
+	// Not the greatest solution, but store daily and total number of individuals
+	// admitted to hospital in the event list
+	model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
+	model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 	{
 		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
@@ -372,7 +371,8 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-
+	model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
+	model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 		transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 	else
