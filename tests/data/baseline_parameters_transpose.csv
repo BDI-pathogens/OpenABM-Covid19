@@ -78,7 +78,7 @@ relative_susceptibility_60_69	1.26
 relative_susceptibility_70_79	1.45
 relative_susceptibility_80	1.66
 relative_transmission_household	2
-relative_transmission_workplace	1
+relative_transmission_occupation	1
 relative_transmission_random	1
 hospitalised_fraction_0_9	0.01
 hospitalised_fraction_10_19	0.0267

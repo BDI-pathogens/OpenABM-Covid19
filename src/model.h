@@ -57,6 +57,7 @@ struct model{
 	network *household_network;
 	network **occupation_network;
 	directory *household_directory;
+	double mean_interactions[ N_AGE_TYPES ];
 
 	event *events;
 	event *next_event;
