@@ -202,6 +202,7 @@ int set_model_param_lockdown_house_interaction_multiplier(model *model, double v
 int set_model_param_lockdown_random_network_multiplier(model *model, double value);
 int set_model_param_lockdown_occupation_multiplier(model *model, double value, int index);
 int set_model_param_lockdown_elderly_on(model *model, int value);
+int set_model_param_relative_transmission( model *model, double value, int type );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
