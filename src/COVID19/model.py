@@ -46,6 +46,9 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_occupation_multiplier_working_network",
     "lockdown_occupation_multiplier_retired_network",
     "lockdown_occupation_multiplier_elderly_network",
+    "relative_transmission_household",
+    "relative_transmission_occupation",
+    "relative_transmission_random",
 ]
 
 
@@ -109,7 +112,7 @@ class ListIndiciesEnum(enum.Enum):
 
 class TransmissionTypeEnum(enum.Enum):
     _household = 0
-    _workplace = 1
+    _occupation = 1
     _random = 2
 
 

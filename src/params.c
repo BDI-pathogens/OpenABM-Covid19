@@ -427,6 +427,29 @@ int set_model_param_app_users_fraction( model *model, double value )
 }
 
 /*****************************************************************************************
+*  Name:		set_model_param_relative_transmission
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_relative_transmission( model *model, double value, int type )
+{
+	double old = model->params->relative_transmission[ type ];
+
+	// ignore very small changes
+	if( fabs( old - value ) < 1e-8 )
+		return TRUE;
+
+	model->params->relative_transmission[ type ]      = value;
+	model->params->relative_transmission_used[ type ] = value;
+
+	if( type == HOUSEHOLD && model->params->lockdown_on )
+		model->params->relative_transmission_used[ type ] = value * model->params->lockdown_house_interaction_multiplier;
+
+	set_up_infectious_curves( model );
+	return TRUE;
+}
+
+
+/*****************************************************************************************
 *  Name:		set_model_param_app_turned_on
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -550,9 +573,14 @@ void update_work_intervention_state(model *model, int value){
 	}
 }
 
-
-void update_household_intervention_state(model *model, int value){
-	if (value == TRUE){
+/*****************************************************************************************
+*  Name:		update_household_intervention_stat
+*  Description: updates the
+******************************************************************************************/
+void update_household_intervention_state(model *model, int value)
+{
+	if (value == TRUE)
+	{
 		// Turn household multipliers on
 		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD] *
 															   model->params->lockdown_house_interaction_multiplier;
@@ -564,6 +592,10 @@ void update_household_intervention_state(model *model, int value){
 	}
 }
 
+/*****************************************************************************************
+*  Name:		set_model_param_lockdown_on
+*  Description: turns lockdown on and off
+******************************************************************************************/
 int set_model_param_lockdown_on( model *model, int value )
 {
 	long pdx;
