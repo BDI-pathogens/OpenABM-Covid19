@@ -33,5 +33,13 @@ setup(
     ext_modules=[covid19_module],
     packages=["COVID19", "adapter_covid19",],
     py_modules=["covid19",],
-    install_requires=["click", "matplotlib", "numpy", "pandas", "scipy", "tqdm", "dataclasses"],
+    install_requires=[
+        "click",
+        "matplotlib",
+        "numpy",
+        "pandas",
+        "scipy",
+        "tqdm",
+        "dataclasses",
+    ],
 )
