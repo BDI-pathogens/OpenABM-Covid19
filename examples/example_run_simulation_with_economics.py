@@ -308,6 +308,8 @@ def _spread_worker(
         for k, v in LOCKDOWN_PARMAETERS.items():
             params.set_param(k, v)
         params.set_param("lockdown_time_on", lockdown_start)
+        if lockdown_end is None:
+            lockdown_end = end_time + 1
         params.set_param("lockdown_time_off", lockdown_end)
 
     # Set up model
