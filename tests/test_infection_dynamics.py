@@ -1061,7 +1061,6 @@ class TestClass(object):
         params.set_param("sd_time_to_symptoms", 2.5)
         
         params.set_param("relative_transmission_household", 0)
-        params.set_param("relative_transmission_workplace", 0)
         
         params.set_param("mean_work_interactions_child", 0)
         params.set_param("mean_work_interactions_adult", 0)
