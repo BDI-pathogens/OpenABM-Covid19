@@ -19,6 +19,9 @@ LOGGER = logging.getLogger(__name__)
 
 class BaseCorporateBankruptcyModel:
     def __init__(self, **kwargs):
+        """
+        Corporate bankruptcy boilerplate class
+        """
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
 
@@ -37,6 +40,13 @@ class BaseCorporateBankruptcyModel:
 
 class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def simulate(self, state: SimulateState, **kwargs) -> None:
+        """
+        Naive corporate bankruptcy model
+
+        Parameters
+        ----------
+        state: state
+        """
         super().simulate(state, **kwargs)
         state.corporate_state = CorporateState(
             {s: 1 for s in Sector},
@@ -53,6 +63,14 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         large_cap_cash_surplus_months: Optional[float] = None,
         **kwargs,
     ):
+        """
+        Corporate bankruptcy model
+
+        Parameters
+        ----------
+        beta: shape parameter for Fisk distribution of days till insolvency for small and medium enterprises (SMEs)
+        large_cap_cash_surplus_months: average number of months of gross surplus for cash buffer of large companies
+        """
         super().__init__(**kwargs)
         self.beta = beta or 1 + np.random.rand()
         # Numpy sinc is of pi*x, not of x
@@ -83,6 +101,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self.sme_company_received_loan: Mapping[Sector, float] = {}
 
     def load(self, reader: Reader) -> None:
+        """
+        Load data required for simulation
+
+        Parameters
+        ----------
+        reader: helper class to load data
+        """
         # primary inputs data
         io_df = reader.load_csv("input_output").set_index("Sector")
         self.employee_compensation = {
@@ -233,13 +258,30 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         }
 
     def _normed_vector(self, vector: np.array):
+        """
+        Compute normed vector
+
+        Parameters
+        ----------
+        vector: numeric vector to be normed
+        """
         return vector / np.sum(vector)
 
     def _simplex_draw(self, n: int):
+        """
+        Random draw from the unit n-simplex
+
+        Parameters
+        ----------
+        n: dimension of simplex
+        """
         exp_draw = expon.rvs(size=n)
         return self._normed_vector(exp_draw)
 
     def _init_sim(self) -> None:
+        """
+        Initialize model simulation state variables
+        """
         small_med = self._get_median_cash_buffer_days(False, self.outflows)
         large_med = self._get_median_cash_buffer_days(True, self.outflows)
         self.cash_state = {
@@ -278,8 +320,10 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             },
         }
 
-    # covid corporate financing facility
     def _apply_ccff(self) -> None:
+        """
+        Apply covid corporate financing facility (CCFF) stimulus
+        """
         for s in Sector:
             sample = np.random.choice(
                 np.where(self.solvent_bool[BusinessSize.large][s])[0],
@@ -296,6 +340,16 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         cash_buffer: float,
         max_cash_buffer_days: Optional[float] = np.inf,
     ) -> np.array:
+        """
+        Simulate cash buffer of companies
+
+        Parameters
+        ----------
+        size: number of comapnies in simulated population
+        median_solvency_days: median number of days till companies go insolvent
+        cash_buffer: total annual cash buffer for the simulated companies
+        max_cash_buffer_days: hard cap on maximum number of cash buffer days a company can have
+        """
         # Rejection sampling to get truncated log-logistic distribution of days till insolvency
         solvent_days = np.zeros((0,))
         while solvent_days.shape[0] < size:
@@ -315,9 +369,12 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self, lcap: bool, net_operating_surplus: Mapping[Sector, float],
     ) -> Mapping[Sector, float]:
         """
-        :param lcap:
-        :param net_operating_surplus:
-        :return:
+        Calculate mean number of cash buffer days
+
+        Parameters
+        ----------
+        lcap: Boolean for if calculation is for large companies or SMEs
+        net_operating_surplus: annual net operating surplus for the group of companies
         """
         if lcap:
             size_modifier = self.large_cap_pct
@@ -336,18 +393,40 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _get_median_cash_buffer_days(
         self, lcap: bool, net_operating_surplus: Mapping[Sector, float] = None,
     ) -> Mapping[Sector, float]:
+        """
+        Calculate median number of cash buffer days
+
+        Parameters
+        ----------
+        lcap: Boolean for if calculation is for large companies or SMEs
+        net_operating_surplus: annual net operating surplus for the group of companies
+        """
         mean_cash_buffer_days = self._get_mean_cash_buffer_days(
             lcap, net_operating_surplus
         )
         return {k: v * self.sinc_theta for k, v in mean_cash_buffer_days.items()}
 
     def _proportion_solvent(self, cash_buffer_sample: np.array) -> float:
+        """
+        Calculate proportion of simulated companies which are still solvent (cash buffer of > 0)
+
+        Parameters
+        ----------
+        cash_buffer_sample: cash buffers remaining for simulated companies
+        """
         solvent = float(np.mean(cash_buffer_sample > 0))
         if np.isnan(solvent):
             return 1
         return solvent
 
     def _update_exhuberance_factor(self, state: SimulateState) -> None:
+        """
+        Compute updated exhuberance factor using growth rates, demand gap, and fear factor
+
+        Parameters
+        ----------
+        state: state
+        """
         fear_factor = state.get_fear_factor()
         for s in Sector:
             self.exhuberance_factor[s] *= (
@@ -366,9 +445,19 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _apply_growth_rates(
         self, factor_map: Mapping[Sector, float],
     ) -> Mapping[Sector, float]:
+        """
+        Apply exhuberance factor
+
+        Parameters
+        ----------
+        factor mapping: variable of interest to have exhuberance growth applied, e.g. capital discount factor
+        """
         return {s: factor_map[s] * self.exhuberance_factor[s] for s in Sector}
 
     def _proportion_employees_job_exists(self) -> Mapping[Sector, float]:
+        """
+        Estimate proportion of employees working for a company which is still solvent
+        """
         large_company_solvent = (
             pd.DataFrame(
                 {
@@ -438,7 +527,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _capital_discount_factor(
         self, proportion_solvent: Mapping[BusinessSize, Mapping[Sector, float]],
     ) -> Mapping[Sector, float]:
+        """
+        Compute capital discount factor
 
+        Parameters
+        ----------
+        proportion_solvent: proportion of companies that are solvent by size and sector
+        """
         return self._apply_growth_rates(
             {
                 s: (
@@ -451,6 +546,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         )
 
     def simulate(self, state: SimulateState, **kwargs,) -> None:
+        """
+        Run corporate bankruptcy simulation
+
+        Parameters
+        ----------
+        state: state
+        """
         super().simulate(state, **kwargs)
         try:
             net_operating_surplus = {
@@ -465,7 +567,6 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             naive_model = NaiveCorporateBankruptcyModel()
             naive_model.simulate(state, **kwargs)
             return
-        # TODO: we should be able to deal with corp bankruptcies without lockdown
 
         if state.time == state.new_spending_day:
             self._new_spending_sector_allocation()
@@ -500,6 +601,13 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         )
 
     def _update_state(self, net_operating_surplus: Mapping[Sector, float],) -> None:
+        """
+        Update corporate bankruptcy simulation variables, e.g. cash state
+
+        Parameters
+        ----------
+        net_operating_surplus: modeled net operating surplus from the GDP model at the current time step
+        """
         largecap_cash_outgoing = {
             s: self.large_cap_pct[s]
             * (
@@ -561,6 +669,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             )
 
     def _loan_guarantees(self):
+        """
+        Apply coronavirus business interruption loan scheme (CBILS) loan guarantee scheme to simulated companies
+        """
         for s in Sector:
             valid_set = 1 - self.sme_company_received_loan[s] * (
                 self.solvent_bool[BusinessSize.sme][s]
@@ -585,6 +696,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
             )
 
     def _new_spending_sector_allocation(self) -> None:
+        """
+        Apply new spending budget stimulus to simulated companies
+        """
         stimulus_amounts = [0.01, 0.25]
         for s in Sector:
             try:
