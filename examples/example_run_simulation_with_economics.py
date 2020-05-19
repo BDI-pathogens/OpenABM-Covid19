@@ -280,7 +280,7 @@ def _spread_worker(
     household_demographics_path: str,
     total_individuals: int,
     lockdown_start: Optional[int],
-    lockdown_end: int,
+    lockdown_end: Optional[int],
     end_time: int,
 ) -> None:
     region, populations, queue = args
