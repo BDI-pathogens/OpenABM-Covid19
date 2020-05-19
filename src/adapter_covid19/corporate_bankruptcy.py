@@ -42,6 +42,7 @@ class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def simulate(self, state: SimulateState, **kwargs) -> None:
         """
         Naive corporate bankruptcy model
+        Somewhat useful for testing the absence of corporate bankruptcies
 
         Parameters
         ----------
@@ -259,7 +260,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
     def _normed_vector(self, vector: np.array):
         """
-        Compute normed vector
+        Compute normed vector (unit vector)
 
         Parameters
         ----------
@@ -323,6 +324,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _apply_ccff(self) -> None:
         """
         Apply covid corporate financing facility (CCFF) stimulus
+        https://www.bankofengland.co.uk/markets/covid-corporate-financing-facility
         """
         for s in Sector:
             sample = np.random.choice(
@@ -394,7 +396,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
         self, lcap: bool, net_operating_surplus: Mapping[Sector, float] = None,
     ) -> Mapping[Sector, float]:
         """
-        Calculate median number of cash buffer days
+        Calculate median number of cash buffer days.
+        Uses historical skew of cash buffer to convert from mean to median
 
         Parameters
         ----------
@@ -421,7 +424,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
     def _update_exhuberance_factor(self, state: SimulateState) -> None:
         """
-        Compute updated exhuberance factor using growth rates, demand gap, and fear factor
+        Compute updated exhuberance factor using growth rates, demand gap, and fear factor.
+        Exhuberance factor is the rate that new companies are forming.
 
         Parameters
         ----------
@@ -447,6 +451,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     ) -> Mapping[Sector, float]:
         """
         Apply exhuberance factor
+        Exhuberance factor is the rate that new companies are forming.
 
         Parameters
         ----------
@@ -670,7 +675,9 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
     def _loan_guarantees(self):
         """
-        Apply coronavirus business interruption loan scheme (CBILS) loan guarantee scheme to simulated companies
+        Apply coronavirus business interruption loan scheme (CBILS)
+        loan guarantee scheme to simulated companies
+        https://www.gov.uk/guidance/apply-for-the-coronavirus-business-interruption-loan-scheme
         """
         for s in Sector:
             valid_set = 1 - self.sme_company_received_loan[s] * (
@@ -698,6 +705,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _new_spending_sector_allocation(self) -> None:
         """
         Apply new spending budget stimulus to simulated companies
+        https://www.gov.uk/government/publications/coronavirus-covid-19-guidance-on-business-support-grant-funding
         """
         stimulus_amounts = [0.01, 0.25]
         for s in Sector:
