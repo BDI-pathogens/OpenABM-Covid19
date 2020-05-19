@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from adapter_covid19.enums import Region, BackToWork
 
 from adapter_covid19.data_structures import Scenario, ModelParams
