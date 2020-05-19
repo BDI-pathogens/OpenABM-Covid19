@@ -22,12 +22,6 @@ from adapter_covid19.enums import Region, Sector, Age, Age10Y, LabourState
 
 logging.basicConfig(level=logging.INFO)
 
-LOCKDOWN_PARMAETERS = {
-    "quarantine_household_on_positive": 1,
-    "quarantine_household_on_symptoms": 1,
-    "self_quarantine_fraction": 0.8,
-}
-
 EXAMPLE_PARAMETERS = {
     "gdp": {},
     "corporate_bankruptcy": {"beta": 1.5, "large_cap_cash_surplus_months": 3},
@@ -305,8 +299,6 @@ def _spread_worker(
 
     # Activate lockdown if specified
     if lockdown_start is not None:
-        for k, v in LOCKDOWN_PARMAETERS.items():
-            params.set_param(k, v)
         params.set_param("lockdown_time_on", lockdown_start)
         if lockdown_end is None:
             lockdown_end = end_time + 1
