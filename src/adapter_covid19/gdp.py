@@ -68,7 +68,6 @@ class BaseGdpModel(abc.ABC):
     def _check_data(self) -> None:
         """
         Checks that sectors, regions and ages are consistent between data
-        :return:
         """
         if "gdp" not in self.datasources:
             raise ValueError("Trying to simulate gdp without gdp...?")
@@ -106,12 +105,23 @@ class BaseGdpModel(abc.ABC):
                 )
 
     def load(self, reader: Reader):
+        """
+        Load datasources required for model
+
+        :param reader: helper to load data
+        """
         for k, v in self.datasources.items():
             self.__setattr__(k, v.load(reader))
         self._check_data()
 
     @abc.abstractmethod
     def simulate(self, state: SimulateState) -> None:
+        """
+        Simulate the GDP response of the economy
+
+        :param state: simulation state of model
+        :type state: SimulateState
+        """
         pass
 
 
@@ -498,6 +508,15 @@ class CobbDouglasLPSetup:
         p_tau: float,
         substitution_rate: float,
     ) -> None:
+        """
+        One-time setup of the GDP model
+
+        :param iot_p: primary input-output data
+        :param dtilde_iot: intermediate input-output data
+        :param ytilde_iot: final input-output data
+        :param p_tau: tax rate on products and production (fraction of pre-crisis levels)
+        :param substitution_rate: Rate at which capital can be substituted for labour and vice versa
+        """
         self.iot_p = iot_p
         self.dtilde_iot = dtilde_iot
         self.ytilde_iot = ytilde_iot
@@ -619,6 +638,16 @@ class CobbDouglasLPSetup:
         p_labour: Mapping[Sector, Utilisation],
         wfh_productivity: Mapping[Sector, float],
     ):
+        """
+        Setup of GDP model that must be run once per timestep
+
+        :param p_delta: demand
+        :param p_kappa: capital
+        :param p_labour: labour
+        :param wfh_productivity:
+            productivity of individuals when working from home (relative to working from office)
+        :return: (Objective fn, output bounds, input bounds)
+        """
         bounds = self.add_constraint(self.c_labour_compensation(), self.bounds)
         bounds = self.add_constraint(self.c_labour_quantity(wfh_productivity), bounds)
         bounds = self.add_constraint(self.c_labour_constraints(p_labour), bounds)
@@ -699,7 +728,7 @@ class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):
         state: SimulateState,
         res: OptimizeResult,
         p_delta: Mapping[Tuple[Sector, FinalUse], float],
-    ) -> IoGdpState:
+    ) -> None:
         x = pd.Series(res.x, index=self.setup.variables)
         # gdp
         max_gdp = self.setup.max_gdp

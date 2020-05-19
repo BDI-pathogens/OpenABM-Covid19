@@ -54,12 +54,16 @@ logger = logging.getLogger(__file__)
 
 
 class Simulator:
+    """Simulator for adaptER-covid19"""
+
     def __init__(
         self, data_path: Optional[str] = None,
     ):
         """
-        Simulator for adapter covid19
-        :param data_path: path of data
+        Simulator for adaptER-covid19
+
+        :param data_path: path to data
+        :type data_path: Optional[str]
         """
         if data_path is None:
             data_path = os.path.join(
@@ -76,6 +80,7 @@ class Simulator:
     ) -> Tuple[Economics, List[SimulateState]]:
         """
         Run simulation for a given scenario
+
         :param scenario: Scenario to run the simulation
         :type scenario: Scenario
         :param show_plots: Show the plots using matplotlib if set to be True
@@ -143,6 +148,7 @@ class Simulator:
     ) -> Dict[str, Tuple[Economics, List[SimulateState]]]:
         """
         Run simulation for multiple given scenarios in sequence
+
         :param scenarios: Dictionary of Scenarios to run the simulation
         :type scenarios: Mapping[str, Scenario]
         :param show_plots: Show the plots using matplotlib if set to be True
