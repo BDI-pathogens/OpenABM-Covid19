@@ -501,7 +501,7 @@ def plot_scenarios(scenarios, end_time=50):
         len(scenarios),
         sharex="col",
         sharey="row",
-        figsize=(7 * len(scenarios), 4 * n_charts),
+        figsize=(5 * len(scenarios), 3 * n_charts),
     )
     for idx, (name, dfs) in enumerate(scenarios.items()):
         axs = [row[idx] for row in axes]
