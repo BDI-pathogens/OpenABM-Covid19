@@ -31,8 +31,9 @@ class BaseCorporateBankruptcyModel:
     @abc.abstractmethod
     def simulate(self, state: SimulateState, **kwargs) -> None:
         """
-        :param state:
-        :return:
+        Simulate the corporate bankruptcy model for one timestep
+
+        :param state: State of simulation
         """
         if kwargs:
             LOGGER.warning(f"Unused kwargs in {self.__class__.__name__}: {kwargs}")
@@ -40,14 +41,6 @@ class BaseCorporateBankruptcyModel:
 
 class NaiveCorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def simulate(self, state: SimulateState, **kwargs) -> None:
-        """
-        Naive corporate bankruptcy model
-        Somewhat useful for testing the absence of corporate bankruptcies
-
-        Parameters
-        ----------
-        state: state
-        """
         super().simulate(state, **kwargs)
         state.corporate_state = CorporateState(
             {s: 1 for s in Sector},
