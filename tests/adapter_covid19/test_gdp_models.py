@@ -14,6 +14,7 @@ from adapter_covid19.enums import (
     M,
     Sector,
     LabourState,
+    PrimaryInput,
 )
 from adapter_covid19.gdp import PiecewiseLinearCobbDouglasGdpModel
 from tests.adapter_covid19.utilities import (
@@ -131,14 +132,44 @@ class TestClass:
             setup.get_gdp(x).sum(), setup.max_gdp, rtol=1e-3, atol=0,
         )
 
-        # objective function equals sum of default operating surplus
+        # objective fn part 1 (gdp) equals sum of default final uses minus imports
         np.testing.assert_allclose(
-            -res.fun, setup.xtilde_iot.loc[M.K].sum(), rtol=1e-5, atol=0,
+            np.sum(list(setup.gdp_per_sector.values()), axis=0).dot(res.x),
+            setup.ytilde_total_iot.sum()
+            - setup.xtilde_iot.loc[M.I].sum()
+            - setup.o_iot.loc[PrimaryInput.TAXES_PRODUCTS].sum(),
+            rtol=1e-3,
+            atol=0,
         )
 
-        pd.options.display.max_rows = 1000
-        pd.options.display.max_columns = 10
-        _df.to_csv("_test.csv")
+        # objective fn part 1 (gdp) equals sum of default operating surplus
+        np.testing.assert_allclose(
+            np.sum(list(setup.gdp_per_sector.values()), axis=0).dot(res.x),
+            setup.xtilde_iot.loc[M.K].sum()
+            + setup.xtilde_iot.loc[M.L].sum()
+            + setup.o_iot.loc[PrimaryInput.TAXES_PRODUCTION].sum(),
+            rtol=1e-5,
+            atol=0,
+        )
+
+        # objective fn part 2 (surplus) equals consumption + net operating surplus
+        np.testing.assert_allclose(
+            np.sum(list(setup.surplus_per_sector.values()), axis=0).dot(res.x),
+            setup.xtilde_iot.loc[M.K].sum(),
+            rtol=1e-5,
+            atol=0,
+        )
+
+        # objective fn part 1 + part 2 = objective fn
+        np.testing.assert_allclose(
+            (
+                np.sum(list(setup.gdp_per_sector.values()), axis=0)
+                + np.sum(list(setup.surplus_per_sector.values()), axis=0)
+            ).dot(res.x),
+            -res.fun,
+            rtol=1e-5,
+            atol=0,
+        )
 
         # found solution matches default solution for each variable
         # note: the household sector has lots of zero values, making the optimization problem underconstrained.
