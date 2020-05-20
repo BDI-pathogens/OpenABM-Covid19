@@ -177,7 +177,50 @@ class Simulator:
         return result
 
 
-def summarize_one_scenario(econ, states, end_time, start_date=None):
+def summarize_one_scenario(
+    econ: Economics,
+    states: List[SimulateState],
+    end_time: int,
+    start_date: Optional[pd.Timestamp] = None,
+) -> Mapping[str, pd.DataFrame]:
+    """
+    Generates a dictionary of DataFrames, containing timeseries on various metrics:
+
+    * **Deaths** - Cummulative deaths in population, expressed as ratio of entire population.
+    * **People Ill** - People ill (with symptoms) on a given day. These people are presumed unable to work.
+    * **Total GDP** - Level at which the economy operates on a given day, expressed as a ratio of pre-crisis GDP.
+    * **GDP Composition** - Breakdown of GDP by sector, normalized to sum to 1.0.
+    * **Capital Stock** - Quantity of capital expressed as a ratio of pre-crisis quantity of capital.
+      Takes into account default of corporates as well as private-sector business investment.
+    * **Investment** - Growth of capital stock due to business investment by sector.
+      Driven by long-term growth trajectory of sector as well as fear factor and opportunity gap (see below).
+    * **Corporate Solvencies - Large Cap** - Proportion of large corporates remaining solvent by sector.
+      (In terms of number of corporates.)
+    * **Corporate Solvencies - SME** - Proportion of SMEs remaining solvent by sector.
+      (In terms of number of corporates.)
+    * **Household Expenditure Reduction (Total)** - Aggregate reduction in household spending, expressed as a ratio
+      of pre-crisis final consumption by housholds. Driven by household earnings (which, in turn, are driven by
+      furloughing/unemployment) and fear factor (see below).
+    * **Household Expenditure Reduction by Sector** - Breakdown of reduction of household spending by sector,
+      expressed of as a ratio of pre-crisis final consumption by housholds of goods produced by that sector.
+      Spending on discretionary consumption is reduced most/first.
+    * **Fear Factor** - Used to influence both household consumption and business investment. The fear factor is a
+      function of lockdown, number of people currently ill and deaths on the previous day.
+    * **Opportunity Gap** - Gap between supply and demand for a given sector, on a scale of 0 to 1. If 0, then
+      demand is the limiting factor for output of given sector. If bigger than 0, then supply is the limiting
+      factor for output of the given sector.
+    * **Unemployed + Furloughed by Sector** - Proportion of workforce who are either unemployed or furloughed,
+      by sector.
+    * **Unemployed vs Furloughed** - Proportion of workforce who are unemplouyed and proportion who are furloughed,
+      in aggregate across sectors.
+
+    :param econ: Economics object used for simulation
+    :param states: List of SimulateState returned by simulation
+    :param end_time: End time of simulation (integer)
+    :param start_date: Start date of simulation (datetime, Optional)
+    :return: Dictionary mapping data frame titles to DataFrames
+    """
+
     dfs = {}
 
     # Table 0a - Death

@@ -1,46 +1,41 @@
 # AdaptER-Covid19
 
+
 ## Introduction
 
 Accurate epidemiological simulations are a key tool for understanding, responding to and managing the Covid-19 pandemic. While understanding health-outcomes of policy interventions is rightly the primary focus of such simulations, there are clear benefits to a holistic simulation that takes into account economic dynamics as well. Created for this purpose, AdaptER-Covid19 (Adaptive Economic Response) is an economic simulation that integrates with the OpenABM-Covid19 simulator in order to jointly model health and economic outcomes of epidemics, with a particular focus on Covid-19.
 
-AdaptER-Covid19 takes as input from the epidemiological part of the model timeseries describing the simulated course of the epidemic (e.g. number of symptomatic individuals) as well as exogenous variables (e.g. whether a lockdown is in place in the given scenario) and simulates the impact on key economic metrics such as GDP, corporate bankruptcy rate and individual insolvency rate. The main focus of the first version of the model is on the short-term effects of labour supply constraints on economic output, as well as second-order effects such as corporate bankruptcies and the longer-term effects these have on capital stock and employment. For this purpose, the UK economy is broken down by sector and region to model local and sector-specific effects of both the epidemic and the policy response. Demand-side effects, such as impact on consumption and investment are not modelled in detail; this will be addressed in future work.
+AdaptER-Covid19 takes as input from the epidemiological part of the model timeseries describing the simulated course of the epidemic (e.g. number of symptomatic individuals) as well as exogenous variables (e.g. whether a lockdown is in place in the given scenario) and simulates the impact on key economic metrics such as GDP, corporate bankruptcy rate and individual insolvency rate, unemployment, household expenditure, private sector investment, opportunity gaps betweeen supply and demand per sector and behavioural changes caused by the epidemic.
 
 It should also be noted that AdaptER-Covid19 is a simulator rather than a forecast. Its outputs are dependent on both the mathematical model as well as a host of parameter choices on which limited data is available (e.g. worker productivity by region and sector when limited to working from home) and which may vary considerably across scenarios. As such, simulation results from AdaptER-Covid19 may be used to draw qualitative conclusions when comparing different scenarios rather than for quantitative estimates or inference of absolute numbers. To allow the user to properly evaluate simulation results, we describe the current model in detail below.
 
+
 ## Model Overview
 
-To limit complexity, the overall economic simulator is broken down into four linked components. The first three model the impact of the epidemic:
+The epidemic model produces detailed timeseries of the health impact on the population by region, age and economic sector that are then fed into the economic model at a daily frequency. Government interventions allow to change the trajectory of the epidemic and the economy. Some interventions, such as the imposition of a lockdown, have a direct effect on both the epidemic and the economic model, while other only affect one of the two models directly (e.g. the effect of furloughing on the economic model). Since the joint model runs daily, it is possible to simulate intervention policies that are responsive to events in the epidemic or the economy. Howeverm there is currently not direct feedback loop from the economic model back to the epidemic model.
 
-* an *input-output model* of the economy that links primary and intermediate inputs to production, on the one hand, to intermediate and final uses of production, on the other hand, on a sector by sector basis and is used in particular to model the effect of constraining labour supply on GDP,
-* a *corporate bankruptcy model* which estimates corporate default rates over time, based on data from the input-output model as well as assumptions around corporate cash flow,
-* an *individual solvency model* which estimates risk of individual insolvencies, by region and sector, based on both corporate bankruptcies as well as overall GDP.
+The economic model is broken down into three main parts. 
 
-Taken together, the above three models constitute a simulation of the short-term shock to the economy caused by the epidemic. Moreover, the destruction of capital through an excess rate of corporate defaults is used to discount GDP going forward. However, this approach is inherently limited to modelling a shortfall of GDP with respect to a baseline and does not account for growth. For this purpose, we add
+* The Input-Output Model, or simply GDP Model, links labour, capital and intermediate inoputs to production to the intermediate and final outputs, while taking interdependencies between sector of industry into account. In particular, it also determines the level of employment. The Input-Output Model is formulated as a constrained optimization problem, solved using linear programming techniques.
+* The Corporate Bankruptcy Model is an agent-based model simulating corporate defaults. It is connected to the IO-Model through the net operating surplus of companies, the stock of capital available for production and the level of unemployment caused by corporate bankruptcies. 
+* The Individual Insolvency Model takes household earnings and behaviour into account to determine aggregate levels of demand as well as the risk of households becoming insolvent. 
 
-* a *long-term trend model* which models growth dynamics of the economy based on fixed long-term growth assumptions
+These components are complemented by a "fear factor" driving behavioural changes in household consumption and risk appetite of private sector investors, as well as an "opportunity gap" metric which measures the gap between supply and demand per sector.
 
-and which is overlaid on the combined output of the first three models.
+Some preliminary calibration of the model has been performed using public data sets for UK available from the Office for National Statistics (ONS). However, many further parameters require careful tuning to create accurate simulation results. In the codebase, we have *randomized* initial settings for these parameters, to make it easy to run the model. These parameters will need to be set by the user  depending on the application. See also the section on parameters below.
 
-Before we go into further detail on these four component models, we point out key **limitations** in the current approach:
+Before we go into further detail on the component models, we point out key **limitations** in the current approach:
 
-* Some quantities that are already modelled in some of the component models are currently not fully linked with other components. For example, financial distress of households from the individual solvency model should be used to constrain household consumption in the final use section of the input-output model. Similarly, capital destruction given by the corporate bankruptcy model should directly affect capital stock in the primary input section of the input-output model. These feedback loops are currently modelled using ad-hoc GDP discounting. A deeper integration along the lines described above is future work.
+* Prices for goods and labour are assumed to be fixed. Inflation is not modelled.
+* In particular, unemployment is determined based on the assumptions that wages are fixed and workers cannot change industries. A full model of a competitive labour market would be a useful addition to the model.
+* Growth of capital in the economy is modelled through the agent-based corporate bankruptcy model as well as through a simplified model of investment by sector that combines long-term growth trends with opportunistic investment behaviour driven by risk appetite and the gap between supply and demand per sector. However, this is not a comprehensive model of the capital market. Also, the corporate bankruptcy model does currently not break down net operating surplus into interest payments and profits.
+* Imports and exports are part of the input-output model, however they are currently assumed to be fixed. Connecting these to a model of the global economy would be a straightforward extension.
 
-* Consumption patterns are not represented in the model yet. Thus, there are a wide range of effects of economic import that are not currently possible to simulate, for example: Consumer reluctance to go to restaurants as case numbers increase, even if a lockdown is not in place. Pent-up demand leading to an increase in spending after a prolonged lockdown is lifted. Shift in demand towards delivery services and home entertainment. Increase in the savings rate across households in response to economic downturn.
+It is essential to keep current limitations of the simulator in mind when interpreting results. See also the section on directions for future work below.
 
-* Similarly, changes in investment behaviour of corporates are not simulated with granularity, apart from overall destruction of capital stock due to defaults. Effects that cannot be simulated in detail include: Investment in technology to facilitate working from home. Investment in delivery services and online ordering and divestment from brick-and-mortar stores. Deleveraging of corporates that do not default.
-
-* Government spending is not currently modelled as a separate source of demand, but rather assumed to be constant. In particular, specific economic stimulus packages are not taken into account and will be addressed in future work.
-
-* As mentioned previously, the model currently combines a model of the short-to-medium term downside impact of the epidemic with a simple long-term growth trend model. Modelling the dynamics of demand as described above properly will give a more detailed simulation of the return to growth in the long term.
-
-* The UK government has deployed a wide range of economic policies. Some of these, such as furloughing of workers and tax deferral are included to a first approximation. However, a wide range of other measures, from mortgage holidays and Statutory Sick Pay to the Covid-19 Corporate Financing Facility and the Coronavirus Business Interruption Loan Scheme, are not currently modelled.
-
-* Labour and capital markets are not currently modelled. For example, the dynamics of employees switching firms or industries and of investors redeploying capital is not modelled. Prices for goods and services are assumed to be constant.
-
-Addressing these limitations is left for future work. However, it is essential to keep current limitations of the simulator in mind when interpreting results. Also see the section on parameters below.
 
 ## Model Components
+
 
 ### Input-Output Model
 
@@ -52,6 +47,7 @@ The input-output model currently does not have an explicit representation of tim
 
 Note that the code base currently contains a simplified version of the above model based on linear programming (LP) which scales economic output linearly for a given supply of labour by sector, region and age. A full nonlinear programming (NLP) implementation including the Cobb-Douglas production function is in development.
 
+
 ### Corporate Bankruptcy Model
 
 The objective of the bankruptcy model is to model the proportion of companies going insolvent and corresponding reduction to GDP  over time. In this context, it is crucial to distinguish between the probability of a specific company defaulting and the proportion of companies in the population that default. For this purpose we apply the log-logistic (Fisk) distribution to model the variation in number of days until companies go insolvent; this distribution is defined by two parameters (shape and scale) and is commonly used in survival analysis, including in the context of business survival [5,6]. 
@@ -60,11 +56,13 @@ The shape parameter of the distribution is assumed to be constant across sectors
 
 One important limitation is that the model currently does not account for interest payments, which form a crucial fixed payment, especially for highly-leverages firms and will be addressed in future work. Another limitation, already mentioned above, is that government support programs are currently not modelled explicitly.
 
+
 ### Individual Insolvency Model
 
 We model the probability of individual insolvency over time, as a function of credit quality by region. The distribution of credit quality within each region is assumed to take the form of a Gaussian mixture model (GMM). The different classes of the GMM are associated with the employment status of an individual, which can be working, furloughed or unemployed. The shape parameter of the Gaussian distributions is fixed. The location parameter is a piecewise linear function of the initial credit quality, before the onset of the simulation, and the cumulative balance of savings the individual has. The balance itself takes savings at the start of the simulation as well as cumulative earnings over the course of the simulation into account. Here, earnings are a function both of the employment status and initial earnings at the start of the simulation. The corporate default rate provided by the bankruptcy model is used to simulate transitions between employment states. Note that this is not an agent-based model, i.e., we are not keeping track of balances by individual but only by group, which limits the ability of the model to simulate the effects of changes in employment status. To address this, we smooth the weights used in the mixture model over time. A more granular modelling of these dynamics is left for future work.
 
 Key limitation of the model is that apart from furloughing, benefits and Covid-19-specific government support programs are not taken into account. Also, as mentioned above, the labour market itself is not modelled, i.e., workers do not have the ability to switch jobs, or find new employment if their previous firm went bankrupt. There is currently no modelling of self-employment, part-time work or short-time work. Finally, while the individual insolvency model does explicitly simulate spending, this is not currently fed back to the demand parameter of the input-output model. All of these are areas of future work.
+
 
 ### Long-term Growth Model
 
@@ -72,11 +70,31 @@ The input-output model simulates economic output as a ratio of GDP at the start 
 
 Modelling long-term growth is a key area for improvement in future work. On the one hand, the long-term growth model itself can be improved considerably, by adopting a more thorough autoregressive approach than assuming fixed growth. On the other hand, as mentioned above, a proper modelling of demand as part of the input-output model will provide more realistic long-term dynamics.
 
+
 ## Parameters
 
 As referred to in the model description above, there are a large number of parameters on which the simulation model depends. These parameters need to be calibrated carefully for the mode to produce realistic results. **Importantly, the code currently does not provide default values for these parameters. Setting parameters is left to the user.** In some places, we may provide *randomized parameters* as a convenience for users when running the code. However, the outputs generated based on randomized parameters should *not* be interpreted as economically meaningful, either in qualitative or quantitative terms.
 
 In some areas the current code does use parameters calibrated on data from the Office for National Statistics. This data is used on the basis of the Open Government License v3.0.
+
+
+## Directions for Future Work
+
+As indicated above, several directions for future enhancements of the model present themselves, apart from calibration and parameter tuning. First of all, there are a number of iterative enhancements to the model that will be of immediate benefit:
+
+* Tighter integration with spread model, in particular with regard to mapping of agent participation in networks in the spread model to worker states, number of key workers, etc. in the economic model.
+* Simulation scenarios that drive both the epidemic and the economic interventions in response to events in the simulation.
+* Improvement of runtime performance (i.e. increase of speed of execution and reduction of memory consumption). Only very limited effort has been spent so far on optimizing the implementation, and there are many areas that can be improved.
+* There is a wide range of economic variables that are already modelled, but that are currently simply assumed to be constant. Examples include imports and exports or government spending as a final use (source of demand). Exposing these variables to simulation scenarios and then using these to drive the simulation is a straightforeward extension.
+
+Going beyond these iterative improvements, there is also a range of major extensions of the model that would be worthwhile:
+
+* The input model currently uses a piecewise-linear production function. Switching the model to the (non-linear) Cobb-Douglas production function would model substitutability of inputs to production more realistically, as it would make small qunatities of substition more cost effective than in the current model, but large substitutions much more expensive. This would imply replacing the LP solver with an NLP solver, likely using a different solver library than Scipy (e.g. using Pyomo as a generic solver interface).
+* As mentioned in the section on limitations, the simulator currently uses simplified models of labour and capital markets. Replacing these with competitive equilibrium models of labour and captial markets would enhance model fidelity. 
+* Switching to such competitive equilibrium models would also enable allowing prices to vary, leading to a simulation of inflation.
+
+Finally, in the long-run, an uplift of the data pipelines to incorporate granular and timely data and an automation of the calibration process would allow the model to update "live" in response to current events and simulate the effect of interventions in response to those events.
+
 
 ## References
 
@@ -86,7 +104,6 @@ In some areas the current code does use parameters calibrated on data from the O
 4. D. Acemoglu, V. M. Carvalho, A. Ozdaglar, and A. Tahbaz-Salehi, "The Network Origins of Aggregate Fluctuations", *Econometrica*, vol. 80, no. 5, pp. 1977–2016, 2012.
 5. T. Mahmood, "Survival of newly founded businesses: A log-logistic model approach", *Small Business Economics*, vol. 14, no. 3, pp. 223-237, 2000.
 6. P. Fisk, "The graduation of income distributions", Econometrica, vol. 29, no. 2, pp. 171-185, 1961.
-
 
 
 ## Disclaimers
