@@ -558,6 +558,13 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	trace_token *next_token;
 	int zero_traced = FALSE;
 
+	// remove the release token
+	if( indiv->index_token_release_event != NULL )
+	{
+		remove_event_from_event_list( model, indiv->index_token_release_event );
+		indiv->index_token_release_event = NULL;
+	}
+
 	if( token == NULL )
 		return;
 
@@ -750,7 +757,9 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_notify_contacts( model, indiv, 1, index_token );
 
 		remove_traced_on_this_trace( model, indiv );
-		add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms );
+		if( indiv->index_token_release_event != NULL )
+			remove_event_from_event_list( model, indiv->index_token_release_event );
+		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms );
 	}
 }
 
@@ -813,9 +822,11 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );
 
+	if( indiv->index_token_release_event != NULL )
+		remove_event_from_event_list( model, indiv->index_token_release_event );
+	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, index_token->contact_time + params->quarantine_length_traced_positive );
+
 	remove_traced_on_this_trace( model, indiv );
-	if( !index_already )
-		add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_positive );
 }
 
 /*****************************************************************************************
