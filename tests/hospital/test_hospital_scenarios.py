@@ -53,6 +53,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -103,6 +104,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -147,6 +149,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -191,6 +194,7 @@ class TestClass(object):
         """
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -239,6 +243,7 @@ class TestClass(object):
         """
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -277,12 +282,16 @@ class TestClass(object):
         for index, row in healthcare_workers.iterrows():
             assert row["hospital_state_source"] not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
 
-# Dylan update for file change
     def test_hospital_infectivity_modifiers_max(self):
         """
         Set patient infectivity modifiers to 100 and test that all healthcare
         workers who have interacted with a patient get infected
         """
+        params = ParameterSet(TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(SCENARIO_FILE)
+
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("waiting_infectivity_modifier", 100)
@@ -298,7 +307,7 @@ class TestClass(object):
                                                )
 
         # Construct the executable command
-        EXE = f"{EXECUTABLE} {TEST_DATA_FILE} {PARAM_LINE_NUMBER} " + \
+        EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} " + \
               f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
 
         # Call the model pipe output to file, read output file
@@ -332,6 +341,7 @@ class TestClass(object):
         """
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
         # Adjust hospital baseline parameter
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
@@ -394,6 +404,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -456,6 +467,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -519,6 +531,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -582,6 +595,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -617,51 +631,6 @@ class TestClass(object):
 
         assert len(waiting_df.index) == 0
 
-
-    # def test_no_space_limit_wards(self):
-    #     """
-    #     Set number of wards in each ward to the population size,
-    #     check that nobody in waiting state
-    #     """
-
-    #     # Adjust baseline parameter
-    #     params = ParameterSet(TEST_DATA_FILE, line_number=1)
-    #     params.set_param("n_total", 20000)
-    #     params.write_params(SCENARIO_FILE)
-
-    #     # Adjust hospital baseline parameter
-    #     h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
-    #     h_params.set_param("n_covid_general_wards", 20000)
-    #     h_params.set_param("n_covid_icu_wards", 20000)
-    #     h_params.write_params(SCENARIO_HOSPITAL_FILE)
-
-    #     # Construct the compilation command and compile
-    #     compile_command = "make clean; make all; make;"
-    #     completed_compilation = subprocess.run([compile_command],
-    #         shell = True,
-    #         cwd = SRC_DIR,
-    #         capture_output = True
-    #         )
-
-    #     # Construct the executable command
-    #     EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-    #         f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {SCENARIO_HOSPITAL_FILE}"
-
-    #     # Call the model pipe output to file, read output file
-    #     file_output = open(TEST_OUTPUT_FILE, "w")
-    #     completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-    #     df_output = pd.read_csv(TEST_OUTPUT_FILE, comment="#", sep=",")
-
-    #     # Check that the simulation ran
-    #     assert len(df_output) != 0
-
-    #     time_step_df = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
-
-    #     waiting_df = time_step_df['hospital_state'] == constant.WAITING
-    #     waiting_df = time_step_df[waiting_df]
-
-    #     assert len(waiting_df.index) == 0
-
     def test_all_hcw(self):
         """
         Set number of hcw to zero,
@@ -675,6 +644,7 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", population_size)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Adjust hospital baseline parameter
@@ -730,6 +700,7 @@ class TestClass(object):
         check that all doctors become infected when the general ward is overloaded with patients.
         '''
 
+
         # Set general doctor-patient infectivity to be really high
         h_params = ParameterSet(TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("relative_transmission_doctor_patient_general", 100.0)
@@ -747,6 +718,7 @@ class TestClass(object):
         params.set_param("relative_transmission_household", 0.0)
         params.set_param("relative_transmission_random", 0.0)
         params.set_param("n_seed_infection", 750000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
@@ -805,6 +777,7 @@ class TestClass(object):
         params.set_param("relative_transmission_household", 0.0)
         params.set_param("relative_transmission_random", 0.0)
         params.set_param("n_seed_infection", 750000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
@@ -863,6 +836,7 @@ class TestClass(object):
         params.set_param("relative_transmission_household", 0.0)
         params.set_param("relative_transmission_random", 0.0)
         params.set_param("n_seed_infection", 750000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
@@ -921,6 +895,7 @@ class TestClass(object):
         params.set_param("relative_transmission_household", 0.0)
         params.set_param("relative_transmission_random", 0.0)
         params.set_param("n_seed_infection", 750000)
+        params.set_param("hospital_on", 1)
         params.write_params(SCENARIO_FILE)
 
         # Construct the compilation command and compile
@@ -953,5 +928,5 @@ class TestClass(object):
         n_icu = df_combined_output["assigned_worker_ward_type"] == 1
         n_icu_nurses = df_combined_output[n_nurses & n_icu & time_infected]
 
-        #Check that all doctors assigned to the general ward end up being infected.
+        #Check that all nurses assigned to the general ward end up being infected.
         assert(len(n_icu_nurses.index) == 0)

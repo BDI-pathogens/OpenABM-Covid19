@@ -11,7 +11,7 @@ Instantaneous contract-tracing and quarantining of contacts is modelled allowing
 evaluation of the design and configuration of digital contract-tracing mobile phone apps.
 
 A full description of the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19_model.pdf).
-A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf). 
+A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf) and the parameters used in the report are documented [here](documentation/Parameters.pdf). 
 The model was developed by the Pathogen Dynamics group, at the [Big Data Institute](https://www.bdi.ox.ac.uk/) at the University of Oxford, in conjunction with IBM UK and [Faculty](https://faculty.ai).
 More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
 
@@ -50,7 +50,7 @@ cd OpenABM-Covid19/src
 ```
 
 where:
-* `input_param_file` : is a csv file of parameter values (see [params.h](src/params.h) for description of parameters)
+* `input_param_file` : is a csv file of parameter values (see [params.h](src/params.h) and [parameters.pdf](documentation/Parameters.pdf) for further details of the parameters)
 * `param_line_number` : the line number of the parameter file for which to use for the simulation
 * `output_file_dir` : path to output directory (this directory must already exist)
 * `household_demographics_file` : a csv file from which samples are taken to represent household demographics in the model

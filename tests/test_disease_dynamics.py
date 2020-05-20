@@ -973,7 +973,7 @@ class TestClass(object):
 
             if N_hosp > 0:
                 mean = N_crit / N_hosp
-                sd = sqrt(mean * (1 - mean))
+                sd = sqrt(critical_fraction[idx]* (1 - critical_fraction[idx]))
                 if N_crit > 0:
                     np.testing.assert_allclose(
                         mean,
@@ -1017,7 +1017,7 @@ class TestClass(object):
 
             if N_crit > 0:
                 mean = N_dead / N_crit
-                sd = sqrt(mean * (1 - mean))
+                sd = sqrt(fatality_fraction[idx]* (1 - fatality_fraction[idx]))
                 if N_dead > 0:
                     np.testing.assert_allclose(
                         mean,
