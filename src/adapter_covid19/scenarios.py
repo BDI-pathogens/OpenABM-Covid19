@@ -28,22 +28,35 @@ consistently.)
 
 Key events on the timeline are
 
-* 12 February - Time 0 - Start of Simulation
-* 23 March - Time 40 
+* 13 March - Time 00 - Start of Simulation
+* 23 March - Time 10 
     - Start of Lockdown (inclusive)
     - Start of `CCFF <https://www.bankofengland.co.uk/news/2020/march/the-covid-corporate-financing-facility>`_. 
-* 31 March - Time 48 - Last day of Q1
-* 1 April - Time 49 - First day of Q2
-* 11 May - Time 89 - End of Lockdown (exclusive)
-* 30 June - Time 139 - Last day of Q2
-* 1 July - Time 140 - First day of Q3
-* 30 September - Time 231 - Last day of Q3
+* 31 March - Time 18 - Last day of Q1
+* 1 April - Time 19 - First day of Q2
+* 11 May - Time 59 - End of Lockdown (exclusive)
+* 30 June - Time 109 - Last day of Q2
+* 1 July - Time 110 - First day of Q3
+* 30 September - Time 201 - Last day of Q3
 
-TODO:
-* Implement timeline with lockdown at 40 below
-* Confirm start date for furlough scheme
-* Confirm start date for new spending
-* Confirm start date for loan guarantees
+
+=========
+Scenarios
+=========
+
+* basic - Lockdown with a hard stop at 11 May, furloughing from the beginning of lockdown until the end of the 
+  simulation, interventions to support corporates (CCFF, loan guarantees, new govt spending)
+* slow_unlock - As basic, but with gradual easing of lockdown (sending back 10% of remaining workforce 
+  every 10 days)
+* slow_unlock_greedy - As slow_unlock, but send back workers in order of productivity.
+* slow_unlock_constrained - As slow_unlock, but prioritizing to send back workers in sectors which are 
+  supply-constrained first
+* no_furlough - As basic, but without furloughing
+* no_corp_support - As basic, but without corporate support
+* no_furlough_no_corp_support - As basic, but without either furloughing or corporate support
+* no_lockdown - No lockdown and no other interventions
+* test - Testing scenario running for just 5 days.
+
 
 =======================
 Institutional Forecasts
@@ -67,20 +80,6 @@ Key figures in "illustrative scenario":
     * Sales (Q2): -40% to -45%
     * Business Investment (Q2): -40% to -50%
 
-
-==========
-Next Steps
-==========
-
-TODO:
-
-* Demand modelling
-    * Reduction in business investment
-    * Waterfall of demand reduction (reduce expenditure on discretionary items first)
-    * Changes of demand imposed by lockdown 
-        - Substitution of demand (e.g. more communication) 
-    * Shift demand of ill individuals toward healthcare
-
 """
 
 
@@ -96,10 +95,10 @@ BASIC_MODEL_PARAMS = ModelParams(
     corporate_params={"beta": 1.4, "large_cap_cash_surplus_months": 18,},
 )
 
-# Basic Scenario (aligned with actual interventions)
-# * Lockdown
-# * Furlough
-# * Corporate Support
+# Basic Scenario
+# - Lockdown with a hard stop at 11 May
+# - furloughing from the beginning of lockdown until the end of the simulation
+# - interventions to support corporates (CCFF, loan guarantees, new govt spending)
 
 BASIC_SCENARIO = Scenario(
     lockdown_start_time=10,
@@ -118,9 +117,9 @@ BASIC_SCENARIO = Scenario(
 )
 
 # Basic No Furlough Scenario
-# * Lockdown
-# * No Furlough
-# * Corporate Support
+# - Lockdown
+# - No Furlough
+# - Corporate Support
 
 BASIC_NO_FURLOUGH_SCENARIO = Scenario(
     lockdown_start_time=10,
@@ -139,9 +138,9 @@ BASIC_NO_FURLOUGH_SCENARIO = Scenario(
 )
 
 # Basic No Corp Support Scenario
-# * Lockdown
-# * Furlough
-# * No Corporate Support
+# - Lockdown
+# - Furlough
+# - No Corporate Support
 
 BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
     lockdown_start_time=10,
@@ -160,9 +159,9 @@ BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
 )
 
 # Basic No Furlough No Corp Support Scenario
-# * Lockdown
-# * No Furlough
-# * No Corporate Support
+# - Lockdown
+# - No Furlough
+# - No Corporate Support
 
 BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
     lockdown_start_time=10,
@@ -181,9 +180,8 @@ BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
 )
 
 # Basic No Lockdown Scenario
-# * No Lockdown
-# * No Furlough
-# * No Corporate Support
+# - No lockdown
+# - No other interventions
 
 BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     lockdown_start_time=10000,
@@ -206,7 +204,7 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
 # * Furlough
 # * Corporate Support
 # * Slow release of lockdown
-# * Naively send people back to work
+# * Naively send people back to work (sending back 10% of remaining workforce every 10 days)
 
 BASIC_SLOW_UNLOCK_SCENARIO = Scenario(
     lockdown_start_time=10,
