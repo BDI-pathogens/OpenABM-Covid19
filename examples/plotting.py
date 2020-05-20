@@ -145,7 +145,8 @@ population_cols = [
 intervention_params = [
     "self_quarantine_fraction", 
     "quarantine_length_self", 
-    "quarantine_length_traced", 
+    "quarantine_length_traced_symptoms", 
+    "quarantine_length_traced_positive", 
     "quarantine_length_positive", 
     "quarantine_dropout_self", 
     "quarantine_dropout_traced", 
