@@ -37,6 +37,7 @@ typedef struct{
 	double daily_fraction_work_used[N_OCCUPATION_NETWORKS];  // fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
+	double work_network_rewire;					// rewire parameter on the Watts-Strogatz work networks
 
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
@@ -231,6 +232,7 @@ int set_model_param_lockdown_house_interaction_multiplier(model *model, double v
 int set_model_param_lockdown_random_network_multiplier(model *model, double value);
 int set_model_param_lockdown_occupation_multiplier(model *model, double value, int index);
 int set_model_param_lockdown_elderly_on(model *model, int value);
+int set_model_param_relative_transmission( model *model, double value, int type );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
