@@ -149,8 +149,8 @@ void build_watts_strogatz_network(
 			
 			// Remove connections between id2 -> id1 
 			// (otherwise we count edges twice)
-			remove_contact(edge_mat[node_list[edge_mat[i][j]]],
-				node_list[i], &(n_edges_arr[node_list[edge_mat[i][j]]]));
+			remove_contact(edge_mat[edge_mat[i][j]],
+				i, &(n_edges_arr[edge_mat[i][j]]));
 		}
 	
 	for(i = 0; i < N; i++)

@@ -34,6 +34,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "self_quarantine_fraction",
     "lockdown_on",
+    "lockdown_elderly_on",
     "app_turned_on",
     "app_users_fraction",
     "trace_on_symptoms",
@@ -45,6 +46,9 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_occupation_multiplier_working_network",
     "lockdown_occupation_multiplier_retired_network",
     "lockdown_occupation_multiplier_elderly_network",
+    "relative_transmission_household",
+    "relative_transmission_occupation",
+    "relative_transmission_random",
 ]
 
 
@@ -113,7 +117,7 @@ class ListIndiciesEnum(enum.Enum):
 
 class TransmissionTypeEnum(enum.Enum):
     _household = 0
-    _workplace = 1
+    _occupation = 1
     _random = 2
 
 
@@ -532,6 +536,18 @@ class Model:
         results["n_death"] = covid19.utils_n_current(self.c_model, covid19.DEATH)
         results["n_recovered"] = covid19.utils_n_current(
             self.c_model, covid19.RECOVERED
+        )
+        results["hospital_admissions"]  = covid19.utils_n_daily(
+            self.c_model, covid19.GENERAL, self.c_model.time
+        )
+        results["hospital_admissions_total"]  = covid19.utils_n_total(
+            self.c_model, covid19.GENERAL
+        )
+        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+            self.c_model, covid19.CRITICAL, self.c_model.time
+        )
+        results["hospital_to_critical_total"] = covid19.utils_n_total(
+            self.c_model, covid19.CRITICAL
         )
         return results
 
