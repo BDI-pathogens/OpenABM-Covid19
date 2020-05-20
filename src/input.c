@@ -144,6 +144,9 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
     if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
 
+    check = fscanf(parameter_file, " %lf ,",  &(params->work_network_rewire));
+    if( check < 1){ print_exit("Failed to read parameter work_network_rewire\n"); };
+
     for( i = 0; i < N_AGE_TYPES; i++ )
     {
         check = fscanf(parameter_file, " %lf ,",  &(params->mean_random_interactions[i]));
