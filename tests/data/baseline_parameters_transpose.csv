@@ -121,11 +121,15 @@ icu_allocation_60_69 1
 icu_allocation_70_79 1
 icu_allocation_80 0.5
 quarantine_length_self	7
-quarantine_length_traced	14
+quarantine_length_traced_symptoms	14
+quarantine_length_traced_positive	14
 quarantine_length_positive	14
 quarantine_dropout_self	0.02
-quarantine_dropout_traced	0.02
+quarantine_dropout_traced_symptoms	0.02
+quarantine_dropout_traced_positive	0.02
 quarantine_dropout_positive	0.02
+quarantine_compliance_traced_symptoms 0.5
+quarantine_compliance_traced_positive 0.9
 test_on_symptoms	0
 test_on_traced	0
 trace_on_symptoms	0
