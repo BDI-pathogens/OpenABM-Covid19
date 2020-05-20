@@ -780,7 +780,7 @@ void write_trace_tokens( model *model )
 	char output_file_name[INPUT_CHAR_LEN];
 	FILE *output_file;
 	long idx, n_events;
-	int day;
+	int day, index_time;
 	individual *indiv;
 	event *event, *next_event;
 	trace_token *token;
@@ -795,7 +795,7 @@ void write_trace_tokens( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf( output_file ,"time,days_since_index,index_ID,index_reason,index_status,days_since_contact,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
+	fprintf( output_file ,"time,index_time,index_ID,index_reason,index_status,contact_time,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
 
 	int max_quarantine_length = max( model->params->quarantine_length_traced_symptoms, model->params->quarantine_length_traced_positive );
 	for( day = 1; day <= max_quarantine_length; day++ )
@@ -813,16 +813,18 @@ void write_trace_tokens( model *model )
 			if( token == NULL )
 				continue;
 
+			index_time = token->contact_time;
+
 			token = token->next_index;
 			while( token != NULL )
 			{
 				fprintf( output_file, "%i,%i,%li,%i,%i,%i,%li,%i,%li,%i\n",
-					model->time + day - max_quarantine_length ,
-					max_quarantine_length - day,
+					model->time,
+					index_time,
 					indiv->idx,
 					token->index_status,
 					indiv->status,
-					token->days_since_contact,
+					token->contact_time,
 					token->individual->idx,
 					token->individual->status,
 					ifelse( token->individual->status > 0, token->individual->infection_events->infector->idx, -1 ),

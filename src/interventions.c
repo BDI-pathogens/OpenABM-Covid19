@@ -165,7 +165,7 @@ trace_token* new_trace_token( model *model, individual *indiv, int contact_time 
 	token->next_index = NULL;
 	token->last_index = NULL;
 	token->individual = indiv;
-	token->days_since_contact = model->time - contact_time;
+	token->contact_time = contact_time;
 	model->n_trace_tokens_used++;
 
 	if( model->n_trace_tokens == model->n_trace_tokens_used)
@@ -186,7 +186,7 @@ trace_token* index_trace_token( model *model, individual *indiv )
 	if( indiv->index_trace_token == NULL )
 	{
 		indiv->index_trace_token = new_trace_token( model, indiv, model->time );
-		indiv->index_trace_token->days_since_contact = model->time;
+		indiv->index_trace_token->contact_time = model->time;
 	}
 
 	return indiv->index_trace_token;
@@ -694,7 +694,7 @@ void intervention_index_case_symptoms_to_positive(
  		{
 			if( gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_positive  ) )
 			{
-				contact_time    = index_token->days_since_contact - token->days_since_contact;
+				contact_time    = token->contact_time;
 				time_quarantine = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
 				intervention_quarantine_until( model, contact, time_quarantine, TRUE, NULL, contact_time, 1 );
 			}
