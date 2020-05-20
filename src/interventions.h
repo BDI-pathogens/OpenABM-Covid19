@@ -20,7 +20,7 @@ struct trace_token{
 	trace_token *last_index;
 	trace_token *next;
 	trace_token *last;
-	int days_since_contact;
+	int contact_time;
 	int index_status;
 };
 
