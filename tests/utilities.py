@@ -209,7 +209,7 @@ def set_homogeneous_random_network_only(params,connections,end_time):
     
     params.set_param( "end_time", end_time) 
     params.set_param( "relative_transmission_household", 0.0 )
-    params.set_param( "relative_transmission_workplace", 0.0 )
+    params.set_param( "relative_transmission_occupation", 0.0 )
     params.set_param( "relative_transmission_random", 1.0 )
     params.set_param( "mean_time_to_symptoms", end_time + 10 )
     params.set_param( "sd_time_to_symptoms", 2.0 )

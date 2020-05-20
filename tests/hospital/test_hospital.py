@@ -47,6 +47,7 @@ completed_compilation = subprocess.run([compile_command],
 # Adjust baseline parameter
 params = ParameterSet(TEST_DATA_FILE, line_number=1)
 params.set_param("n_total", 20000)
+params.set_param("hospital_on", 1)
 params.write_params(SCENARIO_FILE)
 
 # Construct the executable command
