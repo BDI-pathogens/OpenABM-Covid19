@@ -284,14 +284,14 @@ $$\text{Credit Score}_r(t) \sim
 
 
 $$w_{r^{*}, s^{*}}^l = 
-\frac{1}{L} * \frac{N_{r^{*}, s^{*}}}{\sum_{r, s}N_{r, s}} 
+\frac{1}{L} \cdot \frac{N_{r^{*}, s^{*}}}{\sum_{r, s}N_{r, s}} 
 \thinspace \forall l \thinspace \text{in  \{1,2,...,L\}}$$
 
 
 $$m_{r, s}^l(t) = 
 \text{Credit Score}_r(0) + 
-\alpha * \delta \text{Balance}_{r,s} ^ l(t) + 
-\beta * \min(\text{Balance}_{r, s}^l(t), 0)$$
+\alpha \cdot \delta \text{Balance}_{r,s} ^ l(t) + 
+\beta \cdot \min(\text{Balance}_{r, s}^l(t), 0)$$
 
 
 The average balance per region, sector, decile itself takes savings at the start of the simulation as well as cumulative earnings over the course of the simulation into account. We analyze earnings and spendings separately to study the diffrent impact received. 
@@ -313,8 +313,8 @@ Here, earnings are a function both of the employment status and initial earnings
 
 
 $$\text{Earning}_{r, s}^l(t) =
-\sum_c \lambda_{r, s}^c(t) * 
-\eta^c * 
+\sum_c \lambda_{r, s}^c(t) \cdot
+\eta^c \cdot
 \text{Earning}_{r, s}^l(0)
 $$
 
@@ -326,10 +326,10 @@ $$\text{Spending}_{r, s}^l(t) = \sum_k \text{Spending}_{r, s, k}^l(t)$$
 
 
 $$\text{Spending}_{r, s, k}^l(t) =
-\max(
-\text{Spending}_{r, s, k}^l(0) * \frac{\text{Earning}_{r, s}^l(t)}{\text{Earning}_{r, s}^l(0)} * (1 - \text{Fear factor}),
+\max\left(
+\text{Spending}_{r, s, k}^l(0) \cdot \frac{\text{Earning}_{r, s}^l(t)}{\text{Earning}_{r, s}^l(0)} \cdot (1 - \text{Fear factor}),
 \text{Minimum Spending}_{r, s, k}^l
-) * (1 -  \lambda_{r, s}^\text{Dead}(t))
+\right) \cdot (1 -  \lambda_{r, s}^\text{Dead}(t))
 $$
 
 
