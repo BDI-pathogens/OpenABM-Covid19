@@ -486,17 +486,16 @@ class TestClass(object):
 
     def test_all_hcw(self):
         """
-        Everyone in the simulation is a hcw
-        Assert not hcw - patient interactions
+        Everyone in the simulation is a hcw. Assert no hcw - patient interactions.
         """
 
-        population_size = 20000
+        population_size = 10000
         n_covid_general_wards = 20
         n_covid_icu_wards = 10
 
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", population_size)
+        params.set_param("n_total", 10000)
         params.set_param("hospital_on", 1)
         params.write_params(constant.TEST_DATA_FILE)
 
@@ -504,10 +503,10 @@ class TestClass(object):
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_covid_general_wards", n_covid_general_wards)
         h_params.set_param("n_covid_icu_wards", n_covid_icu_wards)
-        h_params.set_param("n_doctors_covid_general_ward", (population_size/4)/n_covid_general_wards)
-        h_params.set_param("n_nurses_covid_general_ward", (population_size/4)/n_covid_general_wards)
-        h_params.set_param("n_doctors_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
-        h_params.set_param("n_nurses_covid_icu_ward", (population_size/4)/n_covid_icu_wards)
+        h_params.set_param("n_doctors_covid_general_ward", int((population_size/4)/n_covid_general_wards))
+        h_params.set_param("n_nurses_covid_general_ward", int((population_size/4)/n_covid_general_wards))
+        h_params.set_param("n_doctors_covid_icu_ward", int((population_size/4)/n_covid_icu_wards))
+        h_params.set_param("n_nurses_covid_icu_ward", int((population_size/4)/n_covid_icu_wards))
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
@@ -533,10 +532,10 @@ class TestClass(object):
         assert len(df_nurse_patient_icu_interactions.index) > 0
 
     def test_transmission_doctor_general(self):
-        '''
+        """
         When general doctor-patient transmission is very high and no other forms of tranmission can occur for doctors,
         check that all doctors become infected when the general ward is overloaded with patients.
-        '''
+        """
 
         # Set general doctor-patient infectivity to be really high
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
