@@ -57,6 +57,7 @@ def setup_covid_methods(request):
     os.mkdir(constant.DATA_DIR_TEST)
     shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
     shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
+    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)
 
     # Adjust any parameters that need adjusting for all tests
     params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
