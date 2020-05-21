@@ -57,6 +57,7 @@ void initialize_individual(
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
+	indiv->index_token_release_event = NULL;
 }
 
 /*****************************************************************************************
