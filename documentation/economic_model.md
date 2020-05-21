@@ -347,6 +347,17 @@ Note that this is not an agent-based model, i.e., we are not keeping track of ba
 Key limitation of the model is that apart from furloughing, benefits and Covid-19-specific government support programs are not taken into account. Also, as mentioned above, the labour market itself is not modelled, i.e., workers do not have the ability to switch jobs, or find new employment if their previous firm went bankrupt. There is currently no modelling of self-employment, part-time work or short-time work. Finally, while the individual insolvency model does explicitly simulate spending, this is not currently fed back to the demand parameter of the input-output model. All of these are areas of future work.
 
 
+### Fear Factor
+
+
+In general, we expect people to be less motivated to go out and spend when they are mentally scared due to the coronavirus, even they are pysically health and well employed. Hence, we define a fear factor which linearly regresses on lockdown status, the number of ill people and the new dead cases.
+
+
+$$\text{Fear factor}(t) = w_1 \text{Lock down}(t) + 
+   w_2 N_{\text{ill}}(t) + 
+    w_3 \delta N_{\text{dead}}(t)$$
+
+
 ### Feedback Loops
 
 
