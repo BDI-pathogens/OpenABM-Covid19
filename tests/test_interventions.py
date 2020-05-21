@@ -325,7 +325,7 @@ class TestClass(object):
                     trace_on_positive = True,
                     test_on_symptoms = True,
                     quarantine_on_traced = True,
-                    app_turn_on_time = 0,
+                    app_turn_on_time = 1,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
                     test_order_wait = 1,
@@ -353,7 +353,7 @@ class TestClass(object):
                     trace_on_positive = True,
                     test_on_symptoms = True,
                     quarantine_on_traced = True,
-                    app_turn_on_time = 0,
+                    app_turn_on_time = 1,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
                     test_order_wait = 1,
@@ -570,10 +570,16 @@ class TestClass(object):
             model.one_time_step();             
         model.write_trace_tokens()  
         model.write_interactions_file()  
-        model.write_individual_file()  
+        model.write_transmissions()  
 
-        df_int = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        # get everyone who is a case as these will not be traced
+        df_trans = df_trans.loc[:,["ID_recipient","is_case"]]
+        df_trans = df_trans[ ( df_trans[ "is_case"] == 1 ) ]
+        df_trans.rename(columns = {"ID_recipient":"traced_ID"}, inplace = True )
         
         # prepare the interaction data to get all household interations
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
@@ -601,7 +607,8 @@ class TestClass(object):
 
         # check everybody with a household interaction is traced
         t = pd.merge( index_traced, index_inter, on = [ "index_ID", "traced_ID" ], how = "outer" )
-        n_no_trace  = len( t[ ( t[ "traced"] != True ) &  (t["household"] == True  )] )
+        t = pd.merge( t, df_trans, on = "traced_ID", how = "left" )
+        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["is_case"] != True  )] )
         n_household = len( t[ (t["household"] == True  ) ] )
         np.testing.assert_equal( n_household>100, True, "insufficient household members traced to test" )
         np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
@@ -995,12 +1002,15 @@ class TestClass(object):
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
                 
-        house_no  = df_indiv.loc[ :,["ID", "house_no"]]
-        house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no"}, inplace = True )
-        total_house = house_no.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
         is_case   = df_indiv.loc[ :,["ID", "is_case", "house_no"]]
-        is_case.rename( columns = { "ID":"index_ID"}, inplace = True )
-
+        is_case.rename( columns = { "ID":"index_ID"}, inplace = True )  
+        house_no  = df_indiv.loc[ :,["ID", "house_no","is_case"]]
+        house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no","is_case":"is_case_traced"}, inplace = True )
+      
+        # remove cases from totals for house as these are not traced
+        total_house = house_no[ (house_no["is_case_traced"]==0)]
+        total_house = total_house.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
+      
         # now look at the number of people asked to quarantine
         model.write_trace_tokens()
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
@@ -1008,9 +1018,9 @@ class TestClass(object):
         # add on house_no and case status to the transmissions and count the number of traced per house
         df_trace = pd.merge( df_trace, house_no, on = "traced_ID", how = "left")
         df_trace = pd.merge( df_trace, is_case, on = "index_ID", how = "left")
-        df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] ) 
+        df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] )         
         trace_grouped = df_trace.groupby( ["index_ID", "is_case","same_house","traced_house_no"]).size().reset_index(name="n_per_house")
-      
+
         # for those who are not cases, we should not have traced household members 
         not_case =  trace_grouped[ ( trace_grouped[ "same_house"] == False ) & ( trace_grouped[ "is_case"] == 0 ) ]      
         np.testing.assert_equal( len( not_case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
@@ -1022,7 +1032,7 @@ class TestClass(object):
         case[ "hh_not_q"] = case[ "total_per_house"] - case[ "n_per_house"]
         case = case[ ( case[ "same_house"] == False ) ];
         np.testing.assert_equal( len( case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
-        np.testing.assert_equal( sum( ( case[ "hh_not_q"] != 0 ) ), 0, "member of household of first-order contact not traced on positive" )
+        np.testing.assert_equal( sum( ( case[ "hh_not_q"] > 0 ) ), 0, "member of household of first-order contact not traced on positive" )
                 
         
         
@@ -1038,7 +1048,7 @@ class TestClass(object):
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
-        
+                
         # step through time until we need to start to save the interactions each day
         for time in range( symptom_time ):
             model.one_time_step();             
@@ -1054,8 +1064,7 @@ class TestClass(object):
         model.write_individual_file()  
         df_trace_pos  = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv_pos = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
-
-         
+                  
          # find everyone who has a trace token who reported on symptom_time
         df_trace_symp_t = df_trace_symp[ (df_trace_symp["index_time"] == df_trace_symp["time"] ) & (df_trace_symp["index_reason"]==0)]
         
