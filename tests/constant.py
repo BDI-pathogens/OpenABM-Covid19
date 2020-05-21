@@ -21,7 +21,9 @@ DATA_DIR_TEST = "data_test"
 
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
-TEST_HOSPITAL_FILE = "./tests/data/hospital_baseline_parameters.csv"
+
+TEST_HOSPITAL_TEMPLATE = "./tests/data/hospital_baseline_parameters.csv"
+TEST_HOSPITAL_FILE = join(DATA_DIR_TEST, "test_hospital_parameters.csv")
 
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
