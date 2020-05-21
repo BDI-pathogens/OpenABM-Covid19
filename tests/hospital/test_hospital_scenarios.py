@@ -170,14 +170,10 @@ class TestClass(object):
         df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE,
                                       comment="#", sep=",", skipinitialspace=True)
 
-        df_doctor_patient_general_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
-        df_nurse_patient_general_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
-        df_doctor_patient_icu_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
-        df_nurse_patient_icu_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+        df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+        df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+        df_doctor_patient_icu_interactions     = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+        df_nurse_patient_icu_interactions      = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
 
         assert len(df_doctor_patient_general_interactions) == 0
         assert len(df_nurse_patient_general_interactions) == 0
@@ -484,12 +480,12 @@ class TestClass(object):
 
         assert len(waiting_df.index) == 0
 
-    def test_all_hcw(self):
+    def test_max_hcw(self):
         """
-        Everyone in the simulation is a hcw. Assert no hcw - patient interactions.
+        half population in the simulation is a hcw. Assert no hcw - patient interactions.
         """
 
-        population_size = 10000
+        hcw_population_size = 5000
         n_covid_general_wards = 20
         n_covid_icu_wards = 10
 
@@ -503,10 +499,10 @@ class TestClass(object):
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_covid_general_wards", n_covid_general_wards)
         h_params.set_param("n_covid_icu_wards", n_covid_icu_wards)
-        h_params.set_param("n_doctors_covid_general_ward", int((population_size/4)/n_covid_general_wards))
-        h_params.set_param("n_nurses_covid_general_ward", int((population_size/4)/n_covid_general_wards))
-        h_params.set_param("n_doctors_covid_icu_ward", int((population_size/4)/n_covid_icu_wards))
-        h_params.set_param("n_nurses_covid_icu_ward", int((population_size/4)/n_covid_icu_wards))
+        h_params.set_param("n_doctors_covid_general_ward", int((hcw_population_size/4)/n_covid_general_wards))
+        h_params.set_param("n_nurses_covid_general_ward", int((hcw_population_size/4)/n_covid_general_wards))
+        h_params.set_param("n_doctors_covid_icu_ward", int((hcw_population_size/4)/n_covid_icu_wards))
+        h_params.set_param("n_nurses_covid_icu_ward", int((hcw_population_size/4)/n_covid_icu_wards))
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
