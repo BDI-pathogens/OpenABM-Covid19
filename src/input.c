@@ -522,7 +522,7 @@ void write_quarantine_reasons(model *model, parameters *params)
 						quarantine_reasons[QR_TRACE_SYMPTOMS] = TRUE;
 					
 					if(index_token->index_status == POSITIVE_TEST)
-						quarantine_reasons[QR_TRACE_SYMPTOMS] = TRUE;
+						quarantine_reasons[QR_TRACE_POSITIVE] = TRUE;
 				}
 				index_id = index_token->individual->idx;
 				index_true_status = index_token->individual->status;
