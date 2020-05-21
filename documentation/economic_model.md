@@ -42,6 +42,40 @@ It is essential to keep current limitations of the simulator in mind when interp
 ### Parameterization of Labour
 
 
+In the model, every member of the workforce can be in one of four employment states
+
+* $\text{wfo}$ - employed and not constrained to work from home
+* $\text{wfh}$ - employed and constrained to work from home
+* $\text{furloughed}$ - furloughed (but not unemployed)
+* $\text{unemployed}$ - unemployed (but not furloughed)
+
+In addition, ever individual in the population can be in one of three health states
+
+* $\text{healthy}$ - healthy and able to work
+* $\text{ill}$ - ill and unable to work
+* $\text{dead}$ - deceased 
+
+Taking combinations of these states yields 9 mutually exclusive and collectively exhaustive states a member of the workforce can be in: $W=\{ \text{healthy wfo}, \text{healthy wfh}, \text{healthy furloughed}, \text{healthy unemployed}, \text{ill wfo}, \text{ill wfh}, \text{ill furloughed}, \text{ill unemployed}, \text{dead}\}$. For each $w\in W$ we define a variable $\lambda^w_{r,s,a}$ which denotes the proportion of workers in region $r$, sector $s$, and age group $a$ who are in state $w$. By construction $\sum_w \lambda^w_{r,s,a} = 1$ for all triples $r,s,a$. Note that we also write $\lambda^w_{s}$ to denote the proportion for the given sector $s$, sutiably aggregated across regions and age groups.
+
+
+For the purposes of the below models, it will be convenient to define another parameterization of workforce utilisations, which impose conditional structure on these utilisation vectors. We denote this alternative parameterization with $p$. Omitting the indices for region, sector and age group, the parameterization $p$ is defined by 
+
+$$p^\text{dead} = \lambda^{\text{dead}}$$
+$$(\lambda^{\text{ill wfo}} + \lambda^{\text{healthy wfo}}) p^\text{ill wfo} = \lambda^{\text{ill wfo}}$$
+$$(\lambda^{\text{ill wfh}} + \lambda^{\text{healthy wfh}}) p^\text{ill wfh} = \lambda^{\text{ill wfh}}$$
+$$(\lambda^{\text{ill furloughed}} + \lambda^{\text{healthy furloughed}}) p^\text{ill furloughed} = \lambda^{\text{ill furloughed}}$$
+$$(\lambda^{\text{ill unemployed}} + \lambda^{\text{healthy unemployed}}) p^\text{ill unemployed} = \lambda^{\text{ill unemployed}}$$
+$$(\lambda^{\text{ill wfh}} + \lambda^{\text{healthy wfh}} + \lambda^{\text{ill wfo}} + \lambda^{\text{healthy wfo}}) p^\text{wfh} = \lambda^{\text{ill wfh}} + \lambda^{\text{healthy wfh}}$$
+$$(\lambda^{\text{ill furloughed}} + \lambda^{\text{healthy furloughed}} + \lambda^{\text{ill unemployed}} + \lambda^{\text{healthy unemployed}}) p^\text{furloughed} = \lambda^{\text{ill furloughed}} + \lambda^{\text{healthy furloughed}}$$
+$$(1- \lambda^\text{dead}) p^\text{furloughed} = \lambda^{\text{ill furloughed}} + \lambda^{\text{healthy furloughed}} + \lambda^{\text{ill unemployed}} + \lambda^{\text{healthy unemployed}}$$
+
+
+Finally, we define abbreviations
+* $\lambda^{\text{working}} = \lambda^{\text{healthy wfo}}$
+* $\lambda^{\text{wfh}} = \lambda^{\text{healthy wfh}}$
+* $\lambda^{\text{ill}} = \lambda^{\text{ill wfo}} + \lambda^{\text{ill wfh}}$
+
+
 ### Input-Output Model
 
 
@@ -110,14 +144,24 @@ On the final use side of things, we introduce labels $U=\{C,K,E\}$ to denote con
 For variables $\tilde{d}_{i,j}$, $\tilde{x}_{m,i}$, $\tilde{y}_{u,i}$ and $\tilde{q}_i$ defined above, we introduce variables $d_{i,j}$, $x_{m,i}$, $y_{u,i}$ and $q_i$ that represent the associated *quantities*. Crucially, we assume prices for all good and for imports are equal to 1 (and, thus, constant), whence $\tilde{d}_{i,j} = d_{i,j}$, $\tilde{y}_{u,i} = y_{u,i}$,  $\tilde{q}_i= q_i$ and $\tilde{x}_{I,i} =x_{I,i}$. Prices for labour and capital are not assumed to be constant.
 
 
-In this setting, the Cobb-Douglas production function is the right-hand side of the identity
-$$ q_i = \Lambda_i \prod_j d_{j,i}^{\gamma_{j,i}} \prod_{m\in M} x^{\gamma_{m,i}}_{m,i}$$
+In this setting, the Cobb-Douglas production function is 
+$$ f^{\text{CD}}(d,x) := \Lambda_i \prod_j d_{j,i}^{\gamma_{j,i}} \prod_{m\in M} x^{\gamma_{m,i}}_{m,i}$$
 where 
 * $\Lambda_i$ total factor productivity in sector $i$
 * $\gamma_{i,j}$ and $\gamma_{m,j}$ for sectors $i,j\in N$ and primary inputs $m\in M$ such that $\sum_{j\in N} \gamma_{j,i} + \sum_{m\in M} \gamma_{m,i} = 1$.
 
 
-**TODO** Linear approximation of Cobb-Douglas
+For computational efficiency, we employ a piecewise-linear approximation of the Cobb-Douglas function in the below optimization problem. This approximation is given by the right hand side in the inequality
+$$f^{\text{PLCD}}(d,x) := \Lambda_i \left((1-\rho) \min\left(
+                                \min_j\left(
+                                    \frac{d_{j,i}}{\gamma_{j,i}}
+                                \right),
+                                \min_m\left(
+                                    \frac{x_{m,i}}{\gamma_{m,i}}
+                                \right)
+                             \right)
+                      + \rho \left(\sum_j \gamma_{j,i} d_{j,i} + \sum_m \gamma_{m,i} d_{m,i} \right)\right) $$
+where $\rho\in[0,1]$ is a constant.
 
 
 Many parameters will be defined relative to pre-crisis values for the economy. To this end, we use the latest IOATs from the ONS. Wherever we refer to a constant taken from the IOATs, we will denote this with the superscript $\text{iot}$. For example, $d_{i,j}^{\text{iot}}$ would refer to the value of $d_{i,j}$ as given in the ONS's IO Tables, and $d_{i,j} \leq d_{i,j}^{\text{iot}}$ would express that $d_{i,j}$ in the model should be at most the constant $d_{i,j}^{\text{iot}}$.
@@ -135,16 +179,22 @@ With the above setup, we can now proceed to defining the linear program.
 ##### Parameters
 
 
-* **TODO** Labour,
+The following parameters are assumed to given, by other model components or set by the user.
+
+
+* $p^w_i$ labour utilisation parameters as defined in previous section for $w\in \{\text{wfh},\text{ill wfo},\text{ill wfh},\text{ill dead}\}$ and sectors $i$,
 * $\kappa_i$ ratio of fixed capital, relative to the pre-crisis level, available in sector $i$
-* $\delta_{u,i}$ ratio of final use $u\in\{C, K, E\}$ in sector $i$, relative to pre-crisis level
+* $\delta_{u,i}$ upper bound on ratio of final use $u\in\{C, K, E\}$ in sector $i$, relative to pre-crisis level (constraint on demand)
 * $\tau$ tax *rate* on both products and production, expressed as a ratio of the pre-crisis level
+* $h_i\in[0,1]$ the productivity when constrained to working from home in sector $i$, as a ratio of unconstrained productivity
+* $\rho\in[0,1]$ a substitution rate controlling the shape of the piecewise linear approximation to Cobb-Douglas
+* $b_i\in[0,1]$ lower bound on proportion of people not employed (furloughed or unemploymed) in sector $i$
 
 
 ##### Variables
 
 
-Using the notation from above, variables in the below are $q_i$, $d_{i,j}$, $x_{I,i}$, $x_{L,i}$, $x_{K,i}$, $\tilde{x}_{L,i}$, $\tilde{x}_{K,i}$, $y_{i}$.
+Using the notation from above, variables in the below are $q_i$, $d_{i,j}$, $x_{I,i}$, $x_{L,i}$, $x_{K,i}$, $\tilde{x}_{L,i}$, $\tilde{x}_{K,i}$, $y_{i}$, $\lambda^{\text{working}}$, $\lambda^{\text{wfh}}$, $\lambda^{\text{ill}}$.
 
 
 ##### Constants
@@ -162,20 +212,21 @@ $$\Lambda_i = \frac{
               }
 \left(\sum_j \tilde{d}_{j,i}^{\text{iot}} + \sum_m \tilde{x}_{m,i}^{\text{iot}}\right)}{\prod_j (\tilde{d}_{j,i}^{\text{iot}})^{\gamma_{j,i}} \prod_{m\in M} (x^{\text{iot}}_{m,i})^{\gamma_{m,i}}}  $$
 
-
-**TODO** gamma
+$$f^{\text{wfo}}_i = (1-p^{\text{wfh}}_i)(1-p^{\text{ill wfo}}_i)(1-p^{\text{dead}}_i)$$
+$$f^{\text{wfh}}_i = p^{\text{wfh}}_i(1-p^{\text{ill wfh}}_i)(1-p^{\text{dead}}_i)$$
+$$f^{\text{ill}}_i = (p^{\text{ill wfo}}_i + p^{\text{ill wfh}}_i)(1-p^{\text{dead}}_i)$$
 
 
 ##### Objective
 
 
-$$ \max \sum_i \tilde{x}_{L,i} + \tilde{x}_{K,i} + \tau q_i \frac{\text{taxes on production}_i^{\text{iot}}}{q_i^{\text{iot}}} $$
+$$ \max \left(\sum_i \tilde{x}_{L,i} + \tilde{x}_{K,i} + \tau q_i \frac{\text{taxes on production}_i^{\text{iot}}}{q_i^{\text{iot}}}\right) + \left( \sum_i \tilde{x}_{K,i} \right)$$
 
 
 ##### Constraints
 
 
-$$ q_i = \Lambda_i \prod_j d_{j,i}^{\gamma_{j,i}} \prod_{m\in M} x^{\gamma_{m,i}}_{m,i}$$
+$$ q_i \leq f^{\text{PLCD}}(d,x)$$
 
 $$ q_i = \frac{1}
               {1-
@@ -185,25 +236,21 @@ $$ q_i = \frac{1}
               \left(\sum_j d_{j,i} + x_{I,i} + \tilde{x}_{L,i} + \tilde{x}_{K,i}\right) $$
 $$ q_i = \sum_j d_{i,j} + \sum_u y_{u,i} $$
 
-$$ x_{L,i} = \left( 1\cdot \lambda^{\text{working}}_i + h_i\cdot\lambda^{\text{wfh}}_i + 0\cdot \lambda^{\text{ill}}_i + 0\cdot \lambda^{\text{furloughed}}_i + 0\cdot \lambda^{\text{unemployed}}_i \right) \tilde{x}_{L,i}^{\text{iot}} $$
+$$ x_{K,i} \leq \kappa_i $$
 
-$$ \tilde{x}_{L,i} = \left(1\cdot \lambda^{\text{working}}_i + 1\cdot\lambda^{\text{wfh}}_i + 1\cdot \lambda^{\text{ill}}_i + 0\cdot \lambda^{\text{furloughed}}_i + 0\cdot \lambda^{\text{unemployed}}_i\right) \tilde{x}_{L,i}^{\text{iot}}$$
+$$ y_i \leq \sum_u \delta_{u,i} \tilde{y}^{\text{iot}}_{u,i}$$
 
-$$\lambda^{\text{working}}_i + \lambda^{\text{wfh}}_i +  \lambda^{\text{ill}}_i +  \lambda^{\text{furloughed}}_i +  \lambda^{\text{unemployed}}_i = 1$$
+$$ x_{L,i} = \left(\lambda^{\text{working}}_i + h_i\lambda^{\text{wfh}}_i\right) \tilde{x}_{L,i}^{\text{iot}} $$
 
-$$\lambda^{\text{furloughed}}_i = p_{\text{furloughed}} (\lambda^{\text{furloughed}}_i + \lambda^{\text{unemployed}}_i)$$
+$$ \tilde{x}_{L,i} = \left( \lambda^{\text{working}}_i + \lambda^{\text{wfh}}_i + \lambda^{\text{ill}}_i \right) \tilde{x}_{L,i}^{\text{iot}}$$
 
-$$ \lambda^{\text{ill employed}} = p_{\text{ill employed}}(\lambda^{\text{working}}_i + \lambda^{\text{wfh}}_i + \lambda^{\text{ill}}) $$
+$$ \lambda^{\text{working}}_i \leq (1-b_i) f^\text{wfo}_i $$
+$$ \lambda^{\text{wfh}}_i \leq (1-b_i) f^\text{wfh}_i $$
+$$ \lambda^{\text{ill}}_i \leq (1-b_i) f^\text{ill}_i $$
 
-$$ \lambda^{\text{wfh}} = p_{\text{wfh}}(\lambda^{\text{working}}_i + \lambda^{\text{wfh}}_i) $$
-
-$$p_{\text{unemployed}} = \lambda^{\text{furloughed}}_i + \lambda^{\text{unemployed}}_i $$
-
-
-#### Outputs and Connections to other Components
-
-
-* Labour utilisation
+$$ \lambda^{\text{wfh}}_i f^\text{wfo}_i = \lambda^{\text{working}}_i f^\text{wfh}_i $$
+$$ \lambda^{\text{wfh}}_i f^\text{ill}_i = \lambda^{\text{ill}}_i f^\text{wfh}_i $$
+$$ \lambda^{\text{working}}_i f^\text{ill}_i = \lambda^{\text{ill}}_i f^\text{wfo}_i $$
 
 
 ### Corporate Bankruptcy Model
@@ -300,12 +347,10 @@ Note that this is not an agent-based model, i.e., we are not keeping track of ba
 Key limitation of the model is that apart from furloughing, benefits and Covid-19-specific government support programs are not taken into account. Also, as mentioned above, the labour market itself is not modelled, i.e., workers do not have the ability to switch jobs, or find new employment if their previous firm went bankrupt. There is currently no modelling of self-employment, part-time work or short-time work. Finally, while the individual insolvency model does explicitly simulate spending, this is not currently fed back to the demand parameter of the input-output model. All of these are areas of future work.
 
 
-### Long-term Growth Model
+### Feedback Loops
 
 
-The input-output model simulates economic output as a ratio of GDP at the start of the simulation. This ratio is then discounted based on corporate bankruptcies over time. Taken together, this produces a simulation of the shortfall in economic output due to the epidemic, at a short time horizon. By construction, it does not take growth dynamics into account. As a simple baseline model for economic growth we model the long-term GDP trend by assuming a fixed annual growth rate that persist throughout the simulation, except during lockdown periods. The level of economic output implied by this long term growth model is then multiplied by the discounted GDP ratio supplied by the shortfall model. Note that the shortfall model will dominate the results in the short term.
-
-Modelling long-term growth is a key area for improvement in future work. On the one hand, the long-term growth model itself can be improved considerably, by adopting a more thorough autoregressive approach than assuming fixed growth. On the other hand, as mentioned above, a proper modelling of demand as part of the input-output model will provide more realistic long-term dynamics.
+**TODO**
 
 
 ## Parameters
