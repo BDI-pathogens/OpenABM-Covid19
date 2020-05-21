@@ -539,3 +539,6 @@ class Model:
 
     def write_transmissions(self):
         covid19.write_transmissions(self.c_model)
+
+    def write_quarantine_reasons(self):
+        covid19.write_quarantine_reasons(self.c_model, self.c_params)

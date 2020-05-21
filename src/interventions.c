@@ -155,6 +155,7 @@ void set_up_trace_tokens( model *model )
 ******************************************************************************************/
 trace_token* new_trace_token( model *model, individual *indiv, int contact_time )
 {
+
 	trace_token *token = model->next_trace_token;
 
 	model->next_trace_token = token->next_index;
@@ -891,5 +892,39 @@ void intervention_smart_release( model *model )
 			intervention_trace_token_release( model, indiv );
 		}
 	}
+}
+
+/*****************************************************************************************
+*  Name:		resolve_quarantine_reasons
+*  Description: Determine a single recorded reason for an individual being quarantined;
+				resolve multiple reasons for an individual being quarantined
+*  Returns:		void
+******************************************************************************************/
+
+int resolve_quarantine_reasons(int *quarantine_reasons)
+{
+	int n_reasons = 0, reason, i;
+	
+	// Reverse traverse (QUARANTINE_REASONS are listed in descending order of precendece)
+	for(i = N_QUARANTINE_REASONS - 1; i >= 0; i--){
+		
+		if(quarantine_reasons[i] == TRUE){
+			n_reasons++;
+			reason = i;
+		}
+	}
+	
+	if(n_reasons == 0){
+		print_now("\nZero reasons for quarantine\n");
+		return UNKNOWN;
+	}
+	
+	// With 1, 2, 3 reasons, assume QUARANTINE_REASONS are listed in descending order of precedence
+	if(n_reasons <= 3)
+		return reason;
+	
+	if(n_reasons > 3)
+		print_now("\nMore than 3 reasons for quarantine.\n");
+	return UNKNOWN;
 }
 

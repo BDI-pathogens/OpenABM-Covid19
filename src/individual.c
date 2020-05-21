@@ -282,3 +282,28 @@ int count_infection_events( individual *indiv )
 
 	return infection_count;
 }
+/*****************************************************************************************
+*  Name:		print_individual
+******************************************************************************************/
+
+void print_individual( individual *indiv)
+{
+	printf("\n");
+	printf("indiv->idx: %li\n", indiv->idx );
+	printf("indiv->status: %d\n", indiv->status );
+	printf("indiv->house_no: %li\n", indiv->house_no );
+	printf("indiv->age_group: %d\n", indiv->age_group );
+	printf("indiv->age_type: %d\n", indiv->age_type );
+	printf("indiv->occupation_network: %d\n", indiv->occupation_network );
+
+	printf("indiv->base_random_interactions: %d\n", indiv->base_random_interactions );
+	printf("indiv->random_interactions: %d\n", indiv->random_interactions );
+
+	printf("indiv->hazard: %f\n", indiv->hazard );
+	printf("indiv->quarantined: %d\n", indiv->quarantined );
+	printf("indiv->quarantine_test_result: %d\n", indiv->quarantine_test_result );
+	
+	printf("indiv->traced_on_this_trace: %f\n", indiv->traced_on_this_trace );
+	printf("indiv->app_user: %d\n", indiv->app_user );
+	fflush(stdout);
+}
