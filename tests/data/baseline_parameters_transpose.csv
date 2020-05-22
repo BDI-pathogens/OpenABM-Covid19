@@ -128,7 +128,7 @@ quarantine_dropout_self	0.02
 quarantine_dropout_traced_symptoms	0.03
 quarantine_dropout_traced_positive	0.03
 quarantine_dropout_positive	0.02
-quarantine_compliance_traced_symptoms	0.5
+quarantine_compliance_traced_symptoms	0.8
 quarantine_compliance_traced_positive	0.9
 test_on_symptoms	0
 test_on_traced	0
