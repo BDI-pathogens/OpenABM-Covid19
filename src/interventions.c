@@ -164,7 +164,6 @@ trace_token* new_trace_token( model *model, individual *indiv, int contact_time 
 	token->next = NULL;
 	token->next_index = NULL;
 	token->last_index = NULL;
-	token->index_status = UNKNOWN;
 	token->individual = indiv;
 	token->contact_time = contact_time;
 	token->index_status = UNKNOWN;
@@ -987,7 +986,8 @@ void intervention_smart_release( model *model )
 /*****************************************************************************************
 *  Name:		resolve_quarantine_reasons
 *  Description: Determine a single recorded reason for an individual being quarantined;
-				resolve multiple reasons for an individual being quarantined
+				resolve multiple reasons for an individual being quarantined.  
+				QUARANTINE_REASONS are listed in descending order of precedence.
 *  Returns:		void
 ******************************************************************************************/
 
@@ -995,7 +995,7 @@ int resolve_quarantine_reasons(int *quarantine_reasons)
 {
 	int n_reasons = 0, reason, i;
 	
-	// Reverse traverse (QUARANTINE_REASONS are listed in descending order of precendece)
+	// Descending traverse (QUARANTINE_REASONS are listed in descending order of precedence)
 	for(i = N_QUARANTINE_REASONS - 1; i >= 0; i--){
 		
 		if(quarantine_reasons[i] == TRUE){
@@ -1004,17 +1004,9 @@ int resolve_quarantine_reasons(int *quarantine_reasons)
 		}
 	}
 	
-	if(n_reasons == 0){
-		print_now("\nZero reasons for quarantine\n");
-		return UNKNOWN;
-	}
-	
-	// With 1, 2, 3 reasons, assume QUARANTINE_REASONS are listed in descending order of precedence
-	if(n_reasons <= 3)
+	if((n_reasons > 0) && (n_reasons < N_QUARANTINE_REASONS))
 		return reason;
 	
-	if(n_reasons > 3)
-		print_now("\nMore than 3 reasons for quarantine.\n");
 	return UNKNOWN;
 }
 
