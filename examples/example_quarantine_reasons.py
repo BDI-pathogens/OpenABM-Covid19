@@ -13,8 +13,8 @@ household_demographics_file = "../tests/data/baseline_household_demographics.csv
 params = Parameters(input_parameter_file, parameter_line_number, 
     output_dir, household_demographics_file)
 
-params.set_param( "end_time", 500 )
-params.set_param( "n_total", 10000 )
+params.set_param( "end_time", 250 )
+params.set_param( "n_total", 1000000 )
 params.set_param( "test_order_wait", 1 )
 params.set_param( "test_result_wait", 1 )
 params.set_param( "self_quarantine_fraction", 0.8 )
