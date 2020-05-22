@@ -197,6 +197,9 @@ The following parameters are assumed to given, by other model components or set 
 Using the notation from above, variables in the below are $q_i$, $d_{i,j}$, $x_{I,i}$, $x_{L,i}$, $x_{K,i}$, $\tilde{x}_{L,i}$, $\tilde{x}_{K,i}$, $y_{i}$, $\lambda^{\text{working}}$, $\lambda^{\text{wfh}}$, $\lambda^{\text{ill}}$.
 
 
+Note that the labour variables $\lambda$ imply $p^\text{not employed}_i$. This is how the model determines the proportion of people who are unemployed or furloughed.
+
+
 ##### Constants
 
 
@@ -382,7 +385,7 @@ Key limitation of the model is that apart from furloughing, benefits and Covid-1
 ### Fear Factor
 
 
-In general, we expect people to be less motivated to go out and spend when they are mentally scared due to the coronavirus, even they are pysically health and well employed. Hence, we define a fear factor which linearly regresses on lockdown status, the number of ill people and the new dead cases.
+In general, we expect people to be less motivated to go out and spend when they are mentally scared due to the coronavirus, even they are pysically health and well employed. Hence, we define a fear factor which linearly regresses on lockdown status, the number of people currently ill and the new dead cases. The weights $w_i$ are parameters that control the impact of these variables on behaviour.
 
 
 $$\text{Fear factor}(t) = w_1 \text{Lock down}(t) + 
@@ -390,10 +393,20 @@ $$\text{Fear factor}(t) = w_1 \text{Lock down}(t) +
     w_3 \delta N_{\text{dead}}(t)$$
 
 
+One possible future extension is to included lagged values of these variables in the fear factor to model lasting behavioural changes caused by the epidemic. Currently, behaviour is assumed to revert to normal proportional to the decline in people currently ill and daily deaths, after government interventions have ceased.
+
+
 ### Feedback Loops
 
 
-**TODO**
+The components are connected through a number of feedback loops, that are summarized in this section:
+
+* The captial discount factor output by the corporate bankruptcy model, which combines the destruction of capital with investment driven long-term trends and opportunistic investments in supply-constrained sectors, is used set the quantity of capital stock used as input to the production function in the input-output model.
+* The corporate bankruptcy model also outputs a proportion of employees per sector who are unemployed because their employer has defaulted. This proportion takes creation of capital and jobs through investment into account. It is then used as a lower bound on unemployment in the input-output model. 
+* The household expenditure output by the individual insolvency model is used as an upper bound to household consumption in the input-output model. This bound combines the household expenditure reduction from the individual insolvency model with a long-term growth trend in demand.
+* The rate of furloughing and unemployment output by the input-output model is used to control household earnings in the individual insolvency model.
+* The net operating surplus by sector ouput bu the input-output model is used update the cash balance of corporates in the corporate bankruptcy model.
+* The fear factor influences both household spending behaviour as well as private sector investment behaviour.
 
 
 ## Parameters
