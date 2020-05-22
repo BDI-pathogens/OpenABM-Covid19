@@ -340,7 +340,7 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
         Parameters
         ----------
-        size: number of comapnies in simulated population
+        size: number of companies in simulated population
         median_solvency_days: median number of days till companies go insolvent
         cash_buffer: total annual cash buffer for the simulated companies
         max_cash_buffer_days: hard cap on maximum number of cash buffer days a company can have
