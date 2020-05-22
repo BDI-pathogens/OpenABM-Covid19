@@ -58,6 +58,7 @@ void initialize_individual(
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
+    indiv->index_token_release_event = NULL;
 
     indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
