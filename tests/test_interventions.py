@@ -325,7 +325,7 @@ class TestClass(object):
                     trace_on_positive = True,
                     test_on_symptoms = True,
                     quarantine_on_traced = True,
-                    app_turn_on_time = 0,
+                    app_turn_on_time = 1,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
                     test_order_wait = 1,
@@ -353,7 +353,7 @@ class TestClass(object):
                     trace_on_positive = True,
                     test_on_symptoms = True,
                     quarantine_on_traced = True,
-                    app_turn_on_time = 0,
+                    app_turn_on_time = 1,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
                     test_order_wait = 1,
@@ -371,6 +371,35 @@ class TestClass(object):
                 tol_sd = 3
             )
         ],
+        "test_quarantined_have_trace_token" : [
+            dict(
+                test_params = dict( 
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 20,
+                    infectious_rate = 8,
+                    self_quarantine_fraction = 0.8,
+                    trace_on_symptoms = True,
+                    trace_on_positive = True,
+                    test_on_symptoms = True,
+                    quarantine_on_traced = True,
+                    app_turn_on_time = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_household_on_traced_positive = True,
+                    quarantine_household_on_traced_symptoms = False,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                ),
+                time_steps_test = 10
+            )
+        ],        
     }
     """
     Test class for checking 
@@ -567,14 +596,21 @@ class TestClass(object):
 
         # step through time until we need to start to save the interactions each day
         for time in range( end_time ):
-            model.one_time_step();
-        model.write_trace_tokens()
-        model.write_interactions_file()
-        model.write_individual_file()
+            model.one_time_step();             
+        model.write_trace_tokens()  
+        model.write_interactions_file()  
+        model.write_transmissions()  
 
-        df_int = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        # get everyone who is a case as these will not be traced
+        df_trans = df_trans.loc[:,["ID_recipient","is_case"]]
+        df_trans = df_trans[ ( df_trans[ "is_case"] == 1 ) ]
+        df_trans.rename(columns = {"ID_recipient":"traced_ID"}, inplace = True )
+        
         # prepare the interaction data to get all household interations
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
         df_int[ "household" ] = ( df_int[ "house_no_1" ] == df_int[ "house_no_2" ] )
@@ -601,7 +637,8 @@ class TestClass(object):
 
         # check everybody with a household interaction is traced
         t = pd.merge( index_traced, index_inter, on = [ "index_ID", "traced_ID" ], how = "outer" )
-        n_no_trace  = len( t[ ( t[ "traced"] != True ) &  (t["household"] == True  )] )
+        t = pd.merge( t, df_trans, on = "traced_ID", how = "left" )
+        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["is_case"] != True  )] )
         n_household = len( t[ (t["household"] == True  ) ] )
         np.testing.assert_equal( n_household>100, True, "insufficient household members traced to test" )
         np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
@@ -788,6 +825,7 @@ class TestClass(object):
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
+        index_traced = index_traced[ ( index_traced["index_ID"] != index_traced["traced_ID"] ) ]
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
 
         # get the age and house_no
@@ -832,8 +870,9 @@ class TestClass(object):
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
-        # find the index case for the new time_step
+        # find the index case for the new time_step (remove index token)
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ]  ) ] 
+        index_traced = index_traced[ ( index_traced["index_ID"] != index_traced["traced_ID"] ) ]
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
 
         # get the age and house_no
@@ -880,6 +919,7 @@ class TestClass(object):
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
+        index_traced = index_traced[ ( index_traced["index_ID"] != index_traced["traced_ID"] ) ]
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID", "days_since_contact" ] ).size().reset_index(name="cons")    
        
         # now perform checks
@@ -944,6 +984,7 @@ class TestClass(object):
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
+        index_traced = index_traced[ ( index_traced["index_ID"] != index_traced["traced_ID"] ) ]
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
         index_cases  = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
 
@@ -995,12 +1036,15 @@ class TestClass(object):
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
                 
-        house_no  = df_indiv.loc[ :,["ID", "house_no"]]
-        house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no"}, inplace = True )
-        total_house = house_no.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
         is_case   = df_indiv.loc[ :,["ID", "is_case", "house_no"]]
-        is_case.rename( columns = { "ID":"index_ID"}, inplace = True )
-
+        is_case.rename( columns = { "ID":"index_ID"}, inplace = True )  
+        house_no  = df_indiv.loc[ :,["ID", "house_no","is_case"]]
+        house_no.rename( columns = { "ID":"traced_ID", "house_no":"traced_house_no","is_case":"is_case_traced"}, inplace = True )
+      
+        # remove cases from totals for house as these are not traced
+        total_house = house_no[ (house_no["is_case_traced"]==0)]
+        total_house = total_house.groupby( ["traced_house_no"]).size().reset_index(name="total_per_house")
+      
         # now look at the number of people asked to quarantine
         model.write_trace_tokens()
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
@@ -1008,9 +1052,9 @@ class TestClass(object):
         # add on house_no and case status to the transmissions and count the number of traced per house
         df_trace = pd.merge( df_trace, house_no, on = "traced_ID", how = "left")
         df_trace = pd.merge( df_trace, is_case, on = "index_ID", how = "left")
-        df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] ) 
+        df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] )         
         trace_grouped = df_trace.groupby( ["index_ID", "is_case","same_house","traced_house_no"]).size().reset_index(name="n_per_house")
-      
+
         # for those who are not cases, we should not have traced household members 
         not_case =  trace_grouped[ ( trace_grouped[ "same_house"] == False ) & ( trace_grouped[ "is_case"] == 0 ) ]      
         np.testing.assert_equal( len( not_case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
@@ -1022,7 +1066,7 @@ class TestClass(object):
         case[ "hh_not_q"] = case[ "total_per_house"] - case[ "n_per_house"]
         case = case[ ( case[ "same_house"] == False ) ];
         np.testing.assert_equal( len( case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
-        np.testing.assert_equal( sum( ( case[ "hh_not_q"] != 0 ) ), 0, "member of household of first-order contact not traced on positive" )
+        np.testing.assert_equal( sum( ( case[ "hh_not_q"] > 0 ) ), 0, "member of household of first-order contact not traced on positive" )
                 
         
         
@@ -1038,7 +1082,7 @@ class TestClass(object):
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
-        
+                
         # step through time until we need to start to save the interactions each day
         for time in range( symptom_time ):
             model.one_time_step();             
@@ -1054,8 +1098,7 @@ class TestClass(object):
         model.write_individual_file()  
         df_trace_pos  = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv_pos = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
-
-         
+                  
          # find everyone who has a trace token who reported on symptom_time
         df_trace_symp_t = df_trace_symp[ (df_trace_symp["index_time"] == df_trace_symp["time"] ) & (df_trace_symp["index_reason"]==0)]
         
@@ -1109,13 +1152,36 @@ class TestClass(object):
         np.testing.assert_allclose( n_quar_pos, n_red*comp_pos, atol=max(tol_sd*sqrt(n_red*comp_pos*(1-comp_pos)),0.5), err_msg="The wrong number quarantined on red messages")
 
 
+    def test_quarantined_have_trace_token(self, test_params, time_steps_test ):
+        """
+        Test that everybody who is in quarantine has a trace token
+        """
          
-         
-         
-         
-         
-         
-         
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+                
+        # step through through the initial steps to get the epidemic going
+        burn_in_time = test_params[ "end_time" ] - time_steps_test
+        for time in range( burn_in_time ):
+            model.one_time_step();             
+            
+        # now record on each step those quaranatined and check for trace tokens
+        for time in range( time_steps_test ):
+            model.one_time_step();                       
+            model.write_trace_tokens()  
+            model.write_individual_file()  
+       
+            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+            quarantined = df_indiv[ df_indiv["quarantined"] == True ].loc[:,["ID"]]
+            have_tokens = df_trace.groupby("traced_ID").size().reset_index(name="n_tokens")
+            quarantined = pd.merge( quarantined, have_tokens, left_on = "ID", right_on = "traced_ID", how = "left" )
+            
+            np.testing.assert_equal( len( quarantined ) > 500, True, err_msg = "Not sufficient people quarantined to test")
+            np.testing.assert_equal( sum( quarantined.n_tokens.isna() ), 0, err_msg = "Individuals quarantined without trace tokens")         
          
     
     

@@ -993,7 +993,6 @@ void write_trace_tokens( model *model )
 
 			index_time = token->contact_time;
 
-			token = token->next_index;
 			while( token != NULL )
 			{
 				fprintf( output_file, "%i,%i,%li,%i,%i,%i,%li,%i,%li,%i\n",
