@@ -529,12 +529,6 @@ void write_quarantine_reasons(model *model, parameters *params)
 				index_house_no = index_token->individual->house_no;
 			}
 			
-			if( indiv->trace_tokens == NULL & indiv->index_trace_token == NULL ){
-				printf(" --------- trace_tokens == NULL & index_trace_token == NULL --------- ");
-				print_individual(indiv);
-				printf(" -------------------------------------------------------------------- ");
-			}
-			
 			// Resolve multiple reasons for quarantine into one reason
 			quarantine_reason = resolve_quarantine_reasons(quarantine_reasons);
 			
@@ -554,8 +548,7 @@ void write_quarantine_reasons(model *model, parameters *params)
 				index_true_status,
 				index_house_no,
 				quarantine_reason,
-				n_reasons
-				);
+				n_reasons);
 		}
 	}
 	fclose(quarantine_reasons_output_file);
