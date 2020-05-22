@@ -282,7 +282,7 @@ void write_time_step_hospital_data( model *model)
     int hospital_idx = 0;
     // TODO: update to run for each hospital
 
-    if(model->params->sys_write_hospital == TRUE)
+    if( model->params->sys_write_hospital )
         {
             // Concatenate file name
             strcpy(output_file_name, model->params->output_file_dir);
@@ -357,7 +357,6 @@ void write_time_step_hospital_data( model *model)
 
             fclose(time_step_hospital_file);
         };
-    
 }
 
 /*****************************************************************************************
