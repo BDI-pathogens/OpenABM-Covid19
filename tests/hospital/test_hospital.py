@@ -16,55 +16,6 @@ from tests import constant
 from parameters import ParameterSet
 
 
-TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-TEST_DIR = TEST_DIR.replace("hospital","")
-TEST_DATA_FILE = TEST_DIR + "data/baseline_parameters.csv"
-PARAM_LINE_NUMBER = 1
-DATA_DIR_TEST = TEST_DIR + "data"
-TEST_HOUSEHOLD_FILE = TEST_DIR + "data/baseline_household_demographics.csv"
-TEST_HOSPITAL_FILE = TEST_DIR +"data/hospital_baseline_parameters.csv"
-TEST_OUTPUT_FILE = TEST_DIR +"data/test_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR +"data/test_hospital_output.csv"
-TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR +"data/time_step_hospital_output.csv"
-TEST_INTERACTIONS_FILE = TEST_DIR +"data/interactions_Run1.csv"
-TEST_INDIVIDUAL_FILE = TEST_DIR +"data/individual_file_Run1.csv"
-TEST_TRANSMISSION_FILE = TEST_DIR + "data/transmission_Run1.csv"
-TEST_HCW_FILE = TEST_DIR +"data/ward_output.csv"
-SRC_DIR = TEST_DIR.replace("tests","") + "src"
-EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
-
-# Files with adjusted parameters for each scenario
-SCENARIO_FILE = TEST_DIR + "/data/scenario_baseline_parameters.csv"
-
-# Construct the compilation command and compile
-compile_command = "make clean; make all; make"
-completed_compilation = subprocess.run([compile_command], 
-    shell = True, 
-    cwd = SRC_DIR, 
-    capture_output = True
-    )
-
-# Adjust baseline parameter
-params = ParameterSet(TEST_DATA_FILE, line_number=1)
-params.set_param("n_total", 20000)
-params.set_param("hospital_on", 1)
-params.write_params(SCENARIO_FILE)
-
-# Construct the executable command
-EXE = f"{EXECUTABLE} {SCENARIO_FILE} {PARAM_LINE_NUMBER} "+\
-    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
-
-# Call the model using baseline parameters, pipe output to file, read output file
-file_output = open(TEST_OUTPUT_FILE, "w")
-completed_run = subprocess.run([EXE], stdout = file_output, shell = True)
-
-# Create a dataframe out of the terminal output
-df_output = pd.read_csv(TEST_OUTPUT_FILE, comment = "#", sep = ",")
-
-# Check that the simulation ran
-assert len(df_output) != 0
-
-
 class TestClass(object):
     """
     Test class for checking
@@ -74,9 +25,19 @@ class TestClass(object):
         """
         Test that healthcare worker IDs correspond to population IDs
         """
+
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
         
-        df_hcw = pd.read_csv(TEST_HCW_FILE)
-        df_population = pd.read_csv(TEST_INDIVIDUAL_FILE)
+        df_hcw = pd.read_csv(constant.TEST_HCW_FILE)
+        df_population = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         hcw_idx_list = df_hcw.pdx.values
         population_idx_list = df_population.ID.values
 
@@ -87,8 +48,18 @@ class TestClass(object):
         """
         If worker type not -1, then work network must be -1
         """
+
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         
-        df_interactions = pd.read_csv(TEST_INTERACTIONS_FILE)
+        df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE)
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
         w1_worknetwork_condition = df_interactions['occupation_network_1'] != -1
         df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
@@ -107,7 +78,17 @@ class TestClass(object):
         Test that healthcare workers IDs appear only once in the hcw file and therefore only belong to one ward/ hospital
         """
 
-        df_hcw = pd.read_csv(TEST_HCW_FILE)
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        df_hcw = pd.read_csv(constant.TEST_HCW_FILE)
         hcw_idx_list = df_hcw.pdx.values
 
         assert len(hcw_idx_list) == len(set(hcw_idx_list))
@@ -118,7 +99,17 @@ class TestClass(object):
         Test that patients in ward do not exceed ward beds
         """
 
-        df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        df_hcw_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
         df_number_beds_exceeded = df_hcw_time_step.query('n_patients > n_beds')
 
         assert len(df_number_beds_exceeded.index) == 0
@@ -128,7 +119,17 @@ class TestClass(object):
         Test that patients in wards not duplicated
         """
 
-        df_hcw_time_step = pd.read_csv(TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        df_hcw_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
         
         # Iterate over time steps
         max_time = df_hcw_time_step['time_step'].max()
@@ -148,7 +149,17 @@ class TestClass(object):
         hospital healthcare workers
         """
 
-        df_transmission_output = pd.read_csv(TEST_TRANSMISSION_FILE)
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        df_transmission_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         infected_non_hcw = df_transmission_output["worker_type_recipient"] == constant.NOT_HEALTHCARE_WORKER
         infected_non_hcw = df_transmission_output[infected_non_hcw]
  

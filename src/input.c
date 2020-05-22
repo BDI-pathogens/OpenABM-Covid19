@@ -474,7 +474,7 @@ void read_hospital_param_file( parameters *params)
             if( check < 1){ print_exit("Failed to read parameter n_hcw_per_ward\n"); };
 
             check = fscanf(hospital_parameter_file, " %i ,", &(params->n_patient_required_interactions[i][j]));
-            if( check < 1){ print_exit("Failed to read parameter n_n_patient_required_interactions\n"); };
+            if( check < 1){ print_exit("Failed to read parameter n_patient_required_interactions\n"); };
         }
     }
 
