@@ -9,6 +9,7 @@
 #include "params.h"
 #include "constant.h"
 #include "utilities.h"
+#include "model.h"
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -287,9 +288,18 @@ int count_infection_events( individual *indiv )
 *  Name:		print_individual
 ******************************************************************************************/
 
-void print_individual( individual *indiv)
+void print_individual( model *model, long idx)
 {
-	printf("\n");
+        individual *indiv;
+        if( idx >= model->params->n_total )
+        {
+            printf("idx higher than n_total; individual does not exist");
+            fflush(stdout);
+            return;
+        }
+        
+        indiv = &(model->population[idx]);
+        
 	printf("indiv->idx: %li\n", indiv->idx );
 	printf("indiv->status: %d\n", indiv->status );
 	printf("indiv->house_no: %li\n", indiv->house_no );
@@ -306,5 +316,15 @@ void print_individual( individual *indiv)
 	
 	printf("indiv->traced_on_this_trace: %f\n", indiv->traced_on_this_trace );
 	printf("indiv->app_user: %d\n", indiv->app_user );
+        if(indiv->trace_tokens == NULL){
+            printf("indiv->trace_tokens: NULL\n");
+        }else{
+            printf("indiv->trace_tokens: non-NULL\n");
+        }
+        if(indiv->index_trace_token == NULL){ 
+            printf("indiv->index_trace_token: NULL\n");
+        }else{
+            printf("indiv->index_trace_token: non-NULL\n");
+        }
 	fflush(stdout);
 }

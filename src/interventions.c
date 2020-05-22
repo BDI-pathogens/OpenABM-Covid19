@@ -738,9 +738,6 @@ void intervention_on_symptoms( model *model, individual *indiv )
 {
 	if( !model->params->interventions_on )
 		return;
-	
-	if( indiv->index_trace_token != NULL )
-		return;
 
 	if( indiv->index_trace_token != NULL )
 		return;
