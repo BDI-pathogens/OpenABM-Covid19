@@ -38,7 +38,7 @@ def compile_covid_ibm(request):
     shutil.copytree(constant.IBM_DIR, constant.IBM_DIR_TEST)
 
     # Construct the compilation command and compile
-    compile_command = "make clean; make all; make"
+    compile_command = "make clean; make install"
     completed_compilation = subprocess.run(
         [compile_command], shell = True, cwd = constant.IBM_DIR_TEST, capture_output = True
     )
