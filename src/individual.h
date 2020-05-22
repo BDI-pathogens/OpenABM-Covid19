@@ -47,6 +47,7 @@ struct individual{
 	
 	trace_token *trace_tokens;
 	trace_token *index_trace_token;
+	event *index_token_release_event;
 	double traced_on_this_trace;
 
     int app_user;

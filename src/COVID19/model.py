@@ -79,6 +79,7 @@ class EVENT_TYPES(enum.Enum):
     N_EVENT_TYPES = 23
 
 
+
 class OccupationNetworkEnum(enum.Enum):
     _primary_network = 0
     _secondary_network = 1

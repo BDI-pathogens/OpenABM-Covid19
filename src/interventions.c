@@ -29,9 +29,10 @@ void set_up_transition_times_intervention( model *model )
 	parameters *params = model->params;
 	int **transitions  = model->transition_time_distributions;
 
-	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], N_DRAW_LIST, params->quarantine_dropout_self,     params->quarantine_length_self );
-	geometric_max_draw_list( transitions[TRACED_QUARANTINE],      N_DRAW_LIST, params->quarantine_dropout_traced,   params->quarantine_length_traced );
-	geometric_max_draw_list( transitions[TEST_RESULT_QUARANTINE], N_DRAW_LIST, params->quarantine_dropout_positive, params->quarantine_length_positive );
+	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], 	  N_DRAW_LIST, params->quarantine_dropout_self,            params->quarantine_length_self );
+	geometric_max_draw_list( transitions[TRACED_QUARANTINE_SYMPTOMS], N_DRAW_LIST, params->quarantine_dropout_traced_symptoms, params->quarantine_length_traced_symptoms );
+	geometric_max_draw_list( transitions[TRACED_QUARANTINE_POSITIVE], N_DRAW_LIST, params->quarantine_dropout_traced_positive, params->quarantine_length_traced_positive );
+	geometric_max_draw_list( transitions[TEST_RESULT_QUARANTINE],     N_DRAW_LIST, params->quarantine_dropout_positive,        params->quarantine_length_positive );
 }
 
 /*****************************************************************************************
@@ -164,7 +165,8 @@ trace_token* new_trace_token( model *model, individual *indiv, int contact_time 
 	token->next_index = NULL;
 	token->last_index = NULL;
 	token->individual = indiv;
-	token->days_since_contact = model->time - contact_time;
+	token->contact_time = contact_time;
+	token->index_status = UNKNOWN;
 	model->n_trace_tokens_used++;
 
 	if( model->n_trace_tokens == model->n_trace_tokens_used)
@@ -185,7 +187,7 @@ trace_token* index_trace_token( model *model, individual *indiv )
 	if( indiv->index_trace_token == NULL )
 	{
 		indiv->index_trace_token = new_trace_token( model, indiv, model->time );
-		indiv->index_trace_token->days_since_contact = model->time;
+		indiv->index_trace_token->contact_time = model->time;
 	}
 
 	return indiv->index_trace_token;
@@ -365,6 +367,7 @@ int intervention_quarantine_until(
 	{
 		// add the trace token to their list
 		trace_token *token = new_trace_token( model, indiv, contact_time );
+		token->index_status = index_token->index_status;
 
 		if( indiv->trace_tokens != NULL )
 		{
@@ -385,7 +388,7 @@ int intervention_quarantine_until(
 	if( indiv->traced_on_this_trace < 1 )
 		return FALSE;
 
-	if( time == model->time )
+	if( time <= model->time )
 		return FALSE;
 
 	if( indiv->quarantine_event == NULL )
@@ -557,6 +560,13 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	trace_token *next_token;
 	int zero_traced = FALSE;
 
+	// remove the release token
+	if( indiv->index_token_release_event != NULL )
+	{
+		remove_event_from_event_list( model, indiv->index_token_release_event );
+		indiv->index_token_release_event = NULL;
+	}
+
 	if( token == NULL )
 		return;
 
@@ -612,14 +622,14 @@ void intervention_quarantine_household(
 
 	n          = model->household_directory->n_jdx[indiv->house_no];
 	members    = model->household_directory->val[indiv->house_no];
-	time_event = ifelse( time != UNKNOWN, time, model->time + sample_transition_time( model, TRACED_QUARANTINE ) );
+	time_event = ifelse( time != UNKNOWN, time, model->time + sample_transition_time( model, TRACED_QUARANTINE_SYMPTOMS ) );
 
 	for( idx = 0; idx < n; idx++ )
 		if( members[idx] != indiv->idx )
 		{
 			contact = &(model->population[members[idx]]);
 
-			if( contact->status == DEATH || is_in_hospital( contact ) )
+			if( contact->status == DEATH || is_in_hospital( contact ) || contact->infection_events->is_case )
 				continue;
 
 			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time, risk_scores[ contact->age_group ] );
@@ -651,11 +661,65 @@ void intervention_quarantine_household_of_traced(
 		contact->traced_on_this_trace = TRUE;
 		token->index_status = index_token->index_status;
 
-		if( contact->house_no != house_no & contact->quarantine_release_event != NULL )
+		if( ( contact->house_no != house_no ) & ( contact->quarantine_release_event != NULL ) )
 		{
 			time_quarantine = contact->quarantine_release_event->time;
 			intervention_quarantine_household( model, contact, time_quarantine, FALSE, index_token, FALSE );
 		}
+	}
+}
+
+/*****************************************************************************************
+*  Name:		intervention_index_case_symptoms_to_positive
+*  Description: Intervention to take place when somebody who is already an index case
+*  				and have previously sent out a message after reporting symptoms, receives
+*  				a positive test result.
+*
+*				First of all - the first order contacts get an upgraded (red) message
+*				which they will be much more likely to comply with
+*
+*  Returns:		void
+******************************************************************************************/
+void intervention_index_case_symptoms_to_positive(
+	model *model,
+	trace_token *index_token
+)
+{
+	parameters *params = model->params;
+	individual *contact;
+	int time_quarantine;
+	int trace_household = params->quarantine_household_on_traced_positive && !params->quarantine_household_on_traced_symptoms;
+	trace_token *token  = index_token;
+	long house_no       = index_token->individual->house_no;
+	int contact_time;
+
+	while( token->next_index != NULL )
+	{
+		token   = token->next_index;
+ 		contact = token->individual;
+ 		token->index_status = index_token->index_status;
+
+ 		if( contact->traced_on_this_trace == FALSE )
+ 		{
+ 			if( contact->status != DEATH && !is_in_hospital( contact ) && !contact->infection_events->is_case )
+ 			{
+				if( gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_positive  ) )
+				{
+					contact_time    = token->contact_time;
+					time_quarantine = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
+
+					intervention_quarantine_until( model, contact, time_quarantine, TRUE, NULL, contact_time, 1 );
+				}
+
+				if( trace_household & ( contact->house_no != house_no ) & ( contact->quarantine_release_event != NULL ) )
+				{
+					time_quarantine = contact->quarantine_release_event->time;
+
+					intervention_quarantine_household( model, contact, time_quarantine, FALSE, index_token, FALSE );
+				}
+ 			}
+			contact->traced_on_this_trace = TRUE;
+ 		}
 	}
 }
 
@@ -673,6 +737,9 @@ void intervention_quarantine_household_of_traced(
 void intervention_on_symptoms( model *model, individual *indiv )
 {
 	if( !model->params->interventions_on )
+		return;
+
+	if( indiv->index_trace_token != NULL )
 		return;
 
 	int quarantine, time_event;
@@ -700,7 +767,9 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_notify_contacts( model, indiv, 1, index_token );
 
 		remove_traced_on_this_trace( model, indiv );
-		add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced );
+		if( indiv->index_token_release_event != NULL )
+			remove_event_from_event_list( model, indiv->index_token_release_event );
+		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms );
 	}
 }
 
@@ -718,10 +787,13 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 	if( !model->params->interventions_on )
 		return;
 
-	intervention_test_order( model, indiv, model->time );
+	if( indiv->quarantine_test_result == NO_TEST && !indiv->infection_events->is_case )
+	{
+		intervention_test_order( model, indiv, model->time );
 
-	if( model->params->allow_clinical_diagnosis )
-		intervention_on_positive_result( model, indiv );
+		if( model->params->allow_clinical_diagnosis )
+			intervention_on_positive_result( model, indiv );
+	}
 }
 
 /*****************************************************************************************
@@ -746,7 +818,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	if( !is_in_hospital( indiv ) )
 	{
-		time_event = model->time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
+		time_event = index_token->contact_time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
 		intervention_quarantine_until( model, indiv, time_event, TRUE, NULL, model->time, 1 );
 	}
 	indiv->traced_on_this_trace = TRUE;
@@ -759,13 +831,15 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	  ( params->quarantine_on_traced || params->test_on_traced )
 	)
 		intervention_notify_contacts( model, indiv, 1, index_token );
-	else
-	if( index_already && params->quarantine_household_on_traced_positive && !params->quarantine_household_on_traced_symptoms )
-		intervention_quarantine_household_of_traced( model, index_token );
+
+	if( index_already )
+		intervention_index_case_symptoms_to_positive( model, index_token );
+
+	if( indiv->index_token_release_event != NULL )
+		remove_event_from_event_list( model, indiv->index_token_release_event );
+	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, index_token->contact_time + params->quarantine_length_traced_positive );
 
 	remove_traced_on_this_trace( model, indiv );
-	if( !index_already )
-		add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced );
 }
 
 /*****************************************************************************************
@@ -804,7 +878,6 @@ void intervention_on_traced(
 	double risk_score
 )
 {
-
 	if( is_in_hospital( indiv ) || indiv->infection_events->is_case )
 		return;
 
@@ -812,8 +885,22 @@ void intervention_on_traced(
 
 	if( params->quarantine_on_traced )
 	{
-		int time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE );
-		int quarantine = intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time, risk_score );
+		int time_event = model->time;
+		int quarantine;
+
+		if( index_token->index_status == SYMPTOMS_ONLY )
+		{
+			if( gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_symptoms ) )
+				time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE_SYMPTOMS );
+
+		}
+		else if( index_token->index_status == POSITIVE_TEST )
+		{
+			if( gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_positive ) )
+				time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
+		}
+
+		quarantine = intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time, risk_score );
 
 		if( quarantine && recursion_level != NOT_RECURSIVE )
 		{
@@ -849,7 +936,7 @@ void intervention_smart_release( model *model )
 
 	int days =  model->params->quarantine_smart_release_day;
 
-	day        = model->time + model->params->quarantine_length_traced - days;
+	day        = model->time + model->params->quarantine_length_traced_symptoms - days;
 	time_index = model->time - days;
 
 	if( time_index < 1)

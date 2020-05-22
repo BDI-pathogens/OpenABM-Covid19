@@ -282,7 +282,7 @@ void write_time_step_hospital_data( model *model)
     int hospital_idx = 0;
     // TODO: update to run for each hospital
 
-    if(model->params->sys_write_hospital == TRUE)
+    if( model->params->sys_write_hospital )
         {
             // Concatenate file name
             strcpy(output_file_name, model->params->output_file_dir);
@@ -357,7 +357,6 @@ void write_time_step_hospital_data( model *model)
 
             fclose(time_step_hospital_file);
         };
-    
 }
 
 /*****************************************************************************************
@@ -891,10 +890,10 @@ int one_time_step( model *model )
     }
 
 	flu_infections( model );
-	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
-	transition_events( model, TEST_RESULT,         &intervention_test_result,         TRUE );
-	transition_events( model, QUARANTINE_RELEASE,  &intervention_quarantine_release,  FALSE );
-	transition_events( model, TRACE_TOKEN_RELEASE, &intervention_trace_token_release, TRUE );
+	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
+	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
+	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
+	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,FALSE );
 
 	if( model->params->quarantine_smart_release_day > 0 )
 		intervention_smart_release( model );

@@ -58,6 +58,7 @@ void initialize_individual(
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
+    indiv->index_token_release_event = NULL;
 
     indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
@@ -162,28 +163,13 @@ void update_random_interactions( individual *indiv, parameters* params )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			lockdown = max( lockdown, params->lockdown_elderly_on );
 
-        if( params->hospital_on )
+        switch( indiv->status )
         {
-            //Updates interactions when an individual is physically within a hospital.
-            switch( indiv->hospital_state )
-            {
-                case MORTUARY:		            n = 0; break;
-                case WAITING:                   n = params->hospitalised_daily_interactions; break;
-                case GENERAL:                   n = params->hospitalised_daily_interactions; break;
-                case ICU:                       n = params->hospitalised_daily_interactions; break;
-                default: 			            n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
-            }
-        }
-        else
-        {
-            switch( indiv->status )
-            {
-                case DEATH:			n = 0; 										 break;
-                case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
-                case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-                case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break;
-                default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
-            }
+            case DEATH:			n = 0; 										 break;
+            case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
+            case CRITICAL:		n = params->hospitalised_daily_interactions; break;
+            case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break;
+            default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
         }
     }
     else
@@ -201,8 +187,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-
-	update_random_interactions( indiv, params );
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -214,7 +199,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-	update_random_interactions( indiv, params );
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -225,7 +210,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-	update_random_interactions( indiv, params );
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -246,7 +231,7 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-	update_random_interactions( indiv, params );
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -257,7 +242,7 @@ void set_critical( individual *indiv, parameters* params, int time )
 void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED_RECOVERING;
-	update_random_interactions( indiv, params );
+    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -279,7 +264,6 @@ void set_case( individual *indiv, int time )
 void set_waiting( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_state = WAITING;
-    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -290,7 +274,6 @@ void set_waiting( individual *indiv, parameters* params, int time )
 void set_general_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_state = GENERAL;
-    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -301,7 +284,6 @@ void set_general_admission( individual *indiv, parameters* params, int time )
 void set_icu_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_state = ICU;
-    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -313,7 +295,6 @@ void set_mortuary_admission( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_state = MORTUARY;
     indiv->current_hospital_event = NULL;
-    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -325,7 +306,6 @@ void set_discharged( individual *indiv, parameters* params, int time )
 {
     indiv->hospital_state = DISCHARGED;
     indiv->current_hospital_event = NULL;
-    update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
