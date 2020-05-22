@@ -108,7 +108,7 @@ fatality_fraction_60_69	0.65
 fatality_fraction_70_79	0.88
 fatality_fraction_80	1
 mean_time_hospitalised_recovery	8.75
-sd_time_hospitalised_recovery	9.25
+sd_time_hospitalised_recovery	8.75
 mean_time_critical_survive	18.8
 sd_time_critical_survive	12.21
 icu_allocation_0_9	1
