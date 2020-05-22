@@ -21,13 +21,17 @@ DATA_DIR_TEST = "data_test"
 
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
-TEST_HOSPITAL_FILE = "./tests/data/hospital_baseline_parameters.csv"
+
+TEST_HOSPITAL_TEMPLATE = "./tests/data/hospital_baseline_parameters.csv"
+TEST_HOSPITAL_FILE = join(DATA_DIR_TEST, "test_hospital_parameters.csv")
 
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
 TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
+TEST_HCW_FILE = join(DATA_DIR_TEST, "ward_output.csv")
+TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = join(DATA_DIR_TEST, "time_step_hospital_output.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
