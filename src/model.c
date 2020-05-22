@@ -891,10 +891,10 @@ int one_time_step( model *model )
     }
 
 	flu_infections( model );
-	transition_events( model, TEST_TAKE,           &intervention_test_take,           TRUE );
-	transition_events( model, TEST_RESULT,         &intervention_test_result,         TRUE );
-	transition_events( model, QUARANTINE_RELEASE,  &intervention_quarantine_release,  FALSE );
-	transition_events( model, TRACE_TOKEN_RELEASE, &intervention_trace_token_release, TRUE );
+	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
+	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
+	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
+	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,FALSE );
 
 	if( model->params->quarantine_smart_release_day > 0 )
 		intervention_smart_release( model );
