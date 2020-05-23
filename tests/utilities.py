@@ -21,6 +21,7 @@ def turn_off_interventions(params, end_time):
     params.set_param("test_on_symptoms", 0)
     params.set_param("quarantine_on_traced", 0)
     params.set_param("traceable_interaction_fraction", 0.0)
+    params.set_param("manual_tracing_traceable_fraction", 0.0)
     params.set_param("tracing_network_depth", 0)
     params.set_param("allow_clinical_diagnosis", 0)
     params.set_param("self_quarantine_fraction", 0.0)
