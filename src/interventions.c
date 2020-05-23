@@ -549,6 +549,52 @@ void intervention_notify_contacts(
 }
 
 /*****************************************************************************************
+*  Name:		intervention_manual_contact_tracing
+*  Description: Adding manual contact tracing to the model by modifying the digital contact
+*				tracing code to remove references to having an application.
+*  				Potential upgrade: Stratify manual contact tracing efficacy by network
+*				since we can more reliably trace colleagues than strangers.
+*  Returns:		void
+******************************************************************************************/
+void intervention_manual_contact_tracing(
+	model *model,
+	individual *indiv,
+	int recursion_level,
+	trace_token *index_token
+)
+{
+
+	interaction *inter;
+	individual *contact;
+	parameters *params = model->params;
+	int idx, ddx, day, n_contacts;
+	double *risk_scores;
+
+	day = model->interaction_day_idx;
+
+	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
+	{
+		n_contacts  = indiv->n_interactions[day];
+		risk_scores = params->risk_score[ ddx ][ indiv->age_group ];
+
+		if( n_contacts > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 0; idx < n_contacts; idx++ )
+			{
+				contact = inter->individual;
+				if( inter->traceable == UNKNOWN )
+					inter->traceable = gsl_ran_bernoulli( rng, params->manual_tracing_traceable_fraction );
+				if( inter->traceable )
+					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+				inter = inter->next;
+			}
+		}
+		ring_dec( day, model->params->days_of_interactions );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		intervention_trace_token_release
 *  Description: what to do when a trace_token is released
 *  Returns:		void
@@ -635,7 +681,10 @@ void intervention_quarantine_household(
 			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time, risk_scores[ contact->age_group ] );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
-				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
+				{
+					intervention_manual_contact_tracing( model, contact, NOT_RECURSIVE, index_token );
+					intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
+				}
 		}
 }
 
@@ -764,7 +813,10 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
+		{
+			intervention_manual_contact_tracing( model, indiv, 1, index_token );
 			intervention_notify_contacts( model, indiv, 1, index_token );
+		}
 
 		remove_traced_on_this_trace( model, indiv );
 		if( indiv->index_token_release_event != NULL )
@@ -829,8 +881,10 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( params->trace_on_positive &&
 	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
 	  ( params->quarantine_on_traced || params->test_on_traced )
-	)
+	) {
+		intervention_manual_contact_tracing( model, indiv, 1, index_token );
 		intervention_notify_contacts( model, indiv, 1, index_token );
+	}
 
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );
@@ -916,8 +970,11 @@ void intervention_on_traced(
 		intervention_test_order( model, indiv, time_test );
 	}
 
-	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )
+	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth ) {
+		intervention_manual_contact_tracing( model, indiv, recursion_level + 1, index_token );
 		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
+	}
+
 }
 
 /*****************************************************************************************

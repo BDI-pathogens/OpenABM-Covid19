@@ -106,6 +106,7 @@ typedef struct{
 	int quarantine_smart_release_day;		// number of days until smart release on no contacts
 
 	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
+	double manual_tracing_traceable_fraction; // the proportion of interactions which are manually traceable
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
 
