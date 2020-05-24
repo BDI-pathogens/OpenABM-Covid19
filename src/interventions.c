@@ -695,9 +695,9 @@ void intervention_index_case_symptoms_to_positive(
 
 	while( token->next_index != NULL )
 	{
-		token   = token->next_index;
- 		contact = token->individual;
- 		token->index_status = index_token->index_status;
+		token	= token->next_index;
+		contact = token->individual;
+		token->index_status = index_token->index_status;
 
  		if( contact->traced_on_this_trace == FALSE )
  		{
@@ -978,5 +978,32 @@ void intervention_smart_release( model *model )
 			intervention_trace_token_release( model, indiv );
 		}
 	}
+}
+
+/*****************************************************************************************
+*  Name:		resolve_quarantine_reasons
+*  Description: Determine a single recorded reason for an individual being quarantined;
+				resolve multiple reasons for an individual being quarantined.  
+				QUARANTINE_REASONS are listed in descending order of precedence.
+*  Returns:		void
+******************************************************************************************/
+
+int resolve_quarantine_reasons(int *quarantine_reasons)
+{
+	int n_reasons = 0, reason, i;
+	
+	// Descending traverse (QUARANTINE_REASONS are listed in descending order of precedence)
+	for(i = N_QUARANTINE_REASONS - 1; i >= 0; i--){
+		
+		if(quarantine_reasons[i] == TRUE){
+			n_reasons++;
+			reason = i;
+		}
+	}
+	
+	if((n_reasons > 0) && (n_reasons < N_QUARANTINE_REASONS))
+		return reason;
+	
+	return UNKNOWN;
 }
 

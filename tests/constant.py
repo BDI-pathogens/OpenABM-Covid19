@@ -26,6 +26,7 @@ TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
 TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
+TEST_QUARANTINE_REASONS_FILE = join(DATA_DIR_TEST, "quarantine_reasons_file_Run1.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
