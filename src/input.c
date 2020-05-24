@@ -424,6 +424,137 @@ void write_output_files(model *model, parameters *params)
 	}
 }	
 
+
+/*****************************************************************************************
+*  Name:		write_quarantine_reasons
+*  Description: Write (csv) files of reasons individuals are quarantined
+******************************************************************************************/
+
+void write_quarantine_reasons(model *model, parameters *params)
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	long idx, jdx;
+	int quarantine_reasons[N_QUARANTINE_REASONS], quarantine_reason, n_reasons, i, n;
+	int index_true_status, index_from_household;
+	long index_id, index_house_no;
+	
+	individual *indiv;
+	trace_token *index_token;
+	long *members;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/quarantine_reasons_file_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+	
+	FILE *quarantine_reasons_output_file;
+	quarantine_reasons_output_file = fopen(output_file_name, "w");
+	if(quarantine_reasons_output_file == NULL)
+		print_exit("Can't open quarantine_reasons output file");
+	
+	fprintf(quarantine_reasons_output_file,"time,");
+	fprintf(quarantine_reasons_output_file,"ID,");
+	fprintf(quarantine_reasons_output_file,"status,");
+	fprintf(quarantine_reasons_output_file,"house_no,");
+	fprintf(quarantine_reasons_output_file,"ID_index,");
+	fprintf(quarantine_reasons_output_file,"status_index,");
+	fprintf(quarantine_reasons_output_file,"house_no_index,");
+	fprintf(quarantine_reasons_output_file,"quarantine_reason,");
+	fprintf(quarantine_reasons_output_file,"n_reasons");
+	fprintf(quarantine_reasons_output_file,"\n");
+	
+	for(idx = 0; idx < params->n_total; idx++)
+	{
+		indiv = &(model->population[idx]);
+		
+		if(indiv->quarantined == TRUE){
+			
+			for(i = 0; i < N_QUARANTINE_REASONS; i++)
+				quarantine_reasons[i] = FALSE;
+			
+			index_true_status = UNKNOWN;
+			index_id = UNKNOWN;
+			index_house_no = UNKNOWN;
+			
+			// Check if this individual has non-NULL trace_tokens attribute
+			if( indiv->index_trace_token != NULL ){
+				
+				// Quarantined from self-reported symptoms
+				if(indiv->index_trace_token->index_status == SYMPTOMS_ONLY)
+					quarantine_reasons[QR_SELF_SYMPTOMS] = TRUE;
+				
+				// Quarantined from self positive
+				if(indiv->index_trace_token->index_status == POSITIVE_TEST)
+					quarantine_reasons[QR_SELF_POSITIVE] = TRUE;
+				
+				index_true_status = indiv->status;
+				index_id = indiv->idx;
+				index_house_no = indiv->house_no;
+			}
+			
+			if( indiv->trace_tokens != NULL ){
+				// Find original index and check if the index was a household member
+				n = model->household_directory->n_jdx[indiv->house_no];
+				members = model->household_directory->val[indiv->house_no];
+				
+				index_token = indiv->trace_tokens;
+				while( index_token->last_index != NULL )
+					index_token = index_token->last_index;
+
+				for(jdx = 0; jdx < n; jdx++){
+					if( index_token->individual->idx == members[jdx] ){
+						index_from_household = TRUE;
+					}
+				}
+				
+				if(index_from_household == TRUE){
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_HOUSEHOLD_SYMPTOMS] = TRUE;
+			
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_HOUSEHOLD_POSITIVE] = TRUE;
+				}else{
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_TRACE_SYMPTOMS] = TRUE;
+					
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_TRACE_POSITIVE] = TRUE;
+				}
+				index_id = index_token->individual->idx;
+				index_true_status = index_token->individual->status;
+				index_house_no = index_token->individual->house_no;
+			}
+			
+			// Resolve multiple reasons for quarantine into one reason
+			quarantine_reason = resolve_quarantine_reasons(quarantine_reasons);
+			
+			n_reasons = 0;
+			for(i = 0; i < N_QUARANTINE_REASONS; i++){
+				if(quarantine_reasons[i] == TRUE)
+					n_reasons += 1;
+			}
+			
+			fprintf(quarantine_reasons_output_file, 
+				"%d,%li,%d,%li,%li,%d,%li,%d,%d\n",
+				model->time,
+				indiv->idx,
+				indiv->status,
+				indiv->house_no,
+				index_id, 
+				index_true_status,
+				index_house_no,
+				quarantine_reason,
+				n_reasons);
+		}
+	}
+	fclose(quarantine_reasons_output_file);
+}
+
+
 /*****************************************************************************************
 *  Name:		write_individual_file
 *  Description: Write (csv) file of individuals in simulation

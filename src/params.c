@@ -141,6 +141,15 @@ int get_model_param_quarantine_household_contacts_on_positive(model *model)
 }
 
 /*****************************************************************************************
+*  Name:                get_model_param_quarantine_household_contacts_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_quarantine_household_contacts_on_symptoms(model *model)
+{
+    return model->params->quarantine_household_contacts_on_symptoms;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_test_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -367,6 +376,16 @@ int set_model_param_quarantine_household_on_traced_symptoms( model *model, int v
 int set_model_param_quarantine_household_contacts_on_positive( model *model, int value )
 {
     model->params->quarantine_household_contacts_on_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:                set_model_param_quarantine_household_contacts_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_household_contacts_on_symptoms( model *model, int value )
+{
+    model->params->quarantine_household_contacts_on_symptoms = value;
     return TRUE;
 }
 
