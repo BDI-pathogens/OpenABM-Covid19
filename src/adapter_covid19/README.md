@@ -3,7 +3,7 @@
 ## Description
 
 AdaptER-Covid19 is an economic model intended to simulate the economic effects of Covid19. For more information, see
-the [model documentation](../../documentation/economic_model.md)/
+the [model documentation](../../documentation/economic_model.ipynb)/
 
 ## Compilation
 
