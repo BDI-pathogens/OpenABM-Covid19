@@ -4,14 +4,18 @@ Utility functions for examples for OpenABM-Covid19
 Created: 17 April 2020
 Author: roberthinch
 """
+import os
 
 from COVID19.model import Model, Parameters, ModelParameterException
 import COVID19.simulation as simulation
 
-input_parameter_file = "../tests/data/baseline_parameters.csv"
+def relative_path(filename: str) -> str:
+    return os.path.join(os.path.dirname(__file__), filename)
+
+input_parameter_file = relative_path("../tests/data/baseline_parameters.csv")
 parameter_line_number = 1
 output_dir = "."
-household_demographics_file = "../tests/data/baseline_household_demographics.csv"
+household_demographics_file = relative_path("../tests/data/baseline_household_demographics.csv")
 
 def get_baseline_parameters():
     params = Parameters(input_parameter_file, parameter_line_number, output_dir, household_demographics_file)
