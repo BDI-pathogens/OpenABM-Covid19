@@ -83,6 +83,13 @@ Key figures in "illustrative scenario":
 """
 
 
+SPREAD_MODEL_PARAMS = {
+    "quarantine_household_on_positive": 1,
+    "quarantine_household_on_symptoms": 1,
+    "self_quarantine_fraction": 0.8,
+}
+
+
 BASIC_MODEL_PARAMS = ModelParams(
     economics_params={},
     gdp_params={},
@@ -114,6 +121,7 @@ BASIC_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 # Basic No Furlough Scenario
@@ -135,6 +143,7 @@ BASIC_NO_FURLOUGH_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 # Basic No Corp Support Scenario
@@ -156,6 +165,7 @@ BASIC_NO_CORP_SUPPORT_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 # Basic No Furlough No Corp Support Scenario
@@ -177,6 +187,7 @@ BASIC_NO_FURLOUGH_NO_CORP_SUPPORT_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 # Basic No Lockdown Scenario
@@ -197,6 +208,7 @@ BASIC_NO_LOCKDOWN_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 # Basic Scenario (aligned with actual interventions)
@@ -222,6 +234,7 @@ BASIC_SLOW_UNLOCK_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 
@@ -248,6 +261,7 @@ BASIC_SLOW_UNLOCK_GREEDY_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 
@@ -274,6 +288,7 @@ BASIC_SLOW_UNLOCK_CONSTRAINED_SCENARIO = Scenario(
     fear_factor_coef_lockdown=0.3,
     fear_factor_coef_ill=4.0,
     fear_factor_coef_dead=1000.0,
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 TEST_SCENARIO = Scenario(
@@ -296,6 +311,7 @@ TEST_SCENARIO = Scenario(
     ill_ratio={t: {r: 0 for r in Region} for t in range(203)},
     dead_ratio={t: {r: 0 for r in Region} for t in range(203)},
     quarantine_ratio={t: {r: 0 for r in Region} for t in range(203)},
+    spread_model_params=SPREAD_MODEL_PARAMS,
 )
 
 SCENARIOS = {
