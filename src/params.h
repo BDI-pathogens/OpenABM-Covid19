@@ -57,8 +57,8 @@ typedef struct{
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care
 
-	double mean_time_to_recover;	// mean time to recover after hospital
-	double sd_time_to_recover;  	// sd time to recover after hospital
+	double mean_time_to_recover;	// mean time to recovery if hospitalisation is not required (days)
+	double sd_time_to_recover;  	// sd time to recovery if hospitalisation is not required (days)
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
 
@@ -91,11 +91,17 @@ typedef struct{
 	int retrace_on_positive; // repeat contract tracing on a positive test if already tested on symptoms
 
 	int quarantine_length_self;				// max length of quarantine if self-quarantine on symptoms
-	int quarantine_length_traced;			// max length of quarantine if contact-traced
+	int quarantine_length_traced_symptoms;	// max length of quarantine if contact-traced from a index case with only symptoms
+	int quarantine_length_traced_positive;	// max length of quarantine if contact-traced from a index case with a positive test
 	int quarantine_length_positive;			// max length of quarantine if receive positive test result
 	double quarantine_dropout_self;			// daily dropout rate if self-quarantined
-	double quarantine_dropout_traced;		// daily dropout rate if contact-traced
-	double quarantine_dropout_positive;     // daily dropout rate if receive positive test result
+	double quarantine_dropout_traced_symptoms;	// daily dropout rate if contact-traced from a index case with only symptoms
+	double quarantine_dropout_traced_positive;	// daily dropout rate if contact-traced rom a index case with a positive test
+	double quarantine_dropout_positive;     	// daily dropout rate if receive positive test result
+
+	double quarantine_compliance_traced_symptoms; // probability that someone complies with a amber quarantine message
+	double quarantine_compliance_traced_positive; // probability that someone complies with a red quarantine message
+
 	int quarantine_on_traced;				// immediately quarantine those who are contact traced
 	int quarantine_smart_release_day;		// number of days until smart release on no contacts
 
@@ -165,6 +171,7 @@ int get_model_param_quarantine_household_on_positive(model *model);
 int get_model_param_quarantine_household_on_traced_symptoms(model *model);
 int get_model_param_quarantine_household_on_traced_positive(model *model);
 int get_model_param_quarantine_household_contacts_on_positive(model *model);
+int get_model_param_quarantine_household_contacts_on_symptoms(model *model);
 int get_model_param_test_on_symptoms(model *model);
 int get_model_param_test_on_traced(model *model);
 int get_model_param_test_result_wait(model *model);
@@ -191,6 +198,7 @@ int set_model_param_quarantine_household_on_positive(model *model, int value);
 int set_model_param_quarantine_household_on_traced_symptoms(model *model, int value);
 int set_model_param_quarantine_household_on_traced_positive(model *model, int value);
 int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
+int set_model_param_quarantine_household_contacts_on_symptoms(model *model, int value);
 int set_model_param_test_on_symptoms(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
 int set_model_param_test_result_wait(model *model, int value);

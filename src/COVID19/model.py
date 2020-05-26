@@ -29,6 +29,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "quarantine_household_on_traced_positive",
     "quarantine_household_on_traced_symptoms",
     "quarantine_household_contacts_on_positive",
+    "quarantine_household_contacts_on_symptoms",
     "quarantine_days",
     "test_order_wait",
     "test_result_wait",
@@ -539,3 +540,9 @@ class Model:
 
     def write_transmissions(self):
         covid19.write_transmissions(self.c_model)
+
+    def write_quarantine_reasons(self):
+        covid19.write_quarantine_reasons(self.c_model, self.c_params)
+
+    def print_individual(self, idx):
+        covid19.print_individual(self.c_model, idx)
