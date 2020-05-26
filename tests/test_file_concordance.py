@@ -10,14 +10,11 @@ Created: April 2020
 Author: p-robot
 """
 
-import subprocess, shutil, os
+import subprocess, os, sys
 from os.path import join
-from string import Template
 import numpy as np, pandas as pd
 import pytest
 
-import sys
-from scipy.signal.fir_filter_design import firwin2
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
 
@@ -130,3 +127,43 @@ class TestClass(object):
             infection_count_by_age_indiv,
             infection_count_by_age_trans
             )
+    
+    def test_quarantine_file_size(self):
+        """
+        Test that the quarantine files produce the same number of people in quarantine as the 
+        time series file (n_quarantine column)
+        """
+        
+        params = utils.get_params_swig()
+        
+        params.set_param( "end_time", 250 )
+        params.set_param( "n_total", 10000 )
+        params.set_param( "test_order_wait", 1 )
+        params.set_param( "test_result_wait", 1 )
+        params.set_param( "self_quarantine_fraction", 0.8 )
+        params.set_param( "quarantine_household_on_positive", 1 )
+        params.set_param( "quarantine_household_on_symptoms", 1 )
+        params.set_param( "test_on_symptoms", 1 )
+        params.set_param( "intervention_start_time", 42 )
+        params.set_param( "app_turn_on_time", 49 )
+        params.set_param( "trace_on_symptoms", 1 )
+        params.set_param( "trace_on_positive", 1 )
+        params.set_param( "quarantine_on_traced", 1 )
+
+        model  = utils.get_model_swig( params )
+        
+        t = 1
+        shapes = []; n_quarantine = []
+        while t <= 200:
+            model.one_time_step()
+            
+            # Write quarantine reasons file
+            model.write_quarantine_reasons()
+            n_quarantine.append(model.one_time_step_results()["n_quarantine"])
+            
+            
+            df_quarantine_reasons = pd.read_csv(constant.TEST_QUARANTINE_REASONS_FILE)
+            shapes.append(df_quarantine_reasons.shape[0])
+            t += 1
+        
+        np.testing.assert_array_equal(np.array(shapes), np.array(n_quarantine))
