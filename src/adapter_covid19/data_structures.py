@@ -677,6 +677,9 @@ class Scenario:
     workers_per_sector: Mapping[Sector, float] = field(default=None, init=False)
     greedy_order: List[Tuple[Region, Sector, Age]] = field(default=None, init=False)
 
+    # Spread model parameters
+    spread_model_params: Mapping[str, Union[float, int, bool, str]] = field(default_factory=dict)
+
     _has_been_lockdown: bool = False
     _utilisations: Mapping = field(
         default_factory=dict, init=False
@@ -717,21 +720,44 @@ class Scenario:
         }
         self._data_path = reader.data_path
 
-        if self.epidemic_active:
-            if len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0:
-                if self.lockdown_start_time >= 1000:
-                    lockdown_start = lockdown_end = 0
-                else:
-                    lockdown_start = self.lockdown_start_time
-                    lockdown_end = self.lockdown_end_time
-                end = self.simulation_end_time + 1
-                file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}_{self.slow_unlock}"
+        if self.epidemic_active and (len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0):
+            file_name = self.get_spread_model_filename()
+            try:
                 data = reader.load_pkl(file_name)
-                self.ill_ratio = data["ill_ratio"]
-                self.dead_ratio = data["dead_ratio"]
-                self.quarantine_ratio = data["quarantine_ratio"]
+            except FileNotFoundError:
+                # We need to do this rather than just running the spread model for the user
+                # because adapter_covid19 is Apache and OpenABM_Covid19 is GPL
+                msg = "Spread model data not found - run it for the given scenario first\n"
+                msg += "```python\n"
+                msg += "from examples.example_run_spread_model_for_economics import run\n"
+                msg += "run(scenario)\n"
+                msg += "```"
+                raise ValueError(msg)
+            self.ill_ratio = data["ill_ratio"]
+            self.dead_ratio = data["dead_ratio"]
+            self.quarantine_ratio = data["quarantine_ratio"]
 
         self.is_loaded = True
+
+    def get_lockdown_info(self) -> Tuple[int, int, int, bool]:
+        if self.lockdown_start_time >= 1000:
+            lockdown_start = lockdown_end = 0
+        else:
+            lockdown_start = self.lockdown_start_time
+            lockdown_end = self.lockdown_end_time
+        end = self.simulation_end_time + 1
+        return lockdown_start, lockdown_end, end, self.slow_unlock
+
+
+    def get_spread_model_filename(self) -> str:
+        assert self.epidemic_active
+        assert len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0
+        lockdown_start, lockdown_end, end, self.slow_unlock = self.get_lockdown_info()
+        file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}_{self.slow_unlock}"
+        if not self.spread_model_params:
+            return file_name
+        extension = "_".join(f"{k}_{self.spread_model_params[k]}" for k in sorted(self.spread_model_params))
+        return f"{file_name}_{extension}"
 
     def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
         if time == START_OF_TIME and lockdown:

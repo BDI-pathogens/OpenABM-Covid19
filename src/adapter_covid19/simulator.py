@@ -57,18 +57,14 @@ class Simulator:
     """Simulator for adaptER-covid19"""
 
     def __init__(
-        self, data_path: Optional[str] = None,
+        self, data_path: str,
     ):
         """
         Simulator for adaptER-covid19
 
         :param data_path: path to data
-        :type data_path: Optional[str]
+        :type data_path: str
         """
-        if data_path is None:
-            data_path = os.path.join(
-                os.path.dirname(__file__), "../../tests/adapter_covid19/data"
-            )
         self.reader = Reader(data_path)
 
     def simulate(
