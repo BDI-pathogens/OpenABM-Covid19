@@ -267,8 +267,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced));
-	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_symptoms\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_positive\n"); };
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_length_positive\n"); };
@@ -276,11 +279,20 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_self));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_self\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced));
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_positive\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_symptoms\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_positive\n"); };
 
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
@@ -411,6 +423,137 @@ void write_output_files(model *model, parameters *params)
 		write_trace_tokens( model );
 	}
 }	
+
+
+/*****************************************************************************************
+*  Name:		write_quarantine_reasons
+*  Description: Write (csv) files of reasons individuals are quarantined
+******************************************************************************************/
+
+void write_quarantine_reasons(model *model, parameters *params)
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	long idx, jdx;
+	int quarantine_reasons[N_QUARANTINE_REASONS], quarantine_reason, n_reasons, i, n;
+	int index_true_status, index_from_household;
+	long index_id, index_house_no;
+	
+	individual *indiv;
+	trace_token *index_token;
+	long *members;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/quarantine_reasons_file_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+	
+	FILE *quarantine_reasons_output_file;
+	quarantine_reasons_output_file = fopen(output_file_name, "w");
+	if(quarantine_reasons_output_file == NULL)
+		print_exit("Can't open quarantine_reasons output file");
+	
+	fprintf(quarantine_reasons_output_file,"time,");
+	fprintf(quarantine_reasons_output_file,"ID,");
+	fprintf(quarantine_reasons_output_file,"status,");
+	fprintf(quarantine_reasons_output_file,"house_no,");
+	fprintf(quarantine_reasons_output_file,"ID_index,");
+	fprintf(quarantine_reasons_output_file,"status_index,");
+	fprintf(quarantine_reasons_output_file,"house_no_index,");
+	fprintf(quarantine_reasons_output_file,"quarantine_reason,");
+	fprintf(quarantine_reasons_output_file,"n_reasons");
+	fprintf(quarantine_reasons_output_file,"\n");
+	
+	for(idx = 0; idx < params->n_total; idx++)
+	{
+		indiv = &(model->population[idx]);
+		
+		if(indiv->quarantined == TRUE){
+			
+			for(i = 0; i < N_QUARANTINE_REASONS; i++)
+				quarantine_reasons[i] = FALSE;
+			
+			index_true_status = UNKNOWN;
+			index_id = UNKNOWN;
+			index_house_no = UNKNOWN;
+			
+			// Check if this individual has non-NULL trace_tokens attribute
+			if( indiv->index_trace_token != NULL ){
+				
+				// Quarantined from self-reported symptoms
+				if(indiv->index_trace_token->index_status == SYMPTOMS_ONLY)
+					quarantine_reasons[QR_SELF_SYMPTOMS] = TRUE;
+				
+				// Quarantined from self positive
+				if(indiv->index_trace_token->index_status == POSITIVE_TEST)
+					quarantine_reasons[QR_SELF_POSITIVE] = TRUE;
+				
+				index_true_status = indiv->status;
+				index_id = indiv->idx;
+				index_house_no = indiv->house_no;
+			}
+			
+			if( indiv->trace_tokens != NULL ){
+				// Find original index and check if the index was a household member
+				n = model->household_directory->n_jdx[indiv->house_no];
+				members = model->household_directory->val[indiv->house_no];
+				
+				index_token = indiv->trace_tokens;
+				while( index_token->last_index != NULL )
+					index_token = index_token->last_index;
+
+				for(jdx = 0; jdx < n; jdx++){
+					if( index_token->individual->idx == members[jdx] ){
+						index_from_household = TRUE;
+					}
+				}
+				
+				if(index_from_household == TRUE){
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_HOUSEHOLD_SYMPTOMS] = TRUE;
+			
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_HOUSEHOLD_POSITIVE] = TRUE;
+				}else{
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_TRACE_SYMPTOMS] = TRUE;
+					
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_TRACE_POSITIVE] = TRUE;
+				}
+				index_id = index_token->individual->idx;
+				index_true_status = index_token->individual->status;
+				index_house_no = index_token->individual->house_no;
+			}
+			
+			// Resolve multiple reasons for quarantine into one reason
+			quarantine_reason = resolve_quarantine_reasons(quarantine_reasons);
+			
+			n_reasons = 0;
+			for(i = 0; i < N_QUARANTINE_REASONS; i++){
+				if(quarantine_reasons[i] == TRUE)
+					n_reasons += 1;
+			}
+			
+			fprintf(quarantine_reasons_output_file, 
+				"%d,%li,%d,%li,%li,%d,%li,%d,%d\n",
+				model->time,
+				indiv->idx,
+				indiv->status,
+				indiv->house_no,
+				index_id, 
+				index_true_status,
+				index_house_no,
+				quarantine_reason,
+				n_reasons);
+		}
+	}
+	fclose(quarantine_reasons_output_file);
+}
+
 
 /*****************************************************************************************
 *  Name:		write_individual_file
@@ -768,7 +911,7 @@ void write_trace_tokens( model *model )
 	char output_file_name[INPUT_CHAR_LEN];
 	FILE *output_file;
 	long idx, n_events;
-	int day;
+	int day, index_time;
 	individual *indiv;
 	event *event, *next_event;
 	trace_token *token;
@@ -783,9 +926,10 @@ void write_trace_tokens( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf( output_file ,"time,days_since_index,index_ID,index_status,days_since_contact,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
+	fprintf( output_file ,"time,index_time,index_ID,index_reason,index_status,contact_time,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
 
-	for( day = 1; day <= model->params->quarantine_length_traced; day++ )
+	int max_quarantine_length = max( model->params->quarantine_length_traced_symptoms, model->params->quarantine_length_traced_positive );
+	for( day = 1; day <= max_quarantine_length; day++ )
 	{
 		n_events    = model->event_lists[TRACE_TOKEN_RELEASE].n_daily_current[ model->time + day ];
 		next_event  = model->event_lists[TRACE_TOKEN_RELEASE].events[ model->time + day ];
@@ -800,15 +944,17 @@ void write_trace_tokens( model *model )
 			if( token == NULL )
 				continue;
 
-			token = token->next_index;
+			index_time = token->contact_time;
+
 			while( token != NULL )
 			{
-				fprintf( output_file, "%i,%i,%li,%i,%i,%li,%i,%li,%i\n",
-					model->time + day - model->params->quarantine_length_traced,
-					model->params->quarantine_length_traced - day,
+				fprintf( output_file, "%i,%i,%li,%i,%i,%i,%li,%i,%li,%i\n",
+					model->time,
+					index_time,
 					indiv->idx,
+					token->index_status,
 					indiv->status,
-					token->days_since_contact,
+					token->contact_time,
 					token->individual->idx,
 					token->individual->status,
 					ifelse( token->individual->status > 0, token->individual->infection_events->infector->idx, -1 ),
@@ -855,7 +1001,8 @@ void write_trace_tokens_ts( model *model, int initialise )
 	else
 		output_file = fopen(output_file_name, "a");
 
-	for( day = 1; day <= model->params->quarantine_length_traced; day++ )
+	int max_quarantine_length = max( model->params->quarantine_length_traced_symptoms, model->params->quarantine_length_traced_positive );
+	for( day = 1; day <=  max_quarantine_length; day++ )
 	{
 		n_events    = model->event_lists[TRACE_TOKEN_RELEASE].n_daily_current[ model->time + day ];
 		next_event  = model->event_lists[TRACE_TOKEN_RELEASE].events[ model->time + day ];
@@ -865,7 +1012,7 @@ void write_trace_tokens_ts( model *model, int initialise )
 			event      = next_event;
 			next_event = event->next;
 			indiv      = event->individual;
-			time_index = model->time + day - model->params->quarantine_length_traced;
+			time_index = model->time + day -  max_quarantine_length;
 
 			n_traced   = 0;
 			n_symptoms = 0;

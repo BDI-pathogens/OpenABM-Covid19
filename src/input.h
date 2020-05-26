@@ -30,6 +30,7 @@ void write_interactions( model* );
 void write_transmissions( model* );
 void write_trace_tokens( model* );
 void write_trace_tokens_ts( model*, int );
+void write_quarantine_reasons( model*, parameters *);
 
 void print_interactions_averages( model*, int );
 
