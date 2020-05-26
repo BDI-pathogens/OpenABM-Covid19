@@ -1,5 +1,6 @@
 import logging
 import multiprocessing
+import os
 import pickle
 import sys
 
@@ -20,18 +21,22 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    if len(sys.argv) > 1:
-        scenario_names = sys.argv[1:]
+    if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
+        valid = '|'.join(SCENARIOS)
+        print(f'Example usage: python -m {sys.argv[0]} -m <data_path> [{valid}, ...]')
+    data_path = sys.argv[1]
+    if len(sys.argv) > 2:
+        scenario_names = sys.argv[2:]
     else:
         scenario_names = SCENARIOS.keys()
 
     unknown_scenarios = [n for n in scenario_names if n not in SCENARIOS.keys()]
     if len(unknown_scenarios) > 0:
-        logger.error(f"Unkown scenarios! {unknown_scenarios}")
+        logger.error(f"Unknown scenarios! {unknown_scenarios}")
         exit(1)
 
     def _run_scenario(scenario_name):
-        s = Simulator()
+        s = Simulator(data_path)
         logger.info(f"Running scenario {scenario_name}")
         scenario = SCENARIOS[scenario_name]
         result = s.simulate(
