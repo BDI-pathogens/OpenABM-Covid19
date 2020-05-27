@@ -191,6 +191,8 @@ class TestClass(object):
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param("test_order_wait",0)
+        params.set_param("test_result_wait",0)
         params = utils.turn_off_quarantine(params)
         params.write_params(constant.TEST_DATA_FILE)
 
