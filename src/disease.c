@@ -191,9 +191,9 @@ void transmit_virus_by_type(
                 {
                     switch( infector->hospital_state )
                     {
-//                        case WAITING:       hospital_state_modifier = model->params->waiting_infectivity_modifier; break;
-//                        case GENERAL:       hospital_state_modifier = model->params->general_infectivity_modifier; break;
-//                        case ICU:           hospital_state_modifier = model->params->icu_infectivity_modifier; break;
+                        case WAITING:       hospital_state_modifier = model->params->waiting_infectivity_modifier; break;
+                        case GENERAL:       hospital_state_modifier = model->params->general_infectivity_modifier; break;
+                        case ICU:           hospital_state_modifier = model->params->icu_infectivity_modifier; break;
                         default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
                     }
                 }
