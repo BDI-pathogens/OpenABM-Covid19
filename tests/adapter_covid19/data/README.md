@@ -7,9 +7,9 @@ can be found in `enums.py`
 
 * Sector: UK sector
 * min_size: (0 to inf) lower bound of number of employees
-* num_companies: (0 to inf) number of companies in this sector with this number of employees
-* num_employees: TODO: Evan
-* per_turnover: TODO: Evan
+* num_companies: (0 to inf) total number of companies in this sector with employee counts in the min_size bucket
+* num_employees: (0 to inf) total number of employees in this sector for companies with employee counts in the min_size bucket
+* per_turnover: (0 to 100) proportion of turnover share within the sector in percentage terms
 
 
 ## `credit_score.csv`
@@ -122,12 +122,12 @@ can be found in `enums.py`
 ## `sme_count.csv`
 
 * Sector: UK Sector
-* sme_count (0 to inf): number of small and medium enterprises per sector
+* sme_count: (0 to inf): number of small and medium enterprises per sector
 
 ## `sme_rate_payer_vulnerability.csv`
 
 * Sector: UK Sector
-* vulnerability: TODO Evan
+* vulnerability: (0 to 100): vulnerability factor (higher = more vulnerable) for sectors which pay rates, and hence will have a higher proportion of companies eligible for new spending government stimulus
 
 ## `supply.csv'`
 
