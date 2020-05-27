@@ -22,8 +22,8 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
-        valid = '|'.join(SCENARIOS)
-        print(f'Example usage: python -m {sys.argv[0]} -m <data_path> [{valid}, ...]')
+        valid = "|".join(SCENARIOS)
+        print(f"Example usage: python -m {sys.argv[0]} -m <data_path> [{valid}, ...]")
     data_path = sys.argv[1]
     if len(sys.argv) > 2:
         scenario_names = sys.argv[2:]

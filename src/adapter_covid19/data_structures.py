@@ -678,7 +678,9 @@ class Scenario:
     greedy_order: List[Tuple[Region, Sector, Age]] = field(default=None, init=False)
 
     # Spread model parameters
-    spread_model_params: Mapping[str, Union[float, int, bool, str]] = field(default_factory=dict)
+    spread_model_params: Mapping[str, Union[float, int, bool, str]] = field(
+        default_factory=dict
+    )
 
     _has_been_lockdown: bool = False
     _utilisations: Mapping = field(
@@ -720,7 +722,9 @@ class Scenario:
         }
         self._data_path = reader.data_path
 
-        if self.epidemic_active and (len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0):
+        if self.epidemic_active and (
+            len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0
+        ):
             file_name = self.get_spread_model_filename()
             try:
                 data = reader.load_pkl(file_name)
@@ -729,7 +733,9 @@ class Scenario:
                 # because adapter_covid19 is Apache and OpenABM_Covid19 is GPL
                 msg = "Spread model data not found - run it for the given scenario first\n"
                 msg += "```python\n"
-                msg += "from examples.example_run_spread_model_for_economics import run\n"
+                msg += (
+                    "from examples.example_run_spread_model_for_economics import run\n"
+                )
                 msg += "run(scenario)\n"
                 msg += "```"
                 raise ValueError(msg)
@@ -748,7 +754,6 @@ class Scenario:
         end = self.simulation_end_time + 1
         return lockdown_start, lockdown_end, end, self.slow_unlock
 
-
     def get_spread_model_filename(self) -> str:
         assert self.epidemic_active
         assert len(self.ill_ratio) == 0 or len(self.dead_ratio) == 0
@@ -756,7 +761,10 @@ class Scenario:
         file_name = f"spread_model_cache_{lockdown_start}_{lockdown_end}_{end}_{self.slow_unlock}"
         if not self.spread_model_params:
             return file_name
-        extension = "_".join(f"{k}_{self.spread_model_params[k]}" for k in sorted(self.spread_model_params))
+        extension = "_".join(
+            f"{k}_{self.spread_model_params[k]}"
+            for k in sorted(self.spread_model_params)
+        )
         return f"{file_name}_{extension}"
 
     def _pre_simulation_checks(self, time: int, lockdown: bool) -> None:
