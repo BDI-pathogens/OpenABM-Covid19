@@ -24,10 +24,10 @@
 ******************************************************************************************/
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
-    int param_line_number, hospital_param_line_number;
+    	int param_line_number, hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
-    char hospital_input_param_file[ INPUT_CHAR_LEN ];
+    	char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
 
 	if(argc > 1)
@@ -86,9 +86,9 @@ void read_command_line_args( parameters *params, int argc, char **argv )
         hospital_param_line_number = 1;
     }
 
-    params->hospital_param_line_number = hospital_param_line_number;
-    strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
-    params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
+    	params->hospital_param_line_number = hospital_param_line_number;
+    	strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
+    	params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
@@ -723,8 +723,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->status,
 			indiv->age_group,
 			indiv->occupation_network,
-            indiv->worker_type,
-            worker_ward_type,
+            		indiv->worker_type,
+            		worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -909,13 +909,13 @@ void write_interactions( model *model )
                 fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
-                    indiv->worker_type,
+                    			indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
-                    inter->individual->worker_type,
+                    			inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->occupation_network
 				);
@@ -1005,16 +1005,16 @@ void write_transmissions( model *model )
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
-    fprintf(output_file , "worker_type_recipient,");
-    fprintf(output_file , "hospital_state_recipient,");
+    	fprintf(output_file , "worker_type_recipient,");
+    	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
-    fprintf(output_file , "worker_type_source,");
-    fprintf(output_file , "hospital_state_source,");
+    	fprintf(output_file , "worker_type_source,");
+    	fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -1046,16 +1046,16 @@ void write_transmissions( model *model )
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
-                    indiv->worker_type,
-                    indiv->hospital_state,
+                    			indiv->worker_type,
+                    			indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
-                    infection_event->infector->worker_type,
-                    infection_event->infector_hospital_state,
+                    			infection_event->infector->worker_type,
+                    			infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
