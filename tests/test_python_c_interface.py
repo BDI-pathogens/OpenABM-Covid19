@@ -3,7 +3,7 @@
 Very basic example to show how testing may work using pytest
 
 Usage:
-With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be 
+With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be
 run by calling 'pytest' from project folder.
 
 pytest ./tests/test_step_calc.py
@@ -56,15 +56,15 @@ class TestClass(object):
         for step in range(0, STEPS):
             model.one_time_step()
             res = model.one_time_step_results()
-            
-            print( "Time =  " + str( res["time"]) + 
-                   "; lockdown = "  +  str( res["lockdown"]) +  
-                   "; app_turned_on = "  +  str( model.get_param( "app_turned_on") ) +  
+
+            print( "Time =  " + str( res["time"]) +
+                   "; lockdown = "  +  str( res["lockdown"]) +
+                   "; app_turned_on = "  +  str( model.get_param( "app_turned_on") ) +
                    "; new_infected = " + str( res[ "total_infected" ] - last )
             )
-            
-            last = res[ "total_infected" ] 
-            
+
+            last = res[ "total_infected" ]
+
             if res["time"] == 20:
                 model.update_running_params( "lockdown_on", 1 )
                 np.testing.assert_equal(model.get_param("lockdown_on"), 1)
@@ -79,7 +79,7 @@ class TestClass(object):
             if res["time"] == 60:
                 model.update_running_params( "app_users_fraction", 0.85 )
     """
-    
+
 
     def test_set_get_parameters(self):
         """
@@ -99,7 +99,7 @@ class TestClass(object):
         for step in range(0, STEPS):
             model.one_time_step()
             res = model.one_time_step_results()
-           
+
             # Try to set valid parameters
             model.update_running_params("test_on_symptoms", 1)
             np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
@@ -309,8 +309,8 @@ class TestClass(object):
         for i in range(covid19.N_AGE_GROUPS):
             np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
 
-        covid19.set_param_array_icu_allocation(params, set_age_groups)
-        covid19.get_param_array_icu_allocation(params, get_age_groups)
+        covid19.set_param_array_location_death_icu(params, set_age_groups)
+        covid19.get_param_array_location_death_icu(params, get_age_groups)
         for i in range(covid19.N_AGE_GROUPS):
             np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
 
@@ -336,5 +336,5 @@ class TestClass(object):
             daily_c = model.one_time_step_results()["hospital_to_critical_daily"]
             daily_hospitalisations.append(daily_h)
             daily_critical.append(daily_c)
-            assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"] 
-            assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"] 
+            assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"]
+            assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"]

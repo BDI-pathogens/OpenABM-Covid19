@@ -27,24 +27,24 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
-	
+
 	if(argc > 1)
 	{
 		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN );
 	}else{
 		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN );
 	}
-	
+
 	if(argc > 2)
 	{
 		param_line_number = (int) strtol(argv[2], NULL, 10);
-		
+
 		if(param_line_number <= 0)
 			print_exit("Error Invalid line number, line number starts from 1");
 	}else{
 		param_line_number = 1;
 	}
-	
+
 	if(argc > 3)
 	{
 		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
@@ -65,14 +65,14 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
-	
+
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
-	
-	strncpy(params->input_household_file, input_household_file, 
+
+	strncpy(params->input_household_file, input_household_file,
 		sizeof(params->input_household_file) - 1);
 	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
-	
+
 	strncpy(params->output_file_dir, output_file_dir, sizeof(params->output_file_dir) - 1);
 	params->output_file_dir[sizeof(params->output_file_dir) - 1] = '\0';
 }
@@ -85,25 +85,25 @@ void read_param_file( parameters *params)
 {
 	FILE *parameter_file;
 	int i, check;
-	
+
 	parameter_file = fopen(params->input_param_file, "r");
 	if(parameter_file == NULL)
 		print_exit("Can't open parameter file");
-	
+
 	// Throw away header (and first `params->param_line_number` lines)
 	for(i = 0; i < params->param_line_number; i++)
 		fscanf(parameter_file, "%*[^\n]\n");
-	
+
 	// Read and attach parameter values to parameter structure
 	check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
 	if( check < 1){ print_exit("Failed to read parameter rng_seed\n"); };
-	
+
 	check = fscanf(parameter_file, " %li ,", &(params->param_id));
 	if( check < 1){ print_exit("Failed to read parameter param_id\n"); };
-	
+
 	check = fscanf(parameter_file, " %li ,", &(params->n_total));
 	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
-	
+
 	for( i = 0; i < N_OCCUPATION_NETWORK_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
@@ -136,43 +136,43 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
 	if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
-	
+
 	check = fscanf(parameter_file, " %i ,",  &(params->end_time));
 	if( check < 1){ print_exit("Failed to read parameter end_time\n"); };
-	
+
 	check = fscanf(parameter_file, " %i ,",  &(params->n_seed_infection));
 	if( check < 1){ print_exit("Failed to read parameter n_seed_infection\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_infectious_period));
 	if( check < 1){ print_exit("Failed to read parameter mean_infectious_period\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectious_period));
 	if( check < 1){ print_exit("Failed to read parameter sd_infectious_period\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
 	if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_symptoms\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_hospital\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
@@ -184,7 +184,7 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
 	if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
-	
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->mild_fraction[i]));
@@ -196,11 +196,11 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
-	
+
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
-	
+
 	for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->household_size[i]));
@@ -260,8 +260,8 @@ void read_param_file( parameters *params)
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
-		check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
-		if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->location_death_icu[i]));
+		if( check < 1){ print_exit("Failed to read parameter location_death_icu\n"); };
 	}
 
 	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
@@ -395,7 +395,7 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
 	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
-	
+
 	check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
 	if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
@@ -422,7 +422,7 @@ void write_output_files(model *model, parameters *params)
 		write_transmissions( model );
 		write_trace_tokens( model );
 	}
-}	
+}
 
 /*****************************************************************************************
 *  Name:		write_individual_file
@@ -430,26 +430,26 @@ void write_output_files(model *model, parameters *params)
 ******************************************************************************************/
 void write_individual_file(model *model, parameters *params)
 {
-	
+
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
 	int infection_count;
 	long idx;
-	
+
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", params->param_line_number);
-	
+
 	// Concatenate file name
 	strcpy(output_file, params->output_file_dir);
 	strcat(output_file, "/individual_file_Run");
 	strcat(output_file, param_line_number);
 	strcat(output_file, ".csv");
-	
+
 	individual_output_file = fopen(output_file, "w");
 	if(individual_output_file == NULL)
 		print_exit("Can't open individual output file");
-	
+
 	fprintf(individual_output_file,"ID,");
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
@@ -461,16 +461,16 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count");
 	fprintf(individual_output_file,"\n");
-	
+
 	// Loop through all individuals in the simulation
 	for(idx = 0; idx < params->n_total; idx++)
 	{
 		indiv = &(model->population[idx]);
-		
+
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
-		
-		fprintf(individual_output_file, 
+
+		fprintf(individual_output_file,
 			"%li,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
@@ -579,7 +579,7 @@ void read_household_demographics_file( parameters *params)
 	int check, value, adx;
 	long hdx, fileSize;
 	char lineBuffer[80];
-	
+
 	// get the length of the reference household file
 	hh_file = fopen(params->input_household_file, "r");
 	if(hh_file == NULL)
@@ -595,7 +595,7 @@ void read_household_demographics_file( parameters *params)
 
 	// allocate memory on the params object
 	set_up_reference_household_memory(params);
-	
+
 	// read in the data (throw away the header line)
 	hh_file = fopen(params->input_household_file, "r");
 	fscanf(hh_file, "%*[^\n]\n");
@@ -604,7 +604,7 @@ void read_household_demographics_file( parameters *params)
 			// Read and attach parameter values to parameter structure
 			check = fscanf(hh_file, " %d ,", &value);
 			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
-			
+
 			params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
 		}
 	}
@@ -921,4 +921,3 @@ void write_trace_tokens_ts( model *model, int initialise )
 	}
 	fclose(output_file);
 }
-
