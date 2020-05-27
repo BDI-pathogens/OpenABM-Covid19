@@ -18,11 +18,11 @@
 typedef struct{
 	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
-    char hospital_input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
+    	char hospital_input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
 	char input_household_file[INPUT_CHAR_LEN]; //path to input household demographics file
 	char output_file_dir[INPUT_CHAR_LEN];	// path to output directory
 	int param_line_number;			// line number to be read from parameter file
-    int hospital_param_line_number;			// line number to be read from parameter file
+    	int hospital_param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
 	int days_of_interactions;		// the number of days of interactions to keep
@@ -143,7 +143,7 @@ typedef struct{
 	int lockdown_elderly_time_off;					// lockdown elderly turned off at this time
 	int lockdown_elderly_on;						// is lockdown elderly currently on
 
-    int testing_symptoms_time_on;							// testing symptoms turned on at this time
+    	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
 		
 	int interventions_on;           // should we use interventions
@@ -155,32 +155,32 @@ typedef struct{
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
-    double ***risk_score;  			// risk score somebody who has been traced
-    double **risk_score_household;  // risk score for household members of symptomatic person
+    	double ***risk_score;  			// risk score somebody who has been traced
+    	double **risk_score_household;  // risk score for household members of symptomatic person
 
-    //Hospital parameters
-    int hospital_on;
-    int n_hospitals;
-    int n_wards[N_HOSPITAL_WARD_TYPES];
-    int n_ward_beds[N_HOSPITAL_WARD_TYPES];
-    int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
-    int max_hcw_daily_interactions;
+    	//Hospital parameters
+    	int hospital_on;
+    	int n_hospitals;
+    	int n_wards[N_HOSPITAL_WARD_TYPES];
+    	int n_ward_beds[N_HOSPITAL_WARD_TYPES];
+    	int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    	int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+    	int max_hcw_daily_interactions;
 
-    //TODO: Add in finer grained transition times between wards once we have more information on them.
-    double mean_time_hospital_transition; // mean time for movement between hospital locations
-    double sd_time_hospital_transition; // sd for movement between hospital locations
+    	//TODO: Add in finer grained transition times between wards once we have more information on them.
+    	double mean_time_hospital_transition; // mean time for movement between hospital locations
+    	double sd_time_hospital_transition; // sd for movement between hospital locations
 
-    double waiting_infectivity_modifier;
-    double general_infectivity_modifier;
-    double icu_infectivity_modifier;
+    	double waiting_infectivity_modifier;
+    	double general_infectivity_modifier;
+    	double icu_infectivity_modifier;
 
-    //Modifiers for patients not receiving care when transitioning from disease states.
-    double hospitalised_waiting_mod;
-    double critical_waiting_mod;
+    	//Modifiers for patients not receiving care when transitioning from disease states.
+    	double hospitalised_waiting_mod;
+    	double critical_waiting_mod;
 
-    //average amount of interactions healthcare workers have with each other per day
-    double hcw_mean_work_interactions;
+    	//average amount of interactions healthcare workers have with each other per day
+    	double hcw_mean_work_interactions;
 
 } parameters;
 
