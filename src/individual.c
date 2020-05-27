@@ -188,7 +188,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-    update_random_interactions( indiv, params );
+    	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -200,7 +200,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-    update_random_interactions( indiv, params );
+    	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -211,7 +211,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-    update_random_interactions( indiv, params );
+    	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -232,7 +232,7 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-    update_random_interactions( indiv, params );
+    	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -243,7 +243,7 @@ void set_critical( individual *indiv, parameters* params, int time )
 void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED_RECOVERING;
-    update_random_interactions( indiv, params );
+    	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -264,7 +264,7 @@ void set_case( individual *indiv, int time )
 ******************************************************************************************/
 void set_waiting( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_state = WAITING;
+	indiv->hospital_state = WAITING;
 }
 
 /*****************************************************************************************
@@ -274,7 +274,7 @@ void set_waiting( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_general_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_state = GENERAL;
+	indiv->hospital_state = GENERAL;
 }
 
 /*****************************************************************************************
@@ -284,7 +284,7 @@ void set_general_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_icu_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_state = ICU;
+	indiv->hospital_state = ICU;
 }
 
 /*****************************************************************************************
@@ -294,8 +294,8 @@ void set_icu_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_mortuary_admission( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_state = MORTUARY;
-    indiv->current_hospital_event = NULL;
+	indiv->hospital_state = MORTUARY;
+	indiv->current_hospital_event = NULL;
 }
 
 /*****************************************************************************************
@@ -305,8 +305,8 @@ void set_mortuary_admission( individual *indiv, parameters* params, int time )
 ******************************************************************************************/
 void set_discharged( individual *indiv, parameters* params, int time )
 {
-    indiv->hospital_state = DISCHARGED;
-    indiv->current_hospital_event = NULL;
+	indiv->hospital_state = DISCHARGED;
+	indiv->current_hospital_event = NULL;
 }
 
 /*****************************************************************************************
@@ -336,7 +336,7 @@ void destroy_individual( individual *indiv )
 int count_infection_events( individual *indiv )
 {
 	int infection_count = 0;
-    infection_event *infection_event;
+    	infection_event *infection_event;
 	infection_event = indiv->infection_events;
 
 	while(infection_event != NULL){
