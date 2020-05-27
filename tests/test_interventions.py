@@ -410,6 +410,8 @@ class TestClass(object):
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_quarantine(params)
+        params.set_param("test_order_wait",0)
+        params.set_param("test_result_wait",0)
         params.write_params(constant.TEST_DATA_FILE)
         
         # Call the model
@@ -964,8 +966,12 @@ class TestClass(object):
 
         # get the individuals who have the app
         model.write_individual_file()
-        df_indiv  = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")  
         app_users = df_indiv.loc[ :,["ID", "app_user"]]
+        cases     = df_indiv.loc[ :,["ID", "is_case"]]
      
         # only consider interactions between those with the app
         app_users = app_users.rename( columns = { "ID":"index_ID", "app_user":"index_app_user"})
@@ -991,9 +997,12 @@ class TestClass(object):
         index_inter = pd.merge( index_cases, df_inter, on = "index_ID", how = "left" )
         index_inter = index_inter[ index_inter[ "n_interactions"] >= required_interactions]
             
-        df_all = pd.merge( index_inter, index_traced, on = [ "index_ID", "traced_ID"], how = "outer")           
+        # remove interactions with index cases who will not be quarantined 
+        index_inter = pd.merge( index_inter, cases, left_on = "traced_ID", right_on = "ID", how = "left" )      
+        index_inter = index_inter[ (index_inter.is_case != 1)]
               
         # now perform checks
+        df_all = pd.merge( index_inter, index_traced, on = [ "index_ID", "traced_ID"], how = "outer")           
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
         np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
@@ -1054,6 +1063,14 @@ class TestClass(object):
         df_trace[ "same_house" ] = ( df_trace[ "house_no"] == df_trace[ "traced_house_no"] )         
         trace_grouped = df_trace.groupby( ["index_ID", "is_case","same_house","traced_house_no"]).size().reset_index(name="n_per_house")
 
+        # find the houses where only a single person has been traced and then see if they are a case
+        single_traced = trace_grouped[ (trace_grouped["n_per_house"] == 1 )]
+        single_traced = pd.merge( single_traced, df_trace, on = ["index_ID", "traced_house_no"])
+        single_traced = single_traced.loc[:,["index_ID", "traced_ID", "traced_house_no"]]
+        single_traced.rename( columns = { "traced_ID":"ID"}, inplace = True)
+        single_traced = pd.merge( single_traced, df_indiv, on = "ID" )
+        single_traced.rename( columns = { "is_case":"traced_is_case"}, inplace = True)
+
         # for those who are not cases, we should not have traced household members 
         not_case =  trace_grouped[ ( trace_grouped[ "same_house"] == False ) & ( trace_grouped[ "is_case"] == 0 ) ]      
         np.testing.assert_equal( len( not_case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
@@ -1062,8 +1079,14 @@ class TestClass(object):
         # for cases we we should have traced everyone in the household of the traded
         case = trace_grouped[ trace_grouped[ "is_case"] == 1 ]
         case = pd.merge( case, total_house, on = "traced_house_no", how = "left")
-        case[ "hh_not_q"] = case[ "total_per_house"] - case[ "n_per_house"]
         case = case[ ( case[ "same_house"] == False ) ];
+        case = pd.merge( case, single_traced, on = "traced_house_no", how = "left")
+        case.fillna(0, inplace=True)
+        case[ "hh_not_q"] = case[ "total_per_house"] - case[ "n_per_house"]
+              
+        # remove houses for only a sinlge person who is a case has been traced (we do not trace the household then)
+        case = case[ (case[ "traced_is_case"]==0) ]           
+      
         np.testing.assert_equal( len( case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
         np.testing.assert_equal( sum( ( case[ "hh_not_q"] > 0 ) ), 0, "member of household of first-order contact not traced on positive" )
                 
