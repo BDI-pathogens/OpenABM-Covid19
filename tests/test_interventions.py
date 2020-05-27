@@ -966,8 +966,12 @@ class TestClass(object):
 
         # get the individuals who have the app
         model.write_individual_file()
-        df_indiv  = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")  
         app_users = df_indiv.loc[ :,["ID", "app_user"]]
+        cases     = df_indiv.loc[ :,["ID", "is_case"]]
      
         # only consider interactions between those with the app
         app_users = app_users.rename( columns = { "ID":"index_ID", "app_user":"index_app_user"})
@@ -993,9 +997,12 @@ class TestClass(object):
         index_inter = pd.merge( index_cases, df_inter, on = "index_ID", how = "left" )
         index_inter = index_inter[ index_inter[ "n_interactions"] >= required_interactions]
             
-        df_all = pd.merge( index_inter, index_traced, on = [ "index_ID", "traced_ID"], how = "outer")           
+        # remove interactions with index cases who will not be quarantined 
+        index_inter = pd.merge( index_inter, cases, left_on = "traced_ID", right_on = "ID", how = "left" )      
+        index_inter = index_inter[ (index_inter.is_case != 1)]
               
         # now perform checks
+        df_all = pd.merge( index_inter, index_traced, on = [ "index_ID", "traced_ID"], how = "outer")           
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
         np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
