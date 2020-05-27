@@ -158,9 +158,9 @@ void transmit_virus_by_type(
 )
 {
 	long idx, jdx, n_infected;
-    int day, n_interaction, t_infect;
+    	int day, n_interaction, t_infect;
 	double hazard_rate;
-    float hospital_state_modifier;
+    	float hospital_state_modifier;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
