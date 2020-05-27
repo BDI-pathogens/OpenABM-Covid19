@@ -59,17 +59,17 @@ void initialize_individual(
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
-    indiv->index_token_release_event = NULL;
+    	indiv->index_token_release_event = NULL;
 
-    indiv->hospital_state = NOT_IN_HOSPITAL;
+    	indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
-    indiv->ward_type = NO_WARD;
-    indiv->ward_idx  = NO_WARD;
-    indiv->hospital_idx = NO_HOSPITAL;
+    	indiv->ward_type = NO_WARD;
+    	indiv->ward_idx  = NO_WARD;
+    	indiv->hospital_idx = NO_HOSPITAL;
 	indiv->disease_progression_predicted[0] = FALSE;
 	indiv->disease_progression_predicted[1] = FALSE;
-    indiv->worker_type = NOT_HEALTHCARE_WORKER;
+    	indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 
 /*****************************************************************************************
