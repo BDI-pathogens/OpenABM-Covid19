@@ -15,30 +15,6 @@ from tests import constant
 import subprocess, pytest, os, sys
 import numpy as np, pandas as pd
 
-# TEST_DIR = os.path.dirname(os.path.realpath(__file__))
-# TEST_DIR = TEST_DIR.replace("hospital", "")
-# TEST_HOSPITAL_FILE = TEST_DIR + "data/hospital_baseline_parameters.csv"
-# TEST_DATA_FILE = TEST_DIR + "data/baseline_parameters.csv"
-# PARAM_LINE_NUMBER = 1
-# DATA_DIR_TEST = TEST_DIR + "data"
-# TEST_HOUSEHOLD_FILE = TEST_DIR + "data/baseline_household_demographics.csv"
-# TEST_OUTPUT_FILE = TEST_DIR + "data/test_output.csv"
-# TEST_OUTPUT_FILE_HOSPITAL = TEST_DIR + "data/test_hospital_output.csv"
-# TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = TEST_DIR + "data/time_step_hospital_output.csv"
-# TEST_INTERACTIONS_FILE = TEST_DIR + "data/interactions_Run1.csv"
-# TEST_INDIVIDUAL_FILE = TEST_DIR + "data/individual_file_Run1.csv"
-# TEST_HCW_FILE = TEST_DIR + "data/ward_output.csv"
-# TEST_TRANSMISSION_FILE = TEST_DIR + "data/transmission_Run1.csv"
-# SRC_DIR = TEST_DIR.replace("tests", "") + "src"
-# EXECUTABLE = SRC_DIR + "/covid19ibm.exe"
-
-# # Files with adjusted parameters for each scenario
-# SCENARIO_FILE = TEST_DIR + "/data/scenario_baseline_parameters.csv"
-# SCENARIO_HOSPITAL_FILE = TEST_DIR + "/data/scenario_hospital_baseline_parameters.csv"
-
-# # Use parameter file from Python C interface to adjust parameters
-# PYTHON_C_DIR = TEST_DIR.replace("tests","") + "src/COVID19"
-# sys.path.append(PYTHON_C_DIR)
 
 class TestClass(object):
     """
