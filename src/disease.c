@@ -49,7 +49,6 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
-
 }
 
 /*****************************************************************************************
@@ -234,15 +233,14 @@ void transmit_virus_by_type(
 ******************************************************************************************/
 void transmit_virus( model *model )
 {
-	transmit_virus_by_type( model, PRESYMPTOMATIC );
-	transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
-	transmit_virus_by_type( model, SYMPTOMATIC );
-	transmit_virus_by_type( model, SYMPTOMATIC_MILD );
-	transmit_virus_by_type( model, ASYMPTOMATIC );
-	transmit_virus_by_type( model, HOSPITALISED );
-	transmit_virus_by_type( model, CRITICAL );
-	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
-
+    transmit_virus_by_type( model, PRESYMPTOMATIC );
+    transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
+    transmit_virus_by_type( model, SYMPTOMATIC );
+    transmit_virus_by_type( model, SYMPTOMATIC_MILD );
+    transmit_virus_by_type( model, ASYMPTOMATIC );
+    transmit_virus_by_type( model, HOSPITALISED );
+    transmit_virus_by_type( model, CRITICAL );
+    transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
 }
 
 /*****************************************************************************************
@@ -409,7 +407,6 @@ void transition_to_critical( model *model, individual *indiv )
     }
 
 	intervention_on_critical( model, indiv );
-
 }
 
 /*****************************************************************************************
