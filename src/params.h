@@ -78,7 +78,7 @@ typedef struct{
 	double sd_time_hospitalised_recovery;   // sd time to recover if hospitalised
 	double mean_time_critical_survive;      // mean time to survive if critical
 	double sd_time_critical_survive;        // sd time to survive if critical
-	double icu_allocation[N_AGE_GROUPS];    // probability of getting an ICU place if needed
+	double location_death_icu[N_AGE_GROUPS];// whether death occurs in the ICU or outside
 
 	int quarantined_daily_interactions; 	// number of interactions a quarantined person has
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
