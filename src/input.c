@@ -247,11 +247,13 @@ void read_param_file( parameters *params)
 			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
 		}
 
-	for( i = 0; i < N_INTERACTION_TYPES; i++ )
-	{
-		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
-		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
-	}
+    //Hardcoded this in until we separate out interaction types for the community and hospital. - Tom.
+    //Previously iterated over N_INTERACTION_TYPES.
+    for( i = 0; i < 3; i++ )
+    {
+        check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
+        if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
+    }
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{

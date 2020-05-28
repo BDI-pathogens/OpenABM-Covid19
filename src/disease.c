@@ -370,7 +370,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
     {
         if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
         {
-            if( gsl_ran_bernoulli( rng, model->params->ocation_death_icu[ indiv->age_group ] ) )
+            if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
                 transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
             else
                 transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
