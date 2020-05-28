@@ -776,14 +776,14 @@ int get_param_testing_symptoms_time_off(parameters *params)
 
 
 /*****************************************************************************************
-*  Name: 		get_param_icu_allocation
+*  Name: 		get_param_location_death_icu
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double get_param_icu_allocation(parameters *params, int idx)
+double get_param_location_death_icu(parameters *params, int idx)
 {
     if (idx >= N_AGE_GROUPS) return ERROR;
 
-    return params->icu_allocation[idx];
+    return params->location_death_icu[idx];
 }
 
 
@@ -1583,13 +1583,13 @@ double set_param_mild_fraction(parameters *params, double value, int idx)
 }
 
 /*****************************************************************************************
-*  Name: 		set_param_icu_allocation
+*  Name: 		set_param_location_death_icu
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
-double set_param_icu_allocation(parameters *params, double value, int idx)
+double set_param_location_death_icu(parameters *params, double value, int idx)
 {
     if (idx >= N_AGE_GROUPS) return ERROR;
-    params->icu_allocation[idx] = value;
+    params->location_death_icu[idx] = value;
     return TRUE;
 }
 
@@ -1674,7 +1674,7 @@ void get_param_array_adjusted_susceptibility(parameters *params, double *value)
 {
     for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
         value[idx] = params->adjusted_susceptibility[idx];
-    } 
+    }
 }
 
 /*****************************************************************************************
@@ -1777,13 +1777,13 @@ void get_param_array_mild_fraction(parameters *params, double *value)
 }
 
 /*****************************************************************************************
-*  Name:        get_param_array_icu_allocation
+*  Name:        get_param_array_location_death_icu
 *  Description: Gets the value of an array
 ******************************************************************************************/
-void get_param_array_icu_allocation(parameters *params, double *value)
+void get_param_array_location_death_icu(parameters *params, double *value)
 {
     for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
-        value[idx] = params->icu_allocation[idx];
+        value[idx] = params->location_death_icu[idx];
     }
 }
 
@@ -1965,13 +1965,13 @@ void set_param_array_app_users_fraction(parameters *params, double *value)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_array_icu_allocation
+*  Name:        set_param_array_location_death_icu
 *  Description: Gets the value of an array
 ******************************************************************************************/
-void set_param_array_icu_allocation(parameters *params, double *value)
+void set_param_array_location_death_icu(parameters *params, double *value)
 {
     for (int idx = 0; idx < N_AGE_GROUPS; idx++) {
-        params->icu_allocation[idx] = value[idx];
+        params->location_death_icu[idx] = value[idx];
     }
 }
 %}
