@@ -164,6 +164,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_critical));
+	if( check < 1){ print_exit("Failed to read parameter sd_time_to_critical\n"); };
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
 
