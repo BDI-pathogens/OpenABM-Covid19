@@ -45,6 +45,7 @@ EVENT_TYPE_STRING = {
 }
 
 key_params = [
+    "n_total", 
     "n_seed_infection", 
     "infectious_rate", 
     "asymptomatic_infectious_factor", 
@@ -84,7 +85,6 @@ sensitivity_analysis_params = [
     "mean_infectious_period",
     "relative_transmission_household"]
 
-
 asymptomatic_cols = [
     "fraction_asymptomatic_0_9",
     "fraction_asymptomatic_10_19",
@@ -95,7 +95,6 @@ asymptomatic_cols = [
     "fraction_asymptomatic_60_69",
     "fraction_asymptomatic_70_79",
     "fraction_asymptomatic_80"]
-
 
 susceptibility_cols = [
     "relative_susceptibility_0_9","relative_susceptibility_10_19",
@@ -145,6 +144,27 @@ population_cols = [
     "population_40_49", "population_50_59", 
     "population_60_69", "population_70_79", 
     "population_80"]
+
+
+def get_df_from_params(params, parameter_names):
+    """
+    Return a pandas dataframe of parameter-value pairs from the passed Parameters object
+    Mainly used as a helper function for displaying parameter values.  
+    
+    Arguments
+    ---------
+    params : parameters object of class COVID19.model.Parameters
+        Parameter object
+    parameter_names : list of str
+        List of parameter names of interest (column names of parameter input file)
+    
+    Returns
+    -------
+    pandas.DataFrame of the parameters of interest
+    """
+    parameter_values = [params.get_param(p) for p in parameter_names]
+    df = pd.DataFrame([parameter_values], columns = parameter_names)
+    return(df)
 
 
 def gamma_params(mn, sd):
@@ -566,7 +586,7 @@ def plot_hist_by_group(df, groupvar, binvar, bins = None, groups = None,
     return(fig, ax)
 
 
-def add_heatmap_to_axes(ax, x, y, bin_list, normalise = False):
+def add_heatmap_to_axes(ax, x, y, bin_list):
     """
     Plot heatmap of 2D histogram.
     
@@ -582,8 +602,6 @@ def add_heatmap_to_axes(ax, x, y, bin_list, normalise = False):
         Array of the y values with which to create a histogram
     bin_list : list
         List of bins to use in the histogram
-    normalise : boolean
-        Should the histogram be normalized by columns?
     
     Returns
     -------
@@ -596,11 +614,7 @@ def add_heatmap_to_axes(ax, x, y, bin_list, normalise = False):
     
     array, xbins, ybins = np.histogram2d(x, y, bin_list)
     
-    if normalise:
-        norm = array/array.sum(axis = 0)
-        array = norm
-    
-    im = ax.imshow(array, origin = "lower", aspect = "equal")
+    im = ax.imshow(array, origin = "lower", aspect = "equal", vmin = 0)
     
     return(ax, im)
 
@@ -644,7 +658,8 @@ def adjust_ticks(ax, xtick_fontsize = 12, ytick_fontsize = 12,
 
 def plot_transmission_heatmap_by_age(df, group1var, group2var, bins = None, 
     group_labels = None, xlabel = "", ylabel = "", title = "", legend_title = "", 
-    legend_loc = "right", xticklabels = None, yticklabels = None, normalise = False):
+    legend_loc = "right", xticklabels = None, yticklabels = None, normalise = False, 
+    vmin = 0, vmax = None):
     """
     Plot 2D histogram (as a heatmap) of transmission events by two grouping variables
     (for instance, age group)
@@ -660,8 +675,7 @@ def plot_transmission_heatmap_by_age(df, group1var, group2var, bins = None,
     
     fig, ax = plt.subplots()
     
-    ax, im = add_heatmap_to_axes(ax, df[group1var].values, df[group2var].values, 
-        bin_list, normalise)
+    ax, im = add_heatmap_to_axes(ax, df[group1var].values, df[group2var].values, bin_list)
     
     ax = adjust_ticks(ax, xtick_fontsize = 16, ytick_fontsize = 16, 
         xticklabels = xticklabels, yticklabels = yticklabels)
@@ -675,6 +689,92 @@ def plot_transmission_heatmap_by_age(df, group1var, group2var, bins = None,
     cbar.ax.tick_params(labelsize = 14)
     
     return(fig, ax)
+
+
+def transmission_heatmap_by_age_by_panels(df, 
+        group1var, group2var, panelvar, bins = None, 
+        groups = None, group_labels = None,
+        panels = None, panel_labels = None,
+        xlabel = "", ylabel = "",
+        legend_title = "", legend_loc = "right",
+        xticklabels = None, yticklabels = None,
+        normalise = False
+    ):
+    """
+    Plot subplots of heatmaps of transmissions from one age group to another across another 
+    categorical variable (panelvar)
+    
+    Arguments
+    ---------
+    group1var : str
+        Column name of first grouping variable (x-axis in heatmap)
+    group2var : str
+        Column name of second grouping variable (x-axis in heatmap)
+    panelvar
+        Column name of variable for making panels
+    NBINS
+        Number of bins
+    group_labels
+    normalise
+    
+    """
+    
+    if not isinstance(bins, list):
+        bin_list = np.arange(bins)
+    
+    if not panels: 
+        panels = np.unique(df[panelvar])
+    
+    n_panels = len(panels)
+    
+    if not panel_labels:
+        panel_labels = panels
+    
+    fig, ax = plt.subplots(ncols = n_panels)
+    
+    ax[0].set_ylabel(ylabel, size = 16)
+    
+    transmission_arrays = []
+    for i, panel in enumerate(panels):
+        
+        df_sub = df.loc[df[panelvar] == panel]
+        
+        array, xbins, ybins = np.histogram2d(
+            x = df_sub[group1var].values, 
+            y = df_sub[group2var].values, 
+            bins = bin_list)
+        transmission_arrays.append(array)
+    
+    vmin_panels = 0
+    vmax_panels = np.max(np.array(transmission_arrays))
+    
+    ims = []
+    for i, panel in enumerate(panels):
+        im = ax[i].imshow(transmission_arrays[i], origin = "lower", aspect = "equal", 
+            vmin = vmin_panels, vmax = vmax_panels)
+        
+        ims.append(im)
+        ax[i] = adjust_ticks(ax[i], xtick_fontsize = 14, ytick_fontsize = 14, 
+            xticklabels = xticklabels, yticklabels = yticklabels)
+        
+        if i > 0:
+            ax[i].set_yticks([])
+        
+        ax[i].set_xlabel(xlabel, size = 16)
+        ax[i].set_title(panel_labels[i], size = 20)
+    
+    fig.subplots_adjust(right = 0.85)
+    axes_cbar = fig.add_axes([0.9, 0.3, 0.02, 0.4])
+    cbar = fig.colorbar(ims[n_panels - 1], cax = axes_cbar)
+    
+    #divider = make_axes_locatable(ax[2])
+    #cax = divider.append_axes('right', size = "7%", pad = 0.2,)
+    
+    #cbar = fig.colorbar(im, fraction = 0.046, pad = 0.04, cax = cax)
+    cbar.set_label(legend_title, size = 18)
+    
+    return(fig, ax)
+
 
 
 def plot_interactions_by_age(df_interact, groupvar, group_labels, 
