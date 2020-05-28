@@ -3,8 +3,8 @@
 Tests of the individual-based model, COVID19-IBM, using the individual file
 
 Usage:
-With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be 
-run by calling 'pytest' from project folder.  
+With pytest installed (https://docs.pytest.org/en/latest/getting-started.html) tests can be
+run by calling 'pytest' from project folder.
 
 Created: March 2020
 Author: p-robot
@@ -40,7 +40,7 @@ class TestClass(object):
         "test_zero_deaths": [dict()],
         "test_disease_transition_times": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     mean_time_to_symptoms=4.0,
                     sd_time_to_symptoms=2.0,
                     mean_time_to_hospital=1.0,
@@ -58,7 +58,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     mean_time_to_symptoms=4.5,
                     sd_time_to_symptoms=2.0,
                     mean_time_to_hospital=1.2,
@@ -76,7 +76,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     mean_time_to_symptoms=5.0,
                     sd_time_to_symptoms=2.5,
                     mean_time_to_hospital=1.4,
@@ -94,7 +94,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     mean_time_to_symptoms=5.5,
                     sd_time_to_symptoms=2.5,
                     mean_time_to_hospital=1.6,
@@ -112,7 +112,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     mean_time_to_symptoms=6.0,
                     sd_time_to_symptoms=3.0,
                     mean_time_to_hospital=1.8,
@@ -132,7 +132,7 @@ class TestClass(object):
         ],
         "test_disease_outcome_proportions": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.05,
                     fraction_asymptomatic_10_19 = 0.05,
                     fraction_asymptomatic_20_29 = 0.05,
@@ -181,7 +181,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.15,
                     fraction_asymptomatic_10_19 = 0.15,
                     fraction_asymptomatic_20_29 = 0.15,
@@ -230,7 +230,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.35,
                     fraction_asymptomatic_10_19 = 0.35,
                     fraction_asymptomatic_20_29 = 0.35,
@@ -328,7 +328,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.70,
                     fraction_asymptomatic_10_19 = 0.70,
                     fraction_asymptomatic_20_29 = 0.40,
@@ -377,7 +377,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.18,
                     fraction_asymptomatic_10_19 = 0.18,
                     fraction_asymptomatic_20_29 = 0.18,
@@ -426,7 +426,7 @@ class TestClass(object):
                 )
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     fraction_asymptomatic_0_9   = 0.10,
                     fraction_asymptomatic_10_19 = 0.10,
                     fraction_asymptomatic_20_29 = 0.10,
@@ -477,46 +477,46 @@ class TestClass(object):
         ],
     }
     """
-    Test class for checking 
+    Test class for checking
     """
     def test_zero_recovery(self):
         """
         Setting recover times to be very large should avoid seeing any in recovered compartment
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
-        
+
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
         params.set_param("mean_time_hospitalised_recovery", 200.0)
-        
+
         params.write_params(constant.TEST_DATA_FILE)
-        
+
         # Call the model
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+
         np.testing.assert_array_equal(
-            df_output[["n_recovered"]].sum(), 
+            df_output[["n_recovered"]].sum(),
             0)
-    
+
     def test_zero_deaths(self):
         """
         Set fatality ratio to zero, should have no deaths if always places in the ICU
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_fatality_fraction_all(params, 0.0)
-        params = utils.set_icu_allocation_all(params, 1.0)
+        params = utils.set_location_death_icu_all(params, 1.0)
         params.write_params(constant.TEST_DATA_FILE)
-        
+
         # Call the model, pipe output to file, read output file
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+
         np.testing.assert_equal(df_output["n_death"].sum(), 0)
-    
+
     def test_total_infectious_rate_zero(self):
         """
         Set infectious rate to zero results in only "n_seed_infection" as total_infected
@@ -528,14 +528,14 @@ class TestClass(object):
         # Call the model, pipe output to file, read output file
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        
+
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+
         output = df_output["total_infected"].iloc[-1]
         expected_output = int(params.get_param("n_seed_infection"))
-        
+
         np.testing.assert_equal(output, expected_output)
-    
+
     def test_zero_infected(self):
         """
         Set seed-cases to zero should result in zero sum of output column
@@ -543,17 +543,17 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("n_seed_infection", 0)
         params.write_params(constant.TEST_DATA_FILE)
-        
+
         # Call the model, pipe output to file, read output file
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
+
         np.testing.assert_equal(df_output["total_infected"].sum(), 0)
-    
+
     def test_disease_transition_times( self, test_params ):
         """
-        Test that the mean and standard deviation of the transition times between 
+        Test that the mean and standard deviation of the transition times between
         states agrees with the parameters
         """
         std_error_limit = 4
@@ -565,17 +565,17 @@ class TestClass(object):
         params.set_param("end_time", 50)
         params.set_param("infectious_rate", 4.0)
         params.set_param( test_params )
-      
+
         params.write_params(constant.TEST_DATA_FILE)
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
-        
+
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = pd.merge(df_indiv, df_trans, 
+        df_indiv = pd.merge(df_indiv, df_trans,
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # time infected until showing symptoms
@@ -689,13 +689,13 @@ class TestClass(object):
         # time from ICU to death
         df_indiv["t_c_d"] = df_indiv["time_death"] - df_indiv["time_critical"]
         mean = df_indiv[
-            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_d"].mean()
         sd = df_indiv[
-            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0)
         ]["t_c_d"].std()
         N = len( df_indiv[
-            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0) 
+            (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0)
         ] )
         np.testing.assert_allclose(
             mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
@@ -726,7 +726,7 @@ class TestClass(object):
 
     def test_disease_outcome_proportions( self, test_params ):
         """
-        Test that the fraction of infected people following each path for 
+        Test that the fraction of infected people following each path for
         the progression of the disease agrees with the parameters
         """
         std_error_limit = 5
@@ -757,7 +757,7 @@ class TestClass(object):
             test_params[ "fraction_asymptomatic_70_79" ],
             test_params[ "fraction_asymptomatic_80" ],
         ]
-         
+
         mild_fraction = [
             test_params[ "mild_fraction_0_9" ],
             test_params[ "mild_fraction_10_19" ],
@@ -769,7 +769,7 @@ class TestClass(object):
             test_params[ "mild_fraction_70_79" ],
             test_params[ "mild_fraction_80" ],
         ]
-        
+
         hospitalised_fraction = [
             test_params[ "hospitalised_fraction_0_9" ],
             test_params[ "hospitalised_fraction_10_19" ],
@@ -813,10 +813,10 @@ class TestClass(object):
         df_indiv = pd.read_csv(
             constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
-        
+
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = pd.merge(df_indiv, df_trans, 
+        df_indiv = pd.merge(df_indiv, df_trans,
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # fraction asymptomatic vs mild+symptomatc
@@ -867,8 +867,8 @@ class TestClass(object):
                     (df_indiv["time_presymptomatic"] > 0) & (df_indiv["time_presymptomatic_mild"] > 0)
                     & (df_indiv["age_group"] == constant.AGES[idx])
                 ]
-            )   
-            
+            )
+
             N    = N_symp + N_asymp + N_mild
             mean_asym = N_asymp / N
             sd_asym   = sqrt(mean_asym * (1 - mean_asym))
@@ -877,7 +877,7 @@ class TestClass(object):
                 fraction_asymptomatic[idx],
                 atol=std_error_limit * sd_asym / sqrt( N ),
             )
-            
+
             mean_mild = N_mild / N
             sd_mild   = sqrt(mean_mild * (1 - mean_mild))
             np.testing.assert_allclose(
@@ -885,13 +885,13 @@ class TestClass(object):
                 mild_fraction[idx],
                 atol=std_error_limit * sd_mild / sqrt( N ),
             )
-            
+
             N_asymp_tot += N_asymp
             N_symp_tot  += N_symp
             N_mild_tot += N_mild
             asypmtomatic_fraction_weighted += fraction_asymptomatic[idx] * N
             mild_fraction_weighted += mild_fraction[idx] * N
-            
+
         # overall asymptomatic and mild fractions
         N    = N_symp_tot + N_asymp_tot + N_mild_tot
         mean_asym = N_asymp_tot / N
@@ -902,7 +902,7 @@ class TestClass(object):
             asypmtomatic_fraction_weighted,
             atol=std_error_limit * sd_asym / sqrt(N),
         )
-        
+
         mean_mild = N_mild_tot / N
         sd_mild   = sqrt(mean_mild * (1 - mean_mild))
         mild_fraction_weighted = mild_fraction_weighted / N
@@ -1003,8 +1003,8 @@ class TestClass(object):
 
             N_dead = len(
                 df_indiv[
-                    (df_indiv["time_death"] > 0) & 
-                    (df_indiv["time_critical"] > 0) & 
+                    (df_indiv["time_death"] > 0) &
+                    (df_indiv["time_critical"] > 0) &
                     (df_indiv["age_group"] == constant.AGES[idx])
                 ]
             )
@@ -1037,4 +1037,3 @@ class TestClass(object):
             fatality_fraction_weighted,
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
-        
