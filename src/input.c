@@ -432,7 +432,10 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
 	if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
-	fclose(parameter_file);
+    check = fscanf(parameter_file, " %i ,", &(params->hospital_on));
+    if( check < 1){ print_exit("Failed to read parameter hospital_on)\n"); };
+
+    fclose(parameter_file);
 }
 
 void read_hospital_param_file( parameters *params)
