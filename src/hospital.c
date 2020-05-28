@@ -442,7 +442,7 @@ void predict_patient_disease_progression( model *model, individual *indiv, doubl
 		{
 			if( gsl_ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 			{
-                if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
+                if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
 					transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 				else
 					transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
