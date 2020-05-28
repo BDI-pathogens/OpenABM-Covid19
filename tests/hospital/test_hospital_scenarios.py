@@ -337,6 +337,13 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("location_death_icu_20_29", 1)
+        params.set_param("location_death_icu_30_39", 1)
+        params.set_param("location_death_icu_40_49", 1)
+        params.set_param("location_death_icu_50_59", 1)
+        params.set_param("location_death_icu_60_69", 1)
+        params.set_param("location_death_icu_70_79", 1)
+        params.set_param("location_death_icu_80", 1)
         params.set_param("hospital_on", 1)
         params.write_params(constant.TEST_DATA_FILE)
 

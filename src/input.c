@@ -24,29 +24,29 @@
 ******************************************************************************************/
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
-    	int param_line_number, hospital_param_line_number;
+    int param_line_number, hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
-    	char hospital_input_param_file[ INPUT_CHAR_LEN ];
+	char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
-
+	
 	if(argc > 1)
 	{
 		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN );
 	}else{
 		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN );
 	}
-	
+
 	if(argc > 2)
 	{
 		param_line_number = (int) strtol(argv[2], NULL, 10);
-		
+
 		if(param_line_number <= 0)
 			print_exit("Error Invalid line number, line number starts from 1");
 	}else{
 		param_line_number = 1;
 	}
-	
+
 	if(argc > 3)
 	{
 		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
@@ -66,7 +66,6 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 			INPUT_CHAR_LEN );
         params->sys_write_hospital = FALSE;
 	}
-
 
     if(argc > 5)
     {
@@ -92,18 +91,14 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
-	
+
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
 
-	strncpy(params->input_household_file, input_household_file, 
+	strncpy(params->input_household_file, input_household_file,
 		sizeof(params->input_household_file) - 1);
 	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
-	
-	strncpy(params->input_household_file, input_household_file, 
-		sizeof(params->input_household_file) - 1);
-	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
-	
+
 	strncpy(params->output_file_dir, output_file_dir, sizeof(params->output_file_dir) - 1);
 	params->output_file_dir[sizeof(params->output_file_dir) - 1] = '\0';
 }
@@ -114,56 +109,56 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 ******************************************************************************************/
 void read_param_file( parameters *params)
 {
-    FILE *parameter_file;
-    int i, check;
+	FILE *parameter_file;
+	int i, check;
 
-    parameter_file = fopen(params->input_param_file, "r");
-    if(parameter_file == NULL)
-        print_exit("Can't open parameter file");
+	parameter_file = fopen(params->input_param_file, "r");
+	if(parameter_file == NULL)
+		print_exit("Can't open parameter file");
 
-    // Throw away header (and first `params->param_line_number` lines)
-    for(i = 0; i < params->param_line_number; i++)
-        fscanf(parameter_file, "%*[^\n]\n");
+	// Throw away header (and first `params->param_line_number` lines)
+	for(i = 0; i < params->param_line_number; i++)
+		fscanf(parameter_file, "%*[^\n]\n");
 
-    // Read and attach parameter values to parameter structure
-    check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
-    if( check < 1){ print_exit("Failed to read parameter rng_seed\n"); };
+	// Read and attach parameter values to parameter structure
+	check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
+	if( check < 1){ print_exit("Failed to read parameter rng_seed\n"); };
 
-    check = fscanf(parameter_file, " %li ,", &(params->param_id));
-    if( check < 1){ print_exit("Failed to read parameter param_id\n"); };
+	check = fscanf(parameter_file, " %li ,", &(params->param_id));
+	if( check < 1){ print_exit("Failed to read parameter param_id\n"); };
 
-    check = fscanf(parameter_file, " %li ,", &(params->n_total));
-    if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
+	check = fscanf(parameter_file, " %li ,", &(params->n_total));
+	if( check < 1){ print_exit("Failed to read parameter n_total\n"); };
 
-    for( i = 0; i < N_OCCUPATION_NETWORK_TYPES; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
-        if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
-    }
+	for( i = 0; i < N_OCCUPATION_NETWORK_TYPES; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,",  &(params->mean_work_interactions[i]));
+		if( check < 1){ print_exit("Failed to read parameter mean_work_interactions\n"); };
+	}
 
-    check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
-    if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
+	check = fscanf(parameter_file, " %lf ,",  &(params->daily_fraction_work));
+	if( check < 1){ print_exit("Failed to read parameter daily_fraction_work\n"); };
 
-    check = fscanf(parameter_file, " %lf ,",  &(params->work_network_rewire));
-    if( check < 1){ print_exit("Failed to read parameter work_network_rewire\n"); };
+	check = fscanf(parameter_file, " %lf ,",  &(params->work_network_rewire));
+	if( check < 1){ print_exit("Failed to read parameter work_network_rewire\n"); };
 
-    for( i = 0; i < N_AGE_TYPES; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,",  &(params->mean_random_interactions[i]));
-        if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
+	for( i = 0; i < N_AGE_TYPES; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,",  &(params->mean_random_interactions[i]));
+		if( check < 1){ print_exit("Failed to read parameter mean_daily_interactions\n"); };
 
-        check = fscanf(parameter_file, " %lf ,",  &(params->sd_random_interactions[i]));
-        if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
-    }
+		check = fscanf(parameter_file, " %lf ,",  &(params->sd_random_interactions[i]));
+		if( check < 1){ print_exit("Failed to read parameter sd_daily_interactions\n"); };
+	}
 
-    check = fscanf(parameter_file, " %i ,",  &(params->random_interaction_distribution));
-    if( check < 1){ print_exit("Failed to read parameter random_interaction_distribution\n"); };
+	check = fscanf(parameter_file, " %i ,",  &(params->random_interaction_distribution));
+	if( check < 1){ print_exit("Failed to read parameter random_interaction_distribution\n"); };
 
-    check = fscanf(parameter_file, " %lf ,",  &(params->child_network_adults));
-    if( check < 1){ print_exit("Failed to read parameter child_network_adults\n"); };
+	check = fscanf(parameter_file, " %lf ,",  &(params->child_network_adults));
+	if( check < 1){ print_exit("Failed to read parameter child_network_adults\n"); };
 
-    check = fscanf(parameter_file, " %lf ,",  &(params->elderly_network_adults));
-    if( check < 1){ print_exit("Failed to read parameter elderly_network_adults\n"); };
+	check = fscanf(parameter_file, " %lf ,",  &(params->elderly_network_adults));
+	if( check < 1){ print_exit("Failed to read parameter elderly_network_adults\n"); };
 
     check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
     if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
@@ -207,11 +202,11 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
     if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
-        if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
-    }
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
+		if( check < 1){ print_exit("Failed to read parameter fraction_asymptomatic\n"); };
+	}
 
     check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
     if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
@@ -222,8 +217,8 @@ void read_param_file( parameters *params)
         if( check < 1){ print_exit("Failed to read parameter mild_fraction\n"); };
     }
 
-    check = fscanf(parameter_file, " %lf ,", &(params->mild_infectious_factor));
-    if( check < 1){ print_exit("Failed to read parameter mild_infectious_factor\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->mild_infectious_factor));
+	if( check < 1){ print_exit("Failed to read parameter mild_infectious_factor\n"); };
 
     check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
     if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
@@ -237,20 +232,20 @@ void read_param_file( parameters *params)
         if( check < 1){ print_exit("Failed to read parameter household_size_*\n"); };
     }
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
-        if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
-    }
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->population[i]));
+		if( check < 1){ print_exit("Failed to read parameter population_**\n"); };
+	}
 
-    check = fscanf(parameter_file, " %lf ,", &(params->daily_non_cov_symptoms_rate));
-    if( check < 1){ print_exit("Failed to read parameter daily_non_cov_symptoms_rate\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->daily_non_cov_symptoms_rate));
+	if( check < 1){ print_exit("Failed to read parameter daily_non_cov_symptoms_rate\n"); };
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-        {
-            check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility[i]));
-            if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
-        }
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+		{
+			check = fscanf(parameter_file, " %lf ,", &(params->relative_susceptibility[i]));
+			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
+		}
 
     //Hardcoded this in until we separate out interaction types for the community and hospital. - Tom.
     //Previously iterated over N_INTERACTION_TYPES.
@@ -260,170 +255,170 @@ void read_param_file( parameters *params)
         if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
     }
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
-        if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
-    }
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->hospitalised_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter hopsitalised_fraction_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
+	}
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
+	}
+
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_hospitalised_recovery ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_hospitalised_recovery\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->sd_time_hospitalised_recovery ));
+	if( check < 1){ print_exit("Failed to read parameter sd_time_hospitalised_recovery\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_critical_survive ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_critical_survive\n"); };
+
+	check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
+	if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
 
     for( i = 0; i < N_AGE_GROUPS; i++ )
     {
-        check = fscanf(parameter_file, " %lf ,", &(params->critical_fraction[i]));
-        if( check < 1){ print_exit("Failed to read parameter critical_fraction_**\n"); };
+        check = fscanf(parameter_file, " %lf ,", &(params->location_death_icu[i]));
+        if( check < 1){ print_exit("Failed to read parameter location_death_icu\n"); };
     }
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->fatality_fraction[i]));
-        if( check < 1){ print_exit("Failed to read parameter fatality_fraction\n"); };
-    }
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
 
-    check = fscanf(parameter_file, " %lf,", &(params->mean_time_hospitalised_recovery ));
-    if( check < 1){ print_exit("Failed to read parameter mean_time_hospitalised_recovery\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %lf,", &(params->sd_time_hospitalised_recovery ));
-    if( check < 1){ print_exit("Failed to read parameter sd_time_hospitalised_recovery\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf,", &(params->mean_time_critical_survive ));
-    if( check < 1){ print_exit("Failed to read parameter mean_time_critical_survive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_length_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
-    if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_self));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_self\n"); };
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
-        if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
-    }
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_symptoms\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_positive\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_traced_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_length_traced_positive\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_length_positive\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_self));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_self\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_traced_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_dropout_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_dropout_positive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->trace_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter trace_on_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_symptoms\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->retrace_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter retrace_on_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_positive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->traceable_interaction_fraction));
+	if( check < 1){ print_exit("Failed to read parameter traceable_interaction_fraction\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
-    if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->tracing_network_depth));
+	if( check < 1){ print_exit("Failed to read parameter tracing_network_depth\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->allow_clinical_diagnosis));
+	if( check < 1){ print_exit("Failed to read parameter allow_clinical_diagnosis\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->trace_on_positive));
-    if( check < 1){ print_exit("Failed to read parameter trace_on_positive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_positive\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->retrace_on_positive));
-    if( check < 1){ print_exit("Failed to read parameter retrace_on_positive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_on_traced));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_on_traced\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_positive\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->traceable_interaction_fraction));
-    if( check < 1){ print_exit("Failed to read parameter traceable_interaction_fraction\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->tracing_network_depth));
-    if( check < 1){ print_exit("Failed to read parameter tracing_network_depth\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->allow_clinical_diagnosis));
-    if( check < 1){ print_exit("Failed to read parameter allow_clinical_diagnosis\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_symptoms\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_positive\n"); };
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantined_daily_interactions));
+	if( check < 1){ print_exit("Failed to read parameter quarantined_daily_interactions\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_symptoms\n"); };
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_positive\n"); };
+	check = fscanf(parameter_file, " %i  ,", &(params->quarantine_smart_release_day));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_smart_release_day\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_on_traced_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_on_traced_symptoms\n"); };
+	check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
+	if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_positive));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_positive\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
+	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->quarantine_household_contacts_on_symptoms));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_household_contacts_on_symptoms\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
 
-    check = fscanf(parameter_file, " %i  ,", &(params->quarantined_daily_interactions));
-    if( check < 1){ print_exit("Failed to read parameter quarantined_daily_interactions\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
+	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
 
-    check = fscanf(parameter_file, " %i  ,", &(params->quarantine_days));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_days\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
+	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
 
-    check = fscanf(parameter_file, " %i  ,", &(params->quarantine_smart_release_day));
-    if( check < 1){ print_exit("Failed to read parameter quarantine_smart_release_day\n"); };
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+	}
 
-    check = fscanf(parameter_file, " %i  ,", &(params->hospitalised_daily_interactions));
-    if( check < 1){ print_exit("Failed to read parameter hospitalised_daily_interactions\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
+	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-    check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
-    if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
+	for (i = 0; i<N_OCCUPATION_NETWORKS; i++){
 
-    check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
-    if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
+		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_occupation_multiplier[i]));
+		if( check < 1){ print_exit("Failed to read parameter lockdown_occupation_multiplier)\n"); };
 
-    check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
-    if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
+	}
+	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_random_network_multiplier)\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
-    if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->lockdown_house_interaction_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_house_interaction_multiplier)\n"); };
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->app_users_fraction[i]));
-        if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
-    }
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_on));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_time_on)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
-    if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
 
-    for (i = 0; i<N_OCCUPATION_NETWORKS; i++){
-
-        check = fscanf(parameter_file, " %lf ,", &(params->lockdown_occupation_multiplier[i]));
-        if( check < 1){ print_exit("Failed to read parameter lockdown_occupation_multiplier)\n"); };
-
-    }
-    check = fscanf(parameter_file, " %lf ,", &(params->lockdown_random_network_multiplier));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_random_network_multiplier)\n"); };
-
-    check = fscanf(parameter_file, " %lf ,", &(params->lockdown_house_interaction_multiplier));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_house_interaction_multiplier)\n"); };
-
-    check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_on));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_time_on)\n"); };
-
-    check = fscanf(parameter_file, " %i ,", &(params->lockdown_time_off));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_time_off)\n"); };
-
-    check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_on));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_on)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_on));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_on)\n"); };
 
     check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
     if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
@@ -431,11 +426,11 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
-    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
+	if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
-    if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
+	if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
     check = fscanf(parameter_file, " %i ,", &(params->hospital_on));
     if( check < 1){ print_exit("Failed to read parameter hospital_on)\n"); };
@@ -530,7 +525,7 @@ void write_output_files(model *model, parameters *params)
         if( params->hospital_on )
             write_ward_data( model );
 	}
-}	
+}
 
 
 /*****************************************************************************************
@@ -669,26 +664,27 @@ void write_quarantine_reasons(model *model, parameters *params)
 ******************************************************************************************/
 void write_individual_file(model *model, parameters *params)
 {
+
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
 
 	int infection_count;
 	long idx;
-	
+
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", params->param_line_number);
-	
+
 	// Concatenate file name
 	strcpy(output_file, params->output_file_dir);
 	strcat(output_file, "/individual_file_Run");
 	strcat(output_file, param_line_number);
 	strcat(output_file, ".csv");
-	
+
 	individual_output_file = fopen(output_file, "w");
 	if(individual_output_file == NULL)
 		print_exit("Can't open individual output file");
-	
+
 	fprintf(individual_output_file,"ID,");
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
@@ -702,12 +698,13 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count");
 	fprintf(individual_output_file,"\n");
-	
+
 	// Loop through all individuals in the simulation
 	for(idx = 0; idx < params->n_total; idx++)
 	{
 		indiv = &(model->population[idx]);
-		
+
+
         int worker_ward_type;
         if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
             worker_ward_type = get_worker_ward_type( model, indiv->idx );
@@ -716,15 +713,15 @@ void write_individual_file(model *model, parameters *params)
 
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
-		
-		fprintf(individual_output_file, 
+
+		fprintf(individual_output_file,
             "%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->occupation_network,
-            		indiv->worker_type,
-            		worker_ward_type,
+			indiv->worker_type,
+			worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -909,13 +906,13 @@ void write_interactions( model *model )
                 fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
-                    			indiv->worker_type,
+					indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
-                    			inter->individual->worker_type,
+					inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->occupation_network
 				);
@@ -938,7 +935,7 @@ void write_ward_data( model *model)
     int ward_type, ward_idx, doctor_idx, nurse_idx;
 
     // TODO: currently only for one hospital, should loop through more hospitals when we have more
-    
+
     int hospital_idx = 0;
 
     // Concatenate file name
@@ -948,7 +945,7 @@ void write_ward_data( model *model)
     ward_output_file = fopen(output_file_name, "w");
 
     fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
-    
+
     // For each ward type
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
@@ -976,7 +973,7 @@ void write_ward_data( model *model)
     }
 
     fclose(ward_output_file);
-        
+
 }
 
 /*****************************************************************************************
@@ -1005,16 +1002,16 @@ void write_transmissions( model *model )
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
-    	fprintf(output_file , "worker_type_recipient,");
-    	fprintf(output_file , "hospital_state_recipient,");
+	fprintf(output_file , "worker_type_recipient,");
+	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
-    	fprintf(output_file , "worker_type_source,");
-    	fprintf(output_file , "hospital_state_source,");
+	fprintf(output_file , "worker_type_source,");
+	fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -1046,16 +1043,16 @@ void write_transmissions( model *model )
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
-                    			indiv->worker_type,
-                    			indiv->hospital_state,
+					indiv->worker_type,
+					indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
-                    			infection_event->infector->worker_type,
-                    			infection_event->infector_hospital_state,
+					infection_event->infector->worker_type,
+					infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
