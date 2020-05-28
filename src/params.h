@@ -56,6 +56,7 @@ typedef struct{
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care
+	double sd_time_to_critical;   // sd time from hospitalised to critical care
 
 	double mean_time_to_recover;	// mean time to recovery if hospitalisation is not required (days)
 	double sd_time_to_recover;  	// sd time to recovery if hospitalisation is not required (days)
