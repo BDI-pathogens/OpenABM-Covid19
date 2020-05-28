@@ -26,6 +26,7 @@ mean_time_to_symptoms	5.42
 sd_time_to_symptoms	2.7
 mean_time_to_hospital	5.14
 mean_time_to_critical	2.27
+sd_time_to_critical	2.27
 mean_time_to_recover	12
 sd_time_to_recover	5
 mean_time_to_death	11.74
