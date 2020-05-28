@@ -32,7 +32,9 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "quarantine_household_contacts_on_symptoms",
     "quarantine_days",
     "test_order_wait",
+    "test_order_wait_priority",
     "test_result_wait",
+    "test_result_wait_priority",
     "self_quarantine_fraction",
     "lockdown_on",
     "lockdown_elderly_on",
@@ -50,6 +52,15 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "relative_transmission_household",
     "relative_transmission_occupation",
     "relative_transmission_random",
+    "priority_test_contacts_0_9",
+    "priority_test_contacts_10_19",
+    "priority_test_contacts_20_29",
+    "priority_test_contacts_30_39",
+    "priority_test_contacts_40_49",
+    "priority_test_contacts_50_59",
+    "priority_test_contacts_60_69",
+    "priority_test_contacts_70_79",
+    "priority_test_contacts_80",
 ]
 
 

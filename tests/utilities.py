@@ -142,6 +142,19 @@ def set_app_users_fraction_all(params, fraction):
 
     return(params)
 
+def set_priority_test_contacts_all(params, n):
+    """
+    Set priority_test_contacts for all ages
+    """
+    param_names = [ "priority_test_contacts_0_9", "priority_test_contacts_10_19",  "priority_test_contacts_20_29",
+        "priority_test_contacts_30_39",  "priority_test_contacts_40_49", "priority_test_contacts_50_59",
+        "priority_test_contacts_60_69",  "priority_test_contacts_70_79", "priority_test_contacts_80" ]
+
+    for p in param_names:
+        params.set_param(p, n)
+
+    return(params)
+
 def set_hospitalisation_fraction_all(params, fraction):
     """
     Set hospitalised fraction to `fraction` for all ages

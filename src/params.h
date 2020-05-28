@@ -123,6 +123,10 @@ typedef struct{
 	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
+	int test_result_wait_priority;			// number of days to wait for a priority test result
+	int test_order_wait_priority;			// minimum number of days to wait for a priority test to be taken
+	
+	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 	
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
@@ -196,6 +200,9 @@ int get_model_param_test_on_symptoms(model *model);
 int get_model_param_test_on_traced(model *model);
 int get_model_param_test_result_wait(model *model);
 int get_model_param_test_order_wait(model *model);
+int get_model_param_test_result_wait_priority(model *model);
+int get_model_param_test_order_wait_priority(model *model);
+int get_model_param_priority_test_contacts(model *model, int idx);
 double get_model_param_app_users_fraction(model *model);
 int get_model_param_app_turned_on(model *model);
 int get_model_param_lockdown_on(model *model);
@@ -203,7 +210,7 @@ double get_model_param_risk_score( model*, int, int, int );
 double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *model);
 double get_model_param_lockdown_random_network_multiplier(model *model);
-double get_model_param_lockdown_occupation_multiplier(model *model, int index);
+double get_model_param_lockdown_occupation_multiplier(model *model, int idx);
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -223,12 +230,15 @@ int set_model_param_test_on_symptoms(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
 int set_model_param_test_result_wait(model *model, int value);
 int set_model_param_test_order_wait(model *model, int value);
+int set_model_param_test_result_wait_priority(model *model, int value);
+int set_model_param_test_order_wait_priority(model *model, int value);
+int set_model_param_priority_test_contacts(model *model, int value, int idx);
 int set_model_param_app_users_fraction(model *model, double value);
 int set_model_param_app_turned_on(model *model, int value);
 int set_model_param_lockdown_on(model *model, int value);
 int set_model_param_lockdown_house_interaction_multiplier(model *model, double value);
 int set_model_param_lockdown_random_network_multiplier(model *model, double value);
-int set_model_param_lockdown_occupation_multiplier(model *model, double value, int index);
+int set_model_param_lockdown_occupation_multiplier(model *model, double value, int idx);
 int set_model_param_lockdown_elderly_on(model *model, int value);
 int set_model_param_relative_transmission( model *model, double value, int type );
 

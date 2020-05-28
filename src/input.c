@@ -385,9 +385,21 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
+    
+    check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait_priority));
+    if( check < 1){ print_exit("Failed to read parameter test_order_wait_priority\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
+    
+	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait_priority));
+	if( check < 1){ print_exit("Failed to read parameter test_result_wait_priority\n"); };
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+    {
+        check = fscanf(parameter_file, " %i ,", &(params->priority_test_contacts[i]));
+        if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+    }
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
@@ -690,6 +702,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
+	fprintf(individual_output_file,"test_status,");
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count");
@@ -710,7 +723,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -720,6 +733,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
+			indiv->quarantine_test_result,
 			indiv->app_user,
 			indiv->random_interactions,
 			infection_count

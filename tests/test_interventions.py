@@ -17,6 +17,7 @@ import numpy as np, pandas as pd
 from scipy import optimize
 from math import sqrt
 from numpy.core.numeric import NaN
+from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -399,7 +400,99 @@ class TestClass(object):
                 ),
                 time_steps_test = 10
             )
-        ],        
+        ],
+        "test_priority_testing": [ 
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 8,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    test_on_symptoms = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = 1,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_compliance_traced_symptoms = 0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 2,
+                    test_result_wait = 1,
+                    test_order_wait_priority = 0,
+                    test_result_wait_priority = 1,
+                    daily_non_cov_symptoms_rate = 0,
+                    mean_time_to_hospital = 30,
+                    traceable_interaction_fraction = 1.0,
+                    quarantine_days = 7,
+                    test_insensitive_period = 0
+                ),
+                app_users_fraction    = 1.0,
+                priority_test_contacts = 30
+            ), 
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 8,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    test_on_symptoms = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = 1,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_compliance_traced_symptoms = 0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 2,
+                    test_result_wait = 1,
+                    test_order_wait_priority = -1,
+                    test_result_wait_priority = -1,
+                    daily_non_cov_symptoms_rate = 0,
+                    mean_time_to_hospital = 30,
+                    traceable_interaction_fraction = 1.0,
+                    quarantine_days = 7,
+                    test_insensitive_period = 0
+                ),
+                app_users_fraction    = 1.0,
+                priority_test_contacts = 30
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 8,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    test_on_symptoms = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = 1,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_compliance_traced_symptoms = 0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 2,
+                    test_result_wait = 2,
+                    test_order_wait_priority = 1,
+                    test_result_wait_priority = 1,
+                    daily_non_cov_symptoms_rate = 0,
+                    mean_time_to_hospital = 30,
+                    traceable_interaction_fraction = 1.0,
+                    quarantine_days = 7,
+                    test_insensitive_period = 0
+                ),
+                app_users_fraction    = 1.0,
+                priority_test_contacts = 30
+            ),
+        ]
     }
     """
     Test class for checking 
@@ -1203,7 +1296,175 @@ class TestClass(object):
             quarantined = pd.merge( quarantined, have_tokens, left_on = "ID", right_on = "traced_ID", how = "left" )
             
             np.testing.assert_equal( len( quarantined ) > 500, True, err_msg = "Not sufficient people quarantined to test")
-            np.testing.assert_equal( sum( quarantined.n_tokens.isna() ), 0, err_msg = "Individuals quarantined without trace tokens")         
+            np.testing.assert_equal( sum( quarantined.n_tokens.isna() ), 0, err_msg = "Individuals quarantined without trace tokens")
+
+    def test_priority_testing(self, test_params, app_users_fraction, priority_test_contacts ):
+        """
+        Tests that people who had the most contacts had a priority test
+        
+        The test needs to be run on the day the app is turned on since
+        cases do not get traced (it is assumed they would ignore any message)
+        and we need to make sure that traced=n unique contacts
          
-    
-    
+        Make traced quarantine on positive perfect (i.e. always adhered to and 
+        complete fidelity) and zero compliance when traced on symptoms. Therefore
+        the number of people in quarantine one day after a test should be everyone
+        for a priority test and only other symptomatics for non-priority tests.           
+        """
+        test_order_wait  = test_params[ "test_order_wait" ]
+        test_result_wait = test_params[ "test_result_wait" ] 
+        if test_params[ "test_order_wait_priority" ] == -1:
+            test_order_wait_priority = test_params[ "test_order_wait" ]
+        else :
+            test_order_wait_priority = test_params[ "test_order_wait_priority" ]
+        if test_params[ "test_result_wait_priority" ] == -1:
+            test_result_wait_priority = test_params[ "test_result_wait" ]
+        else :
+            test_result_wait_priority = test_params[ "test_result_wait_priority" ]
+        
+        
+         # define the times of the events
+        test_time           = test_params[ "end_time" ] - test_result_wait
+        time_non_prior_symp = test_time - test_order_wait
+        time_prior_symp     = test_time - test_order_wait_priority
+        time_prior_res      = test_time + test_result_wait_priority
+        time_non_prior_res  = test_params[ "end_time" ]
+                   
+        # set up model
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        params.set_param( "app_turn_on_time", time_non_prior_symp )
+        params = utils.set_app_users_fraction_all( params, app_users_fraction)
+        params = utils.set_priority_test_contacts_all( params, priority_test_contacts )  
+        model  = utils.get_model_swig( params )     
+         
+        # step through time to the time the non-priority cases are infected
+        for time in range( time_non_prior_symp ):
+          model.one_time_step()
+
+        model.write_individual_file()
+        non_prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        non_prior_symp_df_indiv = non_prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
+        non_prior_symp_df_indiv.rename( columns = { "test_status":"test_status_non_prior_symp"}, inplace = True )
+
+        # step through time to the time the priority cases are infected
+        for time in range( time_prior_symp - time_non_prior_symp ):
+          model.one_time_step()
+
+        model.write_individual_file()
+        prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        prior_symp_df_indiv = prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
+        prior_symp_df_indiv.rename( columns = { "test_status":"test_status_prior_symp"}, inplace = True )
+
+        # step through time the time when all the tests are taken     
+        for time in range( test_time - time_prior_symp ):
+          model.one_time_step()
+        
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # read CSV's
+        test_df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        test_df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        test_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        
+        # determine who should get a priority test:
+        # 1. get the people who developed symptoms on the last step and have the app  
+        test_df_symp = test_df_trans[ ( test_df_trans["time_symptomatic"] == time_prior_symp ) | ( test_df_trans["time_symptomatic"] == time_non_prior_symp  ) ]
+        test_df_symp[ "priority_symp" ] = ( test_df_trans["time_symptomatic"] ==  time_prior_symp ) 
+        test_df_symp = pd.merge( test_df_symp, test_df_indiv, left_on = "ID_recipient", right_on = "ID", how = "left")
+        test_df_symp = test_df_symp[ (test_df_symp["app_user"] == True ) ]
+        test_df_symp = pd.merge( test_df_symp, non_prior_symp_df_indiv, left_on = "ID_recipient", right_on = "ID", how = "left")
+        test_df_symp = pd.merge( test_df_symp, prior_symp_df_indiv, left_on = "ID_recipient", right_on = "ID", how = "left")
+        test_df_symp = test_df_symp.loc[:,["ID_recipient","test_status","test_status_prior_symp","test_status_non_prior_symp", "priority_symp"]]
+         
+        # 2. get the number of contacts using the trace_tokens
+        test_df_trace = test_df_trace[ ( test_df_trace["index_time"] == time_prior_symp ) | ( test_df_trace["index_time"] == time_non_prior_symp  ) ]
+        test_df_trace_sum = test_df_trace.groupby("index_ID").size().reset_index(name="n_interactions")
+        test_df_symp  = pd.merge( test_df_symp, test_df_trace_sum, left_on = "ID_recipient", right_on = "index_ID", how = "left" )
+        test_df_symp["priority"] = ( test_df_symp["n_interactions"] > priority_test_contacts )
+        if test_order_wait_priority != test_order_wait :
+            test_df_symp = test_df_symp[ ( test_df_symp["priority"] == test_df_symp["priority_symp"])]
+
+        # check we have sufficient priority and non-priority to test
+        np.testing.assert_equal(sum(test_df_symp["priority"]== True) > 30, True, "Not sufficient priority cases to meaningfully test" )
+        np.testing.assert_equal(sum(test_df_symp["priority"]== False) > 30, True, "Not sufficient non-priority cases to meaningfully test" )
+        
+        # check that all have test results are recorded at the test time
+        np.testing.assert_equal(sum( (test_df_symp["test_status"]!=1)), 0, "Some test results missing" )        
+       
+        # check tests are ordered for non-priority people at the correct time
+        if test_order_wait > 0 :
+            np.testing.assert_equal(sum((test_df_symp["priority"]== False) & (test_df_symp["test_status_non_prior_symp"]!= -1)), 0, "Non-priority case not ordered on symptoms" )        
+
+        # checks for difference in priority testing 
+        if test_order_wait_priority != test_order_wait :
+            # if priority tests need to wait make sure that they have the priority key
+            if test_order_wait_priority > 0 :
+                np.testing.assert_equal(sum((test_df_symp["priority"]== True) & (test_df_symp["test_status_prior_symp"]!= -3)), 0, "Priority case not ordered priority test" )        
+
+            # non tests should be ordered for priority cases at the non priority time
+            np.testing.assert_equal(sum((test_df_symp["priority"]== True) & (test_df_symp["test_status_non_prior_symp"]!= -2)), 0, "Priority case ordered test prior to symptoms" )        
+
+        # filter down so we just have the trace list we are interested in
+        test_df_trace = pd.merge( test_df_symp, test_df_trace, on = "index_ID", how = "left")
+
+        # run the model x number of steps so the priority tests have come back
+        for steps in range( time_prior_res - test_time ):
+            model.one_time_step()
+        model.write_individual_file()
+        model.write_transmissions()
+        model.write_trace_tokens()
+
+        # count the number of people who are quarantined from each traced list
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_quar  = df_indiv.loc[:,["ID","quarantined"]]
+        df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
+        df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
+        df_trace_sum = pd.merge( test_df_symp, df_quar, on = "index_ID", how = "left")
+
+        priority_not_traced = df_trace_sum[ ( df_trace_sum["priority"]==True) & ( df_trace_sum["n_quar"] != df_trace_sum["n_interactions"])]
+   
+        np.testing.assert_equal(len(df_trace_sum[(df_trace_sum["priority"]==True)]) > 30, True, "In-sufficient priority cases to test")
+        np.testing.assert_equal(len(priority_not_traced), 0, "Traced people not quarantined immediately following a priority test")
+
+        if time_prior_res != time_non_prior_res :
+            # get the people who have been uniquely traced by this index and see how many are quarantined
+            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_trace = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
+            df_trace = pd.merge( test_df_trace, df_trace, on = "traced_ID", how = "left" )
+            df_trace = df_trace[ df_trace["n_traced"]==1]
+            df_quar  = df_indiv.loc[:,["ID","quarantined"]]
+            df_quar  = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
+            df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar_uniq")
+            df_trace_sum = pd.merge( df_trace_sum, df_quar, on = "index_ID", how = "left")
+            df_trace_sum.fillna(0, inplace=True)
+          
+            np.testing.assert_equal( sum( df_trace_sum["priority"]==False ) > 30, True, "Insufficient non-priority cases to test" )
+            non_priority_traced = df_trace_sum[ ( df_trace_sum["priority"]==False) & ( df_trace_sum["n_quar_uniq"] > 1 )]
+
+            np.testing.assert_equal( len( non_priority_traced ), 0, "Non-priority index cases traced people quarantined too soon" )
+            # do a dirty measure rough measure as well to make sure not all are multiply traced
+            non_priority_traced2 = df_trace_sum[ ( df_trace_sum["priority"]==False ) & ( df_trace_sum["n_interactions"] == df_trace_sum["n_quar"] ) ]
+            np.testing.assert_equal( len( non_priority_traced2 ), 0, "Non-priority index cases traced people quarantined too soon (rough measure)" )
+        
+        # next step forward to when the non-priority test results are expected
+        for time in range( time_non_prior_res - time_prior_res ):
+          model.one_time_step()
+        model.write_individual_file()
+
+        # count the number of people who are quarantined from each traced list
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_quar  = df_indiv.loc[:,["ID","quarantined"]]
+        df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
+        df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
+        df_trace_sum = pd.merge( test_df_symp, df_quar, on = "index_ID", how = "left")
+
+        non_priority_not_traced = df_trace_sum[ ( df_trace_sum["priority"]==False) & ( df_trace_sum["n_quar"] != df_trace_sum["n_interactions"])]
+        np.testing.assert_equal(len(df_trace_sum[(df_trace_sum["priority"]==False)]) > 30, True, "In-sufficient non-priority cases to test")
+        np.testing.assert_equal(len(non_priority_not_traced), 0, "Traced people not quarantined after the longer delay of a non-prioirty test")
+        
+        del( model )

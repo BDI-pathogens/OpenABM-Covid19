@@ -635,6 +635,35 @@ int get_param_test_order_wait(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:		get_param_test_order_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_test_order_wait_priority(parameters *params)
+{
+    return params->test_order_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_test_result_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_test_result_wait_priority(parameters *params)
+{
+    return params->test_result_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_priority_test_contacts
+*  Description: Gets the value of int parameter
+******************************************************************************************/
+int get_param_priority_test_contacts(parameters *params, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return ERROR;
+
+    return params->priority_test_contacts[idx];
+}
+
+/*****************************************************************************************
 *  Name:		get_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -1424,6 +1453,37 @@ int set_param_test_result_wait(parameters *params, int value)
 int set_param_test_order_wait(parameters *params, int value)
 {
     params->test_order_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_order_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_order_wait_priority(parameters *params, int value)
+{
+    params->test_order_wait_priority = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_result_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_result_wait_priority(parameters *params, int value)
+{
+    params->test_result_wait_priority = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_priority_test_contacts
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_priority_test_contacts(parameters *params, int value, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return ERROR;
+    params->priority_test_contacts[idx] = value;
     return TRUE;
 }
 

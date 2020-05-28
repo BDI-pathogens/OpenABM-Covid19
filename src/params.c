@@ -93,7 +93,7 @@ int set_demographic_house_table(
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_daily_fraction_work_used
+*  Name: 		get_model_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)
@@ -265,6 +265,34 @@ int get_model_param_test_order_wait(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_test_result_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_result_wait_priority(model *model)
+{
+    return model->params->test_result_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_order_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_order_wait_priority(model *model)
+{
+    return model->params->test_order_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name: 		get_model_param_priority_test_contacts
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_model_param_priority_test_contacts(model *model, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return -1;
+    return model->params->priority_test_contacts[idx];
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -324,10 +352,10 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 *  Name:        get_model_param_lockdown_occupation_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_model_param_lockdown_occupation_multiplier(model *model, int index)
+double get_model_param_lockdown_occupation_multiplier(model *model, int idx)
 {
-	if ( index >= N_OCCUPATION_NETWORKS)  return FALSE;
-	return model->params->lockdown_occupation_multiplier[index];
+	if ( idx >= N_OCCUPATION_NETWORKS)  return FALSE;
+	return model->params->lockdown_occupation_multiplier[idx];
 }
 
 /*****************************************************************************************
@@ -507,6 +535,50 @@ int set_model_param_test_order_wait( model *model, int value )
     return TRUE;
 }
 
+/*****************************************************************************************
+*  Name:		set_model_param_test_result_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_result_wait_priority( model *model, int value )
+{
+    model->params->test_result_wait_priority = value;
+
+    if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
+    	model->params->test_order_wait_priority = model->params->test_order_wait;
+
+    if( value == NO_PRIORITY_TEST )
+    	model->params->test_order_wait_priority = NO_PRIORITY_TEST;
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_order_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_order_wait_priority( model *model, int value )
+{
+    model->params->test_order_wait_priority = value;
+
+    if( model->params->test_result_wait_priority == NO_PRIORITY_TEST )
+     	model->params->test_result_wait_priority = model->params->test_result_wait;
+
+     if( value == NO_PRIORITY_TEST )
+     	model->params->test_result_wait_priority = NO_PRIORITY_TEST;
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_priority_test_contacts
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_priority_test_contacts( model *model, int value, int idx )
+{
+	if (idx >= N_AGE_GROUPS) return FALSE;
+	model->params->priority_test_contacts[idx] = value;
+	return TRUE;
+}
 /*****************************************************************************************
 *  Name:		set_model_param_app_users_fraction
 *  Description: Sets the value of parameter
@@ -800,10 +872,10 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 *  Name:        set_model_param_lockdown_occupation_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_lockdown_occupation_multiplier( model *model, double value, int index )
+int set_model_param_lockdown_occupation_multiplier( model *model, double value, int idx )
 {
-	if (index >= N_OCCUPATION_NETWORKS) return FALSE;
-	model->params->lockdown_occupation_multiplier[index] = value;
+	if (idx >= N_OCCUPATION_NETWORKS) return FALSE;
+	model->params->lockdown_occupation_multiplier[idx] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );
