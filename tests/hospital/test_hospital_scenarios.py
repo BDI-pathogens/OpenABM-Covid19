@@ -221,9 +221,11 @@ class TestClass(object):
         hcw_with_patient_interaction = (df_int["worker_type_1"] != constant.NOT_HEALTHCARE_WORKER) & (df_int["type"] > constant.HOSPITAL_WORK) & (df_int["type"] <= constant.HOSPITAL_NURSE_PATIENT_ICU)
         hcw_with_patient_interaction = df_int[hcw_with_patient_interaction]
 
+        hcw_with_patient_interaction.to_csv("hcw_with_patient_interaction.csv")
+
         # make sure these healthcare workers are infected at some point
         for index, row in hcw_with_patient_interaction.iterrows():
-            hcw_infected = time_step_df["pdx"] == row["ID"] & time_step_df["disease_state"] >= constant.EVENT_TYPES.PRESYMPTOMATIC.value
+            hcw_infected = time_step_df["pdx"] == row["ID_1"] & time_step_df["disease_state"] >= constant.EVENT_TYPES.PRESYMPTOMATIC.value
             hcw_infected = time_step_df[hcw_infected]
             assert len(hcw_infected.index) > 0
 
