@@ -48,7 +48,8 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
-	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
+	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
+
 }
 
 /*****************************************************************************************
@@ -168,7 +169,7 @@ void transmit_virus_by_type(
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-        n_infected  = list->n_daily_current[ day];
+		n_infected  = list->n_daily_current[ day];
 		next_event  = list->events[ day ];
 
 		for( idx = 0; idx < n_infected; idx++ )
@@ -233,14 +234,15 @@ void transmit_virus_by_type(
 ******************************************************************************************/
 void transmit_virus( model *model )
 {
-    transmit_virus_by_type( model, PRESYMPTOMATIC );
-    transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
-    transmit_virus_by_type( model, SYMPTOMATIC );
-    transmit_virus_by_type( model, SYMPTOMATIC_MILD );
-    transmit_virus_by_type( model, ASYMPTOMATIC );
-    transmit_virus_by_type( model, HOSPITALISED );
-    transmit_virus_by_type( model, CRITICAL );
-    transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
+	transmit_virus_by_type( model, PRESYMPTOMATIC );
+	transmit_virus_by_type( model, PRESYMPTOMATIC_MILD );
+	transmit_virus_by_type( model, SYMPTOMATIC );
+	transmit_virus_by_type( model, SYMPTOMATIC_MILD );
+	transmit_virus_by_type( model, ASYMPTOMATIC );
+	transmit_virus_by_type( model, HOSPITALISED );
+	transmit_virus_by_type( model, CRITICAL );
+	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
+
 }
 
 /*****************************************************************************************
@@ -372,7 +374,6 @@ void transition_to_hospitalised( model *model, individual *indiv )
                 transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
             else
                 transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
-
         }
         else
             transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED );
@@ -407,6 +408,7 @@ void transition_to_critical( model *model, individual *indiv )
     }
 
 	intervention_on_critical( model, indiv );
+
 }
 
 /*****************************************************************************************
