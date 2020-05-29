@@ -70,6 +70,7 @@ class TestSetObjects:
             param_line_number=1,
         )
         p.set_param("lockdown_occupation_multiplier_primary_network", 100.0)
+        p.set_param("lockdown_occupation_multiplier_working_network", 0.2)
         assert p.get_param("lockdown_occupation_multiplier_primary_network") == 100.0
         assert p.get_param("lockdown_occupation_multiplier_working_network") == 0.2
 
@@ -90,14 +91,24 @@ class TestSetObjects:
             model.get_param(f"daily_fraction_work_used{age.name}")
             for age in OccupationNetworkEnum
         ]
-        for non_scaled_i, scaled_i in zip(non_scaled, scaled):
-            assert non_scaled_i * 0.2 == scaled_i
+        multipliers = [
+            model.get_param(f"lockdown_occupation_multiplier{age.name}")
+            for age in OccupationNetworkEnum
+        ]
+        
+        for non_scaled_i, scaled_i, m in zip(non_scaled, scaled, multipliers):
+            assert non_scaled_i * m == scaled_i
+        
+        
         model.update_running_params("lockdown_occupation_multiplier_primary_network", 10.0)
         scaled = [
             model.get_param(f"daily_fraction_work_used{age.name}")
             for age in OccupationNetworkEnum
         ]
-        for non_scaled_i, scaled_i, factor in zip(
-            non_scaled, scaled, [10.0, 0.2, 0.2, 0.2, 0.2,]
-        ):
-            assert non_scaled_i * factor == scaled_i
+        multipliers = [
+            model.get_param(f"lockdown_occupation_multiplier{age.name}")
+            for age in OccupationNetworkEnum
+        ]
+        
+        for non_scaled_i, scaled_i, m in zip(non_scaled, scaled, multipliers):
+            assert non_scaled_i * m == scaled_i

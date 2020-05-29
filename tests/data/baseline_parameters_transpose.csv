@@ -21,7 +21,7 @@ end_time	200
 n_seed_infection	5
 mean_infectious_period	6
 sd_infectious_period	2.5
-infectious_rate	5.75
+infectious_rate	5.64
 mean_time_to_symptoms	5.42
 sd_time_to_symptoms	2.7
 mean_time_to_hospital	5.14
@@ -164,12 +164,12 @@ app_users_fraction_60_69	0.7
 app_users_fraction_70_79	0.48
 app_users_fraction_80	0.32
 app_turn_on_time	10000
-lockdown_occupation_multiplier_primary_network	0.2
-lockdown_occupation_multiplier_secondary_network	0.2
-lockdown_occupation_multiplier_working_network	0.2
-lockdown_occupation_multiplier_retired_network	0.2
-lockdown_occupation_multiplier_elderly_network	0.2
-lockdown_random_network_multiplier	0.2
+lockdown_occupation_multiplier_primary_network	0.22
+lockdown_occupation_multiplier_secondary_network	0.22
+lockdown_occupation_multiplier_working_network	0.22
+lockdown_occupation_multiplier_retired_network	0.22
+lockdown_occupation_multiplier_elderly_network	0.22
+lockdown_random_network_multiplier	0.22
 lockdown_house_interaction_multiplier	1.5
 lockdown_time_on	10000
 lockdown_time_off	10000
