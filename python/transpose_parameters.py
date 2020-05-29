@@ -36,4 +36,4 @@ if __name__ == "__main__":
 
     # Write to file
     with open(wide_parameter_file, "w+") as f:
-        f.write(header + "\n" + line)
+        f.write(header + "\n" + line + "\n")
