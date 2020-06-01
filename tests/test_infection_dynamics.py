@@ -318,8 +318,7 @@ class TestClass(object):
                     relative_transmission_household = 1,
                     relative_transmission_occupation = 1,
                     relative_transmission_random = 1,          
-                    end_time = 20,
-                    hospital_on = 0
+                    end_time = 20
                 ),
                 update_relative_transmission_household = 0.9,
                 update_relative_transmission_occupation = 0.8,
@@ -966,8 +965,7 @@ class TestClass(object):
         # run the baseline parameters
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
-
+            params.set_param( param, value )  
         model  = utils.get_model_swig( params )
         
         for time in range(max_time):
@@ -983,7 +981,7 @@ class TestClass(object):
         # run the baseline parameters then at base-line update one
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
+            params.set_param( param, value )  
         model  = utils.get_model_swig( params )
         
         for time in range(test_params["end_time"]):
