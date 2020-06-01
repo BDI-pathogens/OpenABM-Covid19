@@ -1,11 +1,14 @@
 import abc
 import os
 from typing import Tuple, Mapping, Any, Union, Optional, Sequence
+import pickle
 
 import numpy as np
 import pandas as pd
 
-from adapter_covid19.enums import Region, Sector, Age
+from adapter_covid19.enums import Region, Sector, Age, FinalUse, PrimaryInput, Decile
+
+ALL_ENUMS = [Region, Sector, Age, FinalUse, PrimaryInput, Decile]
 
 
 class Reader:
@@ -32,6 +35,11 @@ class Reader:
         if orient.lower() == "dataframe":
             return data
         return data.to_dict(orient)
+
+    def load_pkl(self, filename: str,) -> Any:
+        with open(self._get_filepath(f"{filename}.pkl"), "rb") as f:
+            data = pickle.load(f)
+        return data
 
 
 class DataSource(abc.ABC):
@@ -97,6 +105,47 @@ class RegionSectorAgeDataSource(DataSource):
         if len(data) > 1:
             return data
         return next(iter(data.values()))
+
+
+class RegionDecileSource(DataSource):
+    def load(self, reader: Reader) -> Mapping[Tuple[Region, Decile], float]:
+        frame = reader.load_csv(self.filename)
+        data = {
+            (Region[t.Region], Decile[t.Decile]): t[-1]
+            for t in frame.itertuples(index=False)
+        }
+        return data
+
+
+class RegionSectorDecileSource(DataSource):
+    def load(self, reader: Reader) -> Mapping[Tuple[Region, Sector, Decile], float]:
+        frame = reader.load_csv(self.filename)
+        data = {
+            (Region[t.Region], Sector[t.Sector], Decile[t.Decile]): t[-1]
+            for t in frame.itertuples(index=False)
+        }
+        return data
+
+
+class DataFrameDataSource(DataSource):
+    def load(self, reader: Reader) -> pd.DataFrame:
+        frame = reader.load_csv(self.filename)
+        frame = frame.set_index(frame.columns[0])
+        for enum in ALL_ENUMS:
+            try:
+                frame = frame.rename(index=lambda x: enum[x])
+            except KeyError:
+                pass
+            else:
+                break
+        for enum in ALL_ENUMS:
+            try:
+                frame = frame.rename(columns=lambda x: enum[x])
+            except KeyError:
+                pass
+            else:
+                break
+        return frame
 
 
 class WeightMatrix(DataSource):

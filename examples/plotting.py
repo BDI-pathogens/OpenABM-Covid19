@@ -222,7 +222,7 @@ def plot_parameter_assumptions(df_parameters, xlimits = [0, 30], lw = 3):
         DataFrame of parameter values as input first input argument to the OpenABM-Covid19 model
         This plotting scripts expects the following columns within this dataframe: 
             mean_time_to_hospital
-            mean_time_to_critical
+            mean_time_to_critical, sd_time_to_critical
             mean_time_to_symptoms, sd_time_to_symptoms
             mean_infectious_period, sd_infectious_period
             mean_time_to_recover, sd_time_to_recover
@@ -265,23 +265,21 @@ def plot_parameter_assumptions(df_parameters, xlimits = [0, 30], lw = 3):
     ax[0,0].spines["right"].set_visible(False)
     
     ####################################
-    # Bernoulli of mean time to critical
+    # Gamma of mean time to critical
     ####################################
     
-    height1 = np.ceil(df.mean_time_to_critical[0]) - df.mean_time_to_critical[0]
-    height2 = df.mean_time_to_critical[0] - np.floor(df.mean_time_to_critical[0])
-    
-    x1 = np.floor(df.mean_time_to_critical.values[0])
-    x2 = np.ceil(df.mean_time_to_critical.values[0])
-    ax[1,0].bar([x1, x2], [height1, height2], color = "#0072B2")
-    
-    ax[1,0].set_ylabel("Density")
-    ax[1,0].set_xticks([x1, x2])
-    ax[1,0].set_ylim([0, 1.0])
+    a, b = gamma_params(df.mean_time_to_critical.values, df.sd_time_to_critical.values)
+    ax[1,0].plot(x, gamma.pdf(x, a = a, loc = 0, scale = b), linewidth= lw, color = "#0072B2")
+    ax[1,0].axvline(df.mean_time_to_critical.values, color = "#D55E00", 
+        linestyle = "dashed", alpha = 0.7)
     ax[1,0].set_xlabel("Time to critical\n(from hospitalised; days)")
     ax[1,0].set_title("")
     ax[1,0].spines["top"].set_visible(False)
     ax[1,0].spines["right"].set_visible(False)
+    ax[1,0].text(0.9, 0.7, 'mean: {}\nsd: {}'.format(df.mean_time_to_critical.values[0],
+        df.sd_time_to_critical.values[0]), 
+        ha = 'right', va = 'center', transform = ax[1,0].transAxes)
+    
     
     ################################
     # Gamma of mean time to symptoms

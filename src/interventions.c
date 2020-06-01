@@ -596,7 +596,7 @@ void intervention_trace_token_release( model *model, individual *indiv )
 		contact    = token->individual;
 		remove_one_trace_token( model, token );
 
-		if( contact->trace_tokens == NULL & contact->index_trace_token == NULL )
+		if( (contact->trace_tokens == NULL) & (contact->index_trace_token == NULL) )
 			intervention_quarantine_release( model, contact );
 	}
 }

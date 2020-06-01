@@ -489,13 +489,13 @@ double get_model_param_risk_score(
 	int age_susceptible
 )
 {
-	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+	if( (day < 0) | (day >= MAX_DAILY_INTERACTIONS_KEPT) )
 		return UNKNOWN;
 
-	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
 		return UNKNOWN;
 
-	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+	if( (age_susceptible < 0) | (age_susceptible >= N_AGE_GROUPS) )
 		return UNKNOWN;
 
 	return model->params->risk_score[ day ][ age_infector ][ age_susceptible ];
@@ -511,10 +511,10 @@ double get_model_param_risk_score_household(
 	int age_susceptible
 )
 {
-	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
 		return UNKNOWN;
 
-	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+	if( (age_susceptible < 0) | (age_susceptible >= N_AGE_GROUPS) )
 		return UNKNOWN;
 
 	return model->params->risk_score_household[ age_infector ][ age_susceptible ];
@@ -532,13 +532,13 @@ int set_model_param_risk_score(
 	double value
 )
 {
-	if( day < 0 | day >= MAX_DAILY_INTERACTIONS_KEPT )
+	if( (day < 0) | (day >= MAX_DAILY_INTERACTIONS_KEPT) )
 		return FALSE;
 
-	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
 		return FALSE;
 
-	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+	if( (age_susceptible < 0) | (age_susceptible >= N_AGE_GROUPS) )
 		return FALSE;
 
 	model->params->risk_score[ day ][ age_infector ][ age_susceptible ] = value;
@@ -556,10 +556,10 @@ int set_model_param_risk_score_household(
 	double value
 )
 {
-	if( age_infector < 0 | age_infector >= N_AGE_GROUPS )
+	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
 		return FALSE;
 
-	if( age_susceptible < 0 | age_susceptible >= N_AGE_GROUPS )
+	if( (age_susceptible < 0) | (age_susceptible >= N_AGE_GROUPS) )
 		return FALSE;
 
 	model->params->risk_score_household[ age_infector ][ age_susceptible ] = value;

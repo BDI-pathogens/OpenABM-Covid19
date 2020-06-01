@@ -996,20 +996,20 @@ class TestClass(object):
         df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
         # check the change in values is in tolerance - wide tolerance bands due to saturation effects
-        base     = df_base.loc[0,{"n_infections"}]["n_infections"] 
+        base     = df_base.loc[0,{"n_infections"}]["n_infections"]
         expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
         actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
-                
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "household network: Number of transmissions did not change by expected amount after updating parameter")
+
         base     = df_base.loc[1,{"n_infections"}]["n_infections"] 
         expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
         actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "occupation network: Number of transmissions did not change by expected amount after updating parameter")
         
         base     = df_base.loc[2,{"n_infections"}]["n_infections"] 
         expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
         actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "random network: Number of transmissions did not change by expected amount after updating parameter")
        
     
       
