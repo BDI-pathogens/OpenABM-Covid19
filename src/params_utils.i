@@ -269,6 +269,15 @@ double get_param_mean_time_to_critical(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name: 		get_param_sd_time_to_critical
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_sd_time_to_critical(parameters *params)
+{
+    return params->sd_time_to_critical;
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_mean_time_to_recover
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1033,6 +1042,16 @@ int set_param_mean_time_to_hospital(parameters *params, double value)
 int set_param_mean_time_to_critical(parameters *params, double value)
 {
     params->mean_time_to_critical = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_sd_time_to_critical
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+int set_param_sd_time_to_critical(parameters *params, double value)
+{
+    params->sd_time_to_critical = value;
     return TRUE;
 }
 
