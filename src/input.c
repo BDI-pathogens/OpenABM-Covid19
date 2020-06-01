@@ -36,17 +36,17 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	}else{
 		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN );
 	}
-	
+
 	if(argc > 2)
 	{
 		param_line_number = (int) strtol(argv[2], NULL, 10);
-		
+
 		if(param_line_number <= 0)
 			print_exit("Error Invalid line number, line number starts from 1");
 	}else{
 		param_line_number = 1;
 	}
-	
+
 	if(argc > 3)
 	{
 		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
@@ -92,18 +92,14 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
-	
+
 	strncpy(params->input_param_file, input_param_file, sizeof(params->input_param_file) - 1);
 	params->input_param_file[sizeof(params->input_param_file) - 1] = '\0';
 
-	strncpy(params->input_household_file, input_household_file, 
+	strncpy(params->input_household_file, input_household_file,
 		sizeof(params->input_household_file) - 1);
 	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
-	
-	strncpy(params->input_household_file, input_household_file, 
-		sizeof(params->input_household_file) - 1);
-	params->input_household_file[sizeof(params->input_household_file) - 1] = '\0';
-	
+
 	strncpy(params->output_file_dir, output_file_dir, sizeof(params->output_file_dir) - 1);
 	params->output_file_dir[sizeof(params->output_file_dir) - 1] = '\0';
 }
@@ -195,6 +191,9 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
     if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
 
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_critical));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_critical\n"); };
+
     check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
     if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
 
@@ -230,6 +229,7 @@ void read_param_file( parameters *params)
 
     check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
     if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
+
 
     for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
     {
@@ -292,8 +292,8 @@ void read_param_file( parameters *params)
 
     for( i = 0; i < N_AGE_GROUPS; i++ )
     {
-        check = fscanf(parameter_file, " %lf ,", &(params->icu_allocation[i]));
-        if( check < 1){ print_exit("Failed to read parameter icu_allocation\n"); };
+        check = fscanf(parameter_file, " %lf ,", &(params->location_death_icu[i]));
+        if( check < 1){ print_exit("Failed to read parameter location_death_icu\n"); };
     }
 
     check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
@@ -530,7 +530,138 @@ void write_output_files(model *model, parameters *params)
         if( params->hospital_on )
             write_ward_data( model );
 	}
-}	
+}
+
+
+/*****************************************************************************************
+*  Name:		write_quarantine_reasons
+*  Description: Write (csv) files of reasons individuals are quarantined
+******************************************************************************************/
+
+void write_quarantine_reasons(model *model, parameters *params)
+{
+	char output_file_name[INPUT_CHAR_LEN];
+	long idx, jdx;
+	int quarantine_reasons[N_QUARANTINE_REASONS], quarantine_reason, n_reasons, i, n;
+	int index_true_status, index_from_household;
+	long index_id, index_house_no;
+	
+	individual *indiv;
+	trace_token *index_token;
+	long *members;
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file_name, model->params->output_file_dir);
+	strcat(output_file_name, "/quarantine_reasons_file_Run");
+	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, ".csv");
+	
+	FILE *quarantine_reasons_output_file;
+	quarantine_reasons_output_file = fopen(output_file_name, "w");
+	if(quarantine_reasons_output_file == NULL)
+		print_exit("Can't open quarantine_reasons output file");
+	
+	fprintf(quarantine_reasons_output_file,"time,");
+	fprintf(quarantine_reasons_output_file,"ID,");
+	fprintf(quarantine_reasons_output_file,"status,");
+	fprintf(quarantine_reasons_output_file,"house_no,");
+	fprintf(quarantine_reasons_output_file,"ID_index,");
+	fprintf(quarantine_reasons_output_file,"status_index,");
+	fprintf(quarantine_reasons_output_file,"house_no_index,");
+	fprintf(quarantine_reasons_output_file,"quarantine_reason,");
+	fprintf(quarantine_reasons_output_file,"n_reasons");
+	fprintf(quarantine_reasons_output_file,"\n");
+	
+	for(idx = 0; idx < params->n_total; idx++)
+	{
+		indiv = &(model->population[idx]);
+		
+		if(indiv->quarantined == TRUE){
+			
+			for(i = 0; i < N_QUARANTINE_REASONS; i++)
+				quarantine_reasons[i] = FALSE;
+			
+			index_true_status = UNKNOWN;
+			index_id = UNKNOWN;
+			index_house_no = UNKNOWN;
+			
+			// Check if this individual has non-NULL trace_tokens attribute
+			if( indiv->index_trace_token != NULL ){
+				
+				// Quarantined from self-reported symptoms
+				if(indiv->index_trace_token->index_status == SYMPTOMS_ONLY)
+					quarantine_reasons[QR_SELF_SYMPTOMS] = TRUE;
+				
+				// Quarantined from self positive
+				if(indiv->index_trace_token->index_status == POSITIVE_TEST)
+					quarantine_reasons[QR_SELF_POSITIVE] = TRUE;
+				
+				index_true_status = indiv->status;
+				index_id = indiv->idx;
+				index_house_no = indiv->house_no;
+			}
+			
+			if( indiv->trace_tokens != NULL ){
+				// Find original index and check if the index was a household member
+				n = model->household_directory->n_jdx[indiv->house_no];
+				members = model->household_directory->val[indiv->house_no];
+				
+				index_token = indiv->trace_tokens;
+				while( index_token->last_index != NULL )
+					index_token = index_token->last_index;
+
+				for(jdx = 0; jdx < n; jdx++){
+					if( index_token->individual->idx == members[jdx] ){
+						index_from_household = TRUE;
+					}
+				}
+				
+				if(index_from_household == TRUE){
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_HOUSEHOLD_SYMPTOMS] = TRUE;
+			
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_HOUSEHOLD_POSITIVE] = TRUE;
+				}else{
+					if(index_token->index_status == SYMPTOMS_ONLY)
+						quarantine_reasons[QR_TRACE_SYMPTOMS] = TRUE;
+					
+					if(index_token->index_status == POSITIVE_TEST)
+						quarantine_reasons[QR_TRACE_POSITIVE] = TRUE;
+				}
+				index_id = index_token->individual->idx;
+				index_true_status = index_token->individual->status;
+				index_house_no = index_token->individual->house_no;
+			}
+			
+			// Resolve multiple reasons for quarantine into one reason
+			quarantine_reason = resolve_quarantine_reasons(quarantine_reasons);
+			
+			n_reasons = 0;
+			for(i = 0; i < N_QUARANTINE_REASONS; i++){
+				if(quarantine_reasons[i] == TRUE)
+					n_reasons += 1;
+			}
+			
+			fprintf(quarantine_reasons_output_file, 
+				"%d,%li,%d,%li,%li,%d,%li,%d,%d\n",
+				model->time,
+				indiv->idx,
+				indiv->status,
+				indiv->house_no,
+				index_id, 
+				index_true_status,
+				index_house_no,
+				quarantine_reason,
+				n_reasons);
+		}
+	}
+	fclose(quarantine_reasons_output_file);
+}
+
 
 /*****************************************************************************************
 *  Name:		write_individual_file
@@ -538,26 +669,27 @@ void write_output_files(model *model, parameters *params)
 ******************************************************************************************/
 void write_individual_file(model *model, parameters *params)
 {
+
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
 
 	int infection_count;
 	long idx;
-	
+
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", params->param_line_number);
-	
+
 	// Concatenate file name
 	strcpy(output_file, params->output_file_dir);
 	strcat(output_file, "/individual_file_Run");
 	strcat(output_file, param_line_number);
 	strcat(output_file, ".csv");
-	
+
 	individual_output_file = fopen(output_file, "w");
 	if(individual_output_file == NULL)
 		print_exit("Can't open individual output file");
-	
+
 	fprintf(individual_output_file,"ID,");
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
@@ -571,7 +703,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count");
 	fprintf(individual_output_file,"\n");
-	
+
 	// Loop through all individuals in the simulation
 	for(idx = 0; idx < params->n_total; idx++)
 	{
@@ -585,8 +717,11 @@ void write_individual_file(model *model, parameters *params)
 
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
-		
-		fprintf(individual_output_file, 
+
+		/* Count the number of times an individual has been infected */
+		infection_count = count_infection_events( indiv );
+
+		fprintf(individual_output_file,
             "%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
@@ -693,40 +828,40 @@ void print_interactions_averages(model *model, int header)
 ******************************************************************************************/
 void read_household_demographics_file( parameters *params)
 {
-    FILE *hh_file;
-    int check, value, adx;
-    long hdx, fileSize;
-    char lineBuffer[80];
+	FILE *hh_file;
+	int check, value, adx;
+	long hdx, fileSize;
+	char lineBuffer[80];
 
-    // get the length of the reference household file
-    hh_file = fopen(params->input_household_file, "r");
-    if(hh_file == NULL)
-        print_exit("Can't open household demographics file");
-    fileSize = 0;
-    while( fgets(lineBuffer, 80, hh_file ) )
-        fileSize++;
-    fclose( hh_file );
-    params->N_REFERENCE_HOUSEHOLDS = fileSize - 1;
+	// get the length of the reference household file
+	hh_file = fopen(params->input_household_file, "r");
+	if(hh_file == NULL)
+		print_exit("Can't open household demographics file");
+	fileSize = 0;
+	while( fgets(lineBuffer, 80, hh_file ) )
+		fileSize++;
+	fclose( hh_file );
+	params->N_REFERENCE_HOUSEHOLDS = fileSize - 1;
 
-    if( params->N_REFERENCE_HOUSEHOLDS < 100 )
-        print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
+	if( params->N_REFERENCE_HOUSEHOLDS < 100 )
+		print_exit( "Reference household panel too small (<100) - will not be able to assign household structure");
 
-    // allocate memory on the params object
-    set_up_reference_household_memory(params);
+	// allocate memory on the params object
+	set_up_reference_household_memory(params);
 
-    // read in the data (throw away the header line)
-    hh_file = fopen(params->input_household_file, "r");
-    fscanf(hh_file, "%*[^\n]\n");
-    for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
-        for(adx = 0; adx < N_AGE_GROUPS; adx++){
-            // Read and attach parameter values to parameter structure
-            check = fscanf(hh_file, " %d ,", &value);
-            if( check < 1){ print_exit("Failed to read household demographics file\n"); };
+	// read in the data (throw away the header line)
+	hh_file = fopen(params->input_household_file, "r");
+	fscanf(hh_file, "%*[^\n]\n");
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		for(adx = 0; adx < N_AGE_GROUPS; adx++){
+			// Read and attach parameter values to parameter structure
+			check = fscanf(hh_file, " %d ,", &value);
+			if( check < 1){ print_exit("Failed to read household demographics file\n"); };
 
-            params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
-        }
-    }
-    fclose(hh_file);
+			params->REFERENCE_HOUSEHOLDS[hdx][adx] = value;
+		}
+	}
+	fclose(hh_file);
 }
 
 
@@ -1148,4 +1283,3 @@ int get_worker_ward_type( model *model, int pdx ) {
     }
     return indiv_ward_type;
 }
-

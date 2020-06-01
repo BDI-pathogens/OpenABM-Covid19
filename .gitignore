@@ -12,6 +12,7 @@ examples/results/*.csv
 __pycache__
 .mypy_cache/
 **/*.egg-info
+*.pkl
 
 # Eclipse-related files
 .project
