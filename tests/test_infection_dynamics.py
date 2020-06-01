@@ -318,7 +318,8 @@ class TestClass(object):
                     relative_transmission_household = 1,
                     relative_transmission_occupation = 1,
                     relative_transmission_random = 1,          
-                    end_time = 20
+                    end_time = 20,
+                    hospital_on = 0
                 ),
                 update_relative_transmission_household = 0.9,
                 update_relative_transmission_occupation = 0.8,
