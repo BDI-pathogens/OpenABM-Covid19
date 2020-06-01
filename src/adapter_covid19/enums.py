@@ -95,9 +95,133 @@ def age10y_to_age(age: Mapping[Age10Y, float]) -> Mapping[Age, float]:
     }
 
 
+class AgeAlternate(OrderedEnum):
+    A18 = "18-21"
+    A22 = "22-29"
+    A30 = "30-39"
+    A40 = "40-49"
+    A50 = "50-59"
+    A60 = "60+"
+
+
+class Occupation(OrderedEnum):
+    O11 = "11 Corporate Managers And Directors"
+    O12 = "12 Other Managers And Proprietors"
+    O21 = "21 Science, Engineering, Tech Professionals"
+    O22 = "22 Health Professionals"
+    O23 = "23 Teaching And Educational Professionals"
+    O24 = "24 Business, Media And Public Service Professionals"
+    O31 = "31 Science, Engineering ,Tech Associate Prof"
+    O32 = "32 Health And Social Care Associate Professionals"
+    O33 = "33 Protective Service Occupations"
+    O34 = "34 Culture, Media And Sports Occupations"
+    O35 = "35 Business, Public Service Associate Prof"
+    O41 = "41 Administrative Occupations"
+    O42 = "42 Secretarial And Related Occupations"
+    O51 = "51 Skilled Agricultural And Related Trades"
+    O52 = "52 Skilled Metal, Electrical, Electronic Trades"
+    O53 = "53 Skilled Construction And Building Trades"
+    O54 = "54 Textiles, Printing And Other Skilled Trades"
+    O61 = "61 Caring Personal Service Occupations"
+    O62 = "62 Leisure, Travel And Related Personal Servic"
+    O71 = "71 Sales Occupations"
+    O72 = "72 Customer Service Occupations"
+    O81 = "81 Process, Plant And Machine Operatives"
+    O82 = "82 Transport And Drivers And Operatives"
+    O91 = "91 Elementary Trades And Related Occupations"
+    O92 = "92 Elementary Administration And Service Occupations"
+
+
 class LabourState(OrderedEnum):
-    ill = enum.auto()
-    wfh = enum.auto()
-    working = enum.auto()
-    furloughed = enum.auto()
-    unemployed = enum.auto()
+    ILL = enum.auto()
+    WFH = enum.auto()
+    WORKING = enum.auto()
+    FURLOUGHED = enum.auto()
+    UNEMPLOYED = enum.auto()
+
+
+class HealthState(OrderedEnum):
+    HEALTHY = enum.auto()
+    ILL = enum.auto()
+    DEAD = enum.auto()
+
+
+class EmploymentState(OrderedEnum):
+    WFO = enum.auto()
+    WFH = enum.auto()
+    FURLOUGHED = enum.auto()
+    UNEMPLOYED = enum.auto()
+
+
+class WorkerState(OrderedEnum):
+    # Healthy and working
+    HEALTHY_WFO = enum.auto()
+    HEALTHY_WFH = enum.auto()
+    # Healthy and not working
+    HEALTHY_FURLOUGHED = enum.auto()
+    HEALTHY_UNEMPLOYED = enum.auto()
+    # Ill
+    ILL_WFO = enum.auto()
+    ILL_WFH = enum.auto()
+    ILL_FURLOUGHED = enum.auto()
+    ILL_UNEMPLOYED = enum.auto()
+    # Dead
+    DEAD = enum.auto()
+
+
+class WorkerStateConditional(OrderedEnum):
+    # Healthy and working
+    WFH = enum.auto()
+    FURLOUGHED = enum.auto()
+    NOT_EMPLOYED = enum.auto()
+    # Ill
+    ILL_WFO = enum.auto()
+    ILL_WFH = enum.auto()
+    ILL_FURLOUGHED = enum.auto()
+    ILL_UNEMPLOYED = enum.auto()
+    # Dead
+    DEAD = enum.auto()
+
+
+class PrimaryInput(OrderedEnum):
+    IMPORTS = "imports"
+    TAXES_PRODUCTS = "taxes on products"
+    TAXES_PRODUCTION = "taxes on production"
+    COMPENSATION = "compensation"
+    FIXED_CAPITAL_CONSUMPTION = "fixed capital consumption"
+    NET_OPERATING_SURPLUS = "net operating surplus"
+
+
+class FinalUse(OrderedEnum):
+    C = "consumption"
+    K = "capital formation"
+    E = "exports"
+
+
+class M(OrderedEnum):
+    I = "imports"
+    L = "labour"
+    K = "capital"
+
+
+class Decile(OrderedEnum):
+    one = "1"
+    two = "2"
+    three = "3"
+    four = "4"
+    five = "5"
+    six = "6"
+    seven = "7"
+    eight = "8"
+    nine = "9"
+
+
+class BusinessSize(OrderedEnum):
+    large = "large-cap"
+    sme = "small-medium-enterprise"
+
+
+class BackToWork(OrderedEnum):
+    naive = enum.auto()
+    greedy = enum.auto()
+    constrained = enum.auto()

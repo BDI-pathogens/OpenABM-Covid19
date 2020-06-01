@@ -6,6 +6,7 @@
 #include "params.h"
 #include "constant.h"
 #include "input.h"
+#include "individual.h"
 %}
 
 %rename (create_model) new_model(parameters *params);
@@ -17,5 +18,6 @@
 %include "params.h"
 %include "constant.h"
 %include "input.h"
+%include "individual.h"
 %include model_utils.i 
 %include params_utils.i
