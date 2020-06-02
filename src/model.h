@@ -73,7 +73,7 @@ struct model{
 
 	long n_quarantine_days;
 
-    hospital *hospitals;
+    	hospital *hospitals;
 };
 
 struct event{

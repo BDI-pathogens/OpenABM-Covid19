@@ -692,6 +692,10 @@ void add_interactions_from_network(
         inter1 = &(model->interactions[ all_idx++ ]);
         inter2 = &(model->interactions[ all_idx++ ]);
 
+//        if(network->type == 4 || network->type == 5){
+//             printf(itoa(MAX_DAILY_INTERACTIONS_KEPT));
+//        }
+
         inter1->type       = network->type;
         inter1->traceable  = UNKNOWN;
         inter1->individual = indiv2;
