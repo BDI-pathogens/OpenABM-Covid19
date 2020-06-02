@@ -247,7 +247,7 @@ class TestClass(object):
 
         # make sure these healthcare workers are infected at some point
         for index, row in hcw_with_patient_interaction.iterrows():
-            hcw_infected = time_step_df["pdx"] == row["ID"] & int(time_step_df["disease_state"]) >= constant.EVENT_TYPES.PRESYMPTOMATIC.value
+            hcw_infected = (time_step_df["pdx"] == row["ID_1"]) & (time_step_df["disease_state"] >= constant.EVENT_TYPES.PRESYMPTOMATIC.value)
             hcw_infected = time_step_df[hcw_infected]
             assert len(hcw_infected.index) > 0
 
