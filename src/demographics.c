@@ -28,7 +28,7 @@
 ******************************************************************************************/
 void set_up_allocate_work_places( model *model )
 {
-    int adx, ndx;
+    	int adx, ndx;
 	long pdx, n_adult;
 	long pop_net_raw[N_OCCUPATION_NETWORKS];
 	double other;

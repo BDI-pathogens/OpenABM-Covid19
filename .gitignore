@@ -58,9 +58,10 @@ venv/*
 src/covid19.py
 src/covid19_wrap.c
 
-*.ipynb
 sandbox/*.csv
 examples/*.csv
 examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
 /Debug/
+
+.idea
