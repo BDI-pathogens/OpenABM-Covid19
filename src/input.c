@@ -27,7 +27,7 @@ void read_command_line_args( parameters *params, int argc, char **argv )
     int param_line_number, hospital_param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
-    char hospital_input_param_file[ INPUT_CHAR_LEN ];
+	char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
 
 	if(argc > 1)
@@ -67,7 +67,6 @@ void read_command_line_args( parameters *params, int argc, char **argv )
         params->sys_write_hospital = FALSE;
 	}
 
-
     if(argc > 5)
     {
         strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN );
@@ -86,9 +85,9 @@ void read_command_line_args( parameters *params, int argc, char **argv )
         hospital_param_line_number = 1;
     }
 
-    params->hospital_param_line_number = hospital_param_line_number;
-    strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
-    params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
+    	params->hospital_param_line_number = hospital_param_line_number;
+    	strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
+    	params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
@@ -215,20 +214,20 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->asymptomatic_infectious_factor));
     if( check < 1){ print_exit("Failed to read parameter asymptomatic_infectious_factor\n"); };
 
-    for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %lf ,", &(params->mild_fraction[i]));
-        if( check < 1){ print_exit("Failed to read parameter mild_fraction\n"); };
-    }
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+	{
+		check = fscanf(parameter_file, " %lf ,", &(params->mild_fraction[i]));
+		if( check < 1){ print_exit("Failed to read parameter mild_fraction\n"); };
+	}
 
     check = fscanf(parameter_file, " %lf ,", &(params->mild_infectious_factor));
     if( check < 1){ print_exit("Failed to read parameter mild_infectious_factor\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
-    if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->mean_asymptomatic_to_recovery));
+	if( check < 1){ print_exit("Failed to read parameter mean_asymptomatic_to_recovery\n"); };
 
-    check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
-    if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
+	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
 
 
     for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
@@ -425,11 +424,11 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_on));
     if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_on)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
-    if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->lockdown_elderly_time_off));
+	if( check < 1){ print_exit("Failed to read parameter lockdown_elderly_time_off)\n"); };
 
-    check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
-    if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_on));
+	if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_on)\n"); };
 
     check = fscanf(parameter_file, " %i ,", &(params->testing_symptoms_time_off));
     if( check < 1){ print_exit("Failed to read parameter testing_symptoms_time_off)\n"); };
@@ -442,7 +441,11 @@ void read_param_file( parameters *params)
 
     fclose(parameter_file);
 }
-
+/*****************************************************************************************
+*  Name:		read_hospital_param_file
+*  Description: Read line from hospital parameter file (csv), attach hospital param values
+*               to params struct
+******************************************************************************************/
 void read_hospital_param_file( parameters *params)
 {
     FILE *hospital_parameter_file;
@@ -521,6 +524,7 @@ void read_hospital_param_file( parameters *params)
 ******************************************************************************************/
 void write_output_files(model *model, parameters *params)
 {
+
 	if(params->sys_write_individual == TRUE)
 	{
 		write_individual_file( model, params );
@@ -673,7 +677,6 @@ void write_individual_file(model *model, parameters *params)
 	char output_file[INPUT_CHAR_LEN];
 	FILE *individual_output_file;
 	individual *indiv;
-
 	int infection_count;
 	long idx;
 
@@ -708,15 +711,12 @@ void write_individual_file(model *model, parameters *params)
 	for(idx = 0; idx < params->n_total; idx++)
 	{
 		indiv = &(model->population[idx]);
-		
+
         int worker_ward_type;
         if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
             worker_ward_type = get_worker_ward_type( model, indiv->idx );
         else
             worker_ward_type = NO_WARD;
-
-		/* Count the number of times an individual has been infected */
-		infection_count = count_infection_events( indiv );
 
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
@@ -727,8 +727,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->status,
 			indiv->age_group,
 			indiv->occupation_network,
-            indiv->worker_type,
-            worker_ward_type,
+			indiv->worker_type,
+			worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -866,12 +866,13 @@ void read_household_demographics_file( parameters *params)
 
 
 void set_up_reference_household_memory(parameters *params){
-    long hdx;
-    params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
-    for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
-        params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
-    }
+	long hdx;
+	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
+		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+	}
 }
+
 /*****************************************************************************************
 *  Name:		write_interactions
 *  Description: write interactions details
@@ -913,13 +914,13 @@ void write_interactions( model *model )
                 fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
-                    indiv->worker_type,
+					indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
-                    inter->individual->worker_type,
+					inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->occupation_network
 				);
@@ -942,7 +943,7 @@ void write_ward_data( model *model)
     int ward_type, ward_idx, doctor_idx, nurse_idx;
 
     // TODO: currently only for one hospital, should loop through more hospitals when we have more
-    
+
     int hospital_idx = 0;
 
     // Concatenate file name
@@ -952,7 +953,7 @@ void write_ward_data( model *model)
     ward_output_file = fopen(output_file_name, "w");
 
     fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
-    
+
     // For each ward type
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
     {
@@ -980,7 +981,7 @@ void write_ward_data( model *model)
     }
 
     fclose(ward_output_file);
-        
+
 }
 
 /*****************************************************************************************
@@ -1009,16 +1010,16 @@ void write_transmissions( model *model )
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
-    fprintf(output_file , "worker_type_recipient,");
-    fprintf(output_file , "hospital_state_recipient,");
+	fprintf(output_file , "worker_type_recipient,");
+	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
-    fprintf(output_file , "worker_type_source,");
-    fprintf(output_file , "hospital_state_source,");
+	fprintf(output_file , "worker_type_source,");
+	fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -1050,16 +1051,16 @@ void write_transmissions( model *model )
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
-                    indiv->worker_type,
-                    indiv->hospital_state,
+					indiv->worker_type,
+					indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
-                    infection_event->infector->worker_type,
-                    infection_event->infector_hospital_state,
+					infection_event->infector->worker_type,
+					infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
