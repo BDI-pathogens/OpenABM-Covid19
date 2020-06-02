@@ -956,60 +956,114 @@ class TestClass(object):
         
     def test_relative_transmission_update(self, test_params, update_relative_transmission_household, update_relative_transmission_occupation, update_relative_transmission_random ):
         """
-           Check to that if we change the relative transmission parameters after day 1 we get 
+           Check to that if we change the relative transmission parameters after day 1 we get
            the same result as if we started with the same values
         """
         tol      = 0.05
         max_time = test_params["end_time"]+1;
 
-        # run the baseline parameters
-        params = utils.get_params_swig()
-        for param, value in test_params.items():
-            params.set_param( param, value )  
-        model  = utils.get_model_swig( params )
-        
-        for time in range(max_time):
-            model.one_time_step()
-        model.write_transmissions()
-        df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
-        df_base = df_base[ df_base["time_infected"] == max_time ]
-        df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
-        
-        del model
-        del params
-            
-        # run the baseline parameters then at base-line update one
-        params = utils.get_params_swig()
-        for param, value in test_params.items():
-            params.set_param( param, value )  
-        model  = utils.get_model_swig( params )
-        
-        for time in range(test_params["end_time"]):
-            model.one_time_step()
-        model.update_running_params( "relative_transmission_household",  update_relative_transmission_household )
-        model.update_running_params( "relative_transmission_occupation", update_relative_transmission_occupation )
-        model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
-        model.one_time_step()   
-        model.write_transmissions()
-        df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-        df_update = df_update[ df_update["time_infected"] == max_time ]
-        df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
-        
-        # check the change in values is in tolerance - wide tolerance bands due to saturation effects
-        base     = df_base.loc[0,{"n_infections"}]["n_infections"]
-        expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
-        actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "household network: Number of transmissions did not change by expected amount after updating parameter")
+        household_network_base_values = []
+        household_network_actual_values = []
+        household_network_expected_values = []
 
-        base     = df_base.loc[1,{"n_infections"}]["n_infections"] 
-        expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
-        actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "occupation network: Number of transmissions did not change by expected amount after updating parameter")
-        
-        base     = df_base.loc[2,{"n_infections"}]["n_infections"] 
-        expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
-        actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
-        np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "random network: Number of transmissions did not change by expected amount after updating parameter")
+        occupation_network_base_values = []
+        occupation_network_actual_values = []
+        occupation_network_expected_values = []
+
+        random_network_base_values = []
+        random_network_actual_values = []
+        random_network_expected_values = []
+
+        # Test relative transmission values for multiple rng seeds.
+
+        for seed in range(10):
+
+            test_params["rng_seed"] = seed
+
+            # run the baseline parameters
+            params = utils.get_params_swig()
+            for param, value in test_params.items():
+                params.set_param( param, value )
+            model  = utils.get_model_swig( params )
+
+            for time in range(max_time):
+                model.one_time_step()
+            model.write_transmissions()
+            df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_base = df_base[ df_base["time_infected"] == max_time ]
+            df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections")
+
+            del model
+            del params
+
+            # run the baseline parameters then at base-line update one
+            params = utils.get_params_swig()
+            for param, value in test_params.items():
+                params.set_param( param, value )
+            model  = utils.get_model_swig( params )
+
+            for time in range(test_params["end_time"]):
+                model.one_time_step()
+            model.update_running_params( "relative_transmission_household",  update_relative_transmission_household )
+            model.update_running_params( "relative_transmission_occupation", update_relative_transmission_occupation )
+            model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
+            model.one_time_step()
+            model.write_transmissions()
+
+            df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_update = df_update[ df_update["time_infected"] == max_time ]
+            df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections")
+
+            # check the change in values is in tolerance - wide tolerance bands due to saturation effects
+            base     = df_base.loc[0,{"n_infections"}]["n_infections"]
+            household_network_base_values.append(base)
+            expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
+            household_network_expected_values.append(expected)
+            actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
+            household_network_actual_values.append(actual)
+
+            base     = df_base.loc[1,{"n_infections"}]["n_infections"]
+            occupation_network_base_values.append(base)
+            expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
+            occupation_network_expected_values.append(expected)
+            actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
+            occupation_network_actual_values.append(actual)
+
+            base     = df_base.loc[2,{"n_infections"}]["n_infections"]
+            random_network_base_values.append(base)
+            expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
+            random_network_expected_values.append(expected)
+            actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
+            random_network_actual_values.append(actual)
+
+            # Clean up model for next run.
+            del model
+            del params
+
+        # Check mean actual and expected values are the same for all three network types.
+        df_household_base = pd.DataFrame(household_network_base_values)
+        df_household_actual = pd.DataFrame(household_network_actual_values)
+        df_household_expected = pd.DataFrame(household_network_expected_values)
+        np.testing.assert_allclose(df_household_actual.mean(),
+                                   df_household_expected.mean(),
+                                   atol = df_household_base.mean() * tol,
+                                   err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+
+        df_occupation_base = pd.DataFrame(occupation_network_base_values)
+        df_occupation_actual = pd.DataFrame(occupation_network_actual_values)
+        df_occupation_expected = pd.DataFrame(occupation_network_expected_values)
+        np.testing.assert_allclose(df_occupation_actual.mean(),
+                                   df_occupation_expected.mean(),
+                                   atol = df_occupation_base.mean() * tol,
+                                   err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+
+        df_random_base = pd.DataFrame(random_network_base_values)
+        df_random_actual = pd.DataFrame(random_network_actual_values)
+        df_random_expected = pd.DataFrame(random_network_expected_values)
+        np.testing.assert_allclose(df_random_actual.mean(),
+                                   df_random_expected.mean(),
+                                   atol = df_random_base.mean() * tol,
+                                   err_msg = "Number of transmissions did not change by expected amount after updating parameter")
        
     
       
