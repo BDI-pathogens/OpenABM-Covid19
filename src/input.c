@@ -160,35 +160,35 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,",  &(params->elderly_network_adults));
     if( check < 1){ print_exit("Failed to read parameter elderly_network_adults\n"); };
 
-	check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
-	if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
+    check = fscanf(parameter_file, " %i ,",  &(params->days_of_interactions));
+    if( check < 1){ print_exit("Failed to read parameter days_of_interactions\n"); };
 
-	check = fscanf(parameter_file, " %i ,",  &(params->end_time));
-	if( check < 1){ print_exit("Failed to read parameter end_time\n"); };
+    check = fscanf(parameter_file, " %i ,",  &(params->end_time));
+    if( check < 1){ print_exit("Failed to read parameter end_time\n"); };
 
-	check = fscanf(parameter_file, " %i ,",  &(params->n_seed_infection));
-	if( check < 1){ print_exit("Failed to read parameter n_seed_infection\n"); };
+    check = fscanf(parameter_file, " %i ,",  &(params->n_seed_infection));
+    if( check < 1){ print_exit("Failed to read parameter n_seed_infection\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_infectious_period));
-	if( check < 1){ print_exit("Failed to read parameter mean_infectious_period\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_infectious_period));
+    if( check < 1){ print_exit("Failed to read parameter mean_infectious_period\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectious_period));
-	if( check < 1){ print_exit("Failed to read parameter sd_infectious_period\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_infectious_period));
+    if( check < 1){ print_exit("Failed to read parameter sd_infectious_period\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
-	if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
+    if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_symptoms));
-	if( check < 1){ print_exit("Failed to read parameter sd_time_to_symptoms\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_symptoms));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_symptoms\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_hospital\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_hospital));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_hospital\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_critical));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_critical\n"); };
 
     check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_critical));
     if( check < 1){ print_exit("Failed to read parameter sd_time_to_critical\n"); };
@@ -196,14 +196,14 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_recover));
     if( check < 1){ print_exit("Failed to read parameter mean_time_to_recover\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
-	if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_recover));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_recover\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_death));
+    if( check < 1){ print_exit("Failed to read parameter mean_time_to_death\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
-	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
+    check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
+    if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
     for( i = 0; i < N_AGE_GROUPS; i++ )
     {
@@ -228,6 +228,7 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_asymptomatic_to_recovery));
 	if( check < 1){ print_exit("Failed to read parameter sd_asymptomatic_to_recovery\n"); };
+
 
     for( i = 0; i < N_HOUSEHOLD_MAX; i++ )
     {
@@ -288,11 +289,11 @@ void read_param_file( parameters *params)
     check = fscanf(parameter_file, " %lf,", &(params->sd_time_critical_survive ));
     if( check < 1){ print_exit("Failed to read parameter sd_time_critical_survive\n"); };
 
-	for( i = 0; i < N_AGE_GROUPS; i++ )
-	{
-		check = fscanf(parameter_file, " %lf ,", &(params->location_death_icu[i]));
-		if( check < 1){ print_exit("Failed to read parameter location_death_icu\n"); };
-	}
+    for( i = 0; i < N_AGE_GROUPS; i++ )
+    {
+        check = fscanf(parameter_file, " %lf ,", &(params->location_death_icu[i]));
+        if( check < 1){ print_exit("Failed to read parameter location_death_icu\n"); };
+    }
 
     check = fscanf(parameter_file, " %i ,", &(params->quarantine_length_self));
     if( check < 1){ print_exit("Failed to read parameter quarantine_length_self\n"); };
@@ -710,7 +711,6 @@ void write_individual_file(model *model, parameters *params)
 	for(idx = 0; idx < params->n_total; idx++)
 	{
 		indiv = &(model->population[idx]);
-
 
         int worker_ward_type;
         if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
@@ -1284,4 +1284,3 @@ int get_worker_ward_type( model *model, int pdx ) {
     }
     return indiv_ward_type;
 }
-
