@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
                     n_current( model, HOSPITALISED_RECOVERING ),
                     n_current( model, DEATH ),
                     n_current( model, RECOVERED ),
-                    n_current( model, WAITING ),
-                    n_current( model, GENERAL ),
-                    n_current( model, ICU),
-                    n_current( model, DISCHARGED),
-                    n_current( model, MORTUARY)
+                    n_total( model, WAITING ),
+                    n_total( model, GENERAL ),
+                    n_total( model, ICU),
+                    n_total( model, DISCHARGED),
+                    n_total( model, MORTUARY)
             );
             last_test = n_total( model, TEST_RESULT );
         }
