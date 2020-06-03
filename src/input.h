@@ -31,7 +31,10 @@ void write_transmissions( model* );
 void write_trace_tokens( model* );
 void write_trace_tokens_ts( model*, int );
 void write_quarantine_reasons( model*, parameters *);
-
+void write_occupation_network(model *, parameters *, int );
+void write_household_network(model *, parameters *);
+void write_random_network(model *, parameters *);
+void write_network(char *, network *);
 void print_interactions_averages( model*, int );
 
 #endif /* INPUT_H_ */
