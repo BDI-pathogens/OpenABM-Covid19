@@ -197,15 +197,35 @@ class TestClass(object):
 
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", 100000)
         params.set_param("hospital_on", 1)
+        params.set_param("n_seed_infection", 80000)
+        params.set_param("infectious_rate", 100)
+        params.set_param("fraction_asymptomatic_0_9", 0)
+        params.set_param("fraction_asymptomatic_10_19", 0)
+        params.set_param("fraction_asymptomatic_20_29", 0)
+        params.set_param("fraction_asymptomatic_30_39", 0)
+        params.set_param("fraction_asymptomatic_40_49", 0)
+        params.set_param("fraction_asymptomatic_50_59", 0)
+        params.set_param("fraction_asymptomatic_60_69", 0)
+        params.set_param("fraction_asymptomatic_70_79", 0)
+        params.set_param("fraction_asymptomatic_80", 0)
         params.write_params(constant.TEST_DATA_FILE)
+
+        number_hcw = 10
 
         # Adjust hospital baseline parameter
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
-        h_params.set_param("waiting_infectivity_modifier", 100)
-        h_params.set_param("general_infectivity_modifier", 100)
-        h_params.set_param("icu_infectivity_modifier", 100)
+        h_params.set_param("general_infectivity_modifier", 10000000.0)
+        h_params.set_param("icu_infectivity_modifier", 10000000.0)
+        h_params.set_param("n_covid_general_wards", 1)
+        h_params.set_param("n_covid_icu_wards", 1)
+        h_params.set_param("n_doctors_covid_general_ward", number_hcw)
+        h_params.set_param("n_doctors_covid_icu_ward", number_hcw)
+        h_params.set_param("n_nurses_covid_general_ward", number_hcw)
+        h_params.set_param("n_nurses_covid_icu_ward", number_hcw)
+        h_params.set_param("n_beds_covid_general_ward", 10)
+        h_params.set_param("n_beds_covid_icu_ward", 10)
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
@@ -213,19 +233,18 @@ class TestClass(object):
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
 
-        df_individual_output = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True)
-        time_step_df = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        # Get all healthcare workers
+        df_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        df_all_hcw = df_time_step.query("patient_type == 0")
+        list_all_hcw = df_all_hcw.pdx.unique()
 
-        #get all healthcare workers who have interacted with patients
-        hcw_with_patient_interaction = (df_int["worker_type_1"] != constant.NOT_HEALTHCARE_WORKER) & (df_int["type"] > constant.HOSPITAL_WORK) & (df_int["type"] <= constant.HOSPITAL_NURSE_PATIENT_ICU)
-        hcw_with_patient_interaction = df_int[hcw_with_patient_interaction]
+        for hcw in range(len(list_all_hcw)):
 
-        # make sure these healthcare workers are infected at some point
-        for index, row in hcw_with_patient_interaction.iterrows():
-            hcw_infected = (time_step_df["pdx"] == row["ID_1"]) & (time_step_df["disease_state"] >= constant.EVENT_TYPES.PRESYMPTOMATIC.value)
-            hcw_infected = time_step_df[hcw_infected]
-            assert len(hcw_infected.index) > 0
+            hcw_pdx = list_all_hcw[hcw]
+            hcw_all_time_steps = df_time_step.query("pdx == @hcw_pdx")
+            disease_hospital_state = hcw_all_time_steps["disease_state"].max()
+
+            assert disease_hospital_state > 0
 
     def test_max_hcw_daily_interactions(self):
         """
