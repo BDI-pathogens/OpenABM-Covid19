@@ -790,8 +790,14 @@ void check_hospital_params( parameters *params )
     int general_nurses = params->n_hcw_per_ward[COVID_GENERAL][NURSE] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
     int icu_doctors = params->n_hcw_per_ward[COVID_ICU][DOCTOR] * params->n_wards[COVID_ICU] * params->n_hospitals;
     int icu_nurses = params->n_hcw_per_ward[COVID_ICU][NURSE] * params->n_wards[COVID_ICU] * params->n_hospitals;
-    if( general_nurses + general_doctors + icu_nurses + icu_doctors > (params->n_total - params->n_seed_infection)/2 )
+
+    int total_number_hcw = general_nurses + general_doctors + icu_nurses + icu_doctors;
+
+    if( total_number_hcw > (params->n_total - params->n_seed_infection)/2 )
         print_exit( "BAD PARAMS number of healthcare workers is greater than half the total population. Change number of wards / worker per ward" );
+
+    if( params->hcw_mean_work_interactions > total_number_hcw/2 )
+        print_exit( "BAD PARAM hcw_mean_work_interactions must be less than or equal to half the total number of healthcare workers" );
 }
 
 
