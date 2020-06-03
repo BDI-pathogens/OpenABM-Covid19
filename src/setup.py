@@ -31,13 +31,8 @@ setup(
     author="SWIG Docs",
     description="""Individual-based model for modelling of a COVID-19 outbreak""",
     ext_modules=[covid19_module],
-    packages=[
-        'COVID19',
-        'adapter_covid19',
-    ],
-    py_modules=[
-        'covid19',
-    ],
+    packages=["COVID19", "adapter_covid19",],
+    py_modules=["covid19",],
     install_requires=[
         "click",
         "matplotlib",
@@ -45,5 +40,6 @@ setup(
         "pandas",
         "scipy",
         "tqdm",
-    ]
+        "dataclasses",
+    ],
 )

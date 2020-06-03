@@ -1,94 +1,56 @@
-import itertools
+import logging
+import multiprocessing
 import os
-from typing import Optional
+import pickle
+import sys
 
-import matplotlib.pyplot as plt
-import pandas as pd
+try:
+    from tqdm import tqdm
+except ModuleNotFoundError:
 
-from adapter_covid19.datasources import Reader
-from adapter_covid19.corporate_bankruptcy import CorporateBankruptcyModel
-from adapter_covid19.economics import Economics
-from adapter_covid19.gdp import SupplyDemandGdpModel
-from adapter_covid19.personal_insolvency import PersonalBankruptcyModel
-from adapter_covid19.enums import Region, Sector, Age
+    def tqdm(x):
+        return x
 
 
-def lockdown_then_unlock_no_corona(data_path: Optional[str] = None):
-    """
-    Lockdown at t=5 days, then release lockdown at t=50 days.
+from adapter_covid19.scenarios import *
+from adapter_covid19.simulator import Simulator
 
-    :param data_path:
-    :return:
-    """
-    if data_path is None:
-        data_path = os.path.join(
-            os.path.dirname(__file__), "../../tests/adapter_covid19/data"
-        )
-    reader = Reader(data_path)
-    econ = Economics(
-        SupplyDemandGdpModel(), CorporateBankruptcyModel(), PersonalBankruptcyModel()
-    )
-    econ.load(reader)
-    max_utilisations = {key: 1.0 for key in itertools.product(Region, Sector, Age)}
-    min_utilisations = {key: 0.0 for key in itertools.product(Region, Sector, Age)}
-    length = 100
-    for i in range(length):
-        if 5 <= i < 50:
-            econ.simulate(i, True, min_utilisations)
-        else:
-            econ.simulate(i, False, max_utilisations)
-    df = (
-        pd.DataFrame(
-            [econ.results.fraction_gdp_by_sector(i) for i in range(1, length)],
-            index=range(1, length),
-        )
-        .T.sort_index()
-        .T.cumsum(axis=1)
-    )
-
-    # Plot 1
-    fig, ax = plt.subplots(figsize=(20, 10))
-    ax.fill_between(df.index, df.iloc[:, 0] * 0, df.iloc[:, 0], label=df.columns[0])
-    for i in range(1, df.shape[1]):
-        ax.fill_between(df.index, df.iloc[:, i - 1], df.iloc[:, i], label=df.columns[i])
-    ax.legend(ncol=2)
-
-    # Plot 2
-    df = pd.DataFrame(
-        [
-            econ.results.corporate_solvencies[i]
-            for i in econ.results.corporate_solvencies
-        ]
-    )
-    df.plot(figsize=(20, 10))
-
-    # Plot 3
-    pd.DataFrame(
-        [
-            {
-                r: econ.results.personal_bankruptcy[i][r].personal_bankruptcy
-                for r in Region
-            }
-            for i in econ.results.personal_bankruptcy
-        ]
-    ).plot(figsize=(20, 10))
-
-    # Plot 4
-    pd.DataFrame(
-        [
-            {
-                r: econ.results.personal_bankruptcy[i][r].corporate_bankruptcy
-                for r in Region
-            }
-            for i in econ.results.personal_bankruptcy
-        ]
-    ).plot(figsize=(20, 10))
-
+logger = logging.getLogger(__file__)
 
 if __name__ == "__main__":
-    import sys
 
-    if len(sys.argv) > 1:
-        lockdown_then_unlock_no_corona(sys.argv[1])
+    logging.basicConfig(level=logging.INFO)
+
+    if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
+        valid = "|".join(SCENARIOS)
+        print(f"Example usage: python -m {sys.argv[0]} -m <data_path> [{valid}, ...]")
+    data_path = sys.argv[1]
+    if len(sys.argv) > 2:
+        scenario_names = sys.argv[2:]
     else:
-        lockdown_then_unlock_no_corona()
+        scenario_names = SCENARIOS.keys()
+
+    unknown_scenarios = [n for n in scenario_names if n not in SCENARIOS.keys()]
+    if len(unknown_scenarios) > 0:
+        logger.error(f"Unknown scenarios! {unknown_scenarios}")
+        exit(1)
+
+    def _run_scenario(scenario_name):
+        s = Simulator(data_path)
+        logger.info(f"Running scenario {scenario_name}")
+        scenario = SCENARIOS[scenario_name]
+        result = s.simulate(
+            scenario=scenario, show_plots=False, scenario_name=scenario_name
+        )
+        file_name = f"scenario_{scenario_name}.pkl"
+        logger.info(f"Writing file {file_name}")
+        with open(file_name, "wb") as f:
+            pickle.dump((scenario_name, scenario, result), f)
+        logger.info(f"Finished writing")
+
+    if len(scenario_names) == 1:
+        # Makes debugging a little easier
+        _run_scenario(scenario_names[0])
+    else:
+        with multiprocessing.Pool() as pool:
+            pool.map(_run_scenario, scenario_names)

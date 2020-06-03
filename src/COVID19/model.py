@@ -544,5 +544,14 @@ class Model:
     def write_quarantine_reasons(self):
         covid19.write_quarantine_reasons(self.c_model, self.c_params)
 
+    def write_occupation_network(self, idx):
+        covid19.write_occupation_network(self.c_model, self.c_params, idx)
+
+    def write_household_network(self):
+        covid19.write_household_network(self.c_model, self.c_params)
+
+    def write_random_network(self):
+        covid19.write_random_network(self.c_model, self.c_params)
+
     def print_individual(self, idx):
         covid19.print_individual(self.c_model, idx)
