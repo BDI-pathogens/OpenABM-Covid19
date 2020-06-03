@@ -564,6 +564,7 @@ class TestClass(object):
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 50)
         params.set_param("infectious_rate", 4.0)
+        params.set_param("hospital_on", 0) #turning off hospital as this affects disease transitions
         params.set_param( test_params )
 
         params.write_params(constant.TEST_DATA_FILE)
