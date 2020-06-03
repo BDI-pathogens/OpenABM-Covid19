@@ -1055,3 +1055,101 @@ void write_trace_tokens_ts( model *model, int initialise )
 	}
 	fclose(output_file);
 }
+
+/*****************************************************************************************
+*  Name:		write_occupation_network
+*  Description: Write (csv) file of occupation network
+******************************************************************************************/
+void write_occupation_network(model *model, parameters *params, int network_idx)
+{
+
+	if(network_idx < 0 || network_idx >= N_OCCUPATION_NETWORKS ){
+		printf("Occupation network index outside range of 0, %d\n", N_OCCUPATION_NETWORKS-1);
+		return;
+	}
+
+	char output_file[INPUT_CHAR_LEN];
+	char param_line_number[10], network_idx_text[10];
+	sprintf(param_line_number, "%d", params->param_line_number);
+
+	sprintf(network_idx_text, "%d", network_idx);
+
+	// Concatenate file name
+	strcpy(output_file, params->output_file_dir);
+	strcat(output_file, "/occupation_network");
+	strcat(output_file, network_idx_text);
+	strcat(output_file, "_Run");
+	strcat(output_file, param_line_number);
+	strcat(output_file, ".csv");
+
+	write_network(output_file, model->occupation_network[network_idx]);
+
+}
+
+/*****************************************************************************************
+*  Name:		write_household_network
+*  Description: Write (csv) file of household network
+******************************************************************************************/
+void write_household_network(model *model, parameters *params)
+{
+	char output_file[INPUT_CHAR_LEN];
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file, params->output_file_dir);
+	strcat(output_file, "/household_network_Run");
+	strcat(output_file, param_line_number);
+	strcat(output_file, ".csv");
+
+	write_network(output_file, model->household_network);
+}
+
+/*****************************************************************************************
+*  Name:		write_random_network
+*  Description: Write (csv) file of random network
+******************************************************************************************/
+void write_random_network(model *model, parameters *params)
+{
+	char output_file[INPUT_CHAR_LEN];
+
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", params->param_line_number);
+
+	// Concatenate file name
+	strcpy(output_file, params->output_file_dir);
+	strcat(output_file, "/random_network_Run");
+	strcat(output_file, param_line_number);
+	strcat(output_file, ".csv");
+
+	write_network(output_file, model->random_network);
+}
+
+/*****************************************************************************************
+*  Name:		write_random_network
+*  Description: Write (csv) file of generic network
+******************************************************************************************/
+
+void write_network(char *output_file, network *network_ptr)
+{
+	long idx;
+	FILE *network_file;
+
+	network_file = fopen(output_file, "w");
+	if(network_file == NULL)
+		print_exit("Can't open network output file");
+
+	fprintf(network_file,"ID1,");
+	fprintf(network_file,"ID2");
+	fprintf(network_file,"\n");
+
+	// Loop through all edges in the network
+	for(idx = 0; idx < network_ptr->n_edges; idx++)
+	{
+		fprintf(network_file, "%li,%li\n",
+			network_ptr->edges[idx].id1,
+			network_ptr->edges[idx].id2
+			);
+	}
+	fclose(network_file);
+}
