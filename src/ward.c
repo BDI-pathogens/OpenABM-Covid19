@@ -72,7 +72,7 @@ void build_ward_networks( model *model, ward* ward )
             if( healthcare_worker_working( &(model->population[ ward->doctors[idx].pdx ]) ))
                 hc_workers_doctors[n_hcw_working++] = ward->doctors[idx].pdx;
             
-        //if there are nurses working, rebuild doctor -> patient network
+        //if there are doctors working, rebuild doctor -> patient network
         if( n_hcw_working > 0 )
             build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
         
@@ -98,16 +98,18 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 {
     if( n_patient_required_interactions > 0 )
     {
-        int idx, hdx, patient_interactions_per_hcw, n_total_interactions, n_pos;
+        int idx, hdx, n_total_interactions, n_pos;
+        float patient_interactions_per_hcw;
         long *all_required_interactions, *capped_hcw_interactions;
 
-        //Determine the number of interactions that all patients need.
-        patient_interactions_per_hcw = round( (n_patient_required_interactions * ward->patients->size) / n_hcw_working );
+        //Determine the even distribution of patients' required interactions among working healthcare workers in ward
+        patient_interactions_per_hcw = (n_patient_required_interactions * ward->patients->size) / (float)n_hcw_working;
+
         //TODO: should there be different max interactions for doctors / nurses?
-        //Check whether the number of required interactions is greater than the max possible. If it is, set it to the max.
+        //Check whether the number of required interactions spread across working hcw is greater than the max possible. If it is, set it to the max.
         patient_interactions_per_hcw = (patient_interactions_per_hcw > max_hcw_daily_interactions) ? max_hcw_daily_interactions : patient_interactions_per_hcw;
 
-        n_total_interactions = patient_interactions_per_hcw * n_hcw_working;
+        n_total_interactions = round(patient_interactions_per_hcw * n_hcw_working);
 
         all_required_interactions = calloc( n_patient_required_interactions * ward->patients->size, sizeof(long) );
         capped_hcw_interactions   = calloc( n_total_interactions, sizeof(long) );

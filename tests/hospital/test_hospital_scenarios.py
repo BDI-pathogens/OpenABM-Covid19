@@ -465,7 +465,8 @@ class TestClass(object):
 
     def test_max_hcw(self):
         """
-        half population in the simulation is a hcw. Assert no hcw - patient interactions.
+        Half population in the simulation is are healthcare workers. Assert the model still runs and there are doctor patient interactions.
+
         """
 
         hcw_population_size = 5000
@@ -476,6 +477,8 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 10000)
         params.set_param("hospital_on", 1)
+        params.set_param("days_of_interactions", 50)
+        params.set_param("end_time", 50)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
@@ -495,15 +498,25 @@ class TestClass(object):
 
         df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE)
 
-        df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
-        df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
-        df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
-        df_nurse_patient_icu_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+        interaction_type_HOSPITAL_DOCTOR_PATIENT_GENERAL = constant.HOSPITAL_DOCTOR_PATIENT_GENERAL
+        interaction_type_HOSPITAL_NURSE_PATIENT_GENERAL = constant.HOSPITAL_NURSE_PATIENT_GENERAL
+        interaction_type_HOSPITAL_DOCTOR_PATIENT_ICU = constant.HOSPITAL_DOCTOR_PATIENT_ICU
+        interaction_type_HOSPITAL_NURSE_PATIENT_ICU = constant.HOSPITAL_NURSE_PATIENT_ICU
 
-        df_doctor_patient_general_interactions = df_interactions[df_doctor_patient_general_interactions]
-        df_nurse_patient_general_interactions = df_interactions[df_nurse_patient_general_interactions]
-        df_doctor_patient_icu_interactions = df_interactions[df_doctor_patient_icu_interactions]
-        df_nurse_patient_icu_interactions = df_interactions[df_nurse_patient_icu_interactions]
+        df_doctor_patient_general_interactions = df_interactions.query("type == @interaction_type_HOSPITAL_DOCTOR_PATIENT_GENERAL")
+        df_nurse_patient_general_interactions = df_interactions.query("type == @interaction_type_HOSPITAL_NURSE_PATIENT_GENERAL")
+        df_doctor_patient_icu_interactions = df_interactions.query("type == @interaction_type_HOSPITAL_DOCTOR_PATIENT_ICU")
+        df_nurse_patient_icu_interactions = df_interactions.query("type == @interaction_type_HOSPITAL_NURSE_PATIENT_ICU")
+
+        # df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+        # df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+        # df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+        # df_nurse_patient_icu_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+
+        # df_doctor_patient_general_interactions = df_interactions[df_doctor_patient_general_interactions]
+        # df_nurse_patient_general_interactions = df_interactions[df_nurse_patient_general_interactions]
+        # df_doctor_patient_icu_interactions = df_interactions[df_doctor_patient_icu_interactions]
+        # df_nurse_patient_icu_interactions = df_interactions[df_nurse_patient_icu_interactions]
 
         assert len(df_doctor_patient_general_interactions.index) > 0
         assert len(df_nurse_patient_general_interactions.index) > 0
