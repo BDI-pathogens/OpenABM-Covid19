@@ -39,9 +39,9 @@ class TestClass(object):
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
-        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
 
         df_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
