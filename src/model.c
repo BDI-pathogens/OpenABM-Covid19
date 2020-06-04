@@ -35,14 +35,14 @@ model* new_model( parameters *params )
 	model *model_ptr = NULL;
 	model_ptr = calloc( 1, sizeof( model ) );
 	if( model_ptr == NULL )
-	    print_exit("calloc to model failed\n");
+		print_exit("calloc to model failed\n");
 	
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
-    gsl_rng_env_setup();
-    rng = gsl_rng_alloc ( gsl_rng_default);
-    gsl_rng_set( rng, params->rng_seed );
+	gsl_rng_env_setup();
+	rng = gsl_rng_alloc ( gsl_rng_default);
+	gsl_rng_set( rng, params->rng_seed );
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
@@ -53,8 +53,8 @@ model* new_model( parameters *params )
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
-    if( params->hospital_on )
-        set_up_healthcare_workers_and_hospitals( model_ptr );
+	if( params->hospital_on )
+		set_up_healthcare_workers_and_hospitals( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 
@@ -71,7 +71,7 @@ model* new_model( parameters *params )
 	model_ptr->n_quarantine_days = 0;
 
 	return model_ptr;
-}
+};
 
 /*****************************************************************************************
 *  Name:		destroy_model
@@ -83,39 +83,39 @@ void destroy_model( model *model )
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
-    free( model->population );
-    free( model->possible_interactions );
-    free( model->interactions );
-    free( model->events );
+	free( model->population );
+	free( model->possible_interactions );
+	free( model->interactions );
+	free( model->events );
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
 		free( model->transition_time_distributions[ idx ] );
 	free( model->transition_time_distributions );
 
-    destroy_network( model->random_network);
-    destroy_network( model->household_network );
-    for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
-    	destroy_network( model->occupation_network[idx] );
+	destroy_network( model->random_network);
+	destroy_network( model->household_network );
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+		destroy_network( model->occupation_network[idx] );
 
-    free( model->occupation_network );
-    for( idx = 0; idx < N_EVENT_TYPES; idx++ )
-    	destroy_event_list( model, idx );
-    free( model->event_lists );
-    for( idx = 0; idx < model->household_directory->n_idx; idx++ )
-    	free( model->household_directory->val[idx] );
-    free( model->household_directory->val );
-    free( model->household_directory->n_jdx );
-    free( model->household_directory );
-    free( model->trace_tokens );
-    if( model->params->hospital_on )
-    {
-        for( idx = 0; idx < model->params->n_hospitals; idx++)
-            destroy_hospital( &(model->hospitals[idx]) );
-        free( model->hospitals );
-    }
-    destroy_risk_scores( model );
-    free( model );
+	free( model->occupation_network );
+	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
+		destroy_event_list( model, idx );
+	free( model->event_lists );
+	for( idx = 0; idx < model->household_directory->n_idx; idx++ )
+		free( model->household_directory->val[idx] );
+	free( model->household_directory->val );
+	free( model->household_directory->n_jdx );
+	free( model->household_directory );
+	free( model->trace_tokens );
+	if( model->params->hospital_on )
+	{
+		for( idx = 0; idx < model->params->n_hospitals; idx++)
+			destroy_hospital( &(model->hospitals[idx]) );
+		free( model->hospitals );
+	}
+	destroy_risk_scores( model );
+	free( model );
 
-    gsl_rng_free( rng );
+	gsl_rng_free( rng );
 };
 
 /*****************************************************************************************
@@ -192,15 +192,15 @@ void set_up_networks( model *model )
 	model->random_network        = new_network( n_total, RANDOM );
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 
-    model->household_network = new_network( n_total, HOUSEHOLD );
+	model->household_network = new_network( n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 
-    model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
-    for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
-        set_up_occupation_network( model, idx );
+	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+		set_up_occupation_network( model, idx );
 
-    if( model->params->hospital_on )
-        set_up_hospital_networks( model );
+	if( model->params->hospital_on )
+		set_up_hospital_networks( model );
 
 	for( idx =0; idx < N_AGE_TYPES; idx++ )
 		model->mean_interactions[idx] = estimate_mean_interactions_by_age( model, idx );
@@ -240,19 +240,19 @@ void set_up_occupation_network( model *model, int network )
 ******************************************************************************************/
 void set_up_events( model *model )
 {
-    long idx;
-        int types = 6;
-        parameters *params = model->params;
+	long idx;
+	int types = 6;
+	parameters *params = model->params;
 
-        model->events     = calloc( types * params->n_total, sizeof( event ) );
-        model->next_event = &(model->events[0]);
-        for( idx = 1; idx < types * params->n_total; idx++ )
-        {
-            model->events[idx-1].next = &(model->events[idx]);
-            model->events[idx].last   = &(model->events[idx-1]);
-        }
-        model->events[types * params->n_total - 1].next = model->next_event;
-        model->next_event->last = &(model->events[types * params->n_total - 1] );
+	model->events     = calloc( types * params->n_total, sizeof( event ) );
+	model->next_event = &(model->events[0]);
+	for( idx = 1; idx < types * params->n_total; idx++ )
+	{
+		model->events[idx-1].next = &(model->events[idx]);
+		model->events[idx].last   = &(model->events[idx-1]);
+	}
+	model->events[types * params->n_total - 1].next = model->next_event;
+	model->next_event->last = &(model->events[types * params->n_total - 1] );
 };
 
 /*****************************************************************************************
@@ -262,12 +262,12 @@ void set_up_events( model *model )
 ******************************************************************************************/
 void set_up_population( model *model )
 {
-    parameters *params = model->params;
-    long idx;
+	parameters *params = model->params;
+	long idx;
 
-    model->population = calloc( params->n_total, sizeof( individual ) );
-    for( idx = 0; idx < params->n_total; idx++ )
-        initialize_individual( &(model->population[idx]), params, idx );
+	model->population = calloc( params->n_total, sizeof( individual ) );
+	for( idx = 0; idx < params->n_total; idx++ )
+		initialize_individual( &(model->population[idx]), params, idx );
 }
 
 /*****************************************************************************************
@@ -276,87 +276,87 @@ void set_up_population( model *model )
 ******************************************************************************************/
 void write_time_step_hospital_data( model *model)
 {
-    char output_file_name[INPUT_CHAR_LEN];
-    FILE *time_step_hospital_file;
-    int ward_type, ward_idx, doctor_idx, nurse_idx, patient_idx;
-    int hospital_idx = 0;
-    // TODO: update to run for each hospital
+	char output_file_name[INPUT_CHAR_LEN];
+	FILE *time_step_hospital_file;
+	int ward_type, ward_idx, doctor_idx, nurse_idx, patient_idx;
+	int hospital_idx = 0;
+	// TODO: update to run for each hospital
 
-    if( model->params->sys_write_hospital )
-        {
-            // Concatenate file name
-            strcpy(output_file_name, model->params->output_file_dir);
-            strcat(output_file_name, "/time_step_hospital_output");
-            strcat(output_file_name, ".csv");
+	if( model->params->sys_write_hospital )
+		{
+			// Concatenate file name
+			strcpy(output_file_name, model->params->output_file_dir);
+			strcat(output_file_name, "/time_step_hospital_output");
+			strcat(output_file_name, ".csv");
 
-            // Open outputfile in different mode depending on whether this is the first time step
-            if(model->time == 1)
-            {
-                time_step_hospital_file = fopen(output_file_name, "w");
-                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
-            }
-            else
-            {
-                time_step_hospital_file = fopen(output_file_name, "a");
-            }
+			// Open outputfile in different mode depending on whether this is the first time step
+			if(model->time == 1)
+			{
+				time_step_hospital_file = fopen(output_file_name, "w");
+				fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
+			}
+			else
+			{
+				time_step_hospital_file = fopen(output_file_name, "a");
+			}
 
-            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-            {
-                // For each ward
-                for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
-                {
-                    int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
-                    int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
-                    int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
-                    int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
+			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+			{
+				// For each ward
+				for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
+				{
+					int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
+					int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
+					int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
+					int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
 
-                    // For each doctor
-                    for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
-                    {
-                        int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
-                        int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
+					// For each doctor
+					for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
+					{
+						int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
+						int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
 
-                        individual *indiv_doctor;
-                        indiv_doctor = &(model->population[doctor_pdx]);
-                        int doctor_disease_state = indiv_doctor->status;
-                        int doctor_hospital_state = indiv_doctor->hospital_state;
+						individual *indiv_doctor;
+						indiv_doctor = &(model->population[doctor_pdx]);
+						int doctor_disease_state = indiv_doctor->status;
+						int doctor_hospital_state = indiv_doctor->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
-                    }
-                    // For each nurse
-                    for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
-                    {
-                        int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
-                        int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
+						fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
+					}
+					// For each nurse
+					for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
+					{
+						int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
+						int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
 
-                        individual *indiv_nurse;
-                        indiv_nurse = &(model->population[nurse_pdx]);
-                        int nurse_disease_state = indiv_nurse->status;
-                        int nurse_hospital_state = indiv_nurse->hospital_state;
+						individual *indiv_nurse;
+						indiv_nurse = &(model->population[nurse_pdx]);
+						int nurse_disease_state = indiv_nurse->status;
+						int nurse_hospital_state = indiv_nurse->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
-                    }
+						fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
+					}
 
-                    // For each patient
-                    hospital *hospital;
-                    hospital = &model->hospitals[hospital_idx];
-                    for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
-                    {
-                        int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
+					// For each patient
+					hospital *hospital;
+					hospital = &model->hospitals[hospital_idx];
+					for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
+					{
+						int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
 
-                        individual *indiv_patient;
-                        indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
-                        int patient_disease_state = indiv_patient->status;
-                        int patient_hospital_state = indiv_patient->hospital_state;
+						individual *indiv_patient;
+						indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
+						int patient_disease_state = indiv_patient->status;
+						int patient_hospital_state = indiv_patient->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
-                    }
+						fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
+					}
 
-                }
-            }
+				}
+			}
 
-            fclose(time_step_hospital_file);
-        };
+			fclose(time_step_hospital_file);
+		};
 }
 
 /*****************************************************************************************
@@ -366,11 +366,11 @@ void write_time_step_hospital_data( model *model)
 ******************************************************************************************/
 void set_up_individual_hazard( model *model )
 {
-    parameters *params = model->params;
-    long idx;
+	parameters *params = model->params;
+	long idx;
 
-    for( idx = 0; idx < params->n_total; idx++ )
-        initialize_hazard( &(model->population[idx]), params );
+	for( idx = 0; idx < params->n_total; idx++ )
+		initialize_hazard( &(model->population[idx]), params );
 }
 
 /*****************************************************************************************
@@ -380,33 +380,33 @@ void set_up_individual_hazard( model *model )
 ******************************************************************************************/
 double estimate_total_interactions( model *model )
 {
-    long idx;
-    double n_interactions;
-    n_interactions = 0;
+	long idx;
+	double n_interactions;
+	n_interactions = 0;
 
-    n_interactions += model->household_network->n_edges;
-    for( idx = 0; idx < model->params->n_total; idx++ )
-        n_interactions += model->population[idx].base_random_interactions * 0.5;
-    for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
-        n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
+	n_interactions += model->household_network->n_edges;
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		n_interactions += model->population[idx].base_random_interactions * 0.5;
+	for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
+		n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
-    if( model->params->hospital_on )
-    {
-        int hospital_idx, ward_type, ward_idx;
-        for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
-        {
-            n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
-            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-            {
-                for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
-                {
-                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
-                    n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
-                }
-            }
-        }
-    }
-    return n_interactions;
+	if( model->params->hospital_on )
+	{
+		int hospital_idx, ward_type, ward_idx;
+		for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
+		{
+			n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
+			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+			{
+				for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
+				{
+					n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
+					n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
+				}
+			}
+		}
+	}
+	return n_interactions;
 }
 
 /*****************************************************************************************
@@ -417,29 +417,29 @@ double estimate_total_interactions( model *model )
 ******************************************************************************************/
 void set_up_interactions( model *model )
 {
-    parameters *params = model->params;
-    individual *indiv;
-    long idx, n_idx, indiv_idx, n_daily_interactions, n_interactions;
+	parameters *params = model->params;
+	individual *indiv;
+	long idx, n_idx, indiv_idx, n_daily_interactions, n_interactions;
 
-    n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
-    n_interactions       = n_daily_interactions * params->days_of_interactions;
+	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
+	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
-    model->interactions          = calloc( n_interactions, sizeof( interaction ) );
-    model->n_interactions        = n_interactions;
-    model->interaction_idx       = 0;
-    model->interaction_day_idx   = 0;
+	model->interactions          = calloc( n_interactions, sizeof( interaction ) );
+	model->n_interactions        = n_interactions;
+	model->interaction_idx       = 0;
+	model->interaction_day_idx   = 0;
 
-    model->possible_interactions = calloc( n_daily_interactions, sizeof( long ) );
-    idx = 0;
-    for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
-    {
-        indiv = &(model->population[ indiv_idx ]);
-        for( n_idx = 0; n_idx < indiv->random_interactions; n_idx++ )
-            model->possible_interactions[ idx++ ] = indiv_idx;
-    }
+	model->possible_interactions = calloc( n_daily_interactions, sizeof( long ) );
+	idx = 0;
+	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
+	{
+		indiv = &(model->population[ indiv_idx ]);
+		for( n_idx = 0; n_idx < indiv->random_interactions; n_idx++ )
+			model->possible_interactions[ idx++ ] = indiv_idx;
+	}
 
-    model->n_possible_interactions = idx;
-    model->n_total_intereactions   = 0;
+	model->n_possible_interactions = idx;
+	model->n_total_intereactions   = 0;
 }
 
 /*****************************************************************************************
@@ -449,16 +449,16 @@ void set_up_interactions( model *model )
 ******************************************************************************************/
 event* new_event( model *model )
 {
-    event *event = model->next_event;
+	event *event = model->next_event;
 
-    model->next_event       = event->next;
-    model->next_event->last = event->last;
-    event->last->next       = model->next_event;
+	model->next_event       = event->next;
+	model->next_event->last = event->last;
+	event->last->next       = model->next_event;
 
-    event->next = NULL;
-    event->last = NULL;
+	event->next = NULL;
+	event->last = NULL;
 
-    return event;
+	return event;
 }
 
 /*****************************************************************************************
@@ -471,21 +471,21 @@ event* new_event( model *model )
 ******************************************************************************************/
 void flu_infections( model *model )
 {
-    long idx, pdx, n_infected;
-    individual *indiv;
+	long idx, pdx, n_infected;
+	individual *indiv;
 
-    n_infected = round( model->params->n_total * model->params->daily_non_cov_symptoms_rate );
+	n_infected = round( model->params->n_total * model->params->daily_non_cov_symptoms_rate );
 
-    for( idx = 0; idx < n_infected; idx++ )
-    {
-        pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
-        indiv = &(model->population[pdx]);
+	for( idx = 0; idx < n_infected; idx++ )
+	{
+		pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
+		indiv = &(model->population[pdx]);
 
-        if( is_in_hospital( indiv ) || indiv->status == DEATH )
-            continue;
+		if( is_in_hospital( indiv ) || indiv->status == DEATH )
+			continue;
 
-        intervention_on_symptoms( model, indiv );
-    }
+		intervention_on_symptoms( model, indiv );
+	}
 
 }
 
@@ -501,37 +501,37 @@ void flu_infections( model *model )
 *  Returns:		a pointer to the newly added event
 ******************************************************************************************/
 event* add_individual_to_event_list(
-    model *model,
-    int type,
-    individual *indiv,
-    int time
+	model *model,
+	int type,
+	individual *indiv,
+	int time
 )
 {
-    event_list *list    = &(model->event_lists[ type ]);
-    event *event        = new_event( model );
-    event->individual   = indiv;
-    event->type         = type;
-    event->time         = time;
+	event_list *list    = &(model->event_lists[ type ]);
+	event *event        = new_event( model );
+	event->individual   = indiv;
+	event->type         = type;
+	event->time         = time;
 
-    if( list->n_daily_current[time] >0  )
-    {
-        list->events[ time ]->last = event;
-        event->next  = list->events[ time ];
-    }
+	if( list->n_daily_current[time] >0  )
+	{
+		list->events[ time ]->last = event;
+		event->next  = list->events[ time ];
+	}
 
-    list->events[time ] = event;
-    list->n_daily[time]++;
-    list->n_daily_by_age[time][indiv->age_group]++;
-    list->n_daily_current[time]++;
+	list->events[time ] = event;
+	list->n_daily[time]++;
+	list->n_daily_by_age[time][indiv->age_group]++;
+	list->n_daily_current[time]++;
 
-    if( time <= model->time )
-    {
-        list->n_total++;
-        list->n_current++;
-        list->n_total_by_age[indiv->age_group]++;
-    }
+	if( time <= model->time )
+	{
+		list->n_total++;
+		list->n_current++;
+		list->n_total_by_age[indiv->age_group]++;
+	}
 
-    return event;
+	return event;
 }
 
 /*****************************************************************************************
@@ -545,40 +545,40 @@ event* add_individual_to_event_list(
 *  Returns:		a pointer to the newly added event
 ******************************************************************************************/
 void remove_event_from_event_list(
-    model *model,
-    event *event
+	model *model,
+	event *event
 )
 {
-    int type = event->type;
-    int time = event->time;
-    event_list *list = &(model->event_lists[ type ]);
+	int type = event->type;
+	int time = event->time;
+	event_list *list = &(model->event_lists[ type ]);
 
-    if( list->n_daily_current[ time ] > 1 )
-    {
-        if( event != list->events[ time ] )
-        {
-            if( event->next == NULL )
-                event->last->next = NULL;
-            else
-            {
-                event->last->next = event->next;
-                event->next->last = event->last;
-            }
-        }
-        else
-            list->events[ time ] = event->next;
-    }
-    else
-        list->events[time] = NULL;
+	if( list->n_daily_current[ time ] > 1 )
+	{
+		if( event != list->events[ time ] )
+		{
+			if( event->next == NULL )
+				event->last->next = NULL;
+			else
+			{
+				event->last->next = event->next;
+				event->next->last = event->last;
+			}
+		}
+		else
+			list->events[ time ] = event->next;
+	}
+	else
+		list->events[time] = NULL;
 
-    model->next_event->last->next = event;
-    event->last = model->next_event->last;
-    event->next = model->next_event;
-    model->next_event->last = event;
+	model->next_event->last->next = event;
+	event->last = model->next_event->last;
+	event->next = model->next_event;
+	model->next_event->last = event;
 
-    if( time <= model->time )
-        list->n_current--;
-    list->n_daily_current[ time ]--;
+	if( time <= model->time )
+		list->n_current--;
+	list->n_daily_current[ time ]--;
 }
 
 /*****************************************************************************************
@@ -588,11 +588,11 @@ void remove_event_from_event_list(
 ******************************************************************************************/
 void update_event_list_counters( model *model, int type )
 {
-    model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
-    model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
+	model->event_lists[type].n_current += model->event_lists[type].n_daily_current[ model->time ];
+	model->event_lists[type].n_total   += model->event_lists[type].n_daily[ model->time ];
 
-    for( int age = 0; age < N_AGE_GROUPS; age++ )
-        model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
+	for( int age = 0; age < N_AGE_GROUPS; age++ )
+		model->event_lists[type].n_total_by_age[age] += model->event_lists[type].n_daily_by_age[ model->time ][ age ];
 }
 
 /*****************************************************************************************
@@ -602,20 +602,20 @@ void update_event_list_counters( model *model, int type )
 ******************************************************************************************/
 void set_up_seed_infection( model *model )
 {
-    parameters *params = model->params;
-    int idx;
-    unsigned long int person;
+	parameters *params = model->params;
+	int idx;
+	unsigned long int person;
 
-    idx = 0;
-    while( idx < params->n_seed_infection )
-    {
-        person = gsl_rng_uniform_int( rng, params->n_total );
-        if( !params->hospital_on || model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
-        {
-            new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
-            idx++;
-        }
-    }
+	idx = 0;
+	while( idx < params->n_seed_infection )
+	{
+		person = gsl_rng_uniform_int( rng, params->n_total );
+		if( !params->hospital_on || model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
+		{
+			new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
+			idx++;
+		}
+	}
 }
 
 /*****************************************************************************************
@@ -624,35 +624,35 @@ void set_up_seed_infection( model *model )
 ******************************************************************************************/
 void build_random_network( model *model )
 {
-    long idx, n_pos, person;
-    int jdx;
-    long *interactions = model->possible_interactions;
-    network *network   = model->random_network;
+	long idx, n_pos, person;
+	int jdx;
+	long *interactions = model->possible_interactions;
+	network *network   = model->random_network;
 
-    network->n_edges = 0;
-    n_pos            = 0;
-    for( person = 0; person < model->params->n_total; person++ )
-        for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
-            interactions[n_pos++]=person;
+	network->n_edges = 0;
+	n_pos            = 0;
+	for( person = 0; person < model->params->n_total; person++ )
+		for( jdx = 0; jdx < model->population[person].random_interactions; jdx++ )
+			interactions[n_pos++]=person;
 
-    if( n_pos == 0 )
-        return;
+	if( n_pos == 0 )
+		return;
 
-    gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
+	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
-    idx = 0;
-    n_pos--;
-    while( idx < n_pos )
-    {
-        if( interactions[ idx ] == interactions[ idx + 1 ] )
-        {
-            idx++;
-            continue;
-        }
-        network->edges[network->n_edges].id1 = interactions[ idx++ ];
-        network->edges[network->n_edges].id2 = interactions[ idx++ ];
-        network->n_edges++;
-    }
+	idx = 0;
+	n_pos--;
+	while( idx < n_pos )
+	{
+		if( interactions[ idx ] == interactions[ idx + 1 ] )
+		{
+			idx++;
+			continue;
+		}
+		network->edges[network->n_edges].id1 = interactions[ idx++ ];
+		network->edges[network->n_edges].id2 = interactions[ idx++ ];
+		network->n_edges++;
+	}
 }
 
 /*****************************************************************************************
@@ -661,58 +661,58 @@ void build_random_network( model *model )
 ******************************************************************************************/
 void add_interactions_from_network(
 
-    model *model,
-    network *network,
-    int skip_hospitalised,
-    int skip_quarantined,
-    double prob_drop
+	model *model,
+	network *network,
+	int skip_hospitalised,
+	int skip_quarantined,
+	double prob_drop
 )
 {
-    long idx     = 0;
-    long all_idx = model->interaction_idx;
-    int day      = model->interaction_day_idx;
+	long idx     = 0;
+	long all_idx = model->interaction_idx;
+	int day      = model->interaction_day_idx;
 
-    interaction *inter1, *inter2;
-    individual *indiv1, *indiv2;
+	interaction *inter1, *inter2;
+	individual *indiv1, *indiv2;
 
-    while( idx < network->n_edges )
-    {
-        indiv1 = &(model->population[ network->edges[idx].id1 ] );
-        indiv2 = &(model->population[ network->edges[idx++].id2 ] );
+	while( idx < network->n_edges )
+	{
+		indiv1 = &(model->population[ network->edges[idx].id1 ] );
+		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
 
-        if( indiv1->status == DEATH || indiv2 ->status == DEATH )
-            continue;
-        if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
-            continue;
-        if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
-            continue;
-        if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
-            continue;
+		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
+			continue;
+		if( skip_hospitalised && ( is_in_hospital( indiv1 ) || is_in_hospital( indiv2 ) ) )
+			continue;
+		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
+			continue;
+		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
+			continue;
 
-        inter1 = &(model->interactions[ all_idx++ ]);
-        inter2 = &(model->interactions[ all_idx++ ]);
+		inter1 = &(model->interactions[ all_idx++ ]);
+		inter2 = &(model->interactions[ all_idx++ ]);
 
-        inter1->type       = network->type;
-        inter1->traceable  = UNKNOWN;
-        inter1->individual = indiv2;
-        inter1->next       = indiv1->interactions[ day ];
-        indiv1->interactions[ day ] = inter1;
-        indiv1->n_interactions[ day ]++;
+		inter1->type       = network->type;
+		inter1->traceable  = UNKNOWN;
+		inter1->individual = indiv2;
+		inter1->next       = indiv1->interactions[ day ];
+		indiv1->interactions[ day ] = inter1;
+		indiv1->n_interactions[ day ]++;
 
-        inter2->type       = network->type;
-        inter2->traceable  = UNKNOWN;
-        inter2->individual = indiv1;
-        inter2->next       = indiv2->interactions[ day ];
-        indiv2->interactions[ day ] = inter2;
-        indiv2->n_interactions[ day ]++;
+		inter2->type       = network->type;
+		inter2->traceable  = UNKNOWN;
+		inter2->individual = indiv1;
+		inter2->next       = indiv2->interactions[ day ];
+		indiv2->interactions[ day ] = inter2;
+		indiv2->n_interactions[ day ]++;
 
-        model->n_total_intereactions++;
+		model->n_total_intereactions++;
 
-        if( all_idx >= model->n_interactions )
-            all_idx = 0;
+		if( all_idx >= model->n_interactions )
+			all_idx = 0;
 
-    }
-    model->interaction_idx =  all_idx;
+	}
+	model->interaction_idx =  all_idx;
 }
 
 /*****************************************************************************************
@@ -721,42 +721,42 @@ void add_interactions_from_network(
 ******************************************************************************************/
 void build_daily_network( model *model )
 {
-    int idx, day;
+	int idx, day;
 
-    day = model->interaction_day_idx;
-    for( idx = 0; idx < model->params->n_total; idx++ )
-        model->population[ idx ].n_interactions[ day ] = 0;
+	day = model->interaction_day_idx;
+	for( idx = 0; idx < model->params->n_total; idx++ )
+		model->population[ idx ].n_interactions[ day ] = 0;
 
-    build_random_network( model );
-    add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
-    add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
+	build_random_network( model );
+	add_interactions_from_network( model, model->random_network, FALSE, FALSE, 0 );
+	add_interactions_from_network( model, model->household_network, TRUE, FALSE, 0 );
 
 	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
 		add_interactions_from_network( model, model->occupation_network[idx], TRUE, TRUE, 1.0 - model->params->daily_fraction_work_used[idx] );
 
-    if( model->params->hospital_on )
-    {
-        //Create work networks for healthcare workers.
-        int ward_idx, ward_type;
-        for( idx = 0; idx < model->params->n_hospitals; idx++ )
-            build_hospital_networks( model, &(model->hospitals[idx]) );
+	if( model->params->hospital_on )
+	{
+		//Create work networks for healthcare workers.
+		int ward_idx, ward_type;
+		for( idx = 0; idx < model->params->n_hospitals; idx++ )
+			build_hospital_networks( model, &(model->hospitals[idx]) );
 
-        //Create patient-healthcare interaction networks for each ward and each healthcare worker type.
-        for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        {
-            add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-            {
-                for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-                {
-                    if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
-                        add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-                   if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
-                        add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
-                }
-            }
-        }
-    }
+		//Create patient-healthcare interaction networks for each ward and each healthcare worker type.
+		for( idx = 0; idx < model->params->n_hospitals; idx++ )
+		{
+			add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
+			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+			{
+				for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
+				{
+					if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
+						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+				   if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
+						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
+				}
+			}
+		}
+	}
 };
 
 /*****************************************************************************************
@@ -765,29 +765,29 @@ void build_daily_network( model *model )
 *  Returns:		void
 ******************************************************************************************/
 void transition_events(
-    model *model_ptr,
-    int type,
-    void (*transition_func)( model*, individual* ),
-    int remove_event
+	model *model_ptr,
+	int type,
+	void (*transition_func)( model*, individual* ),
+	int remove_event
 )
 {
-    long idx, n_events;
-    event *event, *next_event;
-    individual *indiv;
+	long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
 
-    n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
-    next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
+	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
+	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
 
-    for( idx = 0; idx < n_events; idx++ )
-    {
-        event      = next_event;
-        next_event = event->next;
-        indiv      = event->individual;
-        transition_func( model_ptr, indiv );
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+		transition_func( model_ptr, indiv );
 
-        if( remove_event )
-            remove_event_from_event_list( model_ptr, event );
-    }
+		if( remove_event )
+			remove_event_from_event_list( model_ptr, event );
+	}
 }
 
 /*****************************************************************************************
@@ -798,53 +798,53 @@ void transition_events(
 ******************************************************************************************/
 void set_up_healthcare_workers_and_hospitals( model *model)
 {
-    //TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
-    long pdx;
-    int idx, n_total_doctors, n_total_nurses;
-    individual *indiv;
+	//TODO: Have set_up_healthcare_workers() mimic the age distribution of actual NHS workers.
+	long pdx;
+	int idx, n_total_doctors, n_total_nurses;
+	individual *indiv;
 
-    //Initialise hospitals.
-    model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
-    for( idx = 0; idx < model->params->n_hospitals; idx++ )
-        initialise_hospital( &(model->hospitals[idx]), model->params, idx );
+	//Initialise hospitals.
+	model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
+	for( idx = 0; idx < model->params->n_hospitals; idx++ )
+		initialise_hospital( &(model->hospitals[idx]), model->params, idx );
 
-    idx = 0;
+	idx = 0;
 
-    //Randomly pick individuals from population between ages 20 - 69 to be doctors and assign them to a hospital.
-    n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];
-    n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
-    while( idx < n_total_doctors )
-    {
-        pdx = gsl_rng_uniform_int( rng, model->params->n_total );
-        indiv = &(model->population[pdx]);
+	//Randomly pick individuals from population between ages 20 - 69 to be doctors and assign them to a hospital.
+	n_total_doctors = model->params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * model->params->n_wards[COVID_GENERAL];
+	n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
+	while( idx < n_total_doctors )
+	{
+		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+		indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
-                continue;
+		if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
+				continue;
 
-        indiv->worker_type = DOCTOR;
-        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
-        idx++;
-    }
+		indiv->worker_type = DOCTOR;
+		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
+		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
+		idx++;
+	}
 
-    idx = 0;
+	idx = 0;
 
-    //Randomly pick individuals from population between ages 20 - 69 to be nurses and assign them to a hospital.
-    n_total_nurses = model->params->n_hcw_per_ward[COVID_GENERAL][NURSE] * model->params->n_wards[COVID_GENERAL];
-    n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
-    while( idx < n_total_nurses )
-    {
-        pdx = gsl_rng_uniform_int( rng, model->params->n_total );
-        indiv = &(model->population[pdx]);
+	//Randomly pick individuals from population between ages 20 - 69 to be nurses and assign them to a hospital.
+	n_total_nurses = model->params->n_hcw_per_ward[COVID_GENERAL][NURSE] * model->params->n_wards[COVID_GENERAL];
+	n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
+	while( idx < n_total_nurses )
+	{
+		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+		indiv = &(model->population[pdx]);
 
-        if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
-                continue;
+		if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
+				continue;
 
-        indiv->worker_type = NURSE;
-        indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
-        idx++;
-    }
+		indiv->worker_type = NURSE;
+		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
+		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
+		idx++;
+	}
 }
 
 /*****************************************************************************************
@@ -861,33 +861,33 @@ int one_time_step( model *model )
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
 
-    build_daily_network( model );
-    transmit_virus( model );
+	build_daily_network( model );
+	transmit_virus( model );
 
-    transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
+	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
 	transition_events( model, SYMPTOMATIC_MILD,  	   &transition_to_symptomatic_mild, 		FALSE );
 	transition_events( model, HOSPITALISED,     	   &transition_to_hospitalised,     		FALSE );
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
 	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
-    transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
-    transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
+	transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
+	transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
-    if( model->params->hospital_on )
-    {
-        transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
-        transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
+	if( model->params->hospital_on )
+	{
+		transition_events( model, DISCHARGED,      		   &transition_to_discharged, 				FALSE );
+		transition_events( model, MORTUARY,        		   &transition_to_mortuary,   				FALSE );
 
-        swap_waiting_general_and_icu_patients( model );
-        hospital_waiting_list_transition_scheduler( model, GENERAL );
-        hospital_waiting_list_transition_scheduler( model, ICU );
+		swap_waiting_general_and_icu_patients( model );
+		hospital_waiting_list_transition_scheduler( model, GENERAL );
+		hospital_waiting_list_transition_scheduler( model, ICU );
 
-        transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
-        transition_events( model, GENERAL,         &transition_to_general,    FALSE );
-        transition_events( model, ICU,             &transition_to_icu,        FALSE );
+		transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
+		transition_events( model, GENERAL,         &transition_to_general,    FALSE );
+		transition_events( model, ICU,             &transition_to_icu,        FALSE );
 
-        ///use printf below to see available beds each timestep
-        //printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
-    }
+		///use printf below to see available beds each timestep
+		//printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
+	}
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
@@ -902,9 +902,9 @@ int one_time_step( model *model )
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
 
-    // Output hospital data for each time step
-    if( model->params->hospital_on )
-        write_time_step_hospital_data( model );
+	// Output hospital data for each time step
+	if( model->params->hospital_on )
+		write_time_step_hospital_data( model );
 
 	return 1;
 };

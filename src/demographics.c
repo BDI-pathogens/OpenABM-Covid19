@@ -65,7 +65,7 @@ void set_up_allocate_work_places( model *model )
 			{
 				if( NETWORK_TYPE_MAP[ndx]!= NETWORK_TYPE_ADULT )
 				{
-                    prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
+					prob[adx][ndx] = 1.0 * pop_net_raw[ndx] * adult_prop[NETWORK_TYPE_MAP[ndx]] / n_adult;
 					other         += prob[adx][ndx];
 				}
 			}
@@ -74,8 +74,8 @@ void set_up_allocate_work_places( model *model )
 			prob[adx][AGE_OCCUPATION_MAP[adx]] = 1.0 - other;
 	}
 
-    for( pdx = 0; pdx < model->params->n_total; pdx++ )
-        model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+		model->population[pdx].occupation_network = discrete_draw( N_OCCUPATION_NETWORKS, prob[model->population[pdx].age_group]);
 
 	for( ndx = 0; ndx < N_AGE_GROUPS; ndx++ )
 		free(prob[ndx]);

@@ -12,18 +12,18 @@
 
 int main(int argc, char *argv[])
 {
-    printf("# Starting simulation\n");
+	printf("# Starting simulation\n");
 
-    parameters params;	
+	parameters params;	
 
-    struct timespec  tv;
-    double tstart, tend;
-    long last_test;
-    int idx;
+	struct timespec  tv;
+	double tstart, tend;
+	long last_test;
+	int idx;
 	char date_time[30];
 	
-    clock_gettime( CLOCK_REALTIME,&tv);
-    tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
+	clock_gettime( CLOCK_REALTIME,&tv);
+	tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
 	time_t time_now = time( NULL );
 	strftime(date_time, sizeof(date_time), "# Date: %d-%m-%Y %I:%M:%S", localtime(&time_now)); 
@@ -39,82 +39,82 @@ int main(int argc, char *argv[])
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
-    if( params.hospital_on )
-    {
-        printf("# Read hospital parameter file\n");
-        read_hospital_param_file( &params );
-        check_hospital_params( &params );
-    }
+	if( params.hospital_on )
+	{
+		printf("# Read hospital parameter file\n");
+		read_hospital_param_file( &params );
+		check_hospital_params( &params );
+	}
 
-    printf("# Start model set-up\n");
+	printf("# Start model set-up\n");
 
-    model *model = new_model( &params );
+	model *model = new_model( &params );
 	
 	printf("# param_id: %li\n", params.param_id);
 	printf("# rng_seed: %li\n", params.rng_seed);
 	printf("# param_line_number: %d\n", params.param_line_number);
-    printf("# hospital_on: %d\n", params.hospital_on);
+	printf("# hospital_on: %d\n", params.hospital_on);
 
-    if ( params.hospital_on )
-	    printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_waiting,n_general,n_ICU,n_discharged,n_mortuary\n");
-    else
-        printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered\n");
-    last_test = 0;
+	if ( params.hospital_on )
+		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_waiting,n_general,n_ICU,n_discharged,n_mortuary\n");
+	else
+		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered\n");
+	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
-        if( model->params->hospital_on )
-        {
-            printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
-                    model->time,
-                    params.lockdown_on,
-                    params.lockdown_elderly_on,
-                    params.interventions_on,
-                    params.test_on_symptoms,
-                    params.app_turned_on,
-                    n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
-                    n_total( model, CASE ),
-                    n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
-                    n_current( model, ASYMPTOMATIC ),
-                    n_current( model, QUARANTINED ),
-                    n_total( model, TEST_RESULT ) - last_test,
-                    n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
-                    n_current( model, HOSPITALISED ),
-                    n_current( model, CRITICAL ),
-                    n_current( model, HOSPITALISED_RECOVERING ),
-                    n_current( model, DEATH ),
-                    n_current( model, RECOVERED ),
-                    n_total( model, WAITING ),
-                    n_total( model, GENERAL ),
-                    n_total( model, ICU),
-                    n_total( model, DISCHARGED),
-                    n_total( model, MORTUARY)
-            );
-            last_test = n_total( model, TEST_RESULT );
-        }
-        else
-        {
-            printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
-                    model->time,
-                    params.lockdown_on,
-                    params.lockdown_elderly_on,
-                    params.interventions_on,
-                    params.test_on_symptoms,
-                    params.app_turned_on,
-                    n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
-                    n_total( model, CASE ),
-                    n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
-                    n_current( model, ASYMPTOMATIC ),
-                    n_current( model, QUARANTINED ),
-                    n_total( model, TEST_RESULT ) - last_test,
-                    n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
-                    n_current( model, HOSPITALISED ),
-                    n_current( model, CRITICAL ),
-                    n_current( model, HOSPITALISED_RECOVERING ),
-                    n_current( model, DEATH ),
-                    n_current( model, RECOVERED )
-            );
-            last_test = n_total( model, TEST_RESULT );
-        }
+		if( model->params->hospital_on )
+		{
+			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+					model->time,
+					params.lockdown_on,
+					params.lockdown_elderly_on,
+					params.interventions_on,
+					params.test_on_symptoms,
+					params.app_turned_on,
+					n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
+					n_total( model, CASE ),
+					n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
+					n_current( model, ASYMPTOMATIC ),
+					n_current( model, QUARANTINED ),
+					n_total( model, TEST_RESULT ) - last_test,
+					n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
+					n_current( model, HOSPITALISED ),
+					n_current( model, CRITICAL ),
+					n_current( model, HOSPITALISED_RECOVERING ),
+					n_current( model, DEATH ),
+					n_current( model, RECOVERED ),
+					n_total( model, WAITING ),
+					n_total( model, GENERAL ),
+					n_total( model, ICU),
+					n_total( model, DISCHARGED),
+					n_total( model, MORTUARY)
+			);
+			last_test = n_total( model, TEST_RESULT );
+		}
+		else
+		{
+			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+					model->time,
+					params.lockdown_on,
+					params.lockdown_elderly_on,
+					params.interventions_on,
+					params.test_on_symptoms,
+					params.app_turned_on,
+					n_total( model, PRESYMPTOMATIC ) + n_total( model, PRESYMPTOMATIC_MILD ) + n_total( model, ASYMPTOMATIC ),
+					n_total( model, CASE ),
+					n_current( model, PRESYMPTOMATIC ) + n_current( model, PRESYMPTOMATIC_MILD ),
+					n_current( model, ASYMPTOMATIC ),
+					n_current( model, QUARANTINED ),
+					n_total( model, TEST_RESULT ) - last_test,
+					n_current( model, SYMPTOMATIC ) + n_current( model, SYMPTOMATIC_MILD ),
+					n_current( model, HOSPITALISED ),
+					n_current( model, CRITICAL ),
+					n_current( model, HOSPITALISED_RECOVERING ),
+					n_current( model, DEATH ),
+					n_current( model, RECOVERED )
+			);
+			last_test = n_total( model, TEST_RESULT );
+		}
 	};
 
 	printf( "\n# End_time:                      %i\n",  model->time );
@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
 	destroy_model( model );
 	destroy_params( &params );
 
-    clock_gettime( CLOCK_REALTIME, &tv );
-    tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
+	clock_gettime( CLOCK_REALTIME, &tv );
+	tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
-    printf("# Ending simulation, run time:   %.2fs\n", tend - tstart );
-    return 0;
+	printf("# Ending simulation, run time:   %.2fs\n", tend - tstart );
+	return 0;
 }

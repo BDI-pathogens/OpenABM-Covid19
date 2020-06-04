@@ -15,7 +15,6 @@ import subprocess
 import sys
 import numpy as np, pandas as pd
 from math import sqrt
-import os
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -741,11 +740,7 @@ class TestClass(object):
         params.set_param("infectious_rate", 4.0)
         params.set_param("mild_infectious_factor", 1.0)
         params.set_param("hospital_on", 0)
-
         params.set_param( test_params )
-
-    
-       
 
         fraction_asymptomatic = [
             test_params[ "fraction_asymptomatic_0_9" ],
@@ -808,7 +803,6 @@ class TestClass(object):
         ]
 
         params.write_params(constant.TEST_DATA_FILE)
-
         file_output = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(

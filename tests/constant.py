@@ -137,6 +137,6 @@ NURSE = 1
 
 # Construct the executable command
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-            f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)

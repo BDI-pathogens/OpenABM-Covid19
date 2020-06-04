@@ -45,7 +45,7 @@ void initialize_individual(
 
 	indiv->infection_events->infector_status  = UNKNOWN;
 	indiv->infection_events->infector_network = UNKNOWN;
-    	indiv->infection_events->infector_hospital_state = UNKNOWN;
+	indiv->infection_events->infector_hospital_state = UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
 	indiv->infection_events->next =  NULL;
 	indiv->infection_events->is_case     = FALSE;
@@ -59,17 +59,17 @@ void initialize_individual(
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
-    	indiv->index_token_release_event = NULL;
+	indiv->index_token_release_event = NULL;
 
-    	indiv->hospital_state = NOT_IN_HOSPITAL;
+	indiv->hospital_state = NOT_IN_HOSPITAL;
 	indiv->current_hospital_event = NULL;
 	indiv->next_hospital_event = NULL;
-    	indiv->ward_type = NO_WARD;
-    	indiv->ward_idx  = NO_WARD;
-    	indiv->hospital_idx = NO_HOSPITAL;
+	indiv->ward_type = NO_WARD;
+	indiv->ward_idx  = NO_WARD;
+	indiv->hospital_idx = NO_HOSPITAL;
 	indiv->disease_progression_predicted[0] = FALSE;
 	indiv->disease_progression_predicted[1] = FALSE;
-    	indiv->worker_type = NOT_HEALTHCARE_WORKER;
+	indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 
 /*****************************************************************************************
@@ -164,19 +164,19 @@ void update_random_interactions( individual *indiv, parameters* params )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			lockdown = max( lockdown, params->lockdown_elderly_on );
 
-        switch( indiv->status )
-        {
-            case DEATH:			n = 0; 										 break;
-            case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
-            case CRITICAL:		n = params->hospitalised_daily_interactions; break;
-            case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break;
-            default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
-        }
-    }
-    else
-        n = params->quarantined_daily_interactions;
+		switch( indiv->status )
+		{
+			case DEATH:			n = 0; 										 break;
+			case HOSPITALISED:	n = params->hospitalised_daily_interactions; break;
+			case CRITICAL:		n = params->hospitalised_daily_interactions; break;
+			case HOSPITALISED_RECOVERING: n = params->hospitalised_daily_interactions; break;
+			default: 			n = ifelse( lockdown, n * params->lockdown_random_network_multiplier, n );
+		}
+	}
+	else
+		n = params->quarantined_daily_interactions;
 
-    indiv->random_interactions = round_random( n );
+	indiv->random_interactions = round_random( n );
 }
 
 /*****************************************************************************************
@@ -188,7 +188,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = DEATH;
 	indiv->current_disease_event = NULL;
-    	update_random_interactions( indiv, params );
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -200,7 +200,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
-    	update_random_interactions( indiv, params );
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -211,7 +211,7 @@ void set_recovered( individual *indiv, parameters* params, int time )
 void set_hospitalised( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED;
-    	update_random_interactions( indiv, params );
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -232,7 +232,7 @@ void set_house_no( individual *indiv, long number )
 void set_critical( individual *indiv, parameters* params, int time )
 {
 	indiv->status = CRITICAL;
-    	update_random_interactions( indiv, params );
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -243,7 +243,7 @@ void set_critical( individual *indiv, parameters* params, int time )
 void set_hospitalised_recovering( individual *indiv, parameters* params, int time )
 {
 	indiv->status = HOSPITALISED_RECOVERING;
-    	update_random_interactions( indiv, params );
+	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************
@@ -336,7 +336,7 @@ void destroy_individual( individual *indiv )
 int count_infection_events( individual *indiv )
 {
 	int infection_count = 0;
-    	infection_event *infection_event;
+	infection_event *infection_event;
 	infection_event = indiv->infection_events;
 
 	while(infection_event != NULL){
@@ -353,15 +353,15 @@ int count_infection_events( individual *indiv )
 
 void print_individual( model *model, long idx)
 {
-        individual *indiv;
-        if( idx >= model->params->n_total )
-        {
-            printf("idx higher than n_total; individual does not exist");
-            fflush(stdout);
-            return;
-        }
-        
-        indiv = &(model->population[idx]);
+	individual *indiv;
+	if( idx >= model->params->n_total )
+	{
+		printf("idx higher than n_total; individual does not exist");
+		fflush(stdout);
+		return;
+	}
+
+	indiv = &(model->population[idx]);
         
 	printf("indiv->idx: %li\n", indiv->idx );
 	printf("indiv->status: %d\n", indiv->status );
