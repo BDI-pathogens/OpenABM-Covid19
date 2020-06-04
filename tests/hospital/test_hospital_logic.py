@@ -18,7 +18,7 @@ from parameters import ParameterSet
 
 class TestClass(object):
     """
-    Test class for checking
+    Test class for checking that the model behaves as expected with baseline parameters.
     """
 
     def test_hcw_in_population_list(self):
@@ -46,13 +46,15 @@ class TestClass(object):
 
     def test_hcw_not_in_work_network(self):
         """
-        If worker type not -1, then work network must be -1
+        If worker type not -1 (they are a healthcare worker), then work network must be -1 (they are not in the standard work network).
         """
 
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
         params.set_param("hospital_on", 1)
+        params.set_param("days_of_interactions", 50)
+        params.set_param("end_time", 50)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model using baseline parameters, pipe output to file, read output file
@@ -60,6 +62,7 @@ class TestClass(object):
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         
         df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE)
+
         w1_hcw_condition = df_interactions['worker_type_1'] != -1
         w1_worknetwork_condition = df_interactions['occupation_network_1'] != -1
         df_test_worker1 = df_interactions[w1_hcw_condition & w1_worknetwork_condition]
@@ -96,7 +99,7 @@ class TestClass(object):
 
     def test_ward_capacity(self):
         """
-        Test that patients in ward do not exceed ward beds
+        Test that patients in ward do not exceed number of ward beds.
         """
 
         # Adjust baseline parameter
@@ -116,7 +119,7 @@ class TestClass(object):
 
     def test_ward_duplicates(self):
         """
-        Test that patients in wards not duplicated
+        Test that patients in wards not duplicated.
         """
 
         # Adjust baseline parameter
@@ -146,7 +149,7 @@ class TestClass(object):
     def test_patients_do_not_infect_non_hcw(self):
         """
         Tests that hospital patients have only been able to infect
-        hospital healthcare workers
+        hospital healthcare workers.
         """
 
         # Adjust baseline parameter
