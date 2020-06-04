@@ -50,19 +50,19 @@ struct individual{
 	event *index_token_release_event;
 	double traced_on_this_trace;
 
-    	int app_user;
+	int app_user;
 
-    	int ward_idx;
-    	int ward_type;
+	int ward_idx;
+	int ward_type;
 
-    	int hospital_idx;
+	int hospital_idx;
 
-    	int hospital_state;
+	int hospital_state;
 	int disease_progression_predicted[N_HOSPITAL_WARD_TYPES];
 	event *current_hospital_event;
 	event *next_hospital_event;
 
-    	int worker_type;
+	int worker_type;
 
 };
 
@@ -77,7 +77,7 @@ struct infection_event{
 	int *times;
 	individual *infector;
 	int infector_status;
-    	int infector_hospital_state;
+	int infector_hospital_state;
 	int infector_network;
 	int time_infected_infector;
 	infection_event *next;

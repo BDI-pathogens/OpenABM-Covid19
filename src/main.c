@@ -1,12 +1,14 @@
 // main.c
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
 #include "model.h"
 #include "network.h"
 #include "params.h"
+#include "utilities.h"
 #include "input.h"
 #include "constant.h"
 
@@ -21,21 +23,21 @@ int main(int argc, char *argv[])
 	long last_test;
 	int idx;
 	char date_time[30];
-	
+
 	clock_gettime( CLOCK_REALTIME,&tv);
 	tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
 	time_t time_now = time( NULL );
 	strftime(date_time, sizeof(date_time), "# Date: %d-%m-%Y %I:%M:%S", localtime(&time_now)); 
 	puts(date_time);
-	
+
 	printf("# Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
-	
+
 	printf("# Read input parameter file\n");
 	read_param_file( &params );
 	check_params( &params );
-	
+
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
@@ -47,7 +49,6 @@ int main(int argc, char *argv[])
 	}
 
 	printf("# Start model set-up\n");
-
 	model *model = new_model( &params );
 	
 	printf("# param_id: %li\n", params.param_id);
