@@ -49,6 +49,7 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
+
 }
 
 /*****************************************************************************************
@@ -90,6 +91,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 
 	return 1.0 * inter / people;
 }
+
 /*****************************************************************************************
 *  Name:		set_up_infectious curves
 *  Description: sets up discrete distributions and functions which are used to
@@ -144,7 +146,6 @@ void set_up_infectious_curves( model *model )
 						  params->sd_infectious_period, infectious_rate * type_factor );
 	};
 }
-
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
 *  Description: Transmits virus over the interaction network for a type of
@@ -167,7 +168,7 @@ void transmit_virus_by_type(
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
-		n_infected  = list->n_daily_current[ day ];
+		n_infected  = list->n_daily_current[ day];
 		next_event  = list->events[ day ];
 
 		for( idx = 0; idx < n_infected; idx++ )
@@ -204,7 +205,7 @@ void transmit_virus_by_type(
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
                         if( model->params->hospital_on )
                         	if ( hospital_state_modifier != 1.0)
-                            	hazard_rate *= hospital_state_modifier;
+                            		hazard_rate *= hospital_state_modifier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
