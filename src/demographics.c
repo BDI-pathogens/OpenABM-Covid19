@@ -28,7 +28,7 @@
 ******************************************************************************************/
 void set_up_allocate_work_places( model *model )
 {
-    	int adx, ndx;
+	int adx, ndx;
 	long pdx, n_adult;
 	long pop_net_raw[N_OCCUPATION_NETWORKS];
 	double other;
@@ -43,7 +43,7 @@ void set_up_allocate_work_places( model *model )
 	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS; ndx++ )
 		pop_net_raw[ndx] = 0;
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-        pop_net_raw[ AGE_OCCUPATION_MAP[model->population[pdx].age_group] ]++;
+		pop_net_raw[ AGE_OCCUPATION_MAP[model->population[pdx].age_group] ]++;
 
 	// given the total adults
 	n_adult = 0;
@@ -224,7 +224,7 @@ void set_up_household_distribution( model *model )
 				indiv = &(model->population[pdx]);
 				set_age_group( indiv, model->params, age );
 				set_house_no( indiv, hdx );
-			    dir->val[hdx][housesize++] = pdx++;
+				dir->val[hdx][housesize++] = pdx++;
 
 				if( pdx == model->params->n_total )
 				{
