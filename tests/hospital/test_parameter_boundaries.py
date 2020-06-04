@@ -39,9 +39,9 @@ class TestClass(object):
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
 
         df_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
 
@@ -59,7 +59,8 @@ class TestClass(object):
 
     def test_zero_general_wards(self):
         """
-        Set hospital general wards to zero, check there are no general patients
+        Set hospital general wards to zero.
+        Assert that there are no general patients.
         """
 
         # Adjust baseline parameter
@@ -89,7 +90,8 @@ class TestClass(object):
 
     def test_zero_icu_wards(self):
         """
-        Set hospital icu wards to zero, check there are no icu patients
+        Set hospital icu wards to zero.
+        Assert that there are no icu patients.
         """
 
         # Adjust baseline parameter
@@ -119,15 +121,16 @@ class TestClass(object):
 
     def test_zero_hcw_patient_interactions(self):
         """
-        Set patient required hcw interactions to zero
-        and check that there are no interactions between
-        hcw and patients
+        Set patient required hcw interactions to zero.
+        Assert that there are no interactions between hcw and patients
         """
 
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
         params.set_param("hospital_on", 1)
+        params.set_param("days_of_interactions", 50)
+        params.set_param("end_time", 50)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
@@ -143,8 +146,7 @@ class TestClass(object):
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
         df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
 
-        df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE,
-                                      comment="#", sep=",", skipinitialspace=True)
+        df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True)
 
         df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
         df_nurse_patient_general_interactions  = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
@@ -159,8 +161,8 @@ class TestClass(object):
 
     def test_hospital_infectivity_modifiers_zero(self):
         """
-        Set patient infectivity modifiers to zero and test that no healthcare
-        workers are infected by a patient
+        Set patient infectivity modifiers to zero.
+        Assert that no healthcare workers are infected by a patient.
         """
 
         # Adjust baseline parameter
@@ -191,8 +193,8 @@ class TestClass(object):
 
     def test_hospital_infectivity_modifiers_max(self):
         """
-        Set patient infectivity modifiers to 100 and test that all healthcare
-        workers who have interacted with a patient get infected
+        Set patient infectivity modifiers high.
+        Assert that all healthcare workers get infected.
         """
 
         # Adjust baseline parameter
@@ -201,15 +203,6 @@ class TestClass(object):
         params.set_param("hospital_on", 1)
         params.set_param("n_seed_infection", 80000)
         params.set_param("infectious_rate", 100)
-        params.set_param("fraction_asymptomatic_0_9", 0)
-        params.set_param("fraction_asymptomatic_10_19", 0)
-        params.set_param("fraction_asymptomatic_20_29", 0)
-        params.set_param("fraction_asymptomatic_30_39", 0)
-        params.set_param("fraction_asymptomatic_40_49", 0)
-        params.set_param("fraction_asymptomatic_50_59", 0)
-        params.set_param("fraction_asymptomatic_60_69", 0)
-        params.set_param("fraction_asymptomatic_70_79", 0)
-        params.set_param("fraction_asymptomatic_80", 0)
         params.write_params(constant.TEST_DATA_FILE)
 
         number_hcw = 10
@@ -246,17 +239,19 @@ class TestClass(object):
 
             assert disease_hospital_state > 0
 
-    def test_max_hcw_daily_interactions(self):
+    def test_zero_max_hcw_daily_interactions(self):
         """
-        Set healthcare workers max daily interactions (with patients) to 0 and
-        check that there are no disease transition from patient to healthcare workers
-        or any interactions
+        Set healthcare workers max daily interactions (with patients) to 0.
+        Assert that there are no disease transition from patient to healthcare workers
+        or any interactions.
         """
 
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
         params.set_param("hospital_on", 1)
+        params.set_param("days_of_interactions", 50)
+        params.set_param("end_time", 50)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
@@ -271,25 +266,20 @@ class TestClass(object):
 
         df_transmissions_output = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
 
-        # get healthcare workers
+        # Get healthcare workers
         healthcare_workers = df_transmissions_output["worker_type_recipient"] != constant.NOT_HEALTHCARE_WORKER
         healthcare_workers = df_transmissions_output[healthcare_workers]
 
-        # check that no healthcare workers have been infected by a patient
+        # Check that no healthcare workers have been infected by a patient
         for index, row in healthcare_workers.iterrows():
             assert row["hospital_state_source"] not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
 
-        df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE,
-                                      comment="#", sep=",", skipinitialspace=True)
+        df_interactions = pd.read_csv(constant.TEST_INTERACTION_FILE,comment="#", sep=",", skipinitialspace=True)
 
-        df_doctor_patient_general_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
-        df_nurse_patient_general_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
-        df_doctor_patient_icu_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
-        df_nurse_patient_icu_interactions = df_interactions[
-            df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
+        df_doctor_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_GENERAL]
+        df_nurse_patient_general_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_GENERAL]
+        df_doctor_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_DOCTOR_PATIENT_ICU]
+        df_nurse_patient_icu_interactions = df_interactions[df_interactions["type"] == constant.HOSPITAL_NURSE_PATIENT_ICU]
 
         assert len(df_doctor_patient_general_interactions) == 0
         assert len(df_nurse_patient_general_interactions) == 0
@@ -299,9 +289,9 @@ class TestClass(object):
 
     def test_zero_hospitalised_waiting_mod(self):
         """
-        Set hospitalised_waiting_mod to zero, everybody
-        in waiting state should be waiting or recovered in
-        the next time steps
+        Set hospitalised_waiting_mod to zero.
+        Assert that everybody in waiting state is waiting or recovered in
+        the next time steps.
         """
 
         # Adjust baseline parameter
@@ -348,9 +338,9 @@ class TestClass(object):
 
     def test_zero_critical_waiting_mod(self):
         """
-        Set critical_waiting_mod to zero, everybody
-        in waiting state should be waiting or recovered in
-        the next time steps
+        Set critical_waiting_mod to zero.
+        Assert that everybody in waiting state is waiting or recovered in
+        the next time steps.
         """
 
         # Adjust baseline parameter
@@ -404,9 +394,8 @@ class TestClass(object):
 
     def test_100_waiting_mods(self):
         """
-        Set hospitalised_waiting_mod and critical_waiting
-        to zero, everybody in waiting state should be in
-        waiting, critical or mortuary in the next time steps
+        Set hospitalised_waiting_mod and critical_waiting to zero.
+        Assert that everybody in waiting state is in waiting, critical or mortuary in the next time steps
         """
 
         # Adjust baseline parameter
@@ -454,8 +443,8 @@ class TestClass(object):
 
     def test_no_space_limit_beds(self):
         """
-        Set number of beds in each ward to the population size,
-        check that nobody in waiting state
+        Set number of beds in each ward to the population size.
+        Assert that nobody enters the waiting state.
         """
 
         # Adjust baseline parameter
@@ -484,8 +473,8 @@ class TestClass(object):
 
     def test_max_hcw(self):
         """
-        Half population in the simulation is are healthcare workers. Assert the model still runs and there are doctor patient interactions.
-
+        Set half the population in the simulation to be healthcare workers. 
+        Assert the model still runs and there are healthcareworker - patient interactions.
         """
 
         hcw_population_size = 5000
@@ -661,9 +650,9 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model pipe output to file, read output file
-        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment="#", sep=",")
 
         # Get all icu doctors
         df_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
