@@ -19,9 +19,9 @@
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return -1;
+	if (idx >= N_OCCUPATION_NETWORKS) return -1;
 
-    return model->params->daily_fraction_work_used[idx];
+	return model->params->daily_fraction_work_used[idx];
 }
 
 /*****************************************************************************************
@@ -30,7 +30,7 @@ double get_model_param_daily_fraction_work_used(model *model, int idx)
 ******************************************************************************************/
 int get_model_param_quarantine_days(model *model)
 {
-    return model->params->quarantine_days;
+	return model->params->quarantine_days;
 }
 
 /*****************************************************************************************
@@ -39,7 +39,7 @@ int get_model_param_quarantine_days(model *model)
 ******************************************************************************************/
 double get_model_param_self_quarantine_fraction(model *model)
 {
-    return model->params->self_quarantine_fraction;
+	return model->params->self_quarantine_fraction;
 }
 
 /*****************************************************************************************
@@ -48,7 +48,7 @@ double get_model_param_self_quarantine_fraction(model *model)
 ******************************************************************************************/
 int get_model_param_trace_on_symptoms(model *model)
 {
-    return model->params->trace_on_symptoms;
+	return model->params->trace_on_symptoms;
 }
 /*****************************************************************************************
 *  Name:		get_model_param_trace_on_positive
@@ -56,7 +56,7 @@ int get_model_param_trace_on_symptoms(model *model)
 ******************************************************************************************/
 int get_model_param_trace_on_positive(model *model)
 {
-    return model->params->trace_on_positive;
+	return model->params->trace_on_positive;
 }
 
 /*****************************************************************************************
@@ -65,7 +65,7 @@ int get_model_param_trace_on_positive(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_on_traced(model *model)
 {
-    return model->params->quarantine_on_traced;
+	return model->params->quarantine_on_traced;
 }
 
 /*****************************************************************************************
@@ -74,7 +74,7 @@ int get_model_param_quarantine_on_traced(model *model)
 ******************************************************************************************/
 double get_model_param_traceable_interaction_fraction(model *model)
 {
-    return model->params->traceable_interaction_fraction;
+	return model->params->traceable_interaction_fraction;
 }
 
 /*****************************************************************************************
@@ -83,7 +83,7 @@ double get_model_param_traceable_interaction_fraction(model *model)
 ******************************************************************************************/
 int get_model_param_tracing_network_depth(model *model)
 {
-    return model->params->tracing_network_depth;
+	return model->params->tracing_network_depth;
 }
 
 /*****************************************************************************************
@@ -92,7 +92,7 @@ int get_model_param_tracing_network_depth(model *model)
 ******************************************************************************************/
 int get_model_param_allow_clinical_diagnosis(model *model)
 {
-    return model->params->allow_clinical_diagnosis;
+	return model->params->allow_clinical_diagnosis;
 }
 
 /*****************************************************************************************
@@ -101,7 +101,7 @@ int get_model_param_allow_clinical_diagnosis(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_on_symptoms(model *model)
 {
-    return model->params->quarantine_household_on_symptoms;
+	return model->params->quarantine_household_on_symptoms;
 }
 
 /*****************************************************************************************
@@ -110,7 +110,7 @@ int get_model_param_quarantine_household_on_symptoms(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_on_positive(model *model)
 {
-    return model->params->quarantine_household_on_positive;
+	return model->params->quarantine_household_on_positive;
 }
 
 /*****************************************************************************************
@@ -119,7 +119,7 @@ int get_model_param_quarantine_household_on_positive(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_on_traced_positive(model *model)
 {
-    return model->params->quarantine_household_on_traced_positive;
+	return model->params->quarantine_household_on_traced_positive;
 }
 
 /*****************************************************************************************
@@ -128,7 +128,7 @@ int get_model_param_quarantine_household_on_traced_positive(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_on_traced_symptoms(model *model)
 {
-    return model->params->quarantine_household_on_traced_symptoms;
+	return model->params->quarantine_household_on_traced_symptoms;
 }
 
 /*****************************************************************************************
@@ -137,7 +137,7 @@ int get_model_param_quarantine_household_on_traced_symptoms(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_contacts_on_positive(model *model)
 {
-    return model->params->quarantine_household_contacts_on_positive;
+	return model->params->quarantine_household_contacts_on_positive;
 }
 
 /*****************************************************************************************
@@ -146,7 +146,7 @@ int get_model_param_quarantine_household_contacts_on_positive(model *model)
 ******************************************************************************************/
 int get_model_param_quarantine_household_contacts_on_symptoms(model *model)
 {
-    return model->params->quarantine_household_contacts_on_symptoms;
+	return model->params->quarantine_household_contacts_on_symptoms;
 }
 
 /*****************************************************************************************
@@ -155,7 +155,7 @@ int get_model_param_quarantine_household_contacts_on_symptoms(model *model)
 ******************************************************************************************/
 int get_model_param_test_on_symptoms(model *model)
 {
-    return model->params->test_on_symptoms;
+	return model->params->test_on_symptoms;
 }
 
 /*****************************************************************************************
@@ -164,7 +164,7 @@ int get_model_param_test_on_symptoms(model *model)
 ******************************************************************************************/
 int get_model_param_test_on_traced(model *model)
 {
-    return model->params->test_on_traced;
+	return model->params->test_on_traced;
 }
 
 /*****************************************************************************************
@@ -173,7 +173,7 @@ int get_model_param_test_on_traced(model *model)
 ******************************************************************************************/
 int get_model_param_test_result_wait(model *model)
 {
-    return model->params->test_result_wait;
+	return model->params->test_result_wait;
 }
 
 /*****************************************************************************************
@@ -182,7 +182,7 @@ int get_model_param_test_result_wait(model *model)
 ******************************************************************************************/
 int get_model_param_test_order_wait(model *model)
 {
-    return model->params->test_order_wait;
+	return model->params->test_order_wait;
 }
 
 /*****************************************************************************************
@@ -191,7 +191,7 @@ int get_model_param_test_order_wait(model *model)
 ******************************************************************************************/
 double get_model_param_app_users_fraction(model *model)
 {
-    int age;
+	int age;
 	double t_pop, frac;
 
 	t_pop = 0;
@@ -211,7 +211,7 @@ double get_model_param_app_users_fraction(model *model)
 ******************************************************************************************/
 int get_model_param_app_turned_on(model *model)
 {
-    return model->params->app_turned_on;
+	return model->params->app_turned_on;
 }
 
 /*****************************************************************************************
@@ -257,8 +257,8 @@ double get_model_param_lockdown_occupation_multiplier(model *model, int index)
 ******************************************************************************************/
 int set_model_param_quarantine_days(model *model, int value )
 {
-    model->params->quarantine_days = value;
-    return TRUE;
+	model->params->quarantine_days = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -267,8 +267,8 @@ int set_model_param_quarantine_days(model *model, int value )
 ******************************************************************************************/
 int set_model_param_self_quarantine_fraction(model *model, double value)
 {
-    model->params->self_quarantine_fraction = value;
-    return TRUE;
+	model->params->self_quarantine_fraction = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -295,8 +295,8 @@ int set_model_param_trace_on_positive(model *model, int value) {
 ******************************************************************************************/
 int set_model_param_quarantine_on_traced( model *model, int value )
 {
-    model->params->quarantine_on_traced = value;
-    return TRUE;
+	model->params->quarantine_on_traced = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -305,8 +305,8 @@ int set_model_param_quarantine_on_traced( model *model, int value )
 ******************************************************************************************/
 int set_model_param_traceable_interaction_fraction( model *model, double value )
 {
-    model->params->traceable_interaction_fraction = value;
-    return TRUE;
+	model->params->traceable_interaction_fraction = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -315,8 +315,8 @@ int set_model_param_traceable_interaction_fraction( model *model, double value )
 ******************************************************************************************/
 int set_model_param_tracing_network_depth( model *model, int value )
 {
-    model->params->tracing_network_depth = value;
-    return TRUE;
+	model->params->tracing_network_depth = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -325,8 +325,8 @@ int set_model_param_tracing_network_depth( model *model, int value )
 ******************************************************************************************/
 int set_model_param_allow_clinical_diagnosis( model *model, int value )
 {
-    model->params->allow_clinical_diagnosis = value;
-    return TRUE;
+	model->params->allow_clinical_diagnosis = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -335,8 +335,8 @@ int set_model_param_allow_clinical_diagnosis( model *model, int value )
 ******************************************************************************************/
 int set_model_param_quarantine_household_on_symptoms( model *model, int value )
 {
-    model->params->quarantine_household_on_symptoms = value;
-    return TRUE;
+	model->params->quarantine_household_on_symptoms = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -345,8 +345,8 @@ int set_model_param_quarantine_household_on_symptoms( model *model, int value )
 ******************************************************************************************/
 int set_model_param_quarantine_household_on_positive( model *model, int value )
 {
-    model->params->quarantine_household_on_positive = value;
-    return TRUE;
+	model->params->quarantine_household_on_positive = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -355,8 +355,8 @@ int set_model_param_quarantine_household_on_positive( model *model, int value )
 ******************************************************************************************/
 int set_model_param_quarantine_household_on_traced_positive( model *model, int value )
 {
-    model->params->quarantine_household_on_traced_positive = value;
-    return TRUE;
+	model->params->quarantine_household_on_traced_positive = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -365,8 +365,8 @@ int set_model_param_quarantine_household_on_traced_positive( model *model, int v
 ******************************************************************************************/
 int set_model_param_quarantine_household_on_traced_symptoms( model *model, int value )
 {
-    model->params->quarantine_household_on_traced_symptoms = value;
-    return TRUE;
+	model->params->quarantine_household_on_traced_symptoms = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -375,8 +375,8 @@ int set_model_param_quarantine_household_on_traced_symptoms( model *model, int v
 ******************************************************************************************/
 int set_model_param_quarantine_household_contacts_on_positive( model *model, int value )
 {
-    model->params->quarantine_household_contacts_on_positive = value;
-    return TRUE;
+	model->params->quarantine_household_contacts_on_positive = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -385,8 +385,8 @@ int set_model_param_quarantine_household_contacts_on_positive( model *model, int
 ******************************************************************************************/
 int set_model_param_quarantine_household_contacts_on_symptoms( model *model, int value )
 {
-    model->params->quarantine_household_contacts_on_symptoms = value;
-    return TRUE;
+	model->params->quarantine_household_contacts_on_symptoms = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -404,8 +404,8 @@ int set_model_param_test_on_symptoms(model *model, int value) {
 ******************************************************************************************/
 int set_model_param_test_on_traced( model *model, int value )
 {
-    model->params->test_on_traced = value;
-    return TRUE;
+	model->params->test_on_traced = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -414,8 +414,8 @@ int set_model_param_test_on_traced( model *model, int value )
 ******************************************************************************************/
 int set_model_param_test_result_wait( model *model, int value )
 {
-    model->params->test_result_wait = value;
-    return TRUE;
+	model->params->test_result_wait = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -424,8 +424,8 @@ int set_model_param_test_result_wait( model *model, int value )
 ******************************************************************************************/
 int set_model_param_test_order_wait( model *model, int value )
 {
-    model->params->test_order_wait = value;
-    return TRUE;
+	model->params->test_order_wait = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -434,15 +434,15 @@ int set_model_param_test_order_wait( model *model, int value )
 ******************************************************************************************/
 int set_model_param_app_users_fraction( model *model, double value )
 {
-    if( value > 1 || value < 0 )
-    	return FALSE;
+	if( value > 1 || value < 0 )
+		return FALSE;
 
-    int age;
-    for( age = 0; age < N_AGE_GROUPS; age++ )
-        model->params->app_users_fraction[ age ] = value;
-    
-    set_up_app_users( model );
-    return TRUE;
+	int age;
+	for( age = 0; age < N_AGE_GROUPS; age++ )
+		model->params->app_users_fraction[ age ] = value;
+	
+	set_up_app_users( model );
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -474,8 +474,8 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 ******************************************************************************************/
 int set_model_param_app_turned_on( model *model, int value )
 {
-    model->params->app_turned_on = value;
-    return TRUE;
+	model->params->app_turned_on = value;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -542,7 +542,7 @@ int set_model_param_risk_score(
 		return FALSE;
 
 	model->params->risk_score[ day ][ age_infector ][ age_susceptible ] = value;
-    return TRUE;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -563,7 +563,7 @@ int set_model_param_risk_score_household(
 		return FALSE;
 
 	model->params->risk_score_household[ age_infector ][ age_susceptible ] = value;
-    return TRUE;
+	return TRUE;
 }
 
 
@@ -580,10 +580,10 @@ void update_work_intervention_state(model *model, int value){
 		// Turn intervetions on
 		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
-            params->daily_fraction_work_used[network] = params->daily_fraction_work *
-                                                                    params->lockdown_occupation_multiplier[network];
-        }
-    }
+			params->daily_fraction_work_used[network] = params->daily_fraction_work *
+																	params->lockdown_occupation_multiplier[network];
+		}
+	}
 	else {
 		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
@@ -745,24 +745,24 @@ void check_params( parameters *params )
 	int idx;
 
 	if( params->days_of_interactions > MAX_DAILY_INTERACTIONS_KEPT )
-    	print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
+		print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
 
-    if( params->end_time > MAX_TIME )
-     	print_exit( "BAD PARAM end_time - can't be greater than MAX_TIME " );
+	if( params->end_time > MAX_TIME )
+		print_exit( "BAD PARAM end_time - can't be greater than MAX_TIME " );
 
-    if( params->quarantine_days > params->days_of_interactions )
-    	print_exit( "BAD PARAM quarantine_days - can't be greater than days_of_interactions" );
+	if( params->quarantine_days > params->days_of_interactions )
+		print_exit( "BAD PARAM quarantine_days - can't be greater than days_of_interactions" );
 
-    if( params->lockdown_time_on < 1 )
-      	print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
+	if( params->lockdown_time_on < 1 )
+		print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
 
-    if( params->lockdown_elderly_time_on < 1 )
-        print_exit( "BAD PARAM lockdown_elderly_time_on - can only be turned on at the first time step" );
+	if( params->lockdown_elderly_time_on < 1 )
+		print_exit( "BAD PARAM lockdown_elderly_time_on - can only be turned on at the first time step" );
 
-    if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
- 	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );
+	if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
+	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );
 
-    if( params->random_interaction_distribution == NEGATIVE_BINOMIAL )
+	if( params->random_interaction_distribution == NEGATIVE_BINOMIAL )
 		for( idx = 0; idx < N_AGE_TYPES; idx++ )
 			if( params->mean_random_interactions[idx] >= params->sd_random_interactions[idx] * params->sd_random_interactions[idx] )
 				print_exit( "BAD_PARAM - sd_random_interations_xxxx - variance must be greater than the mean for (negative binomial distribution");
@@ -774,30 +774,30 @@ void check_params( parameters *params )
 ******************************************************************************************/
 void check_hospital_params( parameters *params )
 {
-    if( params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] < 1 )
-        print_exit( "BAD PARAM n_doctors_covid_general_ward cant be less than 1");
+	if( params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] < 1 )
+		print_exit( "BAD PARAM n_doctors_covid_general_ward cant be less than 1");
 
-    if( params->n_hcw_per_ward[COVID_GENERAL][NURSE] < 1 )
-        print_exit( "BAD PARAM n_nurses_covid_general_ward cant be less than 1");
+	if( params->n_hcw_per_ward[COVID_GENERAL][NURSE] < 1 )
+		print_exit( "BAD PARAM n_nurses_covid_general_ward cant be less than 1");
 
-    if( params->n_hcw_per_ward[COVID_ICU][DOCTOR] < 1 )
-        print_exit( "BAD PARAM n_doctors_covid_icu_ward cant be less than 1");
+	if( params->n_hcw_per_ward[COVID_ICU][DOCTOR] < 1 )
+		print_exit( "BAD PARAM n_doctors_covid_icu_ward cant be less than 1");
 
-    if( params->n_hcw_per_ward[COVID_ICU][NURSE] < 1 )
-        print_exit( "BAD PARAM n_nurses_covid_icu_ward cant be less than 1");
+	if( params->n_hcw_per_ward[COVID_ICU][NURSE] < 1 )
+		print_exit( "BAD PARAM n_nurses_covid_icu_ward cant be less than 1");
 
-    int general_doctors = params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
-    int general_nurses = params->n_hcw_per_ward[COVID_GENERAL][NURSE] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
-    int icu_doctors = params->n_hcw_per_ward[COVID_ICU][DOCTOR] * params->n_wards[COVID_ICU] * params->n_hospitals;
-    int icu_nurses = params->n_hcw_per_ward[COVID_ICU][NURSE] * params->n_wards[COVID_ICU] * params->n_hospitals;
+	int general_doctors = params->n_hcw_per_ward[COVID_GENERAL][DOCTOR] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
+	int general_nurses = params->n_hcw_per_ward[COVID_GENERAL][NURSE] * params->n_wards[COVID_GENERAL] * params->n_hospitals;
+	int icu_doctors = params->n_hcw_per_ward[COVID_ICU][DOCTOR] * params->n_wards[COVID_ICU] * params->n_hospitals;
+	int icu_nurses = params->n_hcw_per_ward[COVID_ICU][NURSE] * params->n_wards[COVID_ICU] * params->n_hospitals;
 
-    int total_number_hcw = general_nurses + general_doctors + icu_nurses + icu_doctors;
+	int total_number_hcw = general_nurses + general_doctors + icu_nurses + icu_doctors;
 
-    if( total_number_hcw > (params->n_total - params->n_seed_infection)/2 )
-        print_exit( "BAD PARAMS number of healthcare workers is greater than half the total population. Change number of wards / worker per ward" );
+	if( total_number_hcw > (params->n_total - params->n_seed_infection)/2 )
+		print_exit( "BAD PARAMS number of healthcare workers is greater than half the total population. Change number of wards / worker per ward" );
 
-    if( params->hcw_mean_work_interactions > total_number_hcw/2 )
-        print_exit( "BAD PARAM hcw_mean_work_interactions must be less than or equal to half the total number of healthcare workers" );
+	if( params->hcw_mean_work_interactions > total_number_hcw/2 )
+		print_exit( "BAD PARAM hcw_mean_work_interactions must be less than or equal to half the total number of healthcare workers" );
 }
 
 
