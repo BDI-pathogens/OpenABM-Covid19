@@ -956,7 +956,7 @@ class TestClass(object):
         
     def test_relative_transmission_update(self, test_params, update_relative_transmission_household, update_relative_transmission_occupation, update_relative_transmission_random ):
         """
-           Check to that if we change the relative transmission parameters after day 1 we get
+           Check to that if we change the relative transmission parameters after day 1 we get 
            the same result as if we started with the same values
         """
         tol      = 0.05
