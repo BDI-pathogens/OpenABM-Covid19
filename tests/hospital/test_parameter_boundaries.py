@@ -18,7 +18,7 @@ import numpy as np, pandas as pd
 
 class TestClass(object):
     """
-    Test class for checking that model behaves as expected at parameter boundaries.
+    Test class for checking that the model behaves as expected at parameter boundaries.
     """
 
     def test_zero_beds(self):
