@@ -203,7 +203,8 @@ void transmit_virus_by_type(
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
                         if( model->params->hospital_on )
-                            hazard_rate *= hospital_state_modifier;
+                        	if ( hospital_state_modifier != 1.0)
+                            	hazard_rate *= hospital_state_modifier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )

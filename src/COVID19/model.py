@@ -186,10 +186,6 @@ class Parameters(object):
             self.household_df = input_households
         elif not input_households:
             raise ParameterException("Household data must be supplied as a csv")
-        # if hospital_input_param_file:
-        #     self.c_params.hospital_input_param_file = hospital_input_param_file
-        # elif not hospital_input_param_file:
-        #     raise ParameterException("Hospital data must be supplied as a csv")
         if hospital_param_line_number:
             self.c_params.hospital_param_line_number = int(hospital_param_line_number)
 
