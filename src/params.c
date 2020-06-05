@@ -14,7 +14,7 @@
 #include "interventions.h"
 
 /*****************************************************************************************
-*  Name:		get_param_daily_fraction_work_used
+*  Name: 		get_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)
@@ -290,7 +290,7 @@ int set_model_param_trace_on_positive(model *model, int value) {
 }
 
 /*****************************************************************************************
-*  Name:		set_model_param_quarantine_on_traced
+*  Name: 		set_model_param_quarantine_on_traced
 *  Description: Sets the value of parameter
 ******************************************************************************************/
 int set_model_param_quarantine_on_traced( model *model, int value )
@@ -429,7 +429,7 @@ int set_model_param_test_order_wait( model *model, int value )
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_app_users_fraction
+*  Name:		set_model_param_app_users_fraction
 *  Description: Sets the value of parameter
 ******************************************************************************************/
 int set_model_param_app_users_fraction( model *model, double value )
@@ -521,7 +521,7 @@ double get_model_param_risk_score_household(
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_risk_score
+*  Name:		set_model_param_risk_score
 *  Description: Sets the value of the risk score parameter
 ******************************************************************************************/
 int set_model_param_risk_score(
@@ -568,28 +568,28 @@ int set_model_param_risk_score_household(
 
 
 /*****************************************************************************************
-*  Name:        set_model_param_lockdown_on
+*  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
 
 void update_work_intervention_state(model *model, int value){
-    int network;
-    parameters *params = model->params;
+	int network;
+	parameters *params = model->params;
 
-    if (value == TRUE) {
-        // Turn intervetions on
-        for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-        {
-            params->daily_fraction_work_used[network] = params->daily_fraction_work *
-                                                                    params->lockdown_occupation_multiplier[network];
-        }
-    }
-    else {
-        for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-        {
-            params->daily_fraction_work_used[network] = params->daily_fraction_work;
-        }
-    }
+	if (value == TRUE) {
+		// Turn intervetions on
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
+		{
+			params->daily_fraction_work_used[network] = params->daily_fraction_work *
+				        					            params->lockdown_occupation_multiplier[network];
+		}
+	}
+	else {
+		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
+		{
+			params->daily_fraction_work_used[network] = params->daily_fraction_work;
+		}
+	}
 }
 
 /*****************************************************************************************
@@ -653,7 +653,7 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
 															  params->lockdown_occupation_multiplier[network];
-
+			
 
 	}
 	else if( value == FALSE )
@@ -666,6 +666,7 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 			for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
 		}
+
 	}else {
 		return FALSE;
 	}
@@ -744,7 +745,7 @@ void check_params( parameters *params )
 	int idx;
 
 	if( params->days_of_interactions > MAX_DAILY_INTERACTIONS_KEPT )
-		print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
+    	print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
 
     if( params->end_time > MAX_TIME )
      	print_exit( "BAD PARAM end_time - can't be greater than MAX_TIME " );
@@ -753,10 +754,10 @@ void check_params( parameters *params )
     	print_exit( "BAD PARAM quarantine_days - can't be greater than days_of_interactions" );
 
     if( params->lockdown_time_on < 1 )
-        print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
+      	print_exit( "BAD PARAM lockdown_time_on - can only be turned on at the first time step" );
 
     if( params->lockdown_elderly_time_on < 1 )
-      	print_exit( "BAD PARAM lockdown_elderly_time_on - can only be turned on at the first time step" );
+        print_exit( "BAD PARAM lockdown_elderly_time_on - can only be turned on at the first time step" );
 
     if( params->random_interaction_distribution != FIXED && params->random_interaction_distribution != NEGATIVE_BINOMIAL )
  	   print_exit( "BAR_PARAM - random_interaction_distribution - only fixed and negative-binomial distributions are supported" );

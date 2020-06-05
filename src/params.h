@@ -46,7 +46,6 @@ typedef struct{
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
 	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
 
-
 	double relative_transmission[N_INTERACTION_TYPES]; 		// relative transmission rate by the type of interactions (e.g. household/workplace/random) w/o social distance
 	double relative_transmission_used[N_INTERACTION_TYPES]; // relative transmission rate by the type of interactions (e.g. household/workplace/random)
 
@@ -67,7 +66,6 @@ typedef struct{
 	double sd_time_to_death;		// sd time to death after hospital
 
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
-
 	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 
 	double fraction_asymptomatic[N_AGE_GROUPS]; // faction who are asymptomatic
@@ -123,7 +121,6 @@ typedef struct{
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results
-
 	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
@@ -167,10 +164,6 @@ typedef struct{
 	int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
 	int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
 	int max_hcw_daily_interactions;
-
-	//TODO: Add in finer grained transition times between wards once we have more information on them.
-	double mean_time_hospital_transition; // mean time for movement between hospital locations
-	double sd_time_hospital_transition; // sd for movement between hospital locations
 
 	double waiting_infectivity_modifier;
 	double general_infectivity_modifier;
