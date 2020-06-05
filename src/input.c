@@ -482,15 +482,6 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %i ,", &( params->max_hcw_daily_interactions ) );
 	if( check < 1){ print_exit( "Failed to read parametermax_hcw_daily_interactions\n" ); };
 
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->waiting_infectivity_modifier ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter max_hcw_daily_interactions\n" ); };
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->general_infectivity_modifier ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter general_infectivity_modifier\n" ); };
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->icu_infectivity_modifier ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter icu_infectivity_modifier\n" ); };
-
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->hospitalised_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter hospitalised_waiting_mod\n" ); };
 
