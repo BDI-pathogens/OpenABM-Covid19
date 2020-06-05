@@ -44,7 +44,8 @@ struct hospital
 
 void initialise_hospital( hospital*, parameters*, int );
 void set_up_hospital_networks(model *model);
-void rebuild_hcw_patient_networks( model *model, hospital *hospital );
+void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospital );
+void add_hospital_network_interactions(model *model, hospital *hospital);
 int healthcare_worker_working(individual* indiv);
 void destroy_hospital( hospital* );
 

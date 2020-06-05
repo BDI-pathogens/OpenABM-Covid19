@@ -635,26 +635,11 @@ void build_daily_network( model *model )
 
 	if( model->params->hospital_on )
 	{
-		//Create work networks for healthcare workers.
-		int ward_idx, ward_type;
 		for( idx = 0; idx < model->params->n_hospitals; idx++ )
-			build_hospital_networks( model, &(model->hospitals[idx]) );
-
-		//Create patient-healthcare interaction networks for each ward and each healthcare worker type.
-		for( idx = 0; idx < model->params->n_hospitals; idx++ )
-		{
-			add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-			{
-				for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-				{
-					if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
-						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-				   if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
-						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
-				}
-			}
-		}
+        {
+            rebuild_healthcare_worker_patient_networks( model, &(model->hospitals[idx]) );
+            add_hospital_network_interactions(  model, &(model->hospitals[idx]) );
+        }
 	}
 };
 
