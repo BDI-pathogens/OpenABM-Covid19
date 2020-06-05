@@ -44,7 +44,6 @@ void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
 {
     int interaction_type;
 
-    //TODO: there must be a better way of getting these interactiont type enums... should there be some kind of enum map?
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->doctor_patient_network = new_network( ward->n_worker[DOCTOR], interaction_type );
     ward->doctor_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
