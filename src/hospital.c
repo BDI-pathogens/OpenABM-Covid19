@@ -103,7 +103,7 @@ void set_up_hospital_networks( model *model )
 
 /*****************************************************************************************
 *  Name:		rebuild_healthcare_worker_patient_networks
-*  Description: creates networks for each ward in a hospital
+*  Description: rebuilds hcw->patient networks for each ward in a hospital
 *  Returns:     void
 ******************************************************************************************/
 void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospital )
@@ -113,6 +113,27 @@ void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospita
     for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
         for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
             build_ward_networks( model, &(hospital->wards[ward_type][ward_idx]) );
+}
+
+/*****************************************************************************************
+*  Name:		add_hospital_network_interactions
+*  Description: Adds the daily interactions to all individual from hospital networks
+*  Returns:     void
+******************************************************************************************/
+void add_hospital_network_interactions(model *model, hospital *hospital)
+{
+    int ward_type, ward_idx;
+    add_interactions_from_network( model, hospital->hospital_workplace_network, TRUE, TRUE, 0 );
+    for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+        {
+            if( hospital->wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
+                add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+            if( hospital->wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
+                add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
+        }
+    }
 }
 
 /*****************************************************************************************
