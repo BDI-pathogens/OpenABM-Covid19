@@ -57,7 +57,7 @@ void transition_to_icu( model *model, individual *indiv );
 void transition_to_mortuary( model *model, individual *indiv );
 void transition_to_discharged( model *model, individual *indiv );
 
-void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
+void add_healthcare_worker_to_hospital(hospital *hospital, individual *indiv, int type);
 int  add_patient_to_hospital( model* model, individual *indiv, int required_ward );
 void release_patient_from_hospital( individual *indiv, hospital *hospital );
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type);
