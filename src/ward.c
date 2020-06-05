@@ -36,7 +36,7 @@ void initialise_ward(
     ward->doctors = calloc( n_max_doctors, sizeof(doctor) );
     ward->nurses  = calloc( n_max_nurses, sizeof(nurse) );
 
-    ward->patients = malloc( sizeof (list) );
+    ward->patients = calloc( 1, sizeof (list) );
     initialise_list( ward->patients );
 }
 
