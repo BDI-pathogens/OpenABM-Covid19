@@ -165,10 +165,6 @@ typedef struct{
 	int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
 	int max_hcw_daily_interactions;
 
-	double waiting_infectivity_modifier;
-	double general_infectivity_modifier;
-	double icu_infectivity_modifier;
-
 	//Modifiers for patients not receiving care when transitioning from disease states.
 	double hospitalised_waiting_mod;
 	double critical_waiting_mod;
