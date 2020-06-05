@@ -173,8 +173,6 @@ void destroy_ward( ward* ward )
 {
     destroy_network( ward->doctor_patient_network );
     destroy_network( ward->nurse_patient_network );
-//    free( ward->doctor_patient_network );
-//    free( ward->nurse_patient_network );
     destroy_list( ward->patients );
     free( ward->patients );
     free( ward->doctors );
