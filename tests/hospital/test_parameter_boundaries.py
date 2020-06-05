@@ -479,7 +479,6 @@ class TestClass(object):
         Assert the model still runs and there are healthcareworker - patient interactions.
         """
 
-        n_seed_infection = 10
         hcw_population_size = 10000
         n_covid_general_wards = 20
         n_covid_icu_wards = 10
@@ -491,7 +490,6 @@ class TestClass(object):
         params.set_param("hospital_on", 1)
         params.set_param("days_of_interactions", 10)
         params.set_param("end_time", 50)
-        params.set_param("n_seed_infection", n_seed_infection)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
