@@ -1460,5 +1460,5 @@ void write_time_step_hospital_data( model *model)
             }
 
             fclose(time_step_hospital_file);
-        };
+        }
 }
