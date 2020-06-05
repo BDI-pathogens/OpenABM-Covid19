@@ -69,5 +69,6 @@ void remove_if_in_waiting_list( individual *indiv, hospital *hospital );
 int hospital_available_beds( hospital *hospital, int ward_type );
 int find_least_full_hospital(model* model, int required_ward);
 
+int individual_eligible_to_become_healthcare_worker( individual *indiv );
 
 #endif /* HOSPITAL_H_ */

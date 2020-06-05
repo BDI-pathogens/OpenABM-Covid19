@@ -166,6 +166,15 @@ int healthcare_worker_working( individual *indiv )
     return TRUE;
 }
 
+int individual_eligible_to_become_healthcare_worker( individual *indiv )
+{
+    return indiv->worker_type == NOT_HEALTHCARE_WORKER &&
+            indiv->age_group > AGE_10_19 &&
+            indiv->age_group < AGE_60_69 &&
+            indiv->occupation_network == WORKING_NETWORK
+            ;
+}
+
 /*****************************************************************************************
 *  Name:		transition_one_hospital_event
 *  Description: Generic function for updating an individual with their next hospital
