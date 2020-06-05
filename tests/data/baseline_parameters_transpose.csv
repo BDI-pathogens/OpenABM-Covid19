@@ -178,3 +178,4 @@ lockdown_elderly_time_off	10000
 testing_symptoms_time_on	10000
 testing_symptoms_time_off	10000
 intervention_start_time	0
+hospital_on 0
