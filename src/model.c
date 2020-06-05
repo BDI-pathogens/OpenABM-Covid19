@@ -707,7 +707,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 
 		indiv->worker_type = DOCTOR;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, DOCTOR );
 		idx++;
 	}
 
@@ -726,7 +726,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 
 		indiv->worker_type = NURSE;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, NURSE );
 		idx++;
 	}
 }

@@ -141,7 +141,7 @@ void add_hospital_network_interactions(model *model, hospital *hospital)
 *  Description: Adds healthcare worker ids to hospital wards
 *  Returns:     void
 ******************************************************************************************/
-void add_healthcare_worker_to_hospital( hospital *hospital, long pdx, int hcw_type )
+void add_healthcare_worker_to_hospital( hospital *hospital, individual* indiv, int hcw_type )
 {
     int ward_type, ward_idx;
     int hcw_allocated;
@@ -168,10 +168,10 @@ void add_healthcare_worker_to_hospital( hospital *hospital, long pdx, int hcw_ty
 
     if( hcw_type == DOCTOR )
         initialise_doctor( &(hospital->wards[ward_type][ward_idx].doctors[hospital->wards[ward_type][ward_idx].n_worker[DOCTOR]++]),
-                pdx, hospital->hospital_idx, ward_idx, ward_type);
+                indiv, hospital->hospital_idx, ward_idx, ward_type);
     else
         initialise_nurse( &(hospital->wards[ward_type][ward_idx].nurses[hospital->wards[ward_type][ward_idx].n_worker[NURSE]++]),
-                pdx, hospital->hospital_idx, ward_idx, ward_type);
+                indiv, hospital->hospital_idx, ward_idx, ward_type);
 }
 
 /*****************************************************************************************
