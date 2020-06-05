@@ -336,7 +336,7 @@ void destroy_individual( individual *indiv )
 int count_infection_events( individual *indiv )
 {
 	int infection_count = 0;
-	infection_event *infection_event;
+    infection_event *infection_event;
 	infection_event = indiv->infection_events;
 
 	while(infection_event != NULL){
@@ -353,15 +353,15 @@ int count_infection_events( individual *indiv )
 
 void print_individual( model *model, long idx)
 {
-	individual *indiv;
-	if( idx >= model->params->n_total )
-	{
-		printf("idx higher than n_total; individual does not exist");
-		fflush(stdout);
-		return;
-	}
-
-	indiv = &(model->population[idx]);
+        individual *indiv;
+        if( idx >= model->params->n_total )
+        {
+            printf("idx higher than n_total; individual does not exist");
+            fflush(stdout);
+            return;
+        }
+        
+        indiv = &(model->population[idx]);
         
 	printf("indiv->idx: %li\n", indiv->idx );
 	printf("indiv->status: %d\n", indiv->status );
