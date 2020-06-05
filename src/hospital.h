@@ -44,7 +44,8 @@ struct hospital
 
 void initialise_hospital( hospital*, parameters*, int );
 void set_up_hospital_networks(model *model);
-void build_hospital_networks( model *model, hospital *hospital );
+void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospital );
+void add_hospital_network_interactions(model *model, hospital *hospital);
 int healthcare_worker_working(individual* indiv);
 void destroy_hospital( hospital* );
 
@@ -56,7 +57,7 @@ void transition_to_icu( model *model, individual *indiv );
 void transition_to_mortuary( model *model, individual *indiv );
 void transition_to_discharged( model *model, individual *indiv );
 
-void add_healthcare_worker_to_hospital(hospital *hospital, long pdx, int type);
+void add_healthcare_worker_to_hospital(hospital *hospital, individual *indiv, int type);
 int  add_patient_to_hospital( model* model, individual *indiv, int required_ward );
 void release_patient_from_hospital( individual *indiv, hospital *hospital );
 void add_patient_to_waiting_list( individual *indiv, hospital *hospital, int ward_type);
@@ -69,5 +70,6 @@ void remove_if_in_waiting_list( individual *indiv, hospital *hospital );
 int hospital_available_beds( hospital *hospital, int ward_type );
 int find_least_full_hospital(model* model, int required_ward);
 
+int individual_eligible_to_become_healthcare_worker( individual *indiv );
 
 #endif /* HOSPITAL_H_ */

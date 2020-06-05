@@ -475,17 +475,18 @@ class TestClass(object):
 
     def test_many_hcw(self):
         """
-        Set half the population in the simulation to be healthcare workers. 
+        Set a third of the population in the simulation to be healthcare workers.
         Assert the model still runs and there are healthcareworker - patient interactions.
         """
 
-        hcw_population_size = 5000
+        hcw_population_size = 10000
         n_covid_general_wards = 20
         n_covid_icu_wards = 10
 
+
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
-        params.set_param("n_total", 10000)
+        params.set_param("n_total", 30000)
         params.set_param("hospital_on", 1)
         params.set_param("days_of_interactions", 10)
         params.set_param("end_time", 50)
