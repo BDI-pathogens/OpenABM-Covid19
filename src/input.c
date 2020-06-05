@@ -493,12 +493,6 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->icu_infectivity_modifier ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter icu_infectivity_modifier\n" ); };
 
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->mean_time_hospital_transition ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter mean_time_hospital_transition\n" ); };
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->sd_time_hospital_transition ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter sd_time_hospital_transition\n" ); };
-
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->hospitalised_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter hospitalised_waiting_mod\n" ); };
 
