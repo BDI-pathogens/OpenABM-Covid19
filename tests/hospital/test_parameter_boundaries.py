@@ -129,8 +129,8 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
         params.set_param("hospital_on", 1)
-        params.set_param("days_of_interactions", 50)
-        params.set_param("end_time", 50)
+        params.set_param("days_of_interactions", 10)
+        params.set_param("end_time", 20)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
@@ -250,8 +250,8 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
         params.set_param("hospital_on", 1)
-        params.set_param("days_of_interactions", 50)
-        params.set_param("end_time", 50)
+        params.set_param("days_of_interactions", 10)
+        params.set_param("end_time", 20)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Adjust hospital baseline parameter
@@ -471,7 +471,7 @@ class TestClass(object):
 
         assert len(waiting_df.index) == 0
 
-    def test_max_hcw(self):
+    def test_many_hcw(self):
         """
         Set half the population in the simulation to be healthcare workers. 
         Assert the model still runs and there are healthcareworker - patient interactions.
@@ -485,7 +485,7 @@ class TestClass(object):
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 10000)
         params.set_param("hospital_on", 1)
-        params.set_param("days_of_interactions", 50)
+        params.set_param("days_of_interactions", 10)
         params.set_param("end_time", 50)
         params.write_params(constant.TEST_DATA_FILE)
 
