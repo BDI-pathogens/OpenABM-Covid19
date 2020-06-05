@@ -72,6 +72,7 @@ class TestClass(object):
         # Adjust hospital baseline parameter
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_covid_general_wards", 0)
+        h_params.set_param("hcw_mean_work_interactions", 0)
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
@@ -103,6 +104,7 @@ class TestClass(object):
         # Adjust hospital baseline parameter
         h_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
         h_params.set_param("n_covid_icu_wards", 0)
+        h_params.set_param("hcw_mean_work_interactions", 0)
         h_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         # Call the model pipe output to file, read output file
