@@ -102,11 +102,11 @@ void set_up_hospital_networks( model *model )
 }
 
 /*****************************************************************************************
-*  Name:		build_hospital_networks
+*  Name:		rebuild_healthcare_worker_patient_networks
 *  Description: creates networks for each ward in a hospital
 *  Returns:     void
 ******************************************************************************************/
-void build_hospital_networks( model *model, hospital *hospital )
+void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospital )
 {
     int ward_type, ward_idx;
 
