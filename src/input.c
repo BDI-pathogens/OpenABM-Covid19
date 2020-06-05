@@ -1448,7 +1448,7 @@ void write_time_step_hospital_data( model *model)
                     hospital = &model->hospitals[hospital_idx];
                     for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
                     {
-                        long patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
+                        int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
 
                         individual *indiv_patient;
                         indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
