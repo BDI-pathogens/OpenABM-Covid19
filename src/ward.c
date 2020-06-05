@@ -118,9 +118,12 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
         n_pos = 0;
 
-        for( int idx = 0; idx < ward->patients->size; idx++ )
+        for( idx = 0; idx < ward->patients->size; idx++ )
+        {
+            long current_patient_idx = list_element_at(ward->patients, idx);
             for( int i = 0; i < n_patient_required_interactions; i++)
-                all_required_interactions[n_pos++] = list_element_at(ward->patients, idx);
+                all_required_interactions[n_pos++] = current_patient_idx;
+        }
 
         //shuffle list of all interactions
         gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
@@ -168,8 +171,8 @@ int ward_available_beds( ward* ward)
 
 void destroy_ward( ward* ward )
 {
-    free( ward->doctor_patient_network );
-    free( ward->nurse_patient_network );
+    destroy_network( ward->doctor_patient_network );
+    destroy_network( ward->nurse_patient_network );
     destroy_list( ward->patients );
     free( ward->patients );
     free( ward->doctors );

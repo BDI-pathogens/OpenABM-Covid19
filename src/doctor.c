@@ -15,13 +15,13 @@
 ******************************************************************************************/
 void initialise_doctor(
     doctor *doctor,
-    long pdx,
+    individual *indiv,
     int hospital_idx,
     int ward_idx,
     int ward_type
 )
 {
-    doctor->pdx          = pdx;
+    doctor->pdx          = indiv->idx;
     doctor->hospital_idx = hospital_idx;
     doctor->ward_idx     = ward_idx;
     doctor->ward_type    = ward_type;

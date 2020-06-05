@@ -497,7 +497,6 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
 
-	//Hardcoded until we can separate out interaction types for hospitals and the community. - Tom
 	for( i = N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i < N_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
