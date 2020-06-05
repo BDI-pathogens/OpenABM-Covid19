@@ -174,6 +174,7 @@ enum QUARANTINE_REASONS{
 #define NOT_HEALTHCARE_WORKER -1
 #define NO_HOSPITAL -1
 #define HOSPITAL_WORK_NETWORK -1
+#define HOSPITAL_NETWORK_TYPES 5
 
 extern gsl_rng * rng;
 
