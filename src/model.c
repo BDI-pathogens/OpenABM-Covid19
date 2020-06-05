@@ -302,21 +302,9 @@ double estimate_total_interactions( model *model )
 		n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
 	if( model->params->hospital_on )
-	{
-		int hospital_idx, ward_type, ward_idx;
-		for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
-		{
+        for( int hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++)
 			n_interactions += model->hospitals[hospital_idx].hospital_workplace_network->n_edges;
-			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-			{
-				for( ward_idx = 0; ward_idx < model->hospitals[hospital_idx].n_wards[ward_type]; ward_idx++ )
-				{
-					n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges;
-					n_interactions += model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges;
-				}
-			}
-		}
-	}
+
 	return n_interactions;
 }
 
@@ -647,26 +635,11 @@ void build_daily_network( model *model )
 
 	if( model->params->hospital_on )
 	{
-		//Create work networks for healthcare workers.
-		int ward_idx, ward_type;
 		for( idx = 0; idx < model->params->n_hospitals; idx++ )
-			build_hospital_networks( model, &(model->hospitals[idx]) );
-
-		//Create patient-healthcare interaction networks for each ward and each healthcare worker type.
-		for( idx = 0; idx < model->params->n_hospitals; idx++ )
-		{
-			add_interactions_from_network( model, model->hospitals[idx].hospital_workplace_network, TRUE, TRUE, 0 );
-			for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-			{
-				for( ward_idx = 0; ward_idx < model->hospitals[idx].n_wards[ward_type]; ward_idx++ )
-				{
-					if( model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
-						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
-				   if( model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
-						add_interactions_from_network( model, model->hospitals[idx].wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
-				}
-			}
-		}
+        {
+            rebuild_healthcare_worker_patient_networks( model, &(model->hospitals[idx]) );
+            add_hospital_network_interactions(  model, &(model->hospitals[idx]) );
+        }
 	}
 };
 
@@ -729,12 +702,12 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-		if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
-				continue;
+        if( !individual_eligible_to_become_healthcare_worker( indiv ) )
+                continue;
 
 		indiv->worker_type = DOCTOR;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, DOCTOR );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, DOCTOR );
 		idx++;
 	}
 
@@ -748,12 +721,12 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-		if( !(indiv->worker_type == NOT_HEALTHCARE_WORKER && indiv->age_group > AGE_10_19 && indiv->age_group < AGE_70_79 && indiv->occupation_network == WORKING_NETWORK) )
-				continue;
+        if( !individual_eligible_to_become_healthcare_worker( indiv ) )
+                continue;
 
 		indiv->worker_type = NURSE;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv->idx, NURSE );
+        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, NURSE );
 		idx++;
 	}
 }
@@ -795,10 +768,7 @@ int one_time_step( model *model )
 		transition_events( model, WAITING,         &transition_to_waiting,    FALSE );
 		transition_events( model, GENERAL,         &transition_to_general,    FALSE );
 		transition_events( model, ICU,             &transition_to_icu,        FALSE );
-
-		///use printf below to see available beds each timestep
-		//printf( "available general beds: %i \navailable icu beds: %i \n", hospital_available_beds(&model->hospitals[0], COVID_GENERAL), hospital_available_beds(&model->hospitals[0], COVID_ICU));
-	}
+    }
 
 	flu_infections( model );
 	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
