@@ -15,13 +15,13 @@
 ******************************************************************************************/
 void initialise_nurse(
     nurse *nurse,
-    long pdx,
+    individual *indiv,
     int hospital_idx,
     int ward_idx,
     int ward_type
 )
 {
-    nurse->pdx          = pdx;
+    nurse->pdx          = indiv->idx;
     nurse->hospital_idx = hospital_idx;
     nurse->ward_idx     = ward_idx;
     nurse->ward_type    = ward_type;
