@@ -251,9 +251,7 @@ void read_param_file( parameters *params)
 			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
 		}
 
-	//Hardcoded this in until we separate out interaction types for the community and hospital. - Tom.
-	//Previously iterated over N_INTERACTION_TYPES.
-    for( i = 0; i < N_INTERACTION_TYPES_NON_HOSPITAL; i++ )
+	for( i = 0; i < N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -499,8 +497,7 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
 
-	//Hardcoded until we can separate out interaction types for hospitals and the community. - Tom
-    for( i = N_INTERACTION_TYPES_NON_HOSPITAL; i < N_INTERACTION_TYPES; i++ )
+	for( i = N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i < N_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
