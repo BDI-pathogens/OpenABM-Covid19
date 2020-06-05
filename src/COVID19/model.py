@@ -536,27 +536,15 @@ class Model:
             self.c_model, covid19.RECOVERED
         )
         results["hospital_admissions"]  = covid19.utils_n_daily(
-            self.c_model, covid19.TRANSITION_TO_HOSPITAL, self.c_model.time
-        )
-        results["hospital_admissions_total"]  = covid19.utils_n_total(
-            self.c_model, covid19.TRANSITION_TO_HOSPITAL
-        )
-        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
-            self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
-        )
-        results["hospital_to_critical_total"] = covid19.utils_n_total(
-            self.c_model, covid19.TRANSITION_TO_CRITICAL
-        )
-        results["general_admissions"]  = covid19.utils_n_daily(
             self.c_model, covid19.GENERAL, self.c_model.time
         )
-        results["general_admissions_total"]  = covid19.utils_n_total(
+        results["hospital_admissions_total"]  = covid19.utils_n_total(
             self.c_model, covid19.GENERAL
         )
-        results["icu_admissions_daily"] = covid19.utils_n_daily(
+        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
             self.c_model, covid19.CRITICAL, self.c_model.time
         )
-        results["icu_admissions_total"] = covid19.utils_n_total(
+        results["hospital_to_critical_total"] = covid19.utils_n_total(
             self.c_model, covid19.CRITICAL
         )
         return results
