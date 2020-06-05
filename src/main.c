@@ -14,30 +14,30 @@
 
 int main(int argc, char *argv[])
 {
-	printf("# Starting simulation\n");
+    printf("# Starting simulation\n");
 
-	parameters params;	
+    parameters params;	
 
-	struct timespec  tv;
-	double tstart, tend;
-	long last_test;
-	int idx;
+    struct timespec  tv;
+    double tstart, tend;
+    long last_test;
+    int idx;
 	char date_time[30];
-
-	clock_gettime( CLOCK_REALTIME,&tv);
-	tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
+	
+    clock_gettime( CLOCK_REALTIME,&tv);
+    tstart = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
 	time_t time_now = time( NULL );
 	strftime(date_time, sizeof(date_time), "# Date: %d-%m-%Y %I:%M:%S", localtime(&time_now)); 
 	puts(date_time);
-
+	
 	printf("# Read command-line args\n");
 	read_command_line_args(&params, argc, argv);
-
+	
 	printf("# Read input parameter file\n");
 	read_param_file( &params );
 	check_params( &params );
-
+	
 	printf("# Read household demographics file\n");
 	read_household_demographics_file( &params );
 	
@@ -132,13 +132,13 @@ int main(int argc, char *argv[])
 	printf( "# Total quarantined days:        %li\n", model->n_quarantine_days );
 
 	write_output_files( model, &params );
-
+	
 	destroy_model( model );
 	destroy_params( &params );
 
-	clock_gettime( CLOCK_REALTIME, &tv );
-	tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
+    clock_gettime( CLOCK_REALTIME, &tv );
+    tend = ( tv.tv_sec ) + ( tv.tv_nsec ) / 1e9;
 
-	printf("# Ending simulation, run time:   %.2fs\n", tend - tstart );
-	return 0;
+    printf("# Ending simulation, run time:   %.2fs\n", tend - tstart );
+    return 0;
 }
