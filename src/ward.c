@@ -149,19 +149,19 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     }
 }
 
-int add_patient_to_ward( ward *ward, long pdx )
+int add_patient_to_ward( ward *ward, individual *indiv )
 {
     if( ward->patients->size < ward->n_beds )
     {
-        list_push_back( pdx, ward->patients );
+        list_push_back( indiv->idx, ward->patients );
         return TRUE;
     }
     return FALSE;
 }
 
-void remove_patient_from_ward( ward* ward, long pdx)
+void remove_patient_from_ward( ward* ward, individual *indiv)
 {
-    list_remove_element( pdx, ward->patients );
+    list_remove_element( indiv->idx, ward->patients );
 }
 
 int ward_available_beds( ward* ward)

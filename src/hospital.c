@@ -249,7 +249,7 @@ void transition_to_waiting( model *model, individual *indiv )
 void transition_to_general( model *model, individual *indiv )
 {   
 	if( indiv->status == HOSPITALISED_RECOVERING && indiv->hospital_state == ICU )
-		remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_ICU][indiv->ward_idx], indiv->idx );
+		remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_ICU][indiv->ward_idx], indiv );
 	
 	if( add_patient_to_hospital( model, indiv, COVID_GENERAL) )
 		set_general_admission( indiv, model->params, 1);
@@ -269,7 +269,7 @@ void transition_to_general( model *model, individual *indiv )
 void transition_to_icu( model *model, individual *indiv )
 {
 	if( indiv->hospital_state == GENERAL )
-		remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_GENERAL][indiv->ward_idx], indiv->idx );
+		remove_patient_from_ward( &model->hospitals[indiv->hospital_idx].wards[COVID_GENERAL][indiv->ward_idx], indiv );
 
 	if( add_patient_to_hospital( model, indiv, COVID_ICU) )        
 		set_icu_admission( indiv, model->params, 1);
@@ -324,7 +324,7 @@ int add_patient_to_hospital( model* model, individual *indiv, int required_ward 
 			assigned_ward_idx = ward_idx;
 
 	// If the patient can be added to the ward, do so.
-	if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv->idx ) )
+	if( add_patient_to_ward( &(assigned_hospital->wards[required_ward][assigned_ward_idx]), indiv ) )
 	{  
 		indiv->ward_idx  = assigned_ward_idx;
 		indiv->ward_type = required_ward;
@@ -431,9 +431,9 @@ void swap_waiting_general_and_icu_patients( model *model )
 			individual *indiv_general = &model->population[ list_element_at( patient_general_list, patient_idx )];
 			individual *indiv_icu   = &model->population[ list_element_at( patient_icu_list, patient_idx )];
 
-			//Remove patients from their current ward.
-			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general->idx);
-			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu->idx);
+            //Remove patients from their current ward.
+			remove_patient_from_ward( &(hospital->wards[COVID_GENERAL][indiv_general->ward_idx]), indiv_general);
+			remove_patient_from_ward( &(hospital->wards[COVID_ICU][indiv_icu->ward_idx]), indiv_icu);
 
 			//Remove them from their current position in the waiting list for their required ward.
 			list_remove_element( indiv_general->idx, hospital->waiting_list[COVID_ICU] );
@@ -545,8 +545,8 @@ void release_patient_from_hospital( individual *indiv, hospital *hospital )
 {
 	remove_if_in_waiting_list( indiv, hospital );
 
-	if( indiv->ward_type != NO_WARD )
-		remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv->idx );
+    if( indiv->ward_type != NO_WARD )
+        remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv );
 
 	indiv->ward_type = NO_WARD;
 	indiv->ward_idx  = NO_WARD;
