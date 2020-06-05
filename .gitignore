@@ -63,5 +63,3 @@ examples/*.csv
 examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
 /Debug/
-
-.idea
