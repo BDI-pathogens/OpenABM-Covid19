@@ -118,7 +118,7 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
         n_pos = 0;
 
-        for( int idx = 0; idx < ward->patients->size; idx++ )
+        for( idx = 0; idx < ward->patients->size; idx++ )
             for( int i = 0; i < n_patient_required_interactions; i++)
                 all_required_interactions[n_pos++] = list_element_at(ward->patients, idx);
 
