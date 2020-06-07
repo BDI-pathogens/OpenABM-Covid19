@@ -534,11 +534,29 @@ void intervention_notify_contacts(
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
+<<<<<<< Updated upstream
 				if( contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
+=======
+				contact_type = inter->type;
+
+				// We first check if this interaction is manually traceable
+				if( inter->manual_traceable == UNKNOWN )
+					inter->manual_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+
+				// Then we check if this interaction is digitally traceable
+				if( inter->app_traceable == UNKNOWN )
+					inter->app_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+
+				// If it is manually traceable, we trigger the interventions
+				if( inter->manual_traceable ) {
+					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+				} else { // If it is not manually traceable but is digitally traceable, we similarly trigger the interventions
+					if( contact->app_user && inter->app_traceable ) {
+>>>>>>> Stashed changes
 						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
 				}
 				inter = inter->next;
