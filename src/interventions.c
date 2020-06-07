@@ -534,14 +534,13 @@ void intervention_notify_contacts(
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-<<<<<<< Updated upstream
+				contact_type = inter->type;
+
 				if( contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
 						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
-=======
-				contact_type = inter->type;
 
 				// We first check if this interaction is manually traceable
 				if( inter->manual_traceable == UNKNOWN )
@@ -552,12 +551,12 @@ void intervention_notify_contacts(
 					inter->app_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
 
 				// If it is manually traceable, we trigger the interventions
-				if( inter->manual_traceable ) {
+				if(inter->manual_traceable) {
 					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
 				} else { // If it is not manually traceable but is digitally traceable, we similarly trigger the interventions
-					if( contact->app_user && inter->app_traceable ) {
->>>>>>> Stashed changes
+					if( contact->app_user &&  inter->app_traceable) {
 						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+					}
 				}
 				inter = inter->next;
 			}
@@ -846,8 +845,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	if( params->trace_on_positive &&
 	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
-	  ( params->quarantine_on_traced || params->test_on_traced )
-	)
+	  ( params->quarantine_on_traced || params->test_on_traced ))
 		intervention_notify_contacts( model, indiv, 1, index_token );
 
 	if( index_already )
@@ -936,6 +934,7 @@ void intervention_on_traced(
 
 	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )
 		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
+
 }
 
 /*****************************************************************************************

@@ -22,6 +22,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_traced",
     "quarantine_on_traced",
     "traceable_interaction_fraction",
+    "manual_tracing_traceable_fraction",
     "tracing_network_depth",
     "allow_clinical_diagnosis",
     "quarantine_household_on_positive",

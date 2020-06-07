@@ -48,6 +48,7 @@ void intervention_quarantine_household( model*, individual*, int, int, trace_tok
 void intervention_test_take( model*, individual* );
 void intervention_test_result( model*, individual* );
 void intervention_notify_contacts( model*, individual*, int, trace_token* );
+void intervention_contact_tracing( model*, individual*, int, trace_token* );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
 void intervention_on_symptoms( model*, individual* );
