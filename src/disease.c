@@ -48,7 +48,7 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
-	bernoulli_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical );
+	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
 
 }
 
@@ -348,7 +348,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 	if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 	{
-		if( gsl_ran_bernoulli( rng, model->params->icu_allocation[ indiv->age_group ] ) )
+		if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 		else
 			transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );

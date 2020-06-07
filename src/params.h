@@ -56,6 +56,7 @@ typedef struct{
 
 	double mean_time_to_hospital;   // mean time from symptoms to hospital
 	double mean_time_to_critical;   // mean time from hospitalised to critical care
+	double sd_time_to_critical;   // sd time from hospitalised to critical care
 
 	double mean_time_to_recover;	// mean time to recovery if hospitalisation is not required (days)
 	double sd_time_to_recover;  	// sd time to recovery if hospitalisation is not required (days)
@@ -78,7 +79,7 @@ typedef struct{
 	double sd_time_hospitalised_recovery;   // sd time to recover if hospitalised
 	double mean_time_critical_survive;      // mean time to survive if critical
 	double sd_time_critical_survive;        // sd time to survive if critical
-	double icu_allocation[N_AGE_GROUPS];    // probability of getting an ICU place if needed
+	double location_death_icu[N_AGE_GROUPS];// whether death occurs in the ICU or outside
 
 	int quarantined_daily_interactions; 	// number of interactions a quarantined person has
 	int hospitalised_daily_interactions; 	// number of interactions a hopsitalised person has
@@ -172,6 +173,7 @@ int get_model_param_quarantine_household_on_positive(model *model);
 int get_model_param_quarantine_household_on_traced_symptoms(model *model);
 int get_model_param_quarantine_household_on_traced_positive(model *model);
 int get_model_param_quarantine_household_contacts_on_positive(model *model);
+int get_model_param_quarantine_household_contacts_on_symptoms(model *model);
 int get_model_param_test_on_symptoms(model *model);
 int get_model_param_test_on_traced(model *model);
 int get_model_param_test_result_wait(model *model);
@@ -198,6 +200,7 @@ int set_model_param_quarantine_household_on_positive(model *model, int value);
 int set_model_param_quarantine_household_on_traced_symptoms(model *model, int value);
 int set_model_param_quarantine_household_on_traced_positive(model *model, int value);
 int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
+int set_model_param_quarantine_household_contacts_on_symptoms(model *model, int value);
 int set_model_param_test_on_symptoms(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
 int set_model_param_test_result_wait(model *model, int value);
