@@ -117,6 +117,7 @@ class TestClass(object):
 
         assert len(df_number_beds_exceeded.index) == 0
 
+
     def test_ward_duplicates(self):
         """
         Test that patients in wards not duplicated.
@@ -146,6 +147,7 @@ class TestClass(object):
 
             assert len(test_df) == len(set(test_df))
 
+
     def test_patients_do_not_infect_non_hcw(self):
         """
         Tests that hospital patients have only been able to infect
@@ -170,6 +172,7 @@ class TestClass(object):
         for index, row in infected_non_hcw.iterrows():
             infector_hospital_state = int(row["hospital_state_source"])
             assert infector_hospital_state not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
+            
 
     def test_interaction_type_representative(self):
         """
