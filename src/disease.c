@@ -160,7 +160,6 @@ void transmit_virus_by_type(
 	long idx, jdx, n_infected;
 	int day, n_interaction, t_infect;
 	double hazard_rate;
-	float hospital_state_modifier;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
@@ -186,26 +185,11 @@ void transmit_virus_by_type(
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
 
-                //Determine the effect hospitalisation has on the hazard rate.
-                if( model->params->hospital_on )
-                {
-                    switch( infector->hospital_state )
-                    {
-                        case WAITING:       hospital_state_modifier = model->params->waiting_infectivity_modifier; break;
-                        case GENERAL:       hospital_state_modifier = model->params->general_infectivity_modifier; break;
-                        case ICU:           hospital_state_modifier = model->params->icu_infectivity_modifier; break;
-                        default: 			hospital_state_modifier = 1.0; // Not in hospital, rates unaffected.
-                    }
-                }
-
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
-                        if( model->params->hospital_on )
-                        	if ( hospital_state_modifier != 1.0)
-                            		hazard_rate *= hospital_state_modifier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
