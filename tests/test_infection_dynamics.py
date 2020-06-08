@@ -966,50 +966,51 @@ class TestClass(object):
         # run the baseline parameters
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
+            params.set_param( param, value )  
         model  = utils.get_model_swig( params )
-
+        
         for time in range(max_time):
             model.one_time_step()
         model.write_transmissions()
         df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_base = df_base[ df_base["time_infected"] == max_time ]
-        df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections")
-
+        df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
+        
         del model
         del params
-
+            
         # run the baseline parameters then at base-line update one
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
+            params.set_param( param, value )  
         model  = utils.get_model_swig( params )
-
+        
         for time in range(test_params["end_time"]):
             model.one_time_step()
         model.update_running_params( "relative_transmission_household",  update_relative_transmission_household )
         model.update_running_params( "relative_transmission_occupation", update_relative_transmission_occupation )
         model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
-        model.one_time_step()
+        model.one_time_step()   
         model.write_transmissions()
-
         df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_update = df_update[ df_update["time_infected"] == max_time ]
-        df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections")
-
+        df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
+        
         # check the change in values is in tolerance - wide tolerance bands due to saturation effects
-        base     = df_base.loc[0,{"n_infections"}]["n_infections"]
+        base     = df_base.loc[0,{"n_infections"}]["n_infections"] 
         expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
         actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
-
-        base     = df_base.loc[1,{"n_infections"}]["n_infections"]
+                
+        base     = df_base.loc[1,{"n_infections"}]["n_infections"] 
         expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
         actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
-
-        base     = df_base.loc[2,{"n_infections"}]["n_infections"]
+        
+        base     = df_base.loc[2,{"n_infections"}]["n_infections"] 
         expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
         actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
+
+
 
