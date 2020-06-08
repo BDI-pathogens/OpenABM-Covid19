@@ -380,8 +380,8 @@ class TestClass(object):
         """
         Test to check that peoples work connections are on the correct network and
         that they have correct number on average
-        """
-
+        """  
+        
         # absolute tolerance
         tolerance = 0.035
         
@@ -409,7 +409,7 @@ class TestClass(object):
        
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-
+       
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
