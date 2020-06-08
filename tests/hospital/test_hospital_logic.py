@@ -171,7 +171,7 @@ class TestClass(object):
             infector_hospital_state = int(row["hospital_state_source"])
             assert infector_hospital_state not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
 
-    def test_interaction_type_representivity(self):
+    def test_interaction_type_representative(self):
         """
         Tests that each type of interaction occurs at least once
         """
