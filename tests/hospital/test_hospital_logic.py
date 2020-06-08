@@ -187,13 +187,13 @@ class TestClass(object):
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
 
         list_all_interaction_types = [constant.HOUSEHOLD,
-                                  constant.OCCUPATION,
-                                  constant.RANDOM,
-                                  constant.HOSPITAL_WORK,
-                                  constant.HOSPITAL_DOCTOR_PATIENT_GENERAL,
-                                  constant.HOSPITAL_NURSE_PATIENT_GENERAL,
-                                  constant.HOSPITAL_DOCTOR_PATIENT_ICU,
-                                  constant.HOSPITAL_NURSE_PATIENT_ICU]
+                                    constant.OCCUPATION,
+                                    constant.RANDOM,
+                                    constant.HOSPITAL_WORK,
+                                    constant.HOSPITAL_DOCTOR_PATIENT_GENERAL,
+                                    constant.HOSPITAL_NURSE_PATIENT_GENERAL,
+                                    constant.HOSPITAL_DOCTOR_PATIENT_ICU,
+                                    constant.HOSPITAL_NURSE_PATIENT_ICU]
 
         df_interaction_output = pd.read_csv(constant.TEST_INTERACTION_FILE)
 
