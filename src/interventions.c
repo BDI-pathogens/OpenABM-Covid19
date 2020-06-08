@@ -326,7 +326,7 @@ void update_intervention_policy( model *model, int time )
 
 	if( time == params->lockdown_time_off )
 		set_model_param_lockdown_on( model, FALSE );
-	
+
 	if( time == params->lockdown_elderly_time_on )
 		set_model_param_lockdown_elderly_on( model, TRUE );
 
@@ -498,7 +498,7 @@ void intervention_test_result( model *model, individual *indiv )
 }
 
 /*****************************************************************************************
-*  Name:		intervention_notify_contracts
+*  Name:		intervention_notify_contacts
 *  Description: If the individual is an app user then we loop over the stored contacts
 *  				and notifies them.
 *  				Start from the oldest date, so that if we have met a contact
@@ -509,16 +509,15 @@ void intervention_notify_contacts(
 	model *model,
 	individual *indiv,
 	int recursion_level,
-	trace_token *index_token
+	trace_token *index_token,
+	int delay
 )
 {
-	if( !indiv->app_user || !model->params->app_turned_on )
-		return;
 
 	interaction *inter;
 	individual *contact;
 	parameters *params = model->params;
-	int idx, ddx, day, n_contacts;
+	int idx, ddx, day, n_contacts, manual_traceable, app_traceable;
 	double *risk_scores;
 
 	day = model->interaction_day_idx;
@@ -533,30 +532,40 @@ void intervention_notify_contacts(
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
+
+				// First, we identify who the contact is
 				contact = inter->individual;
-				contact_type = inter->type;
 
-				if( contact->app_user )
-				{
-					if( inter->traceable == UNKNOWN )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
-					if( inter->traceable )
+				// Second, we check if this interaction is traceable
+				if( inter->traceable == UNKNOWN ) {
 
-				// We first check if this interaction is manually traceable
-				if( inter->manual_traceable == UNKNOWN )
-					inter->manual_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+					// For manual tracing, we use the corresponding parameters for the different networks
+					if ( inter->type == RANDOM )
+						manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction_random );
+					if ( inter->type == OCCUPATION )
+						manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction_occupation );
+					if ( inter->type == HOUSEHOLD )
+						manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction_household );
 
-				// Then we check if this interaction is digitally traceable
-				if( inter->app_traceable == UNKNOWN )
-					inter->app_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+					// For digital tracing, we need to check if the user is an app user and that the app is active
+					if ( indiv->app_user && model->params->app_turned_on )
+						app_traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+					else
+						app_traceable = 0;
 
-				// If it is manually traceable, we trigger the interventions
-				if(inter->manual_traceable) {
-					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
-				} else { // If it is not manually traceable but is digitally traceable, we similarly trigger the interventions
-					if( contact->app_user &&  inter->app_traceable) {
-						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ] );
+					// If digital tracing (if applicable) has traced the individual, then we mark the individual as traced
+					if ( app_traceable )
+						inter->traceable = app_traceable;
+					// If not, we check if manual tracing has found the individual
+					else {
+						if ( manual_traceable )
+							inter->traceable = manual_traceable;
 					}
+				}
+
+				// Third, if the interaction is traceable, we trigger the interventions
+				if(inter->traceable) {
+					intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], app_traceable, delay + params->manual_trace_delay);
 				}
 				inter = inter->next;
 			}
@@ -652,7 +661,7 @@ void intervention_quarantine_household(
 			intervention_quarantine_until( model, contact, time_event, TRUE, index_token, contact_time, risk_scores[ contact->age_group ] );
 
 			if( contact_trace && ( model->params->quarantine_on_traced || model->params->test_on_traced ) )
-				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token );
+				intervention_notify_contacts( model, contact, NOT_RECURSIVE, index_token, time - model->time );
 		}
 }
 
@@ -781,7 +790,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 			intervention_test_order( model, indiv, model->time + params->test_order_wait );
 
 		if( params->trace_on_symptoms && ( params->quarantine_on_traced || params->test_on_traced ) )
-			intervention_notify_contacts( model, indiv, 1, index_token );
+			intervention_notify_contacts( model, indiv, 1, index_token, 0 );
 
 		remove_traced_on_this_trace( model, indiv );
 		if( indiv->index_token_release_event != NULL )
@@ -846,7 +855,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	if( params->trace_on_positive &&
 	 ( !index_already || !params->trace_on_symptoms || params->retrace_on_positive ) &&
 	  ( params->quarantine_on_traced || params->test_on_traced ))
-		intervention_notify_contacts( model, indiv, 1, index_token );
+		intervention_notify_contacts( model, indiv, 1, index_token, 0 );
 
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );
@@ -878,10 +887,12 @@ void intervention_on_critical( model *model, individual *indiv )
 *  				2. Order a test for the individual
 *  				4. Recursive contact-trace
 *
-*  Arguments:	model 		 	- pointer to model
-*  				indiv 		 	- pointer to person being traced
-*  				contact_time 	- time at which the contact was made
-*				recursion level - layers of the network to reach this connection
+*  Arguments:	model 		 			- pointer to model
+*  				indiv 		 			- pointer to person being traced
+*  				contact_time 			- time at which the contact was made
+*				recursion level 		- layers of the network to reach this connection
+*				trace_source			- whether the trace source is through the app
+*				manual_trace_delay_days - how many days of delay to add to manual contact tracing
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -891,11 +902,20 @@ void intervention_on_traced(
 	int contact_time,
 	int recursion_level,
 	trace_token *index_token,
-	double risk_score
+	double risk_score,
+	int trace_source,
+	int manual_trace_delay_days
 )
 {
+	int delay;
+
 	if( is_in_hospital( indiv ) || indiv->infection_events->is_case )
 		return;
+
+	if ( trace_source ) // If the trace was through the app, then we set the delay to 0
+		delay = 0;
+	else // If the trace was done manually, then we set the delay accordingly
+		delay = manual_trace_delay_days;
 
 	parameters *params = model->params;
 
@@ -916,24 +936,24 @@ void intervention_on_traced(
 				time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
 		}
 
-		quarantine = intervention_quarantine_until( model, indiv, time_event, TRUE, index_token, contact_time, risk_score );
+		quarantine = intervention_quarantine_until( model, indiv, time_event + delay, TRUE, index_token, contact_time, risk_score );
 
 		if( quarantine && recursion_level != NOT_RECURSIVE )
 		{
 			if( ( params->quarantine_household_on_traced_positive && index_token->index_status == POSITIVE_TEST	) ||
 				( params->quarantine_household_on_traced_symptoms && index_token->index_status == SYMPTOMS_ONLY ) )
-				intervention_quarantine_household( model, indiv, time_event, FALSE, index_token, contact_time );
+				intervention_quarantine_household( model, indiv, time_event + delay, FALSE, index_token, contact_time );
 		}
 	}
 
 	if( params->test_on_traced )
 	{
-		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
+		int time_test = max( model->time + params->test_order_wait + delay, contact_time + params->test_insensitive_period );
 		intervention_test_order( model, indiv, time_test );
 	}
 
 	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )
-		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token );
+		intervention_notify_contacts( model, indiv, recursion_level + 1, index_token, delay );
 
 }
 
@@ -1000,7 +1020,7 @@ void intervention_smart_release( model *model )
 /*****************************************************************************************
 *  Name:		resolve_quarantine_reasons
 *  Description: Determine a single recorded reason for an individual being quarantined;
-				resolve multiple reasons for an individual being quarantined.  
+				resolve multiple reasons for an individual being quarantined.
 				QUARANTINE_REASONS are listed in descending order of precedence.
 *  Returns:		void
 ******************************************************************************************/
@@ -1008,19 +1028,18 @@ void intervention_smart_release( model *model )
 int resolve_quarantine_reasons(int *quarantine_reasons)
 {
 	int n_reasons = 0, reason, i;
-	
+
 	// Descending traverse (QUARANTINE_REASONS are listed in descending order of precedence)
 	for(i = N_QUARANTINE_REASONS - 1; i >= 0; i--){
-		
+
 		if(quarantine_reasons[i] == TRUE){
 			n_reasons++;
 			reason = i;
 		}
 	}
-	
+
 	if((n_reasons > 0) && (n_reasons < N_QUARANTINE_REASONS))
 		return reason;
-	
+
 	return UNKNOWN;
 }
-

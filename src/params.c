@@ -78,12 +78,39 @@ double get_model_param_traceable_interaction_fraction(model *model)
 }
 
 /*****************************************************************************************
-*  Name:        get_model_param_manual_tracing_traceable_fraction
+*  Name:        get_model_param_manual_traceable_fraction_random
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-double get_model_param_manual_tracing_traceable_fraction(model *model)
+double get_model_param_manual_traceable_fraction_random(model *model)
 {
-    return model->params->manual_tracing_traceable_fraction;
+    return model->params->manual_traceable_fraction_random;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_traceable_fraction_occupation
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_manual_traceable_fraction_occupation(model *model)
+{
+    return model->params->manual_traceable_fraction_occupation;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_traceable_fraction_household
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_manual_traceable_fraction_household(model *model)
+{
+    return model->params->manual_traceable_fraction_household;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_delay
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_manual_trace_delay(model *model)
+{
+    return model->params->manual_trace_delay;
 }
 
 /*****************************************************************************************
@@ -318,13 +345,44 @@ int set_model_param_traceable_interaction_fraction( model *model, double value )
     return TRUE;
 }
 
+
 /*****************************************************************************************
-*  Name:        set_model_param_manual_tracing_traceable_fraction
-*  Description: Sets the value of parameter
+*  Name:        set_model_param_manual_traceable_fraction_random
+*  Description: Sets the value of an int parameter
 ******************************************************************************************/
-int set_model_param_manual_tracing_traceable_fraction( model *model, double value )
+int set_model_param_manual_traceable_fraction_random( model *model, double value )
 {
-    model->params->manual_tracing_traceable_fraction = value;
+    model->params->manual_traceable_fraction_random = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_traceable_fraction_occupation
+*  Description: Sets the value of an int parameter
+******************************************************************************************/
+int set_model_param_manual_traceable_fraction_occupation( model *model, double value )
+{
+    model->params->manual_traceable_fraction_occupation = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_traceable_fraction_household
+*  Description: Sets the value of an int parameter
+******************************************************************************************/
+int set_model_param_manual_traceable_fraction_household( model *model, double value )
+{
+    model->params->manual_traceable_fraction_household = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_delay
+*  Description: Sets the value of an int parameter
+******************************************************************************************/
+int set_model_param_manual_trace_delay( model *model, int value )
+{
+    model->params->manual_trace_delay = value;
     return TRUE;
 }
 

@@ -55,8 +55,7 @@ struct individual{
 
 struct interaction{
 	int type;
-	int manual_traceable;
-	int app_traceable;
+	int traceable;
 	individual *individual;
 	interaction *next;
 };

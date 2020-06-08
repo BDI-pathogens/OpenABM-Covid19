@@ -107,7 +107,10 @@ typedef struct{
 	int quarantine_smart_release_day;		// number of days until smart release on no contacts
 
 	double traceable_interaction_fraction;  // the proportion of interactions which are traceable even if both users have app
-	double manual_tracing_traceable_fraction; // the proportion of interactions which are manually traceable
+	double manual_traceable_fraction_random; // the proportion of interactions on the random network that are manually traceable
+	double manual_traceable_fraction_occupation; // the proportion of interactions on the occupation network that are manually traceable
+	double manual_traceable_fraction_household; // the proportion of interactions on the household network that are manually traceable
+	int manual_trace_delay; // how many days of a delay is there before manual tracing results come out
 	int tracing_network_depth;				// the number of layers in the interaction network to recursively trace
 	int allow_clinical_diagnosis;			// allow a hospital clinical diagnosis to trigger interventions
 
@@ -166,6 +169,10 @@ int get_model_param_trace_on_symptoms(model *model);
 int get_model_param_trace_on_positive(model *model);
 int get_model_param_quarantine_on_traced(model *model);
 double get_model_param_traceable_interaction_fraction(model *model);
+double get_model_param_manual_traceable_fraction_random(model *model);
+double get_model_param_manual_traceable_fraction_occupation(model *model);
+double get_model_param_manual_traceable_fraction_household(model *model);
+int get_model_param_manual_trace_delay(model *model);
 int get_model_param_tracing_network_depth(model *model);
 int get_model_param_allow_clinical_diagnosis(model *model);
 int get_model_param_quarantine_household_on_symptoms(model *model);
@@ -193,6 +200,10 @@ int set_model_param_trace_on_symptoms(model *model, int value);
 int set_model_param_trace_on_positive(model *model, int value);
 int set_model_param_quarantine_on_traced(model *model, int value);
 int set_model_param_traceable_interaction_fraction(model *model, double value);
+int set_model_param_manual_traceable_fraction_random(model *model, double value);
+int set_model_param_manual_traceable_fraction_occupation(model *model, double value);
+int set_model_param_manual_traceable_fraction_household(model *model, double value);
+int set_model_param_manual_trace_delay(model *model, int value);
 int set_model_param_tracing_network_depth(model *model, int value);
 int set_model_param_allow_clinical_diagnosis(model *model, int value);
 int set_model_param_quarantine_household_on_symptoms(model *model, int value);

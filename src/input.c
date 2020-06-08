@@ -408,8 +408,17 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
 	if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->manual_tracing_traceable_fraction));
-	if( check < 1){ print_exit("Failed to read parameter manual_tracing_traceable_fraction\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction_random));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_random\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction_occupation));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_occupation\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction_household));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_household\n"); };
+
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_delay));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_delay\n"); };
 
 	fclose(parameter_file);
 }
