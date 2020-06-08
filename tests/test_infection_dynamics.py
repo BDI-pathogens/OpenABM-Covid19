@@ -972,7 +972,7 @@ class TestClass(object):
         for time in range(max_time):
             model.one_time_step()
         model.write_transmissions()
-        df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         df_base = df_base[ df_base["time_infected"] == max_time ]
         df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
@@ -992,7 +992,7 @@ class TestClass(object):
         model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
         model.one_time_step()   
         model.write_transmissions()
-        df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_update = df_update[ df_update["time_infected"] == max_time ]
         df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
@@ -1011,6 +1011,6 @@ class TestClass(object):
         expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
         actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
-
-
-
+       
+    
+      

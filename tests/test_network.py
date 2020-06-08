@@ -406,7 +406,7 @@ class TestClass(object):
         params.set_param( "n_total",n_total)
         params.set_param( "hospital_on", 0)
         params.write_params(constant.TEST_DATA_FILE)
-       
+
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
        
