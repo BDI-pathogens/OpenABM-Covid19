@@ -12,9 +12,6 @@ n_hospitals,1
  n_nurses_covid_icu_ward,1
  n_patient_nurse_required_interactions_covid_icu_ward,6
  max_hcw_daily_interactions,20
- waiting_infectivity_modifier,1
- general_infectivity_modifier,0.5
- icu_infectivity_modifier,0.5
  hospitalised_waiting_mod,1.3
  critical_waiting_mod,2
  relative_transmission_hospital_work,1
