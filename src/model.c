@@ -35,14 +35,14 @@ model* new_model( parameters *params )
 	model *model_ptr = NULL;
 	model_ptr = calloc( 1, sizeof( model ) );
 	if( model_ptr == NULL )
-		print_exit("calloc to model failed\n");
+	    print_exit("calloc to model failed\n");
 	
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 
-	gsl_rng_env_setup();
-	rng = gsl_rng_alloc ( gsl_rng_default);
-	gsl_rng_set( rng, params->rng_seed );
+    gsl_rng_env_setup();
+    rng = gsl_rng_alloc ( gsl_rng_default);
+    gsl_rng_set( rng, params->rng_seed );
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
@@ -57,7 +57,6 @@ model* new_model( parameters *params )
 		set_up_healthcare_workers_and_hospitals( model_ptr );
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
-
 	set_up_events( model_ptr );
 	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
@@ -91,31 +90,31 @@ void destroy_model( model *model )
 		free( model->transition_time_distributions[ idx ] );
 	free( model->transition_time_distributions );
 
-	destroy_network( model->random_network);
-	destroy_network( model->household_network );
-	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
-		destroy_network( model->occupation_network[idx] );
+    destroy_network( model->random_network);
+    destroy_network( model->household_network );
+    for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+    	destroy_network( model->occupation_network[idx] );
 
-	free( model->occupation_network );
-	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
-		destroy_event_list( model, idx );
-	free( model->event_lists );
-	for( idx = 0; idx < model->household_directory->n_idx; idx++ )
-		free( model->household_directory->val[idx] );
-	free( model->household_directory->val );
-	free( model->household_directory->n_jdx );
-	free( model->household_directory );
-	free( model->trace_tokens );
-	if( model->params->hospital_on )
-	{
-		for( idx = 0; idx < model->params->n_hospitals; idx++)
-			destroy_hospital( &(model->hospitals[idx]) );
-		free( model->hospitals );
-	}
-	destroy_risk_scores( model );
-	free( model );
+    free( model->occupation_network );
+    for( idx = 0; idx < N_EVENT_TYPES; idx++ )
+    	destroy_event_list( model, idx );
+    free( model->event_lists );
+    for( idx = 0; idx < model->household_directory->n_idx; idx++ )
+    	free( model->household_directory->val[idx] );
+    free( model->household_directory->val );
+    free( model->household_directory->n_jdx );
+    free ( model-> household_directory );
+    free( model->trace_tokens );
+    if( model->params->hospital_on )
+    {
+    	for( idx = 0; idx < model->params->n_hospitals; idx++)
+    		destroy_hospital( &(model->hospitals[idx]) );
+    	free( model->hospitals );
+    }
+    destroy_risk_scores( model );
+    free( model );
 
-	gsl_rng_free( rng );
+    gsl_rng_free( rng );
 };
 
 /*****************************************************************************************
@@ -230,6 +229,7 @@ void set_up_occupation_network( model *model, int network )
 	n_interactions =  params->mean_work_interactions[age] / params->daily_fraction_work;
 	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, params->work_network_rewire, TRUE );
 	relabel_network( model->occupation_network[network], people );
+
 	free( people );
 }
 
@@ -253,7 +253,7 @@ void set_up_events( model *model )
 	}
 	model->events[types * params->n_total - 1].next = model->next_event;
 	model->next_event->last = &(model->events[types * params->n_total - 1] );
-};
+}
 
 /*****************************************************************************************
 *  Name:		set_up_population
@@ -341,6 +341,8 @@ void set_up_interactions( model *model )
 	model->n_total_intereactions   = 0;
 }
 
+
+
 /*****************************************************************************************
 *  Name:		new_event
 *  Description: gets a new event tag
@@ -359,6 +361,7 @@ event* new_event( model *model )
 
 	return event;
 }
+
 
 /*****************************************************************************************
 *  Name:		flu_infections

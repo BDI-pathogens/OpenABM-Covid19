@@ -593,9 +593,9 @@ class TestClass(object):
         # set up model
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
+            params.set_param( param, value )  
         model  = utils.get_model_swig( params )
-
+        
         # step through time until we need to start to save the interactions each day
         for time in range( end_time ):
             model.one_time_step();             
@@ -605,7 +605,6 @@ class TestClass(object):
 
         df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         
         # get everyone who is a case as these will not be traced
@@ -617,24 +616,24 @@ class TestClass(object):
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
         df_int[ "household" ] = ( df_int[ "house_no_1" ] == df_int[ "house_no_2" ] )
         df_int = df_int.loc[ :, [ "index_ID", "traced_ID", "household"]]
-
+                
         # don't consider ones with multiple index events
         df_trace["days_since_index"]=df_trace["time"]-df_trace["index_time"]
         df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
         filter_single = df_trace.groupby( ["index_ID", "days_since_index"] ).size();
         filter_single = filter_single.groupby( ["index_ID"]).size().reset_index(name="N");
         filter_single = filter_single[ filter_single[ "N"] == 1 ]
-
+        
         # look at the trace token data to get all traces
-        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ]
-        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")
+        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
+        index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
         index_traced[ "traced" ] = True
         index_traced = pd.merge( index_traced, filter_single, on = "index_ID", how = "inner")
-
+       
         # get all the interactions for the index cases
         index_cases  = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
-        index_inter = pd.merge( index_cases, df_int, on = "index_ID", how = "left" )
-        index_inter = index_inter.groupby( [ "index_ID", "traced_ID", "household" ]).size().reset_index(name="N")
+        index_inter = pd.merge( index_cases, df_int, on = "index_ID", how = "left" )             
+        index_inter = index_inter.groupby( [ "index_ID", "traced_ID", "household" ]).size().reset_index(name="N")    
         index_inter[ "inter" ] = True
 
         # check everybody with a household interaction is traced
@@ -651,7 +650,7 @@ class TestClass(object):
         NOTE - this can only be done soon after a random seed and for small
         changes due to saturation effects
         """
-
+        
         sd_diff  = 3;
         end_time = test_params[ "end_time" ]
 
@@ -659,7 +658,7 @@ class TestClass(object):
         params = utils.turn_off_interventions(params, end_time)
         params.set_param(test_params)
         params.write_params(constant.TEST_DATA_FILE)
-
+        
         # run without lockdown
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
@@ -672,26 +671,26 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)
         params.set_param( "lockdown_time_on", end_time - 1 );
         params.write_params(constant.TEST_DATA_FILE)
-
+        
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
         df_with       = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_with       = df_with[ df_with[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
-
+        
         # now check they are line
-        expect_household = df_without.loc[ constant.HOUSEHOLD, ["N"] ] * test_params[ "lockdown_house_interaction_multiplier" ]
-        np.testing.assert_allclose( df_with.loc[ constant.HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff,
+        expect_household = df_without.loc[ constant.HOUSEHOLD, ["N"] ] * test_params[ "lockdown_house_interaction_multiplier" ]       
+        np.testing.assert_allclose( df_with.loc[ constant.HOUSEHOLD, ["N"] ], expect_household, atol = sqrt( expect_household ) * sd_diff, 
                                     err_msg = "lockdown not changing household transmission as expected" )
         for oc_net in OccupationNetworkEnum:
-            expect_work = df_without.loc[ constant.OCCUPATION, ["N"] ] * test_params[ f"lockdown_occupation_multiplier{oc_net.name}" ]
-            np.testing.assert_allclose( df_with.loc[ constant.OCCUPATION, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff,
+            expect_work = df_without.loc[ constant.OCCUPATION, ["N"] ] * test_params[ f"lockdown_occupation_multiplier{oc_net.name}" ]       
+            np.testing.assert_allclose( df_with.loc[ constant.OCCUPATION, ["N"] ], expect_work, atol = sqrt( expect_work) * sd_diff, 
                                     err_msg = "lockdown not changing work transmission as expected" )
-
-
-        expect_random = df_without.loc[ constant.RANDOM, ["N"] ] * test_params[ "lockdown_random_network_multiplier" ]
-        np.testing.assert_allclose( df_with.loc[ constant.RANDOM, ["N"] ], expect_random, atol = sqrt( expect_random ) * sd_diff,
+      
+      
+        expect_random = df_without.loc[ constant.RANDOM, ["N"] ] * test_params[ "lockdown_random_network_multiplier" ]       
+        np.testing.assert_allclose( df_with.loc[ constant.RANDOM, ["N"] ], expect_random, atol = sqrt( expect_random ) * sd_diff, 
                                     err_msg = "lockdown not changing random transmission as expected" )
-
+      
 
     def test_trace_on_symptoms(self, test_params, app_users_fraction ):
         """
