@@ -447,11 +447,15 @@ void write_quarantine_reasons(model *model, parameters *params)
 
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", model->params->param_line_number);
+	char T[10];
+	sprintf(T, "%d", model->time);
 
 	// Concatenate file name
 	strcpy(output_file_name, model->params->output_file_dir);
 	strcat(output_file_name, "/quarantine_reasons_file_Run");
 	strcat(output_file_name, param_line_number);
+	strcat(output_file_name, "_T");
+	strcat(output_file_name, T);
 	strcat(output_file_name, ".csv");
 	
 	FILE *quarantine_reasons_output_file;
@@ -463,6 +467,7 @@ void write_quarantine_reasons(model *model, parameters *params)
 	fprintf(quarantine_reasons_output_file,"ID,");
 	fprintf(quarantine_reasons_output_file,"status,");
 	fprintf(quarantine_reasons_output_file,"house_no,");
+	fprintf(quarantine_reasons_output_file,"app_user,");
 	fprintf(quarantine_reasons_output_file,"ID_index,");
 	fprintf(quarantine_reasons_output_file,"status_index,");
 	fprintf(quarantine_reasons_output_file,"house_no_index,");
@@ -542,11 +547,12 @@ void write_quarantine_reasons(model *model, parameters *params)
 			}
 			
 			fprintf(quarantine_reasons_output_file, 
-				"%d,%li,%d,%li,%li,%d,%li,%d,%d\n",
+				"%d,%li,%d,%li,%d,%li,%d,%li,%d,%d\n",
 				model->time,
 				indiv->idx,
 				indiv->status,
 				indiv->house_no,
+				indiv->app_user,
 				index_id, 
 				index_true_status,
 				index_house_no,
