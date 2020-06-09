@@ -117,6 +117,7 @@ class TestClass(object):
 
         assert len(df_number_beds_exceeded.index) == 0
 
+
     def test_ward_duplicates(self):
         """
         Test that patients in wards not duplicated.
@@ -146,6 +147,7 @@ class TestClass(object):
 
             assert len(test_df) == len(set(test_df))
 
+
     def test_patients_do_not_infect_non_hcw(self):
         """
         Tests that hospital patients have only been able to infect
@@ -170,3 +172,35 @@ class TestClass(object):
         for index, row in infected_non_hcw.iterrows():
             infector_hospital_state = int(row["hospital_state_source"])
             assert infector_hospital_state not in [constant.EVENT_TYPES.GENERAL.value, constant.EVENT_TYPES.ICU.value]
+            
+
+    def test_interaction_type_representative(self):
+        """
+        Tests that each type of interaction occurs at least once
+        """
+
+        # Adjust baseline parameter
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("n_total", 20000)
+        params.set_param("hospital_on", 1)
+        params.write_params(constant.TEST_DATA_FILE)
+
+        # Call the model using baseline parameters, pipe output to file, read output file
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        list_all_interaction_types = [constant.HOUSEHOLD,
+                                    constant.OCCUPATION,
+                                    constant.RANDOM,
+                                    constant.HOSPITAL_WORK,
+                                    constant.HOSPITAL_DOCTOR_PATIENT_GENERAL,
+                                    constant.HOSPITAL_NURSE_PATIENT_GENERAL,
+                                    constant.HOSPITAL_DOCTOR_PATIENT_ICU,
+                                    constant.HOSPITAL_NURSE_PATIENT_ICU]
+
+        df_interaction_output = pd.read_csv(constant.TEST_INTERACTION_FILE)
+
+        list_this_simulation_interaction_types = df_interaction_output.type.unique()
+        list_this_simulation_interaction_types.sort()
+
+        np.testing.assert_equal( list_all_interaction_types, list_this_simulation_interaction_types)
