@@ -71,8 +71,14 @@ class EVENT_TYPES(enum.Enum):
     TEST_RESULT = 14
     CASE = 15
     TRACE_TOKEN_RELEASE = 16
-    TRANSITION_TO_HOSPITAL = 17
-    N_EVENT_TYPES = 18
+    NOT_IN_HOSPITAL = 17
+    WAITING = 18
+    GENERAL = 19
+    ICU = 20
+    MORTUARY = 21
+    DISCHARGED = 22
+    N_EVENT_TYPES = 23
+
 
 
 class OccupationNetworkEnum(enum.Enum):
@@ -138,7 +144,10 @@ class Parameters(object):
             param_line_number: int = 1,
             output_file_dir: str = "./",
             input_households: Union[str, pd.DataFrame] = None,
+            hospital_input_param_file: str = None,
+            hospital_param_line_number: int = 1,
             read_param_file=True,
+            read_hospital_param_file=True,
     ):
         """[summary]
         
@@ -177,6 +186,23 @@ class Parameters(object):
             self.household_df = input_households
         elif not input_households:
             raise ParameterException("Household data must be supplied as a csv")
+        if hospital_param_line_number:
+            self.c_params.hospital_param_line_number = int(hospital_param_line_number)
+
+        if hospital_input_param_file and read_hospital_param_file:
+            self.c_params.hospital_input_param_file = hospital_input_param_file
+        elif not hospital_input_param_file and read_hospital_param_file:
+            raise ParameterException(
+                "Hospital param path is None and read hospital param file set to true"
+            )
+        else:
+            LOGGER.info(
+                "Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this"
+            )
+
+        if read_hospital_param_file and hospital_input_param_file != None:
+            self._read_hospital_param_file()
+
 
         if read_param_file and input_param_file != None:
             self._read_and_check_from_file()
@@ -236,6 +262,9 @@ class Parameters(object):
                 )
                 for t in self.household_df.itertuples()
             ]
+
+    def _read_hospital_param_file(self):
+        covid19.read_hospital_param_file(self.c_params)
 
     def set_param_dict(self, params):
         for k, v in params.items():
@@ -507,16 +536,16 @@ class Model:
             self.c_model, covid19.RECOVERED
         )
         results["hospital_admissions"]  = covid19.utils_n_daily(
-            self.c_model, covid19.TRANSITION_TO_HOSPITAL, self.c_model.time
+            self.c_model, covid19.GENERAL, self.c_model.time
         )
         results["hospital_admissions_total"]  = covid19.utils_n_total(
-            self.c_model, covid19.TRANSITION_TO_HOSPITAL
+            self.c_model, covid19.GENERAL
         )
         results["hospital_to_critical_daily"] = covid19.utils_n_daily(
-            self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
+            self.c_model, covid19.CRITICAL, self.c_model.time
         )
         results["hospital_to_critical_total"] = covid19.utils_n_total(
-            self.c_model, covid19.TRANSITION_TO_CRITICAL
+            self.c_model, covid19.CRITICAL
         )
         return results
 
