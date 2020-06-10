@@ -43,6 +43,7 @@ def setup_covid_methods(request):
     os.mkdir(constant.DATA_DIR_TEST)
     shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
     shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
+    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)
 
     # Adjust any parameters that need adjusting for all tests
     params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
@@ -317,7 +318,8 @@ class TestClass(object):
                     relative_transmission_household = 1,
                     relative_transmission_occupation = 1,
                     relative_transmission_random = 1,          
-                    end_time = 20
+                    end_time = 20,
+                    hospital_on = 0
                 ),
                 update_relative_transmission_household = 0.9,
                 update_relative_transmission_occupation = 0.8,
@@ -425,6 +427,7 @@ class TestClass(object):
         params.set_param( "n_total", n_total ) 
         params.set_param( "rng_seed", 2 ) 
         params.set_param( "random_interaction_distribution", 0 );
+        params.set_param( "hospital_on", 0 );
 
         # Make mild and asymptomatic infections as infectious as normal ones:
         params.set_param("mild_infectious_factor", 1)
