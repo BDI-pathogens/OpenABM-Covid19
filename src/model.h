@@ -47,6 +47,7 @@ struct model{
 	int time;
 
 	interaction *interactions;
+	interaction *next_interaction;
 	long interaction_idx;
 	int interaction_day_idx;
 	long n_interactions;
@@ -115,6 +116,7 @@ void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
+void return_interactions( model* );
 
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );

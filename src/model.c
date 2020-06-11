@@ -349,7 +349,12 @@ void set_up_interactions( model *model )
 	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
-	model->interactions          = calloc( n_interactions, sizeof( interaction ) );
+	model->interactions     = calloc( n_interactions, sizeof( interaction ) );
+	model->next_interaction = &(model->interactions[0]);
+	for( idx = 1; idx < n_interactions; idx++ )
+		model->interactions[idx-1].next = &(model->interactions[idx]);
+	model->interactions[n_interactions-1].next = &(model->interactions[n_interactions-1]);
+
 	model->n_interactions        = n_interactions;
 	model->interaction_idx       = 0;
 	model->interaction_day_idx   = 0;
@@ -615,8 +620,11 @@ void add_interactions_from_network(
 		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
-		inter1 = &(model->interactions[ all_idx++ ]);
-		inter2 = &(model->interactions[ all_idx++ ]);
+		inter1 = model->next_interaction;
+		inter2 = inter1->next;
+		model->next_interaction = inter2->next;
+		if( inter2->next == inter2 )
+			print_exit( "Run out of interactions tokens!" );
 
 		inter1->type       = network->type;
 		inter1->traceable  = UNKNOWN;
@@ -835,6 +843,35 @@ int add_user_network(
 }
 
 /*****************************************************************************************
+*  Name:		return_interactions
+*  Description: returns all the interaction which are being dropped from peoples
+*  				interaction diary to the the stack of usable tokens
+*  Returns:		void
+******************************************************************************************/
+void return_interactions( model *model )
+{
+	long pdx;
+	int n_inter, idx;
+	interaction *first_inter, *last_inter;
+	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	{
+		n_inter = model->population[pdx].n_interactions[model->interaction_day_idx];
+		if( n_inter )
+		{
+			first_inter = model->population[pdx].interactions[model->interaction_day_idx];
+			last_inter  = first_inter;
+			for( idx = 0; idx < ( n_inter - 1 ); idx++ )
+				last_inter = last_inter->next;
+
+			last_inter->next = model->next_interaction;
+			model->next_interaction = first_inter;
+
+		}
+	}
+	return;
+}
+
+/*****************************************************************************************
 *  Name:		one_time_step
 *  Description: Move the model through one time step
 *  Returns:     int
@@ -885,6 +922,7 @@ int one_time_step( model *model )
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
 
 	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
+	return_interactions( model );
 
 	return 1;
 };
