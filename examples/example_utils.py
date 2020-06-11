@@ -16,9 +16,10 @@ input_parameter_file = relative_path("../tests/data/baseline_parameters.csv")
 parameter_line_number = 1
 output_dir = "."
 household_demographics_file = relative_path("../tests/data/baseline_household_demographics.csv")
+hospital_file = relative_path("../tests/data/hospital_baseline_parameters.csv")
 
 def get_baseline_parameters():
-    params = Parameters(input_parameter_file, parameter_line_number, output_dir, household_demographics_file)
+    params = Parameters(input_parameter_file, parameter_line_number, output_dir, household_demographics_file, hospital_file)
     return params
 
 def get_simulation( params ):
