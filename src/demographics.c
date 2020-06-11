@@ -13,6 +13,7 @@
 #include "params.h"
 #include "network.h"
 #include <math.h>
+#include "demographics.h"
 
 #define REJECTION_MULT 1.0001
 #define ACCEPTANCE_MULT 0.99
@@ -20,6 +21,100 @@
 #define SAMPLE_BATCH 4
 #define POPULATION_PREF 2
 #define MAX_ALLOWABLE_ERROR 1e-5
+
+/*****************************************************************************************
+*  Name:		assign_household_distribution
+*  Description: Given a table of individuals with ages and house numbers, assigns
+*  				them to the objects in the model and generates the household lookup
+*  				directroy.
+*  Returns:		void
+******************************************************************************************/
+void assign_household_distribution( model *model, demographic_household_table *demo_house )
+{
+	long hdx, pdx;
+	int housesize, age, idx;
+	directory *dir;
+	individual *indiv;
+
+	// check to see that demo_house has the correct number of people
+	if( demo_house->n_total != model->params->n_total )
+	{
+		printf( "demo_house n_tota = %li", demo_house->n_total);
+		print_exit( "The demographic-household table has a different n_total to the parameters");
+	}
+
+	// now allocate people to households and set up the household directory
+	dir = calloc( 1, sizeof( directory ) );
+	dir->n_idx = demo_house->n_households;
+	dir->n_jdx = calloc( demo_house->n_households, sizeof( int ) );
+	dir->val   = calloc( demo_house->n_households, sizeof( long* ) );
+	model->household_directory = dir;
+
+	pdx = 0;
+	hdx = 0;
+	while( hdx < demo_house->n_households )
+	{
+		if( demo_house->idx[ pdx ] != pdx )
+			print_exit( "Demographic_household idx column must be 0 to n_total-1 in order" );
+
+		if( demo_house->house_no[ pdx ] != hdx )
+		{
+			printf( "pdx = %li; hdx = %li; demo_house_no = %li\n", pdx, hdx, demo_house->house_no[ pdx ]);
+			print_exit( "Demographic_household house_no column must contains ordered values 0 to n_household-1 (repeated for some household)" );
+		}
+
+		housesize = 0;
+		while( demo_house->house_no[ pdx ] == hdx )
+		{
+			// check the house column is correct
+			age = demo_house->age_group[ pdx ];
+			if( age < 0 | age >= N_AGE_GROUPS )
+				print_exit( "Demographic_household age column values must be between 0 and N_AGE_GROUPS" );
+
+			// set up the individual
+			indiv = &(model->population[pdx]);
+			set_age_group( indiv, model->params, age );
+			set_house_no( indiv, hdx );
+
+			housesize++;
+			pdx++;
+			if( pdx == demo_house->n_total )
+				break;
+		};
+
+		// update the household directory
+		dir->n_jdx[hdx] = housesize;
+		dir->val[hdx] = calloc( housesize, sizeof( long ) );
+		for( idx = 0; idx < housesize; idx++ )
+			dir->val[hdx][idx] = pdx - housesize + idx;
+
+		// check the final values are correct
+		hdx++;
+		if( hdx == demo_house->n_households & pdx != demo_house->n_total )
+			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
+
+		if( hdx != demo_house->n_households & pdx == demo_house->n_total )
+			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
+	}
+
+}
+
+/*****************************************************************************************
+*  Name:		set_up_household_distribution
+*  Description: Either generates the household and age of everybody in the model OR
+*  				use a pre-calculated table.
+*  				Assigns the households to the individuals.
+*
+*  Returns:		void
+******************************************************************************************/
+void set_up_household_distribution( model *model )
+{
+	if( model->params->demo_house == NULL )
+		generate_household_distribution( model );
+
+	// now set to the individuals and create the household directory
+	assign_household_distribution( model, model->params->demo_house );
+}
 
 /*****************************************************************************************
 *  Name:		set_up_allocate_work_places
@@ -98,7 +193,7 @@ void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLD
 }
 
 /*****************************************************************************************
-*  Name:		set_up_household_distribution
+*  Name:		generate_household_distribution
 *  Description: sets up the initial household distribution and allocates people to them
 *  				method matches both population structure and household structure using
 *  				a rejection sampling method.
@@ -110,13 +205,12 @@ void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLD
 *
 *  Returns:		void
 ******************************************************************************************/
-void set_up_household_distribution( model *model )
+void generate_household_distribution( model *model )
 {
 	int idx, housesize, age;
 	long hdx, n_households, pdx, sample;
 	double error, last_error, acceptance;
-	individual *indiv;
-	directory *dir;
+	demographic_household_table *demo_house = calloc( 1, sizeof( demographic_household_table ) );
 	double *population_target      = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_total       = calloc( N_AGE_GROUPS, sizeof(double));
 	double *population_trial       = calloc( N_AGE_GROUPS, sizeof(double));
@@ -205,14 +299,11 @@ void set_up_household_distribution( model *model )
 	if( error > MAX_ALLOWABLE_ERROR )
 		print_exit( "Household rejection sampling failed to accurately converge" );
 
-	// now allocate people to households and set up the household directory
-	dir = calloc( 1, sizeof( directory ) );
-	dir->n_idx = n_households;
-	dir->n_jdx = calloc( n_households, sizeof( int ) );
-	dir->val   = calloc( n_households, sizeof( long* ) );
-	for( hdx = 0; hdx < n_households; hdx++ )
-		dir->val[hdx] = calloc( REFERENCE_HOUSEHOLD_SIZE[households[hdx]] + 1, sizeof( long ) );
-	model->household_directory = dir;
+	// now generate the demographic household table
+	demo_house->idx          = calloc( model->params->n_total, sizeof( long ) );
+	demo_house->age_group    = calloc( model->params->n_total, sizeof( int ) );
+	demo_house->house_no     = calloc( model->params->n_total, sizeof( long ) );
+	demo_house->n_total      = model->params->n_total;
 
 	pdx = 0;
 	for( hdx = 0; hdx < n_households; hdx++ )
@@ -222,10 +313,10 @@ void set_up_household_distribution( model *model )
 		{
 			for( idx = 0; idx < model->params->REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )
 			{
-				indiv = &(model->population[pdx]);
-				set_age_group( indiv, model->params, age );
-				set_house_no( indiv, hdx );
-				dir->val[hdx][housesize++] = pdx++;
+				demo_house->idx[pdx]       = pdx;
+				demo_house->age_group[pdx] = age;
+				demo_house->house_no[pdx]  = hdx;
+				pdx++;
 
 				if( pdx == model->params->n_total )
 				{
@@ -235,11 +326,13 @@ void set_up_household_distribution( model *model )
 			if( pdx == model->params->n_total )
 				break;
 		}
-		model->household_directory->n_jdx[hdx] = housesize;
 		if( pdx == model->params->n_total )
 			break;
 
 	}
+
+	demo_house->n_households = hdx + 1;
+	model->params->demo_house = demo_house;
 
 	free( households );
 	free( REFERENCE_HOUSEHOLD_SIZE );

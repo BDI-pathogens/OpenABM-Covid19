@@ -93,6 +93,9 @@ void set_up_hospital_networks( model *model )
 		//Setup HCW workplace network.
 		hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
 		hospital->hospital_workplace_network = new_network( n_healthcare_workers, HOSPITAL_WORK );
+		hospital->hospital_workplace_network->skip_hospitalised = TRUE;
+		hospital->hospital_workplace_network->skip_quarantined  = TRUE;
+		hospital->hospital_workplace_network->daily_fraction    = 1.0;
 
 		build_watts_strogatz_network( hospital->hospital_workplace_network, n_healthcare_workers, model->params->hcw_mean_work_interactions, model->params->work_network_rewire, FALSE );
 		relabel_network( hospital->hospital_workplace_network, healthcare_workers );
@@ -123,15 +126,15 @@ void rebuild_healthcare_worker_patient_networks( model *model, hospital *hospita
 void add_hospital_network_interactions(model *model, hospital *hospital)
 {
 	int ward_type, ward_idx;
-	add_interactions_from_network( model, hospital->hospital_workplace_network, TRUE, TRUE, 0 );
+	add_interactions_from_network( model, hospital->hospital_workplace_network );
 	for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
 	{
 		for( ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
 		{
 			if( hospital->wards[ward_type][ward_idx].doctor_patient_network->n_edges > 0 )
-				add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].doctor_patient_network, FALSE, TRUE, 0 );
+				add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].doctor_patient_network );
 			if( hospital->wards[ward_type][ward_idx].nurse_patient_network->n_edges > 0 )
-				add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].nurse_patient_network, FALSE, TRUE, 0 );
+				add_interactions_from_network( model, hospital->wards[ward_type][ward_idx].nurse_patient_network );
 		}
 	}
 }

@@ -166,6 +166,7 @@ class Parameters(object):
             Sys.exit(0): [Underlaying C code will exist if params are not viable]
         """
         self.c_params = covid19.parameters()
+        covid19.initialize_params( self.c_params );
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         elif not input_param_file and read_param_file:
@@ -335,6 +336,27 @@ class Parameters(object):
             raise ParameterException(
                 f"Can not set parameter {param} as it doesn't exist"
             )
+
+    def set_demographic_household_table(self, df_demo_house):
+
+        n_total = len( df_demo_house.index )
+        if n_total != self.get_param( "n_total" ):
+            raise ParameterException( "df_demo_house must have n_total rows" )
+
+        if not 'ID' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column ID" )
+
+        if not 'age_group' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column age_group" )
+
+        if not 'house_no' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column house_no" )
+
+        n_households = df_demo_house['house_no'].max()+1
+        covid19.set_up_demographic_house_table( self.c_params, int(n_total),int(n_households) )
+
+        result = [covid19.set_indiv_demographic_house_table(self.c_params,int(row[0]),int(row[1]),int(row[2])) for row in df_demo_house[['ID','age_group','house_no']].values]
+
 
     def return_param_object(self):
         """[summary]
