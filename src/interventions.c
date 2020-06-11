@@ -306,8 +306,6 @@ void update_intervention_policy( model *model, int time )
 		params->app_turned_on       = FALSE;
 		params->lockdown_on	        = FALSE;
 		params->lockdown_elderly_on	= FALSE;
-		for( type = 0; type < N_OCCUPATION_NETWORKS; type++ )
-			params->daily_fraction_work_used[type] = params->daily_fraction_work;
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
 			params->relative_transmission_used[type] = params->relative_transmission[type];

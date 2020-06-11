@@ -58,6 +58,7 @@ struct model{
 	network *household_network;
 	network **occupation_network;
 	directory *household_directory;
+	network *user_network;
 	double mean_interactions[ N_AGE_TYPES ];
 
 	event *events;
@@ -73,7 +74,7 @@ struct model{
 
 	long n_quarantine_days;
 
-    	hospital *hospitals;
+    hospital *hospitals;
 };
 
 struct event{
@@ -115,8 +116,9 @@ void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
 
-void add_interactions_from_network( model*, network*, int, int, double );
-void build_daily_network(model *model);
-void build_random_network( model *model );
+void add_interactions_from_network( model*, network* );
+void build_daily_network( model* );
+void build_random_network( model* );
+int add_user_network( model*, int, int, int, double, long, long*, long*, char* );
 
 #endif /* MODEL_H_ */

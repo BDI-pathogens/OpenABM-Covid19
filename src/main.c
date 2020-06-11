@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     printf("# Starting simulation\n");
 
     parameters params;	
+    initialize_params( &params );
 
     struct timespec  tv;
     double tstart, tend;
