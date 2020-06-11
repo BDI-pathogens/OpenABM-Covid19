@@ -21,17 +21,12 @@ DATA_DIR_TEST = "data_test"
 TEST_DATA_TEMPLATE = "./tests/data/baseline_parameters.csv"
 TEST_DATA_FILE = join(DATA_DIR_TEST, "test_parameters.csv")
 
-TEST_HOSPITAL_TEMPLATE = "./tests/data/hospital_baseline_parameters.csv"
-TEST_HOSPITAL_FILE = join(DATA_DIR_TEST, "test_hospital_parameters.csv")
-
 TEST_OUTPUT_FILE = join(DATA_DIR_TEST, "test_output.csv")
 TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
 TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
 TEST_QUARANTINE_REASONS_FILE = join(DATA_DIR_TEST, "quarantine_reasons_file_Run1.csv")
-TEST_HCW_FILE = join(DATA_DIR_TEST, "ward_output.csv")
-TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = join(DATA_DIR_TEST, "time_step_hospital_output.csv")
 
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
@@ -45,22 +40,15 @@ class EVENT_TYPES(Enum):
     SYMPTOMATIC_MILD = 5
     HOSPITALISED = 6
     CRITICAL = 7
-    HOSPITALISED_RECOVERING = 8
-    RECOVERED = 9
-    DEATH = 10
-    QUARANTINED = 11
-    QUARANTINE_RELEASE = 12
-    TEST_TAKE = 13
-    TEST_RESULT = 14
-    CASE = 15
-    TRACE_TOKEN_RELEASE = 16
-    NOT_IN_HOSPITAL = 17
-    WAITING = 18
-    GENERAL = 19
-    ICU = 20
-    MORTUARY = 21
-    DISCHARGED = 22
-    N_EVENT_TYPES = 23
+    RECOVERED = 8
+    DEATH = 9
+    QUARANTINED = 10
+    QUARANTINE_RELEASE = 11
+    TEST_TAKE = 12
+    TEST_RESULT = 13
+    CASE = 14
+    TRACE_TOKEN_RELEASE = 15
+    N_EVENT_TYPES = 16
 
 # Age groups
 AGE_0_9 = 0
@@ -94,14 +82,8 @@ AGE_TYPES = [CHILD, CHILD, ADULT, ADULT, ADULT, ADULT, ADULT, ELDERLY, ELDERLY]
 HOUSEHOLD = 0
 OCCUPATION = 1
 RANDOM = 2
-HOSPITAL_WORK = 3
-HOSPITAL_DOCTOR_PATIENT_GENERAL = 4
-HOSPITAL_NURSE_PATIENT_GENERAL = 5
-HOSPITAL_DOCTOR_PATIENT_ICU = 6
-HOSPITAL_NURSE_PATIENT_ICU = 7
 
 # work networks
-HOSPITAL_WORK_NETWORK = -1
 PRIMARY_NETWORK = 0
 SECONDARY_NETWORK = 1
 WORKING_NETWORK = 2
@@ -128,15 +110,9 @@ NETWORK_TYPE_MAP = [
 MAX_DAILY_INTERACTIONS_KEPT = 10
 
 PARAM_LINE_NUMBER = 1
-HOSPITAL_PARAM_LINE_NUMBER = 1
-
-# worker type
-NOT_HEALTHCARE_WORKER = -1
-DOCTOR = 0
-NURSE = 1
 
 # Construct the executable command
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
-    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+    f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)

@@ -12,11 +12,11 @@ import pytest
 
 class TestParameters(object):
     def test_set_parameters_arrays_init_to_zero(self):
-        p = Parameters(input_households="notset.csv", read_param_file=False, read_hospital_param_file=False)
+        p = Parameters(input_households="notset.csv", read_param_file=False)
         assert p.get_param("population_40_49") == 0
 
     def test_set_parameters_arrays_set_single_value(self):
-        p = Parameters(input_households="notset.csv", read_param_file=False, read_hospital_param_file=False)
+        p = Parameters(input_households="notset.csv", read_param_file=False)
         assert (
             p.get_param("population_40_49") == 0
         ), "Array memebers not intilialised to zero"
@@ -27,6 +27,6 @@ class TestParameters(object):
         assert p.get_param("population_50_59") == 0
 
     def test_set_age_out_of_range(self):
-        p = Parameters(input_households="notset.csv", read_param_file=False, read_hospital_param_file=False)
+        p = Parameters(input_households="notset.csv", read_param_file=False)
         with pytest.raises(ParameterException):
             p.set_param("population_80_89", 5000)

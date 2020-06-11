@@ -11,7 +11,6 @@ class TestSetObjects:
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
             param_line_number=1,
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv"
         )
         for key in all_params:
             value = all_params[key][0]
@@ -22,7 +21,6 @@ class TestSetObjects:
         p = Parameters(
             read_param_file=False,
             input_households="tests/data/baseline_household_demographics.csv",
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv"
         )
         for key in all_params:
             value = all_params[key][0]
@@ -38,8 +36,6 @@ class TestSetObjects:
         p = Parameters(
             read_param_file=False,
             input_households="tests/data/baseline_household_demographics.csv",
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
-            hospital_param_line_number=1
         )
         for key in all_params:
             value = all_params[key][0]
@@ -55,12 +51,7 @@ class TestSetObjects:
     def test_run_model_read_prama_file_baseline_df(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
         household_df = pd.read_csv("tests/data/baseline_household_demographics.csv")
-        p = Parameters(
-            read_param_file=False,
-            input_households=household_df,
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
-            hospital_param_line_number=1
-        )
+        p = Parameters(read_param_file=False, input_households=household_df,)
         for key in all_params:
             value = all_params[key][0]
             try:
@@ -76,8 +67,6 @@ class TestSetObjects:
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
-            hospital_param_line_number=1,
             param_line_number=1,
         )
         p.set_param("lockdown_occupation_multiplier_primary_network", 100.0)
@@ -90,8 +79,6 @@ class TestSetObjects:
             read_param_file=True,
             input_households="tests/data/baseline_household_demographics.csv",
             input_param_file="tests/data/baseline_parameters.csv",
-            hospital_input_param_file="tests/data/hospital_baseline_parameters.csv",
-            hospital_param_line_number=1,
             param_line_number=1,
         )
         model = Model(p)

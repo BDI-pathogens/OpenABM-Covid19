@@ -51,19 +51,6 @@ struct individual{
 	double traced_on_this_trace;
 
 	int app_user;
-
-	int ward_idx;
-	int ward_type;
-
-	int hospital_idx;
-
-	int hospital_state;
-	int disease_progression_predicted[N_HOSPITAL_WARD_TYPES];
-	event *current_hospital_event;
-	event *next_hospital_event;
-
-	int worker_type;
-
 };
 
 struct interaction{
@@ -77,7 +64,6 @@ struct infection_event{
 	int *times;
 	individual *infector;
 	int infector_status;
-	int infector_hospital_state;
 	int infector_network;
 	int time_infected_infector;
 	infection_event *next;
@@ -109,11 +95,6 @@ void set_hospitalised_recovering( individual*, parameters*, int );
 void set_critical( individual*, parameters*, int );
 void set_dead( individual*, parameters*, int );
 void set_case( individual*, int );
-void set_waiting( individual*, parameters*, int );
-void set_general_admission( individual*, parameters*, int );
-void set_icu_admission( individual*, parameters*, int );
-void set_mortuary_admission( individual*, parameters*, int );
-void set_discharged( individual*, parameters*, int );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );
 void destroy_individual( individual* );

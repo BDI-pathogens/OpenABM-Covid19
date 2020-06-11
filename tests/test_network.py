@@ -42,7 +42,6 @@ def setup_covid_methods(request):
     os.mkdir(constant.DATA_DIR_TEST)
     shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
     shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
-    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)
 
     # Adjust any parameters that need adjusting for all tests
     params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
@@ -326,7 +325,6 @@ class TestClass(object):
         params.set_param("mean_random_interactions_elderly",mean_random_interactions_elderly )
         params.set_param("sd_random_interactions_elderly",  sd_random_interactions_elderly )
         params.set_param("n_total",n_total)
-        params.set_param("hospital_on", 0)
         params.write_params(constant.TEST_DATA_FILE)
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
@@ -404,7 +402,6 @@ class TestClass(object):
         params.set_param( "mean_work_interactions_elderly", mean_work_interactions_elderly )
         params.set_param( "daily_fraction_work",            daily_fraction_work )
         params.set_param( "n_total",n_total)
-        params.set_param( "hospital_on", 0)
         params.write_params(constant.TEST_DATA_FILE)
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
@@ -546,18 +543,10 @@ class TestClass(object):
                                                   ( df_indiv["age_group"] == constant.AGE_50_59 ) | ( df_indiv["age_group"] == constant.AGE_60_69 ) )
                                               ]
                                     )
-
-        num_adults_in_healthcare_worker_network = len(df_indiv[
-                                                ( df_indiv["occupation_network"] == constant.HOSPITAL_WORK_NETWORK ) &
-                                                ( ( df_indiv["age_group"] == constant.AGE_20_29) |
-                                                  ( df_indiv["age_group"] == constant.AGE_30_39) | ( df_indiv["age_group"] == constant.AGE_40_49) |
-                                                  ( df_indiv["age_group"] == constant.AGE_50_59) | ( df_indiv["age_group"] == constant.AGE_60_69) )
-                                               ]
-                                   )
         
         total_children_network = num_children_in_children + num_adults_in_children
         total_elderly_network = num_elderly_in_elderly + num_adults_in_elderly
-        total = total_children_network + total_elderly_network + num_adults_in_adults + num_adults_in_healthcare_worker_network
+        total = total_children_network + total_elderly_network + num_adults_in_adults
         if ( total > 0 ):
             np.testing.assert_equal( total, n_total )
             

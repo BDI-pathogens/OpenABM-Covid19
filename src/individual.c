@@ -45,7 +45,6 @@ void initialize_individual(
 
 	indiv->infection_events->infector_status  = UNKNOWN;
 	indiv->infection_events->infector_network = UNKNOWN;
-	indiv->infection_events->infector_hospital_state = UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
 	indiv->infection_events->next =  NULL;
 	indiv->infection_events->is_case     = FALSE;
@@ -60,16 +59,6 @@ void initialize_individual(
 	indiv->index_trace_token    = NULL;
 	indiv->traced_on_this_trace = FALSE;
 	indiv->index_token_release_event = NULL;
-
-	indiv->hospital_state = NOT_IN_HOSPITAL;
-	indiv->current_hospital_event = NULL;
-	indiv->next_hospital_event = NULL;
-	indiv->ward_type = NO_WARD;
-	indiv->ward_idx  = NO_WARD;
-	indiv->hospital_idx = NO_HOSPITAL;
-	indiv->disease_progression_predicted[0] = FALSE;
-	indiv->disease_progression_predicted[1] = FALSE;
-	indiv->worker_type = NOT_HEALTHCARE_WORKER;
 }
 
 /*****************************************************************************************
@@ -255,58 +244,6 @@ void set_case( individual *indiv, int time )
 {
 	indiv->infection_events->is_case   = TRUE;
 	indiv->infection_events->times[CASE] = time;
-}
-
-/*****************************************************************************************
-*  Name:		set_waiting
-*  Description: sets a person to be added to the hospital waiting list
-*  Returns:		void
-******************************************************************************************/
-void set_waiting( individual *indiv, parameters* params, int time )
-{
-	indiv->hospital_state = WAITING;
-}
-
-/*****************************************************************************************
-*  Name:		set_general_admission
-*  Description: sets a person to be added to a general ward
-*  Returns:		void
-******************************************************************************************/
-void set_general_admission( individual *indiv, parameters* params, int time )
-{
-	indiv->hospital_state = GENERAL;
-}
-
-/*****************************************************************************************
-*  Name:		set_icu_admission
-*  Description: sets a person to be added to an ICU
-*  Returns:		void
-******************************************************************************************/
-void set_icu_admission( individual *indiv, parameters* params, int time )
-{
-	indiv->hospital_state = ICU;
-}
-
-/*****************************************************************************************
-*  Name:		set_mortuary_admission
-*  Description: sets a dead person to be added to the mortuary
-*  Returns:		void
-******************************************************************************************/
-void set_mortuary_admission( individual *indiv, parameters* params, int time )
-{
-	indiv->hospital_state = MORTUARY;
-	indiv->current_hospital_event = NULL;
-}
-
-/*****************************************************************************************
-*  Name:		set_discharged
-*  Description: sets a recovered person to be discharged from the hospital.
-*  Returns:		void
-******************************************************************************************/
-void set_discharged( individual *indiv, parameters* params, int time )
-{
-	indiv->hospital_state = DISCHARGED;
-	indiv->current_hospital_event = NULL;
 }
 
 /*****************************************************************************************

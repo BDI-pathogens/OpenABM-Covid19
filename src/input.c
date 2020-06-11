@@ -16,7 +16,6 @@
 #include "constant.h"
 #include "demographics.h"
 #include "interventions.h"
-#include "hospital.h"
 
 /*****************************************************************************************
 *  Name:		read_command_line_args
@@ -24,10 +23,9 @@
 ******************************************************************************************/
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
-	int param_line_number, hospital_param_line_number;
+	int param_line_number;
 	char input_param_file[ INPUT_CHAR_LEN ];
 	char input_household_file [INPUT_CHAR_LEN ];
-	char hospital_input_param_file[ INPUT_CHAR_LEN ];
 	char output_file_dir[ INPUT_CHAR_LEN ];
 
 	if(argc > 1)
@@ -60,34 +58,10 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 	if(argc > 4)
 	{
 		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN );
-		params->sys_write_hospital = TRUE;
 	}else{
 		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
 			INPUT_CHAR_LEN );
-		params->sys_write_hospital = FALSE;
 	}
-
-	if(argc > 5)
-	{
-		strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN );
-	}else{
-		strncpy(hospital_input_param_file, "../tests/data/hospital_baseline_parameters.csv",
-			INPUT_CHAR_LEN );
-	}
-
-	if(argc > 6)
-	{
-		hospital_param_line_number = (int) strtol(argv[6], NULL, 10);
-
-		if(hospital_param_line_number <= 0)
-			print_exit("Error Invalid line number, line number starts from 1");
-	}else{
-		hospital_param_line_number = 1;
-	}
-
-	params->hospital_param_line_number = hospital_param_line_number;
-	strncpy(params->hospital_input_param_file, hospital_input_param_file, sizeof(params->hospital_input_param_file) - 1);
-	params->hospital_input_param_file[sizeof(params->hospital_input_param_file) - 1] = '\0';
 
 	// Attach to params struct, ensure string is null-terminated
 	params->param_line_number = param_line_number;
@@ -251,7 +225,7 @@ void read_param_file( parameters *params)
 			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
 		}
 
-	for( i = 0; i < N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i++ )
+	for( i = 0; i < N_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -434,70 +408,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->intervention_start_time));
 	if( check < 1){ print_exit("Failed to read parameter intervention_start_time)\n"); };
 
-	check = fscanf(parameter_file, " %i ,", &(params->hospital_on));
-	if( check < 1){ print_exit("Failed to read parameter hospital_on)\n"); };
-
 	fclose(parameter_file);
-}
-/*****************************************************************************************
-*  Name:		read_hospital_param_file
-*  Description: Read line from hospital parameter file (csv), attach hospital param values
-*               to params struct
-******************************************************************************************/
-void read_hospital_param_file( parameters *params)
-{
-	FILE *hospital_parameter_file;
-	int i, j, check;
-
-	hospital_parameter_file = fopen(params->hospital_input_param_file, "r");
-	if(hospital_parameter_file == NULL)
-		print_exit("Can't open hospital parameter file");
-
-	// Throw away header (and first `params->hospital_param_line_number` lines)
-	for(i = 0; i < params->param_line_number; i++)
-		fscanf(hospital_parameter_file, "%*[^\n]\n");
-
-	// Read and attach parameter values to parameter structure
-	check = fscanf(hospital_parameter_file, " %i ,", &(params->n_hospitals));
-	if( check < 1){ print_exit("Failed to read parameter n_hospitals\n"); };
-
-	for( i = 0; i < N_HOSPITAL_WARD_TYPES; i++ )
-	{
-		check = fscanf(hospital_parameter_file, " %i ,", &(params->n_wards[i]));
-		if( check < 1){ print_exit("Failed to read parameter n_wards\n"); };
-
-		check = fscanf(hospital_parameter_file, " %i ,", &(params->n_ward_beds[i]));
-		if( check < 1){ print_exit("Failed to read parameter n_ward_beds\n"); };
-
-		for( j = 0; j < N_WORKER_TYPES; j++)
-		{
-			check = fscanf(hospital_parameter_file, " %i ,", &(params->n_hcw_per_ward[i][j]));
-			if( check < 1){ print_exit("Failed to read parameter n_hcw_per_ward\n"); };
-
-			check = fscanf(hospital_parameter_file, " %i ,", &(params->n_patient_required_interactions[i][j]));
-			if( check < 1){ print_exit("Failed to read parameter n_patient_required_interactions\n"); };
-		}
-	}
-
-	check = fscanf( hospital_parameter_file, " %i ,", &( params->max_hcw_daily_interactions ) );
-	if( check < 1){ print_exit( "Failed to read parametermax_hcw_daily_interactions\n" ); };
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->hospitalised_waiting_mod ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter hospitalised_waiting_mod\n" ); };
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
-
-	for( i = N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i < N_INTERACTION_TYPES; i++ )
-	{
-		check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
-		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
-	}
-
-	check = fscanf( hospital_parameter_file, " %lf ,", &( params->hcw_mean_work_interactions ) );
-	if( check < 1 ){ print_exit( "Failed to read parameter hcw_mean_work_interactions\n" ); };
-
-	fclose(hospital_parameter_file);
 }
 
 /*****************************************************************************************
@@ -513,8 +424,6 @@ void write_output_files(model *model, parameters *params)
 		write_interactions( model );
 		write_transmissions( model );
 		write_trace_tokens( model );
-		if( params->hospital_on )
-			write_ward_data( model );
 	}
 }
 
@@ -679,8 +588,6 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"current_status,");
 	fprintf(individual_output_file,"age_group,");
 	fprintf(individual_output_file,"occupation_network,");
-	fprintf(individual_output_file,"worker_type,");
-	fprintf(individual_output_file,"assigned_worker_ward_type,"),
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
@@ -694,23 +601,15 @@ void write_individual_file(model *model, parameters *params)
 	{
 		indiv = &(model->population[idx]);
 
-		int worker_ward_type;
-		if ( indiv->worker_type != NOT_HEALTHCARE_WORKER )
-			worker_ward_type = get_worker_ward_type( model, indiv->idx );
-		else
-			worker_ward_type = NO_WARD;
-
 		/* Count the number of times an individual has been infected */
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
+			"%li,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
 			indiv->occupation_network,
-			indiv->worker_type,
-			worker_ward_type,
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
@@ -775,7 +674,7 @@ void print_interactions_averages(model *model, int header)
 		int_by_age[ indiv->age_type] += n_int;
 		per_by_age[ indiv->age_type]++;
 
-		cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->infection_events->times[QUARANTINED] != model->time, 1, 0 ) );
+        cqh = ifelse( indiv->status == HOSPITALISED , 2, ifelse( indiv->quarantined && indiv->infection_events->times[QUARANTINED] != model->time, 1, 0 ) );
 		int_by_cqh[cqh] += n_int;
 		per_by_cqh[cqh]++;
 	}
@@ -882,7 +781,7 @@ void write_interactions( model *model )
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
 
-	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2\n");
+	fprintf(output_file ,"ID_1,age_group_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,house_no_2,occupation_network_2\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -893,16 +792,15 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
+
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%li,%i,%li,%i\n",
 					indiv->idx,
 					indiv->age_group,
-					indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
 					inter->individual->idx,
 					inter->individual->age_group,
-					inter->individual->worker_type,
 					inter->individual->house_no,
 					inter->individual->occupation_network
 				);
@@ -913,58 +811,6 @@ void write_interactions( model *model )
 	fclose(output_file);
 }
 
-
-/*****************************************************************************************
-*  Name:        write_ward_data
-*  Description: write data about healthcare workers in each ward
-******************************************************************************************/
-void write_ward_data( model *model)
-{
-	char output_file_name[INPUT_CHAR_LEN];
-	FILE *ward_output_file;
-	int ward_type, ward_idx, doctor_idx, nurse_idx;
-
-	// TODO: currently only for one hospital, should loop through more hospitals when we have more
-
-	int hospital_idx = 0;
-
-	// Concatenate file name
-	strcpy(output_file_name, model->params->output_file_dir);
-	strcat(output_file_name, "/ward_output");
-	strcat(output_file_name, ".csv");
-	ward_output_file = fopen(output_file_name, "w");
-
-	fprintf(ward_output_file,"%s,%s,%s,%s,%s,%s,%s,%s\n", "ward_idx", "ward_type","number_doctors", "number_nurses", "doctor_type", "nurse_type", "pdx", "hospital_idx");
-
-	// For each ward type
-	for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-	{
-		// For each ward
-		for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
-		{
-			int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
-			int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
-
-			// For each doctor
-			for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
-			{
-				int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
-				int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-				fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 1, 0, doctor_pdx, doctor_hospital_idx);
-			}
-			// Loop for each nurse
-			for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
-			{
-				int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
-				int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-				fprintf(ward_output_file,"%i,%i,%i,%i,%i,%i,%i,%i\n",ward_idx, ward_type, number_doctors, number_nurses, 0, 1, nurse_pdx, nurse_hospital_idx);
-			}
-		}
-	}
-
-	fclose(ward_output_file);
-
-}
 
 /*****************************************************************************************
 *  Name:		write_transmissions
@@ -992,16 +838,12 @@ void write_transmissions( model *model )
 	fprintf(output_file , "age_group_recipient,");
 	fprintf(output_file , "house_no_recipient,");
 	fprintf(output_file , "occupation_network_recipient,");
-	fprintf(output_file , "worker_type_recipient,");
-	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
 	fprintf(output_file , "house_no_source,");
 	fprintf(output_file , "occupation_network_source,");
-	fprintf(output_file , "worker_type_source,");
-	fprintf(output_file , "hospital_state_source,");
 	fprintf(output_file , "time_infected_source,");
 	fprintf(output_file , "status_source,");
 	fprintf(output_file , "time_infected,");
@@ -1028,21 +870,17 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%li,%i,%li,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
 					indiv->occupation_network,
-					indiv->worker_type,
-					indiv->hospital_state,
 					infection_event->infector_network,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,
 					infection_event->infector->house_no,
 					infection_event->infector->occupation_network,
-					infection_event->infector->worker_type,
-					infection_event->infector_hospital_state,
 					infection_event->time_infected_infector,
 					infection_event->infector_status,
 					time_infected_infection_event( infection_event ),
@@ -1219,54 +1057,6 @@ void write_trace_tokens_ts( model *model, int initialise )
 }
 
 /*****************************************************************************************
-*  Name:		get_worker_ward_type
-*  Description: Returns the ward type of the healthcare worker passed to this function.
-*  Returns:     int
-******************************************************************************************/
-int get_worker_ward_type( model *model, int pdx ) {
-	individual *indiv;
-	hospital *hospital;
-	ward *ward;
-
-	int indiv_ward_type = NO_WARD;
-	indiv = &( model->population[pdx] );
-
-	// For all wards in all hospitals, check to see if any worker index matches the provided index.
-	// If yes, return the ward type of the ward they are in.
-	for( int hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ ) {
-		hospital = &( model->hospitals[ hospital_idx ] );
-
-		// Check all general wards in the hospital.
-		for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_GENERAL ]; ward_idx++ ) {
-			ward = &( hospital->wards[ COVID_GENERAL ][ ward_idx ] );
-
-			for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
-				if ( ward->doctors[ idx ].pdx == indiv->idx )
-					indiv_ward_type = ward->type;
-			}
-			for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
-				if ( ward->nurses[ idx ].pdx == indiv->idx )
-					indiv_ward_type = ward->type;
-			}
-		}
-
-		// Check all ICU wards in the hospital.
-		for ( int ward_idx = 0; ward_idx < hospital->n_wards[ COVID_ICU ]; ward_idx++ ) {
-			ward = &( hospital->wards[ COVID_ICU ][ ward_idx ] );
-
-			for ( int idx = 0; idx < ward->n_worker[ DOCTOR ]; idx++ ) {
-				if ( ward->doctors[idx].pdx == indiv->idx )
-					indiv_ward_type = ward->type;
-			}
-			for ( int idx = 0; idx < ward->n_worker[ NURSE ]; idx++ ) {
-				if ( ward->nurses[ idx ].pdx == indiv->idx )
-					indiv_ward_type = ward->type;
-			}
-		}
-	}
-	return indiv_ward_type;
-}
-/*****************************************************************************************
 *  Name:		write_occupation_network
 *  Description: Write (csv) file of occupation network
 ******************************************************************************************/
@@ -1362,93 +1152,4 @@ void write_network(char *output_file, network *network_ptr)
 			);
 	}
 	fclose(network_file);
-}
-
-/*****************************************************************************************
-*  Name:        write_time_step_hospital_data
-*  Description: write data concerning the status of hospitals at each time step
-******************************************************************************************/
-void write_time_step_hospital_data( model *model)
-{
-    char output_file_name[INPUT_CHAR_LEN];
-    FILE *time_step_hospital_file;
-    int ward_type, ward_idx, doctor_idx, nurse_idx, patient_idx;
-    int hospital_idx = 0;
-    // TODO: update to run for each hospital
-
-    if( model->params->sys_write_hospital )
-        {
-            // Concatenate file name
-            strcpy(output_file_name, model->params->output_file_dir);
-            strcat(output_file_name, "/time_step_hospital_output");
-            strcat(output_file_name, ".csv");
-
-            // Open outputfile in different mode depending on whether this is the first time step
-            if(model->time == 1)
-            {
-                time_step_hospital_file = fopen(output_file_name, "w");
-                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
-            }
-            else
-            {
-                time_step_hospital_file = fopen(output_file_name, "a");
-            }
-
-            for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
-            {
-                // For each ward
-                for( ward_idx = 0; ward_idx < model->hospitals->n_wards[ward_type]; ward_idx++ )
-                {
-                    int number_doctors = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[DOCTOR];
-                    int number_nurses = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_max_hcw[NURSE];
-                    int number_patients = model->hospitals[hospital_idx].wards[ward_type][ward_idx].patients->size;
-                    int number_beds = model->hospitals[hospital_idx].wards[ward_type][ward_idx].n_beds;
-
-                    // For each doctor
-                    for( doctor_idx = 0; doctor_idx < number_doctors; doctor_idx++ )
-                    {
-                        int doctor_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].pdx;
-                        int doctor_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].doctors[doctor_idx].hospital_idx;
-
-                        individual *indiv_doctor;
-                        indiv_doctor = &(model->population[doctor_pdx]);
-                        int doctor_disease_state = indiv_doctor->status;
-                        int doctor_hospital_state = indiv_doctor->hospital_state;
-
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
-                    }
-                    // For each nurse
-                    for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
-                    {
-                        int nurse_pdx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].pdx;
-                        int nurse_hospital_idx = model->hospitals[hospital_idx].wards[ward_type][ward_idx].nurses[nurse_idx].hospital_idx;
-
-                        individual *indiv_nurse;
-                        indiv_nurse = &(model->population[nurse_pdx]);
-                        int nurse_disease_state = indiv_nurse->status;
-                        int nurse_hospital_state = indiv_nurse->hospital_state;
-
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
-                    }
-
-                    // For each patient
-                    hospital *hospital;
-                    hospital = &model->hospitals[hospital_idx];
-                    for( patient_idx = 0; patient_idx < number_patients; patient_idx++ )
-                    {
-                        int patient_pdx = model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ].idx;
-
-                        individual *indiv_patient;
-                        indiv_patient = &(model->population[ list_element_at(hospital->wards[ward_type][ward_idx].patients, patient_idx) ]);
-                        int patient_disease_state = indiv_patient->status;
-                        int patient_hospital_state = indiv_patient->hospital_state;
-
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
-                    }
-
-                }
-            }
-
-            fclose(time_step_hospital_file);
-        }
 }

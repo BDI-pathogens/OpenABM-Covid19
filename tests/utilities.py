@@ -234,8 +234,6 @@ def get_params_swig():
         1,
         constant.DATA_DIR_TEST,
         constant.TEST_HOUSEHOLD_TEMPLATE,
-        constant.TEST_HOSPITAL_FILE,
-        1
     )
 
 

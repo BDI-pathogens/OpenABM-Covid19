@@ -225,7 +225,7 @@ void set_up_household_distribution( model *model )
 				indiv = &(model->population[pdx]);
 				set_age_group( indiv, model->params, age );
 				set_house_no( indiv, hdx );
-				dir->val[hdx][housesize++] = pdx++;
+			    dir->val[hdx][housesize++] = pdx++;
 
 				if( pdx == model->params->n_total )
 				{

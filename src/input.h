@@ -23,7 +23,6 @@
 void read_command_line_args(parameters *, int, char **);
 void read_param_file(parameters *);
 void read_household_demographics_file(parameters *);
-void read_hospital_param_file( parameters *);
 void set_up_reference_household_memory(parameters *params);
 void write_output_files(model *, parameters *);
 void write_individual_file(model *, parameters *);
@@ -32,16 +31,10 @@ void write_transmissions( model* );
 void write_trace_tokens( model* );
 void write_trace_tokens_ts( model*, int );
 void write_quarantine_reasons( model*, parameters *);
-void write_ward_data( model* );
-int get_worker_ward_type( model *model, int pdx );
-void write_time_step_hospital_data( model *model);
-
 void write_occupation_network(model *, parameters *, int );
 void write_household_network(model *, parameters *);
 void write_random_network(model *, parameters *);
 void write_network(char *, network *);
-
-
 void print_interactions_averages( model*, int );
 
 #endif /* INPUT_H_ */
