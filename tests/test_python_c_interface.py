@@ -91,6 +91,8 @@ class TestClass(object):
             constant.PARAM_LINE_NUMBER,
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+            constant.HOSPITAL_PARAM_LINE_NUMBER
         )
         params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
@@ -166,6 +168,8 @@ class TestClass(object):
             constant.PARAM_LINE_NUMBER,
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+            constant.PARAM_LINE_NUMBER
         )
         params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
@@ -182,6 +186,8 @@ class TestClass(object):
             constant.PARAM_LINE_NUMBER,
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+            constant.PARAM_LINE_NUMBER
         )
         model = Model(params)
         assert covid19.get_param_lockdown_on(model.c_params) == 0
@@ -326,6 +332,7 @@ class TestClass(object):
             constant.PARAM_LINE_NUMBER,
             constant.DATA_DIR_TEST,
             constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
         )
         model = Model(params)
         daily_hospitalisations = []
