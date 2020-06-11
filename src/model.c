@@ -81,12 +81,21 @@ void destroy_model( model *model )
 {
 	long idx;
 	network *network, *next_network;
+	interaction_block *interaction_block, *next_interaction_block;
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
 	free( model->population );
 	free( model->possible_interactions );
-	free( model->interactions );
+
+	next_interaction_block = model->interaction_blocks;
+	while( next_interaction_block != NULL )
+	{
+		interaction_block = next_interaction_block;
+		next_interaction_block = interaction_block->next;
+		free( interaction_block->interactions );
+		free( interaction_block );
+	}
 	free( model->events );
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
 		free( model->transition_time_distributions[ idx ] );
@@ -335,6 +344,36 @@ double estimate_total_interactions( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		add_interaction_block
+*  Description: adds a block of interactions (required to be dynamic if size of network
+*  				can change
+*  Returns:		void
+******************************************************************************************/
+void add_interaction_block( model *model, long n_interactions )
+{
+	long( idx );
+	interaction *interactions;
+	interaction_block *block;
+
+	block = calloc( 1, sizeof( interaction_block ) );
+	block->interactions = calloc( n_interactions, sizeof( interaction ) );
+	interactions = block->interactions;
+
+	if( model->interaction_blocks != NULL )
+		block->next = model->interaction_blocks;
+	model->interaction_blocks = block;
+
+	for( idx = 1; idx < n_interactions; idx++ )
+		interactions[idx-1].next = &(interactions[idx]);
+
+	interactions[n_interactions-1].next = model->next_interaction;
+	if( model->next_interaction == NULL )
+		interactions[n_interactions-1].next = &(interactions[n_interactions-1]);
+
+	model->next_interaction = &(interactions[0]);
+}
+
+/*****************************************************************************************
 *  Name:		set_up_interactions
 *  Description: sets up the stock of interactions, note that these get recycled once we
 *  				move to a later date
@@ -349,11 +388,8 @@ void set_up_interactions( model *model )
 	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
-	model->interactions     = calloc( n_interactions, sizeof( interaction ) );
-	model->next_interaction = &(model->interactions[0]);
-	for( idx = 1; idx < n_interactions; idx++ )
-		model->interactions[idx-1].next = &(model->interactions[idx]);
-	model->interactions[n_interactions-1].next = &(model->interactions[n_interactions-1]);
+	add_interaction_block( model, n_interactions );
+	model->interaction_blocks = calloc( 1, sizeof( interaction_block ) );
 
 	model->n_interactions        = n_interactions;
 	model->interaction_idx       = 0;
@@ -371,7 +407,6 @@ void set_up_interactions( model *model )
 	model->n_possible_interactions = idx;
 	model->n_total_intereactions   = 0;
 }
-
 
 
 /*****************************************************************************************
@@ -838,6 +873,8 @@ int add_user_network(
 
 	user_network->next_network = model->user_network;
 	model->user_network        = user_network;
+
+	add_interaction_block( model, n_edges * 2 * model->params->days_of_interactions );
 
 	return network_id;
 }
