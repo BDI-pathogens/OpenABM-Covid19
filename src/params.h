@@ -18,9 +18,11 @@
 typedef struct{
 	long rng_seed; 					// number used to seed the GSL RNG
 	char input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
+	char hospital_input_param_file[INPUT_CHAR_LEN];	// path to input parameter file
 	char input_household_file[INPUT_CHAR_LEN]; //path to input household demographics file
 	char output_file_dir[INPUT_CHAR_LEN];	// path to output directory
 	int param_line_number;			// line number to be read from parameter file
+	int hospital_param_line_number;			// line number to be read from parameter file
 	long param_id;					// id of the parameter set
 	long n_total;  					// total number of people
 	int days_of_interactions;		// the number of days of interactions to keep
@@ -146,12 +148,29 @@ typedef struct{
 	int intervention_start_time;	// time at which interventions start
 
 	int sys_write_individual; 		// Should an individual file be written to output?
+	int sys_write_hospital; 		// Should a hospital file be written to output?
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 
 	double ***risk_score;  			// risk score somebody who has been traced
 	double **risk_score_household;  // risk score for household members of symptomatic person
+
+	//Hospital parameters
+	int hospital_on;
+	int n_hospitals;
+	int n_wards[N_HOSPITAL_WARD_TYPES];
+	int n_ward_beds[N_HOSPITAL_WARD_TYPES];
+	int n_hcw_per_ward[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+	int n_patient_required_interactions[N_HOSPITAL_WARD_TYPES][N_WORKER_TYPES];
+	int max_hcw_daily_interactions;
+
+	//Modifiers for patients not receiving care when transitioning from disease states.
+	double hospitalised_waiting_mod;
+	double critical_waiting_mod;
+
+	//average amount of interactions healthcare workers have with each other per day
+	double hcw_mean_work_interactions;
 
 } parameters;
 
@@ -219,6 +238,7 @@ int set_model_param_risk_score_household( model*, int, int, double );
 void update_work_intervention_state(model *model, int value);
 void update_household_intervention_state(model *model, int value);
 void check_params( parameters* );
+void check_hospital_params( parameters *params );
 void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */
