@@ -389,7 +389,6 @@ void set_up_interactions( model *model )
 	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
 	add_interaction_block( model, n_interactions );
-	model->interaction_blocks = calloc( 1, sizeof( interaction_block ) );
 
 	model->n_interactions        = n_interactions;
 	model->interaction_idx       = 0;
