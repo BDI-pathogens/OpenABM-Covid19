@@ -16,7 +16,6 @@
 
 
 /*****************************************************************************************
-*  Name: 		get_param_daily_fraction_work_used
 *  Name: 		initialize_params
 *  Description: initializes the params structure
 ******************************************************************************************/
@@ -26,11 +25,26 @@ void initialize_params( parameters *params )
 }
 
 /*****************************************************************************************
-*  Name: 		set_up_demographic_house_table
+*  Name: 		set_demographic_house_table
 *  Description: sets ups a clean demographic house table
+*  Arguments:	params:	  	the parameter structure
+*  				n_total:    the total number of people
+*  				n_household:the total number of households
+*  				people:		the person idx of all the people (length n_total)
+*  				ages:		the age group of all the people (length n_total)
+*  				house_nos:  the house no of all the people (lnength n_total)
 ******************************************************************************************/
-int set_up_demographic_house_table( parameters* params, long n_total, long n_households )
+int set_demographic_house_table(
+	parameters* params,
+	long n_total,
+	long n_households,
+	long* people,
+	long* ages,
+	long* house_nos
+)
 {
+	long pdx;
+
 	if( params->demo_house != NULL )
 	{
 		free( params->demo_house->idx );
@@ -52,39 +66,28 @@ int set_up_demographic_house_table( parameters* params, long n_total, long n_hou
 	params->demo_house->idx          = calloc( n_total, sizeof( long ) );
 	params->demo_house->house_no     = calloc( n_total, sizeof( long ) );
 
-	return TRUE;
-}
+	for( pdx = 0; pdx < n_total; pdx++ )
+	{
+		if( people[pdx] < 0 | people[pdx] >= params->n_total )
+		{
+			print_now( "The person index must be between 0 and n_total -1" );
+			return FALSE;
+		}
+		if( ages[pdx] < 0 | ages[pdx] >= N_AGE_GROUPS )
+		{
+			print_now( "The person's age must be between 0 and N_AGE_GROUPS-1" );
+			return FALSE;
+		}
+		if( house_nos[pdx] < 0 | house_nos[pdx] >= params->demo_house->n_households )
+		{
+			print_now( "The person's nouse_no must be between 0 and n_households" );
+			return FALSE;
+		}
 
-/*****************************************************************************************
-*  Name: 		set_indiv_demographic_house_table
-*  Description: sets the values for an individual in the demo_house table
-******************************************************************************************/
-int set_indiv_demographic_house_table( parameters* params, long pdx, int age, long house_no )
-{
-	if( params->demo_house == NULL )
-	{
-		print_now( "Cannot update demo_house until it has been initialized (call set_up_demographic_house_table)" );
-		return FALSE;
+		params->demo_house->idx[ pdx ]       = people[pdx];
+		params->demo_house->age_group[ pdx ] = ages[pdx];
+		params->demo_house->house_no[ pdx ]  = house_nos[pdx];
 	}
-	if( pdx < 0 | pdx >= params->n_total )
-	{
-		print_now( "The person index must be between 0 and n_total -1" );
-		return FALSE;
-	}
-	if( age < 0 | age >= N_AGE_GROUPS )
-	{
-		print_now( "The person's age must be between 0 and N_AGE_GROUPS-1" );
-		return FALSE;
-	}
-	if( house_no < 0 | house_no >= params->demo_house->n_households )
-	{
-		print_now( "The person's nouse_no must be between 0 and n_households" );
-		return FALSE;
-	}
-
-	params->demo_house->idx[ pdx ]       = pdx;
-	params->demo_house->age_group[ pdx ] = age;
-	params->demo_house->house_no[ pdx ]  = house_no;
 
 	return TRUE;
 }

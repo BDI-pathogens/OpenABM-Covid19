@@ -235,8 +235,7 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
 
-int set_up_demographic_house_table( parameters*, long, long );
-int set_indiv_demographic_house_table( parameters*, long, int, long );
+int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 
 void update_work_intervention_state(model *model, int value);
 void update_household_intervention_state(model *model, int value);
