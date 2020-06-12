@@ -705,12 +705,12 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-        if( !individual_eligible_to_become_healthcare_worker( indiv ) )
-                continue;
+		if( !individual_eligible_to_become_healthcare_worker( indiv ) )
+			continue;
 
 		indiv->worker_type = DOCTOR;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, DOCTOR );
+		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, DOCTOR );
 		idx++;
 	}
 
@@ -724,12 +724,12 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
-        if( !individual_eligible_to_become_healthcare_worker( indiv ) )
-                continue;
+		if( !individual_eligible_to_become_healthcare_worker( indiv ) )
+			continue;
 
 		indiv->worker_type = NURSE;
 		indiv->occupation_network = HOSPITAL_WORK_NETWORK;
-        add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, NURSE );
+		add_healthcare_worker_to_hospital( &(model->hospitals[0]), indiv, NURSE );
 		idx++;
 	}
 }
