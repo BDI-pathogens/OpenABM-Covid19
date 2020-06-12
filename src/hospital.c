@@ -545,8 +545,8 @@ void release_patient_from_hospital( individual *indiv, hospital *hospital )
 {
 	remove_if_in_waiting_list( indiv, hospital );
 
-    if( indiv->ward_type != NO_WARD )
-        remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv );
+	if( indiv->ward_type != NO_WARD )
+		remove_patient_from_ward( &(hospital->wards[indiv->ward_type][indiv->ward_idx]), indiv );
 
 	indiv->ward_type = NO_WARD;
 	indiv->ward_idx  = NO_WARD;
