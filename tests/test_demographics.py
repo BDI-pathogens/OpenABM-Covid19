@@ -293,7 +293,6 @@ class TestClass(object):
         
         # now check the households ages are correct
         df = pd.merge(df_demo,df_indiv,on = ["ID"], how = "left")
-        print( df.columns)
         n_wrong_age   = sum( df["age_group_x"]!=df["age_group_y"])
         n_wrong_house = sum( df["house_no_x"]!=df["house_no_y"])
         np.testing.assert_equal( n_wrong_age, 0, err_msg = "people in the wrong age group")
