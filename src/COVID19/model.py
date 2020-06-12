@@ -147,7 +147,7 @@ class Parameters(object):
             hospital_input_param_file: str = None,
             hospital_param_line_number: int = 1,
             read_param_file=True,
-            read_hospital_param_file=True,
+            read_hospital_param_file=False,
     ):
         """[summary]
         
@@ -467,6 +467,48 @@ class Model:
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
+    
+    def add_user_network(self, df_network, interaction_type = 1, skip_hospitalised = True, skip_quarantine = True, daily_fraction = 1.0, name = "user_network" ):
+        
+        n_edges = len( df_network.index )
+        n_total = self._params_obj.get_param("n_total")
+      
+        if not 'ID_1' in df_network.columns:
+            raise ParameterException( "df_network must have column ID_1" )
+
+        if not 'ID_1' in df_network.columns:
+            raise ParameterException( "df_network must have column ID_1" )
+        
+        if not interaction_type in [0,1,2]:
+            raise ParameterException( "interaction_type must be 0 (household), 1 (occupation) or 2 (random)" )
+            
+        if (daily_fraction > 1) or( daily_fraction < 0):
+            raise ParameterException( "daily fraction must be in the range 0 to 1" )
+     
+        if not skip_hospitalised in [ True, False ]:
+            raise ParameterException( "skip_hospitalised must be True or False" )
+  
+        if not skip_quarantine in [ True, False ]:
+            raise ParameterException( "skip_quarantine must be True or False" )
+  
+        ID_1 = df_network[ "ID_1" ].to_list()
+        ID_2 = df_network[ "ID_2" ].to_list()
+        
+        if (max( ID_1 ) >= n_total) or (min( ID_1 ) < 0): 
+            raise ParameterException( "all values of ID_1 must be between 0 and n_total-1" )
+  
+        if (max( ID_2 ) >= n_total) or (min( ID_2  ) < 0):
+            raise ParameterException( "all values of ID_2 must be between 0 and n_total-1" )
+  
+        ID_1_c = covid19.longArray(n_edges)
+        ID_2_c = covid19.longArray(n_edges)
+  
+        for idx in range(n_edges):
+            ID_1_c[idx] = ID_1[idx]
+            ID_2_c[idx] = ID_2[idx]
+
+        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+
     
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
