@@ -259,11 +259,16 @@ void set_up_occupation_network( model *model, int network )
 	model->occupation_network[network]->skip_quarantined  = TRUE;
 	model->occupation_network[network]->daily_fraction    = model->params->daily_fraction_work;
 	model->occupation_network[network]->network_id        = OCCUPATION_DEFAULT_MAP[network];
+	model->occupation_network[network]->n_edges           = 0;
 	strcpy( model->occupation_network[network]->name, DEFAULT_NETWORKS_NAMES[OCCUPATION_DEFAULT_MAP[network]] );
 
 	n_interactions =  params->mean_work_interactions[age] / params->daily_fraction_work;
-	build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, params->work_network_rewire, TRUE );
-	relabel_network( model->occupation_network[network], people );
+
+	if( n_people > 0 )
+	{
+		build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, params->work_network_rewire, TRUE );
+		relabel_network( model->occupation_network[network], people );
+	}
 
 	free( people );
 }

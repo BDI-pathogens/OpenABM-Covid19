@@ -55,6 +55,9 @@ void set_up_app_users( model *model )
 				not_users     += 1 - model->population[ idx ].app_user;
 			}
 
+		if( ( current_users + not_users) == 0 )
+			continue;
+
 		max_user = ceil( ( current_users + not_users ) * fraction[age] ) - current_users;
 		if( max_user < 0 || max_user > not_users )
 			print_exit( "Bad target app_fraction_users" );
