@@ -1365,6 +1365,92 @@ void write_network(char *output_file, network *network_ptr)
 }
 
 /*****************************************************************************************
+*  Name:        write_hospital_interactions
+*  Description: write interactions that happens within hospital networks
+******************************************************************************************/
+void write_hospital_interactions( model *model )
+{
+    char output_file_name[INPUT_CHAR_LEN];
+    FILE *hospital_interactions_file;
+    individual *indiv;
+    interaction *inter;
+    int day, hcw_ward_type, hcw_ward_index;
+    hospital *hospital = &model->hospitals[0];
+
+    // Concatenate file name
+    strcpy(output_file_name, model->params->output_file_dir);
+    strcat(output_file_name, "/time_step_hospital_interactions");
+    strcat(output_file_name, ".csv");
+
+    day = model->interaction_day_idx;
+    ring_dec( day, model->params->days_of_interactions );
+
+    // Open outputfile in different mode depending on whether this is the first time step
+    if(model->time == 1)
+    {
+        hospital_interactions_file = fopen(output_file_name, "w");
+        fprintf(hospital_interactions_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n","time_step","ID_1", "worker_type_1", "ward_type_1", "ward_idx_1", "hospital_state_1","disease_state_1", "interaction_type", "ID_2", "worker_type_2", "ward_type_2", "ward_idx_2", "hospital_state_2", "disease_state_2");
+    }
+    else
+    {
+        hospital_interactions_file = fopen(output_file_name, "a");
+    }
+
+    for( int ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
+    {
+        for( int ward_idx = 0; ward_idx < hospital->n_wards[ward_type]; ward_idx++ )
+        {
+            ward *current_ward = &hospital->wards[ward_type][ward_idx];
+            for( int hcw_type = 0; hcw_type < N_WORKER_TYPES; hcw_type++ )
+            {
+                for( int hcw_idx = 0; hcw_idx < current_ward->n_worker[hcw_type]; hcw_idx++ )
+                {
+
+                    if(hcw_type == DOCTOR)
+                    {
+                        doctor *doctor = &current_ward->doctors[hcw_idx];
+                        hcw_ward_type = doctor->ward_type;
+                        hcw_ward_index = doctor->ward_idx;
+                        indiv = &model->population[current_ward->doctors[hcw_idx].pdx];
+                    }
+                    else
+                    {
+                        nurse *nurse = &current_ward->nurses[hcw_idx];
+                        hcw_ward_type = nurse->ward_type;
+                        hcw_ward_index = nurse->ward_idx;
+                        indiv = &model->population[current_ward->nurses[hcw_idx].pdx];
+                    }
+
+                    inter = indiv->interactions[day];
+
+                    for( int idx = 0; idx < indiv->n_interactions[day]; idx++ )
+                    {
+                        fprintf(hospital_interactions_file, "%i,%li,%d,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
+                                model->time,
+                                indiv->idx,
+                                indiv->worker_type,
+                                hcw_ward_type,
+                                hcw_ward_index,
+                                indiv->hospital_state,
+                                indiv->status,
+                                inter->type,
+                                inter->individual->idx,
+                                inter->individual->worker_type,
+                                inter->individual->ward_type,
+                                inter->individual->ward_idx,
+                                inter->individual->hospital_state,
+                                inter->individual->status
+                                );
+                        inter = inter->next;
+                    }
+                }
+            }
+        }
+    }
+    fclose(hospital_interactions_file);
+}
+
+/*****************************************************************************************
 *  Name:        write_time_step_hospital_data
 *  Description: write data concerning the status of hospitals at each time step
 ******************************************************************************************/
@@ -1387,7 +1473,7 @@ void write_time_step_hospital_data( model *model)
             if(model->time == 1)
             {
                 time_step_hospital_file = fopen(output_file_name, "w");
-                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state");
+                fprintf(time_step_hospital_file,"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", "time_step","ward_idx", "ward_type", "doctor_type", "nurse_type","patient_type","pdx", "hospital_idx","n_patients","n_beds","disease_state","hospital_state","is_working");
             }
             else
             {
@@ -1415,7 +1501,7 @@ void write_time_step_hospital_data( model *model)
                         int doctor_disease_state = indiv_doctor->status;
                         int doctor_hospital_state = indiv_doctor->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 1, 0, 0, doctor_pdx, doctor_hospital_idx,number_patients,number_beds,doctor_disease_state,doctor_hospital_state,healthcare_worker_working(indiv_doctor));
                     }
                     // For each nurse
                     for( nurse_idx = 0; nurse_idx < number_nurses; nurse_idx++ )
@@ -1428,7 +1514,7 @@ void write_time_step_hospital_data( model *model)
                         int nurse_disease_state = indiv_nurse->status;
                         int nurse_hospital_state = indiv_nurse->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 1, 0, nurse_pdx, nurse_hospital_idx,number_patients,number_beds,nurse_disease_state,nurse_hospital_state,healthcare_worker_working(indiv_nurse));
                     }
 
                     // For each patient
@@ -1443,7 +1529,7 @@ void write_time_step_hospital_data( model *model)
                         int patient_disease_state = indiv_patient->status;
                         int patient_hospital_state = indiv_patient->hospital_state;
 
-                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state);
+                        fprintf(time_step_hospital_file,"%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i\n",model->time,ward_idx, ward_type, 0, 0, 1, patient_pdx, hospital_idx,number_patients,number_beds,patient_disease_state,patient_hospital_state,0);
                     }
 
                 }

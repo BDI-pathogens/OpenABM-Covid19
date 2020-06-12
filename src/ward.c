@@ -130,7 +130,6 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
         idx = 0;
         hdx = 0;
-        n_total_interactions--;
         //assign network edges between hcw and randomly picked patient interactions
         //TODO: shift patterns eg day off
         while( idx < n_total_interactions )

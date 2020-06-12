@@ -67,7 +67,10 @@ int main(int argc, char *argv[])
 		{
             // Output hospital data for each time step
             if( model->params->hospital_on )
+            {
                 write_time_step_hospital_data( model );
+                write_hospital_interactions( model);
+            }
 
 			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 					model->time,

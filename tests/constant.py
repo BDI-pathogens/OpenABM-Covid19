@@ -32,7 +32,7 @@ TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
 TEST_QUARANTINE_REASONS_FILE = join(DATA_DIR_TEST, "quarantine_reasons_file_Run1.csv")
 TEST_HCW_FILE = join(DATA_DIR_TEST, "ward_output.csv")
 TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = join(DATA_DIR_TEST, "time_step_hospital_output.csv")
-
+TEST_OUTPUT_FILE_HOSPITAL_INTERACTIONS = join(DATA_DIR_TEST, "time_step_hospital_interactions.csv")
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
@@ -130,10 +130,14 @@ MAX_DAILY_INTERACTIONS_KEPT = 10
 PARAM_LINE_NUMBER = 1
 HOSPITAL_PARAM_LINE_NUMBER = 1
 
-# worker type
 NOT_HEALTHCARE_WORKER = -1
-DOCTOR = 0
-NURSE = 1
+class HCW_TYPES(Enum):
+    DOCTOR = 0
+    NURSE = 1
+
+class HOSPITAL_WARD_TYPES(Enum):
+    COVID_GENERAL = 0
+    COVID_ICU = 1
 
 # Construct the executable command
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\

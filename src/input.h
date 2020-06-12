@@ -35,6 +35,7 @@ void write_quarantine_reasons( model*, parameters *);
 void write_ward_data( model* );
 int get_worker_ward_type( model *model, int pdx );
 void write_time_step_hospital_data( model *model);
+void write_hospital_interactions(model *model);
 
 void write_occupation_network(model *, parameters *, int );
 void write_household_network(model *, parameters *);
