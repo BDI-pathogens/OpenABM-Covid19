@@ -353,10 +353,21 @@ class Parameters(object):
             raise ParameterException( "df_demo_house must have column house_no" )
 
         n_households = df_demo_house['house_no'].max()+1
-        covid19.set_up_demographic_house_table( self.c_params, int(n_total),int(n_households) )
-
-        result = [covid19.set_indiv_demographic_house_table(self.c_params,int(row[0]),int(row[1]),int(row[2])) for row in df_demo_house[['ID','age_group','house_no']].values]
-
+        
+        ID       = df_demo_house["ID"].to_list()
+        ages     = df_demo_house["age_group"].to_list()
+        house_no = df_demo_house["house_no"].to_list()
+        
+        ID_c       = covid19.longArray(n_total)
+        ages_c     = covid19.longArray(n_total)
+        house_no_c = covid19.longArray(n_total)
+        
+        for idx in range(n_total):
+            ID_c[idx]       = ID[idx]
+            ages_c[idx]     = ages[idx]
+            house_no_c[idx] = house_no[idx]
+        
+        covid19.set_demographic_house_table( self.c_params, int(n_total),int(n_households), ID_c, ages_c, house_no_c )
 
     def return_param_object(self):
         """[summary]
