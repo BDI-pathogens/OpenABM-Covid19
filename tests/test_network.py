@@ -226,6 +226,7 @@ class TestClass(object):
                 test_params = dict(
                     n_total  = 1e4,
                     end_time = 20,
+                    mean_time_to_critical = 30
                 ),
                 new_connections = 1e5
             )
@@ -667,6 +668,7 @@ class TestClass(object):
         # now check that all the edges in the network are interactions in the model
         df = pd.merge(network,df_inter,on = ["ID_1", "ID_2"], how = "left")
         n_miss = sum( df["in_interaction"] != True )
+                
         np.testing.assert_equal( n_miss, 0, err_msg = "interactions from user network are missing")
         
         
