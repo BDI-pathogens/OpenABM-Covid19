@@ -254,12 +254,16 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
     def _normed_vector(self, vector: np.array):
         """
         Compute normed vector (unit vector)
+        Special case if zero vector: returns zero vector
 
         Parameters
         ----------
         vector: numeric vector to be normed
         """
-        return vector / np.sum(vector)
+        abs_sum = np.abs(vector).sum()
+        if abs_sum == 0:
+            return vector
+        return vector / abs_sum
 
     def _simplex_draw(self, n: int):
         """
@@ -355,9 +359,12 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
 
         total_solvent_days = solvent_days.sum()
 
-        corp_cash_buffer = np.array(
-            [days / total_solvent_days * cash_buffer for days in solvent_days]
-        )
+        if total_solvent_days == 0:
+            corp_cash_buffer = np.zeros(size)
+        else:
+            corp_cash_buffer = np.array(
+                [days / total_solvent_days * cash_buffer for days in solvent_days]
+            )
         return corp_cash_buffer
 
     def _get_mean_cash_buffer_days(
@@ -618,6 +625,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                 * (self.solvent_bool[BusinessSize.large][s])
             )
             / DAYS_IN_A_YEAR
+            if self.solvent_bool[BusinessSize.large][s].sum() != 0
+            else 0
             for s in Sector
         }
         sme_cash_outgoing = {
@@ -631,6 +640,8 @@ class CorporateBankruptcyModel(BaseCorporateBankruptcyModel):
                 * (self.solvent_bool[BusinessSize.sme][s])
             )
             / DAYS_IN_A_YEAR
+            if self.solvent_bool[BusinessSize.sme][s].sum() != 0
+            else 0
             for s in Sector
         }
 
