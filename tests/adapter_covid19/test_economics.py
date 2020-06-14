@@ -4,6 +4,8 @@ Basic example testing the adaptER-covid19 economics class
 
 import sys
 
+import pytest
+
 from adapter_covid19.corporate_bankruptcy import (
     CorporateBankruptcyModel,
     NaiveCorporateBankruptcyModel,
@@ -39,6 +41,9 @@ def pytest_generate_tests(metafunc):
 
 
 class TestClass:
+    # Unfortunately pytest can only check for warnings in stdlib
+    # Otherwise we should parameterise with scipy.optimize.OptimizeWarning
+    @pytest.mark.filterwarnings("ignore:.*:Warning:adapter_covid19.gdp")
     def test_interface(
         self,
         gdp_model_cls,

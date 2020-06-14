@@ -2,12 +2,13 @@ import abc
 import copy
 import itertools
 import logging
+import warnings
 from dataclasses import dataclass
 from typing import Tuple, Mapping, Sequence, Optional, Union, List
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import linprog, OptimizeResult
+from scipy.optimize import linprog, OptimizeResult, OptimizeWarning
 
 from adapter_covid19.constants import START_OF_TIME, DAYS_IN_A_YEAR
 from adapter_covid19.data_structures import (
@@ -36,6 +37,15 @@ from adapter_covid19.enums import (
     WorkerStateConditional,
 )
 
+# Sometimes we pass in a non-full-rank matrix into a linear program
+# optimiser and a warning gets raised as a result. This is fine -
+# it only has a slight computational cost penalty, and because of the
+# complexity in setting up the linear program, it is uncertain as to
+# whether the formulation of the LP to ensure full rank would be more
+# performant than just passing a non-full rank matrix in.
+warnings.filterwarnings(
+    action="ignore", category=OptimizeWarning, module=__name__,
+)
 LOGGER = logging.getLogger(__name__)
 
 
