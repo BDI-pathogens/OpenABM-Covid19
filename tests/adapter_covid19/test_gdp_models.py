@@ -6,6 +6,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from adapter_covid19.corporate_bankruptcy import NaiveCorporateBankruptcyModel
 from adapter_covid19.data_structures import PersonalState
@@ -51,6 +52,9 @@ def pytest_generate_tests(metafunc):
 
 
 class TestClass:
+    # Unfortunately pytest can only check for warnings in stdlib
+    # Otherwise we should parameterise with scipy.optimize.OptimizeWarning
+    @pytest.mark.filterwarnings("ignore:.*:Warning:adapter_covid19.gdp")
     def test_interface(self, gdp_model_cls, utilisation):
         reader = Reader(DATA_PATH)
         state = state_from_utilisation(UTILISATION_NO_COVID_NO_LOCKDOWN)
