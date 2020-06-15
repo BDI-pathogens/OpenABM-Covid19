@@ -140,7 +140,9 @@ The infection was assumed to take place immediately before the simulation starts
 ## Natural history of infection
 
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression depend on the age of the infected person.
-The disease state transitions are shown in Figure~\ref{diseaseDynamics} and the model parameters are in the table Disease Dynamics Parameters.
+The disease state transitions are shown in the Figure below and the model parameters are in the table Disease Dynamics Parameters.
+
+<p><img src="diagram_line.png" title="Disease Dynamics" height="600"></p>
 
 A fraction  &#966;<sub>asym</sub>(age) of individuals are asymptomatic and do not develop symptoms, a fraction  &#966;<sub>mild</sub>(age) will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
 Each of these proportions depend on the age of the infected individual.
