@@ -12,6 +12,7 @@ constants from the C code which are used in testing
 
 from os.path import join
 from enum import Enum
+from string import Template
 
 # Directories
 IBM_DIR = "src"
@@ -29,7 +30,7 @@ TEST_INDIVIDUAL_FILE = join(DATA_DIR_TEST, "individual_file_Run1.csv")
 TEST_INTERACTION_FILE = join(DATA_DIR_TEST, "interactions_Run1.csv")
 TEST_TRANSMISSION_FILE = join(DATA_DIR_TEST, "transmission_Run1.csv")
 TEST_TRACE_FILE = join(DATA_DIR_TEST, "trace_tokens_Run1.csv")
-TEST_QUARANTINE_REASONS_FILE = join(DATA_DIR_TEST, "quarantine_reasons_file_Run1.csv")
+TEST_QUARANTINE_REASONS_FILE = Template(join(DATA_DIR_TEST, "quarantine_reasons_file_Run1_T$T.csv"))
 TEST_HCW_FILE = join(DATA_DIR_TEST, "ward_output.csv")
 TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP = join(DATA_DIR_TEST, "time_step_hospital_output.csv")
 TEST_OUTPUT_FILE_HOSPITAL_INTERACTIONS = join(DATA_DIR_TEST, "time_step_hospital_interactions.csv")

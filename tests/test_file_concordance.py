@@ -162,7 +162,8 @@ class TestClass(object):
             n_quarantine.append(model.one_time_step_results()["n_quarantine"])
             
             
-            df_quarantine_reasons = pd.read_csv(constant.TEST_QUARANTINE_REASONS_FILE)
+            df_quarantine_reasons = \
+                pd.read_csv(constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = t))
             shapes.append(df_quarantine_reasons.shape[0])
             t += 1
         
