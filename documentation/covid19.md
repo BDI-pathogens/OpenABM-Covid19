@@ -114,8 +114,8 @@ To model the **susceptibility to infection of a contact according to their age**
 The number tested and the number of positive results was reported within each age group, with the ratio of the latter to the former defining the per-age attack rate.
 We assumed the proportion testing positive was constant within each age bin in each study, and merged the counts into a single set of bins 0-9, 10-19, ... 80+, with contributions from all three studies.
 The largest age bin in each study (which differed in its lower bound, with no upper bound) was assumed to be ten years wide in order to define the merging; the counts in the resulting 80+ category were excluded for the following fitting step as they were sensitive to the assumed upper bound in each study.
-We fit the polynomial form $A + B\times(\text{age})^k$ to the proportions in each age category, using the bin's midpoint, minimising the sum of squared differences from the observed values.
-The best fitting values of $A$, $B$ and $k$ were $0.0300$, $5.53\times10^{-6}$, and $2.00$ respectively.
+We fit the polynomial form *A* + *B*x age<sup>k</sup>* to the proportions in each age category, using the bin's midpoint, minimising the sum of squared differences from the observed values.
+The best fitting values of *A*, *B* and *k* were 0.0300, 5.53x10<sup>-6,</sup>, and 2.00 respectively.
 We took the values predicted by this fit at each age bin's mid-point to define the relative susceptibility of each age group.
 A final normalisation factor was defined so that the average susceptibility for an individual in a population with the age distribution considered here was 1, defining our parameters `relative_susceptibility_0_9` etc.
 The merged data and fit are shown in Table~\ref{table_susceptibility} and Fig.~\ref{fig:susc}.
@@ -128,11 +128,11 @@ Combining all effects, we model the rate at which the virus is transmitted in a 
 
 &#955;(t,s_i,a_s,n) = \frac{R S_{a_s}A_{s_i} B_n}{ \bar I_{a_s}} \int_{t-1}^t f_{ &#915;}(u; &#956;_i,&#963;^2) {\rm d}u,
 
-where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; $n$ is the type of network where the interaction occurred; *I<sub>a_s</sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f_{&#915;}(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a_s</sub>* is the scale-factor for the age of the susceptible; *A<sub>s_i</sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
+where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; *n* is the type of network where the interaction occurred; *I<sub>a<sub>s</sub></sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f<sub>&#915;</sub>(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a<sub>s</sub></sub>* is the scale-factor for the age of the susceptible; *A<sub>s<sub>i</sub></sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
 Table~\ref{table_infectious_parameters} contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
 
-P(t,s_i,a_s,n) = 1 - e^{-&#955;(t,s_i,a_s,n)}.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*P(t,s<sub>i</sub>,a<sub>s</sub>,n) = 1 - e<sup>-&#955;(t,s<sub>i</sub>,a<sub>s</sub>,n)</sup>*.
 
 The epidemic is seeded by infecting a number of individuals at the start of the infection.
 The infection was assumed to take place immediately before the simulation starts.
