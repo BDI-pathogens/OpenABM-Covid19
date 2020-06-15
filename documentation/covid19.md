@@ -126,13 +126,13 @@ This is modelled using a multiplicative factor.
 
 Combining all effects, we model the rate at which the virus is transmitted in a single interaction by
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#955;(t,s<sub>i</sub>,a<sub>s</sub>,n) =  R S<sub>a<sub>s</sub></sub>A<sub>s<sub>i</sub></sub> B<sub>n</sub> / I<sub>a<sub>s</sub></sub> <big>&#8747;</big><sub>t-1</sub><sup>t</sup> *f*<sub>&#915;</sub>(*u*; &#956;<sub>i</sub>,&#963;<sup>2</sup>) d*u*,
+<p><img src="eqn_transmission_rate.png" height="80"></p>
 
 where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; *n* is the type of network where the interaction occurred; *I<sub>a<sub>s</sub></sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f<sub>&#915;</sub>(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a<sub>s</sub></sub>* is the scale-factor for the age of the susceptible; *A<sub>s<sub>i</sub></sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
 Table~\ref{table_infectious_parameters} contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*P(t,s<sub>i</sub>,a<sub>s</sub>,n) = 1 - e<sup>-&#955;(t,s<sub>i</sub>,a<sub>s</sub>,n)</sup>*.
+<p><img src="eqn_prob.png"  height="40"></p>
 
 The epidemic is seeded by infecting a number of individuals at the start of the infection.
 The infection was assumed to take place immediately before the simulation starts.
@@ -270,10 +270,7 @@ Instead of randomly drawing whether transmission has occurred for each interacti
 Each interaction with an infected person reduces the persons *hazard* and when a person's *hazard* drops below 0 they become infected. 
 This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N^{\rm th}* interaction  *P*( infected \  *N*^th), after exposured to interactions with hazard-rates &#955;_1,..,&#955;_N 
 
-P({\rm infected} \  N^{\rm th}) 
-&= P_N \prod_{i=1}^{N-1} ( 1 - P_i) \\
-&= \exp\left( -\sum_{i=1}^{N-1} \lambda_i \right) - \exp\left( -\sum_{i=1}^{N} \ \lambda_i\right) \\
-&= P \left(  \sum_{i=1}^{N-1} \lambda_i  < T <  \sum_{i=1}^{N} \lambda_i \right)
+<p><img src="eqn_hazard.png"  height="220"></p>
 
 where *T* is distributed exponentially with mean 1. 
 The fact that different age groups have different susceptibilities (*S_{a_s}*) is then modelled by allocating different amounts of initial *hazard* to each group.
