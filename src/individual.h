@@ -73,6 +73,11 @@ struct interaction{
 	interaction *next;
 };
 
+struct interaction_block{
+	interaction *interactions;
+	interaction_block *next;
+};
+
 struct infection_event{
 	int *times;
 	individual *infector;

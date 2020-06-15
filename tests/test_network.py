@@ -12,6 +12,7 @@ Author: p-robot
 
 import pytest, sys, subprocess, shutil, os
 import numpy as np, pandas as pd
+import random as rd
 from scipy import optimize
 
 sys.path.append("src/COVID19")
@@ -219,7 +220,17 @@ class TestClass(object):
                     work_network_rewire            = 0.3
                 )
             )
-        ]
+        ],
+        "test_user_defined_network": [ 
+            dict( 
+                test_params = dict(
+                    n_total  = 1e4,
+                    end_time = 20,
+                    mean_time_to_critical = 30
+                ),
+                new_connections = 1e5
+            )
+        ],
     }
     """
     Test class for checking 
@@ -617,4 +628,53 @@ class TestClass(object):
             expected = mean_by_type[constant.NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"]
             np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
            
+    def test_user_defined_network(self, test_params, new_connections):
+        """
+            Adds in a user defined network with random connections
+        """
+        
+        new_connections = int(new_connections)
+         
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model   = utils.get_model_swig( params )
+        n_total = params.get_param("n_total")
+        
+        # build a random network of new connections
+        node_1 = [0]*new_connections
+        node_2 = [0]*new_connections
+        for i in range(new_connections):
+            node_1[i] = rd.randrange(0,n_total-1)
+            node_2[i] = rd.randrange(0,n_total-1)    
+        network = pd.DataFrame({'ID_1':np.array(node_1, dtype='int32'), 'ID_2':np.array(node_2, dtype='int32')})
+       
+        # remove duplicates and edges connecting to self
+        network = network[ (network["ID_1"] != network["ID_2"]) ]
+        network = network.groupby(["ID_1","ID_2"]).size().reset_index(name = "count")
+        n_edges = len( network )
+        np.testing.assert_equal( n_edges > new_connections*0.9,True, err_msg = "In sufficient edges on the network to test")
+
+        # add to the model and run
+        model.add_user_network( network, name = "my test network",skip_hospitalised=False,skip_quarantine=False)
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+            
+        # get the interaction file and check the connections are there
+        model.write_interactions_file()
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter[ "in_interaction"] = True
+        
+        # now check that all the edges in the network are interactions in the model
+        df = pd.merge(network,df_inter,on = ["ID_1", "ID_2"], how = "left")
+        n_miss = sum( df["in_interaction"] != True )
+                
+        np.testing.assert_equal( n_miss, 0, err_msg = "interactions from user network are missing")
+        
+        
+        
+        
+        
+        
+        
         

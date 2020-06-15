@@ -100,17 +100,6 @@ double get_param_daily_fraction_work(parameters *params)
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_daily_fraction_work_used
-*  Description: Gets the value of a parameter
-******************************************************************************************/
-double get_param_daily_fraction_work_used(parameters *params, int idx)
-{
-    if (idx >= N_OCCUPATION_NETWORKS) return ERROR;
-
-    return params->daily_fraction_work_used[idx];
-}
-
-/*****************************************************************************************
 *  Name: 		get_param_child_network_adults
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1629,6 +1618,8 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
 %}
 
 %array_class(double, doubleArray);
+%array_class(int, intArray);
+%array_class(long, longArray);
 %inline %{
 /*****************************************************************************************
 *  Name:        get_param_array_mean_random_interactions
@@ -1660,17 +1651,6 @@ void get_param_array_mean_work_interactions(parameters *params, double *value)
 {
     for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
         value[idx] = params->mean_work_interactions[idx];
-    }
-}
-
-/*****************************************************************************************
-*  Name:        get_param_array_daily_fraction_work_used
-*  Description: Gets the value of an array
-******************************************************************************************/
-void get_param_array_daily_fraction_work_used(parameters *params, double *value)
-{
-    for (int idx = 0; idx < N_OCCUPATION_NETWORKS; idx++) {
-        value[idx] = params->daily_fraction_work_used[idx];
     }
 }
 

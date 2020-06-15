@@ -12,6 +12,85 @@
 #include "disease.h"
 #include "individual.h"
 #include "interventions.h"
+#include "demographics.h"
+
+
+/*****************************************************************************************
+*  Name: 		initialize_params
+*  Description: initializes the params structure
+******************************************************************************************/
+void initialize_params( parameters *params )
+{
+	params->demo_house = NULL;
+}
+
+/*****************************************************************************************
+*  Name: 		set_demographic_house_table
+*  Description: sets ups a clean demographic house table
+*  Arguments:	params:	  	the parameter structure
+*  				n_total:    the total number of people
+*  				n_household:the total number of households
+*  				people:		the person idx of all the people (length n_total)
+*  				ages:		the age group of all the people (length n_total)
+*  				house_nos:  the house no of all the people (lnength n_total)
+******************************************************************************************/
+int set_demographic_house_table(
+	parameters* params,
+	long n_total,
+	long n_households,
+	long* people,
+	long* ages,
+	long* house_nos
+)
+{
+	long pdx;
+
+	if( params->demo_house != NULL )
+	{
+		free( params->demo_house->idx );
+		free( params->demo_house->age_group );
+		free( params->demo_house->house_no );
+		free( params->demo_house );
+	}
+	params->demo_house = calloc( 1, sizeof( demographic_household_table ) );
+
+	if( n_total != params->n_total )
+	{
+		print_now( "Total number of people must be the same as n_total in params" );
+		return FALSE;
+	}
+
+	params->demo_house->n_total      = n_total;
+	params->demo_house->n_households = n_households;
+	params->demo_house->age_group    = calloc( n_total, sizeof( int ) );
+	params->demo_house->idx          = calloc( n_total, sizeof( long ) );
+	params->demo_house->house_no     = calloc( n_total, sizeof( long ) );
+
+	for( pdx = 0; pdx < n_total; pdx++ )
+	{
+		if( people[pdx] < 0 | people[pdx] >= params->n_total )
+		{
+			print_now( "The person index must be between 0 and n_total -1" );
+			return FALSE;
+		}
+		if( ages[pdx] < 0 | ages[pdx] >= N_AGE_GROUPS )
+		{
+			print_now( "The person's age must be between 0 and N_AGE_GROUPS-1" );
+			return FALSE;
+		}
+		if( house_nos[pdx] < 0 | house_nos[pdx] >= params->demo_house->n_households )
+		{
+			print_now( "The person's nouse_no must be between 0 and n_households" );
+			return FALSE;
+		}
+
+		params->demo_house->idx[ pdx ]       = people[pdx];
+		params->demo_house->age_group[ pdx ] = ages[pdx];
+		params->demo_house->house_no[ pdx ]  = house_nos[pdx];
+	}
+
+	return TRUE;
+}
 
 /*****************************************************************************************
 *  Name: 		get_param_daily_fraction_work_used
@@ -21,7 +100,7 @@ double get_model_param_daily_fraction_work_used(model *model, int idx)
 {
     if (idx >= N_OCCUPATION_NETWORKS) return -1;
 
-    return model->params->daily_fraction_work_used[idx];
+    return model->occupation_network[idx]->daily_fraction;
 }
 
 /*****************************************************************************************
@@ -571,8 +650,8 @@ int set_model_param_risk_score_household(
 *  Name:		set_model_param_lockdown_on
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/
-
-void update_work_intervention_state(model *model, int value){
+void update_work_intervention_state(model *model, int value)
+{
 	int network;
 	parameters *params = model->params;
 
@@ -580,14 +659,14 @@ void update_work_intervention_state(model *model, int value){
 		// Turn intervetions on
 		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
-			params->daily_fraction_work_used[network] = params->daily_fraction_work *
-				        					            params->lockdown_occupation_multiplier[network];
+			model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
+				        					            		 params->lockdown_occupation_multiplier[network];
 		}
 	}
 	else {
 		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 		{
-			params->daily_fraction_work_used[network] = params->daily_fraction_work;
+			model->occupation_network[network]->daily_fraction= params->daily_fraction_work;
 		}
 	}
 }
@@ -651,8 +730,8 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 	{
 		for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
 			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
-				params->daily_fraction_work_used[ network ] = params->daily_fraction_work *
-															  params->lockdown_occupation_multiplier[network];
+				model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
+																	 params->lockdown_occupation_multiplier[network];
 			
 
 	}
@@ -664,7 +743,7 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		if( !params->lockdown_on )
 		{
 			for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-				params->daily_fraction_work_used[ network ] = params->daily_fraction_work;
+				model->occupation_network[network]->daily_fraction = params->daily_fraction_work;
 		}
 
 	}else {
@@ -811,4 +890,11 @@ void destroy_params( parameters *params )
 	for( idx = 0; idx < params->N_REFERENCE_HOUSEHOLDS; idx++ )
 		free( params->REFERENCE_HOUSEHOLDS[idx] );
 	free( params->REFERENCE_HOUSEHOLDS );
+
+	if( params->demo_house != NULL )
+	{
+		free( params->demo_house->age_group );
+		free( params->demo_house->house_no );
+		free( params->demo_house->idx );
+	}
 }

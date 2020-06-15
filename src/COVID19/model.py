@@ -147,7 +147,7 @@ class Parameters(object):
             hospital_input_param_file: str = None,
             hospital_param_line_number: int = 1,
             read_param_file=True,
-            read_hospital_param_file=True,
+            read_hospital_param_file=False,
     ):
         """[summary]
         
@@ -166,6 +166,7 @@ class Parameters(object):
             Sys.exit(0): [Underlaying C code will exist if params are not viable]
         """
         self.c_params = covid19.parameters()
+        covid19.initialize_params( self.c_params );
         if input_param_file:
             self.c_params.input_param_file = input_param_file
         elif not input_param_file and read_param_file:
@@ -336,6 +337,38 @@ class Parameters(object):
                 f"Can not set parameter {param} as it doesn't exist"
             )
 
+    def set_demographic_household_table(self, df_demo_house):
+
+        n_total = len( df_demo_house.index )
+        if n_total != self.get_param( "n_total" ):
+            raise ParameterException( "df_demo_house must have n_total rows" )
+
+        if not 'ID' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column ID" )
+
+        if not 'age_group' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column age_group" )
+
+        if not 'house_no' in df_demo_house.columns:
+            raise ParameterException( "df_demo_house must have column house_no" )
+
+        n_households = df_demo_house['house_no'].max()+1
+        
+        ID       = df_demo_house["ID"].to_list()
+        ages     = df_demo_house["age_group"].to_list()
+        house_no = df_demo_house["house_no"].to_list()
+        
+        ID_c       = covid19.longArray(n_total)
+        ages_c     = covid19.longArray(n_total)
+        house_no_c = covid19.longArray(n_total)
+        
+        for idx in range(n_total):
+            ID_c[idx]       = ID[idx]
+            ages_c[idx]     = ages[idx]
+            house_no_c[idx] = house_no[idx]
+        
+        covid19.set_demographic_house_table( self.c_params, int(n_total),int(n_households), ID_c, ages_c, house_no_c )
+
     def return_param_object(self):
         """[summary]
         Run a check on the parameters and return if the c code doesn't bail
@@ -445,6 +478,48 @@ class Model:
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
+    
+    def add_user_network(self, df_network, interaction_type = 1, skip_hospitalised = True, skip_quarantine = True, daily_fraction = 1.0, name = "user_network" ):
+        
+        n_edges = len( df_network.index )
+        n_total = self._params_obj.get_param("n_total")
+      
+        if not 'ID_1' in df_network.columns:
+            raise ParameterException( "df_network must have column ID_1" )
+
+        if not 'ID_1' in df_network.columns:
+            raise ParameterException( "df_network must have column ID_1" )
+        
+        if not interaction_type in [0,1,2]:
+            raise ParameterException( "interaction_type must be 0 (household), 1 (occupation) or 2 (random)" )
+            
+        if (daily_fraction > 1) or( daily_fraction < 0):
+            raise ParameterException( "daily fraction must be in the range 0 to 1" )
+     
+        if not skip_hospitalised in [ True, False ]:
+            raise ParameterException( "skip_hospitalised must be True or False" )
+  
+        if not skip_quarantine in [ True, False ]:
+            raise ParameterException( "skip_quarantine must be True or False" )
+  
+        ID_1 = df_network[ "ID_1" ].to_list()
+        ID_2 = df_network[ "ID_2" ].to_list()
+        
+        if (max( ID_1 ) >= n_total) or (min( ID_1 ) < 0): 
+            raise ParameterException( "all values of ID_1 must be between 0 and n_total-1" )
+  
+        if (max( ID_2 ) >= n_total) or (min( ID_2  ) < 0):
+            raise ParameterException( "all values of ID_2 must be between 0 and n_total-1" )
+  
+        ID_1_c = covid19.longArray(n_edges)
+        ID_2_c = covid19.longArray(n_edges)
+  
+        for idx in range(n_edges):
+            ID_1_c[idx] = ID_1[idx]
+            ID_2_c[idx] = ID_2[idx]
+
+        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+
     
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)

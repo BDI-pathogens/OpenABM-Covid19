@@ -34,7 +34,6 @@ typedef struct{
 	int random_interaction_distribution;          // distribution from which each person random interactions are drawn
 	double mean_work_interactions[N_OCCUPATION_NETWORKS];// mean number of regular work interactions
 	double daily_fraction_work;      			// fraction of daily work interactions without social-distancing
-	double daily_fraction_work_used[N_OCCUPATION_NETWORKS];  // fraction of daily work interactions with social-distancing
 	double child_network_adults;				// fraction of adults in the child network
 	double elderly_network_adults;				// fraction of adults in the elderly network
 	double work_network_rewire;					// rewire parameter on the Watts-Strogatz work networks
@@ -152,6 +151,7 @@ typedef struct{
 	
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
+	demographic_household_table *demo_house; // Pointer to a table of demographic and house numbers (if user specified)
 
 	double ***risk_score;  			// risk score somebody who has been traced
 	double **risk_score_household;  // risk score for household members of symptomatic person
@@ -235,10 +235,13 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
 
+int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
+
 void update_work_intervention_state(model *model, int value);
 void update_household_intervention_state(model *model, int value);
 void check_params( parameters* );
 void check_hospital_params( parameters *params );
+void initialize_params( parameters* );
 void destroy_params( parameters* );
 
 #endif /* PARAMS_H_ */

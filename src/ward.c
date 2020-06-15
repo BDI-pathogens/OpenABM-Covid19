@@ -40,6 +40,10 @@ void initialise_ward(
     initialise_list( ward->patients );
 }
 
+/*****************************************************************************************
+*  Name:		set_up_ward_networks
+*  Returns:		void
+******************************************************************************************/
 void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
 {
     int interaction_type;
@@ -47,11 +51,23 @@ void set_up_ward_networks( ward* ward, int max_hcw_daily_interactions )
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->doctor_patient_network = new_network( ward->n_worker[DOCTOR], interaction_type );
     ward->doctor_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
+    ward->doctor_patient_network->skip_hospitalised = FALSE;
+    ward->doctor_patient_network->skip_quarantined  = TRUE;
+    ward->doctor_patient_network->daily_fraction    = 1.0;
+
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_NURSE_PATIENT_GENERAL : HOSPITAL_NURSE_PATIENT_ICU;
     ward->nurse_patient_network = new_network( ward->n_worker[NURSE], interaction_type );
     ward->nurse_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[NURSE], sizeof(edge) );
+    ward->nurse_patient_network->skip_hospitalised = FALSE;
+    ward->nurse_patient_network->skip_quarantined  = TRUE;
+    ward->nurse_patient_network->daily_fraction    = 1.0;
+
 }
 
+/*****************************************************************************************
+*  Name:		build_ward_networks
+*  Returns:		void
+******************************************************************************************/
 void build_ward_networks( model *model, ward* ward )
 {
     ward->doctor_patient_network->n_edges = 0;
@@ -93,6 +109,10 @@ void build_ward_networks( model *model, ward* ward )
     }
 }
 
+/*****************************************************************************************
+*  Name:		build_ward_networks
+*  Returns:		void
+******************************************************************************************/
 void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, int n_hcw_working, int n_patient_required_interactions, int max_hcw_daily_interactions )
 {
     if( n_patient_required_interactions > 0 )
@@ -148,6 +168,10 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
     }
 }
 
+/*****************************************************************************************
+*  Name:		build_ward_networks
+*  Returns:		int
+******************************************************************************************/
 int add_patient_to_ward( ward *ward, individual *indiv )
 {
     if( ward->patients->size < ward->n_beds )
@@ -158,16 +182,28 @@ int add_patient_to_ward( ward *ward, individual *indiv )
     return FALSE;
 }
 
+/*****************************************************************************************
+*  Name:		remove_patient_from_ward
+*  Returns:		void
+******************************************************************************************/
 void remove_patient_from_ward( ward* ward, individual *indiv)
 {
     list_remove_element( indiv->idx, ward->patients );
 }
 
+/*****************************************************************************************
+*  Name:		ward_available_beds
+*  Returns:		int
+******************************************************************************************/
 int ward_available_beds( ward* ward)
 {
     return ward->n_beds - ward->patients->size;
 }
 
+/*****************************************************************************************
+*  Name:		destroy_ward
+*  Returns:		void
+******************************************************************************************/
 void destroy_ward( ward* ward )
 {
     destroy_network( ward->doctor_patient_network );

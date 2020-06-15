@@ -55,6 +55,9 @@ void set_up_app_users( model *model )
 				not_users     += 1 - model->population[ idx ].app_user;
 			}
 
+		if( ( current_users + not_users) == 0 )
+			continue;
+
 		max_user = ceil( ( current_users + not_users ) * fraction[age] ) - current_users;
 		if( max_user < 0 || max_user > not_users )
 			print_exit( "Bad target app_fraction_users" );
@@ -306,8 +309,6 @@ void update_intervention_policy( model *model, int time )
 		params->app_turned_on       = FALSE;
 		params->lockdown_on	        = FALSE;
 		params->lockdown_elderly_on	= FALSE;
-		for( type = 0; type < N_OCCUPATION_NETWORKS; type++ )
-			params->daily_fraction_work_used[type] = params->daily_fraction_work;
 
 		for( type = 0; type < N_INTERACTION_TYPES; type++ )
 			params->relative_transmission_used[type] = params->relative_transmission[type];

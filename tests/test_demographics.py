@@ -10,6 +10,7 @@ Usage:
 import subprocess
 import numpy as np, pandas as pd
 import pytest
+import random as rd
 
 import sys
 sys.path.append("src/COVID19")
@@ -17,7 +18,6 @@ from parameters import ParameterSet
 
 from . import constant
 from . import utilities as utils
-
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -104,41 +104,56 @@ class TestClass(object):
                 population_60_69= 500000 * 0.11,
                 population_70_79= 500000 * 0.08,
                 population_80= 500000 * 0.05
-            )],
-            "test_household_size" : [dict(n_total = 10000, # default sizes
-                                      household_size_1 = 0.29,
-                                      household_size_2 = 0.34,
-                                      household_size_3 = 0.15,
-                                      household_size_4 = 0.13,
-                                      household_size_5 = 0.04,
-                                      household_size_6 = 0.02
-                                      ),
-                                 dict(n_total=10000, # shift from small to large
-                                      household_size_1 = 0.24,
-                                      household_size_2 = 0.29,
-                                      household_size_3 = 0.10,
-                                      household_size_4 = 0.18,
-                                      household_size_5 = 0.09,
-                                      household_size_6 = 0.07
-                                      ),
-                                 dict(n_total=10000, # shift from large to small
-                                      household_size_1 = 0.33,
-                                      household_size_2 = 0.37,
-                                      household_size_3 = 0.18,
-                                      household_size_4 = 0.10,
-                                      household_size_5 = 0.02,
-                                      household_size_6 = 0.01
-                                      ),
-                                 dict(n_total=10000,# shift from medium
-                                      household_size_1 = 0.32,
-                                      household_size_2 = 0.37,
-                                      household_size_3 = 0.08,
-                                      household_size_4 = 0.05,
-                                      household_size_5 = 0.08,
-                                      household_size_6 = 0.06
-                                      )
-                                 ]
-        }
+            )
+        ],
+        "test_household_size" : [
+            dict(
+                n_total  = 10000, # default sizes
+                household_size_1 = 0.29,
+                household_size_2 = 0.34,
+                household_size_3 = 0.15,
+                household_size_4 = 0.13,
+                household_size_5 = 0.04,
+                household_size_6 = 0.02
+            ),
+            dict(
+                n_total  = 10000, # shift from small to large
+                household_size_1 = 0.24,
+                household_size_2 = 0.29,
+                household_size_3 = 0.10,
+                household_size_4 = 0.18,
+                household_size_5 = 0.09,
+                household_size_6 = 0.07
+            ),
+            dict(
+                n_total  =10000, # shift from large to small
+                household_size_1 = 0.33,
+                household_size_2 = 0.37,
+                household_size_3 = 0.18,
+                household_size_4 = 0.10,
+                household_size_5 = 0.02,
+                household_size_6 = 0.01
+            ),
+            dict(
+                n_total  = 10000,# shift from medium
+                household_size_1 = 0.32,
+                household_size_2 = 0.37,
+                household_size_3 = 0.08,
+                household_size_4 = 0.05,
+                household_size_5 = 0.08,
+                household_size_6 = 0.06
+            )
+        ],
+        "test_user_demographics": [ 
+            dict( 
+                test_params = dict(
+                    n_total  = 1e3,
+                    end_time = 20,
+                ),
+                n_houses = 1e1
+            )
+        ],
+    }
     """
     Test class for checking 
     """
@@ -239,3 +254,53 @@ class TestClass(object):
         # Test!
         np.testing.assert_allclose(df_house["people_count"],
                                    df_house["people_count_expected"], rtol=0.02) 
+        
+        
+    def test_user_demographics(self, test_params, n_houses):
+        """
+            Adds in a user defined demographic and household structure
+        """
+ 
+        n_houses     = int(n_houses)
+        n_total      = int(test_params["n_total"])
+        n_age_groups = int(constant.N_AGE_GROUPS)
+         
+        # build a random household/demographic structure
+        IDs    = range(n_total)
+        houses = [0]*n_total
+        ages   = [0]*n_total
+        for i in range(n_total):
+            houses[i] = round( i / 4 )
+#            houses[i] = rd.randrange(0,n_houses-1)
+            ages[i]   = rd.randrange(0,n_age_groups-1)    
+        houses = sorted( houses )
+        df_demo = pd.DataFrame({'ID':np.array(IDs, dtype='int32'),'age_group':np.array(ages, dtype='int32'),'house_no':np.array(houses, dtype='int32')})
+       
+        # get the intial paramters and add user defined demographics 
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        params.set_demographic_household_table(df_demo)
+        
+        # get the model and run for the required time steps
+        model = utils.get_model_swig( params )
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+            
+        # get the individual file and check age and houses
+        model.write_individual_file()
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        
+        # now check the households ages are correct
+        df = pd.merge(df_demo,df_indiv,on = ["ID"], how = "left")
+        n_wrong_age   = sum( df["age_group_x"]!=df["age_group_y"])
+        n_wrong_house = sum( df["house_no_x"]!=df["house_no_y"])
+        np.testing.assert_equal( n_wrong_age, 0, err_msg = "people in the wrong age group")
+        np.testing.assert_equal( n_wrong_house, 0, err_msg = "people in the wrong house")
+        
+        
+        
+        
+        
+        
+        

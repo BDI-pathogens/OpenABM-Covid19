@@ -10,6 +10,7 @@
 #define STRUCTURE_H_
 
 typedef struct interaction interaction;
+typedef struct interaction_block interaction_block;
 typedef struct infection_event infection_event;
 typedef struct event event;
 typedef struct event_list event_list;
@@ -17,5 +18,6 @@ typedef struct edge edge;
 typedef struct model model;
 typedef struct directory directory;
 typedef struct trace_token trace_token;
+typedef struct demographic_household_table demographic_household_table;
 
 #endif /* STRUCTURE_H_ */
