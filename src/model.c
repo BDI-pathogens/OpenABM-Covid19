@@ -577,14 +577,20 @@ void set_up_seed_infection( model *model )
 	parameters *params = model->params;
 	int idx;
 	unsigned long int person;
+	individual *indiv;
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
 	{
 		person = gsl_rng_uniform_int( rng, params->n_total );
-		if( !params->hospital_on || model->population[person].worker_type == NOT_HEALTHCARE_WORKER )
+		indiv  = &(model->population[ person ]);
+
+		if( time_infected( indiv ) != NO_EVENT )
+			continue;
+
+		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			new_infection( model, &(model->population[ person ]), &(model->population[ person ]) );
+			new_infection( model, indiv, indiv );
 			idx++;
 		}
 	}
