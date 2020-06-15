@@ -125,3 +125,22 @@ class TestSetObjects:
         
         for non_scaled_i, scaled_i, m in zip(non_scaled, scaled, multipliers):
             assert non_scaled_i * m == scaled_i
+
+    def test_set_params_manual_traceable_fraction(self):
+        p = Parameters(
+            read_param_file=True,
+            input_households="tests/data/baseline_household_demographics.csv",
+            input_param_file="tests/data/baseline_parameters.csv",
+            param_line_number=1,
+        )
+
+        p.set_param("manual_traceable_fraction_occupation", 0.8)
+        assert p.get_param("manual_traceable_fraction_occupation") == 0.8
+
+        p.set_param("manual_traceable_fraction_household", 0.6)
+        assert p.get_param("manual_traceable_fraction_household") == 0.6
+        assert p.get_param("manual_traceable_fraction_occupation") == 0.8
+
+        model = Model(p)
+        model.update_running_params("manual_traceable_fraction_household", 0.4)
+        assert model.get_param("manual_traceable_fraction_household") == 0.4

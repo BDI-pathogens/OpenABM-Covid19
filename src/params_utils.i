@@ -189,6 +189,16 @@ double get_param_relative_transmission_used(parameters *params, int idx)
 }
 
 /*****************************************************************************************
+*  Name:        set_param_manual_traceable_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+double get_param_manual_traceable_fraction(parameters *params, int idx)
+{
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
+    return params->manual_traceable_fraction[idx];
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_mean_time_to_symptoms
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -958,6 +968,17 @@ int set_param_relative_transmission(parameters *params, double value, int idx)
 {
     if (idx >= N_INTERACTION_TYPES) return ERROR;
     params->relative_transmission[idx] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_manual_traceable_fraction
+*  Description: Sets the value of parameter in array
+******************************************************************************************/
+int set_param_manual_traceable_fraction(parameters *params, double value, int idx)
+{
+    if (idx >= N_INTERACTION_TYPES) return ERROR;
+    params->manual_traceable_fraction[idx] = value;
     return TRUE;
 }
 

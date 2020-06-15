@@ -24,6 +24,7 @@ def turn_off_interventions(params, end_time):
     params.set_param("tracing_network_depth", 0)
     params.set_param("allow_clinical_diagnosis", 0)
     params.set_param("self_quarantine_fraction", 0.0)
+    params.set_param("manual_trace_on", 0)
 
     params.set_param("quarantine_household_on_positive", 0)
     params.set_param("quarantine_household_on_symptoms", 0)
@@ -48,6 +49,7 @@ def turn_off_interventions(params, end_time):
     params.set_param("lockdown_time_off", end_time + 2)
     params.set_param("testing_symptoms_time_on", end_time + 1)
     params.set_param("testing_symptoms_time_off", end_time + 2)
+    params.set_param("manual_trace_time_on", end_time)
 
     return(params)
 
