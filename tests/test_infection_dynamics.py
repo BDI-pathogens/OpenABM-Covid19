@@ -325,6 +325,15 @@ class TestClass(object):
                 update_relative_transmission_occupation = 0.8,
                 update_relative_transmission_random = 0.8,          
             ),
+        ],
+        "test_single_seed_infections": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 5e3,
+                    infectious_rate = 0.0
+                ),
+            ),
         ]
     }
     """
@@ -1012,5 +1021,30 @@ class TestClass(object):
         actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
        
+    
+         
+    def test_single_seed_infections( self, test_params ):
+        """
+           Check that each person is only infected once in the seed infections
+        """
+     
+        # run the baseline parameters
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+
+        model.one_time_step()
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans[ "n_inf_type" ] = int( df_trans[ "time_asymptomatic" ] == 0 ) + int( df_trans[ "time_presymptomatic_mild" ] == 0 ) + int( df_trans[ "time_presymptomatic_severe" ] == 0 )
+                                   
+        np.testing.assert_equal( len( df_trans ), test_params["n_seed_infection"], "The number of seed infections is not equal to the size of the transmission file")
+        np.testing.assert_equal( sum( df_trans["n_inf_type"] >1 ), 0, "Individuals with more than one type of infections" )
+        np.testing.assert_equal( sum( df_trans["n_inf_type"] == 1), test_params["n_seed_infection"], "Number of transmission with more than one type is not equal to the number of seed infections" )
+
+        
+        
+
     
       
