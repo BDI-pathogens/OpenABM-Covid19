@@ -1037,7 +1037,7 @@ class TestClass(object):
         model.one_time_step()
         model.write_transmissions()
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-        df_trans[ "n_inf_type" ] = int( df_trans[ "time_asymptomatic" ] == 0 ) + int( df_trans[ "time_presymptomatic_mild" ] == 0 ) + int( df_trans[ "time_presymptomatic_severe" ] == 0 )
+        df_trans[ "n_inf_type" ] = (df_trans[ "time_asymptomatic" ] == 0 )*1 + ( df_trans[ "time_presymptomatic_mild" ] == 0 )*1 + ( df_trans[ "time_presymptomatic_severe" ] == 0 )*1
                                    
         np.testing.assert_equal( len( df_trans ), test_params["n_seed_infection"], "The number of seed infections is not equal to the size of the transmission file")
         np.testing.assert_equal( sum( df_trans["n_inf_type"] >1 ), 0, "Individuals with more than one type of infections" )
