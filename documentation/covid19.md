@@ -92,35 +92,35 @@ This list is shuffled and interactions are made between adjacent pairs on the sh
 
 ## Infection Dynamics
 The infection is spread by interactions between infected and susceptible individuals. 
-The rate of transmission is determined by three factors: the status of the infector; the susceptibility of the infectee to infection, according to age; and the type of interaction (i.e.\ on which network it occurred).
+The rate of transmission is determined by three factors: the status of the infector; the susceptibility of the infectee to infection, according to age; and the type of interaction (i.e. on which network it occurred).
 We present the details of each of these rates below.
 We currently do not have data on the distribution of the duration of interactions, so the effect of this on transmission is not modelled.
 
-To model \textbf{the status of the infector} we note that infectiousness varies over the natural course of an infection, i.e. as a function of the amount of time a person has been infected, &#964;.
+To model **the status of the infector** we note that infectiousness varies over the natural course of an infection, i.e. as a function of the amount of time a person has been infected, &#964;.
 Infectiousness starts at zero at the precise moment someone is infected (&#964;=0), reaches a peak at some intermediate time, and tends to zero a long time after infection (large &#964;).
 
 Following~\citep{ferretti2020quantifying}, we take the functional form of infectiousness to be a (scaled) gamma distribution. 
 We chose the mean and standard deviation as intermediate values between different reports~\cite{ferretti2020quantifying,ganyani2020estimating,Ma2020.03.21.20040329}.
 
-We define {\it asymptomatic} individuals as those who never develop symptoms during their infection, and {\it pre-symptomatic} individuals as those who do not currently have symptoms but will do so later.
+We define *asymptomatic* individuals as those who never develop symptoms during their infection, and *pre-symptomatic}* individuals as those who do not currently have symptoms but will do so later.
 Both types of individuals may infect others.
-The overall infectiousness of asymptomatic individuals has been estimated to be lower~\cite{Luo}, reflected in our parameter \texttt{asymptomatic\us infectious\us factor}.
-Individuals who show symptoms but only mildly have also been estimated as less infectious than those with more severe symptoms~\cite{Luo}, reflected in our parameter \texttt{mild\us infectious\us factor}.
+The overall infectiousness of asymptomatic individuals has been estimated to be lower~\cite{Luo}, reflected in our parameter `asymptomatic_infectious_factor`.
+Individuals who show symptoms but only mildly have also been estimated as less infectious than those with more severe symptoms~\cite{Luo}, reflected in our parameter `mild_infectious_factor`.
 For each adult age category, we took the fraction of symptomatic infections that are mild as the fraction of confirmed cases with with either no pneumonia (which was rare -- always less than 6.5\%) or mild pneumonia, i.e. the fraction without severe pneumonia, reported in~\cite{Yang2020.02.10.20021675}.
 For the age categories 0-9 and 10-19, we took the fraction of infections that are mild as the fraction clinically defined as 'mild' in the paediatric meta-analysis~\cite{de2020clinical}, excluding asymptomatic infections from the denominator.
 These fractions of symptomatic infections that are mild by age are listed in Table~\ref{table_disease_dynamics_parmeters}.
 
-To model the \textbf{susceptibility to infection of a contact according to their age} we referred to the literature~\cite{Luo,Zhang,Bi} where close contacts of confirmed cases were monitored and tested.
+To model the **susceptibility to infection of a contact according to their age** we referred to the literature~\cite{Luo,Zhang,Bi} where close contacts of confirmed cases were monitored and tested.
 The number tested and the number of positive results was reported within each age group, with the ratio of the latter to the former defining the per-age attack rate.
 We assumed the proportion testing positive was constant within each age bin in each study, and merged the counts into a single set of bins 0-9, 10-19, ... 80+, with contributions from all three studies.
 The largest age bin in each study (which differed in its lower bound, with no upper bound) was assumed to be ten years wide in order to define the merging; the counts in the resulting 80+ category were excluded for the following fitting step as they were sensitive to the assumed upper bound in each study.
 We fit the polynomial form $A + B\times(\text{age})^k$ to the proportions in each age category, using the bin's midpoint, minimising the sum of squared differences from the observed values.
 The best fitting values of $A$, $B$ and $k$ were $0.0300$, $5.53\times10^{-6}$, and $2.00$ respectively.
 We took the values predicted by this fit at each age bin's mid-point to define the relative susceptibility of each age group.
-A final normalisation factor was defined so that the average susceptibility for an individual in a population with the age distribution considered here was 1, defining our parameters \texttt{relative\us susceptibility\us 0\us 9} etc.
+A final normalisation factor was defined so that the average susceptibility for an individual in a population with the age distribution considered here was 1, defining our parameters `relative_susceptibility_0_9` etc.
 The merged data and fit are shown in Table~\ref{table_susceptibility} and Fig.~\ref{fig:susc}.
 
-Finally, we model the \textbf{type of interaction}, i.e. on which network it took place.
+Finally, we model the **type of interaction**, i.e. on which network it took place.
 Whilst we do not have data on the length of interactions, interactions which take place within a person's home are likely to be closer than other types of interactions leading to higher rates of transmission.
 This is modelled using a multiplicative factor.
 
@@ -128,7 +128,7 @@ Combining all effects, we model the rate at which the virus is transmitted in a 
 
 &#955;(t,s_i,a_s,n) = \frac{R S_{a_s}A_{s_i} B_n}{ \bar I_{a_s}} \int_{t-1}^t f_{ &#915;}(u; &#956;_i,&#963;^2) {\rm d}u,
 
-where $t$ is the time since infection; $s_i$ indicates the infector's symptom status (asymtomatic, mild, moderate/severe); $a_s$ is the age of the susceptible; $n$ is the type of network where the interaction occurred; $\bar{I}_{a_s}$ is the mean number of daily interactions for somebody of the age of the susceptible; $f_{&#915;}(u; &#956;,&#963;^2)$ is the probability density function of a gamma distribution; &#956;_i and &#963;_i$ are the mean and width of the infectiousness curve; $R$ scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); $S_{a_s}$ is the scale-factor for the age of the susceptible; $A_{s_i}$ is the scale-factor for the infector being asymptomatic; $B_n$ is the scale-factor for the network on which the interaction occurred.
+where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; $n$ is the type of network where the interaction occurred; *I<sub>a_s</sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f_{&#915;}(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a_s</sub>* is the scale-factor for the age of the susceptible; *A<sub>s_i</sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
 Table~\ref{table_infectious_parameters} contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
 
@@ -142,26 +142,26 @@ The infection was assumed to take place immediately before the simulation starts
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression depend on the age of the infected person.
 The disease state transitions are shown in Figure~\ref{diseaseDynamics} and the model parameters are in the table Disease Dynamics Parameters.
 
-A fraction  &#966;_{\rm asym}({\rm age}) of individuals are asymptomatic and do not develop symptoms, a fraction  &#966;_{\rm mild}({\rm age}) will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
+A fraction  &#966;<sub>asym</sub>(age) of individuals are asymptomatic and do not develop symptoms, a fraction  &#966;<sub>mild</sub>(age) will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
 Each of these proportions depend on the age of the infected individual.
-Those who are asymptomatic are infectious (at a lower level, see~\nameref{section_ABM_infection} section) and will move to a recovered state after a time &#964;_{\rm a,rec} drawn from a gamma distribution.
+Those who are asymptomatic are infectious (at a lower level, see~\nameref{section_ABM_infection} section) and will move to a recovered state after a time &#964;<sub>a,rec</sub> drawn from a gamma distribution.
 Once an individual is recovered we assume that they have immunity and cannot be reinfected.
 
 Individuals who will develop symptoms start by being in a pre-symptomatic state, in which they are infectious but have no symptoms.
 The pre-symptomatic state is important for modelling interventions because individuals in this state do not realise they are infectious, therefore they cannot self-isolate to prevent infecting others.
-Individuals who develop mild symptoms do so after time &#964;_{\rm sym} and then recover after time &#964;_{\rm rec} (both drawn from gamma distributions).
-The rest of the individuals develop moderate/severe symptoms after a time &#964;_{\rm sym} drawn from the gamma distributed.
+Individuals who develop mild symptoms do so after time &#964;<sub>sym</sub> and then recover after time &#964;<sub>rec</sub> (both drawn from gamma distributions).
+The rest of the individuals develop moderate/severe symptoms after a time &#964;<sub>sym</sub> drawn from the gamma distributed.
 
-Whilst most individuals recover without requiring hospitalisation, a fraction  &#966;_{\rm hosp}({\rm age}) of those with moderate/severe symptoms will require hospitalisation.
+Whilst most individuals recover without requiring hospitalisation, a fraction  &#966;<sub>hosp</sub>(age) of those with moderate/severe symptoms will require hospitalisation.
 This fraction is age-dependent.
-Those who do not require hospitalisation recover after a time &#964;_{\rm rec} drawn from a gamma distribution, whilst those who require hospitalisation are admitted to hospital after a time &#964;_{\rm hosp}, which is drawn from a shifted Bernoulli distribution (either 5 or 6 days).
+Those who do not require hospitalisation recover after a time &#964;<sub>rec</sub> drawn from a gamma distribution, whilst those who require hospitalisation are admitted to hospital after a time &#964;<sub>hosp</sub>, which is drawn from a shifted Bernoulli distribution (either 5 or 6 days).
 
-Among all hospitalised individuals, a fraction  &#966;_{\rm crit}({\rm age}) develop critical symptoms and require intensive care treatment, with the remainder recovering after a time &#964;_{\rm hosp, rec} drawn from a gamma distribution.
-The time from hospitalisation to developing critical symptoms, &#964;_{\rm crit}, is drawn from a shifted Bernoulli distribution (either 2 or 3 days).
-Of those who develop critical symptoms, a fraction  &#966;_{\rm ICU}({\rm age}) will receive intensive care treatment (note for most age groups this will be everybody, however, for the most elderly age groups it may be deemed inappropriate). 
-For patients receiving intensive care treatment, a fraction  &#966;_{\rm death}({\rm age}) die after a time &#964;_{\rm death} drawn from a gamma distribution, with the remainder leaving intensive care after a time &#964;_{\rm crit,surv}.
+Among all hospitalised individuals, a fraction  &#966;<sub>crit</sub>(age) develop critical symptoms and require intensive care treatment, with the remainder recovering after a time &#964;<sub>hosp,rec</sub> drawn from a gamma distribution.
+The time from hospitalisation to developing critical symptoms, &#964;<sub>crit</sub>, is drawn from a shifted Bernoulli distribution (either 2 or 3 days).
+Of those who develop critical symptoms, a fraction  &#966;<sub>ICU</sub>(age) will receive intensive care treatment (note for most age groups this will be everybody, however, for the most elderly age groups it may be deemed inappropriate). 
+For patients receiving intensive care treatment, a fraction  &#966;<sub>death</sub>(age) die after a time &#964;<sub>death</sub> drawn from a gamma distribution, with the remainder leaving intensive care after a time &#964;<sub> crit,surv</sub>.
 Patients who require critical care and do not receive intensive care treatment are assumed to die upon developing critical symptoms.
-Patients who survive critical symptoms remain in hospital for &#964;{\rm hosp, rec} before recovering.
+Patients who survive critical symptoms remain in hospital for &#964;<sub>hosp,rec</sub> before recovering.
 
 ## Passive Interventions
 
@@ -231,7 +231,7 @@ In additional to completing the specified quarantine time or dropping-out, there
 The first is if the index-case tests negative for covid-19, at which point a message is sent to all contacts who were originally traced telling them they can stop quarantining. 
 Note, if an individual has been traced by multiple index-cases, they only get the release message once all index-cases have tested negative.
 The second mechanism for the early termination of quarantining uses the tracing network to determine whether it is likely the (self-reported) index-case did not have covid-19.
-After \texttt{quarantine\us smart\us release\us day}
+After `quarantine_smart_release_day`
 days of an index-case reporting symptoms, we check to see if any of the traced individuals have developed symptoms.
 If none have developed symptoms, we send a release message to all those traced that they can stop quarantining (with the same caveat for those traced by multiple index-cases). 
 
@@ -242,21 +242,21 @@ All required memory is pre-allocated at the start of the simulation for efficien
 
 ### Events
 We use an event-based system to drive disease progression in individuals and interventions, where at each decision point we calculate when the next event will occur and add it to an event list for that day.
-For each type of event there is an \texttt{eventlist} structure which contains an array of linked lists for each day of the simulation.
+For each type of event there is an `eventlist` structure which contains an array of linked lists for each day of the simulation.
 We use doubly linked lists to allow for efficient deletion as well as insertion of events.
 Event lists also keep track of the current and total number of events by type (defined as all entries today and in the past). 
 
 ### Individuals
-Each person in the population is represented by an \texttt{individual} structure and the population is static.
-The \texttt{individual} structure contains the following information:
+Each person in the population is represented by an `individual` structure and the population is static.
+The `individual` structure contains the following information:
 1. Demographic - age, house number, network membership
 2. Interaction diary - list of all interactions over a period of days (note this is not only the ones tracked by the app)
-3. Disease - current status (i.e.\ symptomatic, severity) and pointers to both current and future disease events
+3. Disease - current status (i.e. symptomatic, severity) and pointers to both current and future disease events
 4. Quarantine - is the person currently quarantined, and pointers to that event and the release event
 
 ### Network Construction
-Each interaction network has an associated \texttt{network} structure which contains an array of edges.
-Network structures can be static (i.e.\ household), static but down-sampled (i.e.\ workplace) or dynamically generated at each time step (i.e.\ random).
+Each interaction network has an associated `network` structure which contains an array of edges.
+Network structures can be static (i.e. household), static but down-sampled (i.e. workplace) or dynamically generated at each time step (i.e. random).
 Network generation is modular and any network can be added to the ABM as long as it can be represented by an array of edges.
 Once all the networks have been defined, we add each edge to the individual's interaction diary (which are single-linked lists as deletion is not required).
 
@@ -264,22 +264,22 @@ Once all the networks have been defined, we add each edge to the individual's in
 The next step is to transmit the pathogen across today's interaction network, which is done as a push from all infected people (by disease status).
 For every infection status we pre-calculate the transmission rate for someone who has been infected for that length of time.
 At each time-step we go through all the interactions the infected person had for that day and calculate whether transmission has occurred.
-Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of {\it hazard} (from an exponential distribution) at the start of the simulation.
-Each interaction with an infected person reduces the persons {\it hazard} and when a person's {\it hazard} drops below 0 they become infected. 
-This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the $N^{\rm th}$ interaction  $P({\rm infected} \  N^{\rm th})$, after exposured to interactions with hazard-rates &#955;_1,..,&#955;_N 
+Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of *hazard* (from an exponential distribution) at the start of the simulation.
+Each interaction with an infected person reduces the persons *hazard* and when a person's *hazard* drops below 0 they become infected. 
+This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N^{\rm th}* interaction  *P*( infected \  *N*^th), after exposured to interactions with hazard-rates &#955;_1,..,&#955;_N 
 
 P({\rm infected} \  N^{\rm th}) 
 &= P_N \prod_{i=1}^{N-1} ( 1 - P_i) \\
 &= \exp\left( -\sum_{i=1}^{N-1} \lambda_i \right) - \exp\left( -\sum_{i=1}^{N} \ \lambda_i\right) \\
 &= P \left(  \sum_{i=1}^{N-1} \lambda_i  < T <  \sum_{i=1}^{N} \lambda_i \right)
 
-where $T$ is distributed exponentially with mean 1. 
-The fact that different age groups have different susceptibilities ($S_{a_s}$) is then modelled by allocating different amounts of initial {\it hazard} to each group.
+where *T* is distributed exponentially with mean 1. 
+The fact that different age groups have different susceptibilities (*S_{a_s}*) is then modelled by allocating different amounts of initial *hazard* to each group.
 This improves computational efficiency so it is not necessary to draw a random variable for each potential transmission event.
 
-### Digital Tracing and Release
+### Digital Tracing and Release
 When an individual self-reports symptoms or tests positive, they become an index case and are assigned an index token (which form a linked list). 
-Digital tracing is performed by looping through all contacts in the interaction diary and if the app recorded the interaction (i.e.\ both individuals have the app and the interactions was not randomly missed), a quarantine message is sent along with the index token.
+Digital tracing is performed by looping through all contacts in the interaction diary and if the app recorded the interaction (i.e. both individuals have the app and the interactions was not randomly missed), a quarantine message is sent along with the index token.
 Individuals store every index token they have been traced by for 14 days.
 Upon a negative test of the index case (or other release mechanism), a message is sent to every phone with that index token to remove it.
 Upon removal of all index tokens, an individual is automatically released from quarantine.
