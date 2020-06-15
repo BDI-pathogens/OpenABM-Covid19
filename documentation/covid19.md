@@ -96,8 +96,8 @@ The rate of transmission is determined by three factors: the status of the infec
 We present the details of each of these rates below.
 We currently do not have data on the distribution of the duration of interactions, so the effect of this on transmission is not modelled.
 
-To model \textbf{the status of the infector} we note that infectiousness varies over the natural course of an infection, i.e. as a function of the amount of time a person has been infected, $\tau$.
-Infectiousness starts at zero at the precise moment someone is infected ($\tau=0$), reaches a peak at some intermediate time, and tends to zero a long time after infection (large $\tau$).
+To model \textbf{the status of the infector} we note that infectiousness varies over the natural course of an infection, i.e. as a function of the amount of time a person has been infected, &#964;.
+Infectiousness starts at zero at the precise moment someone is infected (&#964;=0), reaches a peak at some intermediate time, and tends to zero a long time after infection (large &#964;).
 
 Following~\citep{ferretti2020quantifying}, we take the functional form of infectiousness to be a (scaled) gamma distribution. 
 We chose the mean and standard deviation as intermediate values between different reports~\cite{ferretti2020quantifying,ganyani2020estimating,Ma2020.03.21.20040329}.
@@ -112,7 +112,7 @@ These fractions of symptomatic infections that are mild by age are listed in Tab
 
 To model the \textbf{susceptibility to infection of a contact according to their age} we referred to the literature~\cite{Luo,Zhang,Bi} where close contacts of confirmed cases were monitored and tested.
 The number tested and the number of positive results was reported within each age group, with the ratio of the latter to the former defining the per-age attack rate.
-We assumed the proportion testing positive was constant within each age bin in each study, and merged the counts into a single set of bins 0-9, 10-19, $\ldots$ 80+, with contributions from all three studies.
+We assumed the proportion testing positive was constant within each age bin in each study, and merged the counts into a single set of bins 0-9, 10-19, ... 80+, with contributions from all three studies.
 The largest age bin in each study (which differed in its lower bound, with no upper bound) was assumed to be ten years wide in order to define the merging; the counts in the resulting 80+ category were excluded for the following fitting step as they were sensitive to the assumed upper bound in each study.
 We fit the polynomial form $A + B\times(\text{age})^k$ to the proportions in each age category, using the bin's midpoint, minimising the sum of squared differences from the observed values.
 The best fitting values of $A$, $B$ and $k$ were $0.0300$, $5.53\times10^{-6}$, and $2.00$ respectively.
@@ -125,15 +125,15 @@ Whilst we do not have data on the length of interactions, interactions which tak
 This is modelled using a multiplicative factor.
 
 Combining all effects, we model the rate at which the virus is transmitted in a single interaction by
-\begin{equation}
-\lambda(t,s_i,a_s,n) = \frac{R S_{a_s}A_{s_i} B_n}{ \bar I_{a_s}} \int_{t-1}^t f_{\Gamma}(u; \mu_i,\sigma_i^2) {\rm d}u,
-\end{equation}
-where $t$ is the time since infection; $s_i$ indicates the infector's symptom status (asymtomatic, mild, moderate/severe); $a_s$ is the age of the susceptible; $n$ is the type of network where the interaction occurred; $\bar{I}_{a_s}$ is the mean number of daily interactions for somebody of the age of the susceptible; $f_{\Gamma}(u; \mu,\sigma^2)$ is the probability density function of a gamma distribution; $\mu_i$ and $\sigma_i$ are the mean and width of the infectiousness curve; $R$ scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); $S_{a_s}$ is the scale-factor for the age of the susceptible; $A_{s_i}$ is the scale-factor for the infector being asymptomatic; $B_n$ is the scale-factor for the network on which the interaction occurred.
+
+&#955;(t,s_i,a_s,n) = \frac{R S_{a_s}A_{s_i} B_n}{ \bar I_{a_s}} \int_{t-1}^t f_{ &#915;}(u; &#956;_i,&#963;^2) {\rm d}u,
+
+where $t$ is the time since infection; $s_i$ indicates the infector's symptom status (asymtomatic, mild, moderate/severe); $a_s$ is the age of the susceptible; $n$ is the type of network where the interaction occurred; $\bar{I}_{a_s}$ is the mean number of daily interactions for somebody of the age of the susceptible; $f_{&#915;}(u; &#956;,&#963;^2)$ is the probability density function of a gamma distribution; &#956;_i and &#963;_i$ are the mean and width of the infectiousness curve; $R$ scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); $S_{a_s}$ is the scale-factor for the age of the susceptible; $A_{s_i}$ is the scale-factor for the infector being asymptomatic; $B_n$ is the scale-factor for the network on which the interaction occurred.
 Table~\ref{table_infectious_parameters} contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
-\begin{equation}
-P(t,s_i,a_s,n) = 1 - e^{-\lambda(t,s_i,a_s,n)}.
-\end{equation}
+
+P(t,s_i,a_s,n) = 1 - e^{-&#955;(t,s_i,a_s,n)}.
+
 The epidemic is seeded by infecting a number of individuals at the start of the infection.
 The infection was assumed to take place immediately before the simulation starts.
 
@@ -142,26 +142,26 @@ The infection was assumed to take place immediately before the simulation starts
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression depend on the age of the infected person.
 The disease state transitions are shown in Figure~\ref{diseaseDynamics} and the model parameters are in the table Disease Dynamics Parameters.
 
-A fraction $\phi_{\rm asym}({\rm age})$ of individuals are asymptomatic and do not develop symptoms, a fraction $\phi_{\rm mild}({\rm age})$ will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
+A fraction  &#966;_{\rm asym}({\rm age}) of individuals are asymptomatic and do not develop symptoms, a fraction  &#966;_{\rm mild}({\rm age}) will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
 Each of these proportions depend on the age of the infected individual.
-Those who are asymptomatic are infectious (at a lower level, see~\nameref{section_ABM_infection} section) and will move to a recovered state after a time $\tau_{\rm a,rec}$ drawn from a gamma distribution.
+Those who are asymptomatic are infectious (at a lower level, see~\nameref{section_ABM_infection} section) and will move to a recovered state after a time &#964;_{\rm a,rec} drawn from a gamma distribution.
 Once an individual is recovered we assume that they have immunity and cannot be reinfected.
 
 Individuals who will develop symptoms start by being in a pre-symptomatic state, in which they are infectious but have no symptoms.
 The pre-symptomatic state is important for modelling interventions because individuals in this state do not realise they are infectious, therefore they cannot self-isolate to prevent infecting others.
-Individuals who develop mild symptoms do so after time $\tau_{\rm sym}$ and then recover after time $\tau_{\rm rec}$ (both drawn from gamma distributions).
-The rest of the individuals develop moderate/severe symptoms after a time $\tau_{\rm sym}$ drawn from the gamma distributed.
+Individuals who develop mild symptoms do so after time &#964;_{\rm sym} and then recover after time &#964;_{\rm rec} (both drawn from gamma distributions).
+The rest of the individuals develop moderate/severe symptoms after a time &#964;_{\rm sym} drawn from the gamma distributed.
 
-Whilst most individuals recover without requiring hospitalisation, a fraction $\phi_{\rm hosp}({\rm age})$ of those with moderate/severe symptoms will require hospitalisation.
+Whilst most individuals recover without requiring hospitalisation, a fraction  &#966;_{\rm hosp}({\rm age}) of those with moderate/severe symptoms will require hospitalisation.
 This fraction is age-dependent.
-Those who do not require hospitalisation recover after a time $\tau_{\rm rec}$ drawn from a gamma distribution, whilst those who require hospitalisation are admitted to hospital after a time $\tau_{\rm hosp}$, which is drawn from a shifted Bernoulli distribution (either 5 or 6 days).
+Those who do not require hospitalisation recover after a time &#964;_{\rm rec} drawn from a gamma distribution, whilst those who require hospitalisation are admitted to hospital after a time &#964;_{\rm hosp}, which is drawn from a shifted Bernoulli distribution (either 5 or 6 days).
 
-Among all hospitalised individuals, a fraction $\phi_{\rm crit}({\rm age})$ develop critical symptoms and require intensive care treatment, with the remainder recovering after a time $\tau_{\rm hosp, rec}$ drawn from a gamma distribution.
-The time from hospitalisation to developing critical symptoms, $\tau_{\rm crit}$, is drawn from a shifted Bernoulli distribution (either 2 or 3 days).
-Of those who develop critical symptoms, a fraction $\phi_{\rm ICU}({\rm age})$ will receive intensive care treatment (note for most age groups this will be everybody, however, for the most elderly age groups it may be deemed inappropriate). 
-For patients receiving intensive care treatment, a fraction $\phi_{\rm death}({\rm age})$ die after a time $\tau_{\rm death}$ drawn from a gamma distribution, with the remainder leaving intensive care after a time $\tau_{\rm crit,surv}$.
+Among all hospitalised individuals, a fraction  &#966;_{\rm crit}({\rm age}) develop critical symptoms and require intensive care treatment, with the remainder recovering after a time &#964;_{\rm hosp, rec} drawn from a gamma distribution.
+The time from hospitalisation to developing critical symptoms, &#964;_{\rm crit}, is drawn from a shifted Bernoulli distribution (either 2 or 3 days).
+Of those who develop critical symptoms, a fraction  &#966;_{\rm ICU}({\rm age}) will receive intensive care treatment (note for most age groups this will be everybody, however, for the most elderly age groups it may be deemed inappropriate). 
+For patients receiving intensive care treatment, a fraction  &#966;_{\rm death}({\rm age}) die after a time &#964;_{\rm death} drawn from a gamma distribution, with the remainder leaving intensive care after a time &#964;_{\rm crit,surv}.
 Patients who require critical care and do not receive intensive care treatment are assumed to die upon developing critical symptoms.
-Patients who survive critical symptoms remain in hospital for $\tau_{\rm hosp, rec}$ before recovering.
+Patients who survive critical symptoms remain in hospital for &#964;{\rm hosp, rec} before recovering.
 
 ## Passive Interventions
 
@@ -266,13 +266,13 @@ For every infection status we pre-calculate the transmission rate for someone wh
 At each time-step we go through all the interactions the infected person had for that day and calculate whether transmission has occurred.
 Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of {\it hazard} (from an exponential distribution) at the start of the simulation.
 Each interaction with an infected person reduces the persons {\it hazard} and when a person's {\it hazard} drops below 0 they become infected. 
-This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the $N^{\rm th}$ interaction  $P({\rm infected} \  N^{\rm th})$, after exposured to interactions with hazard-rates $\{ \lambda_1,..,\lambda_N \}$
-\begin{align*}
+This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the $N^{\rm th}$ interaction  $P({\rm infected} \  N^{\rm th})$, after exposured to interactions with hazard-rates &#955;_1,..,&#955;_N 
+
 P({\rm infected} \  N^{\rm th}) 
 &= P_N \prod_{i=1}^{N-1} ( 1 - P_i) \\
 &= \exp\left( -\sum_{i=1}^{N-1} \lambda_i \right) - \exp\left( -\sum_{i=1}^{N} \ \lambda_i\right) \\
 &= P \left(  \sum_{i=1}^{N-1} \lambda_i  < T <  \sum_{i=1}^{N} \lambda_i \right)
-\end{align*}
+
 where $T$ is distributed exponentially with mean 1. 
 The fact that different age groups have different susceptibilities ($S_{a_s}$) is then modelled by allocating different amounts of initial {\it hazard} to each group.
 This improves computational efficiency so it is not necessary to draw a random variable for each potential transmission event.
