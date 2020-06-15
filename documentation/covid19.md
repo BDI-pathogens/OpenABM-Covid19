@@ -268,12 +268,12 @@ For every infection status we pre-calculate the transmission rate for someone wh
 At each time-step we go through all the interactions the infected person had for that day and calculate whether transmission has occurred.
 Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of *hazard* (from an exponential distribution) at the start of the simulation.
 Each interaction with an infected person reduces the persons *hazard* and when a person's *hazard* drops below 0 they become infected. 
-This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N^{\rm th}* interaction  *P*( infected \  *N*^th), after exposured to interactions with hazard-rates &#955;_1,..,&#955;_N 
+This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N*<sup>th</sup> interaction  *P*(infected *N*<sup>th</sup>), after exposured to interactions with hazard-rates &#955;<sub>1</sub>,..,&#955;<sub>N</sub> 
 
 <p><img src="eqn_hazard.png"  height="220"></p>
 
 where *T* is distributed exponentially with mean 1. 
-The fact that different age groups have different susceptibilities (*S_{a_s}*) is then modelled by allocating different amounts of initial *hazard* to each group.
+The fact that different age groups have different susceptibilities (*S<sub>a<sub>s</sub></sub>*) is then modelled by allocating different amounts of initial *hazard* to each group.
 This improves computational efficiency so it is not necessary to draw a random variable for each potential transmission event.
 
 ### Digital Tracing and Release
