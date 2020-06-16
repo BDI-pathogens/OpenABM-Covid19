@@ -11,6 +11,7 @@ Author: p-robot
 """
 
 import pytest, sys, subprocess, shutil, os
+import math
 import numpy as np, pandas as pd
 import random as rd
 from scipy import optimize
@@ -221,7 +222,7 @@ class TestClass(object):
                 )
             )
         ],
-        "test_user_defined_network": [ 
+        "test_user_defined_network": [
             dict( 
                 test_params = dict(
                     n_total  = 1e4,
@@ -230,6 +231,52 @@ class TestClass(object):
                 ),
                 new_connections = 1e5
             )
+        ],
+        "test_custom_occupation_network": [
+            dict(
+                test_params = dict(
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 12,
+                    mean_work_interactions_adult   = 5,
+                    mean_work_interactions_elderly = 4,
+                    daily_fraction_work            = 0.5,
+                    work_network_rewire            = 0.1
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 10,
+                    mean_work_interactions_adult   = 7,
+                    mean_work_interactions_elderly = 3,
+                    daily_fraction_work            = 0.75,
+                    work_network_rewire            = 0.2
+                ),
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 10000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
         ],
     }
     """
@@ -398,9 +445,9 @@ class TestClass(object):
         
         # note when counting connections we count each end
         ageTypeMap1 = pd.DataFrame( 
-            data={ "age_group_1": constant.AGES, "age_type_1": constant.AGE_TYPES } );
+            data={ "age_group_1": constant.AGES, "age_type_1": constant.AGE_TYPES } )
         ageTypeMap2 = pd.DataFrame(
-            data={ "age_group_2": constant.AGES, "age_type_2": constant.AGE_TYPES } );
+            data={ "age_group_2": constant.AGES, "age_type_2": constant.AGE_TYPES } )
             
         paramByNetworkType = [ 
             mean_work_interactions_child, 
@@ -595,13 +642,13 @@ class TestClass(object):
         model  = utils.get_model_swig( params )
            
         # step through time until we need to start to save the interactions each day
-        model.one_time_step();   
+        model.one_time_step()
         model.write_interactions_file()
         df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
         df_inter[ "time" ] = 0
 
         for time in range( test_params[ "end_time" ] ):
-            model.one_time_step();   
+            model.one_time_step()
             model.write_interactions_file()
             df = pd.read_csv(constant.TEST_INTERACTION_FILE)
             df[ "time" ] = time + 1
@@ -610,7 +657,7 @@ class TestClass(object):
         df_inter = df_inter[ df_inter[ "type" ] == constant.OCCUPATION ]
   
         # check to see there are sufficient daily connections and only one per set of contacts a day
-        df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N");
+        df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N")
         min_size = (test_params["end_time"]+1) * test_params[ "n_total"] *  min( 1,test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"] )
 
         np.testing.assert_equal(sum(df_unique_daily["N"]==1)>min_size, True, "Less contacts than expected on the occuaptional networks" )
@@ -670,10 +717,94 @@ class TestClass(object):
         n_miss = sum( df["in_interaction"] != True )
                 
         np.testing.assert_equal( n_miss, 0, err_msg = "interactions from user network are missing")
-        
-        
-        
-        
+
+    def test_custom_occupation_network( self, test_params ):
+        """
+          For user defined occupational networks,
+          check to see that people only meet with the same person
+          once per day on each occupational network;
+
+          Check to see that when you look over multiple days that
+          the mean number of unique contacts is mean_daily/daily_fraction
+        """
+
+        tol = 0.02
+
+        # Set up user-defined occupation network tables.
+        n_total = test_params['n_total']
+        IDs = np.arange(n_total, dtype='int32')
+        network_no = np.arange(10, dtype='int32')  # Set up 10 occupation networks
+
+        assignment = np.zeros(n_total, dtype='int32')
+        for i in range(10):
+            assignment[i*n_total//10 : (i+1)*n_total//10] = i
+
+        age_type = np.zeros(10)
+        age_type[0:2] = constant.CHILD
+        age_type[2:8] = constant.ADULT
+        age_type[8:10] = constant.ELDERLY
+
+        mean_work_interaction = np.zeros(10)
+        mean_work_interaction[0:2] = test_params['mean_work_interactions_child']
+        mean_work_interaction[2:8] = test_params['mean_work_interactions_adult']
+        mean_work_interaction[8:] = test_params['mean_work_interactions_elderly']
+
+        lockdown_multiplier = np.ones(10) * 0.2
+
+        network_id = np.arange(10)
+        network_name = ['primary', 'secondary', 'adult_1', 'adult_2', 'adult_3', 'adult_4',
+                        'adult_5', 'adult_6', 'elderly_1', 'elderly_2']
+
+        df_occupation_network  = pd.DataFrame({'ID':IDs,'network_no':assignment})
+        df_occupation_network_property = pd.DataFrame({
+            'network_no': network_no,
+            'age_type': age_type,
+            'mean_work_interaction': mean_work_interaction,
+            'lockdown_multiplier': lockdown_multiplier,
+            'network_id': network_id,
+            'network_name': network_name})
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        # load custom occupation network table before constructing the model
+        params.set_occupation_network_table(df_occupation_network, df_occupation_network_property)
+
+        model  = utils.get_model_swig( params )
+
+        model.one_time_step()
+        model.write_interactions_file()
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter[ "time" ] = 0
+
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+            model.write_interactions_file()
+            df = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df[ "time" ] = time + 1
+            df_inter = df_inter.append( df )
+
+        df_inter = df_inter[ df_inter[ "type" ] == constant.OCCUPATION ]
+
+        # check to see there are sufficient daily connections and only one per set of contacts a day
+        df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N")
+        min_size = (test_params["end_time"]+1) * test_params[ "n_total"] *  min( 1,test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"] )
+
+        np.testing.assert_equal(sum(df_unique_daily["N"]==1)>min_size, True, "Less contacts than expected on the occuaptional networks" )
+        np.testing.assert_equal(sum(df_unique_daily["N"]!=1), 0, "Repeat connections on same day on the occupational networks" )
+
+        # check the mean unique connections over multiple days is mean/daily fraction
+        df_unique = df_inter.groupby(["occupation_network_1","ID_1","ID_2"]).size().reset_index(name="N_unique")
+        df_unique = df_unique.groupby(["occupation_network_1","ID_1"]).size().reset_index(name="N_conn")
+        df_unique = df_unique.groupby(["occupation_network_1"]).mean()
+
+        mean_by_type = [ test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"]]
+
+        for network in range(10): # 10 custom occupation networks
+            actual   = df_unique.loc[network,{"N_conn"}]["N_conn"]
+            expected = mean_by_type[constant.CUSTOM_NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"]
+            np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
+
         
         
         

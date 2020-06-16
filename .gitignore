@@ -8,6 +8,8 @@ src/**/*.csv
 !src/adapter_covid19/data/*.csv
 src/**/*.so
 examples/results/*.csv
+cmake-build-debug/CMakeFiles/**
+
 # Python testing files
 __pycache__
 .mypy_cache/
