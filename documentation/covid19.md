@@ -115,7 +115,9 @@ We fit the polynomial form *A* + *B* x age<sup>k</sup>* to the proportions in ea
 The best fitting values of *A*, *B* and *k* were 0.0300, 5.53x10<sup>-6,</sup>, and 2.00 respectively.
 We took the values predicted by this fit at each age bin's mid-point to define the relative susceptibility of each age group.
 A final normalisation factor was defined so that the average susceptibility for an individual in a population with the age distribution considered here was 1, defining our parameters `relative_susceptibility_0_9` etc.
-The merged data and fit are shown in Table **Susceptibility** and Fig.~\ref{fig:susc}.
+The merged data and fit are shown in Table **Susceptibility** and are shown in the figure below.
+
+<p><img src="susceptibility.png" height="300"></p>
 
 Finally, we model the **type of interaction**, i.e. on which network it took place.
 Whilst we do not have data on the length of interactions, interactions which take place within a person's home are likely to be closer than other types of interactions leading to higher rates of transmission.
@@ -125,7 +127,7 @@ Combining all effects, we model the rate at which the virus is transmitted in a 
 <p><img src="eqn_transmission_rate.png" height="80"></p>
 
 where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; *n* is the type of network where the interaction occurred; *I<sub>a<sub>s</sub></sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f<sub>&#915;</sub>(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a<sub>s</sub></sub>* is the scale-factor for the age of the susceptible; *A<sub>s<sub>i</sub></sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
-Table~\ref{table_infectious_parameters} contains the values of the parameters used in simulations.
+Table **Infectious Parameters** contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
 
 <p><img src="eqn_prob.png"  height="40"></p>
@@ -136,13 +138,13 @@ The infection was assumed to take place immediately before the simulation starts
 ## Natural history of infection
 
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression depend on the age of the infected person.
-The disease state transitions are shown in the Figure below and the model parameters are in the table Disease Dynamics Parameters.
+The disease state transitions are shown in the Figure below and the model parameters are in the table **Disease Dynamics Parameters**.
 
 <p><img src="diagram_line.png" title="Disease Dynamics" height="600"></p>
 
 A fraction  &#966;<sub>asym</sub>(age) of individuals are asymptomatic and do not develop symptoms, a fraction  &#966;<sub>mild</sub>(age) will eventually develop mild symptoms, and the remainder develop moderate/severe symptoms.
 Each of these proportions depend on the age of the infected individual.
-Those who are asymptomatic are infectious (at a lower level, see~\nameref{section_ABM_infection} section) and will move to a recovered state after a time &#964;<sub>a,rec</sub> drawn from a gamma distribution.
+Those who are asymptomatic are infectious (at a lower level) and will move to a recovered state after a time &#964;<sub>a,rec</sub> drawn from a gamma distribution.
 Once an individual is recovered we assume that they have immunity and cannot be reinfected.
 
 Individuals who will develop symptoms start by being in a pre-symptomatic state, in which they are infectious but have no symptoms.
@@ -186,7 +188,7 @@ Additionally, given that during a lock-down people stay at home more, we increas
 
 ### Shield Group
 Given that fatality rate is highly skewed towards the over 70s, we have the option of applying a lock-down just to this demographic group. 
-The effect of the lock-down is the same as that described in section \ref{lockdown}, with the exception that interactions on the household network are not increased.
+The effect of the lock-down is the same as that described in the previous section, with the exception that interactions on the household network are not increased.
 
 ## Active Interventions
 
