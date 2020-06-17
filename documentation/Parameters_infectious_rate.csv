@@ -1,5 +1,0 @@
-The infectious_rate should be adjusted according to the doubling time as follows:,,,,,,,,,,
-,,,,,,,,,,
-Doubling time,Baseline value,High asymptomatic rate in children,High asymptomatic rate for all ages,Low susceptibility in children,Equal susceptibility across ages,Low reporting of non-covid illness,High reporting of non-covid illness,Low relative household transmission,Generation time 5 days,Generation time 7 days
-3,6.75,6.75,8,6,7,6.75,6.75,6.25,5,8
-3.5,5.75,5.75,6.5,5,5.75,5.75,5.75,5,4.25,6.75
