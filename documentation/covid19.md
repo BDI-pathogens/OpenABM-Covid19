@@ -25,9 +25,9 @@ Demographics
 
 The demographics of the ABM are based upon UK national data for 2018 from the Office of National Statistics (ONS). 
 Individuals are categorised into nine age groups by decade, from age group (0-9 years) to (80+ years). 
-The simulation is run on a static population and the proportion of individuals in each age group is the same as that specified by the population level statistics in Table~\ref{table_demographic_parameters}.
+The simulation is run on a static population and the proportion of individuals in each age group is the same as that specified by the population level statistics in Table **Demographic Parameters**.
 Every individual is part of a household, which forms an important part of their daily interactions.
-Household size data is shown in Table~\ref{table_demographic_parameters}.
+Household size data is shown in Table **Demographic Parameters**.
 Since the duration of the simulated epidemic is less than a year, we do not consider changes in the population due to births, deaths due to other causes, and migration.
 
 Interaction Network
@@ -43,16 +43,16 @@ First, they model the transmission of infection between individuals on each day 
 Second, when we model contact tracing via the phone app, the phone sees a subset of the network which is then used for contact tracing.
 
 The membership of different networks leads to age-group assortativity in the interactions.
-A previous study of social contacts for infectious disease modelling has estimated the mean number of interactions that individuals have by age group~\citep{mossong2008social}.
+A previous study of social contacts for infectious disease modelling has estimated the mean number of interactions that individuals have by age group [[1]](#1).
 This study is based on participants being asked to recall their interactions over the past day. 
-We estimate mean interactions by age group by aggregating data (see Table~\ref{table_mean_daily_interactions}).
+We estimate mean interactions by age group by aggregating data (see Table **Mean Daily Interactions**).
 It is possible for an individual not to be connected to anybody (e.g. a person living alone in a household).
 
 ### Household Network
 
 Each individual is assigned to live in a single household.  
 Each day every person has an interaction with everybody within their household.
-The proportion of people living in households of different sizes is taken from ONS data (see~\nameref{section_ABM_demographics}).
+The proportion of people living in households of different sizes is taken from ONS data.
 There are two important population-level aggregate statistics that we match: the household-size structure and the population age-structure.
 When individuals are assigned to households, we need to match these aggregate statistics and also require that our households reflect typical age mixes.
 To achieve this we use a reference panel of 10,000 households containing the household composition by age, produced by down-sampling UK-wide household composition data from the 2011 Census produced by the ONS.
@@ -66,7 +66,7 @@ Finally, we checked the discrepancy of the total sampled set of households again
 
 ### Workplace Networks
 Each individual is a member of one workplace network (including e.g. schools for children and social activities for older adults). 
-The workplace networks are modelled as Watts-Strogatz small-world networks~\citep{watts1998collective}.
+The workplace networks are modelled as Watts-Strogatz small-world networks [[2]](#2).
 When constructing the workplace networks, we ensure the absence of overlaps between the household interactions and the local interactions on the small-world network.
 Every day each person interacts with a random subset (50%) of their connections on their workplace network.
 
@@ -75,7 +75,7 @@ On each of these networks we introduce a small number of adults (1 adult per 5 c
 Similarly for the 70y-79y age group and the 80y+ age group we have separate networks representing day-time social activities among elderly people (again with 1 adult per 5 elderly people).
 All remaining adults (the vast majority) are part of the 20y-69y network.
 Due to the difference in total number of daily interactions, each age group has a different number of interactions in their workplace network.
-Parameters and values corresponding to the workplace network are shown in Table~\ref{table_work_place_network_parameters}.
+Parameters and values corresponding to the workplace network are shown in Table **Work-place network parameters**.
 Note the parameters are for the mean daily connections, so the number of interactions on the network are higher due to the daily sampling of connections.
 
 ### Random Network
@@ -84,7 +84,7 @@ These interactions occur once and are independent of the previous day's connecti
 The number of random connections an individual makes is the same each day (without interventions) and is drawn at the start of the simulation from a negative-binomial distribution, an over-dispersed skew distribution.
 This variation in the number of interactions introduces 'super-spreaders' into the network who have many more interactions than average.
 
-The mean numbers of connections were chosen so that the total number of daily interactions matched that from a previous study of social interaction~\citep{mossong2008social}. 
+The mean numbers of connections were chosen so that the total number of daily interactions matched that from a previous study of social interaction [[1]](#1). 
 The number of random interactions was chosen to be lower in children in comparison to other age groups. 
 In the simulation, each day a list is created containing all individuals who make random interactions and each person is repeated by the number of interactions they make.
 
@@ -99,8 +99,8 @@ We currently do not have data on the distribution of the duration of interaction
 To model **the status of the infector** we note that infectiousness varies over the natural course of an infection, i.e. as a function of the amount of time a person has been infected, &#964;.
 Infectiousness starts at zero at the precise moment someone is infected (&#964;=0), reaches a peak at some intermediate time, and tends to zero a long time after infection (large &#964;).
 
-Following~\citep{ferretti2020quantifying}, we take the functional form of infectiousness to be a (scaled) gamma distribution. 
-We chose the mean and standard deviation as intermediate values between different reports~\cite{ferretti2020quantifying,ganyani2020estimating,Ma2020.03.21.20040329}.
+Following [[3]](#3), we take the functional form of infectiousness to be a (scaled) gamma distribution. 
+We chose the mean and standard deviation as intermediate values between different reports [[3]](#3)[[4]](#4)[[5]](#5).  
 
 We define *asymptomatic* individuals as those who never develop symptoms during their infection, and *pre-symptomatic}* individuals as those who do not currently have symptoms but will do so later.
 Both types of individuals may infect others.
@@ -289,8 +289,21 @@ Both speed and memory are linear in population size (tested from 100k to 1m).
 96% of the CPU usage is spent on rebuilding the daily interaction networks and updating the individual's interaction diaries.
 About 60% of the memory usage is spent on storing the interaction diaries (for 5 days), another 20% is spent on storing the semi-static networks with the remaining 20% spent on storing individuals and their states in event lists.
 
+## References
+<a id="1">[1]</a> 
+Joel Mossong, Niel Hens, Mark Jit, Philippe Beutels, Kari Auranen, Rafael Mikolajczyk, Marco Massari, Stefania Salmaso, Gianpaolo Scalia Tomba, Jacco Wallinga, et al. Social contacts and mixing patterns relevant to the spread of infectious diseases. PLoSmedicine, 5(3), 2008
 
+<a id="2">[2]</a> 
+Duncan J Watts and Steven H Strogatz. Collective dynamics of ‘small-world’ networks. Nature, 393(6684):440, 1998.
 
+<a id="3">[3]</a> 
+Luca Ferretti, Chris Wymant, Michelle Kendall, Lele Zhao, Anel Nurtay, Lucie Abeler-Dorner, Michael Parker, David Bonsall, and Christophe Fraser. Quantifying SARS-CoV-2 transmission suggests epidemic control  with  digital  contact tracing. Science, 2020.
+
+<a id="4">[4]</a> 
+Tapiwa Ganyani, Cecile Kremer, Dongxuan Chen, Andrea Torneri, Christel Faes, JaccoWallinga, and Niel Hens. Estimating the generation interval for COVID-19 based onsymptom onset data.medRxiv, 2020.
+
+<a id="5">[5]</a> 
+Shujuan Ma, Jiayue Zhang, Minyan Zeng, Qingping Yun, Wei Guo, Yixiang Zheng, ShiZhao,  Maggie  H  Wang,  and  Zuyao  Yang.   Epidemiological  parameters  of  coronavirusdisease 2019: a pooled analysis of publicly reported individual data of 1155 cases fromseven countries. medRxiv, 2020
 
 
 
