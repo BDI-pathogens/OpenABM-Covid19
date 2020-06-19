@@ -339,7 +339,59 @@ void update_intervention_policy( model *model, int time )
 
 	if( time == params->testing_symptoms_time_off )
 		set_model_param_test_on_symptoms( model, FALSE );
-};
+}
+
+/*****************************************************************************************
+*  Name:		intervention_notify_contracts
+*  Description: If the individual is an app user then we loop over the stored contacts
+*  				and if they are app users too then count the interaction as traceable
+*  Returns:		number of traceable interactions
+******************************************************************************************/
+int number_of_traceable_interactions(model *model, individual *indiv)
+{
+	if( !indiv->app_user || !model->params->app_turned_on )
+		return ERROR;
+
+	interaction *inter;
+	individual *contact;
+	parameters *params = model->params;
+	int idx, ddx, day, n_contacts, traceable_inter = 0;
+
+	// estimate the number of contacts
+	n_contacts = 0;
+	for( ddx = 0; ddx < MAX_DAILY_INTERACTIONS_KEPT; ddx++ )
+		n_contacts += indiv->n_interactions[ddx];
+	long *contacts = calloc( n_contacts, sizeof( long ) );
+
+	day = model->interaction_day_idx;
+	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
+	{
+		n_contacts = indiv->n_interactions[day];
+		if( n_contacts > 0 )
+		{
+			inter = indiv->interactions[day];
+			for( idx = 0; idx < n_contacts; idx++ )
+			{
+				contact = inter->individual;
+				if( contact->app_user )
+				{
+					if( inter->traceable == UNKNOWN )
+						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+					if( inter->traceable )
+                        contacts[ traceable_inter++ ] = contact->idx;
+				}
+				inter = inter->next;
+			}
+		}
+		ring_dec( day, model->params->days_of_interactions );
+	}
+
+	// now see how many unique contacts there are
+	traceable_inter = n_unique_elements( contacts, traceable_inter );
+	free( contacts );
+
+    return traceable_inter;
+}
 
 /*****************************************************************************************
 *  Name:		intervention_on_quarantine_until
@@ -437,8 +489,27 @@ void intervention_test_order( model *model, individual *indiv, int time )
 {
 	if( indiv->quarantine_test_result == NO_TEST && !(indiv->infection_events->is_case) )
 	{
-		add_individual_to_event_list( model, TEST_TAKE, indiv, time );
-		indiv->quarantine_test_result = TEST_ORDERED;
+        if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
+        {
+        	add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+        	indiv->quarantine_test_result = TEST_ORDERED;
+        }
+        else
+        {
+			int traceable_inter = number_of_traceable_interactions( model, indiv );
+
+			if( traceable_inter >= model->params->priority_test_contacts[indiv->age_group] )
+			{
+				/* If individual had more than the n contacts, order a priority test */
+				int test_order_wait_priority = model->params->test_order_wait_priority;
+				add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + test_order_wait_priority );
+				indiv->quarantine_test_result = TEST_ORDERED_PRIORITY;
+			} else
+			{
+				add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+				indiv->quarantine_test_result = TEST_ORDERED;
+			}
+        }
 	}
 }
 
@@ -452,6 +523,12 @@ void intervention_test_order( model *model, individual *indiv, int time )
 ******************************************************************************************/
 void intervention_test_take( model *model, individual *indiv )
 {
+	int result_time = model->time;
+	if( indiv->quarantine_test_result == TEST_ORDERED_PRIORITY )
+		result_time += model->params->test_result_wait_priority;
+	else
+		result_time += model->params->test_result_wait;
+
 	if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
 		indiv->quarantine_test_result = FALSE;
 	else
@@ -462,7 +539,7 @@ void intervention_test_take( model *model, individual *indiv )
 			indiv->quarantine_test_result = FALSE;
 	}
 
-	add_individual_to_event_list( model, TEST_RESULT, indiv, model->time + model->params->test_result_wait );
+	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time );
 }
 
 /*****************************************************************************************

@@ -258,3 +258,35 @@ double sum_square_diff_array( double *array, double *array2, int N )
 	return diff;
 }
 
+/*****************************************************************************************
+*  Name:		compare_longs
+*  Description: which of 2 longs is largest
+******************************************************************************************/
+int compare_longs (const void *a, const void *b)
+{
+    const long *da = (const long *) a;
+    const long *db = (const long *) b;
+    return (*da > *db) - (*da < *db);
+}
+
+/*****************************************************************************************
+*  Name:		n_unique_elements
+*  Description: how many unique elements in an array of longs
+******************************************************************************************/
+int n_unique_elements( long* array, int n )
+{
+	if( n == 0 )
+		return 0;
+
+	int idx, n_unique = 1;
+
+	qsort( array, n, sizeof( long ), compare_longs );
+	for( idx = 1; idx < n; idx++ )
+		if( array[ idx - 1 ] != array[ idx ] )
+			n_unique++;
+
+	return n_unique;
+}
+
+
+

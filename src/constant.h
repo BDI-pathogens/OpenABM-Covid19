@@ -172,10 +172,12 @@ enum QUARANTINE_REASONS{
 };
 
 #define UNKNOWN -1
+#define NO_PRIORITY_TEST -1
 #define NO_EVENT -1
 #define NO_EDGE -1
 #define NO_TEST -2
 #define TEST_ORDERED -1
+#define TEST_ORDERED_PRIORITY -3
 #define NOT_RECURSIVE 1000
 #define MAX_DAILY_INTERACTIONS_KEPT 10
 #define MAX_TIME 500
