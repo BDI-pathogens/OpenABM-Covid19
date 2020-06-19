@@ -25,9 +25,9 @@ Demographics
 
 The demographics of the ABM are based upon UK national data for 2018 from the Office of National Statistics (ONS). 
 Individuals are categorised into nine age groups by decade, from age group (0-9 years) to (80+ years). 
-The simulation is run on a static population and the proportion of individuals in each age group is the same as that specified by the population level statistics in Table **Demographic Parameters**.
+The simulation is run on a static population and the proportion of individuals in each age group is the same as that specified by the population level statistics in Table [Demographic parameters](./parameters/demographic_parameters.md).
 Every individual is part of a household, which forms an important part of their daily interactions.
-Household size data is shown in Table **Demographic Parameters**.
+Household size data is shown in Table [Demographic parameters](./parameters/demographic_parameters.md).
 Since the duration of the simulated epidemic is less than a year, we do not consider changes in the population due to births, deaths due to other causes, and migration.
 
 Interaction Network
@@ -73,7 +73,7 @@ On each of these networks we introduce a small number of adults (1 adult per 5 c
 Similarly for the 70y-79y age group and the 80y+ age group we have separate networks representing day-time social activities among elderly people (again with 1 adult per 5 elderly people).
 All remaining adults (the vast majority) are part of the 20y-69y network.
 Due to the difference in total number of daily interactions, each age group has a different number of interactions in their workplace network.
-Parameters and values corresponding to the workplace network are shown in Table **Work-place network parameters**.
+Parameters and values corresponding to the workplace network are shown in Table [Workplace network parameters](./parameters/work-place_network_parameters.md).
 Note the parameters are for the mean daily connections, so the number of interactions on the network are higher due to the daily sampling of connections.
 
 ### Random Network
@@ -85,7 +85,7 @@ This variation in the number of interactions introduces 'super-spreaders' into t
 The mean numbers of connections were chosen so that the total number of daily interactions matched that from a previous study of social interaction [[1]](#1). 
 The number of random interactions was chosen to be lower in children in comparison to other age groups. 
 In the simulation, each day a list is created containing all individuals who make random interactions and each person is repeated by the number of interactions they make.
-This list is shuffled and interactions are made between adjacent pairs on the shuffled list.
+This list is shuffled and interactions are made between adjacent pairs on the shuffled list.  Parameters associated with random networks are listed in Table [Random network parameters](./parameters/random_network_parameters.md).  
 
 ## Infection Dynamics
 The infection is spread by interactions between infected and susceptible individuals. 
@@ -105,7 +105,7 @@ The overall infectiousness of asymptomatic individuals has been estimated to be 
 Individuals who show symptoms but only mildly have also been estimated as less infectious than those with more severe symptoms [[6]](#6), reflected in our parameter `mild_infectious_factor`.
 For each adult age category, we took the fraction of symptomatic infections that are mild as the fraction of confirmed cases with with either no pneumonia (which was rare -- always less than 6.5%) or mild pneumonia, i.e. the fraction without severe pneumonia, reported in [[7]](#7).
 For the age categories 0-9 and 10-19, we took the fraction of infections that are mild as the fraction clinically defined as 'mild' in the paediatric meta-analysis [[8]](#8), excluding asymptomatic infections from the denominator.
-These fractions of symptomatic infections that are mild by age are listed in Table **Disease Dynamics**.
+These fractions of symptomatic infections that are mild by age are listed in Table [Disease dynamics parameters](./parameters/disease_dynamics_parameters.md).
 
 To model the **susceptibility to infection of a contact according to their age** we referred to the literature [[6]](#6)[[9]](#9)[[10]](#10) where close contacts of confirmed cases were monitored and tested.
 The number tested and the number of positive results was reported within each age group, with the ratio of the latter to the former defining the per-age attack rate.
@@ -127,7 +127,7 @@ Combining all effects, we model the rate at which the virus is transmitted in a 
 <p><img src="eqn_transmission_rate.png" height="80"></p>
 
 where *t* is the time since infection; *s<sub>i</sub>* indicates the infector's symptom status (asymtomatic, mild, moderate/severe); *a<sub>s</sub>* is the age of the susceptible; *n* is the type of network where the interaction occurred; *I<sub>a<sub>s</sub></sub>* is the mean number of daily interactions for somebody of the age of the susceptible; *f<sub>&#915;</sub>(u; &#956;,&#963;<sup>2</sup>)* is the probability density function of a gamma distribution; *&#956;<sub>i</sub>* and *&#963;<sub>i</sub>* are the mean and width of the infectiousness curve; *R* scales the overall infection rate (under some simplifying assumptions it is mean number of people infected by each moderately/severely symptomatic individual); *S<sub>a<sub>s</sub></sub>* is the scale-factor for the age of the susceptible; *A<sub>s<sub>i</sub></sub>* is the scale-factor for the infector being asymptomatic; *B<sub>n</sub>* is the scale-factor for the network on which the interaction occurred.
-Table **Infectious Parameters** contains the values of the parameters used in simulations.
+Table [Infection parameters](./parameters/infection_parameters.md) contains the values of the parameters used in simulations.
 The rate of virus transmission is converted to a probability of transmission
 
 <p><img src="eqn_prob.png"  height="40"></p>
@@ -138,7 +138,7 @@ The infection was assumed to take place immediately before the simulation starts
 ## Natural history of infection
 
 Upon infection, an individual enters a disease progression cascade where the outcome and rates of progression depend on the age of the infected person.
-The disease state transitions are shown in the Figure below and the model parameters are in the table **Disease Dynamics Parameters**.
+The disease state transitions are shown in the Figure below and the model parameters are in Table [Disease dynamics parameters](./parameters/disease_dynamics_parameters.md).
 
 <p><img src="diagram_line.png" title="Disease Dynamics" height="600"></p>
 
@@ -165,26 +165,19 @@ Patients who survive critical symptoms remain in hospital for &#964;<sub>hosp,re
 
 ## Passive Interventions
 
-The ABM has the ability to model both passive and active non-pharmaceutical interventions. 
-Interventions are designed to reduce the rate of transmission but have the potential to quarantine significant numbers of people. 
-We define passive interventions to be those which do not involve testing or contact tracing.
-Here we provide details on each of the passive interventions and their impact on the contact network.
+The ABM has the ability to model both passive and active non-pharmaceutical interventions.  Interventions are designed to reduce the rate of transmission but have the potential to quarantine significant numbers of people.  We define passive interventions to be those which do not involve testing or contact tracing. Here we provide details on each of the passive interventions and their impact on the contact network.  Table [Passive intervention parameters](./parameters/passive_intervention_parameters.md) summarises the parameters in the model associated with passive interventions.  
 
 ### Hospitalisation 
-Upon hospitalisation, a patient immediately stops interacting with both their household and workplace networks. We also reduce the number of random interactions that they have. 
-We do not currently model the interactions within hospitals (this is planned for future work).
+Upon hospitalisation, a patient immediately stops interacting with both their household and workplace networks. The number of random interactions that they have is reduced.  More detailed modelling of hospitals is contained in the hospital module of OpenABM-Covid19, see [the documentation on the hospital module](hospital_model.pdf) for further details.  
 
 ### Self-quarantine upon symptoms
-Upon experiencing symptoms, a proportion of patients in our model self-quarantine immediately as per government advice. 
-There is a daily dropout rate for the duration of the quarantine to model individuals failing to comply.
-We also allow for the development of symptoms which cause an individual to self-quarantine when in fact they do not have covid-19, for example they may have seasonal flu which has similar symptoms.
-Quarantine is modelled by stopping interactions on the individual's workplace network and greatly reducing their number of interactions on the random network.
-The ABM also contains the option that everybody in the household of a person with symptoms will be asked to self-quarantine.
+Upon experiencing symptoms, a proportion of individuals self-quarantine immediately as per government advice.  There is a daily dropout rate for the duration of the quarantine to model individuals failing to comply.
+We also allow for the development of symptoms which cause an individual to self-quarantine when in fact they do not have COVID-19, for example they may have seasonal flu which has similar symptoms.
+Quarantine is modelled by stopping interactions on the individual's workplace network and greatly reducing their number of interactions on the random network.  The ABM also contains the option that everybody in the household of a person with symptoms will be asked to self-quarantine.
 
 ### Lock-down
 The ABM can simulate the effect of a country-wide lock-down by reducing the number of contact that people have. 
-In a lock-down, we reduce the number of interactions that people have by 80% on both their work-place and random networks. 
-Additionally, given that during a lock-down people stay at home more, we increase transmission rate for interactions on the household network by a factor. 
+In a lock-down, the number of interactions that people have is reduced by 80% on both their work-place and random networks.  Additionally, given that during a lock-down people stay at home more, we increase transmission rate for interactions on the household network by a factor. 
 
 ### Shield Group
 Given that fatality rate is highly skewed towards the over 70s, we have the option of applying a lock-down just to this demographic group. 
@@ -192,8 +185,7 @@ The effect of the lock-down is the same as that described in the previous sectio
 
 ## Active Interventions
 
-We define active interventions to be those which involve contact tracing or testing.
-There are three events in the ABM which can be the initial trigger for an active intervention:
+Active interventions are defined to be those which involve contact tracing or testing.  There are three events in the ABM which can be the initial trigger for an active intervention:
 1. developing symptoms (true covid-19 or not) in the community 
 2. testing positive for covid-19
 3. hospitalisation (clinical diagnosis alone, or combined with a positive test result) 
@@ -204,6 +196,9 @@ There are three types of active intervention which can be triggered:
 1. testing for covid-19 infection
 2. self-quarantining
 3. digital contact tracing
+
+Table [Active intervention parameters](./parameters/active_intervention_parameters.md) summarises the parameters in the model associated with active interventions.  
+
 
 ### Testing for infection
 Currently the test for SARS-COV-2 is not sensitive immediately upon infection, which we model by only returning a positive test if the patient has been infected for three days when the test takes place. 
