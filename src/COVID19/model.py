@@ -380,6 +380,32 @@ class Parameters(object):
         
         covid19.set_demographic_house_table( self.c_params, int(n_total),int(n_households), ID_c, ages_c, house_no_c )
 
+    def set_occupation_network_table(self, df_occupation_networks, df_occupation_network_properties):
+        n_total = len(df_occupation_networks.index)
+        if n_total != self.get_param("n_total"):
+            raise ParameterException("df_occupation_networks must have n_total rows")
+
+        n_networks = df_occupation_networks['network_no'].max() + 1
+        covid19.set_occupation_network_table(self.c_params, int(n_total), int(n_networks))
+        [covid19.set_indiv_occupation_network_property(
+            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), int(row[4]),
+            str(row[5]))
+            for row in df_occupation_network_properties[[
+            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 'network_id',
+            'network_name']].values]
+
+        ID         = df_occupation_networks['ID'].to_list()
+        network_no = df_occupation_networks['network_no'].to_list()
+
+        ID_c         = covid19.longArray(n_total)
+        network_no_c = covid19.longArray(n_total)
+
+        for idx in range(n_total):
+            ID_c[idx]         = ID[idx]
+            network_no_c[idx] = network_no[idx]
+
+        covid19.set_indiv_occupation_network(self.c_params, n_total, ID_c, network_no_c)
+
     def return_param_object(self):
         """[summary]
         Run a check on the parameters and return if the c code doesn't bail
@@ -531,7 +557,6 @@ class Model:
 
         covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
 
-    
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
         if ret == 0:

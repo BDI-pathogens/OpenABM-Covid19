@@ -54,9 +54,11 @@ struct model{
 	long *possible_interactions;
 	long n_possible_interactions;
 	long n_total_intereactions;
+	long n_occupation_networks;
 
 	network *random_network;
 	network *household_network;
+	int use_custom_occupation_networks;
 	network **occupation_network;
 	directory *household_directory;
 	network *user_network;
@@ -102,7 +104,7 @@ void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
-void set_up_occupation_network( model*, int );
+void set_up_occupation_network( model* );
 void set_up_individual_hazard( model* );
 void destroy_model( model* );
 

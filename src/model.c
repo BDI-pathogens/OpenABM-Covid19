@@ -40,6 +40,17 @@ model* new_model( parameters *params )
 	model_ptr->params = params;
 	model_ptr->time   = 0;
 	model_ptr->user_network = NULL;
+    if (params->occupation_network_table == NULL)
+    {
+        model_ptr->use_custom_occupation_networks = 0;
+        model_ptr->n_occupation_networks = N_DEFAULT_OCCUPATION_NETWORKS;
+        set_up_default_occupation_network_table( params );
+    }
+    else
+    {
+        model_ptr->use_custom_occupation_networks = 1;
+        model_ptr->n_occupation_networks = params->occupation_network_table->n_networks;
+    }
 
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
@@ -103,7 +114,7 @@ void destroy_model( model *model )
 
     destroy_network( model->random_network);
     destroy_network( model->household_network );
-    for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+    for( idx = 0; idx < model->n_occupation_networks; idx++ )
     	destroy_network( model->occupation_network[idx] );
     free( model->occupation_network );
 
@@ -224,9 +235,7 @@ void set_up_networks( model *model )
 	model->household_network->network_id         = HOUSEHOLD_NETWORK;
 	strcpy( model->household_network->name, DEFAULT_NETWORKS_NAMES[HOUSEHOLD_NETWORK] );
 
-	model->occupation_network = calloc( N_OCCUPATION_NETWORKS, sizeof( network* ) );
-	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
-		set_up_occupation_network( model, idx );
+    set_up_occupation_network( model );
 
 	if( model->params->hospital_on )
 		set_up_hospital_networks( model );
@@ -240,37 +249,40 @@ void set_up_networks( model *model )
 *  Description: sets up the work network
 *  Returns:		void
 ******************************************************************************************/
-void set_up_occupation_network( model *model, int network )
+void set_up_occupation_network( model *model )
 {
-	long idx;
-	long n_people = 0;
+	long idx, n_people ;
 	long *people;
 	double n_interactions;
-	int age = NETWORK_TYPE_MAP[network];
 	parameters *params = model->params;
 
-	people = calloc( params->n_total, sizeof( long ) );
-	for( idx = 0; idx < params->n_total; idx++ )
-		if( model->population[idx].occupation_network == network )
-			people[n_people++] = idx;
+    model->occupation_network = calloc( model->n_occupation_networks, sizeof( network* ) );
+    for( int network = 0; network < model->n_occupation_networks; network++ )
+    {
+        n_people = 0;
+        people = calloc( params->n_total, sizeof(long) );
+        for ( idx = 0; idx < params->n_total; idx++ )
+            if (model->population[idx].occupation_network == network)
+                people[n_people++] = idx;
 
-	model->occupation_network[network] = new_network( n_people, OCCUPATION );
-	model->occupation_network[network]->skip_hospitalised = TRUE;
-	model->occupation_network[network]->skip_quarantined  = TRUE;
-	model->occupation_network[network]->daily_fraction    = model->params->daily_fraction_work;
-	model->occupation_network[network]->network_id        = OCCUPATION_DEFAULT_MAP[network];
-	model->occupation_network[network]->n_edges           = 0;
-	strcpy( model->occupation_network[network]->name, DEFAULT_NETWORKS_NAMES[OCCUPATION_DEFAULT_MAP[network]] );
+        model->occupation_network[network] = new_network( n_people, OCCUPATION );
+        model->occupation_network[network]->skip_hospitalised = TRUE;
+        model->occupation_network[network]->skip_quarantined = TRUE;
+        model->occupation_network[network]->daily_fraction = model->params->daily_fraction_work;
+        model->occupation_network[network]->network_id = params->occupation_network_table->network_ids[network];
+        model->occupation_network[network]->n_edges = 0;
+        strcpy( model->occupation_network[network]->name, params->occupation_network_table->network_names[network] );
+        n_interactions = params->occupation_network_table->mean_interactions[network] / params->daily_fraction_work;
 
-	n_interactions =  params->mean_work_interactions[age] / params->daily_fraction_work;
+        if ( n_people > 0 )
+        {
+            build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions,
+                                         params->work_network_rewire, TRUE );
+            relabel_network( model->occupation_network[network], people );
+        }
 
-	if( n_people > 0 )
-	{
-		build_watts_strogatz_network( model->occupation_network[network], n_people, n_interactions, params->work_network_rewire, TRUE );
-		relabel_network( model->occupation_network[network], people );
-	}
-
-	free( people );
+        free( people );
+    }
 }
 
 /*****************************************************************************************
@@ -338,7 +350,7 @@ double estimate_total_interactions( model *model )
 	n_interactions += model->household_network->n_edges;
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		n_interactions += model->population[idx].base_random_interactions * 0.5;
-	for( idx = 0; idx < N_OCCUPATION_NETWORKS ; idx++ )
+	for( idx = 0; idx < model->n_occupation_networks ; idx++ )
 		n_interactions += model->occupation_network[idx]->n_edges * model->params->daily_fraction_work;
 
 	if( model->params->hospital_on )
@@ -711,7 +723,7 @@ void build_daily_network( model *model )
 	add_interactions_from_network( model, model->random_network );
 	add_interactions_from_network( model, model->household_network );
 
-	for( idx = 0; idx < N_OCCUPATION_NETWORKS; idx++ )
+	for( idx = 0; idx < model->n_occupation_networks; idx++ )
 		add_interactions_from_network( model, model->occupation_network[idx] );
 
 	user_network = model->user_network;
@@ -857,7 +869,7 @@ int add_user_network(
 	}
 
 	// get the next free network_id
-	network_id = N_OCCUPATION_NETWORKS + 1;
+	network_id = model->n_occupation_networks + 1;
 	user_network = model->user_network;
 	while( user_network != NULL )
 	{

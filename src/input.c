@@ -413,7 +413,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	for (i = 0; i<N_OCCUPATION_NETWORKS; i++){
+	for (i = 0; i < N_DEFAULT_OCCUPATION_NETWORKS; i++){
 
 		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_occupation_multiplier[i]));
 		if( check < 1){ print_exit("Failed to read parameter lockdown_occupation_multiplier)\n"); };
@@ -1293,8 +1293,8 @@ int get_worker_ward_type( model *model, int pdx ) {
 void write_occupation_network(model *model, parameters *params, int network_idx)
 {
 
-	if(network_idx < 0 || network_idx >= N_OCCUPATION_NETWORKS ){
-		printf("Occupation network index outside range of 0, %d\n", N_OCCUPATION_NETWORKS-1);
+	if(network_idx < 0 || network_idx >= model->n_occupation_networks ){
+		printf("Occupation network index outside range of 0, %ld\n", model->n_occupation_networks-1);
 		return;
 	}
 

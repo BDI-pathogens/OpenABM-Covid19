@@ -80,7 +80,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 			inter += weight[HOUSEHOLD];
 	}
 
-	for( ndx = 0; ndx < N_OCCUPATION_NETWORKS ; ndx++ )
+	for( ndx = 0; ndx < model->n_occupation_networks ; ndx++ )
 		for( pdx = 0; pdx < model->occupation_network[ndx]->n_edges; pdx++ )
 		{
 			if( model->population[model->occupation_network[ndx]->edges[pdx].id1].age_type == age )
