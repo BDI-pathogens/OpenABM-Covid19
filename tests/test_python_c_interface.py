@@ -81,7 +81,7 @@ class TestClass(object):
     """
 
 
-    def test_set_get_parameters(self):
+    def test_set_get_model_parameters(self):
         """
         Test the a parameter can be changed in between step runs
         """
@@ -94,15 +94,13 @@ class TestClass(object):
             constant.TEST_HOSPITAL_FILE,
             constant.HOSPITAL_PARAM_LINE_NUMBER
         )
-        params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
 
         # Run steps
         for step in range(0, STEPS):
             model.one_time_step()
-            res = model.one_time_step_results()
 
-            # Try to set valid parameters
+            # Try to set valid model parameters
             model.update_running_params("test_on_symptoms", 1)
             np.testing.assert_equal(model.get_param("test_on_symptoms"), 1)
 
@@ -154,6 +152,12 @@ class TestClass(object):
 
             model.update_running_params("self_quarantine_fraction", 1)
             np.testing.assert_equal(model.get_param("self_quarantine_fraction"), 1)
+
+            # Try to set/get array model parameters
+            for age in AgeGroupEnum:
+                contacts = randrange(1, 10)
+                model.update_running_params(f"priority_test_contacts{age.name}", contacts)
+                assert model.get_param(f"priority_test_contacts{age.name}") == contacts
 
             # Try to set/get invalid parameters
             with pytest.raises(ModelParameterException):
@@ -229,9 +233,9 @@ class TestClass(object):
         for i in range(covid19.N_AGE_TYPES):
             set_age_types[i] = uniform(FLOAT_START, FLOAT_END)
 
-        get_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
-        set_work_networks = covid19.doubleArray(covid19.N_OCCUPATION_NETWORKS)
-        for i in range(covid19.N_OCCUPATION_NETWORKS):
+        get_work_networks = covid19.doubleArray(covid19.N_DEFAULT_OCCUPATION_NETWORKS)
+        set_work_networks = covid19.doubleArray(covid19.N_DEFAULT_OCCUPATION_NETWORKS)
+        for i in range(covid19.N_DEFAULT_OCCUPATION_NETWORKS):
             set_work_networks[i] = uniform(FLOAT_START, FLOAT_END)
 
         get_interaction_types = covid19.doubleArray(covid19.N_INTERACTION_TYPES)
@@ -262,7 +266,7 @@ class TestClass(object):
 
         covid19.set_param_array_mean_work_interactions(params, set_work_networks)
         covid19.get_param_array_mean_work_interactions(params, get_work_networks)
-        for i in range(covid19.N_OCCUPATION_NETWORKS):
+        for i in range(covid19.N_DEFAULT_OCCUPATION_NETWORKS):
             np.testing.assert_equal(set_work_networks[i], get_work_networks[i])
 
         covid19.set_param_array_relative_susceptibility(params, set_age_groups)

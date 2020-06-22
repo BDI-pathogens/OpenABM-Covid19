@@ -38,9 +38,6 @@ void normalize_array( double*, int );
 void copy_array( double*, double*, int );
 void copy_normalize_array( double*, double*, int );
 double sum_square_diff_array( double*, double*, int );
-
-
-
-
+int n_unique_elements( long*, int );
 
 #endif /* UTILITIES_H_ */

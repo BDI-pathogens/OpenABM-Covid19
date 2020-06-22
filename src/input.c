@@ -385,9 +385,21 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
+    
+    check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait_priority));
+    if( check < 1){ print_exit("Failed to read parameter test_order_wait_priority\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
+    
+	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait_priority));
+	if( check < 1){ print_exit("Failed to read parameter test_result_wait_priority\n"); };
+
+	for( i = 0; i < N_AGE_GROUPS; i++ )
+    {
+        check = fscanf(parameter_file, " %i ,", &(params->priority_test_contacts[i]));
+        if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+    }
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
@@ -401,7 +413,7 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->app_turn_on_time));
 	if( check < 1){ print_exit("Failed to read parameter app_turn_on_time)\n"); };
 
-	for (i = 0; i<N_OCCUPATION_NETWORKS; i++){
+	for (i = 0; i < N_DEFAULT_OCCUPATION_NETWORKS; i++){
 
 		check = fscanf(parameter_file, " %lf ,", &(params->lockdown_occupation_multiplier[i]));
 		if( check < 1){ print_exit("Failed to read parameter lockdown_occupation_multiplier)\n"); };
@@ -690,6 +702,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"house_no,");
 	fprintf(individual_output_file,"quarantined,");
 	fprintf(individual_output_file,"time_quarantined,");
+	fprintf(individual_output_file,"test_status,");
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count");
@@ -710,7 +723,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -720,6 +733,7 @@ void write_individual_file(model *model, parameters *params)
 			indiv->house_no,
 			indiv->quarantined,
 			indiv->infection_events->times[QUARANTINED],
+			indiv->quarantine_test_result,
 			indiv->app_user,
 			indiv->random_interactions,
 			infection_count
@@ -1279,8 +1293,8 @@ int get_worker_ward_type( model *model, int pdx ) {
 void write_occupation_network(model *model, parameters *params, int network_idx)
 {
 
-	if(network_idx < 0 || network_idx >= N_OCCUPATION_NETWORKS ){
-		printf("Occupation network index outside range of 0, %d\n", N_OCCUPATION_NETWORKS-1);
+	if(network_idx < 0 || network_idx >= model->n_occupation_networks ){
+		printf("Occupation network index outside range of 0, %ld\n", model->n_occupation_networks-1);
 		return;
 	}
 
