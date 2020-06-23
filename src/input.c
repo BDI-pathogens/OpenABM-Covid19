@@ -383,6 +383,15 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
 
+	check = fscanf(parameter_file, " %i , ",   &(params->test_sensitive_period));
+	if( check < 1){ print_exit("Failed to read parameter test_sensitive_period\n"); };
+
+	check = fscanf(parameter_file, " %lf, ",   &(params->test_sensitivity));
+	if( check < 1){ print_exit("Failed to read parameter test_sensitivity\n"); };
+
+	check = fscanf(parameter_file, " %lf , ",   &(params->test_specificity));
+	if( check < 1){ print_exit("Failed to read parameter test_specificity\n"); };
+
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
     

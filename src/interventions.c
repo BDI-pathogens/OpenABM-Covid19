@@ -302,7 +302,7 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 void update_intervention_policy( model *model, int time )
 {
 	parameters *params = model->params;
-	int type;
+	int type, day;
 
 	if( time == 0 )
 	{
@@ -314,6 +314,15 @@ void update_intervention_policy( model *model, int time )
 			params->relative_transmission_used[type] = params->relative_transmission[type];
 
 		params->interventions_on = ( params->intervention_start_time == 0 );
+
+		if( params->test_sensitivity_curve[ 0 ] == UNKNOWN )
+			for( day = 0; day < MAX_DAYS_SENSITIVE; day++ )
+			{
+				if( day < params->test_insensitive_period || day >= params->test_sensitive_period )
+					params->test_sensitivity_curve[ day ] = 1 - params->test_specificity;
+				else
+					params->test_sensitivity_curve[ day ] = params->test_sensitivity;
+			}
 	}
 
 	if( time == params->intervention_start_time )
@@ -542,10 +551,19 @@ void intervention_test_take( model *model, individual *indiv )
 		indiv->quarantine_test_result = FALSE;
 	else
 	{
-		if( model->time - time_infected( indiv ) >= model->params->test_insensitive_period )
-			indiv->quarantine_test_result = TRUE;
+		int time_infected = time_infected( indiv );
+
+		if( time_infected != UNKNOWN )
+		{
+			time_infected = model->time - time_infected( indiv );
+			if( time_infected < MAX_DAYS_SENSITIVE )
+				indiv->quarantine_test_result = gsl_ran_bernoulli( rng, model->params->test_sensitivity_curve[ time_infected ] );
+			else
+				indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
+
+		}
 		else
-			indiv->quarantine_test_result = FALSE;
+			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
 	}
 
 	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time );

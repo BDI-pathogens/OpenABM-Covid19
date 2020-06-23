@@ -131,7 +131,6 @@ typedef struct{
 
 	int test_on_symptoms;					// carry out a test on those with symptoms
 	int test_on_traced;						// carry out a test on those with positive test results
-	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_result_wait;					// number of days to wait for a test result
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	int test_result_wait_priority;			// number of days to wait for a priority test result
@@ -139,6 +138,12 @@ typedef struct{
 	
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 	
+	double test_sensitivity_curve[MAX_DAYS_SENSITIVE];	// curve
+	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
+	int test_sensitive_period;				// number of days post infection in which the test is sensitive
+	double test_sensitivity;				// sensitivity of test
+	double test_specificity;				// specificity of test
+
 	double app_users_fraction[N_AGE_GROUPS];// Proportion of the population that use the app by age
 	int app_turned_on;						// is the app turned on
 	int app_turn_on_time;   				// time after which the app is usable
