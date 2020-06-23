@@ -492,7 +492,23 @@ class TestClass(object):
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
             ),
-        ]
+        ],
+        "test_test_sensitivity": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 500,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    test_order_wait  = 0,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 0.7,
+                ),
+            )
+        ],
     }
     """
     Test class for checking 
