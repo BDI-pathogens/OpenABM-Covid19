@@ -88,7 +88,8 @@ class EVENT_TYPES(enum.Enum):
     ICU = 20
     MORTUARY = 21
     DISCHARGED = 22
-    N_EVENT_TYPES = 23
+    MANUAL_CONTACT_TRACING = 23
+    N_EVENT_TYPES = 24
 
 
 
@@ -646,6 +647,9 @@ class Model:
 
     def write_interactions_file(self):
         covid19.write_interactions(self.c_model)
+
+    def write_interactions_history_file(self, n_days_ago):
+        covid19.write_interactions_history(self.c_model, n_days_ago)
 
     def write_trace_tokens_timeseries(self):
         covid19.write_trace_tokens_ts(self.c_model)
