@@ -948,9 +948,13 @@ void write_ward_data( model *model)
 
 	int hospital_idx = 0;
 
+	char param_line_number[10];
+	sprintf(param_line_number, "%d", model->params->param_line_number);
+
 	// Concatenate file name
 	strcpy(output_file_name, model->params->output_file_dir);
 	strcat(output_file_name, "/ward_output");
+	strcat(output_file_name, param_line_number);
 	strcat(output_file_name, ".csv");
 	ward_output_file = fopen(output_file_name, "w");
 
@@ -1397,9 +1401,13 @@ void write_hospital_interactions( model *model )
     int day, hcw_ward_type, hcw_ward_index;
     hospital *hospital = &model->hospitals[0];
 
+    char param_line_number[10];
+    sprintf(param_line_number, "%d", model->params->param_line_number);
+
     // Concatenate file name
     strcpy(output_file_name, model->params->output_file_dir);
     strcat(output_file_name, "/time_step_hospital_interactions");
+    strcat(output_file_name, param_line_number);
     strcat(output_file_name, ".csv");
 
     day = model->interaction_day_idx;
@@ -1484,9 +1492,14 @@ void write_time_step_hospital_data( model *model)
 
     if( model->params->sys_write_hospital )
         {
+            
+            char param_line_number[10];
+            sprintf(param_line_number, "%d", model->params->param_line_number);
+
             // Concatenate file name
             strcpy(output_file_name, model->params->output_file_dir);
             strcat(output_file_name, "/time_step_hospital_output");
+            strcat(output_file_name, param_line_number);
             strcat(output_file_name, ".csv");
 
             // Open outputfile in different mode depending on whether this is the first time step
