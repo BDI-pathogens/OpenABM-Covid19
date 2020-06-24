@@ -1,0 +1,21 @@
+# Table: Infection parameters
+| Name | Value | Symbol | Description | Source | 
+|  ---- | ---- | ---- | ---- | ---- |
+| `n_seed_infection` | 5 | - | Number of infections seeded at simulation start | - |
+| `mean_infectious_period` | 6 | &#956; | Mean of the generation time distribution (days) | Ma et al, 2020; Ganyani et al. 2020; Ferretti & Wymant et al. 2022 |
+| `sd_infectious_period` | 2.5 | &#963; | Standard deviation (days) of infectious period | Ma et al, 2020; Ganyani et al. 2020; Ferretti & Wymant et al. 2022 |
+| `infectious_rate` | 5.64 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
+| `asymptomatic_infectious_factor` | 0.29 | *A<sub>asym</sub>* | Infectious rate of asymptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
+| `mild_infectious_factor` | 0.48 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
+| `relative_susceptibility_0_9` | 0.35 | *S<sub>0-9</sub>* | Relative susceptibility to infection, aged 0-9 | Zhang et al. 2020 |
+| `relative_susceptibility_10_19` | 0.69 | *S<sub>10-19</sub>* | Relative susceptibility to infection, aged 10-19 | Zhang et al. 2020 |
+| `relative_susceptibility_20_29` | 1.03 | *S<sub>20-29</sub>* | Relative susceptibility to infection, aged 20-29 | Zhang et al. 2020 |
+| `relative_susceptibility_30_39` | 1.03 | *S<sub>30-39</sub>* | Relative susceptibility to infection, aged 30-39 | Zhang et al. 2020 |
+| `relative_susceptibility_40_49` | 1.03 | *S<sub>40-49</sub>* | Relative susceptibility to infection, aged 40-49 | Zhang et al. 2020 |
+| `relative_susceptibility_50_59` | 1.03 | *S<sub>50-59</sub>* | Relative susceptibility to infection, aged 50-59 | Zhang et al. 2020 |
+| `relative_susceptibility_60_69` | 1.27 | *S<sub>60-69</sub>* | Relative susceptibility to infection, aged 60-69 | Zhang et al. 2020 |
+| `relative_susceptibility_70_79` | 1.52 | *S<sub>70-79</sub>* | Relative susceptibility to infection, aged 70-79 | Zhang et al. 2020 |
+| `relative_susceptibility_80` | 1.52 | *S<sub>80</sub>* | Relative susceptibility to infection, aged 80+ | Zhang et al. 2020 |
+| `relative_transmission_household` | 2 | *B<sub>home</sub>* | Relative infectious rate of household interaction | - |
+| `relative_transmission_occupation` | 1 | *B<sub>occupation</sub>* | Relative infectious rate of workplace interaction | - |
+| `relative_transmission_random` | 1 | *B<sub>random</sub>* | Relative infectious rate of random interaction | - |

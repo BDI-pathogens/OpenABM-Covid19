@@ -19,5 +19,6 @@ typedef struct model model;
 typedef struct directory directory;
 typedef struct trace_token trace_token;
 typedef struct demographic_household_table demographic_household_table;
+typedef struct demographic_occupation_network_table demographic_occupation_network_table;
 
 #endif /* STRUCTURE_H_ */

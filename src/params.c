@@ -13,6 +13,7 @@
 #include "individual.h"
 #include "interventions.h"
 #include "demographics.h"
+#include <string.h>
 
 
 /*****************************************************************************************
@@ -22,6 +23,7 @@
 void initialize_params( parameters *params )
 {
 	params->demo_house = NULL;
+	params->occupation_network_table = NULL;
 }
 
 /*****************************************************************************************
@@ -93,12 +95,124 @@ int set_demographic_house_table(
 }
 
 /*****************************************************************************************
-*  Name: 		get_param_daily_fraction_work_used
+*  Name: 		set_indiv_occupation_network_property
+*  Description: Sets the values of a single occupational network by index
+******************************************************************************************/
+int set_indiv_occupation_network_property(
+	parameters* params,
+	long network,
+	int age_type,
+	double mean_interaction,
+	double lockdown_multiplier,
+	long network_id,
+	const char *network_name
+)
+{
+	demographic_occupation_network_table *table = params->occupation_network_table;
+
+	table->age_type[network]                        = age_type;
+    table->mean_interactions[network]               = mean_interaction;
+    table->lockdown_occupation_multipliers[network] = lockdown_multiplier;
+    table->network_ids[network]                     = network_id;
+
+    if( strlen( network_name ) < 128 )
+    {
+        strcpy( table->network_names[network], network_name );
+    }
+    else
+        print_exit( "Network name cannot exceed 127 characters." );
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_occupation_network_table
+*  Description: Allocates memory for the occupational networks
+******************************************************************************************/
+int set_occupation_network_table(
+	parameters* params,
+	long n_total,
+	long n_networks
+)
+{
+	if( params->occupation_network_table != NULL )
+		destroy_occupation_network_table( params );
+
+	params->occupation_network_table = calloc( 1, sizeof(demographic_occupation_network_table) );
+	params->occupation_network_table->n_networks = n_networks;
+	params->occupation_network_table->network_no = calloc( n_total, sizeof(long) );
+	params->occupation_network_table->age_type = calloc( n_networks, sizeof(int) );
+	params->occupation_network_table->mean_interactions = calloc( n_networks, sizeof(double) );
+	params->occupation_network_table->lockdown_occupation_multipliers = calloc( n_networks, sizeof(double) );
+	params->occupation_network_table->network_ids = calloc( n_networks, sizeof(long) );
+
+	params->occupation_network_table->network_names = calloc( n_networks, sizeof(char *) );
+    for( int i = 0; i != n_networks; ++i )
+    	params->occupation_network_table->network_names[i] = calloc( 128, sizeof(char) );
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_indiv_occupation_network
+*  Description: Assigns occupation network to each individual.
+******************************************************************************************/
+int set_indiv_occupation_network(
+	parameters* params,
+	long n_total,
+	long *people,
+	long *network
+)
+{
+    if( params->occupation_network_table == NULL )
+    {
+        print_exit("Occupation_network_table is not initialized.");
+    }
+
+    if ( n_total != params->n_total )
+    {
+        print_exit("Each individual must have one occupation network assignment.");
+    }
+
+    for ( int pdx = 0; pdx != n_total; ++pdx)
+    {
+        if( network[pdx] < 0 | network[pdx] >= params->occupation_network_table->n_networks )
+        {
+            print_now( "The person's network_no must be between 0 and n_occupation_networks." );
+            return FALSE;
+        }
+        params->occupation_network_table->network_no[pdx] = network[pdx];
+    }
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name: 		set_up_default_occupation_network_table
+*  Description: Generate the occupation network table from the default parameters if
+*  				a custom network table has not been supplied
+******************************************************************************************/
+void set_up_default_occupation_network_table( parameters *params )
+{
+    set_occupation_network_table( params, params->n_total, N_DEFAULT_OCCUPATION_NETWORKS );
+
+    for( int network = 0; network != N_DEFAULT_OCCUPATION_NETWORKS; ++network )
+    {
+        set_indiv_occupation_network_property( params, network, NETWORK_TYPE_MAP[network],
+                                               params->mean_work_interactions[NETWORK_TYPE_MAP[network]],
+                                               params->lockdown_occupation_multiplier[network],
+                                               OCCUPATION_DEFAULT_MAP[network],
+                                               DEFAULT_NETWORKS_NAMES[OCCUPATION_DEFAULT_MAP[network]] );
+    }
+}
+
+/*****************************************************************************************
+*  Name: 		get_model_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
 double get_model_param_daily_fraction_work_used(model *model, int idx)
 {
-    if (idx >= N_OCCUPATION_NETWORKS) return -1;
+    if (idx >= N_DEFAULT_OCCUPATION_NETWORKS) return -1;
 
     return model->occupation_network[idx]->daily_fraction;
 }
@@ -266,6 +380,34 @@ int get_model_param_test_order_wait(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_test_result_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_result_wait_priority(model *model)
+{
+    return model->params->test_result_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_order_wait_priority
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_order_wait_priority(model *model)
+{
+    return model->params->test_order_wait_priority;
+}
+
+/*****************************************************************************************
+*  Name: 		get_model_param_priority_test_contacts
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_model_param_priority_test_contacts(model *model, int idx)
+{
+    if (idx >= N_AGE_GROUPS) return -1;
+    return model->params->priority_test_contacts[idx];
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -325,10 +467,10 @@ double get_model_param_lockdown_random_network_multiplier(model *model)
 *  Name:        get_model_param_lockdown_occupation_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
-double get_model_param_lockdown_occupation_multiplier(model *model, int index)
+double get_model_param_lockdown_occupation_multiplier(model *model, int idx)
 {
-	if ( index >= N_OCCUPATION_NETWORKS)  return FALSE;
-	return model->params->lockdown_occupation_multiplier[index];
+	if ( idx >= N_DEFAULT_OCCUPATION_NETWORKS)  return FALSE;
+	return model->params->lockdown_occupation_multiplier[idx];
 }
 
 /*****************************************************************************************
@@ -590,6 +732,50 @@ int set_model_param_test_order_wait( model *model, int value )
 }
 
 /*****************************************************************************************
+*  Name:		set_model_param_test_result_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_result_wait_priority( model *model, int value )
+{
+    model->params->test_result_wait_priority = value;
+
+    if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
+    	model->params->test_order_wait_priority = model->params->test_order_wait;
+
+    if( value == NO_PRIORITY_TEST )
+    	model->params->test_order_wait_priority = NO_PRIORITY_TEST;
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_order_wait_priority
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_order_wait_priority( model *model, int value )
+{
+    model->params->test_order_wait_priority = value;
+
+    if( model->params->test_result_wait_priority == NO_PRIORITY_TEST )
+     	model->params->test_result_wait_priority = model->params->test_result_wait;
+
+     if( value == NO_PRIORITY_TEST )
+     	model->params->test_result_wait_priority = NO_PRIORITY_TEST;
+
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_priority_test_contacts
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_priority_test_contacts( model *model, int value, int idx )
+{
+	if (idx >= N_AGE_GROUPS) return FALSE;
+	model->params->priority_test_contacts[idx] = value;
+	return TRUE;
+}
+/*****************************************************************************************
 *  Name:		set_model_param_app_users_fraction
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -739,14 +925,23 @@ void update_work_intervention_state(model *model, int value)
 
 	if (value == TRUE) {
 		// Turn intervetions on
-		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-		{
-			model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
-				        					            		 params->lockdown_occupation_multiplier[network];
-		}
+        if (model->use_custom_occupation_networks == 0)
+        {
+            for (network = 0; network < N_DEFAULT_OCCUPATION_NETWORKS; network++ )
+            {
+                model->occupation_network[network]->daily_fraction = params->daily_fraction_work * params->lockdown_occupation_multiplier[network];
+            }
+        }
+        else
+            for ( network = 0; network < model->n_occupation_networks; network++ )
+            {
+                model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
+                                                                     model->params->occupation_network_table->lockdown_occupation_multipliers[network];
+            }
+
 	}
 	else {
-		for (network = 0; network < N_OCCUPATION_NETWORKS; network++ )
+		for ( network = 0; network < model->n_occupation_networks; network++ )
 		{
 			model->occupation_network[network]->daily_fraction= params->daily_fraction_work;
 		}
@@ -808,15 +1003,28 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 	parameters *params = model->params;
 	individual *indiv;
 
-	if( value == TRUE )
-	{
-		for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-			if( NETWORK_TYPE_MAP[ network ] == NETWORK_TYPE_ELDERLY )
-				model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
-																	 params->lockdown_occupation_multiplier[network];
-			
+    if (value == TRUE)
+    {
+        if (model->use_custom_occupation_networks == 0)
+        {
+            for ( network = 0; network < N_DEFAULT_OCCUPATION_NETWORKS; network++ )
+            {
+                if ( NETWORK_TYPE_MAP[network] == NETWORK_TYPE_ELDERLY )
+                    model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
+                                                                         params->lockdown_occupation_multiplier[network];
+            }
+        }
+        else
+        {
+            for ( network = 0; network < model->n_occupation_networks; network++ )
+            {
+                if ( params->occupation_network_table->age_type[network] == NETWORK_TYPE_ELDERLY )
+                    model->occupation_network[network]->daily_fraction = params->daily_fraction_work *
+                                                                         params->occupation_network_table->lockdown_occupation_multipliers[network];
+            }
 
-	}
+        }
+    }
 	else if( value == FALSE )
 	{
 		if( !params->lockdown_elderly_on )
@@ -824,11 +1032,13 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 
 		if( !params->lockdown_on )
 		{
-			for( network = 0; network < N_OCCUPATION_NETWORKS; network++ )
-				model->occupation_network[network]->daily_fraction = params->daily_fraction_work;
+            for( network = 0; network < model->n_occupation_networks; network++ )
+                model->occupation_network[network]->daily_fraction = params->daily_fraction_work;
 		}
 
-	}else {
+	}
+	else
+	{
 		return FALSE;
 	}
 	params->lockdown_elderly_on = value;
@@ -882,10 +1092,14 @@ int set_model_param_lockdown_random_network_multiplier( model *model, double val
 *  Name:        set_model_param_lockdown_occupation_multiplier
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_lockdown_occupation_multiplier( model *model, double value, int index )
+int set_model_param_lockdown_occupation_multiplier( model *model, double value, int idx )
 {
-	if (index >= N_OCCUPATION_NETWORKS) return FALSE;
-	model->params->lockdown_occupation_multiplier[index] = value;
+	if ( idx >= model->n_occupation_networks ) return FALSE;
+
+	if ( model->use_custom_occupation_networks == 0 )
+		model->params->lockdown_occupation_multiplier[idx] = value;
+	else
+		model->params->occupation_network_table->lockdown_occupation_multipliers[idx] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );
@@ -995,7 +1209,6 @@ int set_model_param_manual_trace_notifications_per_worker_day( model* model, int
 	return TRUE;
 }
 
-
 /*****************************************************************************************
 *  Name:		check_params
 *  Description: Carries out checks on the input parameters
@@ -1060,6 +1273,16 @@ void check_hospital_params( parameters *params )
         print_exit( "BAD PARAM hcw_mean_work_interactions must be less than or equal to half the total number of healthcare workers" );
 }
 
+void destroy_occupation_network_table(parameters *params)
+{
+    for (int i = 0; i != params->occupation_network_table->n_networks; ++i)
+        free(params->occupation_network_table->network_names[i]);
+    free(params->occupation_network_table->network_names);
+    free(params->occupation_network_table->network_ids);
+    free(params->occupation_network_table->mean_interactions);
+    free(params->occupation_network_table->age_type);
+    free(params->occupation_network_table->network_no);
+}
 
 /*****************************************************************************************
 *  Name:        destroy_params
@@ -1078,4 +1301,8 @@ void destroy_params( parameters *params )
 		free( params->demo_house->house_no );
 		free( params->demo_house->idx );
 	}
+
+	if ( params->occupation_network_table != NULL )
+	    destroy_occupation_network_table(params);
+
 }
