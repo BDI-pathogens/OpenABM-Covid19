@@ -15,6 +15,7 @@ import subprocess
 import sys
 import numpy as np, pandas as pd
 from scipy import optimize
+from scipy.stats import binom
 from math import sqrt
 from numpy.core.numeric import NaN
 from random import randrange
@@ -300,6 +301,8 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                     test_order_wait = 1,
                     test_result_wait = 1,
                     quarantine_household_on_positive = True,
@@ -427,7 +430,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -457,7 +462,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -487,7 +494,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -739,7 +748,7 @@ class TestClass(object):
             dict(
                 test_params = dict( 
                     n_total = 100000,
-                    n_seed_infection = 500,
+                    n_seed_infection = 4000,
                     end_time = 10,
                     infectious_rate = 6,
                     self_quarantine_fraction = 1.0,
@@ -748,6 +757,10 @@ class TestClass(object):
                     test_order_wait  = 0,
                     app_turn_on_time = 0,
                     test_sensitivity = 0.7,
+                    daily_non_cov_symptoms_rate =0.01,
+                    test_specificity = 0.9,
+                    test_insensitive_period = 3
+
                 ),
             )
         ],
@@ -956,11 +969,13 @@ class TestClass(object):
 
         df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         
-        # get everyone who is a case as these will not be traced
-        df_trans = df_trans.loc[:,["ID_recipient","is_case"]]
-        df_trans = df_trans[ ( df_trans[ "is_case"] == 1 ) ]
+        # get everyone who is a case or just released from hospital as these will not be traced
+        df_trans = df_trans.loc[:,["ID_recipient","is_case","time_recovered","time_hospitalised"]]
+        df_trans[ "not_traced"] = ( df_trans["time_recovered"] >= ( end_time - 1) ) & ( df_trans["time_hospitalised"] >= 0 ) 
+        df_trans[ "not_traced"] = df_trans[ "not_traced"] | ( df_trans[ "is_case"] == 1 )  
+        df_trans = df_trans[ ( df_trans[ "not_traced"] == 1 ) ]
         df_trans.rename(columns = {"ID_recipient":"traced_ID"}, inplace = True )
         
         # prepare the interaction data to get all household interations
@@ -990,8 +1005,8 @@ class TestClass(object):
         # check everybody with a household interaction is traced
         t = pd.merge( index_traced, index_inter, on = [ "index_ID", "traced_ID" ], how = "outer" )
         t = pd.merge( t, df_trans, on = "traced_ID", how = "left" )
-        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["is_case"] != True  )] )
-        n_household = len( t[ (t["household"] == True  ) ] )
+        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["not_traced"] != True )] )
+        n_household = len( t[ (t["household"] == True ) ] )
         np.testing.assert_equal( n_household>100, True, "insufficient household members traced to test" )
         np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
 
@@ -1195,6 +1210,8 @@ class TestClass(object):
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
         np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
        
+        del( model )
+
     def test_risk_score_age(self, test_params, min_age_inf, min_age_sus):
         """
         Test that if risk score quarantining is set to 0 for the youngest
@@ -1242,6 +1259,8 @@ class TestClass(object):
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
         np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
        
+        del( model )
+    
     def test_risk_score_days_since_contact(self, test_params, days_since_contact):
         """
         Test that if risk score quarantining is set to be 0 for days greater
@@ -1277,6 +1296,8 @@ class TestClass(object):
         # now perform checks
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( max( index_traced[ "days_since_contact"] ) <= days_since_contact, 1,  "tracing contacts from longer ago than risk score allows" )
+       
+        del( model )
        
     def test_risk_score_multiple_contact(self, test_params, days_since_contact, required_interactions):
         """
@@ -1357,6 +1378,8 @@ class TestClass(object):
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
         np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
+        
+        del( model )
 
     def test_quarantine_household_on_trace_positive_not_symptoms(self, test_params ):
         """
@@ -1524,6 +1547,8 @@ class TestClass(object):
         np.testing.assert_equal( n_red > 100, True, err_msg = "Not sufficient red messages to non-quarantiners to test")
         np.testing.assert_allclose( n_quar_pos, n_red*comp_pos, atol=max(tol_sd*sqrt(n_red*comp_pos*(1-comp_pos)),0.5), err_msg="The wrong number quarantined on red messages")
 
+        del( model )
+
 
     def test_quarantined_have_trace_token(self, test_params, time_steps_test ):
         """
@@ -1555,6 +1580,9 @@ class TestClass(object):
             
             np.testing.assert_equal( len( quarantined ) > 500, True, err_msg = "Not sufficient people quarantined to test")
             np.testing.assert_equal( sum( quarantined.n_tokens.isna() ), 0, err_msg = "Individuals quarantined without trace tokens")
+       
+        del( model )
+
 
     def test_priority_testing(self, test_params, app_users_fraction, priority_test_contacts ):
         """
@@ -1725,8 +1753,82 @@ class TestClass(object):
         np.testing.assert_equal(len(df_trace_sum[(df_trace_sum["priority"]==False)]) > 30, True, "In-sufficient non-priority cases to test")
         np.testing.assert_equal(len(non_priority_not_traced), 0, "Traced people not quarantined after the longer delay of a non-prioirty test")
         
-        del( model )
+        del( model )   
+        
+    def test_test_sensitivity(self, test_params ):
+        """
+        Test that the tests results have the required sensitivity and specificity
+        Make sure there sufficient true/false pos/neg and then check they 
+        lie within the 99% confidence interval
+        Note tests carried out of positive cases prior to the test becoming sensitive
+        must be treated differently
+        """
+        end_time  = test_params[ "end_time" ]
+        max_CI    = 0.99
+        upper_CI  = ( 1 + max_CI ) / 2 
+        lower_CI  = ( 1 - max_CI ) / 2 
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( end_time ):
+            model.one_time_step()
 
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # read CSV's
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+    
+        # get the new index cases
+        df_trace = df_trace[ ( df_trace[ "index_time"] == end_time ) ]
+        df_trace = df_trace.groupby( "index_ID" ).size().reset_index(name="n_trace")
+
+        # join on the time they were infected to calculated sensitivity of test
+        df_trans = df_trans.loc[:,["ID_recipient","time_infected"]]
+        df_trace = pd.merge( df_trace, df_trans, left_on = "index_ID", right_on = "ID_recipient", how = "left")
+        df_trace.fillna(-1, inplace=True)
+        df_trace["infected"] = (df_trace["time_infected"]>-1)
+
+        # join on the test result and work out test was in period it is sensitive
+        df_indiv.loc[:,["ID","test_status"]]
+        df_trace = pd.merge( df_trace, df_indiv, left_on = "index_ID", right_on = "ID", how = "left" )       
+        df_trace[ "test_sensitive" ] = ( df_trace["time_infected"] != - 1 ) & ( df_trace["time_infected"] <= ( end_time - test_params[ "test_insensitive_period"]))
+              
+        # check the specificity of the test
+        true_neg  = sum( ( df_trace["infected"] == False ) & ( df_trace["test_status"] == 0 ) )
+        false_pos = sum( ( df_trace["infected"] == False ) & ( df_trace["test_status"] == 1 ) )
+        p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "test_specificity"] )
+        np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
+        np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too few false positives given the test specificity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
+
+        # check the sensitivity in the initial period when not sensitive
+        false_neg  = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 0 ) & ( df_trace["test_sensitive"] == False ))
+        true_pos   = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 1 ) & ( df_trace["test_sensitive"] == False ))
+        p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "test_specificity"] )
+        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in insensitive period to test" )
+        np.testing.assert_equal( true_pos > 20, True, "In-sufficient true positives in insensitive period to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too many true positives in insensitive period given the test specificity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
+
+        # check the sensitivity in the initial period when not sensitive
+        false_neg  = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 0 ) & ( df_trace["test_sensitive"] == True ))
+        true_pos   = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 1 ) & ( df_trace["test_sensitive"] == True ))
+        p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "test_sensitivity"] )
+        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too many true positives in sensitive period given the test sensitivity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in sensitive period the test sensitivity" )
+
+        del( model )
 
     def test_manual_trace_params(self, test_params, time_steps_test ):
         """
@@ -1841,6 +1943,3 @@ class TestClass(object):
 
       
         
-        
-
-       
