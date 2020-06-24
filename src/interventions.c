@@ -348,7 +348,6 @@ void update_intervention_policy( model *model, int time )
 		model->manual_trace_interview_quota = params->manual_trace_n_workers * params->manual_trace_interviews_per_worker_day;
 		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
 	}
-	//printf("LOG: Updating manual trace quota iq=%i, nq=%i, nw=%i, iwd=%i, nwd=%i\n", model->manual_trace_interview_quota, model->manual_trace_notification_quota, params->manual_trace_n_workers, params->manual_trace_interviews_per_worker_day, params->manual_trace_notifications_per_worker_day );
 };
 
 /*****************************************************************************************
@@ -515,8 +514,6 @@ void intervention_test_result( model *model, individual *indiv )
 ******************************************************************************************/
 void intervention_manual_trace( model *model, individual *indiv )
 {
-	//printf("LOG: Manual Trace t=%i, i=%i\n", model->time, indiv->idx);
-	// int index_already  = ( indiv->index_trace_token != NULL );
 	trace_token *index_token = index_trace_token( model, indiv );
 	indiv->traced_on_this_trace = TRUE;
 
@@ -541,14 +538,11 @@ void intervention_notify_contacts(
 	int trace_type
 )
 {
-	//printf("LOG: Notifying contacts t=%i, i=%i, type=%i\n", model->time, indiv->idx, trace_type);
 	if( trace_type == DIGITAL_TRACE && (!indiv->app_user || !model->params->app_turned_on ))
 		return;
 
 	if( trace_type == MANUAL_TRACE )
 	{
-		//printf("LOG: Trying Manual Tracing of contacts %i, %i, %i, %i, %i, %i, %i, %i\n", model->params->manual_trace_on, model->params->manual_trace_exclude_app_users, indiv->app_user, model->params->app_turned_on, model->manual_trace_interview_quota, model->params->manual_trace_n_workers, model->params->manual_trace_interviews_per_worker_day, model->manual_trace_notification_quota );
-	
 		if( !model->params->manual_trace_on )
 			return;
 		if( model->params->manual_trace_exclude_app_users && indiv->app_user && model->params->app_turned_on )
@@ -556,7 +550,6 @@ void intervention_notify_contacts(
 		if( model->manual_trace_interview_quota <= 0 )
 			return;
 		model->manual_trace_interview_quota--;
-		//printf("LOG: Manual Tracing contacts\n");
 	}
 
 	interaction *inter;
@@ -578,8 +571,6 @@ void intervention_notify_contacts(
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
 				contact = inter->individual;
-				// if (contact->traced_on_this_trace)
-				// 	continue;
 				if( trace_type == DIGITAL_TRACE && contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
@@ -589,13 +580,10 @@ void intervention_notify_contacts(
 				}
 				else if( trace_type == MANUAL_TRACE )
 				{
-					//printf("LOG: Manual Tracing found contact\n");
 					if( inter->manual_traceable == UNKNOWN )
-						//printf("LOG: Manual Tracing new contact %i p=%.2f\n", inter->type, params->manual_traceable_fraction[inter->type]);
 						inter->manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
 					if( inter->manual_traceable && model->manual_trace_notification_quota > 0 )
 					{
-						// printf("LOG: Manual Tracing traced contact t=%i, type=%i p=%.2f\n", model->time - ddx, inter->type, params->manual_traceable_fraction[inter->type]);
 						model->manual_trace_notification_quota--;
 						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
 					}
@@ -904,10 +892,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		  ( params->manual_trace_on_hospitalization && is_in_hospital( indiv ) ) ) &&
 	    ( params->quarantine_on_traced || params->test_on_traced )
 	)
-	{
 		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay );
-		// release_time = max( release_time, model->time + params->manual_trace_delay );
-	}
 
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );
@@ -957,7 +942,6 @@ void intervention_on_traced(
 	int trace_type
 )
 {
-	//printf("LOG: Traced t=%i, i=%i, type=%i\n", model->time, indiv->idx, trace_type);
 	if( is_in_hospital( indiv ) || indiv->infection_events->is_case )
 		return;
 
