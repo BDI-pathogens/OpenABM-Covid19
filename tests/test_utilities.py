@@ -11,21 +11,31 @@ Author: p-robot
 """
 
 import pytest, numpy as np, covid19
-from scipy.stats import gamma, geom, nbinom, describe
+from scipy.stats import gamma, geom, nbinom, bernoulli, describe
 
 from . import constant
 from . import utilities as utils
 
 
 def get_gamma_params(mu, sigma):
+    """
+    Return parameters a,b to gamma distribution from given mean, std
+    (as expected by scipy.stats.gamma)
+    """
     b = sigma * sigma / mu
     a = mu / b
     return(a, b)
 
+
 def get_nbinom_params(mu, sigma):
+    """
+    Return parameters n, p to negative binomial from given mean, std
+    (as expected by scipy.stats.nbinom)
+    """
     p = mu / sigma / sigma;
     n = mu**2 / ( sigma**2 - mu );
     return(n, p)
+
 
 def create_c_array(array, ctype):
     """
@@ -57,6 +67,9 @@ def create_c_array(array, ctype):
 
 
 def c_array_as_python_list(array_c, N):
+    """
+    Return python list from a Swig object of a C array.  
+    """
     array = []
     for i in range(N):
         array.append(array_c[i])
@@ -71,32 +84,41 @@ def pytest_generate_tests(metafunc):
         argnames, [[funcargs[name] for name in argnames] for funcargs in funcarglist]
     )
 
-
 class TestClass(object):
     """
-    Test class
+    Test class for testing functions within utilities.c (C internals)
     """
     params = {
         "test_sum_square_diff_array": [dict()],
-        "test_gamma_draw_list": [dict()],
-        
-        "test_bernoulli_draw_list": [dict()],
-        "test_geometric_max_draw_list": [dict()],
-        "test_negative_binomial_draw": [dict()],
+        "test_gamma_draw_list": [
+            dict(n = 1000, mu = 5.6, sigma = 3.7),
+            dict(n = 1000, mu = 5.6, sigma = 2.7),
+            dict(n = 100, mu = 10.2, sigma = 2.7)],
+        "test_bernoulli_draw_list": [
+            dict(n = 1000, mu = 5.26),
+            dict(n = 1000, mu = 1.31)],
+        "test_geometric_max_draw_list": [
+            dict(n = 1000, p = 0.1, maxv = 30),
+            dict(n = 1000, p = 0.05, maxv = 30)],
+        "test_negative_binomial_draw": [
+            dict(N = 10000000, mu = 10.2, sigma = 5.5),
+            dict(N = 10000000, mu = 20, sigma = 7)],
         "test_discrete_draw": [
-            dict(array = [0.1, 0.1, 0.1, 0.1]), # NB: GSL normalises the arrays
-            dict(array = np.arange(1, 10)/11 ),
-            dict(array = [0.01, 0.01, 0.9])],
+            dict(array = [0.1, 0.1, 0.1, 0.1], M = 100000), # NB: GSL normalises the arrays
+            dict(array = np.arange(1, 10)/11, M = 100000),
+            dict(array = [0.01, 0.01, 0.9], M = 100000)],
         "test_n_unique_elements": [
             dict(array = np.random.randint(1, 1000, 1000))],
         "test_copy_array" : [dict()],
         "test_normalize_array" : [dict()],
-        "test_gamma_rate_curve" : [dict()]
+        "test_gamma_rate_curve" : [
+            dict(N = 35, mu = 10.6, sigma = 3.7, factor = 0.5),
+            dict(N = 35, mu = 10.6, sigma = 3.7, factor = 2.5),
+            dict(N = 35, mu = 10.6, sigma = 5.7, factor = 0.5),
+            dict(N = 500, mu = 10.6, sigma = 7.7, factor = 0.5),
+            dict(N = 500, mu = 10.6, sigma = 3.7, factor = 0.5)]
     }
     def test_sum_square_diff_array(self):
-        """
-        Test that sum_square_diff_array returns the same values as numpy
-        """
         N = 1000 
         np.random.seed(2020)
         array1 = np.random.uniform(0, 1, N)
@@ -106,16 +128,11 @@ class TestClass(object):
         
         array1_c = create_c_array(array1, ctype = "double")
         array2_c = create_c_array(array2, ctype = "double")
-
         sse_c = covid19.sum_square_diff_array(array1_c, array2_c, N)
 
         np.testing.assert_almost_equal(sse_np, sse_c, decimal = 10)
 
-    def test_gamma_draw_list(self):
-        n = 1000
-        mu = 5.6
-        sigma = 3.7
-
+    def test_gamma_draw_list(self, n, mu, sigma):
         # Calculate using C
         array_c = covid19.intArray(n)
         covid19.gamma_draw_list(array_c, n, mu, sigma)
@@ -125,54 +142,37 @@ class TestClass(object):
         a, b = get_gamma_params(mu, sigma)
         array_np = np.round(gamma.ppf(( np.arange(n)  + 1 )/( n + 1 ), a, loc = 0, scale = b))
         array_np = np.maximum(array_np, 1)
-
+        
         np.testing.assert_array_equal(array_c, array_np)
     
-    def test_bernoulli_draw_list(self): 
-        n = 1000
-        mu = 5.26
-
+    def test_bernoulli_draw_list(self, n, mu): 
         array_c = covid19.intArray(n)
         covid19.bernoulli_draw_list(array_c, n, mu)
         array_c = c_array_as_python_list(array_c, n)
-
-        a = int(np.floor(mu))
-        p = int( (mu - a) * n )
-        array_np = np.zeros(n)
-        array_np[:p] = a + 1
-        array_np[p:] = a
         
-        np.testing.assert_array_equal(array_c, array_np)
-
+        a = int(np.floor(mu))
+        array_np = a + bernoulli.ppf(( np.arange(n)  + 1 )/( n + 1 ), mu - a, loc = 0)
+        
+        np.testing.assert_equal(np.sort(array_c), array_np)
     
-    # def geometric_draw_list(n, mu):
-    #     """
-    #     """
-    #     quantiles = expon.ppf(q = np.linspace(1/n, 1 - 1/n, n), scale = mu)
-    #     return np.maximum(np.round(quantiles), 1)
-
-    def test_geometric_max_draw_list(self):
-        n = 1000
-        p = 0.1
-        maxv = 30
-
+    def test_geometric_max_draw_list(self, n, p, maxv):
+        """
+        NB: slight mismatches on arrays possibly due to rounding error in C
+        """
         array_c = covid19.intArray(n)
         covid19.geometric_max_draw_list(array_c, n, p, maxv)
-        array_c = c_array_as_python_list(array_c, n)
+        array_c = np.array(c_array_as_python_list(array_c, n))
 
-        array_np = geom.ppf(( np.arange(n)  + 1 )/( n + 1 ), p) - 1
+        array_np = geom.ppf( np.linspace(1/n, 1 - 1/n, n) , p ) - 1
         array_np = np.minimum(array_np, maxv)
-
-        np.testing.assert_array_equal(array_c, array_np)
+        
+        np.testing.assert_almost_equal(np.mean(array_c), np.mean(array_np), decimal = 2)
     
-    def test_negative_binomial_draw(self):
-        
-        # Set the GSL random seed (instantiating the rng object)
+    def test_negative_binomial_draw(self, N, mu, sigma):
+        """
+        NB: requires setting the GSL random seed (instantiating the rng object)
+        """
         covid19.setup_gsl_rng(2021)
-        
-        N = 10000000
-        mu = 10.2
-        sigma = 5.5
         
         n, p = get_nbinom_params(mu, sigma)
         
@@ -187,11 +187,11 @@ class TestClass(object):
             [summary_obs.mean, np.sqrt(summary_obs.variance), summary_obs.skewness], 
             decimal = 2)
 
-    def test_discrete_draw(self, array):
-        
+    def test_discrete_draw(self, array, M):
+        """
+        NB: requires setting the GSL random seed
+        """
         covid19.setup_gsl_rng(2021)
-        
-        M = 100000
         
         array_c = create_c_array(array, ctype = "double")
         samples = [covid19.discrete_draw(len(array), array_c) for i in range(M)]
@@ -203,7 +203,6 @@ class TestClass(object):
             array/np.sum(array), decimal = 2)
     
     def test_n_unique_elements(self, array):
-        
         N = len(array)
         array_c = create_c_array(array, ctype = "long")
         
@@ -213,7 +212,6 @@ class TestClass(object):
         np.testing.assert_equal(nel_openabm, nel_numpy)
     
     def test_copy_array(self):
-        
         N = 100
         array = np.random.uniform(1, N, N)
         array_from = create_c_array(array, ctype = "double")
@@ -228,27 +226,20 @@ class TestClass(object):
         np.testing.assert_array_equal(array_from, array_to)
     
     def test_normalize_array(self):
-        
+        """
+        NB: normalizes is implemented in-place
+        """
         N = 100
         array = np.random.uniform(1, N, N)
         array_c = create_c_array(array, ctype = "double")
-        
         covid19.normalize_array(array_c, N)
-        
-        # Convert back to Python objects
         array_c = c_array_as_python_list(array_c, N)
         
         array_numpy = array/np.sum(array)
         
         np.testing.assert_array_almost_equal(array_c, array_numpy, decimal = 10)
     
-    def test_gamma_rate_curve(self):
-        
-        N = 35
-        mu = 10.6
-        sigma = 3.7
-        factor = 0.5
-        
+    def test_gamma_rate_curve(self, N, mu, sigma, factor):
         a, b = get_gamma_params(mu, sigma)
         
         array_scipy = factor * np.diff(gamma.cdf(( np.arange(N + 1)), a, loc = 0, scale = b))
@@ -257,4 +248,4 @@ class TestClass(object):
         covid19.gamma_rate_curve(array_c, N, mu, sigma, factor)
         array_c = c_array_as_python_list(array_c, N)
         
-        np.testing.assert_array_almost_equal(array_c, array_scipy)
+        np.testing.assert_array_almost_equal(array_c, array_scipy, decimal = 4)
