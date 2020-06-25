@@ -2,6 +2,7 @@
 %module covid19
 %{
 #define SWIG_FILE_WITH_INIT
+#define SWIG_PYTHON_CAST_MODE
 #include "model.h"
 #include "params.h"
 #include "constant.h"
