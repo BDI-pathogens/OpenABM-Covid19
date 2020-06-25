@@ -23,6 +23,7 @@
 void initialize_params( parameters *params )
 {
 	params->demo_house = NULL;
+	params->occupation_network_table = NULL;
 }
 
 /*****************************************************************************************
