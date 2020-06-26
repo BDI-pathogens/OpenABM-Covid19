@@ -135,6 +135,7 @@ typedef struct{
 	int test_order_wait;					// minimum number of days to wait for a test to be taken
 	int test_result_wait_priority;			// number of days to wait for a priority test result
 	int test_order_wait_priority;			// minimum number of days to wait for a priority test to be taken
+	int test_release_on_negative;			// release on a negative test result
 	
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 	

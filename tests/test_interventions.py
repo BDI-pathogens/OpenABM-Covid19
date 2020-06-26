@@ -796,6 +796,39 @@ class TestClass(object):
                 ),
             )
         ],
+         "test_recursive_testing": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 4000,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    test_on_symptoms  = True,
+                    test_on_traced    = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = True,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_household_on_traced_positive = False,
+                    quarantine_household_on_traced_symptoms = False,
+                    quarantine_compliance_traced_symptoms = 1.0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 1,
+                    test_result_wait = 1,
+                    test_specificity = 1,
+                    test_insensitive_period = 0,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 1,
+                    allow_clinical_diagnosis = False,
+                    daily_non_cov_symptoms_rate =0.00,
+                ),
+            )
+        ],
     }
     """
     Test class for checking
@@ -1927,6 +1960,67 @@ class TestClass(object):
 
         np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
 
+    def test_recursive_testing(self, test_params ):
+        """
+        Test checks that following a positive test for an index case we order a 
+        test for all directly traced people
+        
+        Additionally checks that when a symptomatic index case receives a positive test
+        tests are ordered for all directly traced people
+        """
+        end_time  = test_params[ "end_time" ]
+        symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( symp_time ):
+            model.one_time_step()  
+        
+        # get the test status at the point of becoming an index case  
+        model.write_trace_tokens()
+        df_trace_symp = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_symp = df_trace_symp[ ( df_trace_symp[ "index_time" ] == symp_time ) & ( df_trace_symp["index_reason"] == 1 ) ]
+        df_trace_symp = df_trace_symp.groupby("index_ID").size().reset_index(name="n_traced")
+        df_trace_symp["pos_at_symp"] = True
+        
+        # go to step before symptomatic index cases get their test results back to get the status of those traced
+        for time in range( end_time - symp_time ):
+            model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # get a list of everyone who is directly traced
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_direct_trace = df_trace[ ( ( df_trace[ "index_time" ] == symp_time ) | ( df_trace[ "index_time" ] == end_time )) & ( df_trace["index_reason"] == 1 ) ]
+        df_direct_trace = df_direct_trace[ ( df_direct_trace[ "index_ID" ] == df_direct_trace[ "traced_from_ID" ] )]
+        df_direct_trace = df_direct_trace[ ( df_direct_trace[ "index_ID" ] != df_direct_trace[ "traced_ID" ] )]
+        
+        # add data about the status of the index case when they became an index
+        df = pd.merge( df_direct_trace, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        df = pd.merge( df, df_trace_symp, on = "index_ID", how = "left")
+
+        # remove those who are not tested on traced
+        # 1. those who are cases already
+        # 2. those who have not quarantined
+        # 3. those where the index case was positive at the time the symptomatic cases became the index (i.e. they would have been tested then)
+
+        df = df[ ( df[ "is_case" ] != 1) & ( df[ "quarantined" ] == 1 ) & ( df[ "pos_at_symp" ] != True )]
+                
+        np.testing.assert_equal( sum( df[ "index_time" ] == symp_time ) > 1000, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( sum( ( df[ "index_time" ] == symp_time ) & ( df[ "test_status"] == -2 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )
+        np.testing.assert_equal( sum( df[ "index_time" ] == end_time ) > 1000, True, "In-sufficient traced from index positive at end time " )
+        np.testing.assert_equal( sum( ( df[ "index_time" ] == end_time ) & ( df[ "test_status"] == -2 ) ), 0, "Traced people not getting a test after new positive index case" )
+
+        del( model )
 
     def test_manual_trace_only_of_given_type(self, test_params, time_steps_test, interaction_type ):
         """

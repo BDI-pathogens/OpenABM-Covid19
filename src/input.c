@@ -329,6 +329,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->test_release_on_negative));
+	if( check < 1){ print_exit("Failed to read parameter test_release_on_negative\n"); };
+
 	check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
 
