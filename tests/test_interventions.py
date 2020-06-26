@@ -764,7 +764,7 @@ class TestClass(object):
                 ),
             )
         ],
-        "test_recursive_testing": [
+        "test_recursive_testing_indirect_release": [
             dict(
                 test_params = dict( 
                     n_total = 100000,
@@ -793,8 +793,6 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
-            
-
                 ),
             )
         ],
@@ -1864,9 +1862,10 @@ class TestClass(object):
 
         del( model )
         
-    def test_recursive_testing(self, test_params ):
+    def test_recursive_testing_indirect_release(self, test_params ):
         """
-        Test that the t
+        Test that when recursively tested people are released that 
+        those indirectly traced through them are also released
         """
         end_time  = test_params[ "end_time" ]
         symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
@@ -1881,27 +1880,23 @@ class TestClass(object):
 
         # write files
         model.write_trace_tokens()
-     #   model.write_individual_file()
-      #  model.write_transmissions()
       
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = df_trace[ df_trace[ "index_time" ] == symp_time ]
         
+        # get everyone directly traced by the index case
         df_direct_trace = df_trace[ ( df_trace[ "index_ID" ] == df_trace[ "traced_from_ID" ] )]
         df_direct_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
         df_direct_trace.rename( columns = {"traced_ID":"direct_traced_ID"}, inplace = True )
         
-        index_ID = df_trace.iloc[0,2]
-        print( df_trace[ df_trace["index_ID"]==index_ID].loc[:,["index_ID", "traced_from_ID", "traced_ID", "index_reason"]])
-
+        # now get those indirectly traced (i.e. household members of traced)
         df_indirect_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_from_ID" ] ) & ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
-
         df = pd.merge( df_indirect_trace, df_direct_trace, left_on = ["index_ID", "traced_from_ID"], right_on = ["index_ID", "direct_traced_ID"], how = "left")
         df.fillna(-1, inplace=True)
 
-        np.testing.assert_equal( len( df_indirect_trace) > 500, True, "In-sufficient indirect-traced to " )
-
-        print( df[ df[ "direct_traced_ID"] == -1 ])
+        # test that everyone who has been indirectly traced, the directly traced person is still on the trace list
+        np.testing.assert_equal( len( df_indirect_trace) > 500, True, "In-sufficient indirect-traced to test" )
+        np.testing.assert_equal( sum( df[ "direct_traced_ID"] == -1 ), 0, "Indirect traced people where the traced from person is no longer on the trace list" )
 
         del( model )
 
