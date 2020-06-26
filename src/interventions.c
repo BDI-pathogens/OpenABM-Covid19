@@ -936,6 +936,8 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	remove_traced_on_this_trace( model, indiv );
 }
+
+/*****************************************************************************************
 *  Name:		intervention_on_critical
 *  Description: The interventions performed upon becoming critical
 *  Returns:		void

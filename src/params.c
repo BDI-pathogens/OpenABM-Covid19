@@ -640,6 +640,7 @@ int set_model_param_test_on_traced( model *model, int value )
 int set_model_param_test_result_wait( model *model, int value )
 {
     model->params->test_result_wait = value;
+	check_params( model->params );
     return TRUE;
 }
 
@@ -650,6 +651,7 @@ int set_model_param_test_result_wait( model *model, int value )
 int set_model_param_test_order_wait( model *model, int value )
 {
     model->params->test_order_wait = value;
+	check_params( model->params );
     return TRUE;
 }
 
@@ -667,6 +669,8 @@ int set_model_param_test_result_wait_priority( model *model, int value )
     if( value == NO_PRIORITY_TEST )
     	model->params->test_order_wait_priority = NO_PRIORITY_TEST;
 
+	check_params( model->params );
+
     return TRUE;
 }
 
@@ -683,6 +687,8 @@ int set_model_param_test_order_wait_priority( model *model, int value )
 
      if( value == NO_PRIORITY_TEST )
      	model->params->test_result_wait_priority = NO_PRIORITY_TEST;
+
+ 	check_params( model->params );
 
     return TRUE;
 }
@@ -1062,6 +1068,18 @@ void check_params( parameters *params )
 		for( idx = 0; idx < N_AGE_TYPES; idx++ )
 			if( params->mean_random_interactions[idx] >= params->sd_random_interactions[idx] * params->sd_random_interactions[idx] )
 				print_exit( "BAD_PARAM - sd_random_interations_xxxx - variance must be greater than the mean for (negative binomial distribution");
+
+    if( params->test_on_traced )
+    {
+    	if( params->test_order_wait + params->test_result_wait == 0 )
+    		print_exit( "BAD_PARAM - total test time must be at least a day if using recursive testing");
+
+    	if( params->test_order_wait_priority != NO_PRIORITY_TEST )
+    	{
+    		if( params->test_order_wait_priority + params->test_result_wait_priority == 0 )
+    			print_exit( "BAD_PARAM - total test time must be at least a day if using recursive testing");
+    	}
+    }
 }
 
 /*****************************************************************************************
