@@ -135,6 +135,7 @@
 | `quarantine_compliance_traced_positive` | 0.9 | - | Fraction of individuals who initially comply with a quarantine notification after their contact tested positive | - |
 | `test_on_symptoms` | 0 | - | Test individuals who show symptoms (0=no, 1=yes) | - |
 | `test_on_traced` | 0 | - | Test individuals who have been contact-traced (0=no, 1=yes) | - |
+| `test_release_on_negative` | 1 | - | Release individuals following a negative test (0=no, 1=yes) | - |
 | `trace_on_symptoms` | 0 | - | Trace contacts of individuals who show symptoms (0=no, 1=yes) | - |
 | `trace_on_positive` | 0 | - | Trace contacts of an individual who tests positive (0=no, 1=yes) | - |
 | `retrace_on_positive` | 0 | - | Repeat contract tracing be carried out on a positive test if already tested on symptoms (0=no, 1=yes) | - |

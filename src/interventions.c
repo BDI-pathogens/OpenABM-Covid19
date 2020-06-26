@@ -250,6 +250,9 @@ void remove_traces_on_individual( model *model, individual *indiv )
 		next_token = token->next;
 		last_index_token = token->last_index;
 
+		if( ( indiv->house_no == token->traced_from->house_no ) && token->traced_from->index_trace_token != NULL )
+			continue;
+
 		remove_one_trace_token( model, token );
 
 		while( last_index_token->traced_from != NULL )
@@ -478,7 +481,7 @@ int intervention_quarantine_until(
 }
 
 /*****************************************************************************************
-*  Name:		intervention_on_quarantine_release
+*  Name:		intervention_quarantine_release
 *  Description: Release an individual held in quarantine
 *  Returns:		void
 ******************************************************************************************/
@@ -564,7 +567,11 @@ void intervention_test_take( model *model, individual *indiv )
 *  Name:		intervention_test_result
 *  Description: An individual gets a test result
 *
-*  				 1. On a negative result the person is released from quarantine
+*  				 1. On a negative result remove the trace tokens from an individual
+*  				 	and those with dependent trace tokens. Optionally release and
+*  				 	then only if the person has no trace tokens after removal (we
+*  				 	do not remove trace tokens if there is a remaining index case
+*  				 	in the house, this is only done upon them having a negative test)
 *  				 2. On a positive result they become a case and trigger the
 *  				 	intervention_on_positive_result cascade
 *  Returns:		void
@@ -573,11 +580,14 @@ void intervention_test_result( model *model, individual *indiv )
 {
 	if( indiv->quarantine_test_result == FALSE )
 	{
-		if( indiv->quarantined )
-			intervention_quarantine_release( model, indiv );
+		if( model->params->test_release_on_negative )
+		{
+			remove_traces_on_individual( model, indiv );
+			intervention_trace_token_release( model, indiv );
 
-		remove_traces_on_individual( model, indiv );
-		intervention_trace_token_release( model, indiv );
+			if( indiv->trace_tokens == NULL )
+				intervention_quarantine_release( model, indiv );
+		}
 	}
 	else
 	{
@@ -700,7 +710,7 @@ void intervention_quarantine_household(
 {
 	parameters *params = model->params;
 	individual *contact;
-	int idx, n, time_event, quarantine;
+	int idx, n, time_event, quarantine, time_test;
 	long* members;
 	double *risk_scores = model->params->risk_score_household[ indiv->age_group ];
 
@@ -720,8 +730,8 @@ void intervention_quarantine_household(
 
 			if( quarantine && params->test_on_traced && ( index_token->index_status == POSITIVE_TEST ) )
 			{
-				int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
-				intervention_test_order( model, indiv, time_test );
+				time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
+				intervention_test_order( model, contact, time_test );
 			}
 
 			if( contact_trace && ( params->quarantine_on_traced || params->test_on_traced ) )
