@@ -449,6 +449,31 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->hospital_on));
 	if( check < 1){ print_exit("Failed to read parameter hospital_on)\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_on));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_on\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_time_on));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_time_on\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_on_hospitalization));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_on_hospitalization\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_on_positive));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_on_positive\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_delay));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_delay\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_exclude_app_users));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_exclude_app_users\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_n_workers));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_n_workers\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_interviews_per_worker_day));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_interviews_per_worker_day\n"); };
+	check = fscanf(parameter_file, " %i ,", &(params->manual_trace_notifications_per_worker_day));
+	if( check < 1){ print_exit("Failed to read parameter manual_trace_notifications_per_worker_day\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction[HOUSEHOLD]));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_household\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction[OCCUPATION]));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_occupation\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction[RANDOM]));
+	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_random\n"); };
+
 	fclose(parameter_file);
 }
 /*****************************************************************************************
@@ -883,7 +908,7 @@ void write_interactions( model *model )
 {
 	char output_file_name[INPUT_CHAR_LEN];
 	FILE *output_file;
-	long pdx;
+	long pdx, time;
 	int day, idx;
 	individual *indiv;
 	interaction *inter;
@@ -901,8 +926,9 @@ void write_interactions( model *model )
 
 	day = model->interaction_day_idx;
 	ring_dec( day, model->params->days_of_interactions );
+	time = model->time - 1;
 
-	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2\n");
+	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -913,7 +939,7 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i\n",
+				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i,%i,%i,%li\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->worker_type,
@@ -924,7 +950,10 @@ void write_interactions( model *model )
 					inter->individual->age_group,
 					inter->individual->worker_type,
 					inter->individual->house_no,
-					inter->individual->occupation_network
+					inter->individual->occupation_network,
+					inter->traceable,
+					inter->manual_traceable,
+					time
 				);
 				inter = inter->next;
 			}

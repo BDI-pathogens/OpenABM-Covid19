@@ -49,6 +49,17 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "lockdown_occupation_multiplier_working_network",
     "lockdown_occupation_multiplier_retired_network",
     "lockdown_occupation_multiplier_elderly_network",
+    "manual_trace_on",
+    "manual_trace_on_hospitalization",
+    "manual_trace_on_positive",
+    "manual_trace_delay",
+    "manual_trace_exclude_app_users",
+    "manual_trace_n_workers",
+    "manual_trace_interviews_per_worker_day",
+    "manual_trace_notifications_per_worker_day",
+    "manual_traceable_fraction_household",
+    "manual_traceable_fraction_occupation",
+    "manual_traceable_fraction_random",
     "relative_transmission_household",
     "relative_transmission_occupation",
     "relative_transmission_random",
@@ -88,7 +99,8 @@ class EVENT_TYPES(enum.Enum):
     ICU = 20
     MORTUARY = 21
     DISCHARGED = 22
-    N_EVENT_TYPES = 23
+    MANUAL_CONTACT_TRACING = 23
+    N_EVENT_TYPES = 24
 
 
 

@@ -492,10 +492,252 @@ class TestClass(object):
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
             ),
-        ]
+        ],        
+        "test_manual_trace_params" : [
+            dict(
+                test_params = dict( 
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 30,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 1,
+                    quarantine_household_on_symptoms = 1,
+                    quarantine_household_on_traced_positive = 1,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                    manual_trace_on = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_time_on = 1,
+                    manual_trace_on_hospitalization = 1,
+                    manual_trace_on_positive = 1,
+		            manual_trace_n_workers = 300,
+                    manual_trace_interviews_per_worker_day = 15,
+                ),
+                time_steps_test = 5
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 30,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 1,
+                    quarantine_household_on_symptoms = 1,
+                    quarantine_household_on_traced_positive = 1,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                    manual_trace_time_on = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_on_positive = 1,
+                    manual_trace_on_hospitalization = 1,
+                ),
+                time_steps_test = 5
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 30,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 0.5,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 1,
+                    quarantine_household_on_symptoms = 1,
+                    quarantine_household_on_traced_positive = 1,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                    app_turn_on_time = 1,
+                    manual_trace_time_on = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_on_positive = 1,
+                    manual_trace_on_hospitalization = 1,
+                    manual_traceable_fraction_occupation = 1,
+                    manual_traceable_fraction_household = 1,
+                    manual_traceable_fraction_random = 1,
+                ),
+                time_steps_test = 5
+            ),
+        ],
+        "test_manual_trace_only_of_given_type" : [
+            dict(
+                test_params = dict(
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 15,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 0,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_household_on_traced_positive = 0,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                    app_turn_on_time = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_time_on = 1,
+                    manual_trace_on_positive = 1,
+                    manual_trace_on_hospitalization = 1,
+                    manual_traceable_fraction_occupation = 0,
+                    manual_traceable_fraction_household = 1,
+                    manual_traceable_fraction_random = 0,
+                ),
+                time_steps_test = 5,
+                interaction_type = 0,
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 20,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 0,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_household_on_traced_positive = 0,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 0.5,
+                    quarantine_compliance_traced_positive = 0.9,
+                    manual_trace_time_on = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_on_positive = 1,
+                    manual_trace_on_hospitalization = 1,
+                    manual_traceable_fraction_occupation = 1,
+                    manual_traceable_fraction_household = 0,
+                    manual_traceable_fraction_random = 0,
+                    mean_work_interactions_adult = 10,
+                ),
+                time_steps_test = 5,
+                interaction_type = 1,
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 20000,
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 12,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = 1,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    quarantine_on_traced = 1,
+                    traceable_interaction_fraction = 1,
+                    daily_non_cov_symptoms_rate = 0.002,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    quarantine_household_on_positive = 0,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_household_on_traced_positive = 0,
+                    quarantine_household_on_traced_symptoms = 0,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_symptoms = 1,
+                    quarantine_compliance_traced_positive = 1,
+                    manual_trace_delay = 0,
+                    manual_trace_time_on = 1,
+                    manual_trace_on_positive = 1,
+                    manual_trace_on_hospitalization = 1,
+                    manual_traceable_fraction_occupation = 0,
+                    manual_traceable_fraction_household = 0,
+                    manual_traceable_fraction_random = 1,
+                    mean_work_interactions_child = 1,
+                    mean_work_interactions_adult = 1,
+                    mean_random_interactions_adult = 10,
+                ),
+                time_steps_test = 5,
+                interaction_type = 2,
+            ),
+        ],
+        "test_manual_trace_delay" : [
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 1000,
+                    end_time = 12,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_positive = 1,
+                    test_on_symptoms = 1,
+                    test_on_traced = 0,
+                    quarantine_on_traced = 1,
+                    test_order_wait = 1,
+                    test_result_wait = 1,
+                    allow_clinical_diagnosis = False,
+                    quarantine_dropout_traced_symptoms = 0,
+                    quarantine_dropout_traced_positive = 0,
+                    quarantine_compliance_traced_positive = 1,
+                    quarantine_household_on_positive = 0,
+                    quarantine_household_on_symptoms = 0,
+                    quarantine_household_on_traced_positive = 0,
+                    quarantine_household_on_traced_symptoms = 0,
+                    manual_trace_time_on = 1,
+                    manual_trace_delay = delay,
+                    manual_trace_on_positive = 1,
+                    manual_traceable_fraction_occupation = 1,
+                    manual_traceable_fraction_household = 1,
+                    manual_traceable_fraction_random = 1,
+                    manual_trace_n_workers = 2e3,
+                    manual_trace_on_hospitalization = 0
+                ),
+                delay = delay,
+            ) for delay in [0, 1, 2, 3]
+        ],
     }
     """
-    Test class for checking 
+    Test class for checking
     """
     def test_zero_quarantine(self):
         """
@@ -1468,3 +1710,121 @@ class TestClass(object):
         np.testing.assert_equal(len(non_priority_not_traced), 0, "Traced people not quarantined after the longer delay of a non-prioirty test")
         
         del( model )
+
+
+    def test_manual_trace_params(self, test_params, time_steps_test ):
+        """
+        Tests that people are traced based on manual tracing.
+        """
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        # step through through the initial steps to get the epidemic going
+        end_time = test_params[ "end_time" ]
+        burn_in_time = test_params[ "end_time" ] - time_steps_test
+        for time in range( burn_in_time ):
+            model.one_time_step()
+
+        all_pos = pd.DataFrame()
+
+        for time in range( time_steps_test ):
+            model.one_time_step()
+            model.write_interactions_file()
+
+            df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            all_pos = all_pos.append(df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
+        model.write_trace_tokens()
+
+        np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
+
+
+    def test_manual_trace_only_of_given_type(self, test_params, time_steps_test, interaction_type ):
+        """
+        Tests that only the given interaction_type contains manual traces.
+        """
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        # step through through the initial steps to get the epidemic going
+        burn_in_time = test_params[ "end_time" ] - time_steps_test
+        for time in range( burn_in_time ):
+            model.one_time_step()
+
+        all_pos = pd.DataFrame()
+
+        for time in range( time_steps_test ):
+            model.one_time_step()
+            model.write_interactions_file()
+
+            df_inter = pd.read_csv( constant.TEST_INTERACTION_FILE )
+            all_pos = all_pos.append( df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
+
+        np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] == interaction_type  ] ) > 0, True, "expected manual traces do not exist" )
+        np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] != interaction_type  ] ) == 0, True, "unexpected manual traces exist" )
+
+    def test_manual_trace_delay(self, test_params, delay ):
+        """
+        Tests that delays in traces are accounted for by the manual tracing delay.
+        
+        Make sure that nobody has been manually traced from somebody who has not
+        been an index for long enough (full test turn around + manual testing; exclude
+        hopsitalised people who get quicker test)
+        
+        Check that everyone who has been an an index for the sufficient time does
+        manually trace someone (if they have an interaction with a susceptible)
+        """
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+        
+        # write files
+        model.write_trace_tokens()
+        model.write_transmissions()
+        model.write_interactions_file()
+        model.write_individual_file()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        # remove hospitalised since they get quicker tested 
+        df_hosp = df_trans.loc[:,["time_hospitalised", "ID_recipient" ] ]
+        df_hosp.rename( columns = { "ID_recipient":"index_ID"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_hosp, on = "index_ID", how = "left" )
+        df_trace.fillna( 0, inplace = True )
+        df_trace = df_trace[ df_trace[ "time_hospitalised"] <= 0 ]
+
+        # remove those who have 0 interactions with non-susceptible (they will not trace anyone)
+        df_inter = pd.merge( df_inter, df_indiv, left_on = "ID_2", right_on = "ID" )
+        df_inter = df_inter[ df_inter[ "current_status"] == 0 ].groupby( "ID_1" ).size().reset_index( name = "n_suscept" )
+        df_trace = pd.merge( df_trace, df_inter, left_on = "index_ID", right_on = "ID_1" )
+        df_trace.fillna( 0, inplace = True )        
+        df_trace = df_trace[ df_trace[ "n_suscept"] > 0 ]
+         
+        trace_delay = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] + delay
+        
+        # make sure that too recent index cases have traced nobody
+        df_recent = df_trace[ (df_trace[ "index_time" ] > ( test_params[ "end_time" ] - trace_delay ) ) ]
+        df_recent =  df_recent.groupby( "index_ID" ).size().reset_index( name = "count" ) 
+        np.testing.assert_equal( len( df_recent ) >100, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( sum( df_recent["count" ] != 1 ), 0, "Tracing occurred too quickly from an index case" )
+
+        # make sure we are tracing from everybody
+        df_manual_trace = df_trace[ (df_trace[ "index_time" ] == ( test_params[ "end_time" ] - trace_delay ) ) ]
+        df_manual_trace = df_manual_trace.groupby( "index_ID" ).size().reset_index( name = "count" ) 
+        np.testing.assert_equal( len( df_manual_trace ) >100, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
+
+      
+        
+        
+
+       

@@ -243,6 +243,7 @@ int get_model_param_trace_on_symptoms(model *model)
 {
     return model->params->trace_on_symptoms;
 }
+
 /*****************************************************************************************
 *  Name:		get_model_param_trace_on_positive
 *  Description: Gets the value of an int parameter
@@ -470,6 +471,87 @@ double get_model_param_lockdown_occupation_multiplier(model *model, int idx)
 {
 	if ( idx >= N_DEFAULT_OCCUPATION_NETWORKS)  return FALSE;
 	return model->params->lockdown_occupation_multiplier[idx];
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_on_hospitalization
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_on_hospitalization( model* model )
+{
+	return model->params->manual_trace_on_hospitalization;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_on_positive
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_on_positive( model* model )
+{
+	return model->params->manual_trace_on_positive;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_on
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_on( model* model )
+{
+	return model->params->manual_trace_on;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_delay
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_delay( model* model )
+{
+	return model->params->manual_trace_delay;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_exclude_app_users
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_exclude_app_users( model* model )
+{
+	return model->params->manual_trace_exclude_app_users;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_n_workers
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_n_workers( model* model )
+{
+	return model->params->manual_trace_n_workers;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_interviews_per_worker_day
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_interviews_per_worker_day( model* model )
+{
+	return model->params->manual_trace_interviews_per_worker_day;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_trace_notifications_per_worker_day
+*  Description: Gets the value of parameter
+******************************************************************************************/
+int get_model_param_manual_trace_notifications_per_worker_day( model* model )
+{
+	return model->params->manual_trace_notifications_per_worker_day;
+}
+
+/*****************************************************************************************
+*  Name:        get_model_param_manual_traceable_fraction_occupation
+*  Description: Gets the value of parameter
+******************************************************************************************/
+double get_model_param_manual_traceable_fraction( model* model, int type )
+{
+	return model->params->manual_traceable_fraction[type];
 }
 
 /*****************************************************************************************
@@ -1014,16 +1096,115 @@ int set_model_param_lockdown_occupation_multiplier( model *model, double value, 
 {
 	if ( idx >= model->n_occupation_networks ) return FALSE;
 
-    if ( model->use_custom_occupation_networks == 0 )
-        model->params->lockdown_occupation_multiplier[idx] = value;
-    else
-        model->params->occupation_network_table->lockdown_occupation_multipliers[idx] = value;
+	if ( model->use_custom_occupation_networks == 0 )
+		model->params->lockdown_occupation_multiplier[idx] = value;
+	else
+		model->params->occupation_network_table->lockdown_occupation_multipliers[idx] = value;
 
 	if( model->params->lockdown_on )
 		return set_model_param_lockdown_on( model, TRUE );
 
 	if( model->params->lockdown_elderly_on )
 		return set_model_param_lockdown_elderly_on( model, TRUE );
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_traceable_fraction
+*  Description: Sets the value of parameter for given type
+******************************************************************************************/
+int set_model_param_manual_traceable_fraction( model *model, double value, int type )
+{
+	model->params->manual_traceable_fraction[type] = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_on_hospitalization
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_on_hospitalization( model* model, int value )
+{
+	model->params->manual_trace_on_hospitalization = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_on_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_on_positive( model* model, int value )
+{
+	model->params->manual_trace_on_positive = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_on
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_on( model* model, int value )
+{
+	model->params->manual_trace_on = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_delay
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_delay( model* model, int value )
+{
+	model->params->manual_trace_delay = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_exclude_app_users
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_exclude_app_users( model* model, int value )
+{
+	model->params->manual_trace_exclude_app_users = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_n_workers
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_n_workers( model* model, int value )
+{
+	model->params->manual_trace_n_workers = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_interviews_per_worker_day
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_interviews_per_worker_day( model* model, int value )
+{
+	model->params->manual_trace_interviews_per_worker_day = value;
+
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_manual_trace_notifications_per_worker_day
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_manual_trace_notifications_per_worker_day( model* model, int value )
+{
+	model->params->manual_trace_notifications_per_worker_day = value;
 
 	return TRUE;
 }

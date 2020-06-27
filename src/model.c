@@ -685,6 +685,7 @@ void add_interactions_from_network(
 
 		inter1->type       = network->type;
 		inter1->traceable  = UNKNOWN;
+		inter1->manual_traceable  = UNKNOWN;
 		inter1->individual = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
 		indiv1->interactions[ day ] = inter1;
@@ -692,6 +693,7 @@ void add_interactions_from_network(
 
 		inter2->type       = network->type;
 		inter2->traceable  = UNKNOWN;
+		inter2->manual_traceable  = UNKNOWN;
 		inter2->individual = indiv1;
 		inter2->next       = indiv2->interactions[ day ];
 		indiv2->interactions[ day ] = inter2;
@@ -970,10 +972,11 @@ int one_time_step( model *model )
     }
 
 	flu_infections( model );
-	transition_events( model, TEST_TAKE,          &intervention_test_take,          TRUE );
-	transition_events( model, TEST_RESULT,        &intervention_test_result,        TRUE );
-	transition_events( model, QUARANTINE_RELEASE, &intervention_quarantine_release, FALSE );
-	transition_events( model, TRACE_TOKEN_RELEASE,&intervention_trace_token_release,FALSE );
+	transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
+	transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
+	transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
+	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
+	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );
 
 	if( model->params->quarantine_smart_release_day > 0 )
 		intervention_smart_release( model );

@@ -88,6 +88,17 @@ typedef struct{
 	int quarantine_days;					// number of days of previous contacts to quarantine
 	double self_quarantine_fraction;		// fraction of people who self-quarantine when show symptoms
 
+	int manual_trace_on;   // manual contract trace
+	int manual_trace_time_on;   				// time at which manual contact tracing begins
+	int manual_trace_on_hospitalization;   // manual contract trace on hospitalization
+	int manual_trace_on_positive;   // manual contract trace on positive result
+	int manual_trace_delay;   // delay in starting manual trace
+	int manual_trace_exclude_app_users;   // exclude app users from manual contact tracing
+	int manual_trace_n_workers;   // number of workers who can perform manual contact tracing
+	int manual_trace_interviews_per_worker_day;   // number of manual tracing index case interviews that can be made per day
+	int manual_trace_notifications_per_worker_day;   // number of manual tracing trace notifications that can be made per day
+	double manual_traceable_fraction[N_INTERACTION_TYPES];   // the proportion of interactions which are manually traceable for the interaction types (house/work/random)
+
 	int trace_on_symptoms;   // contract trace on symptoms
 	int trace_on_positive;   // contract trace on positive result
 	int retrace_on_positive; // repeat contract tracing on a positive test if already tested on symptoms
@@ -213,6 +224,15 @@ double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *model);
 double get_model_param_lockdown_random_network_multiplier(model *model);
 double get_model_param_lockdown_occupation_multiplier(model *model, int idx);
+int get_model_param_manual_trace_on_hospitalization( model* model );
+int get_model_param_manual_trace_on_positive( model* model );
+int get_model_param_manual_trace_on( model* model );
+int get_model_param_manual_trace_delay( model* model );
+int get_model_param_manual_trace_exclude_app_users( model* model );
+int get_model_param_manual_trace_n_workers( model* model );
+int get_model_param_manual_trace_interviews_per_worker_day( model* model );
+int get_model_param_manual_trace_notifications_per_worker_day( model* model );
+double get_model_param_manual_traceable_fraction( model* model, int );
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -243,6 +263,15 @@ int set_model_param_lockdown_random_network_multiplier(model *model, double valu
 int set_model_param_lockdown_occupation_multiplier(model *model, double value, int idx);
 int set_model_param_lockdown_elderly_on(model *model, int value);
 int set_model_param_relative_transmission( model *model, double value, int type );
+int set_model_param_manual_trace_on_hospitalization( model* model, int value );
+int set_model_param_manual_trace_on_positive( model* model, int value );
+int set_model_param_manual_trace_on( model* model, int value );
+int set_model_param_manual_trace_delay( model* model, int value );
+int set_model_param_manual_trace_exclude_app_users( model* model, int value );
+int set_model_param_manual_trace_n_workers( model* model, int value );
+int set_model_param_manual_trace_interviews_per_worker_day( model* model, int value );
+int set_model_param_manual_trace_notifications_per_worker_day( model* model, int value );
+int set_model_param_manual_traceable_fraction( model* model, double value, int type );
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
