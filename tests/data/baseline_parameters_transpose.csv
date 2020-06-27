@@ -31,25 +31,25 @@ mean_time_to_recover,12,&#956;<sub>rec</sub>,Mean time to recovery if hospitalis
 sd_time_to_recover,5,&#963;<sub>rec</sub>,Standard deviation of time to recovery if hospitalisaion is not required (days),Yang et al 2020,Disease dynamics parameters
 mean_time_to_death,11.74,&#956;<sub>death</sub>,Mean time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
 sd_time_to_death,8.79,&#963;<sub>death</sub>,Standard deviation of time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
-fraction_asymptomatic_0_9,0.25,&#966;<sub>asym</sub>(0-9),"Fraction of infected individuals who are asymptomatic, aged 0-9",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_10_19,0.25,&#966;<sub>asym</sub>(10-19),"Fraction of infected individuals who are asymptomatic, aged 10-19",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_20_29,0.25,&#966;<sub>asym</sub>(20-29),"Fraction of infected individuals who are asymptomatic, aged 20-29",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_30_39,0.25,&#966;<sub>asym</sub>(30-39),"Fraction of infected individuals who are asymptomatic, aged 30-39",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_40_49,0.25,&#966;<sub>asym</sub>(40-49),"Fraction of infected individuals who are asymptomatic, aged 40-49",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_50_59,0.25,&#966;<sub>asym</sub>(50-59),"Fraction of infected individuals who are asymptomatic, aged 50-59",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_60_69,0.25,&#966;<sub>asym</sub>(60-69),"Fraction of infected individuals who are asymptomatic, aged 60-69",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_70_79,0.25,&#966;<sub>asym</sub>(70-79),"Fraction of infected individuals who are asymptomatic, aged 70-79",Byambasuren et al. 2020,Disease dynamics parameters
-fraction_asymptomatic_80,0.25,&#966;<sub>asym</sub>(80),"Fraction of infected individuals who are asymptomatic, aged 80+",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_0_9,0.339,&#966;<sub>asym</sub>(0-9),"Fraction of infected individuals who are asymptomatic, aged 0-9",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_10_19,0.305,&#966;<sub>asym</sub>(10-19),"Fraction of infected individuals who are asymptomatic, aged 10-19",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_20_29,0.271,&#966;<sub>asym</sub>(20-29),"Fraction of infected individuals who are asymptomatic, aged 20-29",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_30_39,0.237,&#966;<sub>asym</sub>(30-39),"Fraction of infected individuals who are asymptomatic, aged 30-39",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_40_49,0.203,&#966;<sub>asym</sub>(40-49),"Fraction of infected individuals who are asymptomatic, aged 40-49",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_50_59,0.169,&#966;<sub>asym</sub>(50-59),"Fraction of infected individuals who are asymptomatic, aged 50-59",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_60_69,0.135,&#966;<sub>asym</sub>(60-69),"Fraction of infected individuals who are asymptomatic, aged 60-69",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_70_79,0.101,&#966;<sub>asym</sub>(70-79),"Fraction of infected individuals who are asymptomatic, aged 70-79",Byambasuren et al. 2020,Disease dynamics parameters
+fraction_asymptomatic_80,0.0667,&#966;<sub>asym</sub>(80),"Fraction of infected individuals who are asymptomatic, aged 80+",Byambasuren et al. 2020,Disease dynamics parameters
 asymptomatic_infectious_factor,0.29,*A<sub>asym</sub>*,Infectious rate of asymptomatic individuals relative to symptomatic individuals,Luo et al 2020,Infection parameters
-mild_fraction_0_9,0.254,&#966;<sub>mild</sub>(0-9),"Fraction of infected individuals with mild symptoms, aged 0-9",de Souza et al. 2020,Disease dynamics parameters
-mild_fraction_10_19,0.229,&#966;<sub>mild</sub>(10-19),"Fraction of infected individuals with mild symptoms, aged 10-19",de Souza et al. 2020,Disease dynamics parameters
-mild_fraction_20_29,0.203,&#966;<sub>mild</sub>(20-29),"Fraction of infected individuals with mild symptoms, aged 20-29","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_30_39,0.178,&#966;<sub>mild</sub>(30-39),"Fraction of infected individuals with mild symptoms, aged 30-39","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_40_49,0.152,&#966;<sub>mild</sub>(40-49),"Fraction of infected individuals with mild symptoms, aged 40-49","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_50_59,0.127,&#966;<sub>mild</sub>(50-59),"Fraction of infected individuals with mild symptoms, aged 50-59","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_60_69,0.101,&#966;<sub>mild</sub>(60-69),"Fraction of infected individuals with mild symptoms, aged 60-69","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_70_79,0.0756,&#966;<sub>mild</sub>(70-79),"Fraction of infected individuals with mild symptoms, aged 70-79","Yang, Lu et al. 2020",Disease dynamics parameters
-mild_fraction_80,0.0500,&#966;<sub>mild</sub>(80),"Fraction of infected individuals with mild symptoms, aged 80+","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_0_9,0.339,&#966;<sub>mild</sub>(0-9),"Fraction of infected individuals with mild symptoms, aged 0-9",de Souza et al. 2020,Disease dynamics parameters
+mild_fraction_10_19,0.305,&#966;<sub>mild</sub>(10-19),"Fraction of infected individuals with mild symptoms, aged 10-19",de Souza et al. 2020,Disease dynamics parameters
+mild_fraction_20_29,0.271,&#966;<sub>mild</sub>(20-29),"Fraction of infected individuals with mild symptoms, aged 20-29","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_30_39,0.237,&#966;<sub>mild</sub>(30-39),"Fraction of infected individuals with mild symptoms, aged 30-39","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_40_49,0.203,&#966;<sub>mild</sub>(40-49),"Fraction of infected individuals with mild symptoms, aged 40-49","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_50_59,0.169,&#966;<sub>mild</sub>(50-59),"Fraction of infected individuals with mild symptoms, aged 50-59","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_60_69,0.135,&#966;<sub>mild</sub>(60-69),"Fraction of infected individuals with mild symptoms, aged 60-69","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_70_79,0.101,&#966;<sub>mild</sub>(70-79),"Fraction of infected individuals with mild symptoms, aged 70-79","Yang, Lu et al. 2020",Disease dynamics parameters
+mild_fraction_80,0.0667,&#966;<sub>mild</sub>(80),"Fraction of infected individuals with mild symptoms, aged 80+","Yang, Lu et al. 2020",Disease dynamics parameters
 mild_infectious_factor,0.48,*A<sub>mild</sub>*,Infectious rate of mildly symptomatic individuals relative to symptomatic individuals,Luo et al 2020,Infection parameters
 mean_asymptomatic_to_recovery,15,"&#956;<sub>a,rec</sub>",Mean time from infection to recovery (and no longer infectious) for an asymptomatic individual (days),Yang et al 2020,Disease dynamics parameters
 sd_asymptomatic_to_recovery,5,"&#963;<sub>a,rec</sub>",Standard deviation from infection to recovery for an asymptomatic individual (days),Yang et al 2020,Disease dynamics parameters
