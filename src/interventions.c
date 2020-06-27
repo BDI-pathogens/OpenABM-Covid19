@@ -550,9 +550,11 @@ void intervention_test_take( model *model, individual *indiv )
 
 	if( time_infected != UNKNOWN )
 	{
-		time_infected = model->time - time_infected( indiv );
-		if( time_infected < MAX_DAYS_SENSITIVE )
-			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, model->params->test_sensitivity_curve[ time_infected ] );
+		time_infected   = model->time - time_infected;
+		int symptomatic = ( time_symptomatic( indiv ) <= model->time ) & ( time_symptomatic( indiv ) >= max( model->time - model->params->test_sensitive_period, 0 ) );
+
+		if( ( symptomatic || time_infected >= model->params->test_insensitive_period ) && time_infected < model->params->test_sensitive_period )
+			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, model->params->test_sensitivity );
 		else
 			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
 	}

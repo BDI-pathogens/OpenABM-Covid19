@@ -507,12 +507,16 @@ class TestClass(object):
                 test_params = dict( 
                     n_total = 100000,
                     n_seed_infection = 4000,
-                    end_time = 10,
+                    end_time = 12,
                     infectious_rate = 6,
                     self_quarantine_fraction = 1.0,
-                    test_on_symptoms = 1,
-                    quarantine_on_traced = 1,
+                    quarantine_household_on_symptoms = True,
+                    test_on_symptoms = True,
+                    test_on_traced = True,
+                    trace_on_symptoms = True,
+                    quarantine_on_traced = True,
                     test_order_wait  = 0,
+                    test_result_wait  = 1,
                     app_turn_on_time = 0,
                     test_sensitivity = 0.7,
                     daily_non_cov_symptoms_rate =0.01,
@@ -1600,33 +1604,29 @@ class TestClass(object):
             model.one_time_step()
 
         # write files
-        model.write_trace_tokens()
         model.write_individual_file()
         model.write_transmissions()
 
         # read CSV's
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
     
-        # get the new index cases
-        df_trace = df_trace[ ( df_trace[ "index_time"] == end_time ) ]
-        df_trace = df_trace.groupby( "index_ID" ).size().reset_index(name="n_trace")
+        # find everyone with a test result
+        df_test = df_indiv.loc[:,["ID","test_status"]]
+        df_test = df_test[ df_test["test_status"] >= 0 ]
+        df_trans = df_trans.loc[:,["ID_recipient","time_infected", "time_symptomatic"]]
+        df_test = pd.merge( df_test, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+        df_test.fillna(-1, inplace=True)
+        df_test["infected"] = (df_test["time_infected"]>-1)
 
-        # join on the time they were infected to calculated sensitivity of test
-        df_trans = df_trans.loc[:,["ID_recipient","time_infected"]]
-        df_trace = pd.merge( df_trace, df_trans, left_on = "index_ID", right_on = "ID_recipient", how = "left")
-        df_trace.fillna(-1, inplace=True)
-        df_trace["infected"] = (df_trace["time_infected"]>-1)
-
-        # join on the test result and work out test was in period it is sensitive
-        df_indiv.loc[:,["ID","test_status"]]
-        df_trace = pd.merge( df_trace, df_indiv, left_on = "index_ID", right_on = "ID", how = "left" )       
-        df_trace[ "test_sensitive" ] = ( df_trace["time_infected"] != - 1 ) & ( df_trace["time_infected"] <= ( end_time - test_params[ "test_insensitive_period"]))
-              
+        # work out whether test is sensitive based on time of infected and whether showing symptoms     
+        df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= ( end_time - test_params[ "test_insensitive_period"] ) ) )
+        df_test[ "test_sensitive_symp" ] = ( ( df_test["time_symptomatic"] <= end_time ) & ( df_test["time_symptomatic"] >= 0 ) )
+        df_test[ "test_sensitive" ] = ( df_test[ "test_sensitive_inf" ] | df_test[ "test_sensitive_symp" ] )
+                                              
         # check the specificity of the test
-        true_neg  = sum( ( df_trace["infected"] == False ) & ( df_trace["test_status"] == 0 ) )
-        false_pos = sum( ( df_trace["infected"] == False ) & ( df_trace["test_status"] == 1 ) )
+        true_neg  = sum( ( df_test["infected"] == False ) & ( df_test["test_status"] == 0 ) )
+        false_pos = sum( ( df_test["infected"] == False ) & ( df_test["test_status"] == 1 ) )
         p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "test_specificity"] )
         np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
         np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
@@ -1634,22 +1634,22 @@ class TestClass(object):
         np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
 
         # check the sensitivity in the initial period when not sensitive
-        false_neg  = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 0 ) & ( df_trace["test_sensitive"] == False ))
-        true_pos   = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 1 ) & ( df_trace["test_sensitive"] == False ))
+        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == False ))
+        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == False ))
         p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "test_specificity"] )
-        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in insensitive period to test" )
-        np.testing.assert_equal( true_pos > 20, True, "In-sufficient true positives in insensitive period to test" )
-        np.testing.assert_equal( p_val > lower_CI, True, "Too many true positives in insensitive period given the test specificity" )
+        np.testing.assert_equal( false_neg > 50, True, "In-sufficient false negatives in insensitive period to test" )
+        np.testing.assert_equal( true_pos > 10, True, "In-sufficient true positives in insensitive period to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too true positives in insensitive period given the test specificity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
 
         # check the sensitivity in the initial period when not sensitive
-        false_neg  = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 0 ) & ( df_trace["test_sensitive"] == True ))
-        true_pos   = sum( ( df_trace["infected"] == True ) & ( df_trace["test_status"] == 1 ) & ( df_trace["test_sensitive"] == True ))
+        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == True ))
+        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == True ))
         p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "test_sensitivity"] )
         np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
         np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
-        np.testing.assert_equal( p_val > lower_CI, True, "Too many true positives in sensitive period given the test sensitivity" )
-        np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in sensitive period the test sensitivity" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too few true positives in sensitive period given the test sensitivity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too many true positives in sensitive period the test sensitivity" )
 
         del( model )
         
