@@ -704,17 +704,18 @@ class TestClass(object):
         "test_manual_trace_delay" : [
             dict(
                 test_params = dict(
-                    n_total = 20000,
-                    n_seed_infection = 100,
+                    n_total = 100000,
+                    n_seed_infection = 1000,
                     end_time = 12,
-                    infectious_rate = 12,
+                    infectious_rate = 6,
                     self_quarantine_fraction = 1.0,
                     trace_on_positive = 1,
                     test_on_symptoms = 1,
-                    test_on_traced = 1,
+                    test_on_traced = 0,
                     quarantine_on_traced = 1,
                     test_order_wait = 1,
                     test_result_wait = 1,
+                    allow_clinical_diagnosis = False,
                     quarantine_dropout_traced_symptoms = 0,
                     quarantine_dropout_traced_positive = 0,
                     quarantine_compliance_traced_positive = 1,
@@ -728,8 +729,9 @@ class TestClass(object):
                     manual_traceable_fraction_occupation = 1,
                     manual_traceable_fraction_household = 1,
                     manual_traceable_fraction_random = 1,
+                    manual_trace_n_workers = 2e3,
+                    manual_trace_on_hospitalization = 0
                 ),
-                time_steps_test = 4 + delay,
                 delay = delay,
             ) for delay in [0, 1, 2, 3]
         ],
@@ -1764,40 +1766,65 @@ class TestClass(object):
         np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] == interaction_type  ] ) > 0, True, "expected manual traces do not exist" )
         np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] != interaction_type  ] ) == 0, True, "unexpected manual traces exist" )
 
-    def test_manual_trace_delay(self, test_params, time_steps_test, delay ):
+    def test_manual_trace_delay(self, test_params, delay ):
         """
         Tests that delays in traces are accounted for by the manual tracing delay.
+        
+        Make sure that nobody has been manually traced from somebody who has not
+        been an index for long enough (full test turn around + manual testing; exclude
+        hopsitalised people who get quicker test)
+        
+        Check that everyone who has been an an index for the sufficient time does
+        manually trace someone (if they have an interaction with a susceptible)
         """
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
 
-        burn_in_time = test_params[ "end_time" ] - time_steps_test
-        for time in range( burn_in_time ):
+        for time in range( test_params[ "end_time" ] ):
             model.one_time_step()
-
-        model.write_quarantine_reasons()
-        df_quar = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute( T=burn_in_time ) )
-        df_quar = df_quar[ df_quar[ "quarantine_reason" ] == 4 ]
-
-        for time in range( time_steps_test ):
-            model.one_time_step()
-            model.write_quarantine_reasons()
-            df_quar_t = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute( T=burn_in_time + time + 1) )
-            df_quar = df_quar.append( df_quar_t[ df_quar_t[ "quarantine_reason" ] == 4 ] )
-
+        
+        # write files
+        model.write_trace_tokens()
+        model.write_transmissions()
+        model.write_interactions_file()
         model.write_individual_file()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
 
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
-        df_indiv = df_indiv[ df_indiv[ "quarantined" ] == 1 ]
-        df_reas = pd.merge( df_indiv, df_quar )
+        # remove hospitalised since they get quicker tested 
+        df_hosp = df_trans.loc[:,["time_hospitalised", "ID_recipient" ] ]
+        df_hosp.rename( columns = { "ID_recipient":"index_ID"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_hosp, on = "index_ID", how = "left" )
+        df_trace.fillna( 0, inplace = True )
+        df_trace = df_trace[ df_trace[ "time_hospitalised"] <= 0 ]
 
-        df_index = df_indiv.add_suffix( "_index" )
-        df_reas = pd.merge( df_reas, df_index )
+        # remove those who have 0 interactions with non-susceptible (they will not trace anyone)
+        df_inter = pd.merge( df_inter, df_indiv, left_on = "ID_2", right_on = "ID" )
+        df_inter = df_inter[ df_inter[ "current_status"] == 0 ].groupby( "ID_1" ).size().reset_index( name = "n_suscept" )
+        df_trace = pd.merge( df_trace, df_inter, left_on = "index_ID", right_on = "ID_1" )
+        df_trace.fillna( 0, inplace = True )        
+        df_trace = df_trace[ df_trace[ "n_suscept"] > 0 ]
+         
+        trace_delay = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] + delay
+        
+        # make sure that too recent index cases have traced nobody
+        df_recent = df_trace[ (df_trace[ "index_time" ] > ( test_params[ "end_time" ] - trace_delay ) ) ]
+        df_recent =  df_recent.groupby( "index_ID" ).size().reset_index( name = "count" ) 
+        np.testing.assert_equal( len( df_recent ) >100, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( sum( df_recent["count" ] != 1 ), 0, "Tracing occurred too quickly from an index case" )
 
-        np.testing.assert_equal( len( df_reas ) > 10, True, "insufficient quarantine events to test" )
+        # make sure we are tracing from everybody
+        df_manual_trace = df_trace[ (df_trace[ "index_time" ] == ( test_params[ "end_time" ] - trace_delay ) ) ]
+        df_manual_trace = df_manual_trace.groupby( "index_ID" ).size().reset_index( name = "count" ) 
+        np.testing.assert_equal( len( df_manual_trace ) >100, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
-        delay_counts = ( df_reas[ "time_quarantined" ] - df_reas[ "time_quarantined_index" ] ).value_counts()
-        total_delay = delay + params.get_param( "test_order_wait" ) + params.get_param( "test_result_wait" )
-        np.testing.assert_equal( delay_counts.index[ delay_counts.argmax() ] == total_delay, True, "delay mismatching quarantine times" )
+      
+        
+        
+
+       
