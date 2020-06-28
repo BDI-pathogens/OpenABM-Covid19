@@ -153,8 +153,8 @@ quarantine_smart_release_day,0,,Release a chain of quarantined people if after t
 hospitalised_daily_interactions,0,,Daily random interactions of a hospitalised individual,,Passive intervention parameters
 test_insensitive_period,3,,Number of days following infection the test is insensitive,Woelfel et al. 2020,Active intervention parameters
 test_sensitive_period,14,,Number of days following infection to end of period where test is sensitive,,Active intervention parameters				
-test_sensitivitiy,0.8,,Sensitivity of test in the time where it is sensitive,,Active intervention parameters		
-test_specificity,0.95,,Specificity of test (at any time),,Active intervention parameters			
+test_sensitivity,0.8,,Sensitivity of test in the time where it is sensitive,,Active intervention parameters		
+test_specificity,0.99,,Specificity of test (at any time),,Active intervention parameters			
 test_order_wait,1,,Minimum number of days to wait to take a test,,Active intervention parameters
 test_order_wait_priority,-1,,Minimum number of days to wait for a priority test to be taken,,
 test_result_wait,1,,Number of days to wait for a test result,,Active intervention parameters

@@ -608,12 +608,48 @@ int get_param_test_on_traced(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:		get_param_test_release_on_negative
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_test_release_on_negative(parameters *params)
+{
+    return params->test_release_on_negative;
+}
+
+/*****************************************************************************************
 *  Name:		get_param_test_insensitive_period
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
 int get_param_test_insensitive_period(parameters *params)
 {
     return params->test_insensitive_period;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_test_sensitive_period
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_test_sensitive_period(parameters *params)
+{
+    return params->test_sensitive_period;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_test_sensitivity
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_param_test_sensitivity(parameters *params)
+{
+    return params->test_sensitivity;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_test_specificity
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_param_test_specificity(parameters *params)
+{
+    return params->test_specificity;
 }
 
 /*****************************************************************************************
@@ -1433,6 +1469,56 @@ int set_param_test_on_symptoms(parameters *params, int value)
 int set_param_test_on_traced(parameters *params, int value)
 {
     params->test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_release_on_negative
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_release_on_negative(parameters *params, int value)
+{
+    params->test_release_on_negative = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_insensitive_period
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_insensitive_period(parameters *params, int value)
+{
+    params->test_insensitive_period = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_sensitive_period
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_sensitive_period(parameters *params, int value)
+{
+    params->test_sensitive_period = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_sensitivity
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_sensitivity(parameters *params, double value)
+{
+    params->test_sensitivity = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_test_specificity
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_specificity(parameters *params, double value)
+{
+    params->test_specificity = value;
     return TRUE;
 }
 
