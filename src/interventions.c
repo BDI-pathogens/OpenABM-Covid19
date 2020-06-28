@@ -269,9 +269,7 @@ void remove_traces_on_individual( model *model, individual *indiv )
 			if( (contact->trace_tokens == NULL) & (contact->index_trace_token == NULL) )
 				intervention_quarantine_release( model, contact );
 		}
-
 	}
-	indiv->trace_tokens = NULL;
 }
 
 /*****************************************************************************************
@@ -586,9 +584,6 @@ void intervention_test_result( model *model, individual *indiv )
 		{
 			remove_traces_on_individual( model, indiv );
 			intervention_trace_token_release( model, indiv );
-
-			if( indiv->trace_tokens == NULL )
-				intervention_quarantine_release( model, indiv );
 		}
 	}
 	else
@@ -677,6 +672,8 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	if( index_token == NULL )
 		return;
 
+	indiv->index_trace_token = NULL;
+
 	// if nobody traced then nothing to do
 	next_token = index_token->next_index;
 
@@ -693,7 +690,9 @@ void intervention_trace_token_release( model *model, individual *indiv )
 	}
 
 	remove_one_trace_token( model, index_token );
-	indiv->index_trace_token = NULL;
+
+	if( indiv->trace_tokens == NULL )
+		intervention_quarantine_release( model, indiv );
 }
 
 /*****************************************************************************************
