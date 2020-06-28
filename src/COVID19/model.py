@@ -61,6 +61,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "priority_test_contacts_60_69",
     "priority_test_contacts_70_79",
     "priority_test_contacts_80",
+    "test_release_on_negative",
 ]
 
 
