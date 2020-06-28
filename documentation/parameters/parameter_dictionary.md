@@ -155,8 +155,8 @@
 | `hospitalised_daily_interactions` | 0 | - | Daily random interactions of a hospitalised individual | - |
 | `test_insensitive_period` | 3 | - | Number of days following infection the test is insensitive | Woelfel et al. 2020 |
 | `test_sensitive_period` | 14 | - | Number of days following infection to end of period where test is sensitive | - |
-| `test_sensitivitiy` | 0.8 | - | Sensitivity of test in the time where it is sensitive | - |
-| `test_specificity` | 0.95 | - | Specificity of test (at any time) | - |
+| `test_sensitivity` | 0.8 | - | Sensitivity of test in the time where it is sensitive | - |
+| `test_specificity` | 0.99 | - | Specificity of test (at any time) | - |
 | `test_order_wait` | 1 | - | Minimum number of days to wait to take a test | - |
 | `test_order_wait_priority` | -1 | - | Minimum number of days to wait for a priority test to be taken | - |
 | `test_result_wait` | 1 | - | Number of days to wait for a test result | - |
