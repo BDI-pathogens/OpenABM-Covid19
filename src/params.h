@@ -215,6 +215,7 @@ int get_model_param_quarantine_household_contacts_on_positive(model *model);
 int set_model_param_relative_transmission( model *model, double value, int type );
 int get_model_param_quarantine_household_contacts_on_symptoms(model *model);
 int get_model_param_test_on_symptoms(model *model);
+int get_model_param_test_release_on_negative(model *model);
 int get_model_param_test_on_traced(model *model);
 int get_model_param_test_result_wait(model *model);
 int get_model_param_test_order_wait(model *model);
@@ -254,6 +255,7 @@ int set_model_param_quarantine_household_on_traced_positive(model *model, int va
 int set_model_param_quarantine_household_contacts_on_positive(model *model, int value);
 int set_model_param_quarantine_household_contacts_on_symptoms(model *model, int value);
 int set_model_param_test_on_symptoms(model *model, int value);
+int set_model_param_test_release_on_negative(model *model, int value);
 int set_model_param_test_on_traced(model *model, int value);
 int set_model_param_test_result_wait(model *model, int value);
 int set_model_param_test_order_wait(model *model, int value);

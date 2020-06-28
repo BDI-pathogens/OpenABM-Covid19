@@ -353,6 +353,15 @@ int get_model_param_test_on_symptoms(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_test_release_on_negative
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_test_release_on_negative(model *model)
+{
+    return model->params->test_release_on_negative;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_test_on_traced
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -708,6 +717,16 @@ int set_model_param_test_on_symptoms(model *model, int value) {
 int set_model_param_test_on_traced( model *model, int value )
 {
     model->params->test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_test_release_on_negative
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_release_on_negative( model *model, int value )
+{
+    model->params->test_release_on_negative = value;
     return TRUE;
 }
 
