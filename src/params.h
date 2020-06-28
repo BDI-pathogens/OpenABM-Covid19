@@ -139,7 +139,6 @@ typedef struct{
 	
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 	
-	double test_sensitivity_curve[MAX_DAYS_SENSITIVE];	// curve
 	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_sensitive_period;				// number of days post infection in which the test is sensitive
 	double test_sensitivity;				// sensitivity of test

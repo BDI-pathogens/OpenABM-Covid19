@@ -306,7 +306,7 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 void update_intervention_policy( model *model, int time )
 {
 	parameters *params = model->params;
-	int type, day;
+	int type;
 
 	if( time == 0 )
 	{
@@ -318,15 +318,6 @@ void update_intervention_policy( model *model, int time )
 			params->relative_transmission_used[type] = params->relative_transmission[type];
 
 		params->interventions_on = ( params->intervention_start_time == 0 );
-
-		if( params->test_sensitivity_curve[ 0 ] == UNKNOWN )
-			for( day = 0; day < MAX_DAYS_SENSITIVE; day++ )
-			{
-				if( day < params->test_insensitive_period || day >= params->test_sensitive_period )
-					params->test_sensitivity_curve[ day ] = 1 - params->test_specificity;
-				else
-					params->test_sensitivity_curve[ day ] = params->test_sensitivity;
-			}
 	}
 
 	if( time == params->intervention_start_time )

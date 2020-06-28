@@ -22,10 +22,6 @@
 ******************************************************************************************/
 void initialize_params( parameters *params )
 {
-	params->test_specificity = 1;
-	for( int day = 0; day < MAX_DAYS_SENSITIVE; day++ )
-		params->test_sensitivity_curve[ day ] = UNKNOWN;
-
 	params->demo_house = NULL;
 	params->occupation_network_table = NULL;
 }
