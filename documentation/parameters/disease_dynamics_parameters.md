@@ -10,24 +10,24 @@
 | `sd_time_to_recover` | 5 | &#963;<sub>rec</sub> | Standard deviation of time to recovery if hospitalisaion is not required (days) | Yang et al 2020 |
 | `mean_time_to_death` | 11.74 | &#956;<sub>death</sub> | Mean time to death after acquiring critical care (days) | Personal communication with SPI-M; data soon to be published |
 | `sd_time_to_death` | 8.79 | &#963;<sub>death</sub> | Standard deviation of time to death after acquiring critical care (days) | Personal communication with SPI-M; data soon to be published |
-| `fraction_asymptomatic_0_9` | 0.16 | &#966;<sub>asym</sub>(0-9) | Fraction of infected individuals who are asymptomatic, aged 0-9 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_10_19` | 0.16 | &#966;<sub>asym</sub>(10-19) | Fraction of infected individuals who are asymptomatic, aged 10-19 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_20_29` | 0.16 | &#966;<sub>asym</sub>(20-29) | Fraction of infected individuals who are asymptomatic, aged 20-29 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_30_39` | 0.16 | &#966;<sub>asym</sub>(30-39) | Fraction of infected individuals who are asymptomatic, aged 30-39 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_40_49` | 0.16 | &#966;<sub>asym</sub>(40-49) | Fraction of infected individuals who are asymptomatic, aged 40-49 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_50_59` | 0.16 | &#966;<sub>asym</sub>(50-59) | Fraction of infected individuals who are asymptomatic, aged 50-59 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_60_69` | 0.16 | &#966;<sub>asym</sub>(60-69) | Fraction of infected individuals who are asymptomatic, aged 60-69 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_70_79` | 0.16 | &#966;<sub>asym</sub>(70-79) | Fraction of infected individuals who are asymptomatic, aged 70-79 | Byambasuren et al. 2020 |
-| `fraction_asymptomatic_80` | 0.16 | &#966;<sub>asym</sub>(80) | Fraction of infected individuals who are asymptomatic, aged 80+ | Byambasuren et al. 2020 |
-| `mild_fraction_0_9` | 0.79 | &#966;<sub>mild</sub>(0-9) | Fraction of infected individuals with mild symptoms, aged 0-9 | de Souza et al. 2020 |
-| `mild_fraction_10_19` | 0.79 | &#966;<sub>mild</sub>(10-19) | Fraction of infected individuals with mild symptoms, aged 10-19 | de Souza et al. 2020 |
-| `mild_fraction_20_29` | 0.73 | &#966;<sub>mild</sub>(20-29) | Fraction of infected individuals with mild symptoms, aged 20-29 | Yang, Lu et al. 2020 |
-| `mild_fraction_30_39` | 0.68 | &#966;<sub>mild</sub>(30-39) | Fraction of infected individuals with mild symptoms, aged 30-39 | Yang, Lu et al. 2020 |
-| `mild_fraction_40_49` | 0.65 | &#966;<sub>mild</sub>(40-49) | Fraction of infected individuals with mild symptoms, aged 40-49 | Yang, Lu et al. 2020 |
-| `mild_fraction_50_59` | 0.59 | &#966;<sub>mild</sub>(50-59) | Fraction of infected individuals with mild symptoms, aged 50-59 | Yang, Lu et al. 2020 |
-| `mild_fraction_60_69` | 0.53 | &#966;<sub>mild</sub>(60-69) | Fraction of infected individuals with mild symptoms, aged 60-69 | Yang, Lu et al. 2020 |
-| `mild_fraction_70_79` | 0.41 | &#966;<sub>mild</sub>(70-79) | Fraction of infected individuals with mild symptoms, aged 70-79 | Yang, Lu et al. 2020 |
-| `mild_fraction_80` | 0.27 | &#966;<sub>mild</sub>(80) | Fraction of infected individuals with mild symptoms, aged 80+ | Yang, Lu et al. 2020 |
+| `fraction_asymptomatic_0_9` | 0.339 | &#966;<sub>asym</sub>(0-9) | Fraction of infected individuals who are asymptomatic, aged 0-9 | - |
+| `fraction_asymptomatic_10_19` | 0.305 | &#966;<sub>asym</sub>(10-19) | Fraction of infected individuals who are asymptomatic, aged 10-19 | - |
+| `fraction_asymptomatic_20_29` | 0.271 | &#966;<sub>asym</sub>(20-29) | Fraction of infected individuals who are asymptomatic, aged 20-29 | - |
+| `fraction_asymptomatic_30_39` | 0.237 | &#966;<sub>asym</sub>(30-39) | Fraction of infected individuals who are asymptomatic, aged 30-39 | - |
+| `fraction_asymptomatic_40_49` | 0.203 | &#966;<sub>asym</sub>(40-49) | Fraction of infected individuals who are asymptomatic, aged 40-49 | - |
+| `fraction_asymptomatic_50_59` | 0.169 | &#966;<sub>asym</sub>(50-59) | Fraction of infected individuals who are asymptomatic, aged 50-59 | - |
+| `fraction_asymptomatic_60_69` | 0.135 | &#966;<sub>asym</sub>(60-69) | Fraction of infected individuals who are asymptomatic, aged 60-69 | - |
+| `fraction_asymptomatic_70_79` | 0.101 | &#966;<sub>asym</sub>(70-79) | Fraction of infected individuals who are asymptomatic, aged 70-79 | - |
+| `fraction_asymptomatic_80` | 0.0667 | &#966;<sub>asym</sub>(80) | Fraction of infected individuals who are asymptomatic, aged 80+ | - |
+| `mild_fraction_0_9` | 0.224 | &#966;<sub>mild</sub>(0-9) | Fraction of infected individuals with mild symptoms, aged 0-9 | Riccardo et al. 2020 |
+| `mild_fraction_10_19` | 0.212 | &#966;<sub>mild</sub>(10-19) | Fraction of infected individuals with mild symptoms, aged 10-19 | Riccardo et al. 2020 |
+| `mild_fraction_20_29` | 0.198 | &#966;<sub>mild</sub>(20-29) | Fraction of infected individuals with mild symptoms, aged 20-29 | Riccardo et al. 2020 |
+| `mild_fraction_30_39` | 0.181 | &#966;<sub>mild</sub>(30-39) | Fraction of infected individuals with mild symptoms, aged 30-39 | Riccardo et al. 2020 |
+| `mild_fraction_40_49` | 0.162 | &#966;<sub>mild</sub>(40-49) | Fraction of infected individuals with mild symptoms, aged 40-49 | Riccardo et al. 2020 |
+| `mild_fraction_50_59` | 0.140 | &#966;<sub>mild</sub>(50-59) | Fraction of infected individuals with mild symptoms, aged 50-59 | Riccardo et al. 2020 |
+| `mild_fraction_60_69` | 0.117 | &#966;<sub>mild</sub>(60-69) | Fraction of infected individuals with mild symptoms, aged 60-69 | Riccardo et al. 2020 |
+| `mild_fraction_70_79` | 0.0906 | &#966;<sub>mild</sub>(70-79) | Fraction of infected individuals with mild symptoms, aged 70-79 | Riccardo et al. 2020 |
+| `mild_fraction_80` | 0.0623 | &#966;<sub>mild</sub>(80) | Fraction of infected individuals with mild symptoms, aged 80+ | Riccardo et al. 2020 |
 | `mean_asymptomatic_to_recovery` | 15 | &#956;<sub>a,rec</sub> | Mean time from infection to recovery (and no longer infectious) for an asymptomatic individual (days) | Yang et al 2020 |
 | `sd_asymptomatic_to_recovery` | 5 | &#963;<sub>a,rec</sub> | Standard deviation from infection to recovery for an asymptomatic individual (days) | Yang et al 2020 |
 | `hospitalised_fraction_0_9` | 0.01 | &#966;<sub>hosp</sub>(0-9) | Fraction of infected individuals with severe symptoms aged 0-9 who are hospitalised | Ferguson et al, 2020 |

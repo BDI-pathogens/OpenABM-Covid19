@@ -1083,22 +1083,14 @@ class TestClass(object):
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
         df_int[ "household" ] = ( df_int[ "house_no_1" ] == df_int[ "house_no_2" ] )
         df_int = df_int.loc[ :, [ "index_ID", "traced_ID", "household"]]
-                
-        # don't consider ones with multiple index events
-        df_trace["days_since_index"]=df_trace["time"]-df_trace["index_time"]
-        df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
-        filter_single = df_trace.groupby( ["index_ID", "days_since_index"] ).size();
-        filter_single = filter_single.groupby( ["index_ID"]).size().reset_index(name="N");
-        filter_single = filter_single[ filter_single[ "N"] == 1 ]
-        
+
         # look at the trace token data to get all traces
-        index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
+        index_traced = df_trace[ ( df_trace[ "index_time" ] == end_time ) ] 
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
         index_traced[ "traced" ] = True
-        index_traced = pd.merge( index_traced, filter_single, on = "index_ID", how = "inner")
-       
+
         # get all the interactions for the index cases
-        index_cases  = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
+        index_cases = pd.DataFrame( data = { 'index_ID': index_traced.index_ID.unique() } )
         index_inter = pd.merge( index_cases, df_int, on = "index_ID", how = "left" )             
         index_inter = index_inter.groupby( [ "index_ID", "traced_ID", "household" ]).size().reset_index(name="N")    
         index_inter[ "inter" ] = True
@@ -2054,7 +2046,7 @@ class TestClass(object):
    
         # now check that nobody has got a test ordered yet
         df = pd.merge( df_trace_symp, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( len( df ) > 300, True, "In-sufficient traced from index symptomatic at symptomatic time" )
         np.testing.assert_equal( sum( ( df[ "test_status"] != -2 ) ), 0, "Traced people getting a test after a symptomatic gets a positive test" )
      
         # now step forward to when the symptomatic cases get their results back
@@ -2076,7 +2068,7 @@ class TestClass(object):
    
         # all those directly traced should now be asking for a test
         df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( len( df ) > 300, True, "In-sufficient traced from index symptomatic at symptomatic time" )
         np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
     
         # now look at at everyone who is traced directly from a positive index case and only traced once
@@ -2093,7 +2085,7 @@ class TestClass(object):
         df = pd.merge( df, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
         df = df[ df["test_status_1" ] == -2 ]
            
-        np.testing.assert_equal( len( df ) > 1000, True, "In-sufficient traced from index positive at end time " )
+        np.testing.assert_equal( len( df ) > 700, True, "In-sufficient traced from index positive at end time " )
         np.testing.assert_equal( sum( df[ "test_status" ] != -1 ), 0, "Traced people not getting a test after new positive index case" )
 
         del( model )
@@ -2254,182 +2246,4 @@ class TestClass(object):
         np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
       
-    def test_recursive_testing(self, test_params ):
-        """
-        Test checks that following a positive test for an index case we order a 
-        test for all directly traced people
-        
-        Additionally checks that when a symptomatic index case receives a positive test
-        tests are ordered for all directly traced people
-        """
-        end_time  = test_params[ "end_time" ]
-        symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
-
-        params = utils.get_params_swig()
-        for param, value in test_params.items():
-            params.set_param( param, value )  
-        model = utils.get_model_swig( params )
-        
-        for time in range( symp_time ):
-            model.one_time_step()  
-        
-        # get the test status at the point of becoming an index case  
-        model.write_trace_tokens()
-        model.write_individual_file()
-        
-        # remove those traced by more than one index and the index cases who have been traced
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
-        df_trace_uniq = df_trace_uniq[df_trace_uniq["n_traced"] == 1 ]
-        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
-        df_trace_uniq.rename(columns={"traced_ID":"index_ID","n_traced":"n_traced_index"}, inplace = True)
-        df_trace = pd.merge( df_trace, df_trace_uniq, on = "index_ID", how = "left" )
-        df_trace = df_trace[ ( df_trace[ "n_traced"] == 1 ) & ( df_trace[ "n_traced_index"] == 1 )]
-        
-        # now get the new index case who have traced more than one and just get the direct traced
-        df_trace_symp = df_trace[ ( df_trace[ "index_time" ] == symp_time ) & ( df_trace["index_reason"] == 0 ) ]
-        df_trace_symp = df_trace_symp.groupby(["index_time","index_ID"]).size().reset_index(name="n_traced")
-        df_trace_symp = df_trace_symp[ df_trace_symp["n_traced"] > 1 ]
-        df_trace_symp["pos_at_symp"] = True
-        df_trace_symp = pd.merge(df_trace_symp, df_trace, on = ["index_time","index_ID"], how = "left")
-        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] != df_trace_symp["traced_ID"])]
-        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] == df_trace_symp["traced_from_ID"])]
-        df_trace_symp = df_trace_symp.loc[:,["index_time","index_ID","traced_ID",]]
-                
-        # go to step before symptomatic index cases get their test results back to get the status of those traced
-        for time in range( end_time - symp_time - 1 ):
-            model.one_time_step()
-
-        # write files
-        model.write_trace_tokens()
-        model.write_individual_file()
-        model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv_1 = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv_1 = pd.merge(df_indiv_1, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
-
-        # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end_1")
-        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
-        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end_1"] == 1 ]
-   
-        # now check that nobody has got a test ordered yet
-        df = pd.merge( df_trace_symp, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
-        np.testing.assert_equal( sum( ( df[ "test_status"] != -2 ) ), 0, "Traced people getting a test after a symptomatic gets a positive test" )
-     
-        # now step forward to when the symptomatic cases get their results back
-        model.one_time_step()
-
-        # write files
-        model.write_trace_tokens()
-        model.write_individual_file()
-        model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
-
-        # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end")
-        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
-        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end"] == 1 ]
-   
-        # all those directly traced should now be asking for a test
-        df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
-        np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
-    
-        # now look at at everyone who is traced directly from a positive index case and only traced once
-        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
-        df_trace = df_trace[df_trace["n_traced_end"] == 1 ]
-        df_trace = df_trace[ ( df_trace[ "index_time" ] ==  end_time ) & ( df_trace["index_reason"] == 1 ) ]
-        df_trace = df_trace[ ( df_trace[ "index_ID" ] == df_trace[ "traced_from_ID" ] )]
-        df_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
-        df       = pd.merge( df_trace, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-
-        # remove traced people who were waiting for a test already
-        df_indiv_1 = df_indiv_1.loc[:,["ID","test_status"]]
-        df_indiv_1.rename(columns={"test_status":"test_status_1"},inplace=True)
-        df = pd.merge( df, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        df = df[ df["test_status_1" ] == -2 ]
-           
-        np.testing.assert_equal( len( df ) > 1000, True, "In-sufficient traced from index positive at end time " )
-        np.testing.assert_equal( sum( df[ "test_status" ] != -1 ), 0, "Traced people not getting a test after new positive index case" )
-
-        del( model )
-
-    def test_recursive_testing_household_not_released(self, test_params ):
-        """
-        Test that when recursively tested people that if a household 
-        member of an index case tests negative they do not get released
-        if the index case has tested positive
-        """
-        end_time   = test_params[ "end_time" ]
-        index_time = end_time - 2 * ( test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] )
-
-        params = utils.get_params_swig()
-        for param, value in test_params.items():
-            params.set_param( param, value )  
-        model = utils.get_model_swig( params )
-        
-        for time in range( index_time ):
-            model.one_time_step()
-
-        # get the symptomatic index cases        
-        model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_symp  = df_trace[ df_trace[ "index_time"] == index_time ]
-        df_symp  = df_symp[ df_symp["index_reason"] == 0].groupby( ["index_time", "index_ID"]).size().reset_index( name ="n_traced_symp")
-        
-        for time in range( end_time - index_time - 1 ):
-            model.one_time_step()
-        
-        # get the test results
-        model.write_individual_file()
-        model.write_trace_tokens()
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = df_indiv.loc[:,["ID","test_status","house_no", "current_status", "quarantined"]]
-
-        # first filter out all those who have been traced multiple times 
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_n_trace = df_trace.groupby( "traced_ID" ).size().reset_index(name="n_trace")
-        df_n_trace.rename( columns={"traced_ID":"index_ID"}, inplace = True )
-        df_trace = pd.merge( df_trace, df_n_trace, on = "index_ID" )
-        df_trace = df_trace[ (df_trace["n_trace"] == 1 ) ]
-
-        # just look at those who were symptomatic when they became index cases but are now positive
-        df_trace = pd.merge( df_symp, df_trace, on = [ "index_time", "index_ID"], how = "inner" )
-        df_trace = df_trace[ df_trace[ "index_reason"] == 1 ]
-
-        # next filter out those who have no susceptibles in their house
-        df_house = df_indiv.loc[:,["ID","house_no"]]
-        df_house.rename( columns={"ID":"index_ID", "house_no":"index_house_no"}, inplace = True )
-        df_trace = pd.merge( df_trace, df_house, on = "index_ID" )
-        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID" )
-        df_trace = df_trace[ ( df_trace[ "house_no" ] == df_trace[ "index_house_no" ]) ]
-        df_n_trace = df_trace.groupby( "index_ID" ).size().reset_index(name="n_traced")
-        df_n_trace = df_n_trace[ (df_n_trace["n_traced"] > 1 ) ]
-        df_trace   = pd.merge( df_n_trace, df_trace, on = "index_ID") 
-        
-        # get those with negative and positive test
-        df_neg = df_trace[ df_trace["test_status"] == 0 ].loc[:,["index_ID", "traced_ID"]]
-        
-        # make sure that they still have the trace token on the next step
-        model.one_time_step()
-        model.write_trace_tokens()
-        model.write_individual_file()
-        df_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace[ "has_token"] = True
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = df_indiv.loc[:,["ID","quarantined"]]
-        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left")
-        df_neg = pd.merge( df_neg, df_trace, on = [ "index_ID", "traced_ID"], how = "left" )
-                        
-        np.testing.assert_equal( len( df_neg) > 100, True, "In-sufficient household member with negative test results" )
-        np.testing.assert_equal( sum( df_neg["has_token"] != True ), 0, "Household members lose their token on a negative result despite positive household member" )
-        np.testing.assert_equal( sum( df_neg["quarantined"]==0), 0, "Household members released from quarantine despite positive household member" )
-
-    
+      

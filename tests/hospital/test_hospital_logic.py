@@ -182,7 +182,9 @@ class TestClass(object):
         # Adjust baseline parameter
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("n_total", 20000)
+        params.set_param("n_seed_infection", 1000)
         params.set_param("hospital_on", 1)
+        params.set_param("end_time", 30)
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model using baseline parameters, pipe output to file, read output file
