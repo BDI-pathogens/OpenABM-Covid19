@@ -84,8 +84,8 @@ if __name__ == "__main__":
     # Write parameters in a form readable by the model
     df[["Name", "Value"]].set_index("Name").transpose().to_csv(wide_parameter_file, index = False)
     
-    # Generate markdown tables for each parameter type
-    parameter_types = df["Parameter type"].dropna().unique()
+    # Generate markdown tables for each parameter type (first strip on white space)
+    parameter_types = df["Parameter type"].dropna().str.strip().unique()
     
     for t in parameter_types:
         df_type = df.loc[df["Parameter type"] == t]

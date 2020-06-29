@@ -2,8 +2,8 @@
 | Name | Value | Symbol | Description | Source | 
 |  ---- | ---- | ---- | ---- | ---- |
 | `n_seed_infection` | 5 | - | Number of infections seeded at simulation start | - |
-| `mean_infectious_period` | 6 | &#956; | Mean of the generation time distribution (days) | Ma et al, 2020; Ganyani et al. 2020; Ferretti & Wymant et al. 2022 |
-| `sd_infectious_period` | 2.5 | &#963; | Standard deviation (days) of infectious period | Ma et al, 2020; Ganyani et al. 2020; Ferretti & Wymant et al. 2022 |
+| `mean_infectious_period` | 5.5 | &#956; | Mean of the generation time distribution (days) | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
+| `sd_infectious_period` | 2.14 | &#963; | Standard deviation (days) of infectious period | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `infectious_rate` | 5.64 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
 | `asymptomatic_infectious_factor` | 0.29 | *A<sub>asym</sub>* | Infectious rate of asymptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
 | `mild_infectious_factor` | 0.48 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
