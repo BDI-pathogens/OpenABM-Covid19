@@ -858,7 +858,7 @@ int add_user_network(
 	// check to see that the edges all make sense
 	for( idx = 0; idx < n_edges; idx++ )
 	{
-		if( edgeStart[ idx ] < 0 | edgeEnd[ idx ] < 0 | edgeStart[ idx ] >= n_total | edgeEnd[ idx ] >= n_total )
+		if( (edgeStart[ idx ] < 0) | (edgeEnd[ idx ] < 0) | (edgeStart[ idx ] >= n_total) | (edgeEnd[ idx ] >= n_total) )
 		{
 			print_now( "edgeStart and edgeEnd can only contain indices between 0 and n_total" );
 			return FALSE;

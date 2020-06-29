@@ -68,7 +68,7 @@ void assign_household_distribution( model *model, demographic_household_table *d
 		{
 			// check the house column is correct
 			age = demo_house->age_group[ pdx ];
-			if( age < 0 | age >= N_AGE_GROUPS )
+			if( (age < 0) | (age >= N_AGE_GROUPS) )
 				print_exit( "Demographic_household age column values must be between 0 and N_AGE_GROUPS" );
 
 			// set up the individual
@@ -90,10 +90,10 @@ void assign_household_distribution( model *model, demographic_household_table *d
 
 		// check the final values are correct
 		hdx++;
-		if( hdx == demo_house->n_households & pdx != demo_house->n_total )
+		if( (hdx == demo_house->n_households) & (pdx != demo_house->n_total) )
 			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
 
-		if( hdx != demo_house->n_households & pdx == demo_house->n_total )
+		if( (hdx != demo_house->n_households) & (pdx == demo_house->n_total) )
 			print_exit( "The person with index n_total-1 is not in house with index n_household-1!" );
 	}
 
