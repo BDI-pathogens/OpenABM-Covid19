@@ -70,17 +70,17 @@ int set_demographic_house_table(
 
 	for( pdx = 0; pdx < n_total; pdx++ )
 	{
-		if( people[pdx] < 0 | people[pdx] >= params->n_total )
+		if( (people[pdx] < 0) | (people[pdx] >= params->n_total) )
 		{
 			print_now( "The person index must be between 0 and n_total -1" );
 			return FALSE;
 		}
-		if( ages[pdx] < 0 | ages[pdx] >= N_AGE_GROUPS )
+		if( (ages[pdx] < 0) | (ages[pdx] >= N_AGE_GROUPS) )
 		{
 			print_now( "The person's age must be between 0 and N_AGE_GROUPS-1" );
 			return FALSE;
 		}
-		if( house_nos[pdx] < 0 | house_nos[pdx] >= params->demo_house->n_households )
+		if( (house_nos[pdx] < 0) | (house_nos[pdx] >= params->demo_house->n_households) )
 		{
 			print_now( "The person's nouse_no must be between 0 and n_households" );
 			return FALSE;
@@ -176,7 +176,7 @@ int set_indiv_occupation_network(
 
     for ( int pdx = 0; pdx != n_total; ++pdx)
     {
-        if( network[pdx] < 0 | network[pdx] >= params->occupation_network_table->n_networks )
+        if( (network[pdx] < 0) | (network[pdx] >= params->occupation_network_table->n_networks) )
         {
             print_now( "The person's network_no must be between 0 and n_occupation_networks." );
             return FALSE;
@@ -766,7 +766,7 @@ int set_model_param_test_result_wait_priority( model *model, int value )
     if( value == NO_PRIORITY_TEST )
     	model->params->test_order_wait_priority = NO_PRIORITY_TEST;
 
-	check_params( model->params );
+    check_params( model->params );
 
     return TRUE;
 }
