@@ -135,6 +135,7 @@
 | `quarantine_compliance_traced_positive` | 0.9 | - | Fraction of individuals who initially comply with a quarantine notification after their contact tested positive | - |
 | `test_on_symptoms` | 0 | - | Test individuals who show symptoms (0=no, 1=yes) | - |
 | `test_on_traced` | 0 | - | Test individuals who have been contact-traced (0=no, 1=yes) | - |
+| `test_release_on_negative` | 1 | - | Release individuals following a negative test (0=no, 1=yes) | - |
 | `trace_on_symptoms` | 0 | - | Trace contacts of individuals who show symptoms (0=no, 1=yes) | - |
 | `trace_on_positive` | 0 | - | Trace contacts of an individual who tests positive (0=no, 1=yes) | - |
 | `retrace_on_positive` | 0 | - | Repeat contract tracing be carried out on a positive test if already tested on symptoms (0=no, 1=yes) | - |
@@ -153,6 +154,9 @@
 | `quarantine_smart_release_day` | 0 | - | Release a chain of quarantined people if after this number of days nobody has shown symptoms on the chain | - |
 | `hospitalised_daily_interactions` | 0 | - | Daily random interactions of a hospitalised individual | - |
 | `test_insensitive_period` | 3 | - | Number of days following infection the test is insensitive | Woelfel et al. 2020 |
+| `test_sensitive_period` | 14 | - | Number of days following infection to end of period where test is sensitive | - |
+| `test_sensitivity` | 0.8 | - | Sensitivity of test in the time where it is sensitive | - |
+| `test_specificity` | 0.99 | - | Specificity of test (at any time) | - |
 | `test_order_wait` | 1 | - | Minimum number of days to wait to take a test | - |
 | `test_order_wait_priority` | -1 | - | Minimum number of days to wait for a priority test to be taken | - |
 | `test_result_wait` | 1 | - | Number of days to wait for a test result | - |

@@ -329,6 +329,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_traced));
 	if( check < 1){ print_exit("Failed to read parameter test_on_traced\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->test_release_on_negative));
+	if( check < 1){ print_exit("Failed to read parameter test_release_on_negative\n"); };
+
 	check = fscanf(parameter_file, " %i ,", &(params->trace_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter trace_on_symptoms\n"); };
 
@@ -382,6 +385,15 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_insensitive_period));
 	if( check < 1){ print_exit("Failed to read parameter test_insensitive_period\n"); };
+
+	check = fscanf(parameter_file, " %i , ",   &(params->test_sensitive_period));
+	if( check < 1){ print_exit("Failed to read parameter test_sensitive_period\n"); };
+
+	check = fscanf(parameter_file, " %lf, ",   &(params->test_sensitivity));
+	if( check < 1){ print_exit("Failed to read parameter test_sensitivity\n"); };
+
+	check = fscanf(parameter_file, " %lf , ",   &(params->test_specificity));
+	if( check < 1){ print_exit("Failed to read parameter test_specificity\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
@@ -1144,7 +1156,7 @@ void write_trace_tokens( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf( output_file ,"time,index_time,index_ID,index_reason,index_status,contact_time,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
+	fprintf( output_file ,"time,index_time,index_ID,index_reason,index_status,contact_time,traced_from_ID,traced_ID,traced_status,traced_infector_ID,traced_time_infected\n" );
 
 	int max_quarantine_length = max( model->params->quarantine_length_traced_symptoms, model->params->quarantine_length_traced_positive );
 	for( day = 1; day <= max_quarantine_length; day++ )
@@ -1166,13 +1178,14 @@ void write_trace_tokens( model *model )
 
 			while( token != NULL )
 			{
-				fprintf( output_file, "%i,%i,%li,%i,%i,%i,%li,%i,%li,%i\n",
+				fprintf( output_file, "%i,%i,%li,%i,%i,%i,%li,%li,%i,%li,%i\n",
 					model->time,
 					index_time,
 					indiv->idx,
 					token->index_status,
 					indiv->status,
 					token->contact_time,
+					ifelse( token->traced_from != NULL, token->traced_from->idx, -1 ),
 					token->individual->idx,
 					token->individual->status,
 					ifelse( token->individual->status > 0, token->individual->infection_events->infector->idx, -1 ),

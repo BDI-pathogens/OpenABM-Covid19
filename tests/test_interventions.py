@@ -15,6 +15,7 @@ import subprocess
 import sys
 import numpy as np, pandas as pd
 from scipy import optimize
+from scipy.stats import binom
 from math import sqrt
 from numpy.core.numeric import NaN
 from random import randrange
@@ -300,6 +301,8 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     traceable_interaction_fraction = 1,
                     daily_non_cov_symptoms_rate = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                     test_order_wait = 1,
                     test_result_wait = 1,
                     quarantine_household_on_positive = True,
@@ -427,7 +430,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -457,7 +462,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -487,7 +494,9 @@ class TestClass(object):
                     mean_time_to_hospital = 30,
                     traceable_interaction_fraction = 1.0,
                     quarantine_days = 7,
-                    test_insensitive_period = 0
+                    test_insensitive_period = 0,
+                    test_sensitivity = 1,
+                    test_specificity = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -735,6 +744,127 @@ class TestClass(object):
                 delay = delay,
             ) for delay in [0, 1, 2, 3]
         ],
+        "test_test_sensitivity": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 4000,
+                    end_time = 12,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    quarantine_household_on_symptoms = True,
+                    test_on_symptoms = True,
+                    test_on_traced = True,
+                    trace_on_symptoms = True,
+                    quarantine_on_traced = True,
+                    test_order_wait  = 0,
+                    test_result_wait  = 1,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 0.7,
+                    daily_non_cov_symptoms_rate =0.01,
+                    test_specificity = 0.9,
+                    test_insensitive_period = 3
+
+                ),
+            )
+        ],
+        "test_recursive_testing_indirect_release": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 4000,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    trace_on_symptoms = True,
+                    test_on_symptoms  = True,
+                    test_on_traced    = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = True,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_household_on_traced_positive = True,
+                    quarantine_household_on_traced_symptoms = False,
+                    quarantine_compliance_traced_symptoms = 1.0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 1,
+                    test_result_wait = 1,
+                    test_specificity = 1,
+                    test_insensitive_period = 0,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 1,
+                    daily_non_cov_symptoms_rate =0.00,
+                ),
+            )
+        ],
+         "test_recursive_testing": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 4000,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    mean_time_to_hospital = 20,
+                    trace_on_symptoms = True,
+                    test_on_symptoms  = True,
+                    test_on_traced    = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = True,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_household_on_traced_positive = False,
+                    quarantine_household_on_traced_symptoms = False,
+                    quarantine_compliance_traced_symptoms = 1.0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 1,
+                    test_result_wait = 1,
+                    test_specificity = 1,
+                    test_insensitive_period = 0,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 1,
+                    allow_clinical_diagnosis = False,
+                    daily_non_cov_symptoms_rate =0.00,
+                ),
+            )
+        ],
+        "test_recursive_testing_household_not_released": [
+            dict(
+                test_params = dict( 
+                    n_total = 100000,
+                    n_seed_infection = 4000,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    mean_time_to_hospital = 20,
+                    trace_on_symptoms = True,
+                    test_on_symptoms  = True,
+                    test_on_traced    = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = True,
+                    quarantine_household_on_positive = True,
+                    quarantine_household_on_symptoms = True,
+                    quarantine_compliance_traced_symptoms = 1.0,
+                    quarantine_compliance_traced_positive = 1.0,
+                    quarantine_dropout_self = 0.0,
+                    quarantine_dropout_traced_positive = 0.0,
+                    quarantine_dropout_positive = 0.0,
+                    test_order_wait  = 1,
+                    test_result_wait = 1,
+                    test_specificity = 1,
+                    test_insensitive_period = 0,
+                    app_turn_on_time = 0,
+                    test_sensitivity = 1,
+                    daily_non_cov_symptoms_rate =0.00,
+                ),
+            )
+        ],
     }
     """
     Test class for checking
@@ -940,11 +1070,13 @@ class TestClass(object):
 
         df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         
-        # get everyone who is a case as these will not be traced
-        df_trans = df_trans.loc[:,["ID_recipient","is_case"]]
-        df_trans = df_trans[ ( df_trans[ "is_case"] == 1 ) ]
+        # get everyone who is a case or just released from hospital as these will not be traced
+        df_trans = df_trans.loc[:,["ID_recipient","is_case","time_recovered","time_hospitalised"]]
+        df_trans[ "not_traced"] = ( df_trans["time_recovered"] >= ( end_time - 1) ) & ( df_trans["time_hospitalised"] >= 0 ) 
+        df_trans[ "not_traced"] = df_trans[ "not_traced"] | ( df_trans[ "is_case"] == 1 )  
+        df_trans = df_trans[ ( df_trans[ "not_traced"] == 1 ) ]
         df_trans.rename(columns = {"ID_recipient":"traced_ID"}, inplace = True )
         
         # prepare the interaction data to get all household interations
@@ -974,8 +1106,8 @@ class TestClass(object):
         # check everybody with a household interaction is traced
         t = pd.merge( index_traced, index_inter, on = [ "index_ID", "traced_ID" ], how = "outer" )
         t = pd.merge( t, df_trans, on = "traced_ID", how = "left" )
-        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["is_case"] != True  )] )
-        n_household = len( t[ (t["household"] == True  ) ] )
+        n_no_trace  = len( t[ ( t[ "traced"] != True ) & (t["household"] == True ) & (t["not_traced"] != True )] )
+        n_household = len( t[ (t["household"] == True ) ] )
         np.testing.assert_equal( n_household>100, True, "insufficient household members traced to test" )
         np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
 
@@ -1179,6 +1311,8 @@ class TestClass(object):
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
         np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
        
+        del( model )
+
     def test_risk_score_age(self, test_params, min_age_inf, min_age_sus):
         """
         Test that if risk score quarantining is set to 0 for the youngest
@@ -1226,6 +1360,8 @@ class TestClass(object):
         np.testing.assert_equal( max( index_traced[ "index_age_group"] ),  constant.N_AGE_GROUPS-1,  "oldest age group are not index cases" )
         np.testing.assert_equal( max( index_traced[ "traced_age_group"] ), constant.N_AGE_GROUPS-1,  "oldest age group are not traced" )
        
+        del( model )
+    
     def test_risk_score_days_since_contact(self, test_params, days_since_contact):
         """
         Test that if risk score quarantining is set to be 0 for days greater
@@ -1261,6 +1397,8 @@ class TestClass(object):
         # now perform checks
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( max( index_traced[ "days_since_contact"] ) <= days_since_contact, 1,  "tracing contacts from longer ago than risk score allows" )
+       
+        del( model )
        
     def test_risk_score_multiple_contact(self, test_params, days_since_contact, required_interactions):
         """
@@ -1341,6 +1479,8 @@ class TestClass(object):
         np.testing.assert_equal( len( index_traced ) > 50, 1, "less than 50 traced people, in-sufficient to test" )
         np.testing.assert_equal( len( index_inter ), len( index_traced ), "incorrect number of people traced" )
         np.testing.assert_equal( len( index_inter ), len( df_all ), "incorrect number of people traced" )
+        
+        del( model )
 
     def test_quarantine_household_on_trace_positive_not_symptoms(self, test_params ):
         """
@@ -1508,6 +1648,8 @@ class TestClass(object):
         np.testing.assert_equal( n_red > 100, True, err_msg = "Not sufficient red messages to non-quarantiners to test")
         np.testing.assert_allclose( n_quar_pos, n_red*comp_pos, atol=max(tol_sd*sqrt(n_red*comp_pos*(1-comp_pos)),0.5), err_msg="The wrong number quarantined on red messages")
 
+        del( model )
+
 
     def test_quarantined_have_trace_token(self, test_params, time_steps_test ):
         """
@@ -1539,6 +1681,9 @@ class TestClass(object):
             
             np.testing.assert_equal( len( quarantined ) > 500, True, err_msg = "Not sufficient people quarantined to test")
             np.testing.assert_equal( sum( quarantined.n_tokens.isna() ), 0, err_msg = "Individuals quarantined without trace tokens")
+       
+        del( model )
+
 
     def test_priority_testing(self, test_params, app_users_fraction, priority_test_contacts ):
         """
@@ -1709,8 +1854,116 @@ class TestClass(object):
         np.testing.assert_equal(len(df_trace_sum[(df_trace_sum["priority"]==False)]) > 30, True, "In-sufficient non-priority cases to test")
         np.testing.assert_equal(len(non_priority_not_traced), 0, "Traced people not quarantined after the longer delay of a non-prioirty test")
         
-        del( model )
+        del( model )   
+        
+    def test_test_sensitivity(self, test_params ):
+        """
+        Test that the tests results have the required sensitivity and specificity
+        Make sure there sufficient true/false pos/neg and then check they 
+        lie within the 99% confidence interval
+        Note tests carried out of positive cases prior to the test becoming sensitive
+        must be treated differently
+        """
+        end_time  = test_params[ "end_time" ]
+        max_CI    = 0.99
+        upper_CI  = ( 1 + max_CI ) / 2 
+        lower_CI  = ( 1 - max_CI ) / 2 
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( end_time ):
+            model.one_time_step()
 
+        # write files
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # read CSV's
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+    
+        # find everyone with a test result
+        df_test = df_indiv.loc[:,["ID","test_status"]]
+        df_test = df_test[ df_test["test_status"] >= 0 ]
+        df_trans = df_trans.loc[:,["ID_recipient","time_infected", "time_symptomatic"]]
+        df_test = pd.merge( df_test, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+        df_test.fillna(-1, inplace=True)
+        df_test["infected"] = (df_test["time_infected"]>-1)
+
+        # work out whether test is sensitive based on time of infected and whether showing symptoms     
+        df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= ( end_time - test_params[ "test_insensitive_period"] ) ) )
+        df_test[ "test_sensitive_symp" ] = ( ( df_test["time_symptomatic"] <= end_time ) & ( df_test["time_symptomatic"] >= 0 ) )
+        df_test[ "test_sensitive" ] = ( df_test[ "test_sensitive_inf" ] | df_test[ "test_sensitive_symp" ] )
+                                              
+        # check the specificity of the test
+        true_neg  = sum( ( df_test["infected"] == False ) & ( df_test["test_status"] == 0 ) )
+        false_pos = sum( ( df_test["infected"] == False ) & ( df_test["test_status"] == 1 ) )
+        p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "test_specificity"] )
+        np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
+        np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too few false positives given the test specificity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
+
+        # check the sensitivity in the initial period when not sensitive
+        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == False ))
+        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == False ))
+        p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "test_specificity"] )
+        np.testing.assert_equal( false_neg > 50, True, "In-sufficient false negatives in insensitive period to test" )
+        np.testing.assert_equal( true_pos > 5, True, "In-sufficient true positives in insensitive period to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too true positives in insensitive period given the test specificity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
+
+        # check the sensitivity in the initial period when not sensitive
+        false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == True ))
+        true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == True ))
+        p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "test_sensitivity"] )
+        np.testing.assert_equal( false_neg > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, "Too few true positives in sensitive period given the test sensitivity" )
+        np.testing.assert_equal( p_val < upper_CI, True, "Too many true positives in sensitive period the test sensitivity" )
+
+        del( model )
+        
+    def test_recursive_testing_indirect_release(self, test_params ):
+        """
+        Test that when recursively tested people are released that 
+        those indirectly traced through them are also released
+        """
+        end_time  = test_params[ "end_time" ]
+        symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( end_time ):
+            model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+      
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = df_trace[ df_trace[ "index_time" ] == symp_time ]
+        
+        # get everyone directly traced by the index case
+        df_direct_trace = df_trace[ ( df_trace[ "index_ID" ] == df_trace[ "traced_from_ID" ] )]
+        df_direct_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
+        df_direct_trace.rename( columns = {"traced_ID":"direct_traced_ID"}, inplace = True )
+        
+        # now get those indirectly traced (i.e. household members of traced)
+        df_indirect_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_from_ID" ] ) & ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
+        df = pd.merge( df_indirect_trace, df_direct_trace, left_on = ["index_ID", "traced_from_ID"], right_on = ["index_ID", "direct_traced_ID"], how = "left")
+        df.fillna(-1, inplace=True)
+
+        # test that everyone who has been indirectly traced, the directly traced person is still on the trace list
+        np.testing.assert_equal( len( df_indirect_trace) > 500, True, "In-sufficient indirect-traced to test" )
+        np.testing.assert_equal( sum( df[ "direct_traced_ID"] == -1 ), 0, "Indirect traced people where the traced from person is no longer on the trace list" )
+
+        del( model )
 
     def test_manual_trace_params(self, test_params, time_steps_test ):
         """
@@ -1739,6 +1992,183 @@ class TestClass(object):
 
         np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
 
+    def test_recursive_testing(self, test_params ):
+        """
+        Test checks that following a positive test for an index case we order a 
+        test for all directly traced people
+        
+        Additionally checks that when a symptomatic index case receives a positive test
+        tests are ordered for all directly traced people
+        """
+        end_time  = test_params[ "end_time" ]
+        symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( symp_time ):
+            model.one_time_step()  
+        
+        # get the test status at the point of becoming an index case  
+        model.write_trace_tokens()
+        model.write_individual_file()
+        
+        # remove those traced by more than one index and the index cases who have been traced
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
+        df_trace_uniq = df_trace_uniq[df_trace_uniq["n_traced"] == 1 ]
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_uniq.rename(columns={"traced_ID":"index_ID","n_traced":"n_traced_index"}, inplace = True)
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "index_ID", how = "left" )
+        df_trace = df_trace[ ( df_trace[ "n_traced"] == 1 ) & ( df_trace[ "n_traced_index"] == 1 )]
+        
+        # now get the new index case who have traced more than one and just get the direct traced
+        df_trace_symp = df_trace[ ( df_trace[ "index_time" ] == symp_time ) & ( df_trace["index_reason"] == 0 ) ]
+        df_trace_symp = df_trace_symp.groupby(["index_time","index_ID"]).size().reset_index(name="n_traced")
+        df_trace_symp = df_trace_symp[ df_trace_symp["n_traced"] > 1 ]
+        df_trace_symp["pos_at_symp"] = True
+        df_trace_symp = pd.merge(df_trace_symp, df_trace, on = ["index_time","index_ID"], how = "left")
+        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] != df_trace_symp["traced_ID"])]
+        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] == df_trace_symp["traced_from_ID"])]
+        df_trace_symp = df_trace_symp.loc[:,["index_time","index_ID","traced_ID",]]
+                
+        # go to step before symptomatic index cases get their test results back to get the status of those traced
+        for time in range( end_time - symp_time - 1 ):
+            model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv_1 = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv_1 = pd.merge(df_indiv_1, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # remove those who have been traced multiple times from the original list
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end_1")
+        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end_1"] == 1 ]
+   
+        # now check that nobody has got a test ordered yet
+        df = pd.merge( df_trace_symp, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( sum( ( df[ "test_status"] != -2 ) ), 0, "Traced people getting a test after a symptomatic gets a positive test" )
+     
+        # now step forward to when the symptomatic cases get their results back
+        model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # remove those who have been traced multiple times from the original list
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end")
+        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end"] == 1 ]
+   
+        # all those directly traced should now be asking for a test
+        df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
+    
+        # now look at at everyone who is traced directly from a positive index case and only traced once
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace = df_trace[df_trace["n_traced_end"] == 1 ]
+        df_trace = df_trace[ ( df_trace[ "index_time" ] ==  end_time ) & ( df_trace["index_reason"] == 1 ) ]
+        df_trace = df_trace[ ( df_trace[ "index_ID" ] == df_trace[ "traced_from_ID" ] )]
+        df_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
+        df       = pd.merge( df_trace, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+
+        # remove traced people who were waiting for a test already
+        df_indiv_1 = df_indiv_1.loc[:,["ID","test_status"]]
+        df_indiv_1.rename(columns={"test_status":"test_status_1"},inplace=True)
+        df = pd.merge( df, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        df = df[ df["test_status_1" ] == -2 ]
+           
+        np.testing.assert_equal( len( df ) > 1000, True, "In-sufficient traced from index positive at end time " )
+        np.testing.assert_equal( sum( df[ "test_status" ] != -1 ), 0, "Traced people not getting a test after new positive index case" )
+
+        del( model )
+
+    def test_recursive_testing_household_not_released(self, test_params ):
+        """
+        Test that when recursively tested people that if a household 
+        member of an index case tests negative they do not get released
+        if the index case has tested positive
+        """
+        end_time   = test_params[ "end_time" ]
+        index_time = end_time - 2 * ( test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] )
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( index_time ):
+            model.one_time_step()
+
+        # get the symptomatic index cases        
+        model.write_trace_tokens()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_symp  = df_trace[ df_trace[ "index_time"] == index_time ]
+        df_symp  = df_symp[ df_symp["index_reason"] == 0].groupby( ["index_time", "index_ID"]).size().reset_index( name ="n_traced_symp")
+        
+        for time in range( end_time - index_time - 1 ):
+            model.one_time_step()
+        
+        # get the test results
+        model.write_individual_file()
+        model.write_trace_tokens()
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = df_indiv.loc[:,["ID","test_status","house_no", "current_status", "quarantined"]]
+
+        # first filter out all those who have been traced multiple times 
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_n_trace = df_trace.groupby( "traced_ID" ).size().reset_index(name="n_trace")
+        df_n_trace.rename( columns={"traced_ID":"index_ID"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_n_trace, on = "index_ID" )
+        df_trace = df_trace[ (df_trace["n_trace"] == 1 ) ]
+
+        # just look at those who were symptomatic when they became index cases but are now positive
+        df_trace = pd.merge( df_symp, df_trace, on = [ "index_time", "index_ID"], how = "inner" )
+        df_trace = df_trace[ df_trace[ "index_reason"] == 1 ]
+
+        # next filter out those who have no susceptibles in their house
+        df_house = df_indiv.loc[:,["ID","house_no"]]
+        df_house.rename( columns={"ID":"index_ID", "house_no":"index_house_no"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_house, on = "index_ID" )
+        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID" )
+        df_trace = df_trace[ ( df_trace[ "house_no" ] == df_trace[ "index_house_no" ]) ]
+        df_n_trace = df_trace.groupby( "index_ID" ).size().reset_index(name="n_traced")
+        df_n_trace = df_n_trace[ (df_n_trace["n_traced"] > 1 ) ]
+        df_trace   = pd.merge( df_n_trace, df_trace, on = "index_ID") 
+        
+        # get those with negative and positive test
+        df_neg = df_trace[ df_trace["test_status"] == 0 ].loc[:,["index_ID", "traced_ID"]]
+        
+        # make sure that they still have the trace token on the next step
+        model.one_time_step()
+        model.write_trace_tokens()
+        model.write_individual_file()
+        df_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace[ "has_token"] = True
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = df_indiv.loc[:,["ID","quarantined"]]
+        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left")
+        df_neg = pd.merge( df_neg, df_trace, on = [ "index_ID", "traced_ID"], how = "left" )
+                        
+        np.testing.assert_equal( len( df_neg) > 100, True, "In-sufficient household member with negative test results" )
+        np.testing.assert_equal( sum( df_neg["has_token"] != True ), 0, "Household members lose their token on a negative result despite positive household member" )
+        np.testing.assert_equal( sum( df_neg["quarantined"]==0), 0, "Household members released from quarantine despite positive household member" )
 
     def test_manual_trace_only_of_given_type(self, test_params, time_steps_test, interaction_type ):
         """
@@ -1820,11 +2250,186 @@ class TestClass(object):
         # make sure we are tracing from everybody
         df_manual_trace = df_trace[ (df_trace[ "index_time" ] == ( test_params[ "end_time" ] - trace_delay ) ) ]
         df_manual_trace = df_manual_trace.groupby( "index_ID" ).size().reset_index( name = "count" ) 
-        np.testing.assert_equal( len( df_manual_trace ) >100, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( len( df_manual_trace ) >80, True, "Insufficient index cases to test" )
         np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
       
+    def test_recursive_testing(self, test_params ):
+        """
+        Test checks that following a positive test for an index case we order a 
+        test for all directly traced people
         
-        
+        Additionally checks that when a symptomatic index case receives a positive test
+        tests are ordered for all directly traced people
+        """
+        end_time  = test_params[ "end_time" ]
+        symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
 
-       
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( symp_time ):
+            model.one_time_step()  
+        
+        # get the test status at the point of becoming an index case  
+        model.write_trace_tokens()
+        model.write_individual_file()
+        
+        # remove those traced by more than one index and the index cases who have been traced
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
+        df_trace_uniq = df_trace_uniq[df_trace_uniq["n_traced"] == 1 ]
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_uniq.rename(columns={"traced_ID":"index_ID","n_traced":"n_traced_index"}, inplace = True)
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "index_ID", how = "left" )
+        df_trace = df_trace[ ( df_trace[ "n_traced"] == 1 ) & ( df_trace[ "n_traced_index"] == 1 )]
+        
+        # now get the new index case who have traced more than one and just get the direct traced
+        df_trace_symp = df_trace[ ( df_trace[ "index_time" ] == symp_time ) & ( df_trace["index_reason"] == 0 ) ]
+        df_trace_symp = df_trace_symp.groupby(["index_time","index_ID"]).size().reset_index(name="n_traced")
+        df_trace_symp = df_trace_symp[ df_trace_symp["n_traced"] > 1 ]
+        df_trace_symp["pos_at_symp"] = True
+        df_trace_symp = pd.merge(df_trace_symp, df_trace, on = ["index_time","index_ID"], how = "left")
+        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] != df_trace_symp["traced_ID"])]
+        df_trace_symp = df_trace_symp[ ( df_trace_symp["index_ID"] == df_trace_symp["traced_from_ID"])]
+        df_trace_symp = df_trace_symp.loc[:,["index_time","index_ID","traced_ID",]]
+                
+        # go to step before symptomatic index cases get their test results back to get the status of those traced
+        for time in range( end_time - symp_time - 1 ):
+            model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv_1 = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv_1 = pd.merge(df_indiv_1, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # remove those who have been traced multiple times from the original list
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end_1")
+        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end_1"] == 1 ]
+   
+        # now check that nobody has got a test ordered yet
+        df = pd.merge( df_trace_symp, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( sum( ( df[ "test_status"] != -2 ) ), 0, "Traced people getting a test after a symptomatic gets a positive test" )
+     
+        # now step forward to when the symptomatic cases get their results back
+        model.one_time_step()
+
+        # write files
+        model.write_trace_tokens()
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # remove those who have been traced multiple times from the original list
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end")
+        df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end"] == 1 ]
+   
+        # all those directly traced should now be asking for a test
+        df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        np.testing.assert_equal( len( df ) > 500, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
+    
+        # now look at at everyone who is traced directly from a positive index case and only traced once
+        df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
+        df_trace = df_trace[df_trace["n_traced_end"] == 1 ]
+        df_trace = df_trace[ ( df_trace[ "index_time" ] ==  end_time ) & ( df_trace["index_reason"] == 1 ) ]
+        df_trace = df_trace[ ( df_trace[ "index_ID" ] == df_trace[ "traced_from_ID" ] )]
+        df_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
+        df       = pd.merge( df_trace, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+
+        # remove traced people who were waiting for a test already
+        df_indiv_1 = df_indiv_1.loc[:,["ID","test_status"]]
+        df_indiv_1.rename(columns={"test_status":"test_status_1"},inplace=True)
+        df = pd.merge( df, df_indiv_1, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
+        df = df[ df["test_status_1" ] == -2 ]
+           
+        np.testing.assert_equal( len( df ) > 1000, True, "In-sufficient traced from index positive at end time " )
+        np.testing.assert_equal( sum( df[ "test_status" ] != -1 ), 0, "Traced people not getting a test after new positive index case" )
+
+        del( model )
+
+    def test_recursive_testing_household_not_released(self, test_params ):
+        """
+        Test that when recursively tested people that if a household 
+        member of an index case tests negative they do not get released
+        if the index case has tested positive
+        """
+        end_time   = test_params[ "end_time" ]
+        index_time = end_time - 2 * ( test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] )
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        for time in range( index_time ):
+            model.one_time_step()
+
+        # get the symptomatic index cases        
+        model.write_trace_tokens()
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_symp  = df_trace[ df_trace[ "index_time"] == index_time ]
+        df_symp  = df_symp[ df_symp["index_reason"] == 0].groupby( ["index_time", "index_ID"]).size().reset_index( name ="n_traced_symp")
+        
+        for time in range( end_time - index_time - 1 ):
+            model.one_time_step()
+        
+        # get the test results
+        model.write_individual_file()
+        model.write_trace_tokens()
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = df_indiv.loc[:,["ID","test_status","house_no", "current_status", "quarantined"]]
+
+        # first filter out all those who have been traced multiple times 
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_n_trace = df_trace.groupby( "traced_ID" ).size().reset_index(name="n_trace")
+        df_n_trace.rename( columns={"traced_ID":"index_ID"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_n_trace, on = "index_ID" )
+        df_trace = df_trace[ (df_trace["n_trace"] == 1 ) ]
+
+        # just look at those who were symptomatic when they became index cases but are now positive
+        df_trace = pd.merge( df_symp, df_trace, on = [ "index_time", "index_ID"], how = "inner" )
+        df_trace = df_trace[ df_trace[ "index_reason"] == 1 ]
+
+        # next filter out those who have no susceptibles in their house
+        df_house = df_indiv.loc[:,["ID","house_no"]]
+        df_house.rename( columns={"ID":"index_ID", "house_no":"index_house_no"}, inplace = True )
+        df_trace = pd.merge( df_trace, df_house, on = "index_ID" )
+        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID" )
+        df_trace = df_trace[ ( df_trace[ "house_no" ] == df_trace[ "index_house_no" ]) ]
+        df_n_trace = df_trace.groupby( "index_ID" ).size().reset_index(name="n_traced")
+        df_n_trace = df_n_trace[ (df_n_trace["n_traced"] > 1 ) ]
+        df_trace   = pd.merge( df_n_trace, df_trace, on = "index_ID") 
+        
+        # get those with negative and positive test
+        df_neg = df_trace[ df_trace["test_status"] == 0 ].loc[:,["index_ID", "traced_ID"]]
+        
+        # make sure that they still have the trace token on the next step
+        model.one_time_step()
+        model.write_trace_tokens()
+        model.write_individual_file()
+        df_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace[ "has_token"] = True
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = df_indiv.loc[:,["ID","quarantined"]]
+        df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left")
+        df_neg = pd.merge( df_neg, df_trace, on = [ "index_ID", "traced_ID"], how = "left" )
+                        
+        np.testing.assert_equal( len( df_neg) > 100, True, "In-sufficient household member with negative test results" )
+        np.testing.assert_equal( sum( df_neg["has_token"] != True ), 0, "Household members lose their token on a negative result despite positive household member" )
+        np.testing.assert_equal( sum( df_neg["quarantined"]==0), 0, "Household members released from quarantine despite positive household member" )
+
+    
