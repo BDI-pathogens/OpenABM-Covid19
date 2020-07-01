@@ -107,7 +107,10 @@ void set_quarantine_status(
 		indiv->infection_events->times[QUARANTINED] = time;
 
 		// Increment counters for time series output
+		model->n_quarantine_events++;
+
 		if(indiv->app_user == TRUE){
+			model->n_quarantine_events_app_user++;
 			model->n_quarantine_app_user++;
 			if(indiv->status > SUSCEPTIBLE)
 				model->n_quarantine_app_user_infected++;
@@ -127,8 +130,11 @@ void set_quarantine_status(
 		indiv->quarantine_release_event = NULL;
 
 		// Increment counters for time series output
+		model->n_quarantine_release_events++;
+
 		if(indiv->app_user == TRUE){
 			model->n_quarantine_app_user--;
+			model->n_quarantine_release_events_app_user++;
 			if(indiv->status > SUSCEPTIBLE)
 				model->n_quarantine_app_user_infected--;
 			if(indiv->status == RECOVERED)

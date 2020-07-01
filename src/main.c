@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
 	printf("# hospital_on: %d\n", params.hospital_on);
 
 	if ( params.hospital_on )
-		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_waiting,n_general,n_ICU,n_discharged,n_mortuary,n_quarantine_infected,n_quarantine_recovered,n_quarantine_app_user,n_quarantine_app_user_infected,n_quarantine_app_user_recovered\n");
+		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_waiting,n_general,n_ICU,n_discharged,n_mortuary,n_quarantine_infected,n_quarantine_recovered,n_quarantine_app_user,n_quarantine_app_user_infected,n_quarantine_app_user_recovered,n_quarantine_events,n_quarantine_events_app_user,n_quarantine_release_events,n_quarantine_release_events_app_user\n");
 	else
-		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_quarantine_infected,n_quarantine_recovered,n_quarantine_app_user,n_quarantine_app_user_infected,n_quarantine_app_user_recovered\n");
+		printf( "time,lockdown,lockdown_elderly,intervention_on,test_on_symptoms,app_on,total_infected,total_case,n_presymptom,n_asymptom,n_quarantine,n_tests,n_symptoms,n_hospital,n_critical,n_hospitalised_recovering,n_death,n_recovered,n_quarantine_infected,n_quarantine_recovered,n_quarantine_app_user,n_quarantine_app_user_infected,n_quarantine_app_user_recovered,n_quarantine_events,n_quarantine_events_app_user,n_quarantine_release_events,n_quarantine_release_events_app_user\n");
 	last_test = 0;
 	while( model->time < params.end_time && one_time_step( model ) )
 	{
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
                 write_hospital_interactions( model);
             }
 
-			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 					model->time,
 					params.lockdown_on,
 					params.lockdown_elderly_on,
@@ -101,13 +101,17 @@ int main(int argc, char *argv[])
 					model->n_quarantine_recovered,
 					model->n_quarantine_app_user,
 					model->n_quarantine_app_user_infected,
-					model->n_quarantine_app_user_recovered
+					model->n_quarantine_app_user_recovered,
+					model->n_quarantine_events,
+					model->n_quarantine_events_app_user,
+					model->n_quarantine_release_events,
+					model->n_quarantine_release_events_app_user
 			);
 			last_test = n_total( model, TEST_RESULT );
 		}
 		else
 		{
-			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
+			printf( "%i,%i,%i,%i,%i,%i,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li,%li\n",
 					model->time,
 					params.lockdown_on,
 					params.lockdown_elderly_on,
@@ -130,7 +134,11 @@ int main(int argc, char *argv[])
 					model->n_quarantine_recovered,
 					model->n_quarantine_app_user,
 					model->n_quarantine_app_user_infected,
-					model->n_quarantine_app_user_recovered
+					model->n_quarantine_app_user_recovered,
+					model->n_quarantine_events,
+					model->n_quarantine_events_app_user,
+					model->n_quarantine_release_events,
+					model->n_quarantine_release_events_app_user
 			);
 			last_test = n_total( model, TEST_RESULT );
 		}

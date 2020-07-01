@@ -215,6 +215,18 @@ class TestClass(object):
         
         df_ts = pd.DataFrame(results)
         
+        # Test that quarantining events (and release events) add to total numbers in quarantine
+        n_quar_events = np.cumsum(df_ts["n_quarantine_events"].values - \
+            df_ts["n_quarantine_release_events"].values)
+        
+        np.testing.assert_array_equal(df_ts["n_quarantine"].values, n_quar_events)
+        
+        n_quar_events_app_user = np.cumsum(df_ts["n_quarantine_events_app_user"].values - \
+            df_ts["n_quarantine_release_events_app_user"].values)
+        
+        np.testing.assert_array_equal(df_ts["n_quarantine_app_user"].values, n_quar_events_app_user)
+        
+        
         dfs =[pd.read_csv(constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = t)) \
             for t in np.arange(1, T)]
         dfs = pd.concat(dfs)

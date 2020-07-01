@@ -677,7 +677,12 @@ class Model:
         results["n_quarantine_app_user"] = self.c_model.n_quarantine_app_user
         results["n_quarantine_app_user_infected"] = self.c_model.n_quarantine_app_user_infected
         results["n_quarantine_app_user_recovered"] = self.c_model.n_quarantine_app_user_recovered
-
+        results["n_quarantine_events"] = self.c_model.n_quarantine_events
+        results["n_quarantine_release_events"] = self.c_model.n_quarantine_release_events
+        results["n_quarantine_events_app_user"] = self.c_model.n_quarantine_events_app_user
+        results["n_quarantine_release_events_app_user"] = \
+            self.c_model.n_quarantine_release_events_app_user
+        
         return results
 
     def write_output_files(self):
