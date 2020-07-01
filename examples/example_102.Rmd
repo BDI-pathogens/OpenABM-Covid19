@@ -1,0 +1,91 @@
+---
+title: "example_102.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(reticulate)
+```
+
+```{r include = TRUE}
+# Import Python modules
+COVID19 <- import("COVID19")
+Model <-COVID19$model$Model
+Parameters <-COVID19$model$Parameters
+simulation <- COVID19$simulation
+```
+
+```{r include = TRUE}
+# Parameter input arguments
+input_parameter_file <- "../tests/data/baseline_parameters.csv"
+parameter_line_number <- 1
+output_dir <- "."
+household_demographics_file <- "../tests/data/baseline_household_demographics.csv"
+hospital_file <- "../tests/data/hospital_baseline_parameters.csv"
+```
+
+
+```{r include = TRUE}
+# Instantiate Parameters object, Model object, and Simulation object
+params <- Parameters(
+    input_parameter_file, 
+    parameter_line_number,
+    output_dir,
+    household_demographics_file, 
+    hospital_file)
+
+# Set end time of the simulation
+params$set_param( "n_total", 50000 )
+params$set_param( "end_time", 500 )
+
+model <- simulation$COVID19IBM(model = Model(params))
+sim <- simulation$Simulation(env = model, end_time = params$get_param("end_time"))
+```
+
+Run the model until there are 500 infecteds
+
+```{r include = TRUE}
+sim$steps(1L)
+while( sim$results$total_infected[length(sim$results$total_infected)] < 500){
+    sim$steps(1L) # needs to be an integer
+}
+```
+
+Turn on lockdown and run the model for another 30 days
+
+```{r include = TRUE}
+sim$env$model$update_running_params("lockdown_on", 1)
+sim$steps(30L)
+```
+
+Now turn off the lockdown and turn on digital contract tracing, with the following options.
+
+1. 80% of people self-quarantine along with their household when they develop symptoms.
+2. Tracing happens as soon as somebody develops symptoms and contacts quarantine themselves.
+3. The households members of those traced also quarantine
+
+We then run the simulation for another 100 days.
+    
+```{r, include = TRUE}
+sim$env$model$update_running_params("lockdown_on", 0)
+
+# 80% self-quarantine along with their households
+sim$env$model$update_running_params("self_quarantine_fraction", 0.8 )
+sim$env$model$update_running_params("quarantine_household_on_symptoms", 1 )
+
+# turn on the app and quarantine those people who have been traced along with their households
+sim$env$model$update_running_params("app_turned_on", 1 )
+sim$env$model$update_running_params("quarantine_on_traced", 1 )
+sim$env$model$update_running_params("trace_on_symptoms", 1 )
+sim$env$model$update_running_params("quarantine_household_on_traced_symptoms", 1 )
+
+# step forwrard another 100 days
+sim$steps( 100L )
+```
+
+Plot total infected through time
+
+```{r, include = TRUE}
+plot(sim$results$time, sim$results$total_infected, 
+     type = "l", col = "blue", xlab = "Time", ylab = "Total infected")
+```
