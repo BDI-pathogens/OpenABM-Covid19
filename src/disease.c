@@ -289,6 +289,15 @@ void transition_one_disese_event(
 		remove_event_from_event_list( model, indiv->current_disease_event );
 	if( indiv->next_disease_event != NULL )
 		indiv->current_disease_event = indiv->next_disease_event;
+	
+	if( indiv->quarantined == TRUE){
+		if(from == SUSCEPTIBLE){
+			model->n_quarantine_infected++;
+			if(indiv->app_user == TRUE){
+				model->n_quarantine_app_user_infected++;
+			}
+		}
+	}
 
 	if( to != NO_EVENT )
 	{
@@ -430,7 +439,7 @@ void transition_to_recovered( model *model, individual *indiv )
 	}
 
 	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
-	set_recovered( indiv, model->params, model->time );
+	set_recovered( indiv, model->params, model->time, model);
 }
 
 /*****************************************************************************************

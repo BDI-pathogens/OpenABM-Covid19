@@ -671,6 +671,13 @@ class Model:
         results["hospital_to_critical_total"] = covid19.utils_n_total(
             self.c_model, covid19.CRITICAL
         )
+        
+        results["n_quarantine_infected"] = self.c_model.n_quarantine_infected
+        results["n_quarantine_recovered"] = self.c_model.n_quarantine_recovered
+        results["n_quarantine_app_user"] = self.c_model.n_quarantine_app_user
+        results["n_quarantine_app_user_infected"] = self.c_model.n_quarantine_app_user_infected
+        results["n_quarantine_app_user_recovered"] = self.c_model.n_quarantine_app_user_recovered
+
         return results
 
     def write_output_files(self):
