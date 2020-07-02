@@ -408,9 +408,9 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 100000,
-                    n_seed_infection = 500,
+                    n_seed_infection = 1000,
                     end_time = 8,
-                    infectious_rate = 6,
+                    infectious_rate = 7,
                     self_quarantine_fraction = 1.0,
                     trace_on_symptoms = True,
                     test_on_symptoms = True,
@@ -440,9 +440,9 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 100000,
-                    n_seed_infection = 500,
+                    n_seed_infection = 1000,
                     end_time = 8,
-                    infectious_rate = 6,
+                    infectious_rate = 7,
                     self_quarantine_fraction = 1.0,
                     trace_on_symptoms = True,
                     test_on_symptoms = True,
@@ -472,9 +472,9 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 100000,
-                    n_seed_infection = 500,
+                    n_seed_infection = 1000,
                     end_time = 8,
-                    infectious_rate = 6,
+                    infectious_rate = 7,
                     self_quarantine_fraction = 1.0,
                     trace_on_symptoms = True,
                     test_on_symptoms = True,
