@@ -334,6 +334,23 @@ class TestClass(object):
                     infectious_rate = 0.0
                 ),
             ),
+        ],
+        "test_presymptomatic_symptomatic_transmissions": [
+            dict(
+                n_total = 500000,
+                n_seed_infection = 1,
+                end_time = 100
+            ),
+            dict(
+                n_total = 250000,
+                n_seed_infection = 1,
+                end_time = 100
+            ),
+            dict(
+                n_total = 1000000,
+                n_seed_infection = 1,
+                end_time = 100
+            )
         ]
     }
     """
@@ -1045,6 +1062,89 @@ class TestClass(object):
 
         
         
+    def test_presymptomatic_symptomatic_transmissions( 
+            self, 
+            n_total,
+            n_seed_infection,
+            end_time
+        ):
+        """
+        Test that presymptomatic and symptomatic individuals transmit as expected
+        """
+        tolerance = 0.05        
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params.set_param("self_quarantine_fraction", 0)
+
+        params.set_param("hospitalised_fraction_0_9", 0)
+        params.set_param("hospitalised_fraction_10_19", 0)
+        params.set_param("hospitalised_fraction_20_29", 0)
+        params.set_param("hospitalised_fraction_30_39", 0)
+        params.set_param("hospitalised_fraction_40_49", 0)
+        params.set_param("hospitalised_fraction_50_59", 0)
+        params.set_param("hospitalised_fraction_60_69", 0)
+        params.set_param("hospitalised_fraction_70_79", 0)
+        params.set_param("hospitalised_fraction_80", 0)
+            
+       
+        params.set_param("mean_infectious_period", 6)
+        params.set_param("sd_infectious_period", 2.5)
+        params.set_param("mean_time_to_recover", 60)
+        params.set_param("sd_time_to_recover", 1)
+        params.set_param("mean_time_to_hospital", 60)
+        params.set_param("mean_time_to_symptoms", 6)
+        params.set_param("sd_time_to_symptoms", 2.5)
+        
+        params.set_param("relative_transmission_household", 0)
+        params.set_param("relative_transmission_occupation", 0)
+        
+        params.set_param("mean_work_interactions_child", 0)
+        params.set_param("mean_work_interactions_adult", 0)
+        params.set_param("mean_work_interactions_elderly", 0)
+        params.set_param("daily_fraction_work", 0)
+        
+        params.set_param("n_total", n_total)
+        params.set_param("n_seed_infection", n_seed_infection)
+        params.set_param("end_time", end_time)
+        
+        params.write_params(constant.TEST_DATA_FILE)
+        
+        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+ 
+        # check to see that the number of entries in the transmission file is that in the time-series
+        np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
+        
+        # check if hospitalised and ICU-ed people infect anybody
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.HOSPITALISED.value] ) , 0," transmission from hospitalised people" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.CRITICAL.value] )     , 0," transmission from critical people" )
+        
+        # Find the time at which a small fraction of the population has been
+        # infected, then restrict to all transmission events where the infector
+        # was infected before then. It needs to be small enough that people
+        # infected just before this point can get through their whole infectious
+        # period without encountering epidemic saturation, but large enough to
+        # give minimal noise. 
+        # by Chris Wymant 
+        # <<<     
+        fraction_mid_expo_phase = 0.001
+        df_output  = df_output[ df_output[ "total_infected" ] < ( n_total * fraction_mid_expo_phase ) ].max()
+        time_mid_expo_growth = df_output["time"]
+        df_trans = df_trans[df_trans["time_infected_source"] < int(time_mid_expo_growth)]
+        # >>> 
+        
+        N_presymptomatics = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC.value] ) 
+        N_symptomatics = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC.value] ) 
+        
+#        np.testing.assert_equal( N_presymptomatics, N_symptomatics, "presymptomatic and symptomatic are not equally transmitting" )
+     
+        N_presymptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] )
+        N_symptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] )
+        N_involved = N_presymptomatics_mild+N_presymptomatics+N_symptomatics_mild+N_symptomatics
+        
+        np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
+        np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance) 
 
     
       
