@@ -2242,7 +2242,7 @@ class TestClass(object):
         # make sure we are tracing from everybody
         df_manual_trace = df_trace[ (df_trace[ "index_time" ] == ( test_params[ "end_time" ] - trace_delay ) ) ]
         df_manual_trace = df_manual_trace.groupby( "index_ID" ).size().reset_index( name = "count" ) 
-        np.testing.assert_equal( len( df_manual_trace ) >80, True, "Insufficient index cases to test" )
+        np.testing.assert_equal( len( df_manual_trace ) >50, True, "Insufficient index cases to test" )
         np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
       
