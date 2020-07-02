@@ -16,7 +16,7 @@ import numpy as np, pandas as pd
 import pytest
 
 sys.path.append("src/COVID19")
-from parameters import ParameterSet
+from COVID19.model import Model, Parameters
 
 from . import constant
 from . import utilities as utils
@@ -168,3 +168,105 @@ class TestClass(object):
             t += 1
         
         np.testing.assert_array_equal(np.array(shapes), np.array(n_quarantine))
+
+    def test_quarantine_totals(self):
+        """
+        Test the totals in the time series output are consistent with the "quarantine reasons" files
+        """
+        T = 100
+        
+        params = Parameters(constant.TEST_DATA_TEMPLATE, 1, constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOSPITAL_FILE, 1, True, True)
+        
+        params.set_param( "n_total", 100000 )
+        
+        model  = utils.get_model_swig( params )
+        
+        results = list()
+        
+        # Run for 30 days
+        t = 1
+        while t <= 30:
+            model.one_time_step()
+            model.write_quarantine_reasons()
+            results.append(model.one_time_step_results())
+            t += 1
+        
+        # Turn on self-quarantining and run for another 10 days
+        model.update_running_params( "self_quarantine_fraction", 0.8 )
+        model.update_running_params( "quarantine_household_on_positive", 1 )
+        model.update_running_params( "quarantine_household_on_symptoms", 1 )
+        
+        while t <= 40:
+            model.one_time_step()
+            model.write_quarantine_reasons()
+            results.append(model.one_time_step_results())
+            t += 1
+        
+        # Turn on the app and run until time 100
+        model.update_running_params( "app_turned_on", 1 )
+        model.update_running_params( "quarantine_on_traced", 1 )
+        
+        while t < T:
+            model.one_time_step()
+            model.write_quarantine_reasons()
+            results.append(model.one_time_step_results())
+            t += 1
+        
+        df_ts = pd.DataFrame(results)
+        
+        # Test that quarantining events (and release events) add to total numbers in quarantine
+        n_quar_events = np.cumsum(df_ts["n_quarantine_events"].values - \
+            df_ts["n_quarantine_release_events"].values)
+        
+        np.testing.assert_array_equal(df_ts["n_quarantine"].values, n_quar_events)
+        
+        n_quar_events_app_user = np.cumsum(df_ts["n_quarantine_events_app_user"].values - \
+            df_ts["n_quarantine_release_events_app_user"].values)
+        
+        np.testing.assert_array_equal(df_ts["n_quarantine_app_user"].values, n_quar_events_app_user)
+        
+        
+        dfs =[pd.read_csv(constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = t)) \
+            for t in np.arange(1, T)]
+        dfs = pd.concat(dfs)
+        dfs["infected"] = (dfs.status > constant.EVENT_TYPES.SUSCEPTIBLE.value)*1
+        dfs["recovered"] = (dfs.status == constant.EVENT_TYPES.RECOVERED.value)*1
+        
+        idx_vars = ["time", "app_user", "infected", "recovered"]
+        dfs_gp = dfs.groupby(idx_vars)["ID"].count().reset_index()
+        
+        # Calculate n_quarantine
+        n_quarantine = dfs_gp.groupby("time")["ID"].sum()
+        n_quarantine = n_quarantine.reindex(np.arange(1, T)).fillna(0).values
+        np.testing.assert_array_equal(n_quarantine, df_ts.n_quarantine.values)
+        
+        # Calculate n_quarantine_app_user
+        n_quarantine_app_user = dfs_gp.loc[dfs_gp.app_user==1].groupby("time")["ID"].sum()
+        n_quarantine_app_user = n_quarantine_app_user.reindex(np.arange(1, T)).fillna(0).values
+        np.testing.assert_array_equal(n_quarantine_app_user, df_ts.n_quarantine_app_user.values)
+        
+        # Calculate n_quarantine_infected
+        n_quarantine_infected = dfs_gp.loc[dfs_gp.infected==1].groupby("time")["ID"].sum()
+        n_quarantine_infected = n_quarantine_infected.reindex(np.arange(1, T)).fillna(0).values
+        np.testing.assert_array_equal(n_quarantine_infected, df_ts.n_quarantine_infected.values)
+        
+        # Calculate n_quarantine_recovered
+        n_quarantine_recovered = dfs_gp.loc[dfs_gp.recovered==1].groupby("time")["ID"].sum()
+        n_quarantine_recovered = n_quarantine_recovered.reindex(np.arange(1, T)).fillna(0).values
+        
+        # Calculate n_quarantine_app_user_infected
+        n_quarantine_app_user_infected = \
+            dfs_gp.loc[(dfs_gp.app_user==1)&(dfs_gp.infected==1)].groupby("time")["ID"].sum()
+        n_quarantine_app_user_infected = \
+            n_quarantine_app_user_infected.reindex(np.arange(1, T)).fillna(0).values
+        np.testing.assert_array_equal(n_quarantine_app_user_infected, 
+            df_ts.n_quarantine_app_user_infected.values)
+        
+        # Calculate n_quarantine_app_user_recovered
+        n_quarantine_app_user_recovered = \
+            dfs_gp.loc[(dfs_gp.app_user==1)&(dfs_gp.recovered==1)].groupby("time")["ID"].sum()
+        n_quarantine_app_user_recovered = \
+            n_quarantine_app_user_recovered.reindex(np.arange(1, T)).fillna(0).values
+        np.testing.assert_array_equal(n_quarantine_app_user_recovered, 
+            df_ts.n_quarantine_app_user_recovered.values)

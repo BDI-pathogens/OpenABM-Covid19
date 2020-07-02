@@ -78,6 +78,7 @@ model* new_model( parameters *params )
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
 	set_up_risk_scores( model_ptr );
+	set_up_counters( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -242,6 +243,38 @@ void set_up_networks( model *model )
 
 	for( idx =0; idx < N_AGE_TYPES; idx++ )
 		model->mean_interactions[idx] = estimate_mean_interactions_by_age( model, idx );
+}
+
+/*****************************************************************************************
+*  Name:		set_up_counters
+*  Description: sets up counters of events
+*  Returns:		void
+******************************************************************************************/
+void set_up_counters( model *model ){
+	
+	model->n_quarantine_infected = 0;
+	model->n_quarantine_recovered = 0;
+	model->n_quarantine_app_user = 0;
+	model->n_quarantine_app_user_infected = 0;
+	model->n_quarantine_app_user_recovered = 0;
+	// Daily totals
+	model->n_quarantine_events = 0;
+	model->n_quarantine_events_app_user = 0;
+	model->n_quarantine_release_events = 0;
+	model->n_quarantine_release_events_app_user = 0;
+}
+
+/*****************************************************************************************
+*  Name:		reset_counters
+*  Description: reset counters of events
+*  Returns:		void
+******************************************************************************************/
+void reset_counters( model *model ){
+
+	model->n_quarantine_events = 0;
+	model->n_quarantine_events_app_user = 0;
+	model->n_quarantine_release_events = 0;
+	model->n_quarantine_release_events_app_user = 0;
 }
 
 /*****************************************************************************************
@@ -940,6 +973,7 @@ void return_interactions( model *model )
 int one_time_step( model *model )
 {
 	(model->time)++;
+	reset_counters( model );
 	update_intervention_policy( model, model->time );
 
 	int idx;

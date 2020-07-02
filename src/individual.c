@@ -97,13 +97,30 @@ void set_quarantine_status(
 	individual *indiv,
 	parameters *params,
 	int time,
-	int status
+	int status,
+	model *model
 )
 {
 	if( status )
 	{
 		indiv->quarantined             = TRUE;
 		indiv->infection_events->times[QUARANTINED] = time;
+
+		// Increment counters for time series output
+		model->n_quarantine_events++;
+
+		if(indiv->app_user == TRUE){
+			model->n_quarantine_events_app_user++;
+			model->n_quarantine_app_user++;
+			if(indiv->status > SUSCEPTIBLE)
+				model->n_quarantine_app_user_infected++;
+			if(indiv->status == RECOVERED)
+				model->n_quarantine_app_user_recovered++;
+		}
+		if(indiv->status > SUSCEPTIBLE)
+			model->n_quarantine_infected++;
+		if(indiv->status == RECOVERED)
+			model->n_quarantine_recovered++;
 	}
 	else
 	{
@@ -111,6 +128,22 @@ void set_quarantine_status(
 		indiv->infection_events->times[QUARANTINED]  = UNKNOWN;
 		indiv->quarantine_event         = NULL;
 		indiv->quarantine_release_event = NULL;
+
+		// Increment counters for time series output
+		model->n_quarantine_release_events++;
+
+		if(indiv->app_user == TRUE){
+			model->n_quarantine_app_user--;
+			model->n_quarantine_release_events_app_user++;
+			if(indiv->status > SUSCEPTIBLE)
+				model->n_quarantine_app_user_infected--;
+			if(indiv->status == RECOVERED)
+				model->n_quarantine_app_user_recovered--;
+		}
+		if(indiv->status > SUSCEPTIBLE)
+			model->n_quarantine_infected--;
+		if(indiv->status == RECOVERED)
+			model->n_quarantine_recovered--;
 	}
 	update_random_interactions( indiv, params );
 }
@@ -196,8 +229,14 @@ void set_dead( individual *indiv, parameters* params, int time )
 *  Description: sets a person to recovered
 *  Returns:		void
 ******************************************************************************************/
-void set_recovered( individual *indiv, parameters* params, int time )
+void set_recovered( individual *indiv, parameters* params, int time, model *model )
 {
+	if( indiv->quarantined == TRUE){
+		model->n_quarantine_recovered++;
+		if(indiv->app_user == TRUE)
+			model->n_quarantine_app_user_recovered++;
+	}
+
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
 	update_random_interactions( indiv, params );

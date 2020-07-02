@@ -462,7 +462,7 @@ int intervention_quarantine_until(
 	if( indiv->quarantine_event == NULL )
 	{
 		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
-		set_quarantine_status( indiv, model->params, model->time, TRUE );
+		set_quarantine_status( indiv, model->params, model->time, TRUE, model );
 	}
 
 	if( indiv->quarantine_release_event != NULL )
@@ -491,7 +491,7 @@ void intervention_quarantine_release( model *model, individual *indiv )
 	if( indiv->quarantine_event != NULL )
 	{
 		remove_event_from_event_list( model, indiv->quarantine_event );
-		set_quarantine_status( indiv, model->params, model->time, FALSE );
+		set_quarantine_status( indiv, model->params, model->time, FALSE, model);
 	};
 }
 

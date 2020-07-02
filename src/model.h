@@ -80,7 +80,17 @@ struct model{
 
 	long n_quarantine_days;
 
-    hospital *hospitals;
+	long n_quarantine_app_user;
+	long n_quarantine_infected;
+	long n_quarantine_recovered;
+	long n_quarantine_app_user_infected;
+	long n_quarantine_app_user_recovered;
+	long n_quarantine_events;
+	long n_quarantine_events_app_user;
+	long n_quarantine_release_events;
+	long n_quarantine_release_events_app_user;
+
+	hospital *hospitals;
 };
 
 struct event{
@@ -107,6 +117,8 @@ void set_up_interactions( model* );
 void set_up_events( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
+void set_up_counters( model* );
+void reset_counters( model* );
 void set_up_occupation_network( model* );
 void set_up_individual_hazard( model* );
 void destroy_model( model* );
