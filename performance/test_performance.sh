@@ -33,7 +33,7 @@ fi
 END=`date +%s`
 RUNTIME=$((END-START))
 echo "execution time was" $RUNTIME "seconds"
-if (( $RUNTIME > 40 )); 
+if (( $RUNTIME > 300 )); 
 then
     printf  "\n*********************************\n** FAILURE - TOO SLOW\n*********************************\n\n"
 fi
