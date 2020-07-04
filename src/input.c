@@ -410,7 +410,7 @@ void read_param_file( parameters *params)
 	for( i = 0; i < N_AGE_GROUPS; i++ )
     {
         check = fscanf(parameter_file, " %i ,", &(params->priority_test_contacts[i]));
-        if( check < 1){ print_exit("Failed to read parameter app_users_fraction\n"); };
+        if( check < 1){ print_exit("Failed to read parameter priority_test_contacts\n"); };
     }
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
