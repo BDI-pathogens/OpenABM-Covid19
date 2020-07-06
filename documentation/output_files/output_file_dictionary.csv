@@ -57,4 +57,8 @@ n_quarantine_events,Daily number of quarantine events,timeseries
 n_quarantine_release_events,Daily number of quarantine release events,timeseries
 n_quarantine_events_app_user,Daily number of quarantine events of app users,timeseries
 n_quarantine_release_events_app_user,Daily number of quarantine release events of app users,timeseries
-
+ID,Unique identifier for each individual in the simulation,individual file
+current_status,Disease status of the individual at the point at which the individual file is written to file, individual file
+age_group,Age group of the individual,individual file
+occupation_network, The occupation network to which this individual has membership (coded by the `enum OCCUPATION_NETWORKS` enum in constant.h),individual file
+worker_type,
