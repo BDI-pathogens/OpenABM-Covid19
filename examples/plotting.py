@@ -14,7 +14,6 @@ from scipy.stats import gamma
 
 from matplotlib import pyplot as plt
 from matplotlib import cm
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # Colours for plotting the household, work, and random networks
 network_colours = ['#009E73', '#0072B2', '#D55E00']
@@ -547,7 +546,7 @@ def plot_hist_by_group(df, groupvar, binvar, bins = None, groups = None,
     width = np.diff(bin_list)[0]/(n_groups + 1)
     
     fig, ax = plt.subplots()
-    ax.grid(which = 'major', axis = 'y', alpha = 0.7, zorder = 0)
+    #ax.grid(which = 'major', axis = 'y', alpha = 0.7, zorder = 0)
     
     for i, g in enumerate(groups):
         heights, b = np.histogram(df.loc[df[groupvar] == g][binvar], bin_list, density = density)
@@ -696,7 +695,7 @@ def transmission_heatmap_by_age_by_panels(df,
         xlabel = "", ylabel = "",
         legend_title = "", legend_loc = "right",
         xticklabels = None, yticklabels = None,
-        normalise = False
+        normalise = False, title_fontsize = 20
     ):
     """
     Plot subplots of heatmaps of transmissions from one age group to another across another 
@@ -759,16 +758,12 @@ def transmission_heatmap_by_age_by_panels(df,
             ax[i].set_yticks([])
         
         ax[i].set_xlabel(xlabel, size = 16)
-        ax[i].set_title(panel_labels[i], size = 20)
+        ax[i].set_title(panel_labels[i], size = title_fontsize)
     
     fig.subplots_adjust(right = 0.85)
     axes_cbar = fig.add_axes([0.9, 0.3, 0.02, 0.4])
     cbar = fig.colorbar(ims[n_panels - 1], cax = axes_cbar)
     
-    #divider = make_axes_locatable(ax[2])
-    #cax = divider.append_axes('right', size = "7%", pad = 0.2,)
-    
-    #cbar = fig.colorbar(im, fraction = 0.046, pad = 0.04, cax = cax)
     cbar.set_label(legend_title, size = 18)
     
     return(fig, ax)
@@ -795,7 +790,7 @@ def plot_interactions_by_age(df_interact, groupvar, group_labels,
     colours = get_discrete_viridis_colours(n_groups)
     
     fig, ax = plt.subplots()
-    ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
+    #ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
     ax.hist(hists, bins, stacked = True, label = group_labels, 
         width = 0.8, color = colours, edgecolor = "#0d1a26", linewidth = 0.5, zorder = 3)
     
@@ -967,7 +962,7 @@ def plot_stacked_hist_by_group(df,
     
     fig, ax = plt.subplots()
     
-    ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
+    #ax.grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
     ax.hist(hists, bins, stacked = True, label = group_labels, width = 0.8, 
         color = colours, edgecolor = "#0d1a26", linewidth = 0.5, 
         zorder = 3)
@@ -1044,7 +1039,7 @@ def PlotStackedHistByGroupByPanel(df,
         # Split by group
         hists = [df.loc[(df[groupvar] == state) & (df[panelvar] == panel)][countvar] for state in groups]
         
-        ax[i].grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
+        #ax[i].grid(which = 'major', axis = 'y', alpha = 0.4, zorder = 0)
         
         ax[i].hist(hists, bins, stacked = True, label = group_labels, width = 0.8, 
             alpha = a, color = colours, edgecolor = "#0d1a26", linewidth = 0.5, 
