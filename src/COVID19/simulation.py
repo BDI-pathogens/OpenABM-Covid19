@@ -151,34 +151,6 @@ class Simulation:
                     print("Reached end time of simulation before completing all steps")
                 break
 
-    def simulations(self, n_simulations):
-        """
-        Run the model for a specific number of simulations, starting from the
-        current state, save data as model progresses.
-        """
-
-        for self.simulation_number in range(n_simulations):
-            self.start_simulation()
-
-            if self.verbose:
-                print("simulation_number:", self.simulation_number)
-
-            self.timestep = 0
-            while self.timestep <= self.end_time:
-
-                if self.verbose:
-                    print("Current timestep:", self.timestep)
-
-                next_state = self.env.step(self.current_action)
-                next_action = self.agent.step(next_state)
-
-                # Save the data from the model
-                self.collect_results(next_state, next_action)
-
-                self.timestep += 1
-
-            self.end_simulation()
-
     def collect_results(self, state, action):
         """Collect model results at each step; fixme action is not currently stored
         """
@@ -205,8 +177,7 @@ class COVID19IBM(Environment):
         """
         Start a simulation, return the state of the system
         """
-        self.model._create()
-        return self.model.one_time_step_results()
+        pass
 
     def end_simulation(self):
         self.model._destroy()
