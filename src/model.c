@@ -316,6 +316,12 @@ void set_up_occupation_network( model *model )
 
         free( people );
     }
+
+    if( model->use_custom_occupation_networks == FALSE )
+    {
+    	free( params->occupation_network_table );
+    	params->occupation_network_table = NULL;
+    }
 }
 
 /*****************************************************************************************
