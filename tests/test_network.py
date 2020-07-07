@@ -277,6 +277,83 @@ class TestClass(object):
                     work_network_rewire            = 0.3
                 )
             ),
+            dict(
+                test_params = dict(
+                    n_total = 6000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 2000,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 800,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 200,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 80,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 50,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 30,
+                    end_time = 15,
+                    mean_work_interactions_child   = 6,
+                    mean_work_interactions_adult   = 12,
+                    mean_work_interactions_elderly = 5,
+                    daily_fraction_work            = 0.25,
+                    work_network_rewire            = 0.3
+                )
+            ),
         ],
     }
     """
@@ -728,7 +805,6 @@ class TestClass(object):
           the mean number of unique contacts is mean_daily/daily_fraction
         """
 
-        tol = 0.02
 
         # Set up user-defined occupation network tables.
         n_total = test_params['n_total']
@@ -770,8 +846,16 @@ class TestClass(object):
         # load custom occupation network table before constructing the model
         params.set_occupation_network_table(df_occupation_network, df_occupation_network_property)
 
-        model  = utils.get_model_swig( params )
+        # make a simple demographic table. For small networks, household rejection sampling won't converge.
+        hhIDs      = np.array( range(n_total), dtype='int32')
+        house_no = np.array( hhIDs / 4, dtype='int32' )
+        ages     = np.array( np.mod( hhIDs, 9) , dtype='int32' )
+        df_demo  = pd.DataFrame({'ID': hhIDs,'age_group':ages,'house_no':house_no})
 
+        # add to the parameters and get the model
+        params.set_demographic_household_table( df_demo ),
+
+        model  = utils.get_model_swig( params )
         model.one_time_step()
         model.write_interactions_file()
         df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
@@ -788,9 +872,15 @@ class TestClass(object):
 
         # check to see there are sufficient daily connections and only one per set of contacts a day
         df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N")
-        min_size = (test_params["end_time"]+1) * test_params[ "n_total"] *  min( 1,test_params["mean_work_interactions_child"],test_params["mean_work_interactions_adult"],test_params["mean_work_interactions_elderly"] )
 
-        np.testing.assert_equal(sum(df_unique_daily["N"]==1)>min_size, True, "Less contacts than expected on the occuaptional networks" )
+        connection_upper_bound = (test_params["n_total"] / 10 -1 ) // 2 * 2.0
+
+        min_size = (test_params["end_time"]+1) * test_params["n_total"] * (
+                0.2 * min (connection_upper_bound * test_params['daily_fraction_work'], test_params["mean_work_interactions_child"] )
+                + 0.6 * min (connection_upper_bound * test_params['daily_fraction_work'], test_params["mean_work_interactions_adult"])
+                + 0.2 * min (connection_upper_bound * test_params['daily_fraction_work'], test_params["mean_work_interactions_elderly"]))
+
+        np.testing.assert_allclose(sum(df_unique_daily["N"]==1), min_size, rtol=0.1, err_msg="Unexpected contacts on the occupational networks" )
         np.testing.assert_equal(sum(df_unique_daily["N"]!=1), 0, "Repeat connections on same day on the occupational networks" )
 
         # check the mean unique connections over multiple days is mean/daily fraction
@@ -802,10 +892,11 @@ class TestClass(object):
 
         for network in range(10): # 10 custom occupation networks
             actual   = df_unique.loc[network,{"N_conn"}]["N_conn"]
-            expected = mean_by_type[constant.CUSTOM_NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"]
-            np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
-
-        
-        
-        
-        
+            expected = min( connection_upper_bound,
+                            mean_by_type[constant.CUSTOM_NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"])
+            if expected == connection_upper_bound:
+                atol = 1
+                np.testing.assert_allclose(actual,expected,atol=atol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
+            else:
+                rtol = 0.02
+                np.testing.assert_allclose(actual,expected,rtol=rtol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
