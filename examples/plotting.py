@@ -695,7 +695,8 @@ def transmission_heatmap_by_age_by_panels(df,
         xlabel = "", ylabel = "",
         legend_title = "", legend_loc = "right",
         xticklabels = None, yticklabels = None,
-        normalise = False, title_fontsize = 20
+        normalise = False, title_fontsize = 20,
+        spines = False
     ):
     """
     Plot subplots of heatmaps of transmissions from one age group to another across another 
@@ -746,8 +747,10 @@ def transmission_heatmap_by_age_by_panels(df,
     vmax_panels = np.max(np.array(transmission_arrays))
     
     ims = []
+
     for i, panel in enumerate(panels):
-        im = ax[i].imshow(transmission_arrays[i], origin = "lower", aspect = "equal", 
+        im = ax[i].imshow(np.ma.masked_where(transmission_arrays[i] == 0, transmission_arrays[i]), 
+            origin = "lower", aspect = "equal", 
             vmin = vmin_panels, vmax = vmax_panels)
         
         ims.append(im)
@@ -759,6 +762,12 @@ def transmission_heatmap_by_age_by_panels(df,
         
         ax[i].set_xlabel(xlabel, size = 16)
         ax[i].set_title(panel_labels[i], size = title_fontsize)
+        
+        if not spines:
+            ax[i].spines["top"].set_visible(False)
+            ax[i].spines["right"].set_visible(False)
+            ax[i].spines["bottom"].set_visible(False)
+            ax[i].spines["left"].set_visible(False)
     
     fig.subplots_adjust(right = 0.85)
     axes_cbar = fig.add_axes([0.9, 0.3, 0.02, 0.4])
