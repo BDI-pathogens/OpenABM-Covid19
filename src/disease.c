@@ -49,6 +49,7 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
+	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, params->mean_time_to_susceptible_after_shift, params->time_to_susceptible_shift );
 
 }
 
@@ -283,7 +284,7 @@ void transition_one_disese_event(
 {
 	indiv->status           = from;
 
-	if( from != NO_EVENT )
+	if( (from != NO_EVENT) | (from != SUSCEPTIBLE))
 		indiv->infection_events->times[from] = model->time;
 	if( indiv->current_disease_event != NULL )
 		remove_event_from_event_list( model, indiv->current_disease_event );
@@ -438,8 +439,19 @@ void transition_to_recovered( model *model, individual *indiv )
 		}
 	}
 
-	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
+	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 	set_recovered( indiv, model->params, model->time, model);
+}
+
+/*****************************************************************************************
+*  Name:               transition_to_susceptible
+*  Description: Transitions recovered to susceptible
+*  Returns:            void
+******************************************************************************************/
+void transition_to_susceptible( model *model, individual *indiv )
+{
+       transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
+       set_susceptible( indiv, model->params, model->time );
 }
 
 /*****************************************************************************************

@@ -536,16 +536,18 @@ event* add_individual_to_event_list(
 	event->type         = type;
 	event->time         = time;
 
-	if( list->n_daily_current[time] >0  )
-	{
-		list->events[ time ]->last = event;
-		event->next  = list->events[ time ];
-	}
+	if( time < MAX_TIME){
+		if( list->n_daily_current[time] >0  )
+		{
+			list->events[ time ]->last = event;
+			event->next  = list->events[ time ];
+		}
 
-	list->events[time ] = event;
-	list->n_daily[time]++;
-	list->n_daily_by_age[time][indiv->age_group]++;
-	list->n_daily_current[time]++;
+		list->events[time ] = event;
+		list->n_daily[time]++;
+		list->n_daily_by_age[time][indiv->age_group]++;
+		list->n_daily_current[time]++;
+	}
 
 	if( time <= model->time )
 	{
@@ -995,6 +997,7 @@ int one_time_step( model *model )
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
 	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
 	transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
+    transition_events( model, SUSCEPTIBLE,			   &transition_to_susceptible,		        FALSE );
 	transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
 	if( model->params->hospital_on )

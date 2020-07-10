@@ -33,6 +33,8 @@
 | `sd_time_to_recover` | 5 | &#963;<sub>rec</sub> | Standard deviation of time to recovery if hospitalisaion is not required (days) | Yang et al 2020 |
 | `mean_time_to_death` | 11.74 | &#956;<sub>death</sub> | Mean time to death after acquiring critical care (days) | Personal communication with SPI-M; data soon to be published |
 | `sd_time_to_death` | 8.79 | &#963;<sub>death</sub> | Standard deviation of time to death after acquiring critical care (days) | Personal communication with SPI-M; data soon to be published |
+| `mean_time_to_susceptible_after_shift` | 180 | - | mean time to susceptible after recovered (and after a fixed period of `time_to_susceptible_shift` days) | - |
+| `time_to_susceptible_shift` | 10000 | - | Fixed number of days individuals are immune until waning immunity begins | - |
 | `fraction_asymptomatic_0_9` | 0.605 | &#966;<sub>asym</sub>(0-9) | Fraction of infected individuals who are asymptomatic, aged 0-9 | - |
 | `fraction_asymptomatic_10_19` | 0.546 | &#966;<sub>asym</sub>(10-19) | Fraction of infected individuals who are asymptomatic, aged 10-19 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `fraction_asymptomatic_20_29` | 0.483 | &#966;<sub>asym</sub>(20-29) | Fraction of infected individuals who are asymptomatic, aged 20-29 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |

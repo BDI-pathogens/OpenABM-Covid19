@@ -238,7 +238,36 @@ void set_recovered( individual *indiv, parameters* params, int time, model *mode
 	}
 
 	indiv->status        = RECOVERED;
-	indiv->current_disease_event = NULL;
+	update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_susceptible
+*  Description: sets a person to susceptible
+*  Returns:		void
+******************************************************************************************/
+void set_susceptible( individual *indiv, parameters* params, int time )
+{
+	indiv->status        = SUSCEPTIBLE;
+
+	infection_event *infection_event;
+	infection_event = indiv->infection_events;
+
+	int jdx;
+	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
+	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+		indiv->infection_events->times[jdx] = UNKNOWN;
+
+	indiv->infection_events->infector_status  = UNKNOWN;
+	indiv->infection_events->infector_network = UNKNOWN;
+	indiv->infection_events->time_infected_infector = UNKNOWN;
+	indiv->infection_events->next =  infection_event;
+	indiv->infection_events->is_case     = FALSE;
+
+	// Reset the hazard for the newly susceptible individual
+	initialize_hazard( indiv, params );
+
 	update_random_interactions( indiv, params );
 }
 

@@ -110,6 +110,7 @@ void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
 void set_quarantine_status( individual*, parameters*, int, int, model* );
 void set_recovered( individual*, parameters*, int , model *);
+void set_susceptible( individual*, parameters*, int );
 void set_hospitalised( individual*, parameters*, int );
 void set_hospitalised_recovering( individual*, parameters*, int );
 void set_critical( individual*, parameters*, int );
