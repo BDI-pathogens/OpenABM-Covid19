@@ -42,7 +42,7 @@
 | `fraction_asymptomatic_60_69` | 0.238 | &#966;<sub>asym</sub>(60-69) | Fraction of infected individuals who are asymptomatic, aged 60-69 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `fraction_asymptomatic_70_79` | 0.214 | &#966;<sub>asym</sub>(70-79) | Fraction of infected individuals who are asymptomatic, aged 70-79 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `fraction_asymptomatic_80` | 0.192 | &#966;<sub>asym</sub>(80) | Fraction of infected individuals who are asymptomatic, aged 80+ | - |
-| `asymptomatic_infectious_factor` | 0.29 | *A<sub>asym</sub>* | Infectious rate of asymptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
+| `asymptomatic_infectious_factor` | 0.33 | *A<sub>asym</sub>* | Infectious rate of asymptomatic individuals relative to symptomatic individuals | Personal communication, Sun |
 | `mild_fraction_0_9` | 0.533 | &#966;<sub>mild</sub>(0-9) | Fraction of infected individuals with mild symptoms, aged 0-9 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_10_19` | 0.569 | &#966;<sub>mild</sub>(10-19) | Fraction of infected individuals with mild symptoms, aged 10-19 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_20_29` | 0.597 | &#966;<sub>mild</sub>(20-29) | Fraction of infected individuals with mild symptoms, aged 20-29 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
@@ -52,7 +52,7 @@
 | `mild_fraction_60_69` | 0.571 | &#966;<sub>mild</sub>(60-69) | Fraction of infected individuals with mild symptoms, aged 60-69 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_70_79` | 0.523 | &#966;<sub>mild</sub>(70-79) | Fraction of infected individuals with mild symptoms, aged 70-79 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_80` | 0.461 | &#966;<sub>mild</sub>(80) | Fraction of infected individuals with mild symptoms, aged 80+ | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
-| `mild_infectious_factor` | 0.48 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Luo et al 2020 |
+| `mild_infectious_factor` | 0.72 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Personal communction, Sun |
 | `mean_asymptomatic_to_recovery` | 15 | &#956;<sub>a,rec</sub> | Mean time from infection to recovery (and no longer infectious) for an asymptomatic individual (days) | Yang et al 2020 |
 | `sd_asymptomatic_to_recovery` | 5 | &#963;<sub>a,rec</sub> | Standard deviation from infection to recovery for an asymptomatic individual (days) | Yang et al 2020 |
 | `household_size_1` | 7452 | - | Number of UK households with 1 person (thousands) | ONS UK |
