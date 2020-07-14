@@ -100,12 +100,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 *  Description: sets up discrete distributions and functions which are used to
 *  				model events and calculates infectious rate per interaction.
 *
-*  				The infectious rate per interaction adult is the infectious rate divided
-*  				by the mean number of daily interactions of an adult.
-*
-*  				Adjustments are calculated for children and elderly based upon their
-*  				difference in the number of daily interactions and the relative overall
-*  				susceptibility.
+*  				The infectious rate is adjusted by the total mean interactions
 *
 *  Returns:		void
 ******************************************************************************************/
