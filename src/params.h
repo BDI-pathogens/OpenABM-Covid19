@@ -136,9 +136,9 @@ typedef struct{
 	int test_result_wait_priority;			// number of days to wait for a priority test result
 	int test_order_wait_priority;			// minimum number of days to wait for a priority test to be taken
 	int test_release_on_negative;			// release on a negative test result
-	
+
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
-	
+
 	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_sensitive_period;				// number of days post infection in which the test is sensitive
 	double test_sensitivity;				// sensitivity of test
@@ -162,13 +162,13 @@ typedef struct{
 
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
-		
+
 	int interventions_on;           // should we use interventions
 	int intervention_start_time;	// time at which interventions start
 
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_hospital; 		// Should a hospital file be written to output?
-	
+
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 	demographic_household_table *demo_house; // Pointer to a table of demographic and house numbers (if user specified)
@@ -198,6 +198,7 @@ typedef struct{
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
+int get_model_param_hospital_on(model *model);
 double get_model_param_daily_fraction_work_used(model *model, int idx);
 int get_model_param_quarantine_days(model *model);
 double get_model_param_self_quarantine_fraction(model *model);

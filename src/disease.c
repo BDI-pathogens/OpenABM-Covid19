@@ -289,7 +289,7 @@ void transition_one_disese_event(
 		remove_event_from_event_list( model, indiv->current_disease_event );
 	if( indiv->next_disease_event != NULL )
 		indiv->current_disease_event = indiv->next_disease_event;
-	
+
 	if( indiv->quarantined == TRUE){
 		if(from == SUSCEPTIBLE){
 			model->n_quarantine_infected++;
@@ -354,6 +354,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
 
+
 	if( model->params->hospital_on )
 	{
 		int assigned_hospital_idx = find_least_full_hospital( model, COVID_GENERAL );
@@ -361,6 +362,9 @@ void transition_to_hospitalised( model *model, individual *indiv )
 	}
 	else
 	{
+		model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
+		model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
+
 		if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 		{
 			if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
@@ -387,6 +391,7 @@ void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
 
+
 	if( model->params->hospital_on )
 	{
 		remove_if_in_waiting_list(indiv, &model->hospitals[indiv->hospital_idx]);
@@ -394,6 +399,9 @@ void transition_to_critical( model *model, individual *indiv )
 	}
 	else
 	{
+		model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
+		model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
+
 		if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 		else

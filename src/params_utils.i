@@ -13,6 +13,14 @@ int get_param_quarantine_days(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:        get_param_hospital_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_hospital_on(parameters *params)
+{
+    return params->hospital_on;
+}
+/*****************************************************************************************
 *  Name: 		get_param_rng_seed
 *  Description: Gets the value of a parameter
 ******************************************************************************************/

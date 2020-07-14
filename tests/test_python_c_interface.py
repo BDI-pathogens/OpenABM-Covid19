@@ -341,11 +341,14 @@ class TestClass(object):
         model = Model(params)
         daily_hospitalisations = []
         daily_critical = []
-        for step in range(10):
+        for step in range(50):
             model.one_time_step()
             daily_h = model.one_time_step_results()["hospital_admissions"]
             daily_c = model.one_time_step_results()["hospital_to_critical_daily"]
             daily_hospitalisations.append(daily_h)
             daily_critical.append(daily_c)
+            print(model.one_time_step_results())
             assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"]
             assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"]
+        assert sum(daily_hospitalisations) > 0
+        assert sum(daily_critical) > 0
