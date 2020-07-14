@@ -56,6 +56,9 @@ void set_up_transition_times( model *model )
 *  Name:		estimate_mean_interactions_by_age
 *  Description: estimates the weighted mean number of interactions by age
 *  				each interaction is weighted by the type factor
+*
+* 	Argument:  age - integer of the age group, if age == -1 then include everyone
+*
 *  Returns:		void
 ******************************************************************************************/
 double estimate_mean_interactions_by_age( model *model, int age )
@@ -66,7 +69,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 	double *weight = model->params->relative_transmission;
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
-		if( model->population[pdx].age_type == age )
+		if( ( model->population[pdx].age_type == age ) | ( age == -1 ) )
 		{
 			people++;
 			inter += model->population[pdx].base_random_interactions * weight[RANDOM];
@@ -74,18 +77,18 @@ double estimate_mean_interactions_by_age( model *model, int age )
 
 	for( pdx = 0; pdx < model->household_network->n_edges; pdx++ )
 	{
-		if( model->population[model->household_network->edges[pdx].id1].age_type == age )
+		if( ( model->population[model->household_network->edges[pdx].id1].age_type == age ) | ( age == -1 ) )
 			inter += weight[HOUSEHOLD];
-		if( model->population[model->household_network->edges[pdx].id2].age_type == age )
+		if( ( model->population[model->household_network->edges[pdx].id2].age_type == age ) | ( age == -1 ))
 			inter += weight[HOUSEHOLD];
 	}
 
 	for( ndx = 0; ndx < model->n_occupation_networks ; ndx++ )
 		for( pdx = 0; pdx < model->occupation_network[ndx]->n_edges; pdx++ )
 		{
-			if( model->population[model->occupation_network[ndx]->edges[pdx].id1].age_type == age )
+			if( ( model->population[model->occupation_network[ndx]->edges[pdx].id1].age_type == age ) | ( age == -1 ))
 				inter += model->params->daily_fraction_work * weight[OCCUPATION];
-			if( model->population[model->occupation_network[ndx]->edges[pdx].id2].age_type == age )
+			if( ( model->population[model->occupation_network[ndx]->edges[pdx].id2].age_type == age  ) | ( age == -1 ))
 				inter  += model->params->daily_fraction_work * weight[OCCUPATION];
 		}
 
@@ -97,12 +100,7 @@ double estimate_mean_interactions_by_age( model *model, int age )
 *  Description: sets up discrete distributions and functions which are used to
 *  				model events and calculates infectious rate per interaction.
 *
-*  				The infectious rate per interaction adult is the infectious rate divided
-*  				by the mean number of daily interactions of an adult.
-*
-*  				Adjustments are calculated for children and elderly based upon their
-*  				difference in the number of daily interactions and the relative overall
-*  				susceptibility.
+*  				The infectious rate is adjusted by the total mean interactions
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -112,10 +110,10 @@ void set_up_infectious_curves( model *model )
 	double infectious_rate, type_factor;
 	int type, group;
 
-	infectious_rate   = params->infectious_rate / model->mean_interactions[AGE_TYPE_ADULT];
+	infectious_rate   = params->infectious_rate / model->mean_interactions;
 
 	for( group = 0; group < N_AGE_GROUPS; group++ )
-		params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions[AGE_TYPE_ADULT] / model->mean_interactions[AGE_TYPE_MAP[group]];
+		params->adjusted_susceptibility[group] = params->relative_susceptibility[group];
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{
