@@ -219,6 +219,19 @@ int get_model_param_hospital_on(model *model)
 }
 
 
+/*****************************************************************************************
+*  Name: 		get_model_param_fatality_fraction
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_model_param_fatality_fraction(model * model, int age_group)
+{
+
+    if ( age_group >= N_AGE_GROUPS ) return ERROR;
+
+	return model->params->fatality_fraction[age_group];
+}
+
+
 
 /*****************************************************************************************
 *  Name: 		get_model_param_daily_fraction_work_used
@@ -1291,6 +1304,19 @@ void check_params( parameters *params )
     	}
     }
 }
+
+/*****************************************************************************************
+*  Name:        set_model_param_fatality_fraction
+*  Description: Allow updates of the fatality fraction
+******************************************************************************************/
+int set_model_param_fatality_fraction(model * model, double value, int age_group)
+{
+	if (age_group >= N_AGE_GROUPS) return ERROR;
+	model->params->fatality_fraction[age_group] = value;
+	return TRUE;
+}
+
+
 
 /*****************************************************************************************
 *  Name:        check_hospital_params

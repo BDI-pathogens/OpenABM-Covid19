@@ -242,6 +242,7 @@ int get_model_param_manual_trace_n_workers( model* model );
 int get_model_param_manual_trace_interviews_per_worker_day( model* model );
 int get_model_param_manual_trace_notifications_per_worker_day( model* model );
 double get_model_param_manual_traceable_fraction( model* model, int );
+double get_model_param_fatality_fraction( model * model, int age_group );
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -285,6 +286,7 @@ int set_model_param_manual_traceable_fraction( model* model, double value, int t
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
+int set_model_param_fatality_fraction( model * model, double value, int age_group );
 
 int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 int set_occupation_network_table( parameters* params,  long n_total, long n_networks );
