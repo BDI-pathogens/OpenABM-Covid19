@@ -314,7 +314,7 @@ class TestClass(object):
                 test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 100,
-                    infectious_rate = 6.0,
+                    infectious_rate = 5.0,
                     relative_transmission_household = 1,
                     relative_transmission_occupation = 1,
                     relative_transmission_random = 1,          
@@ -337,7 +337,7 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 500000,
+                n_total = 750000,
                 n_seed_infection = 1,
                 end_time = 100
             ),

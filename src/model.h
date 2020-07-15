@@ -62,7 +62,7 @@ struct model{
 	network **occupation_network;
 	directory *household_directory;
 	network *user_network;
-	double mean_interactions[ N_AGE_TYPES ];
+	double mean_interactions;
 
 	long manual_trace_interview_quota;
 	long manual_trace_notification_quota;

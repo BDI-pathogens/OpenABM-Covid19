@@ -206,6 +206,20 @@ void set_up_default_occupation_network_table( parameters *params )
     }
 }
 
+
+
+/*****************************************************************************************
+*  Name: 		get_model_param_hospital_on
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_model_param_hospital_on(model *model)
+{
+
+    return model->params->hospital_on;
+}
+
+
+
 /*****************************************************************************************
 *  Name: 		get_model_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
@@ -812,7 +826,7 @@ int set_model_param_app_users_fraction( model *model, double value )
     int age;
     for( age = 0; age < N_AGE_GROUPS; age++ )
         model->params->app_users_fraction[ age ] = value;
-    
+
     set_up_app_users( model );
     return TRUE;
 }
