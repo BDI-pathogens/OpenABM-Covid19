@@ -103,7 +103,7 @@ We define *asymptomatic* individuals as those who never develop symptoms during 
 Both types of individuals may infect others.
 The overall infectiousness of asymptomatic individuals has been estimated to be lower [[6]](#6), reflected in our parameter `asymptomatic_infectious_factor`.
 Individuals who show symptoms but only mildly have also been estimated as less infectious than those with more severe symptoms [[6]](#6), reflected in our parameter `mild_infectious_factor`.
-For each adult age category, we took the fraction of symptomatic infections that are mild as the fraction of confirmed cases with with either no pneumonia (which was rare -- always less than 6.5%) or mild pneumonia, i.e. the fraction without severe pneumonia, reported in [[7]](#7).
+For each adult age category, we took the fraction of symptomatic infections that are mild as the fraction of confirmed cases with either no pneumonia (which was rare -- always less than 6.5%) or mild pneumonia, i.e. the fraction without severe pneumonia, reported in [[7]](#7).
 For the age categories 0-9 and 10-19, we took the fraction of infections that are mild as the fraction clinically defined as 'mild' in the paediatric meta-analysis [[8]](#8), excluding asymptomatic infections from the denominator.
 These fractions of symptomatic infections that are mild by age are listed in Table [Disease dynamics parameters](./parameters/disease_dynamics_parameters.md).
 
