@@ -288,7 +288,7 @@ int set_model_param_fatality_fraction( model * model, double value, int age_grou
 
 int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 int set_occupation_network_table( parameters* params,  long n_total, long n_networks );
-int set_indiv_occupation_network_property( parameters* params, long network, int age_group, double mean_interaction, double lockdown_multiplier, long network_id, const char *network_name );
+int set_indiv_occupation_network_property( parameters* params, long network, int age_type, double mean_interaction, double lockdown_multiplier, long network_id, const char *network_name );
 int set_indiv_occupation_network( parameters* params, long n_total, long *people, long *network );
 void set_up_default_occupation_network_table( parameters *params );
 
