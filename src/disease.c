@@ -469,7 +469,7 @@ void transition_to_death( model *model, individual *indiv )
 {
 	if( model->params->hospital_on )
 	{
-		if( indiv->hospital_state != NOT_IN_HOSPITAL )
+		if( !not_in_hospital(indiv) )
 		{
 			remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
 			transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );

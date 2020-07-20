@@ -375,8 +375,8 @@ void hospital_waiting_list_transition_scheduler( model *model, int hospital_stat
 				patient_waiting_modifier = 1;
 			} else
 			{
-				if( indiv->hospital_state == NOT_IN_HOSPITAL )
-					transition_one_hospital_event( model, indiv, NOT_IN_HOSPITAL, WAITING, NO_EDGE );
+				if( not_in_hospital(indiv) )
+					transition_one_hospital_event( model, indiv, indiv->hospital_state, WAITING, NO_EDGE );
 
 				if ( indiv->status == HOSPITALISED )
 					patient_waiting_modifier = model->params->hospitalised_waiting_mod;

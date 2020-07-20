@@ -99,6 +99,7 @@ struct infection_event{
 #define time_infected_infection_event( infection_event ) ( max( max( infection_event->times[PRESYMPTOMATIC], infection_event->times[ASYMPTOMATIC ] ), infection_event->times[PRESYMPTOMATIC_MILD] ) )
 
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
+#define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
