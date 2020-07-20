@@ -241,8 +241,7 @@ void set_up_networks( model *model )
 	if( model->params->hospital_on )
 		set_up_hospital_networks( model );
 
-	for( idx =0; idx < N_AGE_TYPES; idx++ )
-		model->mean_interactions[idx] = estimate_mean_interactions_by_age( model, idx );
+	model->mean_interactions = estimate_mean_interactions_by_age( model, -1 );
 }
 
 /*****************************************************************************************
@@ -536,16 +535,18 @@ event* add_individual_to_event_list(
 	event->type         = type;
 	event->time         = time;
 
-	if( list->n_daily_current[time] >0  )
-	{
-		list->events[ time ]->last = event;
-		event->next  = list->events[ time ];
-	}
+	if( time < MAX_TIME){
+		if( list->n_daily_current[time] >0  )
+		{
+			list->events[ time ]->last = event;
+			event->next  = list->events[ time ];
+		}
 
-	list->events[time ] = event;
-	list->n_daily[time]++;
-	list->n_daily_by_age[time][indiv->age_group]++;
-	list->n_daily_current[time]++;
+		list->events[time ] = event;
+		list->n_daily[time]++;
+		list->n_daily_by_age[time][indiv->age_group]++;
+		list->n_daily_current[time]++;
+	}
 
 	if( time <= model->time )
 	{

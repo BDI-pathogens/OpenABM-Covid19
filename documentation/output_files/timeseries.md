@@ -15,7 +15,7 @@
 | `total_infected_60_69` | Cumulative infected aged 60-69 years |
 | `total_infected_70_79` | Cumulative infected aged 70-79 years |
 | `total_infected_80` | Cumulative infected aged 80+ years |
-| `total_case` | Cumulative cases |
+| `total_case` | Cumulative cases (a case is defined by a positive test result) |
 | `total_case_0_9` | Cumulative cases aged 0-9 years |
 | `total_case_10_19` | Cumulative cases aged 10-19 years |
 | `total_case_20_29` | Cumulative cases aged 20-29 years |
@@ -25,8 +25,7 @@
 | `total_case_60_69` | Cumulative cases aged 60-69 years |
 | `total_case_70_79` | Cumulative cases aged 70-79 years |
 | `total_case_80` | Cumulative cases aged 80+ years |
-| `total_death` | Cumulative deaths |
-| `total_death` | Cumulative deaths |
+| `total_death` | Cumulative deaths (where COVID19 is the primary cause of death) |
 | `total_death_0_9` | Cumulative deaths aged 0-9 years |
 | `total_death_10_19` | Cumulative deaths aged 10-19 years |
 | `total_death_20_29` | Cumulative deaths aged 20-29 years |

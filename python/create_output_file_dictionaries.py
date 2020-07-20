@@ -2,7 +2,7 @@ import sys
 from os.path import join
 import pandas as pd, numpy as np
 
-def create_markdown_from_df(df, title = ""):
+def create_markdown_from_df(df, title = "", include_file_type = False):
     """
     Create text string of markdown table from pandas dataframe of OpenABM-Covid19 parameters
     Used in automated creation of markdown tables for model documentation.
@@ -36,11 +36,17 @@ def create_markdown_from_df(df, title = ""):
 
     table_body = list()
     for i, row in df.iterrows():
-
-        table_row = "| `{}` | {} |".format(
-            row["Column name"],
-            row.Description)
-
+        
+        if include_file_type:
+            table_row = "| `{}` | {} | {} |".format(
+                row["Column name"],
+                row.Description,
+                row["File type"])
+        else:
+            table_row = "| `{}` | {} |".format(
+                row["Column name"],
+                row.Description)
+        
         table_body.append(table_row)
 
     output = title_text + header + hline + table_body
@@ -76,8 +82,8 @@ if __name__ == "__main__":
             f.write(markdown_table)
 
     # Generate table for all parameters
-    df_all = df.replace(np.nan, "-").drop(columns = ["File type"])
-    markdown_table = create_markdown_from_df(df_all, title = "Table: Output file dictionary")
+    df_all = df.replace(np.nan, "-")
+    markdown_table = create_markdown_from_df(df_all, title = "Table: Output file dictionary", include_file_type = True)
 
     with open(join("documentation", "output_files", "output_file_dictionary.md"), 'w') as f:
         f.write(markdown_table)

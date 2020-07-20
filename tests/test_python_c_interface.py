@@ -340,12 +340,61 @@ class TestClass(object):
         )
         model = Model(params)
         daily_hospitalisations = []
-        daily_critical = []
-        for step in range(10):
+        for step in range(50):
             model.one_time_step()
             daily_h = model.one_time_step_results()["hospital_admissions"]
-            daily_c = model.one_time_step_results()["hospital_to_critical_daily"]
             daily_hospitalisations.append(daily_h)
-            daily_critical.append(daily_c)
             assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"]
+        assert sum(daily_hospitalisations) > 0
+
+    def test_icu_entry(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+        )
+        model = Model(params)
+        daily_critical = []
+        for step in range(50):
+            model.one_time_step()
+            daily_c = model.one_time_step_results()["hospital_to_critical_daily"]
+            daily_critical.append(daily_c)
             assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"]
+        assert sum(daily_critical) > 0
+
+    def test_deaths(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+        )
+        model = Model(params)
+        daily_deaths = []
+        for step in range(50):
+            model.one_time_step()
+            daily_death = model.one_time_step_results()["daily_death"]
+            daily_deaths.append(daily_death)
+            assert sum(daily_deaths) == model.one_time_step_results()["total_death"]
+        assert sum(daily_deaths) > 0
+
+
+    def test_update_fatality_fraction(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+        )
+        model = Model(params)
+        assert model.get_param("fatality_fraction_80") == 1.0
+
+        model.update_running_params("fatality_fraction_80", 0.6)
+        assert model.get_param("fatality_fraction_80") == 0.6
+
+
+

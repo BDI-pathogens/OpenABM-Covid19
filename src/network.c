@@ -52,6 +52,13 @@ void build_watts_strogatz_network(
 	int randomise_nodes
 )
 {
+    // Check upper-bound of k and potentially reset it.
+    // Upper-bound of k is N-1 if N is odd, N-2 if N is even.
+    if ( 2 * ceil( k / 2 )  >= N - 1 ) k = ( N - 1) / 2 * 2;
+
+    // If k is the upper-bound value, no need to rewire.
+    if ( k ==  (N - 1) / 2 * 2 ) p_rewire = 0.0;
+
 	long k_used, k_right, i, j, ii;
 	double p_right;
 
@@ -91,11 +98,11 @@ void build_watts_strogatz_network(
 
 	double u;
 	long new_contact, old_contact;
-	
+
 	// Step 2: Randomly rewire connections with probability "p_rewire"
 	for(i = 0; i < N; i++){
 		for(j = 0; j < n_edges_arr[i]; j++){
-			
+
 			u = gsl_rng_uniform(rng);
 			
 			if(u < p_rewire){
@@ -107,7 +114,7 @@ void build_watts_strogatz_network(
 				while(check_member_or_self(new_contact, i, edge_mat[i], n_edges_arr[i])){
 					new_contact = gsl_rng_uniform_int(rng, N);
 				}
-				
+
 				// Remove contact between person "i" and the original contact
 				old_contact = edge_mat[i][j];
 				

@@ -73,6 +73,15 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "priority_test_contacts_70_79",
     "priority_test_contacts_80",
     "test_release_on_negative",
+    "fatality_fraction_0_9",
+    "fatality_fraction_10_19",
+    "fatality_fraction_20_29",
+    "fatality_fraction_30_39",
+    "fatality_fraction_40_49",
+    "fatality_fraction_50_59",
+    "fatality_fraction_60_69",
+    "fatality_fraction_70_79",
+    "fatality_fraction_80",
 ]
 
 
@@ -174,17 +183,17 @@ class Parameters(object):
             read_hospital_param_file=False,
     ):
         """[summary]
-        
+
         Arguments:
             object {[type]} -- [description]
-        
+
         Keyword Arguments:
             input_param_file {str} -- [Parameters file path] (default: {None})
             param_line_number {int} -- [Which column of the input param file to read] (default: 1)
             output_file_dir {str} -- [Where to write output files to] (default: {"./"})
             input_households {str} -- [Household demographics file (required)] (default: {None})
             read_param_file {bool} -- [Read param file, all params can be set from python interface] (default: {True})
-        
+
         Raises:
             ParameterException: [Warnings if parameters are not correctly set]
             Sys.exit(0): [Underlaying C code will exist if params are not viable]
@@ -377,20 +386,20 @@ class Parameters(object):
             raise ParameterException( "df_demo_house must have column house_no" )
 
         n_households = df_demo_house['house_no'].max()+1
-        
+
         ID       = df_demo_house["ID"].to_list()
         ages     = df_demo_house["age_group"].to_list()
         house_no = df_demo_house["house_no"].to_list()
-        
+
         ID_c       = covid19.longArray(n_total)
         ages_c     = covid19.longArray(n_total)
         house_no_c = covid19.longArray(n_total)
-        
+
         for idx in range(n_total):
             ID_c[idx]       = ID[idx]
             ages_c[idx]     = ages[idx]
             house_no_c[idx] = house_no[idx]
-        
+
         covid19.set_demographic_house_table( self.c_params, int(n_total),int(n_households), ID_c, ages_c, house_no_c )
 
     def set_occupation_network_table(self, df_occupation_networks, df_occupation_network_properties):
@@ -446,6 +455,7 @@ class Model:
         self.c_model = None
         self._create()
         self._is_running = False
+        self.nosocomial = bool(self.get_param("hospital_on"))
 
     def __del__(self):
         self._destroy()
@@ -522,48 +532,48 @@ class Model:
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score")
         return value
-    
+
     def get_risk_score_household(self, age_inf, age_sus):
         value = covid19.get_model_param_risk_score_household(self.c_model, age_inf, age_sus)
         if value < 0:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
-    
+
     def add_user_network(self, df_network, interaction_type = 1, skip_hospitalised = True, skip_quarantine = True, daily_fraction = 1.0, name = "user_network" ):
-        
+
         n_edges = len( df_network.index )
         n_total = self._params_obj.get_param("n_total")
-      
+
         if not 'ID_1' in df_network.columns:
             raise ParameterException( "df_network must have column ID_1" )
 
         if not 'ID_1' in df_network.columns:
             raise ParameterException( "df_network must have column ID_1" )
-        
+
         if not interaction_type in [0,1,2]:
             raise ParameterException( "interaction_type must be 0 (household), 1 (occupation) or 2 (random)" )
-            
+
         if (daily_fraction > 1) or( daily_fraction < 0):
             raise ParameterException( "daily fraction must be in the range 0 to 1" )
-     
+
         if not skip_hospitalised in [ True, False ]:
             raise ParameterException( "skip_hospitalised must be True or False" )
-  
+
         if not skip_quarantine in [ True, False ]:
             raise ParameterException( "skip_quarantine must be True or False" )
-  
+
         ID_1 = df_network[ "ID_1" ].to_list()
         ID_2 = df_network[ "ID_2" ].to_list()
-        
-        if (max( ID_1 ) >= n_total) or (min( ID_1 ) < 0): 
+
+        if (max( ID_1 ) >= n_total) or (min( ID_1 ) < 0):
             raise ParameterException( "all values of ID_1 must be between 0 and n_total-1" )
-  
+
         if (max( ID_2 ) >= n_total) or (min( ID_2  ) < 0):
             raise ParameterException( "all values of ID_2 must be between 0 and n_total-1" )
-  
+
         ID_1_c = covid19.longArray(n_edges)
         ID_2_c = covid19.longArray(n_edges)
-  
+
         for idx in range(n_edges):
             ID_1_c[idx] = ID_1[idx]
             ID_2_c[idx] = ID_2[idx]
@@ -574,7 +584,7 @@ class Model:
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
         if ret == 0:
             raise  ModelParameterException( "Failed to set risk score")
-    
+
     def set_risk_score_household(self, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score_household(self.c_model, age_inf, age_sus, value)
         if ret == 0:
@@ -637,6 +647,11 @@ class Model:
             key = f"total_death{age.name}"
             value = covid19.utils_n_total_age(self.c_model, covid19.DEATH, age.value)
             results[key] = value
+
+        results["daily_death"] = covid19.utils_n_daily(
+                self.c_model, covid19.DEATH, self.c_model.time
+            )
+
         results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
         ) + covid19.utils_n_current(self.c_model, covid19.PRESYMPTOMATIC_MILD)
@@ -659,19 +674,34 @@ class Model:
         results["n_recovered"] = covid19.utils_n_current(
             self.c_model, covid19.RECOVERED
         )
-        results["hospital_admissions"]  = covid19.utils_n_daily(
-            self.c_model, covid19.GENERAL, self.c_model.time
-        )
-        results["hospital_admissions_total"]  = covid19.utils_n_total(
-            self.c_model, covid19.GENERAL
-        )
-        results["hospital_to_critical_daily"] = covid19.utils_n_daily(
-            self.c_model, covid19.CRITICAL, self.c_model.time
-        )
-        results["hospital_to_critical_total"] = covid19.utils_n_total(
-            self.c_model, covid19.CRITICAL
-        )
-        
+        if self.nosocomial:
+            results["hospital_admissions"]  = covid19.utils_n_daily(
+                self.c_model, covid19.GENERAL, self.c_model.time
+            )
+            results["hospital_admissions_total"]  = covid19.utils_n_total(
+                self.c_model, covid19.GENERAL
+            )
+            results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+                self.c_model, covid19.CRITICAL, self.c_model.time
+            )
+            results["hospital_to_critical_total"] = covid19.utils_n_total(
+                self.c_model, covid19.CRITICAL
+            )
+        else:
+            results["hospital_admissions"]  = covid19.utils_n_daily(
+                self.c_model, covid19.TRANSITION_TO_HOSPITAL, self.c_model.time
+            )
+            results["hospital_admissions_total"]  = covid19.utils_n_total(
+                self.c_model, covid19.TRANSITION_TO_HOSPITAL
+            )
+            results["hospital_to_critical_daily"] = covid19.utils_n_daily(
+                self.c_model, covid19.TRANSITION_TO_CRITICAL, self.c_model.time
+            )
+            results["hospital_to_critical_total"] = covid19.utils_n_total(
+                self.c_model, covid19.TRANSITION_TO_CRITICAL
+            )
+
+
         results["n_quarantine_infected"] = self.c_model.n_quarantine_infected
         results["n_quarantine_recovered"] = self.c_model.n_quarantine_recovered
         results["n_quarantine_app_user"] = self.c_model.n_quarantine_app_user
@@ -682,7 +712,7 @@ class Model:
         results["n_quarantine_events_app_user"] = self.c_model.n_quarantine_events_app_user
         results["n_quarantine_release_events_app_user"] = \
             self.c_model.n_quarantine_release_events_app_user
-        
+
         return results
 
     def write_output_files(self):
