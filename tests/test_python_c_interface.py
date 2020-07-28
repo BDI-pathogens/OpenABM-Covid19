@@ -381,7 +381,6 @@ class TestClass(object):
             assert sum(daily_deaths) == model.one_time_step_results()["total_death"]
         assert sum(daily_deaths) > 0
 
-
     def test_update_fatality_fraction(self):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
