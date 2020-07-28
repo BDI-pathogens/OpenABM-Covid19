@@ -376,7 +376,7 @@ class TestClass(object):
         daily_deaths = []
         for step in range(50):
             model.one_time_step()
-            daily_death = model.one_time_step_results()["daily_death"]
+            daily_death = model.one_time_step_results()["n_death"]
             daily_deaths.append(daily_death)
             assert sum(daily_deaths) == model.one_time_step_results()["total_death"]
         assert sum(daily_deaths) > 0
