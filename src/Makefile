@@ -59,7 +59,7 @@ update_R_files:
 	mv covid19.R ../R/covid19.R
 
   # Update NAMESPACE & DESCRIPTION files
-	grep '`.*` = function(.*)' covid19.R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
+	grep '`.*` = function(.*)' ../R/covid19.R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
   # 'Version' must be only numbers with '.' or '-': edit git-tag to match this
 	sed \
 	  -e "s/@VERSION@/$$(git describe --tags --abbrev=0 | cut -c 2-)/" \

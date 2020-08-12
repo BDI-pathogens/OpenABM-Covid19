@@ -1,7 +1,7 @@
 Package: covid19
 Version: 0.3-0
 Date: 2020-08-12
-GitTag: v0.3-Rpreview-1-gf7d61b7
+GitTag: v0.3-Rpreview-3-g3d0653b
 Title: Agent-based model for modelling the Covid-19
 License: GPL-3.0
 Authors@R:
