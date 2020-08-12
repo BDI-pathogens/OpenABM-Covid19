@@ -46,6 +46,12 @@ documentation/*.toc
 # R-related files
 .Rhistory
 
+# R package build files
+/covid19/
+/covid19_*.tar.gz
+/covid19_*.tgz
+/covid19_*.zip
+
 # performance related
 performance/*.trace
 performance/*.dtps
