@@ -60,13 +60,6 @@ venv/*
 src/covid19.py
 src/covid19_wrap.c
 
-# Generated files for R source package
-src/covid19.R
-src/covid19_wrap_R.c
-src/covid19.tar.gz
-src/DESCRIPTION
-src/NAMESPACE
-
 sandbox/*.csv
 examples/*.csv
 examples/.ipynb_checkpoints

@@ -30,18 +30,7 @@ LIB = /usr/local/lib
 CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 
 # Swig's output
-SWIG_OUTPUT_PY = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
-SWIG_OUTPUT_R = covid19_wrap_R.c covid19.R
-SWIG_OUTPUT = $(SWIG_OUTPUT_PY) $(SWIG_OUTPUT_R)
-
-# R source package tarball
-R_PKG = covid19.tar.gz
-# Define the tar's file structure using --xform expressions.
-R_TAR_FLAGS  = --xform='s|\(.*\).R$$|R/\1.R|'# Put R files in 'R/' subdir
-R_TAR_FLAGS += --xform='s|\(.*\).\([ch]\)$$|src/\1.\2|'# Put C files in 'src/' subdir
-R_TAR_FLAGS += --xform='s|^Makevars$$|src/Makevars|'# Put Makevars in 'src/' subdir
-R_TAR_FLAGS += --xform='s|\(.*\)$$|covid19/\1|'# Put all files in covid19/ subdir
-R_PKG_CONTENT = DESCRIPTION NAMESPACE Makevars $(filter-out main.h,$(OBJS:%.o=%.c) $(OBJS:%.o=%.h)) structure.h $(SWIG_OUTPUT_R)
+SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
 
 
 # To compile
@@ -64,24 +53,19 @@ clean:
 	$(C) $(CFLAGS) -c $< -o $@
 
 
-# Generating an R source package
-covid19_wrap_R.c:
+# Generated source file (for R source package)
+update_R_files:
 	swig -r -o covid19_wrap_R.c covid19.i
-covid19.R: covid19_wrap_R.c
+	mv covid19.R ../R/covid19.R
 
-NAMESPACE: covid19.R
-  # Search for generated wrapper functions in .R file, and add them to NAMESPACE
-	grep '`.*` = function(.*)' covid19.R | sed 's|`\(.*\)`.*|export( \1 )|' > NAMESPACE
-DESCRIPTION: DESCRIPTION.in
+  # Update NAMESPACE & DESCRIPTION files
+	grep '`.*` = function(.*)' covid19.R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
   # 'Version' must be only numbers with '.' or '-': edit git-tag to match this
 	sed \
 	  -e "s/@VERSION@/$$(git describe --tags --abbrev=0 | cut -c 2-)/" \
 	  -e "s/@GIT_TAG@/$$(git describe --tags)/" \
 	  -e "s/@DATE@/$$(date +%Y-%m-%d)/" \
-	  DESCRIPTION.in > DESCRIPTION
-
-$(R_PKG): $(R_PKG_CONTENT)
-	tar -czf $(R_PKG) $(R_TAR_FLAGS) $(R_PKG_CONTENT)
+	  DESCRIPTION.in > ../DESCRIPTION
 
 
-.PHONY: install dev all clean
+.PHONY: install dev all clean update_R_files
