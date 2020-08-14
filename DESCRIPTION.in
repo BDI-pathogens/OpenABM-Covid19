@@ -1,8 +1,9 @@
-Package: OpenABMCovid19
-Version: 0.3-0
+Package: @R_PKGNAME@
+Version: @VERSION@
+Date: @DATE@
+GitTag: @GIT_TAG@
 Title: Agent-based model for modelling the Covid-19
 License: GPL-3 | file LICENSE
-SystemRequirements: Gnu Scientific Library version >= 2.6
 Authors@R:
   c(person("Oli", "Legat", role = c("cre"), email = "olegat@google.com"),
     person("Robert", "Hinch", role = "aut"),

@@ -22,9 +22,10 @@
 ^tests$
 ^src\/adapter_covid19$
 
-# Build script and outputs
-^build-Rpkg-win\.bat$
-^OpenABMCovid19$
+# Build files
+.*\.in$
+^Makefile$
+^OpenABMCovid19.tmp$
 ^OpenABMCovid19_.*\.tar\.gz$
 ^OpenABMCovid19_.*\.tgz$
 ^OpenABMCovid19_.*\.zip$

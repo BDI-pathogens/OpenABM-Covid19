@@ -32,9 +32,6 @@ CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 # Swig's output
 SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
 
-# R Package Name
-R_PKGNAME = OpenABMCovid19
-
 
 # To compile
 install: $(OBJS)
@@ -54,15 +51,6 @@ clean:
 
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@
-
-
-# Generated source file (for R source package)
-update_R_files:
-	swig -r -package $(R_PKGNAME) -o covid19_wrap_R.c covid19.i
-	mv $(R_PKGNAME).R ../R/$(R_PKGNAME).R
-
-  # Update NAMESPACE & DESCRIPTION files
-	grep '`.*` = function(.*)' ../R/$(R_PKGNAME).R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
 
 
 .PHONY: install dev all clean update_R_files

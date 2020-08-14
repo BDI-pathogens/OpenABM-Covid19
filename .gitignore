@@ -52,6 +52,9 @@ documentation/*.toc
 /OpenABMCovid19_*.tar.gz
 /OpenABMCovid19_*.tgz
 /OpenABMCovid19_*.zip
+/OpenABMCovid19.tmp/
+DESCRIPTION
+NAMESPACE
 
 # performance related
 performance/*.trace
@@ -64,8 +67,11 @@ data_test/*
 
 venv/*
 
+# SWIG generated files
 src/covid19.py
 src/covid19_wrap.c
+src/covid19_wrap_R.c
+R/OpenABMCovid19.R
 
 sandbox/*.csv
 examples/*.csv

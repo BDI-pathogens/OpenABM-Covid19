@@ -94,3 +94,50 @@ Tests
 
 A full description of the tests run on the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19_tests.pdf).
 Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-started.html) and can be run from the main project directory by calling `pytest`.  Tests require Python 3.7 or later.  Individual tests can be run using, for instance, `pytest tests/test_ibm.py::TestClass::test_hospitalised_zero`.  Tests have been run against modules listed in [tests/requirements.txt](tests/requirements) in case they are to be run within a virtual environment.  
+
+R Packaging
+-----------
+
+To build the R source or binary package, you should use the Makefile at the root of the source directory. You must have the following commands included in your `PATH` environment variable.
+
+- `R`
+- `swig`
+- `git`
+
+The Makefile will automatically run SWIG to generate source code (and other build steps such preprocessing *.in files) before running `R CMD build`.
+
+
+To build the R source package, use:
+```
+make Rbuild
+```
+This will output a source package tar-ball named `OpenABMCovid19_${VERSION}.tar.gz`
+
+
+To build the R binary package, use:
+```
+make Rinstall
+```
+This will output a binary package on your current platform (`.zip` for Window, `.tgz` for macOS).
+
+
+### Requirements for building on Windows
+
+If you're building on Windows, there are additional tools that are needed to build the binary package. This is the recommended setup:
+
+- Download precompiled 32 and 64 bits libraries of GSL (installed in C:\gsl)
+- Install Rtools (in C:\Rtools)
+- Install SWIG via Cygwin64
+
+It's adviced to put Rtools & R bin dir at the start of the `PATH` environment and the git & cygwin bin dir at the end.
+
+Example environment:
+```batch
+@REM R & Rtools at the start
+set PATH=C:\Program Files\R\R-3.6.2\bin\x64;%PATH%
+set PATH=C:\Rtools\bin;%PATH%
+
+@REM git & swig at the end
+set PATH=%PATH%;C:\Program Files\Git\cmd
+set PATH=%PATH%;C:\cygwin64\bin
+```
