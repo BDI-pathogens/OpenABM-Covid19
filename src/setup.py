@@ -40,7 +40,7 @@ setup(
     py_modules=["covid19",],
     install_requires=[
         "click",
-        "matplotlib",
+        "matplotlib==3.2.2",
         "numpy",
         "pandas",
         "scipy",
