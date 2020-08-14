@@ -31616,7 +31616,7 @@ SWIGINTERN R_CallMethodDef CallEntries[] = {
    {NULL, NULL, 0}
 };
 
-SWIGEXPORT void R_init_covid19(DllInfo *dll) {
+SWIGEXPORT void R_init_OpenABMCovid19(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
 
 

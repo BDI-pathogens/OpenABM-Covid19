@@ -47,10 +47,11 @@ documentation/*.toc
 .Rhistory
 
 # R package build files
-/covid19/
-/covid19_*.tar.gz
-/covid19_*.tgz
-/covid19_*.zip
+/OpenABMCovid19/
+/OpenABMCovid19.Rcheck/
+/OpenABMCovid19_*.tar.gz
+/OpenABMCovid19_*.tgz
+/OpenABMCovid19_*.zip
 
 # performance related
 performance/*.trace

@@ -11,13 +11,13 @@ REM      Installed in C:\Rtools
 REM      https://cran.r-project.org/bin/windows/Rtools/
 REM
 REM    - GSL C lib
-REM      Installed in C:\gsl\i386 and c:\gsl\x64
+REM      Installed in C:\gsl\i386 and C:\gsl\x64
 REM      https://github.com/olegat/OpenABM-Covid19/releases/download/v0.3-Rpreview/gsl-2.6-win.zip
 
 REM build source package
 R CMD build .
 
 REM build binary package
-R CMD INSTALL --build --library=. covid19_*.tar.gz
+R CMD INSTALL --build --library=. OpenABM.Covid19_*.tar.gz
 
 @echo ON

@@ -1,19 +1,37 @@
-.*\.py
-.*\.pyc
-^\.github$
+# -*- mode: conf -*-
+
+# R files
 ^\.Rhistory$
-^README\.md$
-^covid19_.*\.tar\.gz$
-^covid19_.*\.tgz$
-^covid19_.*\.zip$
-^documentation$
+^.*\.Rproj$
+^\.Rproj\.user$
+^.*\.Rcheck$
+
+# R utility scripts
+^R\/demographics\.R$
+^R\/plotting\.R$
+
+# SWIG interface files
+.*\.i$
+
+# Python files
+.*\.py$
+.*\.pyc$
 ^examples$
 ^performance$
 ^python$
 ^tests$
-^R\/demographics\.R$
-^R\/plotting\.R$
-^src\/DESCRIPTION\.in$
-^src\/.*\..i$
-^src\/Makefile$
 ^src\/adapter_covid19$
+
+# Build script and outputs
+^build-Rpkg-win\.bat$
+^OpenABMCovid19$
+^OpenABMCovid19_.*\.tar\.gz$
+^OpenABMCovid19_.*\.tgz$
+^OpenABMCovid19_.*\.zip$
+
+# Misc
+^\.github$
+^README\.md$
+^cran-comments\.md$
+^documentation$
+^src\/Makefile$

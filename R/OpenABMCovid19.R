@@ -5,7 +5,7 @@
 # the SWIG interface file instead.
 
 ##   Generated via the command line invocation:
-##	 swig -r -o covid19_wrap_R.c covid19.i
+##	 swig -r -package OpenABMCovid19 -o covid19_wrap_R.c covid19.i
 
 
 #                         srun.swg                            #
@@ -494,7 +494,7 @@ function(x) {print(as(x, "character"))})))
     warning("using only the first element of s_type");
   };
   
-  ;.Call('R_swig_event_list_type_set', self, s_type, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_type_set', self, s_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -507,7 +507,7 @@ class(`event_list_type_set`) = c("SWIGFunction", class('event_list_type_set'))
 `event_list_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_event_list_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_event_list_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -521,7 +521,7 @@ class(`event_list_type_get`) = c("SWIGFunction", class('event_list_type_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_events, "ExternalReference")) s_events = slot(s_events,"ref") 
-  ;.Call('R_swig_event_list_events_set', self, s_events, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_events_set', self, s_events, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -534,7 +534,7 @@ class(`event_list_events_set`) = c("SWIGFunction", class('event_list_events_set'
 `event_list_events_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_events_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_events_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_event", ref=ans) ;
   
   ans
@@ -551,7 +551,7 @@ class(`event_list_events_get`) = c("SWIGFunction", class('event_list_events_get'
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_n_daily = as.integer(s_n_daily);
-  ;.Call('R_swig_event_list_n_daily_set', self, s_n_daily, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_daily_set', self, s_n_daily, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -564,7 +564,7 @@ class(`event_list_n_daily_set`) = c("SWIGFunction", class('event_list_n_daily_se
 `event_list_n_daily_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_n_daily_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_n_daily_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_long", ref=ans) ;
   
   ans
@@ -581,7 +581,7 @@ class(`event_list_n_daily_get`) = c("SWIGFunction", class('event_list_n_daily_ge
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_n_daily_by_age, "ExternalReference")) s_n_daily_by_age = slot(s_n_daily_by_age,"ref") 
-  ;.Call('R_swig_event_list_n_daily_by_age_set', self, s_n_daily_by_age, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_daily_by_age_set', self, s_n_daily_by_age, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -594,7 +594,7 @@ class(`event_list_n_daily_by_age_set`) = c("SWIGFunction", class('event_list_n_d
 `event_list_n_daily_by_age_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_n_daily_by_age_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_n_daily_by_age_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_long", ref=ans) ;
   
   ans
@@ -611,7 +611,7 @@ class(`event_list_n_daily_by_age_get`) = c("SWIGFunction", class('event_list_n_d
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_n_daily_current = as.integer(s_n_daily_current);
-  ;.Call('R_swig_event_list_n_daily_current_set', self, s_n_daily_current, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_daily_current_set', self, s_n_daily_current, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -624,7 +624,7 @@ class(`event_list_n_daily_current_set`) = c("SWIGFunction", class('event_list_n_
 `event_list_n_daily_current_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_n_daily_current_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_n_daily_current_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_long", ref=ans) ;
   
   ans
@@ -646,7 +646,7 @@ class(`event_list_n_daily_current_get`) = c("SWIGFunction", class('event_list_n_
     warning("using only the first element of s_n_total");
   };
   
-  ;.Call('R_swig_event_list_n_total_set', self, s_n_total, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_total_set', self, s_n_total, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -659,7 +659,7 @@ class(`event_list_n_total_set`) = c("SWIGFunction", class('event_list_n_total_se
 `event_list_n_total_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_event_list_n_total_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_total_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -673,7 +673,7 @@ class(`event_list_n_total_get`) = c("SWIGFunction", class('event_list_n_total_ge
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_n_total_by_age = as.integer(s_n_total_by_age);
-  ;.Call('R_swig_event_list_n_total_by_age_set', self, s_n_total_by_age, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_total_by_age_set', self, s_n_total_by_age, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -686,7 +686,7 @@ class(`event_list_n_total_by_age_set`) = c("SWIGFunction", class('event_list_n_t
 `event_list_n_total_by_age_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_n_total_by_age_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_n_total_by_age_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_long", ref=ans) ;
   
   ans
@@ -708,7 +708,7 @@ class(`event_list_n_total_by_age_get`) = c("SWIGFunction", class('event_list_n_t
     warning("using only the first element of s_n_current");
   };
   
-  ;.Call('R_swig_event_list_n_current_set', self, s_n_current, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_current_set', self, s_n_current, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -721,7 +721,7 @@ class(`event_list_n_current_set`) = c("SWIGFunction", class('event_list_n_curren
 `event_list_n_current_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_event_list_n_current_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_event_list_n_current_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -735,7 +735,7 @@ class(`event_list_n_current_get`) = c("SWIGFunction", class('event_list_n_curren
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_infectious_curve, "ExternalReference")) s_infectious_curve = slot(s_infectious_curve,"ref") 
-  ;.Call('R_swig_event_list_infectious_curve_set', self, s_infectious_curve, PACKAGE='covid19');
+  ;.Call('R_swig_event_list_infectious_curve_set', self, s_infectious_curve, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -748,7 +748,7 @@ class(`event_list_infectious_curve_set`) = c("SWIGFunction", class('event_list_i
 `event_list_infectious_curve_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_list_infectious_curve_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_list_infectious_curve_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_double", ref=ans) ;
   
   ans
@@ -763,7 +763,7 @@ class(`event_list_infectious_curve_get`) = c("SWIGFunction", class('event_list_i
 
 `event_list` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_event_list', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_event_list', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_event_list", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_event_list)
@@ -861,7 +861,7 @@ setMethod('copyToC', 'event_list', CopyToC_event_list);
     warning("using only the first element of s_n_idx");
   };
   
-  ;.Call('R_swig_directory_n_idx_set', self, s_n_idx, PACKAGE='covid19');
+  ;.Call('R_swig_directory_n_idx_set', self, s_n_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -874,7 +874,7 @@ class(`directory_n_idx_set`) = c("SWIGFunction", class('directory_n_idx_set'))
 `directory_n_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_directory_n_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_directory_n_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -888,7 +888,7 @@ class(`directory_n_idx_get`) = c("SWIGFunction", class('directory_n_idx_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_n_jdx = as.integer(s_n_jdx);
-  ;.Call('R_swig_directory_n_jdx_set', self, s_n_jdx, PACKAGE='covid19');
+  ;.Call('R_swig_directory_n_jdx_set', self, s_n_jdx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -901,7 +901,7 @@ class(`directory_n_jdx_set`) = c("SWIGFunction", class('directory_n_jdx_set'))
 `directory_n_jdx_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_directory_n_jdx_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_directory_n_jdx_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -918,7 +918,7 @@ class(`directory_n_jdx_get`) = c("SWIGFunction", class('directory_n_jdx_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_val, "ExternalReference")) s_val = slot(s_val,"ref") 
-  ;.Call('R_swig_directory_val_set', self, s_val, PACKAGE='covid19');
+  ;.Call('R_swig_directory_val_set', self, s_val, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -931,7 +931,7 @@ class(`directory_val_set`) = c("SWIGFunction", class('directory_val_set'))
 `directory_val_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_directory_val_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_directory_val_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_long", ref=ans) ;
   
   ans
@@ -946,7 +946,7 @@ class(`directory_val_get`) = c("SWIGFunction", class('directory_val_get'))
 
 `directory` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_directory', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_directory', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_directory", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_directory)
@@ -1035,7 +1035,7 @@ setMethod('copyToC', 'directory', CopyToC_directory);
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_params, "ExternalReference")) s_params = slot(s_params,"ref") 
-  ;.Call('R_swig_model_params_set', self, s_params, PACKAGE='covid19');
+  ;.Call('R_swig_model_params_set', self, s_params, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1048,7 +1048,7 @@ class(`model_params_set`) = c("SWIGFunction", class('model_params_set'))
 `model_params_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_params_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_params_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_parameters", ref=ans) ;
   
   ans
@@ -1065,7 +1065,7 @@ class(`model_params_get`) = c("SWIGFunction", class('model_params_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_population, "ExternalReference")) s_population = slot(s_population,"ref") 
-  ;.Call('R_swig_model_population_set', self, s_population, PACKAGE='covid19');
+  ;.Call('R_swig_model_population_set', self, s_population, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1078,7 +1078,7 @@ class(`model_population_set`) = c("SWIGFunction", class('model_population_set'))
 `model_population_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_population_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_population_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_individual", ref=ans) ;
   
   ans
@@ -1100,7 +1100,7 @@ class(`model_population_get`) = c("SWIGFunction", class('model_population_get'))
     warning("using only the first element of s_time");
   };
   
-  ;.Call('R_swig_model_time_set', self, s_time, PACKAGE='covid19');
+  ;.Call('R_swig_model_time_set', self, s_time, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1113,7 +1113,7 @@ class(`model_time_set`) = c("SWIGFunction", class('model_time_set'))
 `model_time_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_time_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_time_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1127,7 +1127,7 @@ class(`model_time_get`) = c("SWIGFunction", class('model_time_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_interaction_blocks, "ExternalReference")) s_interaction_blocks = slot(s_interaction_blocks,"ref") 
-  ;.Call('R_swig_model_interaction_blocks_set', self, s_interaction_blocks, PACKAGE='covid19');
+  ;.Call('R_swig_model_interaction_blocks_set', self, s_interaction_blocks, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1140,7 +1140,7 @@ class(`model_interaction_blocks_set`) = c("SWIGFunction", class('model_interacti
 `model_interaction_blocks_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_interaction_blocks_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_interaction_blocks_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction_block", ref=ans) ;
   
   ans
@@ -1157,7 +1157,7 @@ class(`model_interaction_blocks_get`) = c("SWIGFunction", class('model_interacti
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_next_interaction, "ExternalReference")) s_next_interaction = slot(s_next_interaction,"ref") 
-  ;.Call('R_swig_model_next_interaction_set', self, s_next_interaction, PACKAGE='covid19');
+  ;.Call('R_swig_model_next_interaction_set', self, s_next_interaction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1170,7 +1170,7 @@ class(`model_next_interaction_set`) = c("SWIGFunction", class('model_next_intera
 `model_next_interaction_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_next_interaction_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_next_interaction_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction", ref=ans) ;
   
   ans
@@ -1192,7 +1192,7 @@ class(`model_next_interaction_get`) = c("SWIGFunction", class('model_next_intera
     warning("using only the first element of s_interaction_idx");
   };
   
-  ;.Call('R_swig_model_interaction_idx_set', self, s_interaction_idx, PACKAGE='covid19');
+  ;.Call('R_swig_model_interaction_idx_set', self, s_interaction_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1205,7 +1205,7 @@ class(`model_interaction_idx_set`) = c("SWIGFunction", class('model_interaction_
 `model_interaction_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_interaction_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_interaction_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1224,7 +1224,7 @@ class(`model_interaction_idx_get`) = c("SWIGFunction", class('model_interaction_
     warning("using only the first element of s_interaction_day_idx");
   };
   
-  ;.Call('R_swig_model_interaction_day_idx_set', self, s_interaction_day_idx, PACKAGE='covid19');
+  ;.Call('R_swig_model_interaction_day_idx_set', self, s_interaction_day_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1237,7 +1237,7 @@ class(`model_interaction_day_idx_set`) = c("SWIGFunction", class('model_interact
 `model_interaction_day_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_interaction_day_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_interaction_day_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1256,7 +1256,7 @@ class(`model_interaction_day_idx_get`) = c("SWIGFunction", class('model_interact
     warning("using only the first element of s_n_interactions");
   };
   
-  ;.Call('R_swig_model_n_interactions_set', self, s_n_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_interactions_set', self, s_n_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1269,7 +1269,7 @@ class(`model_n_interactions_set`) = c("SWIGFunction", class('model_n_interaction
 `model_n_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1283,7 +1283,7 @@ class(`model_n_interactions_get`) = c("SWIGFunction", class('model_n_interaction
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_possible_interactions = as.integer(s_possible_interactions);
-  ;.Call('R_swig_model_possible_interactions_set', self, s_possible_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_model_possible_interactions_set', self, s_possible_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1296,7 +1296,7 @@ class(`model_possible_interactions_set`) = c("SWIGFunction", class('model_possib
 `model_possible_interactions_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_possible_interactions_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_possible_interactions_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_long", ref=ans) ;
   
   ans
@@ -1318,7 +1318,7 @@ class(`model_possible_interactions_get`) = c("SWIGFunction", class('model_possib
     warning("using only the first element of s_n_possible_interactions");
   };
   
-  ;.Call('R_swig_model_n_possible_interactions_set', self, s_n_possible_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_possible_interactions_set', self, s_n_possible_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1331,7 +1331,7 @@ class(`model_n_possible_interactions_set`) = c("SWIGFunction", class('model_n_po
 `model_n_possible_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_possible_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_possible_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1350,7 +1350,7 @@ class(`model_n_possible_interactions_get`) = c("SWIGFunction", class('model_n_po
     warning("using only the first element of s_n_total_intereactions");
   };
   
-  ;.Call('R_swig_model_n_total_intereactions_set', self, s_n_total_intereactions, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_total_intereactions_set', self, s_n_total_intereactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1363,7 +1363,7 @@ class(`model_n_total_intereactions_set`) = c("SWIGFunction", class('model_n_tota
 `model_n_total_intereactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_total_intereactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_total_intereactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1382,7 +1382,7 @@ class(`model_n_total_intereactions_get`) = c("SWIGFunction", class('model_n_tota
     warning("using only the first element of s_n_occupation_networks");
   };
   
-  ;.Call('R_swig_model_n_occupation_networks_set', self, s_n_occupation_networks, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_occupation_networks_set', self, s_n_occupation_networks, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1395,7 +1395,7 @@ class(`model_n_occupation_networks_set`) = c("SWIGFunction", class('model_n_occu
 `model_n_occupation_networks_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_occupation_networks_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_occupation_networks_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1409,7 +1409,7 @@ class(`model_n_occupation_networks_get`) = c("SWIGFunction", class('model_n_occu
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_random_network, "ExternalReference")) s_random_network = slot(s_random_network,"ref") 
-  ;.Call('R_swig_model_random_network_set', self, s_random_network, PACKAGE='covid19');
+  ;.Call('R_swig_model_random_network_set', self, s_random_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1422,7 +1422,7 @@ class(`model_random_network_set`) = c("SWIGFunction", class('model_random_networ
 `model_random_network_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_random_network_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_random_network_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_network", ref=ans) ;
   
   ans
@@ -1439,7 +1439,7 @@ class(`model_random_network_get`) = c("SWIGFunction", class('model_random_networ
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_household_network, "ExternalReference")) s_household_network = slot(s_household_network,"ref") 
-  ;.Call('R_swig_model_household_network_set', self, s_household_network, PACKAGE='covid19');
+  ;.Call('R_swig_model_household_network_set', self, s_household_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1452,7 +1452,7 @@ class(`model_household_network_set`) = c("SWIGFunction", class('model_household_
 `model_household_network_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_household_network_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_household_network_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_network", ref=ans) ;
   
   ans
@@ -1474,7 +1474,7 @@ class(`model_household_network_get`) = c("SWIGFunction", class('model_household_
     warning("using only the first element of s_use_custom_occupation_networks");
   };
   
-  ;.Call('R_swig_model_use_custom_occupation_networks_set', self, s_use_custom_occupation_networks, PACKAGE='covid19');
+  ;.Call('R_swig_model_use_custom_occupation_networks_set', self, s_use_custom_occupation_networks, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1487,7 +1487,7 @@ class(`model_use_custom_occupation_networks_set`) = c("SWIGFunction", class('mod
 `model_use_custom_occupation_networks_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_use_custom_occupation_networks_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_use_custom_occupation_networks_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1501,7 +1501,7 @@ class(`model_use_custom_occupation_networks_get`) = c("SWIGFunction", class('mod
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_occupation_network, "ExternalReference")) s_occupation_network = slot(s_occupation_network,"ref") 
-  ;.Call('R_swig_model_occupation_network_set', self, s_occupation_network, PACKAGE='covid19');
+  ;.Call('R_swig_model_occupation_network_set', self, s_occupation_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1514,7 +1514,7 @@ class(`model_occupation_network_set`) = c("SWIGFunction", class('model_occupatio
 `model_occupation_network_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_occupation_network_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_occupation_network_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_network", ref=ans) ;
   
   ans
@@ -1531,7 +1531,7 @@ class(`model_occupation_network_get`) = c("SWIGFunction", class('model_occupatio
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_household_directory, "ExternalReference")) s_household_directory = slot(s_household_directory,"ref") 
-  ;.Call('R_swig_model_household_directory_set', self, s_household_directory, PACKAGE='covid19');
+  ;.Call('R_swig_model_household_directory_set', self, s_household_directory, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1544,7 +1544,7 @@ class(`model_household_directory_set`) = c("SWIGFunction", class('model_househol
 `model_household_directory_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_household_directory_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_household_directory_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_directory", ref=ans) ;
   
   ans
@@ -1561,7 +1561,7 @@ class(`model_household_directory_get`) = c("SWIGFunction", class('model_househol
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_user_network, "ExternalReference")) s_user_network = slot(s_user_network,"ref") 
-  ;.Call('R_swig_model_user_network_set', self, s_user_network, PACKAGE='covid19');
+  ;.Call('R_swig_model_user_network_set', self, s_user_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1574,7 +1574,7 @@ class(`model_user_network_set`) = c("SWIGFunction", class('model_user_network_se
 `model_user_network_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_user_network_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_user_network_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_network", ref=ans) ;
   
   ans
@@ -1591,7 +1591,7 @@ class(`model_user_network_get`) = c("SWIGFunction", class('model_user_network_ge
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_model_mean_interactions_set', self, s_mean_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_model_mean_interactions_set', self, s_mean_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1604,7 +1604,7 @@ class(`model_mean_interactions_set`) = c("SWIGFunction", class('model_mean_inter
 `model_mean_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_mean_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_mean_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1623,7 +1623,7 @@ class(`model_mean_interactions_get`) = c("SWIGFunction", class('model_mean_inter
     warning("using only the first element of s_manual_trace_interview_quota");
   };
   
-  ;.Call('R_swig_model_manual_trace_interview_quota_set', self, s_manual_trace_interview_quota, PACKAGE='covid19');
+  ;.Call('R_swig_model_manual_trace_interview_quota_set', self, s_manual_trace_interview_quota, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1636,7 +1636,7 @@ class(`model_manual_trace_interview_quota_set`) = c("SWIGFunction", class('model
 `model_manual_trace_interview_quota_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_manual_trace_interview_quota_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_manual_trace_interview_quota_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1655,7 +1655,7 @@ class(`model_manual_trace_interview_quota_get`) = c("SWIGFunction", class('model
     warning("using only the first element of s_manual_trace_notification_quota");
   };
   
-  ;.Call('R_swig_model_manual_trace_notification_quota_set', self, s_manual_trace_notification_quota, PACKAGE='covid19');
+  ;.Call('R_swig_model_manual_trace_notification_quota_set', self, s_manual_trace_notification_quota, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1668,7 +1668,7 @@ class(`model_manual_trace_notification_quota_set`) = c("SWIGFunction", class('mo
 `model_manual_trace_notification_quota_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_manual_trace_notification_quota_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_manual_trace_notification_quota_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1682,7 +1682,7 @@ class(`model_manual_trace_notification_quota_get`) = c("SWIGFunction", class('mo
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_events, "ExternalReference")) s_events = slot(s_events,"ref") 
-  ;.Call('R_swig_model_events_set', self, s_events, PACKAGE='covid19');
+  ;.Call('R_swig_model_events_set', self, s_events, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1695,7 +1695,7 @@ class(`model_events_set`) = c("SWIGFunction", class('model_events_set'))
 `model_events_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_events_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_events_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -1712,7 +1712,7 @@ class(`model_events_get`) = c("SWIGFunction", class('model_events_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_next_event, "ExternalReference")) s_next_event = slot(s_next_event,"ref") 
-  ;.Call('R_swig_model_next_event_set', self, s_next_event, PACKAGE='covid19');
+  ;.Call('R_swig_model_next_event_set', self, s_next_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1725,7 +1725,7 @@ class(`model_next_event_set`) = c("SWIGFunction", class('model_next_event_set'))
 `model_next_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_next_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_next_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -1742,7 +1742,7 @@ class(`model_next_event_get`) = c("SWIGFunction", class('model_next_event_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_event_lists, "ExternalReference")) s_event_lists = slot(s_event_lists,"ref") 
-  ;.Call('R_swig_model_event_lists_set', self, s_event_lists, PACKAGE='covid19');
+  ;.Call('R_swig_model_event_lists_set', self, s_event_lists, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1755,7 +1755,7 @@ class(`model_event_lists_set`) = c("SWIGFunction", class('model_event_lists_set'
 `model_event_lists_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_event_lists_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_event_lists_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event_list", ref=ans) ;
   
   ans
@@ -1772,7 +1772,7 @@ class(`model_event_lists_get`) = c("SWIGFunction", class('model_event_lists_get'
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_trace_tokens, "ExternalReference")) s_trace_tokens = slot(s_trace_tokens,"ref") 
-  ;.Call('R_swig_model_trace_tokens_set', self, s_trace_tokens, PACKAGE='covid19');
+  ;.Call('R_swig_model_trace_tokens_set', self, s_trace_tokens, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1785,7 +1785,7 @@ class(`model_trace_tokens_set`) = c("SWIGFunction", class('model_trace_tokens_se
 `model_trace_tokens_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_trace_tokens_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_trace_tokens_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_trace_token", ref=ans) ;
   
   ans
@@ -1802,7 +1802,7 @@ class(`model_trace_tokens_get`) = c("SWIGFunction", class('model_trace_tokens_ge
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_next_trace_token, "ExternalReference")) s_next_trace_token = slot(s_next_trace_token,"ref") 
-  ;.Call('R_swig_model_next_trace_token_set', self, s_next_trace_token, PACKAGE='covid19');
+  ;.Call('R_swig_model_next_trace_token_set', self, s_next_trace_token, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1815,7 +1815,7 @@ class(`model_next_trace_token_set`) = c("SWIGFunction", class('model_next_trace_
 `model_next_trace_token_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_next_trace_token_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_next_trace_token_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_trace_token", ref=ans) ;
   
   ans
@@ -1837,7 +1837,7 @@ class(`model_next_trace_token_get`) = c("SWIGFunction", class('model_next_trace_
     warning("using only the first element of s_n_trace_tokens_used");
   };
   
-  ;.Call('R_swig_model_n_trace_tokens_used_set', self, s_n_trace_tokens_used, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_trace_tokens_used_set', self, s_n_trace_tokens_used, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1850,7 +1850,7 @@ class(`model_n_trace_tokens_used_set`) = c("SWIGFunction", class('model_n_trace_
 `model_n_trace_tokens_used_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_trace_tokens_used_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_trace_tokens_used_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1869,7 +1869,7 @@ class(`model_n_trace_tokens_used_get`) = c("SWIGFunction", class('model_n_trace_
     warning("using only the first element of s_n_trace_tokens");
   };
   
-  ;.Call('R_swig_model_n_trace_tokens_set', self, s_n_trace_tokens, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_trace_tokens_set', self, s_n_trace_tokens, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1882,7 +1882,7 @@ class(`model_n_trace_tokens_set`) = c("SWIGFunction", class('model_n_trace_token
 `model_n_trace_tokens_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_trace_tokens_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_trace_tokens_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1896,7 +1896,7 @@ class(`model_n_trace_tokens_get`) = c("SWIGFunction", class('model_n_trace_token
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_transition_time_distributions, "ExternalReference")) s_transition_time_distributions = slot(s_transition_time_distributions,"ref") 
-  ;.Call('R_swig_model_transition_time_distributions_set', self, s_transition_time_distributions, PACKAGE='covid19');
+  ;.Call('R_swig_model_transition_time_distributions_set', self, s_transition_time_distributions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1909,7 +1909,7 @@ class(`model_transition_time_distributions_set`) = c("SWIGFunction", class('mode
 `model_transition_time_distributions_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_transition_time_distributions_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_transition_time_distributions_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_int", ref=ans) ;
   
   ans
@@ -1931,7 +1931,7 @@ class(`model_transition_time_distributions_get`) = c("SWIGFunction", class('mode
     warning("using only the first element of s_n_quarantine_days");
   };
   
-  ;.Call('R_swig_model_n_quarantine_days_set', self, s_n_quarantine_days, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_days_set', self, s_n_quarantine_days, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1944,7 +1944,7 @@ class(`model_n_quarantine_days_set`) = c("SWIGFunction", class('model_n_quaranti
 `model_n_quarantine_days_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_days_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_days_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1963,7 +1963,7 @@ class(`model_n_quarantine_days_get`) = c("SWIGFunction", class('model_n_quaranti
     warning("using only the first element of s_n_quarantine_app_user");
   };
   
-  ;.Call('R_swig_model_n_quarantine_app_user_set', self, s_n_quarantine_app_user, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_set', self, s_n_quarantine_app_user, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1976,7 +1976,7 @@ class(`model_n_quarantine_app_user_set`) = c("SWIGFunction", class('model_n_quar
 `model_n_quarantine_app_user_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_app_user_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -1995,7 +1995,7 @@ class(`model_n_quarantine_app_user_get`) = c("SWIGFunction", class('model_n_quar
     warning("using only the first element of s_n_quarantine_infected");
   };
   
-  ;.Call('R_swig_model_n_quarantine_infected_set', self, s_n_quarantine_infected, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_infected_set', self, s_n_quarantine_infected, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2008,7 +2008,7 @@ class(`model_n_quarantine_infected_set`) = c("SWIGFunction", class('model_n_quar
 `model_n_quarantine_infected_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_infected_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_infected_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2027,7 +2027,7 @@ class(`model_n_quarantine_infected_get`) = c("SWIGFunction", class('model_n_quar
     warning("using only the first element of s_n_quarantine_recovered");
   };
   
-  ;.Call('R_swig_model_n_quarantine_recovered_set', self, s_n_quarantine_recovered, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_recovered_set', self, s_n_quarantine_recovered, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2040,7 +2040,7 @@ class(`model_n_quarantine_recovered_set`) = c("SWIGFunction", class('model_n_qua
 `model_n_quarantine_recovered_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_recovered_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_recovered_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2059,7 +2059,7 @@ class(`model_n_quarantine_recovered_get`) = c("SWIGFunction", class('model_n_qua
     warning("using only the first element of s_n_quarantine_app_user_infected");
   };
   
-  ;.Call('R_swig_model_n_quarantine_app_user_infected_set', self, s_n_quarantine_app_user_infected, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_infected_set', self, s_n_quarantine_app_user_infected, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2072,7 +2072,7 @@ class(`model_n_quarantine_app_user_infected_set`) = c("SWIGFunction", class('mod
 `model_n_quarantine_app_user_infected_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_app_user_infected_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_infected_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2091,7 +2091,7 @@ class(`model_n_quarantine_app_user_infected_get`) = c("SWIGFunction", class('mod
     warning("using only the first element of s_n_quarantine_app_user_recovered");
   };
   
-  ;.Call('R_swig_model_n_quarantine_app_user_recovered_set', self, s_n_quarantine_app_user_recovered, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_recovered_set', self, s_n_quarantine_app_user_recovered, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2104,7 +2104,7 @@ class(`model_n_quarantine_app_user_recovered_set`) = c("SWIGFunction", class('mo
 `model_n_quarantine_app_user_recovered_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_app_user_recovered_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_app_user_recovered_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2123,7 +2123,7 @@ class(`model_n_quarantine_app_user_recovered_get`) = c("SWIGFunction", class('mo
     warning("using only the first element of s_n_quarantine_events");
   };
   
-  ;.Call('R_swig_model_n_quarantine_events_set', self, s_n_quarantine_events, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_events_set', self, s_n_quarantine_events, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2136,7 +2136,7 @@ class(`model_n_quarantine_events_set`) = c("SWIGFunction", class('model_n_quaran
 `model_n_quarantine_events_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_events_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_events_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2155,7 +2155,7 @@ class(`model_n_quarantine_events_get`) = c("SWIGFunction", class('model_n_quaran
     warning("using only the first element of s_n_quarantine_events_app_user");
   };
   
-  ;.Call('R_swig_model_n_quarantine_events_app_user_set', self, s_n_quarantine_events_app_user, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_events_app_user_set', self, s_n_quarantine_events_app_user, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2168,7 +2168,7 @@ class(`model_n_quarantine_events_app_user_set`) = c("SWIGFunction", class('model
 `model_n_quarantine_events_app_user_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_events_app_user_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_events_app_user_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2187,7 +2187,7 @@ class(`model_n_quarantine_events_app_user_get`) = c("SWIGFunction", class('model
     warning("using only the first element of s_n_quarantine_release_events");
   };
   
-  ;.Call('R_swig_model_n_quarantine_release_events_set', self, s_n_quarantine_release_events, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_release_events_set', self, s_n_quarantine_release_events, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2200,7 +2200,7 @@ class(`model_n_quarantine_release_events_set`) = c("SWIGFunction", class('model_
 `model_n_quarantine_release_events_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_release_events_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_release_events_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2219,7 +2219,7 @@ class(`model_n_quarantine_release_events_get`) = c("SWIGFunction", class('model_
     warning("using only the first element of s_n_quarantine_release_events_app_user");
   };
   
-  ;.Call('R_swig_model_n_quarantine_release_events_app_user_set', self, s_n_quarantine_release_events_app_user, PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_release_events_app_user_set', self, s_n_quarantine_release_events_app_user, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2232,7 +2232,7 @@ class(`model_n_quarantine_release_events_app_user_set`) = c("SWIGFunction", clas
 `model_n_quarantine_release_events_app_user_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_model_n_quarantine_release_events_app_user_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_model_n_quarantine_release_events_app_user_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2246,7 +2246,7 @@ class(`model_n_quarantine_release_events_app_user_get`) = c("SWIGFunction", clas
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_hospitals, "ExternalReference")) s_hospitals = slot(s_hospitals,"ref") 
-  ;.Call('R_swig_model_hospitals_set', self, s_hospitals, PACKAGE='covid19');
+  ;.Call('R_swig_model_hospitals_set', self, s_hospitals, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2259,7 +2259,7 @@ class(`model_hospitals_set`) = c("SWIGFunction", class('model_hospitals_set'))
 `model_hospitals_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_model_hospitals_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_model_hospitals_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_hospital", ref=ans) ;
   
   ans
@@ -2275,7 +2275,7 @@ class(`model_hospitals_get`) = c("SWIGFunction", class('model_hospitals_get'))
 `delete_model` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_delete_model', self, PACKAGE='covid19');
+  ;.Call('R_swig_delete_model', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2287,7 +2287,7 @@ class(`delete_model`) = c("SWIGFunction", class('delete_model'))
 
 `model` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_model', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_model', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_model", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_model)
@@ -2421,7 +2421,7 @@ setMethod('copyToC', 'model', CopyToC_model);
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_individual, "ExternalReference")) s_individual = slot(s_individual,"ref") 
-  ;.Call('R_swig_event_individual_set', self, s_individual, PACKAGE='covid19');
+  ;.Call('R_swig_event_individual_set', self, s_individual, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2434,7 +2434,7 @@ class(`event_individual_set`) = c("SWIGFunction", class('event_individual_set'))
 `event_individual_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_individual_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_individual_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_individual", ref=ans) ;
   
   ans
@@ -2456,7 +2456,7 @@ class(`event_individual_get`) = c("SWIGFunction", class('event_individual_get'))
     warning("using only the first element of s_type");
   };
   
-  ;.Call('R_swig_event_type_set', self, s_type, PACKAGE='covid19');
+  ;.Call('R_swig_event_type_set', self, s_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2469,7 +2469,7 @@ class(`event_type_set`) = c("SWIGFunction", class('event_type_set'))
 `event_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_event_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_event_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2488,7 +2488,7 @@ class(`event_type_get`) = c("SWIGFunction", class('event_type_get'))
     warning("using only the first element of s_time");
   };
   
-  ;.Call('R_swig_event_time_set', self, s_time, PACKAGE='covid19');
+  ;.Call('R_swig_event_time_set', self, s_time, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2501,7 +2501,7 @@ class(`event_time_set`) = c("SWIGFunction", class('event_time_set'))
 `event_time_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_event_time_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_event_time_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2515,7 +2515,7 @@ class(`event_time_get`) = c("SWIGFunction", class('event_time_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_event__next_set', self, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_event__next_set', self, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2528,7 +2528,7 @@ class(`event__next_set`) = c("SWIGFunction", class('event__next_set'))
 `event__next_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event__next_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event__next_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -2545,7 +2545,7 @@ class(`event__next_get`) = c("SWIGFunction", class('event__next_get'))
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_last, "ExternalReference")) s_last = slot(s_last,"ref") 
-  ;.Call('R_swig_event_last_set', self, s_last, PACKAGE='covid19');
+  ;.Call('R_swig_event_last_set', self, s_last, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2558,7 +2558,7 @@ class(`event_last_set`) = c("SWIGFunction", class('event_last_set'))
 `event_last_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_event_last_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_event_last_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -2573,7 +2573,7 @@ class(`event_last_get`) = c("SWIGFunction", class('event_last_get'))
 
 `event` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_event', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_event', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_event)
@@ -2663,7 +2663,7 @@ setMethod('copyToC', 'event', CopyToC_event);
 `create_model` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;ans = .Call('R_swig_create_model', s_arg1, PACKAGE='covid19');
+  ;ans = .Call('R_swig_create_model', s_arg1, PACKAGE='OpenABMCovid19');
   ans <- new("_p_model", ref=ans) ;
   
   ans
@@ -2679,7 +2679,7 @@ class(`create_model`) = c("SWIGFunction", class('create_model'))
 `set_up_population` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_population', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_population', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2692,7 +2692,7 @@ class(`set_up_population`) = c("SWIGFunction", class('set_up_population'))
 `set_up_healthcare_workers_and_hospitals` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_healthcare_workers_and_hospitals', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_healthcare_workers_and_hospitals', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2705,7 +2705,7 @@ class(`set_up_healthcare_workers_and_hospitals`) = c("SWIGFunction", class('set_
 `set_up_interactions` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_interactions', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_interactions', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2718,7 +2718,7 @@ class(`set_up_interactions`) = c("SWIGFunction", class('set_up_interactions'))
 `set_up_events` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_events', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_events', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2731,7 +2731,7 @@ class(`set_up_events`) = c("SWIGFunction", class('set_up_events'))
 `set_up_seed_infection` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_seed_infection', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_seed_infection', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2744,7 +2744,7 @@ class(`set_up_seed_infection`) = c("SWIGFunction", class('set_up_seed_infection'
 `set_up_networks` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_networks', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_networks', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2757,7 +2757,7 @@ class(`set_up_networks`) = c("SWIGFunction", class('set_up_networks'))
 `set_up_counters` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_counters', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_counters', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2770,7 +2770,7 @@ class(`set_up_counters`) = c("SWIGFunction", class('set_up_counters'))
 `reset_counters` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_reset_counters', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_reset_counters', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2783,7 +2783,7 @@ class(`reset_counters`) = c("SWIGFunction", class('reset_counters'))
 `set_up_occupation_network` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_occupation_network', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_occupation_network', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2796,7 +2796,7 @@ class(`set_up_occupation_network`) = c("SWIGFunction", class('set_up_occupation_
 `set_up_individual_hazard` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_set_up_individual_hazard', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_individual_hazard', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2809,7 +2809,7 @@ class(`set_up_individual_hazard`) = c("SWIGFunction", class('set_up_individual_h
 `destroy_model` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_destroy_model', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_destroy_model', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2822,7 +2822,7 @@ class(`destroy_model`) = c("SWIGFunction", class('destroy_model'))
 `one_time_step` = function(s_arg1, .copy = FALSE)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_one_time_step', s_arg1, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_one_time_step', s_arg1, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2835,7 +2835,7 @@ class(`one_time_step`) = c("SWIGFunction", class('one_time_step'))
 `flu_infections` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_flu_infections', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_flu_infections', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2848,7 +2848,7 @@ class(`flu_infections`) = c("SWIGFunction", class('flu_infections'))
 `create_event` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;ans = .Call('R_swig_create_event', s_arg1, PACKAGE='covid19');
+  ;ans = .Call('R_swig_create_event', s_arg1, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -2877,7 +2877,7 @@ class(`create_event`) = c("SWIGFunction", class('create_event'))
     warning("using only the first element of s_arg4");
   };
   
-  ;ans = .Call('R_swig_add_individual_to_event_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='covid19');
+  ;ans = .Call('R_swig_add_individual_to_event_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -2900,7 +2900,7 @@ class(`add_individual_to_event_list`) = c("SWIGFunction", class('add_individual_
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_up_event_list', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_event_list', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2919,7 +2919,7 @@ class(`set_up_event_list`) = c("SWIGFunction", class('set_up_event_list'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_destroy_event_list', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_destroy_event_list', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2933,7 +2933,7 @@ class(`destroy_event_list`) = c("SWIGFunction", class('destroy_event_list'))
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_remove_event_from_event_list', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_remove_event_from_event_list', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2952,7 +2952,7 @@ class(`remove_event_from_event_list`) = c("SWIGFunction", class('remove_event_fr
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_update_event_list_counters', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_update_event_list_counters', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -2990,7 +2990,7 @@ class(`update_event_list_counters`) = c("SWIGFunction", class('update_event_list
     warning("using only the first element of s_arg4");
   };
   
-  ;.Call('R_swig_transition_events', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='covid19');
+  ;.Call('R_swig_transition_events', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3009,7 +3009,7 @@ class(`transition_events`) = c("SWIGFunction", class('transition_events'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_add_interaction_block', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_add_interaction_block', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3022,7 +3022,7 @@ class(`add_interaction_block`) = c("SWIGFunction", class('add_interaction_block'
 `return_interactions` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_return_interactions', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_return_interactions', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3036,7 +3036,7 @@ class(`return_interactions`) = c("SWIGFunction", class('return_interactions'))
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_add_interactions_from_network', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_add_interactions_from_network', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3049,7 +3049,7 @@ class(`add_interactions_from_network`) = c("SWIGFunction", class('add_interactio
 `build_daily_network` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_build_daily_network', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_build_daily_network', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3062,7 +3062,7 @@ class(`build_daily_network`) = c("SWIGFunction", class('build_daily_network'))
 `build_random_network` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_build_random_network', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_build_random_network', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3103,7 +3103,7 @@ class(`build_random_network`) = c("SWIGFunction", class('build_random_network'))
   s_arg7 = as.integer(s_arg7);
   s_arg8 = as.integer(s_arg8);
   s_arg9 = as(s_arg9, "character"); 
-  ;.Call('R_swig_add_user_network', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, s_arg6, s_arg7, s_arg8, s_arg9, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_add_user_network', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, s_arg6, s_arg7, s_arg8, s_arg9, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3122,7 +3122,7 @@ class(`add_user_network`) = c("SWIGFunction", class('add_user_network'))
     warning("using only the first element of s_rng_seed");
   };
   
-  ;.Call('R_swig_parameters_rng_seed_set', self, s_rng_seed, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_rng_seed_set', self, s_rng_seed, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3135,7 +3135,7 @@ class(`parameters_rng_seed_set`) = c("SWIGFunction", class('parameters_rng_seed_
 `parameters_rng_seed_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_rng_seed_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_rng_seed_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3155,7 +3155,7 @@ class(`parameters_rng_seed_get`) = c("SWIGFunction", class('parameters_rng_seed_
   
 #  assert(length(s_input_param_file) >= INPUT_CHAR_LEN)
   
-  ;.Call('R_swig_parameters_input_param_file_set', self, s_input_param_file, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_input_param_file_set', self, s_input_param_file, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3168,7 +3168,7 @@ class(`parameters_input_param_file_set`) = c("SWIGFunction", class('parameters_i
 `parameters_input_param_file_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_input_param_file_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_input_param_file_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_char", ref=ans) ;
   
   ans
@@ -3191,7 +3191,7 @@ class(`parameters_input_param_file_get`) = c("SWIGFunction", class('parameters_i
   
 #  assert(length(s_hospital_input_param_file) >= INPUT_CHAR_LEN)
   
-  ;.Call('R_swig_parameters_hospital_input_param_file_set', self, s_hospital_input_param_file, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospital_input_param_file_set', self, s_hospital_input_param_file, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3204,7 +3204,7 @@ class(`parameters_hospital_input_param_file_set`) = c("SWIGFunction", class('par
 `parameters_hospital_input_param_file_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_hospital_input_param_file_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_hospital_input_param_file_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_char", ref=ans) ;
   
   ans
@@ -3227,7 +3227,7 @@ class(`parameters_hospital_input_param_file_get`) = c("SWIGFunction", class('par
   
 #  assert(length(s_input_household_file) >= INPUT_CHAR_LEN)
   
-  ;.Call('R_swig_parameters_input_household_file_set', self, s_input_household_file, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_input_household_file_set', self, s_input_household_file, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3240,7 +3240,7 @@ class(`parameters_input_household_file_set`) = c("SWIGFunction", class('paramete
 `parameters_input_household_file_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_input_household_file_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_input_household_file_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_char", ref=ans) ;
   
   ans
@@ -3263,7 +3263,7 @@ class(`parameters_input_household_file_get`) = c("SWIGFunction", class('paramete
   
 #  assert(length(s_output_file_dir) >= INPUT_CHAR_LEN)
   
-  ;.Call('R_swig_parameters_output_file_dir_set', self, s_output_file_dir, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_output_file_dir_set', self, s_output_file_dir, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3276,7 +3276,7 @@ class(`parameters_output_file_dir_set`) = c("SWIGFunction", class('parameters_ou
 `parameters_output_file_dir_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_output_file_dir_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_output_file_dir_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_char", ref=ans) ;
   
   ans
@@ -3298,7 +3298,7 @@ class(`parameters_output_file_dir_get`) = c("SWIGFunction", class('parameters_ou
     warning("using only the first element of s_param_line_number");
   };
   
-  ;.Call('R_swig_parameters_param_line_number_set', self, s_param_line_number, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_param_line_number_set', self, s_param_line_number, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3311,7 +3311,7 @@ class(`parameters_param_line_number_set`) = c("SWIGFunction", class('parameters_
 `parameters_param_line_number_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_param_line_number_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_param_line_number_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3330,7 +3330,7 @@ class(`parameters_param_line_number_get`) = c("SWIGFunction", class('parameters_
     warning("using only the first element of s_hospital_param_line_number");
   };
   
-  ;.Call('R_swig_parameters_hospital_param_line_number_set', self, s_hospital_param_line_number, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospital_param_line_number_set', self, s_hospital_param_line_number, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3343,7 +3343,7 @@ class(`parameters_hospital_param_line_number_set`) = c("SWIGFunction", class('pa
 `parameters_hospital_param_line_number_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hospital_param_line_number_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospital_param_line_number_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3362,7 +3362,7 @@ class(`parameters_hospital_param_line_number_get`) = c("SWIGFunction", class('pa
     warning("using only the first element of s_param_id");
   };
   
-  ;.Call('R_swig_parameters_param_id_set', self, s_param_id, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_param_id_set', self, s_param_id, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3375,7 +3375,7 @@ class(`parameters_param_id_set`) = c("SWIGFunction", class('parameters_param_id_
 `parameters_param_id_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_param_id_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_param_id_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3394,7 +3394,7 @@ class(`parameters_param_id_get`) = c("SWIGFunction", class('parameters_param_id_
     warning("using only the first element of s_n_total");
   };
   
-  ;.Call('R_swig_parameters_n_total_set', self, s_n_total, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_total_set', self, s_n_total, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3407,7 +3407,7 @@ class(`parameters_n_total_set`) = c("SWIGFunction", class('parameters_n_total_se
 `parameters_n_total_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_n_total_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_total_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3426,7 +3426,7 @@ class(`parameters_n_total_get`) = c("SWIGFunction", class('parameters_n_total_ge
     warning("using only the first element of s_days_of_interactions");
   };
   
-  ;.Call('R_swig_parameters_days_of_interactions_set', self, s_days_of_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_days_of_interactions_set', self, s_days_of_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3439,7 +3439,7 @@ class(`parameters_days_of_interactions_set`) = c("SWIGFunction", class('paramete
 `parameters_days_of_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_days_of_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_days_of_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3458,7 +3458,7 @@ class(`parameters_days_of_interactions_get`) = c("SWIGFunction", class('paramete
     warning("using only the first element of s_end_time");
   };
   
-  ;.Call('R_swig_parameters_end_time_set', self, s_end_time, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_end_time_set', self, s_end_time, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3471,7 +3471,7 @@ class(`parameters_end_time_set`) = c("SWIGFunction", class('parameters_end_time_
 `parameters_end_time_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_end_time_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_end_time_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3490,7 +3490,7 @@ class(`parameters_end_time_get`) = c("SWIGFunction", class('parameters_end_time_
     warning("using only the first element of s_n_seed_infection");
   };
   
-  ;.Call('R_swig_parameters_n_seed_infection_set', self, s_n_seed_infection, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_seed_infection_set', self, s_n_seed_infection, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3503,7 +3503,7 @@ class(`parameters_n_seed_infection_set`) = c("SWIGFunction", class('parameters_n
 `parameters_n_seed_infection_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_n_seed_infection_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_seed_infection_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3520,7 +3520,7 @@ class(`parameters_n_seed_infection_get`) = c("SWIGFunction", class('parameters_n
   
 #  assert(length(s_mean_random_interactions) >= N_AGE_TYPES)
   
-  ;.Call('R_swig_parameters_mean_random_interactions_set', self, s_mean_random_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_random_interactions_set', self, s_mean_random_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3533,7 +3533,7 @@ class(`parameters_mean_random_interactions_set`) = c("SWIGFunction", class('para
 `parameters_mean_random_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_random_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_random_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3550,7 +3550,7 @@ class(`parameters_mean_random_interactions_get`) = c("SWIGFunction", class('para
   
 #  assert(length(s_sd_random_interactions) >= N_AGE_TYPES)
   
-  ;.Call('R_swig_parameters_sd_random_interactions_set', self, s_sd_random_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_random_interactions_set', self, s_sd_random_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3563,7 +3563,7 @@ class(`parameters_sd_random_interactions_set`) = c("SWIGFunction", class('parame
 `parameters_sd_random_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_random_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_random_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3582,7 +3582,7 @@ class(`parameters_sd_random_interactions_get`) = c("SWIGFunction", class('parame
     warning("using only the first element of s_random_interaction_distribution");
   };
   
-  ;.Call('R_swig_parameters_random_interaction_distribution_set', self, s_random_interaction_distribution, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_random_interaction_distribution_set', self, s_random_interaction_distribution, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3595,7 +3595,7 @@ class(`parameters_random_interaction_distribution_set`) = c("SWIGFunction", clas
 `parameters_random_interaction_distribution_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_random_interaction_distribution_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_random_interaction_distribution_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3612,7 +3612,7 @@ class(`parameters_random_interaction_distribution_get`) = c("SWIGFunction", clas
   
 #  assert(length(s_mean_work_interactions) >= N_DEFAULT_OCCUPATION_NETWORKS)
   
-  ;.Call('R_swig_parameters_mean_work_interactions_set', self, s_mean_work_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_work_interactions_set', self, s_mean_work_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3625,7 +3625,7 @@ class(`parameters_mean_work_interactions_set`) = c("SWIGFunction", class('parame
 `parameters_mean_work_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_work_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_work_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3639,7 +3639,7 @@ class(`parameters_mean_work_interactions_get`) = c("SWIGFunction", class('parame
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_daily_fraction_work_set', self, s_daily_fraction_work, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_daily_fraction_work_set', self, s_daily_fraction_work, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3652,7 +3652,7 @@ class(`parameters_daily_fraction_work_set`) = c("SWIGFunction", class('parameter
 `parameters_daily_fraction_work_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_daily_fraction_work_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_daily_fraction_work_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3666,7 +3666,7 @@ class(`parameters_daily_fraction_work_get`) = c("SWIGFunction", class('parameter
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_child_network_adults_set', self, s_child_network_adults, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_child_network_adults_set', self, s_child_network_adults, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3679,7 +3679,7 @@ class(`parameters_child_network_adults_set`) = c("SWIGFunction", class('paramete
 `parameters_child_network_adults_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_child_network_adults_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_child_network_adults_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3693,7 +3693,7 @@ class(`parameters_child_network_adults_get`) = c("SWIGFunction", class('paramete
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_elderly_network_adults_set', self, s_elderly_network_adults, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_elderly_network_adults_set', self, s_elderly_network_adults, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3706,7 +3706,7 @@ class(`parameters_elderly_network_adults_set`) = c("SWIGFunction", class('parame
 `parameters_elderly_network_adults_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_elderly_network_adults_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_elderly_network_adults_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3720,7 +3720,7 @@ class(`parameters_elderly_network_adults_get`) = c("SWIGFunction", class('parame
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_work_network_rewire_set', self, s_work_network_rewire, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_work_network_rewire_set', self, s_work_network_rewire, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3733,7 +3733,7 @@ class(`parameters_work_network_rewire_set`) = c("SWIGFunction", class('parameter
 `parameters_work_network_rewire_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_work_network_rewire_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_work_network_rewire_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3747,7 +3747,7 @@ class(`parameters_work_network_rewire_get`) = c("SWIGFunction", class('parameter
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_infectious_period_set', self, s_mean_infectious_period, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_infectious_period_set', self, s_mean_infectious_period, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3760,7 +3760,7 @@ class(`parameters_mean_infectious_period_set`) = c("SWIGFunction", class('parame
 `parameters_mean_infectious_period_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_infectious_period_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_infectious_period_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3774,7 +3774,7 @@ class(`parameters_mean_infectious_period_get`) = c("SWIGFunction", class('parame
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_infectious_period_set', self, s_sd_infectious_period, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_infectious_period_set', self, s_sd_infectious_period, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3787,7 +3787,7 @@ class(`parameters_sd_infectious_period_set`) = c("SWIGFunction", class('paramete
 `parameters_sd_infectious_period_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_infectious_period_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_infectious_period_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3801,7 +3801,7 @@ class(`parameters_sd_infectious_period_get`) = c("SWIGFunction", class('paramete
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_infectious_rate_set', self, s_infectious_rate, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_infectious_rate_set', self, s_infectious_rate, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3814,7 +3814,7 @@ class(`parameters_infectious_rate_set`) = c("SWIGFunction", class('parameters_in
 `parameters_infectious_rate_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_infectious_rate_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_infectious_rate_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3831,7 +3831,7 @@ class(`parameters_infectious_rate_get`) = c("SWIGFunction", class('parameters_in
   
 #  assert(length(s_relative_susceptibility) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_relative_susceptibility_set', self, s_relative_susceptibility, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_susceptibility_set', self, s_relative_susceptibility, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3844,7 +3844,7 @@ class(`parameters_relative_susceptibility_set`) = c("SWIGFunction", class('param
 `parameters_relative_susceptibility_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_relative_susceptibility_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_susceptibility_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3861,7 +3861,7 @@ class(`parameters_relative_susceptibility_get`) = c("SWIGFunction", class('param
   
 #  assert(length(s_adjusted_susceptibility) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_adjusted_susceptibility_set', self, s_adjusted_susceptibility, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_adjusted_susceptibility_set', self, s_adjusted_susceptibility, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3874,7 +3874,7 @@ class(`parameters_adjusted_susceptibility_set`) = c("SWIGFunction", class('param
 `parameters_adjusted_susceptibility_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_adjusted_susceptibility_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_adjusted_susceptibility_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3891,7 +3891,7 @@ class(`parameters_adjusted_susceptibility_get`) = c("SWIGFunction", class('param
   
 #  assert(length(s_relative_transmission) >= N_INTERACTION_TYPES)
   
-  ;.Call('R_swig_parameters_relative_transmission_set', self, s_relative_transmission, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_transmission_set', self, s_relative_transmission, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3904,7 +3904,7 @@ class(`parameters_relative_transmission_set`) = c("SWIGFunction", class('paramet
 `parameters_relative_transmission_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_relative_transmission_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_transmission_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3921,7 +3921,7 @@ class(`parameters_relative_transmission_get`) = c("SWIGFunction", class('paramet
   
 #  assert(length(s_relative_transmission_used) >= N_INTERACTION_TYPES)
   
-  ;.Call('R_swig_parameters_relative_transmission_used_set', self, s_relative_transmission_used, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_transmission_used_set', self, s_relative_transmission_used, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3934,7 +3934,7 @@ class(`parameters_relative_transmission_used_set`) = c("SWIGFunction", class('pa
 `parameters_relative_transmission_used_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_relative_transmission_used_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_relative_transmission_used_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3948,7 +3948,7 @@ class(`parameters_relative_transmission_used_get`) = c("SWIGFunction", class('pa
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_to_symptoms_set', self, s_mean_time_to_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_symptoms_set', self, s_mean_time_to_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3961,7 +3961,7 @@ class(`parameters_mean_time_to_symptoms_set`) = c("SWIGFunction", class('paramet
 `parameters_mean_time_to_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_to_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3975,7 +3975,7 @@ class(`parameters_mean_time_to_symptoms_get`) = c("SWIGFunction", class('paramet
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_to_symptoms_set', self, s_sd_time_to_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_symptoms_set', self, s_sd_time_to_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -3988,7 +3988,7 @@ class(`parameters_sd_time_to_symptoms_set`) = c("SWIGFunction", class('parameter
 `parameters_sd_time_to_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_to_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4005,7 +4005,7 @@ class(`parameters_sd_time_to_symptoms_get`) = c("SWIGFunction", class('parameter
   
 #  assert(length(s_hospitalised_fraction) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_hospitalised_fraction_set', self, s_hospitalised_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_fraction_set', self, s_hospitalised_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4018,7 +4018,7 @@ class(`parameters_hospitalised_fraction_set`) = c("SWIGFunction", class('paramet
 `parameters_hospitalised_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hospitalised_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4035,7 +4035,7 @@ class(`parameters_hospitalised_fraction_get`) = c("SWIGFunction", class('paramet
   
 #  assert(length(s_critical_fraction) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_critical_fraction_set', self, s_critical_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_critical_fraction_set', self, s_critical_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4048,7 +4048,7 @@ class(`parameters_critical_fraction_set`) = c("SWIGFunction", class('parameters_
 `parameters_critical_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_critical_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_critical_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4065,7 +4065,7 @@ class(`parameters_critical_fraction_get`) = c("SWIGFunction", class('parameters_
   
 #  assert(length(s_fatality_fraction) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_fatality_fraction_set', self, s_fatality_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_fatality_fraction_set', self, s_fatality_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4078,7 +4078,7 @@ class(`parameters_fatality_fraction_set`) = c("SWIGFunction", class('parameters_
 `parameters_fatality_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_fatality_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_fatality_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4092,7 +4092,7 @@ class(`parameters_fatality_fraction_get`) = c("SWIGFunction", class('parameters_
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_to_hospital_set', self, s_mean_time_to_hospital, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_hospital_set', self, s_mean_time_to_hospital, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4105,7 +4105,7 @@ class(`parameters_mean_time_to_hospital_set`) = c("SWIGFunction", class('paramet
 `parameters_mean_time_to_hospital_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_to_hospital_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_hospital_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4119,7 +4119,7 @@ class(`parameters_mean_time_to_hospital_get`) = c("SWIGFunction", class('paramet
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_to_critical_set', self, s_mean_time_to_critical, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_critical_set', self, s_mean_time_to_critical, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4132,7 +4132,7 @@ class(`parameters_mean_time_to_critical_set`) = c("SWIGFunction", class('paramet
 `parameters_mean_time_to_critical_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_to_critical_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_critical_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4146,7 +4146,7 @@ class(`parameters_mean_time_to_critical_get`) = c("SWIGFunction", class('paramet
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_to_critical_set', self, s_sd_time_to_critical, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_critical_set', self, s_sd_time_to_critical, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4159,7 +4159,7 @@ class(`parameters_sd_time_to_critical_set`) = c("SWIGFunction", class('parameter
 `parameters_sd_time_to_critical_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_to_critical_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_critical_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4173,7 +4173,7 @@ class(`parameters_sd_time_to_critical_get`) = c("SWIGFunction", class('parameter
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_to_recover_set', self, s_mean_time_to_recover, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_recover_set', self, s_mean_time_to_recover, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4186,7 +4186,7 @@ class(`parameters_mean_time_to_recover_set`) = c("SWIGFunction", class('paramete
 `parameters_mean_time_to_recover_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_to_recover_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_recover_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4200,7 +4200,7 @@ class(`parameters_mean_time_to_recover_get`) = c("SWIGFunction", class('paramete
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_to_recover_set', self, s_sd_time_to_recover, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_recover_set', self, s_sd_time_to_recover, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4213,7 +4213,7 @@ class(`parameters_sd_time_to_recover_set`) = c("SWIGFunction", class('parameters
 `parameters_sd_time_to_recover_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_to_recover_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_recover_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4227,7 +4227,7 @@ class(`parameters_sd_time_to_recover_get`) = c("SWIGFunction", class('parameters
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_to_death_set', self, s_mean_time_to_death, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_death_set', self, s_mean_time_to_death, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4240,7 +4240,7 @@ class(`parameters_mean_time_to_death_set`) = c("SWIGFunction", class('parameters
 `parameters_mean_time_to_death_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_to_death_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_to_death_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4254,7 +4254,7 @@ class(`parameters_mean_time_to_death_get`) = c("SWIGFunction", class('parameters
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_to_death_set', self, s_sd_time_to_death, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_death_set', self, s_sd_time_to_death, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4267,7 +4267,7 @@ class(`parameters_sd_time_to_death_set`) = c("SWIGFunction", class('parameters_s
 `parameters_sd_time_to_death_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_to_death_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_to_death_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4284,7 +4284,7 @@ class(`parameters_sd_time_to_death_get`) = c("SWIGFunction", class('parameters_s
   
 #  assert(length(s_household_size) >= N_HOUSEHOLD_MAX)
   
-  ;.Call('R_swig_parameters_household_size_set', self, s_household_size, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_household_size_set', self, s_household_size, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4297,7 +4297,7 @@ class(`parameters_household_size_set`) = c("SWIGFunction", class('parameters_hou
 `parameters_household_size_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_household_size_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_household_size_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4314,7 +4314,7 @@ class(`parameters_household_size_get`) = c("SWIGFunction", class('parameters_hou
   
 #  assert(length(s_population) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_population_set', self, s_population, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_population_set', self, s_population, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4327,7 +4327,7 @@ class(`parameters_population_set`) = c("SWIGFunction", class('parameters_populat
 `parameters_population_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_population_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_population_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4344,7 +4344,7 @@ class(`parameters_population_get`) = c("SWIGFunction", class('parameters_populat
   
 #  assert(length(s_fraction_asymptomatic) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_fraction_asymptomatic_set', self, s_fraction_asymptomatic, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_fraction_asymptomatic_set', self, s_fraction_asymptomatic, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4357,7 +4357,7 @@ class(`parameters_fraction_asymptomatic_set`) = c("SWIGFunction", class('paramet
 `parameters_fraction_asymptomatic_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_fraction_asymptomatic_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_fraction_asymptomatic_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4371,7 +4371,7 @@ class(`parameters_fraction_asymptomatic_get`) = c("SWIGFunction", class('paramet
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_asymptomatic_infectious_factor_set', self, s_asymptomatic_infectious_factor, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_asymptomatic_infectious_factor_set', self, s_asymptomatic_infectious_factor, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4384,7 +4384,7 @@ class(`parameters_asymptomatic_infectious_factor_set`) = c("SWIGFunction", class
 `parameters_asymptomatic_infectious_factor_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_asymptomatic_infectious_factor_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_asymptomatic_infectious_factor_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4401,7 +4401,7 @@ class(`parameters_asymptomatic_infectious_factor_get`) = c("SWIGFunction", class
   
 #  assert(length(s_mild_fraction) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_mild_fraction_set', self, s_mild_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mild_fraction_set', self, s_mild_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4414,7 +4414,7 @@ class(`parameters_mild_fraction_set`) = c("SWIGFunction", class('parameters_mild
 `parameters_mild_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mild_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mild_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4428,7 +4428,7 @@ class(`parameters_mild_fraction_get`) = c("SWIGFunction", class('parameters_mild
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mild_infectious_factor_set', self, s_mild_infectious_factor, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mild_infectious_factor_set', self, s_mild_infectious_factor, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4441,7 +4441,7 @@ class(`parameters_mild_infectious_factor_set`) = c("SWIGFunction", class('parame
 `parameters_mild_infectious_factor_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mild_infectious_factor_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mild_infectious_factor_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4455,7 +4455,7 @@ class(`parameters_mild_infectious_factor_get`) = c("SWIGFunction", class('parame
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_asymptomatic_to_recovery_set', self, s_mean_asymptomatic_to_recovery, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_asymptomatic_to_recovery_set', self, s_mean_asymptomatic_to_recovery, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4468,7 +4468,7 @@ class(`parameters_mean_asymptomatic_to_recovery_set`) = c("SWIGFunction", class(
 `parameters_mean_asymptomatic_to_recovery_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_asymptomatic_to_recovery_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_asymptomatic_to_recovery_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4482,7 +4482,7 @@ class(`parameters_mean_asymptomatic_to_recovery_get`) = c("SWIGFunction", class(
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_asymptomatic_to_recovery_set', self, s_sd_asymptomatic_to_recovery, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_asymptomatic_to_recovery_set', self, s_sd_asymptomatic_to_recovery, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4495,7 +4495,7 @@ class(`parameters_sd_asymptomatic_to_recovery_set`) = c("SWIGFunction", class('p
 `parameters_sd_asymptomatic_to_recovery_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_asymptomatic_to_recovery_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_asymptomatic_to_recovery_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4509,7 +4509,7 @@ class(`parameters_sd_asymptomatic_to_recovery_get`) = c("SWIGFunction", class('p
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_hospitalised_recovery_set', self, s_mean_time_hospitalised_recovery, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_hospitalised_recovery_set', self, s_mean_time_hospitalised_recovery, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4522,7 +4522,7 @@ class(`parameters_mean_time_hospitalised_recovery_set`) = c("SWIGFunction", clas
 `parameters_mean_time_hospitalised_recovery_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_hospitalised_recovery_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_hospitalised_recovery_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4536,7 +4536,7 @@ class(`parameters_mean_time_hospitalised_recovery_get`) = c("SWIGFunction", clas
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_hospitalised_recovery_set', self, s_sd_time_hospitalised_recovery, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_hospitalised_recovery_set', self, s_sd_time_hospitalised_recovery, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4549,7 +4549,7 @@ class(`parameters_sd_time_hospitalised_recovery_set`) = c("SWIGFunction", class(
 `parameters_sd_time_hospitalised_recovery_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_hospitalised_recovery_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_hospitalised_recovery_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4563,7 +4563,7 @@ class(`parameters_sd_time_hospitalised_recovery_get`) = c("SWIGFunction", class(
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_mean_time_critical_survive_set', self, s_mean_time_critical_survive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_critical_survive_set', self, s_mean_time_critical_survive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4576,7 +4576,7 @@ class(`parameters_mean_time_critical_survive_set`) = c("SWIGFunction", class('pa
 `parameters_mean_time_critical_survive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_mean_time_critical_survive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_mean_time_critical_survive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4590,7 +4590,7 @@ class(`parameters_mean_time_critical_survive_get`) = c("SWIGFunction", class('pa
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_sd_time_critical_survive_set', self, s_sd_time_critical_survive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_critical_survive_set', self, s_sd_time_critical_survive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4603,7 +4603,7 @@ class(`parameters_sd_time_critical_survive_set`) = c("SWIGFunction", class('para
 `parameters_sd_time_critical_survive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sd_time_critical_survive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sd_time_critical_survive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4620,7 +4620,7 @@ class(`parameters_sd_time_critical_survive_get`) = c("SWIGFunction", class('para
   
 #  assert(length(s_location_death_icu) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_location_death_icu_set', self, s_location_death_icu, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_location_death_icu_set', self, s_location_death_icu, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4633,7 +4633,7 @@ class(`parameters_location_death_icu_set`) = c("SWIGFunction", class('parameters
 `parameters_location_death_icu_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_location_death_icu_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_location_death_icu_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4652,7 +4652,7 @@ class(`parameters_location_death_icu_get`) = c("SWIGFunction", class('parameters
     warning("using only the first element of s_quarantined_daily_interactions");
   };
   
-  ;.Call('R_swig_parameters_quarantined_daily_interactions_set', self, s_quarantined_daily_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantined_daily_interactions_set', self, s_quarantined_daily_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4665,7 +4665,7 @@ class(`parameters_quarantined_daily_interactions_set`) = c("SWIGFunction", class
 `parameters_quarantined_daily_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantined_daily_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantined_daily_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4684,7 +4684,7 @@ class(`parameters_quarantined_daily_interactions_get`) = c("SWIGFunction", class
     warning("using only the first element of s_hospitalised_daily_interactions");
   };
   
-  ;.Call('R_swig_parameters_hospitalised_daily_interactions_set', self, s_hospitalised_daily_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_daily_interactions_set', self, s_hospitalised_daily_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4697,7 +4697,7 @@ class(`parameters_hospitalised_daily_interactions_set`) = c("SWIGFunction", clas
 `parameters_hospitalised_daily_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hospitalised_daily_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_daily_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4716,7 +4716,7 @@ class(`parameters_hospitalised_daily_interactions_get`) = c("SWIGFunction", clas
     warning("using only the first element of s_quarantine_days");
   };
   
-  ;.Call('R_swig_parameters_quarantine_days_set', self, s_quarantine_days, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_days_set', self, s_quarantine_days, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4729,7 +4729,7 @@ class(`parameters_quarantine_days_set`) = c("SWIGFunction", class('parameters_qu
 `parameters_quarantine_days_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_days_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_days_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4743,7 +4743,7 @@ class(`parameters_quarantine_days_get`) = c("SWIGFunction", class('parameters_qu
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_self_quarantine_fraction_set', self, s_self_quarantine_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_self_quarantine_fraction_set', self, s_self_quarantine_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4756,7 +4756,7 @@ class(`parameters_self_quarantine_fraction_set`) = c("SWIGFunction", class('para
 `parameters_self_quarantine_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_self_quarantine_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_self_quarantine_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4775,7 +4775,7 @@ class(`parameters_self_quarantine_fraction_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_manual_trace_on");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_on_set', self, s_manual_trace_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_set', self, s_manual_trace_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4788,7 +4788,7 @@ class(`parameters_manual_trace_on_set`) = c("SWIGFunction", class('parameters_ma
 `parameters_manual_trace_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4807,7 +4807,7 @@ class(`parameters_manual_trace_on_get`) = c("SWIGFunction", class('parameters_ma
     warning("using only the first element of s_manual_trace_time_on");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_time_on_set', self, s_manual_trace_time_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_time_on_set', self, s_manual_trace_time_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4820,7 +4820,7 @@ class(`parameters_manual_trace_time_on_set`) = c("SWIGFunction", class('paramete
 `parameters_manual_trace_time_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_time_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_time_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4839,7 +4839,7 @@ class(`parameters_manual_trace_time_on_get`) = c("SWIGFunction", class('paramete
     warning("using only the first element of s_manual_trace_on_hospitalization");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_on_hospitalization_set', self, s_manual_trace_on_hospitalization, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_hospitalization_set', self, s_manual_trace_on_hospitalization, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4852,7 +4852,7 @@ class(`parameters_manual_trace_on_hospitalization_set`) = c("SWIGFunction", clas
 `parameters_manual_trace_on_hospitalization_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_on_hospitalization_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_hospitalization_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4871,7 +4871,7 @@ class(`parameters_manual_trace_on_hospitalization_get`) = c("SWIGFunction", clas
     warning("using only the first element of s_manual_trace_on_positive");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_on_positive_set', self, s_manual_trace_on_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_positive_set', self, s_manual_trace_on_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4884,7 +4884,7 @@ class(`parameters_manual_trace_on_positive_set`) = c("SWIGFunction", class('para
 `parameters_manual_trace_on_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_on_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_on_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4903,7 +4903,7 @@ class(`parameters_manual_trace_on_positive_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_manual_trace_delay");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_delay_set', self, s_manual_trace_delay, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_delay_set', self, s_manual_trace_delay, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4916,7 +4916,7 @@ class(`parameters_manual_trace_delay_set`) = c("SWIGFunction", class('parameters
 `parameters_manual_trace_delay_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_delay_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_delay_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4935,7 +4935,7 @@ class(`parameters_manual_trace_delay_get`) = c("SWIGFunction", class('parameters
     warning("using only the first element of s_manual_trace_exclude_app_users");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_exclude_app_users_set', self, s_manual_trace_exclude_app_users, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_exclude_app_users_set', self, s_manual_trace_exclude_app_users, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4948,7 +4948,7 @@ class(`parameters_manual_trace_exclude_app_users_set`) = c("SWIGFunction", class
 `parameters_manual_trace_exclude_app_users_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_exclude_app_users_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_exclude_app_users_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4967,7 +4967,7 @@ class(`parameters_manual_trace_exclude_app_users_get`) = c("SWIGFunction", class
     warning("using only the first element of s_manual_trace_n_workers");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_n_workers_set', self, s_manual_trace_n_workers, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_n_workers_set', self, s_manual_trace_n_workers, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4980,7 +4980,7 @@ class(`parameters_manual_trace_n_workers_set`) = c("SWIGFunction", class('parame
 `parameters_manual_trace_n_workers_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_n_workers_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_n_workers_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -4999,7 +4999,7 @@ class(`parameters_manual_trace_n_workers_get`) = c("SWIGFunction", class('parame
     warning("using only the first element of s_manual_trace_interviews_per_worker_day");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_interviews_per_worker_day_set', self, s_manual_trace_interviews_per_worker_day, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_interviews_per_worker_day_set', self, s_manual_trace_interviews_per_worker_day, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5012,7 +5012,7 @@ class(`parameters_manual_trace_interviews_per_worker_day_set`) = c("SWIGFunction
 `parameters_manual_trace_interviews_per_worker_day_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_interviews_per_worker_day_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_interviews_per_worker_day_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5031,7 +5031,7 @@ class(`parameters_manual_trace_interviews_per_worker_day_get`) = c("SWIGFunction
     warning("using only the first element of s_manual_trace_notifications_per_worker_day");
   };
   
-  ;.Call('R_swig_parameters_manual_trace_notifications_per_worker_day_set', self, s_manual_trace_notifications_per_worker_day, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_notifications_per_worker_day_set', self, s_manual_trace_notifications_per_worker_day, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5044,7 +5044,7 @@ class(`parameters_manual_trace_notifications_per_worker_day_set`) = c("SWIGFunct
 `parameters_manual_trace_notifications_per_worker_day_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_trace_notifications_per_worker_day_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_trace_notifications_per_worker_day_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5061,7 +5061,7 @@ class(`parameters_manual_trace_notifications_per_worker_day_get`) = c("SWIGFunct
   
 #  assert(length(s_manual_traceable_fraction) >= N_INTERACTION_TYPES)
   
-  ;.Call('R_swig_parameters_manual_traceable_fraction_set', self, s_manual_traceable_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_traceable_fraction_set', self, s_manual_traceable_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5074,7 +5074,7 @@ class(`parameters_manual_traceable_fraction_set`) = c("SWIGFunction", class('par
 `parameters_manual_traceable_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_manual_traceable_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_manual_traceable_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5093,7 +5093,7 @@ class(`parameters_manual_traceable_fraction_get`) = c("SWIGFunction", class('par
     warning("using only the first element of s_trace_on_symptoms");
   };
   
-  ;.Call('R_swig_parameters_trace_on_symptoms_set', self, s_trace_on_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_trace_on_symptoms_set', self, s_trace_on_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5106,7 +5106,7 @@ class(`parameters_trace_on_symptoms_set`) = c("SWIGFunction", class('parameters_
 `parameters_trace_on_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_trace_on_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_trace_on_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5125,7 +5125,7 @@ class(`parameters_trace_on_symptoms_get`) = c("SWIGFunction", class('parameters_
     warning("using only the first element of s_trace_on_positive");
   };
   
-  ;.Call('R_swig_parameters_trace_on_positive_set', self, s_trace_on_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_trace_on_positive_set', self, s_trace_on_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5138,7 +5138,7 @@ class(`parameters_trace_on_positive_set`) = c("SWIGFunction", class('parameters_
 `parameters_trace_on_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_trace_on_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_trace_on_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5157,7 +5157,7 @@ class(`parameters_trace_on_positive_get`) = c("SWIGFunction", class('parameters_
     warning("using only the first element of s_retrace_on_positive");
   };
   
-  ;.Call('R_swig_parameters_retrace_on_positive_set', self, s_retrace_on_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_retrace_on_positive_set', self, s_retrace_on_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5170,7 +5170,7 @@ class(`parameters_retrace_on_positive_set`) = c("SWIGFunction", class('parameter
 `parameters_retrace_on_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_retrace_on_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_retrace_on_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5189,7 +5189,7 @@ class(`parameters_retrace_on_positive_get`) = c("SWIGFunction", class('parameter
     warning("using only the first element of s_quarantine_length_self");
   };
   
-  ;.Call('R_swig_parameters_quarantine_length_self_set', self, s_quarantine_length_self, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_self_set', self, s_quarantine_length_self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5202,7 +5202,7 @@ class(`parameters_quarantine_length_self_set`) = c("SWIGFunction", class('parame
 `parameters_quarantine_length_self_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_length_self_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_self_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5221,7 +5221,7 @@ class(`parameters_quarantine_length_self_get`) = c("SWIGFunction", class('parame
     warning("using only the first element of s_quarantine_length_traced_symptoms");
   };
   
-  ;.Call('R_swig_parameters_quarantine_length_traced_symptoms_set', self, s_quarantine_length_traced_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_traced_symptoms_set', self, s_quarantine_length_traced_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5234,7 +5234,7 @@ class(`parameters_quarantine_length_traced_symptoms_set`) = c("SWIGFunction", cl
 `parameters_quarantine_length_traced_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_length_traced_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_traced_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5253,7 +5253,7 @@ class(`parameters_quarantine_length_traced_symptoms_get`) = c("SWIGFunction", cl
     warning("using only the first element of s_quarantine_length_traced_positive");
   };
   
-  ;.Call('R_swig_parameters_quarantine_length_traced_positive_set', self, s_quarantine_length_traced_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_traced_positive_set', self, s_quarantine_length_traced_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5266,7 +5266,7 @@ class(`parameters_quarantine_length_traced_positive_set`) = c("SWIGFunction", cl
 `parameters_quarantine_length_traced_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_length_traced_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_traced_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5285,7 +5285,7 @@ class(`parameters_quarantine_length_traced_positive_get`) = c("SWIGFunction", cl
     warning("using only the first element of s_quarantine_length_positive");
   };
   
-  ;.Call('R_swig_parameters_quarantine_length_positive_set', self, s_quarantine_length_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_positive_set', self, s_quarantine_length_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5298,7 +5298,7 @@ class(`parameters_quarantine_length_positive_set`) = c("SWIGFunction", class('pa
 `parameters_quarantine_length_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_length_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_length_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5312,7 +5312,7 @@ class(`parameters_quarantine_length_positive_get`) = c("SWIGFunction", class('pa
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_dropout_self_set', self, s_quarantine_dropout_self, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_self_set', self, s_quarantine_dropout_self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5325,7 +5325,7 @@ class(`parameters_quarantine_dropout_self_set`) = c("SWIGFunction", class('param
 `parameters_quarantine_dropout_self_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_dropout_self_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_self_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5339,7 +5339,7 @@ class(`parameters_quarantine_dropout_self_get`) = c("SWIGFunction", class('param
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_dropout_traced_symptoms_set', self, s_quarantine_dropout_traced_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_traced_symptoms_set', self, s_quarantine_dropout_traced_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5352,7 +5352,7 @@ class(`parameters_quarantine_dropout_traced_symptoms_set`) = c("SWIGFunction", c
 `parameters_quarantine_dropout_traced_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_dropout_traced_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_traced_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5366,7 +5366,7 @@ class(`parameters_quarantine_dropout_traced_symptoms_get`) = c("SWIGFunction", c
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_dropout_traced_positive_set', self, s_quarantine_dropout_traced_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_traced_positive_set', self, s_quarantine_dropout_traced_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5379,7 +5379,7 @@ class(`parameters_quarantine_dropout_traced_positive_set`) = c("SWIGFunction", c
 `parameters_quarantine_dropout_traced_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_dropout_traced_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_traced_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5393,7 +5393,7 @@ class(`parameters_quarantine_dropout_traced_positive_get`) = c("SWIGFunction", c
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_dropout_positive_set', self, s_quarantine_dropout_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_positive_set', self, s_quarantine_dropout_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5406,7 +5406,7 @@ class(`parameters_quarantine_dropout_positive_set`) = c("SWIGFunction", class('p
 `parameters_quarantine_dropout_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_dropout_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_dropout_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5420,7 +5420,7 @@ class(`parameters_quarantine_dropout_positive_get`) = c("SWIGFunction", class('p
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_compliance_traced_symptoms_set', self, s_quarantine_compliance_traced_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_compliance_traced_symptoms_set', self, s_quarantine_compliance_traced_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5433,7 +5433,7 @@ class(`parameters_quarantine_compliance_traced_symptoms_set`) = c("SWIGFunction"
 `parameters_quarantine_compliance_traced_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_compliance_traced_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_compliance_traced_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5447,7 +5447,7 @@ class(`parameters_quarantine_compliance_traced_symptoms_get`) = c("SWIGFunction"
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_quarantine_compliance_traced_positive_set', self, s_quarantine_compliance_traced_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_compliance_traced_positive_set', self, s_quarantine_compliance_traced_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5460,7 +5460,7 @@ class(`parameters_quarantine_compliance_traced_positive_set`) = c("SWIGFunction"
 `parameters_quarantine_compliance_traced_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_compliance_traced_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_compliance_traced_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5479,7 +5479,7 @@ class(`parameters_quarantine_compliance_traced_positive_get`) = c("SWIGFunction"
     warning("using only the first element of s_quarantine_on_traced");
   };
   
-  ;.Call('R_swig_parameters_quarantine_on_traced_set', self, s_quarantine_on_traced, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_on_traced_set', self, s_quarantine_on_traced, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5492,7 +5492,7 @@ class(`parameters_quarantine_on_traced_set`) = c("SWIGFunction", class('paramete
 `parameters_quarantine_on_traced_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_on_traced_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_on_traced_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5511,7 +5511,7 @@ class(`parameters_quarantine_on_traced_get`) = c("SWIGFunction", class('paramete
     warning("using only the first element of s_quarantine_smart_release_day");
   };
   
-  ;.Call('R_swig_parameters_quarantine_smart_release_day_set', self, s_quarantine_smart_release_day, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_smart_release_day_set', self, s_quarantine_smart_release_day, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5524,7 +5524,7 @@ class(`parameters_quarantine_smart_release_day_set`) = c("SWIGFunction", class('
 `parameters_quarantine_smart_release_day_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_smart_release_day_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_smart_release_day_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5538,7 +5538,7 @@ class(`parameters_quarantine_smart_release_day_get`) = c("SWIGFunction", class('
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_traceable_interaction_fraction_set', self, s_traceable_interaction_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_traceable_interaction_fraction_set', self, s_traceable_interaction_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5551,7 +5551,7 @@ class(`parameters_traceable_interaction_fraction_set`) = c("SWIGFunction", class
 `parameters_traceable_interaction_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_traceable_interaction_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_traceable_interaction_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5570,7 +5570,7 @@ class(`parameters_traceable_interaction_fraction_get`) = c("SWIGFunction", class
     warning("using only the first element of s_tracing_network_depth");
   };
   
-  ;.Call('R_swig_parameters_tracing_network_depth_set', self, s_tracing_network_depth, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_tracing_network_depth_set', self, s_tracing_network_depth, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5583,7 +5583,7 @@ class(`parameters_tracing_network_depth_set`) = c("SWIGFunction", class('paramet
 `parameters_tracing_network_depth_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_tracing_network_depth_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_tracing_network_depth_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5602,7 +5602,7 @@ class(`parameters_tracing_network_depth_get`) = c("SWIGFunction", class('paramet
     warning("using only the first element of s_allow_clinical_diagnosis");
   };
   
-  ;.Call('R_swig_parameters_allow_clinical_diagnosis_set', self, s_allow_clinical_diagnosis, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_allow_clinical_diagnosis_set', self, s_allow_clinical_diagnosis, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5615,7 +5615,7 @@ class(`parameters_allow_clinical_diagnosis_set`) = c("SWIGFunction", class('para
 `parameters_allow_clinical_diagnosis_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_allow_clinical_diagnosis_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_allow_clinical_diagnosis_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5634,7 +5634,7 @@ class(`parameters_allow_clinical_diagnosis_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_quarantine_household_on_symptoms");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_on_symptoms_set', self, s_quarantine_household_on_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_symptoms_set', self, s_quarantine_household_on_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5647,7 +5647,7 @@ class(`parameters_quarantine_household_on_symptoms_set`) = c("SWIGFunction", cla
 `parameters_quarantine_household_on_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_on_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5666,7 +5666,7 @@ class(`parameters_quarantine_household_on_symptoms_get`) = c("SWIGFunction", cla
     warning("using only the first element of s_quarantine_household_on_positive");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_on_positive_set', self, s_quarantine_household_on_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_positive_set', self, s_quarantine_household_on_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5679,7 +5679,7 @@ class(`parameters_quarantine_household_on_positive_set`) = c("SWIGFunction", cla
 `parameters_quarantine_household_on_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_on_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5698,7 +5698,7 @@ class(`parameters_quarantine_household_on_positive_get`) = c("SWIGFunction", cla
     warning("using only the first element of s_quarantine_household_on_traced_symptoms");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_on_traced_symptoms_set', self, s_quarantine_household_on_traced_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_traced_symptoms_set', self, s_quarantine_household_on_traced_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5711,7 +5711,7 @@ class(`parameters_quarantine_household_on_traced_symptoms_set`) = c("SWIGFunctio
 `parameters_quarantine_household_on_traced_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_on_traced_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_traced_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5730,7 +5730,7 @@ class(`parameters_quarantine_household_on_traced_symptoms_get`) = c("SWIGFunctio
     warning("using only the first element of s_quarantine_household_on_traced_positive");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_on_traced_positive_set', self, s_quarantine_household_on_traced_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_traced_positive_set', self, s_quarantine_household_on_traced_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5743,7 +5743,7 @@ class(`parameters_quarantine_household_on_traced_positive_set`) = c("SWIGFunctio
 `parameters_quarantine_household_on_traced_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_on_traced_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_on_traced_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5762,7 +5762,7 @@ class(`parameters_quarantine_household_on_traced_positive_get`) = c("SWIGFunctio
     warning("using only the first element of s_quarantine_household_contacts_on_positive");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_contacts_on_positive_set', self, s_quarantine_household_contacts_on_positive, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_contacts_on_positive_set', self, s_quarantine_household_contacts_on_positive, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5775,7 +5775,7 @@ class(`parameters_quarantine_household_contacts_on_positive_set`) = c("SWIGFunct
 `parameters_quarantine_household_contacts_on_positive_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_contacts_on_positive_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_contacts_on_positive_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5794,7 +5794,7 @@ class(`parameters_quarantine_household_contacts_on_positive_get`) = c("SWIGFunct
     warning("using only the first element of s_quarantine_household_contacts_on_symptoms");
   };
   
-  ;.Call('R_swig_parameters_quarantine_household_contacts_on_symptoms_set', self, s_quarantine_household_contacts_on_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_contacts_on_symptoms_set', self, s_quarantine_household_contacts_on_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5807,7 +5807,7 @@ class(`parameters_quarantine_household_contacts_on_symptoms_set`) = c("SWIGFunct
 `parameters_quarantine_household_contacts_on_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_quarantine_household_contacts_on_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_quarantine_household_contacts_on_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5826,7 +5826,7 @@ class(`parameters_quarantine_household_contacts_on_symptoms_get`) = c("SWIGFunct
     warning("using only the first element of s_test_on_symptoms");
   };
   
-  ;.Call('R_swig_parameters_test_on_symptoms_set', self, s_test_on_symptoms, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_on_symptoms_set', self, s_test_on_symptoms, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5839,7 +5839,7 @@ class(`parameters_test_on_symptoms_set`) = c("SWIGFunction", class('parameters_t
 `parameters_test_on_symptoms_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_on_symptoms_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_on_symptoms_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5858,7 +5858,7 @@ class(`parameters_test_on_symptoms_get`) = c("SWIGFunction", class('parameters_t
     warning("using only the first element of s_test_on_traced");
   };
   
-  ;.Call('R_swig_parameters_test_on_traced_set', self, s_test_on_traced, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_on_traced_set', self, s_test_on_traced, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5871,7 +5871,7 @@ class(`parameters_test_on_traced_set`) = c("SWIGFunction", class('parameters_tes
 `parameters_test_on_traced_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_on_traced_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_on_traced_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5890,7 +5890,7 @@ class(`parameters_test_on_traced_get`) = c("SWIGFunction", class('parameters_tes
     warning("using only the first element of s_test_result_wait");
   };
   
-  ;.Call('R_swig_parameters_test_result_wait_set', self, s_test_result_wait, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_result_wait_set', self, s_test_result_wait, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5903,7 +5903,7 @@ class(`parameters_test_result_wait_set`) = c("SWIGFunction", class('parameters_t
 `parameters_test_result_wait_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_result_wait_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_result_wait_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5922,7 +5922,7 @@ class(`parameters_test_result_wait_get`) = c("SWIGFunction", class('parameters_t
     warning("using only the first element of s_test_order_wait");
   };
   
-  ;.Call('R_swig_parameters_test_order_wait_set', self, s_test_order_wait, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_order_wait_set', self, s_test_order_wait, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5935,7 +5935,7 @@ class(`parameters_test_order_wait_set`) = c("SWIGFunction", class('parameters_te
 `parameters_test_order_wait_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_order_wait_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_order_wait_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5954,7 +5954,7 @@ class(`parameters_test_order_wait_get`) = c("SWIGFunction", class('parameters_te
     warning("using only the first element of s_test_result_wait_priority");
   };
   
-  ;.Call('R_swig_parameters_test_result_wait_priority_set', self, s_test_result_wait_priority, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_result_wait_priority_set', self, s_test_result_wait_priority, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5967,7 +5967,7 @@ class(`parameters_test_result_wait_priority_set`) = c("SWIGFunction", class('par
 `parameters_test_result_wait_priority_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_result_wait_priority_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_result_wait_priority_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5986,7 +5986,7 @@ class(`parameters_test_result_wait_priority_get`) = c("SWIGFunction", class('par
     warning("using only the first element of s_test_order_wait_priority");
   };
   
-  ;.Call('R_swig_parameters_test_order_wait_priority_set', self, s_test_order_wait_priority, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_order_wait_priority_set', self, s_test_order_wait_priority, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -5999,7 +5999,7 @@ class(`parameters_test_order_wait_priority_set`) = c("SWIGFunction", class('para
 `parameters_test_order_wait_priority_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_order_wait_priority_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_order_wait_priority_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6018,7 +6018,7 @@ class(`parameters_test_order_wait_priority_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_test_release_on_negative");
   };
   
-  ;.Call('R_swig_parameters_test_release_on_negative_set', self, s_test_release_on_negative, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_release_on_negative_set', self, s_test_release_on_negative, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6031,7 +6031,7 @@ class(`parameters_test_release_on_negative_set`) = c("SWIGFunction", class('para
 `parameters_test_release_on_negative_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_release_on_negative_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_release_on_negative_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6048,7 +6048,7 @@ class(`parameters_test_release_on_negative_get`) = c("SWIGFunction", class('para
   
 #  assert(length(s_priority_test_contacts) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_priority_test_contacts_set', self, s_priority_test_contacts, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_priority_test_contacts_set', self, s_priority_test_contacts, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6061,7 +6061,7 @@ class(`parameters_priority_test_contacts_set`) = c("SWIGFunction", class('parame
 `parameters_priority_test_contacts_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_priority_test_contacts_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_priority_test_contacts_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -6083,7 +6083,7 @@ class(`parameters_priority_test_contacts_get`) = c("SWIGFunction", class('parame
     warning("using only the first element of s_test_insensitive_period");
   };
   
-  ;.Call('R_swig_parameters_test_insensitive_period_set', self, s_test_insensitive_period, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_insensitive_period_set', self, s_test_insensitive_period, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6096,7 +6096,7 @@ class(`parameters_test_insensitive_period_set`) = c("SWIGFunction", class('param
 `parameters_test_insensitive_period_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_insensitive_period_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_insensitive_period_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6115,7 +6115,7 @@ class(`parameters_test_insensitive_period_get`) = c("SWIGFunction", class('param
     warning("using only the first element of s_test_sensitive_period");
   };
   
-  ;.Call('R_swig_parameters_test_sensitive_period_set', self, s_test_sensitive_period, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_sensitive_period_set', self, s_test_sensitive_period, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6128,7 +6128,7 @@ class(`parameters_test_sensitive_period_set`) = c("SWIGFunction", class('paramet
 `parameters_test_sensitive_period_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_sensitive_period_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_sensitive_period_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6142,7 +6142,7 @@ class(`parameters_test_sensitive_period_get`) = c("SWIGFunction", class('paramet
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_test_sensitivity_set', self, s_test_sensitivity, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_sensitivity_set', self, s_test_sensitivity, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6155,7 +6155,7 @@ class(`parameters_test_sensitivity_set`) = c("SWIGFunction", class('parameters_t
 `parameters_test_sensitivity_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_sensitivity_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_sensitivity_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6169,7 +6169,7 @@ class(`parameters_test_sensitivity_get`) = c("SWIGFunction", class('parameters_t
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_test_specificity_set', self, s_test_specificity, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_specificity_set', self, s_test_specificity, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6182,7 +6182,7 @@ class(`parameters_test_specificity_set`) = c("SWIGFunction", class('parameters_t
 `parameters_test_specificity_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_test_specificity_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_test_specificity_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6199,7 +6199,7 @@ class(`parameters_test_specificity_get`) = c("SWIGFunction", class('parameters_t
   
 #  assert(length(s_app_users_fraction) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_parameters_app_users_fraction_set', self, s_app_users_fraction, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_users_fraction_set', self, s_app_users_fraction, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6212,7 +6212,7 @@ class(`parameters_app_users_fraction_set`) = c("SWIGFunction", class('parameters
 `parameters_app_users_fraction_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_app_users_fraction_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_users_fraction_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6231,7 +6231,7 @@ class(`parameters_app_users_fraction_get`) = c("SWIGFunction", class('parameters
     warning("using only the first element of s_app_turned_on");
   };
   
-  ;.Call('R_swig_parameters_app_turned_on_set', self, s_app_turned_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_turned_on_set', self, s_app_turned_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6244,7 +6244,7 @@ class(`parameters_app_turned_on_set`) = c("SWIGFunction", class('parameters_app_
 `parameters_app_turned_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_app_turned_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_turned_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6263,7 +6263,7 @@ class(`parameters_app_turned_on_get`) = c("SWIGFunction", class('parameters_app_
     warning("using only the first element of s_app_turn_on_time");
   };
   
-  ;.Call('R_swig_parameters_app_turn_on_time_set', self, s_app_turn_on_time, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_turn_on_time_set', self, s_app_turn_on_time, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6276,7 +6276,7 @@ class(`parameters_app_turn_on_time_set`) = c("SWIGFunction", class('parameters_a
 `parameters_app_turn_on_time_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_app_turn_on_time_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_app_turn_on_time_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6290,7 +6290,7 @@ class(`parameters_app_turn_on_time_get`) = c("SWIGFunction", class('parameters_a
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_daily_non_cov_symptoms_rate_set', self, s_daily_non_cov_symptoms_rate, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_daily_non_cov_symptoms_rate_set', self, s_daily_non_cov_symptoms_rate, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6303,7 +6303,7 @@ class(`parameters_daily_non_cov_symptoms_rate_set`) = c("SWIGFunction", class('p
 `parameters_daily_non_cov_symptoms_rate_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_daily_non_cov_symptoms_rate_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_daily_non_cov_symptoms_rate_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6320,7 +6320,7 @@ class(`parameters_daily_non_cov_symptoms_rate_get`) = c("SWIGFunction", class('p
   
 #  assert(length(s_lockdown_occupation_multiplier) >= N_DEFAULT_OCCUPATION_NETWORKS)
   
-  ;.Call('R_swig_parameters_lockdown_occupation_multiplier_set', self, s_lockdown_occupation_multiplier, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_occupation_multiplier_set', self, s_lockdown_occupation_multiplier, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6333,7 +6333,7 @@ class(`parameters_lockdown_occupation_multiplier_set`) = c("SWIGFunction", class
 `parameters_lockdown_occupation_multiplier_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_occupation_multiplier_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_occupation_multiplier_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6347,7 +6347,7 @@ class(`parameters_lockdown_occupation_multiplier_get`) = c("SWIGFunction", class
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_lockdown_random_network_multiplier_set', self, s_lockdown_random_network_multiplier, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_random_network_multiplier_set', self, s_lockdown_random_network_multiplier, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6360,7 +6360,7 @@ class(`parameters_lockdown_random_network_multiplier_set`) = c("SWIGFunction", c
 `parameters_lockdown_random_network_multiplier_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_random_network_multiplier_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_random_network_multiplier_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6374,7 +6374,7 @@ class(`parameters_lockdown_random_network_multiplier_get`) = c("SWIGFunction", c
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_lockdown_house_interaction_multiplier_set', self, s_lockdown_house_interaction_multiplier, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_house_interaction_multiplier_set', self, s_lockdown_house_interaction_multiplier, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6387,7 +6387,7 @@ class(`parameters_lockdown_house_interaction_multiplier_set`) = c("SWIGFunction"
 `parameters_lockdown_house_interaction_multiplier_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_house_interaction_multiplier_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_house_interaction_multiplier_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6406,7 +6406,7 @@ class(`parameters_lockdown_house_interaction_multiplier_get`) = c("SWIGFunction"
     warning("using only the first element of s_lockdown_time_on");
   };
   
-  ;.Call('R_swig_parameters_lockdown_time_on_set', self, s_lockdown_time_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_time_on_set', self, s_lockdown_time_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6419,7 +6419,7 @@ class(`parameters_lockdown_time_on_set`) = c("SWIGFunction", class('parameters_l
 `parameters_lockdown_time_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_time_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_time_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6438,7 +6438,7 @@ class(`parameters_lockdown_time_on_get`) = c("SWIGFunction", class('parameters_l
     warning("using only the first element of s_lockdown_time_off");
   };
   
-  ;.Call('R_swig_parameters_lockdown_time_off_set', self, s_lockdown_time_off, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_time_off_set', self, s_lockdown_time_off, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6451,7 +6451,7 @@ class(`parameters_lockdown_time_off_set`) = c("SWIGFunction", class('parameters_
 `parameters_lockdown_time_off_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_time_off_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_time_off_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6470,7 +6470,7 @@ class(`parameters_lockdown_time_off_get`) = c("SWIGFunction", class('parameters_
     warning("using only the first element of s_lockdown_on");
   };
   
-  ;.Call('R_swig_parameters_lockdown_on_set', self, s_lockdown_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_on_set', self, s_lockdown_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6483,7 +6483,7 @@ class(`parameters_lockdown_on_set`) = c("SWIGFunction", class('parameters_lockdo
 `parameters_lockdown_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6502,7 +6502,7 @@ class(`parameters_lockdown_on_get`) = c("SWIGFunction", class('parameters_lockdo
     warning("using only the first element of s_lockdown_elderly_time_on");
   };
   
-  ;.Call('R_swig_parameters_lockdown_elderly_time_on_set', self, s_lockdown_elderly_time_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_time_on_set', self, s_lockdown_elderly_time_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6515,7 +6515,7 @@ class(`parameters_lockdown_elderly_time_on_set`) = c("SWIGFunction", class('para
 `parameters_lockdown_elderly_time_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_elderly_time_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_time_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6534,7 +6534,7 @@ class(`parameters_lockdown_elderly_time_on_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_lockdown_elderly_time_off");
   };
   
-  ;.Call('R_swig_parameters_lockdown_elderly_time_off_set', self, s_lockdown_elderly_time_off, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_time_off_set', self, s_lockdown_elderly_time_off, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6547,7 +6547,7 @@ class(`parameters_lockdown_elderly_time_off_set`) = c("SWIGFunction", class('par
 `parameters_lockdown_elderly_time_off_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_elderly_time_off_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_time_off_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6566,7 +6566,7 @@ class(`parameters_lockdown_elderly_time_off_get`) = c("SWIGFunction", class('par
     warning("using only the first element of s_lockdown_elderly_on");
   };
   
-  ;.Call('R_swig_parameters_lockdown_elderly_on_set', self, s_lockdown_elderly_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_on_set', self, s_lockdown_elderly_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6579,7 +6579,7 @@ class(`parameters_lockdown_elderly_on_set`) = c("SWIGFunction", class('parameter
 `parameters_lockdown_elderly_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_lockdown_elderly_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_lockdown_elderly_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6598,7 +6598,7 @@ class(`parameters_lockdown_elderly_on_get`) = c("SWIGFunction", class('parameter
     warning("using only the first element of s_testing_symptoms_time_on");
   };
   
-  ;.Call('R_swig_parameters_testing_symptoms_time_on_set', self, s_testing_symptoms_time_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_testing_symptoms_time_on_set', self, s_testing_symptoms_time_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6611,7 +6611,7 @@ class(`parameters_testing_symptoms_time_on_set`) = c("SWIGFunction", class('para
 `parameters_testing_symptoms_time_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_testing_symptoms_time_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_testing_symptoms_time_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6630,7 +6630,7 @@ class(`parameters_testing_symptoms_time_on_get`) = c("SWIGFunction", class('para
     warning("using only the first element of s_testing_symptoms_time_off");
   };
   
-  ;.Call('R_swig_parameters_testing_symptoms_time_off_set', self, s_testing_symptoms_time_off, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_testing_symptoms_time_off_set', self, s_testing_symptoms_time_off, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6643,7 +6643,7 @@ class(`parameters_testing_symptoms_time_off_set`) = c("SWIGFunction", class('par
 `parameters_testing_symptoms_time_off_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_testing_symptoms_time_off_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_testing_symptoms_time_off_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6662,7 +6662,7 @@ class(`parameters_testing_symptoms_time_off_get`) = c("SWIGFunction", class('par
     warning("using only the first element of s_interventions_on");
   };
   
-  ;.Call('R_swig_parameters_interventions_on_set', self, s_interventions_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_interventions_on_set', self, s_interventions_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6675,7 +6675,7 @@ class(`parameters_interventions_on_set`) = c("SWIGFunction", class('parameters_i
 `parameters_interventions_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_interventions_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_interventions_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6694,7 +6694,7 @@ class(`parameters_interventions_on_get`) = c("SWIGFunction", class('parameters_i
     warning("using only the first element of s_intervention_start_time");
   };
   
-  ;.Call('R_swig_parameters_intervention_start_time_set', self, s_intervention_start_time, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_intervention_start_time_set', self, s_intervention_start_time, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6707,7 +6707,7 @@ class(`parameters_intervention_start_time_set`) = c("SWIGFunction", class('param
 `parameters_intervention_start_time_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_intervention_start_time_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_intervention_start_time_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6726,7 +6726,7 @@ class(`parameters_intervention_start_time_get`) = c("SWIGFunction", class('param
     warning("using only the first element of s_sys_write_individual");
   };
   
-  ;.Call('R_swig_parameters_sys_write_individual_set', self, s_sys_write_individual, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sys_write_individual_set', self, s_sys_write_individual, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6739,7 +6739,7 @@ class(`parameters_sys_write_individual_set`) = c("SWIGFunction", class('paramete
 `parameters_sys_write_individual_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sys_write_individual_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sys_write_individual_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6758,7 +6758,7 @@ class(`parameters_sys_write_individual_get`) = c("SWIGFunction", class('paramete
     warning("using only the first element of s_sys_write_hospital");
   };
   
-  ;.Call('R_swig_parameters_sys_write_hospital_set', self, s_sys_write_hospital, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sys_write_hospital_set', self, s_sys_write_hospital, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6771,7 +6771,7 @@ class(`parameters_sys_write_hospital_set`) = c("SWIGFunction", class('parameters
 `parameters_sys_write_hospital_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_sys_write_hospital_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_sys_write_hospital_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6790,7 +6790,7 @@ class(`parameters_sys_write_hospital_get`) = c("SWIGFunction", class('parameters
     warning("using only the first element of s_N_REFERENCE_HOUSEHOLDS");
   };
   
-  ;.Call('R_swig_parameters_N_REFERENCE_HOUSEHOLDS_set', self, s_N_REFERENCE_HOUSEHOLDS, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_N_REFERENCE_HOUSEHOLDS_set', self, s_N_REFERENCE_HOUSEHOLDS, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6803,7 +6803,7 @@ class(`parameters_N_REFERENCE_HOUSEHOLDS_set`) = c("SWIGFunction", class('parame
 `parameters_N_REFERENCE_HOUSEHOLDS_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_N_REFERENCE_HOUSEHOLDS_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_N_REFERENCE_HOUSEHOLDS_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6817,7 +6817,7 @@ class(`parameters_N_REFERENCE_HOUSEHOLDS_get`) = c("SWIGFunction", class('parame
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_REFERENCE_HOUSEHOLDS, "ExternalReference")) s_REFERENCE_HOUSEHOLDS = slot(s_REFERENCE_HOUSEHOLDS,"ref") 
-  ;.Call('R_swig_parameters_REFERENCE_HOUSEHOLDS_set', self, s_REFERENCE_HOUSEHOLDS, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_REFERENCE_HOUSEHOLDS_set', self, s_REFERENCE_HOUSEHOLDS, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6830,7 +6830,7 @@ class(`parameters_REFERENCE_HOUSEHOLDS_set`) = c("SWIGFunction", class('paramete
 `parameters_REFERENCE_HOUSEHOLDS_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_REFERENCE_HOUSEHOLDS_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_REFERENCE_HOUSEHOLDS_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_int", ref=ans) ;
   
   ans
@@ -6847,7 +6847,7 @@ class(`parameters_REFERENCE_HOUSEHOLDS_get`) = c("SWIGFunction", class('paramete
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_demo_house, "ExternalReference")) s_demo_house = slot(s_demo_house,"ref") 
-  ;.Call('R_swig_parameters_demo_house_set', self, s_demo_house, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_demo_house_set', self, s_demo_house, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6860,7 +6860,7 @@ class(`parameters_demo_house_set`) = c("SWIGFunction", class('parameters_demo_ho
 `parameters_demo_house_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_demo_house_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_demo_house_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_demographic_household_table", ref=ans) ;
   
   ans
@@ -6877,7 +6877,7 @@ class(`parameters_demo_house_get`) = c("SWIGFunction", class('parameters_demo_ho
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_occupation_network_table, "ExternalReference")) s_occupation_network_table = slot(s_occupation_network_table,"ref") 
-  ;.Call('R_swig_parameters_occupation_network_table_set', self, s_occupation_network_table, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_occupation_network_table_set', self, s_occupation_network_table, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6890,7 +6890,7 @@ class(`parameters_occupation_network_table_set`) = c("SWIGFunction", class('para
 `parameters_occupation_network_table_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_occupation_network_table_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_occupation_network_table_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_demographic_occupation_network_table", ref=ans) ;
   
   ans
@@ -6907,7 +6907,7 @@ class(`parameters_occupation_network_table_get`) = c("SWIGFunction", class('para
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_risk_score, "ExternalReference")) s_risk_score = slot(s_risk_score,"ref") 
-  ;.Call('R_swig_parameters_risk_score_set', self, s_risk_score, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_risk_score_set', self, s_risk_score, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6920,7 +6920,7 @@ class(`parameters_risk_score_set`) = c("SWIGFunction", class('parameters_risk_sc
 `parameters_risk_score_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_risk_score_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_risk_score_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_p_double", ref=ans) ;
   
   ans
@@ -6937,7 +6937,7 @@ class(`parameters_risk_score_get`) = c("SWIGFunction", class('parameters_risk_sc
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_risk_score_household, "ExternalReference")) s_risk_score_household = slot(s_risk_score_household,"ref") 
-  ;.Call('R_swig_parameters_risk_score_household_set', self, s_risk_score_household, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_risk_score_household_set', self, s_risk_score_household, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6950,7 +6950,7 @@ class(`parameters_risk_score_household_set`) = c("SWIGFunction", class('paramete
 `parameters_risk_score_household_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_risk_score_household_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_risk_score_household_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_double", ref=ans) ;
   
   ans
@@ -6972,7 +6972,7 @@ class(`parameters_risk_score_household_get`) = c("SWIGFunction", class('paramete
     warning("using only the first element of s_hospital_on");
   };
   
-  ;.Call('R_swig_parameters_hospital_on_set', self, s_hospital_on, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospital_on_set', self, s_hospital_on, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -6985,7 +6985,7 @@ class(`parameters_hospital_on_set`) = c("SWIGFunction", class('parameters_hospit
 `parameters_hospital_on_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hospital_on_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospital_on_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7004,7 +7004,7 @@ class(`parameters_hospital_on_get`) = c("SWIGFunction", class('parameters_hospit
     warning("using only the first element of s_n_hospitals");
   };
   
-  ;.Call('R_swig_parameters_n_hospitals_set', self, s_n_hospitals, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_hospitals_set', self, s_n_hospitals, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7017,7 +7017,7 @@ class(`parameters_n_hospitals_set`) = c("SWIGFunction", class('parameters_n_hosp
 `parameters_n_hospitals_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_n_hospitals_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_hospitals_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7034,7 +7034,7 @@ class(`parameters_n_hospitals_get`) = c("SWIGFunction", class('parameters_n_hosp
   
 #  assert(length(s_n_wards) >= N_HOSPITAL_WARD_TYPES)
   
-  ;.Call('R_swig_parameters_n_wards_set', self, s_n_wards, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_wards_set', self, s_n_wards, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7047,7 +7047,7 @@ class(`parameters_n_wards_set`) = c("SWIGFunction", class('parameters_n_wards_se
 `parameters_n_wards_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_n_wards_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_n_wards_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -7067,7 +7067,7 @@ class(`parameters_n_wards_get`) = c("SWIGFunction", class('parameters_n_wards_ge
   
 #  assert(length(s_n_ward_beds) >= N_HOSPITAL_WARD_TYPES)
   
-  ;.Call('R_swig_parameters_n_ward_beds_set', self, s_n_ward_beds, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_ward_beds_set', self, s_n_ward_beds, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7080,7 +7080,7 @@ class(`parameters_n_ward_beds_set`) = c("SWIGFunction", class('parameters_n_ward
 `parameters_n_ward_beds_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_n_ward_beds_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_n_ward_beds_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -7103,7 +7103,7 @@ class(`parameters_n_ward_beds_get`) = c("SWIGFunction", class('parameters_n_ward
   
 #  assert(length(s_n_hcw_per_ward) >= N_HOSPITAL_WARD_TYPES)
   
-  ;.Call('R_swig_parameters_n_hcw_per_ward_set', self, s_n_hcw_per_ward, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_hcw_per_ward_set', self, s_n_hcw_per_ward, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7116,7 +7116,7 @@ class(`parameters_n_hcw_per_ward_set`) = c("SWIGFunction", class('parameters_n_h
 `parameters_n_hcw_per_ward_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_n_hcw_per_ward_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_n_hcw_per_ward_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_a_N_WORKER_TYPES__int", ref=ans) ;
   
   ans
@@ -7139,7 +7139,7 @@ class(`parameters_n_hcw_per_ward_get`) = c("SWIGFunction", class('parameters_n_h
   
 #  assert(length(s_n_patient_required_interactions) >= N_HOSPITAL_WARD_TYPES)
   
-  ;.Call('R_swig_parameters_n_patient_required_interactions_set', self, s_n_patient_required_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_n_patient_required_interactions_set', self, s_n_patient_required_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7152,7 +7152,7 @@ class(`parameters_n_patient_required_interactions_set`) = c("SWIGFunction", clas
 `parameters_n_patient_required_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_parameters_n_patient_required_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_parameters_n_patient_required_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_a_N_WORKER_TYPES__int", ref=ans) ;
   
   ans
@@ -7174,7 +7174,7 @@ class(`parameters_n_patient_required_interactions_get`) = c("SWIGFunction", clas
     warning("using only the first element of s_max_hcw_daily_interactions");
   };
   
-  ;.Call('R_swig_parameters_max_hcw_daily_interactions_set', self, s_max_hcw_daily_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_max_hcw_daily_interactions_set', self, s_max_hcw_daily_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7187,7 +7187,7 @@ class(`parameters_max_hcw_daily_interactions_set`) = c("SWIGFunction", class('pa
 `parameters_max_hcw_daily_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_max_hcw_daily_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_max_hcw_daily_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7201,7 +7201,7 @@ class(`parameters_max_hcw_daily_interactions_get`) = c("SWIGFunction", class('pa
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_hospitalised_waiting_mod_set', self, s_hospitalised_waiting_mod, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_waiting_mod_set', self, s_hospitalised_waiting_mod, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7214,7 +7214,7 @@ class(`parameters_hospitalised_waiting_mod_set`) = c("SWIGFunction", class('para
 `parameters_hospitalised_waiting_mod_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hospitalised_waiting_mod_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hospitalised_waiting_mod_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7228,7 +7228,7 @@ class(`parameters_hospitalised_waiting_mod_get`) = c("SWIGFunction", class('para
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_critical_waiting_mod_set', self, s_critical_waiting_mod, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_critical_waiting_mod_set', self, s_critical_waiting_mod, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7241,7 +7241,7 @@ class(`parameters_critical_waiting_mod_set`) = c("SWIGFunction", class('paramete
 `parameters_critical_waiting_mod_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_critical_waiting_mod_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_critical_waiting_mod_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7255,7 +7255,7 @@ class(`parameters_critical_waiting_mod_get`) = c("SWIGFunction", class('paramete
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_parameters_hcw_mean_work_interactions_set', self, s_hcw_mean_work_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hcw_mean_work_interactions_set', self, s_hcw_mean_work_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7268,7 +7268,7 @@ class(`parameters_hcw_mean_work_interactions_set`) = c("SWIGFunction", class('pa
 `parameters_hcw_mean_work_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_parameters_hcw_mean_work_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_parameters_hcw_mean_work_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7281,7 +7281,7 @@ class(`parameters_hcw_mean_work_interactions_get`) = c("SWIGFunction", class('pa
 `delete_parameters` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_delete_parameters', self, PACKAGE='covid19');
+  ;.Call('R_swig_delete_parameters', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7293,7 +7293,7 @@ class(`delete_parameters`) = c("SWIGFunction", class('delete_parameters'))
 
 `parameters` = function()
 {
-  ;ans = .Call('R_swig_new_parameters', PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_parameters', PACKAGE='OpenABMCovid19');
   ans <- new("_p_parameters", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_parameters)
@@ -7644,7 +7644,7 @@ setMethod('copyToC', 'parameters', CopyToC_parameters);
 `get_model_param_hospital_on` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_hospital_on', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_hospital_on', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7663,7 +7663,7 @@ class(`get_model_param_hospital_on`) = c("SWIGFunction", class('get_model_param_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_model_param_daily_fraction_work_used', pmodel, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_daily_fraction_work_used', pmodel, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7676,7 +7676,7 @@ class(`get_model_param_daily_fraction_work_used`) = c("SWIGFunction", class('get
 `get_model_param_quarantine_days` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_days', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_days', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7689,7 +7689,7 @@ class(`get_model_param_quarantine_days`) = c("SWIGFunction", class('get_model_pa
 `get_model_param_self_quarantine_fraction` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_self_quarantine_fraction', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_self_quarantine_fraction', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7702,7 +7702,7 @@ class(`get_model_param_self_quarantine_fraction`) = c("SWIGFunction", class('get
 `get_model_param_trace_on_symptoms` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_trace_on_symptoms', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_trace_on_symptoms', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7715,7 +7715,7 @@ class(`get_model_param_trace_on_symptoms`) = c("SWIGFunction", class('get_model_
 `get_model_param_trace_on_positive` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_trace_on_positive', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_trace_on_positive', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7728,7 +7728,7 @@ class(`get_model_param_trace_on_positive`) = c("SWIGFunction", class('get_model_
 `get_model_param_quarantine_on_traced` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_on_traced', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_on_traced', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7741,7 +7741,7 @@ class(`get_model_param_quarantine_on_traced`) = c("SWIGFunction", class('get_mod
 `get_model_param_traceable_interaction_fraction` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_traceable_interaction_fraction', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_traceable_interaction_fraction', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7754,7 +7754,7 @@ class(`get_model_param_traceable_interaction_fraction`) = c("SWIGFunction", clas
 `get_model_param_tracing_network_depth` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_tracing_network_depth', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_tracing_network_depth', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7767,7 +7767,7 @@ class(`get_model_param_tracing_network_depth`) = c("SWIGFunction", class('get_mo
 `get_model_param_allow_clinical_diagnosis` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_allow_clinical_diagnosis', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_allow_clinical_diagnosis', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7780,7 +7780,7 @@ class(`get_model_param_allow_clinical_diagnosis`) = c("SWIGFunction", class('get
 `get_model_param_quarantine_household_on_symptoms` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_on_symptoms', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_on_symptoms', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7793,7 +7793,7 @@ class(`get_model_param_quarantine_household_on_symptoms`) = c("SWIGFunction", cl
 `get_model_param_quarantine_household_on_positive` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_on_positive', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_on_positive', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7806,7 +7806,7 @@ class(`get_model_param_quarantine_household_on_positive`) = c("SWIGFunction", cl
 `get_model_param_quarantine_household_on_traced_symptoms` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_on_traced_symptoms', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_on_traced_symptoms', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7819,7 +7819,7 @@ class(`get_model_param_quarantine_household_on_traced_symptoms`) = c("SWIGFuncti
 `get_model_param_quarantine_household_on_traced_positive` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_on_traced_positive', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_on_traced_positive', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7832,7 +7832,7 @@ class(`get_model_param_quarantine_household_on_traced_positive`) = c("SWIGFuncti
 `get_model_param_quarantine_household_contacts_on_positive` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_contacts_on_positive', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_contacts_on_positive', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7852,7 +7852,7 @@ class(`get_model_param_quarantine_household_contacts_on_positive`) = c("SWIGFunc
     warning("using only the first element of type");
   };
   
-  ;.Call('R_swig_set_model_param_relative_transmission', pmodel, value, type, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_relative_transmission', pmodel, value, type, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7865,7 +7865,7 @@ class(`set_model_param_relative_transmission`) = c("SWIGFunction", class('set_mo
 `get_model_param_quarantine_household_contacts_on_symptoms` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_quarantine_household_contacts_on_symptoms', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_quarantine_household_contacts_on_symptoms', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7878,7 +7878,7 @@ class(`get_model_param_quarantine_household_contacts_on_symptoms`) = c("SWIGFunc
 `get_model_param_test_on_symptoms` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_on_symptoms', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_on_symptoms', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7891,7 +7891,7 @@ class(`get_model_param_test_on_symptoms`) = c("SWIGFunction", class('get_model_p
 `get_model_param_test_release_on_negative` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_release_on_negative', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_release_on_negative', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7904,7 +7904,7 @@ class(`get_model_param_test_release_on_negative`) = c("SWIGFunction", class('get
 `get_model_param_test_on_traced` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_on_traced', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_on_traced', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7917,7 +7917,7 @@ class(`get_model_param_test_on_traced`) = c("SWIGFunction", class('get_model_par
 `get_model_param_test_result_wait` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_result_wait', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_result_wait', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7930,7 +7930,7 @@ class(`get_model_param_test_result_wait`) = c("SWIGFunction", class('get_model_p
 `get_model_param_test_order_wait` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_order_wait', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_order_wait', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7943,7 +7943,7 @@ class(`get_model_param_test_order_wait`) = c("SWIGFunction", class('get_model_pa
 `get_model_param_test_result_wait_priority` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_result_wait_priority', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_result_wait_priority', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7956,7 +7956,7 @@ class(`get_model_param_test_result_wait_priority`) = c("SWIGFunction", class('ge
 `get_model_param_test_order_wait_priority` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_test_order_wait_priority', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_test_order_wait_priority', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7975,7 +7975,7 @@ class(`get_model_param_test_order_wait_priority`) = c("SWIGFunction", class('get
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_model_param_priority_test_contacts', pmodel, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_priority_test_contacts', pmodel, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -7988,7 +7988,7 @@ class(`get_model_param_priority_test_contacts`) = c("SWIGFunction", class('get_m
 `get_model_param_app_users_fraction` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_app_users_fraction', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_app_users_fraction', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8001,7 +8001,7 @@ class(`get_model_param_app_users_fraction`) = c("SWIGFunction", class('get_model
 `get_model_param_app_turned_on` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_app_turned_on', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_app_turned_on', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8014,7 +8014,7 @@ class(`get_model_param_app_turned_on`) = c("SWIGFunction", class('get_model_para
 `get_model_param_lockdown_on` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_lockdown_on', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_lockdown_on', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8045,7 +8045,7 @@ class(`get_model_param_lockdown_on`) = c("SWIGFunction", class('get_model_param_
     warning("using only the first element of s_arg4");
   };
   
-  ;.Call('R_swig_get_model_param_risk_score', s_arg1, s_arg2, s_arg3, s_arg4, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_risk_score', s_arg1, s_arg2, s_arg3, s_arg4, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8070,7 +8070,7 @@ class(`get_model_param_risk_score`) = c("SWIGFunction", class('get_model_param_r
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_get_model_param_risk_score_household', s_arg1, s_arg2, s_arg3, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_risk_score_household', s_arg1, s_arg2, s_arg3, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8083,7 +8083,7 @@ class(`get_model_param_risk_score_household`) = c("SWIGFunction", class('get_mod
 `get_model_param_lockdown_house_interaction_multiplier` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_lockdown_house_interaction_multiplier', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_lockdown_house_interaction_multiplier', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8096,7 +8096,7 @@ class(`get_model_param_lockdown_house_interaction_multiplier`) = c("SWIGFunction
 `get_model_param_lockdown_random_network_multiplier` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_lockdown_random_network_multiplier', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_lockdown_random_network_multiplier', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8115,7 +8115,7 @@ class(`get_model_param_lockdown_random_network_multiplier`) = c("SWIGFunction", 
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_model_param_lockdown_occupation_multiplier', pmodel, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_lockdown_occupation_multiplier', pmodel, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8128,7 +8128,7 @@ class(`get_model_param_lockdown_occupation_multiplier`) = c("SWIGFunction", clas
 `get_model_param_manual_trace_on_hospitalization` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_on_hospitalization', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_on_hospitalization', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8141,7 +8141,7 @@ class(`get_model_param_manual_trace_on_hospitalization`) = c("SWIGFunction", cla
 `get_model_param_manual_trace_on_positive` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_on_positive', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_on_positive', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8154,7 +8154,7 @@ class(`get_model_param_manual_trace_on_positive`) = c("SWIGFunction", class('get
 `get_model_param_manual_trace_on` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_on', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_on', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8167,7 +8167,7 @@ class(`get_model_param_manual_trace_on`) = c("SWIGFunction", class('get_model_pa
 `get_model_param_manual_trace_delay` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_delay', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_delay', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8180,7 +8180,7 @@ class(`get_model_param_manual_trace_delay`) = c("SWIGFunction", class('get_model
 `get_model_param_manual_trace_exclude_app_users` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_exclude_app_users', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_exclude_app_users', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8193,7 +8193,7 @@ class(`get_model_param_manual_trace_exclude_app_users`) = c("SWIGFunction", clas
 `get_model_param_manual_trace_n_workers` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_n_workers', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_n_workers', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8206,7 +8206,7 @@ class(`get_model_param_manual_trace_n_workers`) = c("SWIGFunction", class('get_m
 `get_model_param_manual_trace_interviews_per_worker_day` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_interviews_per_worker_day', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_interviews_per_worker_day', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8219,7 +8219,7 @@ class(`get_model_param_manual_trace_interviews_per_worker_day`) = c("SWIGFunctio
 `get_model_param_manual_trace_notifications_per_worker_day` = function(pmodel, .copy = FALSE)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_get_model_param_manual_trace_notifications_per_worker_day', pmodel, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_trace_notifications_per_worker_day', pmodel, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8238,7 +8238,7 @@ class(`get_model_param_manual_trace_notifications_per_worker_day`) = c("SWIGFunc
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_get_model_param_manual_traceable_fraction', pmodel, s_arg2, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_manual_traceable_fraction', pmodel, s_arg2, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8257,7 +8257,7 @@ class(`get_model_param_manual_traceable_fraction`) = c("SWIGFunction", class('ge
     warning("using only the first element of age_group");
   };
   
-  ;.Call('R_swig_get_model_param_fatality_fraction', pmodel, age_group, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_model_param_fatality_fraction', pmodel, age_group, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8276,7 +8276,7 @@ class(`get_model_param_fatality_fraction`) = c("SWIGFunction", class('get_model_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_days', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_days', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8290,7 +8290,7 @@ class(`set_model_param_quarantine_days`) = c("SWIGFunction", class('set_model_pa
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
   
-  ;.Call('R_swig_set_model_param_self_quarantine_fraction', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_self_quarantine_fraction', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8309,7 +8309,7 @@ class(`set_model_param_self_quarantine_fraction`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_trace_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_trace_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8328,7 +8328,7 @@ class(`set_model_param_trace_on_symptoms`) = c("SWIGFunction", class('set_model_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_trace_on_positive', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_trace_on_positive', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8347,7 +8347,7 @@ class(`set_model_param_trace_on_positive`) = c("SWIGFunction", class('set_model_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_on_traced', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_on_traced', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8361,7 +8361,7 @@ class(`set_model_param_quarantine_on_traced`) = c("SWIGFunction", class('set_mod
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
   
-  ;.Call('R_swig_set_model_param_traceable_interaction_fraction', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_traceable_interaction_fraction', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8380,7 +8380,7 @@ class(`set_model_param_traceable_interaction_fraction`) = c("SWIGFunction", clas
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_tracing_network_depth', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_tracing_network_depth', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8399,7 +8399,7 @@ class(`set_model_param_tracing_network_depth`) = c("SWIGFunction", class('set_mo
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_allow_clinical_diagnosis', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_allow_clinical_diagnosis', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8418,7 +8418,7 @@ class(`set_model_param_allow_clinical_diagnosis`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8437,7 +8437,7 @@ class(`set_model_param_quarantine_household_on_symptoms`) = c("SWIGFunction", cl
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_on_positive', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_on_positive', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8456,7 +8456,7 @@ class(`set_model_param_quarantine_household_on_positive`) = c("SWIGFunction", cl
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_on_traced_symptoms', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_on_traced_symptoms', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8475,7 +8475,7 @@ class(`set_model_param_quarantine_household_on_traced_symptoms`) = c("SWIGFuncti
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_on_traced_positive', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_on_traced_positive', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8494,7 +8494,7 @@ class(`set_model_param_quarantine_household_on_traced_positive`) = c("SWIGFuncti
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_contacts_on_positive', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_contacts_on_positive', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8513,7 +8513,7 @@ class(`set_model_param_quarantine_household_contacts_on_positive`) = c("SWIGFunc
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_quarantine_household_contacts_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_quarantine_household_contacts_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8532,7 +8532,7 @@ class(`set_model_param_quarantine_household_contacts_on_symptoms`) = c("SWIGFunc
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_on_symptoms', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8551,7 +8551,7 @@ class(`set_model_param_test_on_symptoms`) = c("SWIGFunction", class('set_model_p
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_release_on_negative', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_release_on_negative', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8570,7 +8570,7 @@ class(`set_model_param_test_release_on_negative`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_on_traced', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_on_traced', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8589,7 +8589,7 @@ class(`set_model_param_test_on_traced`) = c("SWIGFunction", class('set_model_par
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_result_wait', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_result_wait', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8608,7 +8608,7 @@ class(`set_model_param_test_result_wait`) = c("SWIGFunction", class('set_model_p
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_order_wait', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_order_wait', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8627,7 +8627,7 @@ class(`set_model_param_test_order_wait`) = c("SWIGFunction", class('set_model_pa
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_result_wait_priority', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_result_wait_priority', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8646,7 +8646,7 @@ class(`set_model_param_test_result_wait_priority`) = c("SWIGFunction", class('se
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_test_order_wait_priority', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_test_order_wait_priority', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8671,7 +8671,7 @@ class(`set_model_param_test_order_wait_priority`) = c("SWIGFunction", class('set
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_model_param_priority_test_contacts', pmodel, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_priority_test_contacts', pmodel, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8685,7 +8685,7 @@ class(`set_model_param_priority_test_contacts`) = c("SWIGFunction", class('set_m
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
   
-  ;.Call('R_swig_set_model_param_app_users_fraction', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_app_users_fraction', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8704,7 +8704,7 @@ class(`set_model_param_app_users_fraction`) = c("SWIGFunction", class('set_model
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_app_turned_on', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_app_turned_on', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8723,7 +8723,7 @@ class(`set_model_param_app_turned_on`) = c("SWIGFunction", class('set_model_para
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_lockdown_on', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_lockdown_on', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8737,7 +8737,7 @@ class(`set_model_param_lockdown_on`) = c("SWIGFunction", class('set_model_param_
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
   
-  ;.Call('R_swig_set_model_param_lockdown_house_interaction_multiplier', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_lockdown_house_interaction_multiplier', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8751,7 +8751,7 @@ class(`set_model_param_lockdown_house_interaction_multiplier`) = c("SWIGFunction
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
   
-  ;.Call('R_swig_set_model_param_lockdown_random_network_multiplier', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_lockdown_random_network_multiplier', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8771,7 +8771,7 @@ class(`set_model_param_lockdown_random_network_multiplier`) = c("SWIGFunction", 
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_model_param_lockdown_occupation_multiplier', pmodel, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_lockdown_occupation_multiplier', pmodel, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8790,7 +8790,7 @@ class(`set_model_param_lockdown_occupation_multiplier`) = c("SWIGFunction", clas
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_lockdown_elderly_on', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_lockdown_elderly_on', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8809,7 +8809,7 @@ class(`set_model_param_lockdown_elderly_on`) = c("SWIGFunction", class('set_mode
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_on_hospitalization', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_on_hospitalization', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8828,7 +8828,7 @@ class(`set_model_param_manual_trace_on_hospitalization`) = c("SWIGFunction", cla
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_on_positive', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_on_positive', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8847,7 +8847,7 @@ class(`set_model_param_manual_trace_on_positive`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_on', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_on', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8866,7 +8866,7 @@ class(`set_model_param_manual_trace_on`) = c("SWIGFunction", class('set_model_pa
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_delay', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_delay', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8885,7 +8885,7 @@ class(`set_model_param_manual_trace_delay`) = c("SWIGFunction", class('set_model
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_exclude_app_users', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_exclude_app_users', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8904,7 +8904,7 @@ class(`set_model_param_manual_trace_exclude_app_users`) = c("SWIGFunction", clas
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_n_workers', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_n_workers', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8923,7 +8923,7 @@ class(`set_model_param_manual_trace_n_workers`) = c("SWIGFunction", class('set_m
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_interviews_per_worker_day', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_interviews_per_worker_day', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8942,7 +8942,7 @@ class(`set_model_param_manual_trace_interviews_per_worker_day`) = c("SWIGFunctio
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_model_param_manual_trace_notifications_per_worker_day', pmodel, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_trace_notifications_per_worker_day', pmodel, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8962,7 +8962,7 @@ class(`set_model_param_manual_trace_notifications_per_worker_day`) = c("SWIGFunc
     warning("using only the first element of type");
   };
   
-  ;.Call('R_swig_set_model_param_manual_traceable_fraction', pmodel, value, type, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_manual_traceable_fraction', pmodel, value, type, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -8994,7 +8994,7 @@ class(`set_model_param_manual_traceable_fraction`) = c("SWIGFunction", class('se
   };
   
   
-  ;.Call('R_swig_set_model_param_risk_score', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_risk_score', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9020,7 +9020,7 @@ class(`set_model_param_risk_score`) = c("SWIGFunction", class('set_model_param_r
   };
   
   
-  ;.Call('R_swig_set_model_param_risk_score_household', s_arg1, s_arg2, s_arg3, s_arg4, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_risk_score_household', s_arg1, s_arg2, s_arg3, s_arg4, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9040,7 +9040,7 @@ class(`set_model_param_risk_score_household`) = c("SWIGFunction", class('set_mod
     warning("using only the first element of age_group");
   };
   
-  ;.Call('R_swig_set_model_param_fatality_fraction', pmodel, value, age_group, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_model_param_fatality_fraction', pmodel, value, age_group, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9068,7 +9068,7 @@ class(`set_model_param_fatality_fraction`) = c("SWIGFunction", class('set_model_
   s_arg4 = as.integer(s_arg4);
   s_arg5 = as.integer(s_arg5);
   s_arg6 = as.integer(s_arg6);
-  ;.Call('R_swig_set_demographic_house_table', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, s_arg6, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_demographic_house_table', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, s_arg6, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9093,7 +9093,7 @@ class(`set_demographic_house_table`) = c("SWIGFunction", class('set_demographic_
     warning("using only the first element of n_networks");
   };
   
-  ;.Call('R_swig_set_occupation_network_table', params, n_total, n_networks, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_occupation_network_table', params, n_total, n_networks, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9127,7 +9127,7 @@ class(`set_occupation_network_table`) = c("SWIGFunction", class('set_occupation_
   };
   
   network_name = as(network_name, "character"); 
-  ;.Call('R_swig_set_indiv_occupation_network_property', params, network, age_type, mean_interaction, lockdown_multiplier, network_id, network_name, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_indiv_occupation_network_property', params, network, age_type, mean_interaction, lockdown_multiplier, network_id, network_name, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9148,7 +9148,7 @@ class(`set_indiv_occupation_network_property`) = c("SWIGFunction", class('set_in
   
   people = as.integer(people);
   network = as.integer(network);
-  ;.Call('R_swig_set_indiv_occupation_network', params, n_total, people, network, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_indiv_occupation_network', params, n_total, people, network, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9161,7 +9161,7 @@ class(`set_indiv_occupation_network`) = c("SWIGFunction", class('set_indiv_occup
 `set_up_default_occupation_network_table` = function(params)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_set_up_default_occupation_network_table', params, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_default_occupation_network_table', params, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9180,7 +9180,7 @@ class(`set_up_default_occupation_network_table`) = c("SWIGFunction", class('set_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_update_work_intervention_state', pmodel, value, PACKAGE='covid19');
+  ;.Call('R_swig_update_work_intervention_state', pmodel, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9199,7 +9199,7 @@ class(`update_work_intervention_state`) = c("SWIGFunction", class('update_work_i
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_update_household_intervention_state', pmodel, value, PACKAGE='covid19');
+  ;.Call('R_swig_update_household_intervention_state', pmodel, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9212,7 +9212,7 @@ class(`update_household_intervention_state`) = c("SWIGFunction", class('update_h
 `check_params` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_check_params', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_check_params', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9225,7 +9225,7 @@ class(`check_params`) = c("SWIGFunction", class('check_params'))
 `check_hospital_params` = function(params)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_check_hospital_params', params, PACKAGE='covid19');
+  ;.Call('R_swig_check_hospital_params', params, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9238,7 +9238,7 @@ class(`check_hospital_params`) = c("SWIGFunction", class('check_hospital_params'
 `initialize_params` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_initialize_params', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_initialize_params', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9251,7 +9251,7 @@ class(`initialize_params`) = c("SWIGFunction", class('initialize_params'))
 `destroy_params` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_destroy_params', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_destroy_params', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9264,7 +9264,7 @@ class(`destroy_params`) = c("SWIGFunction", class('destroy_params'))
 `destroy_occupation_network_table` = function(params)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_destroy_occupation_network_table', params, PACKAGE='covid19');
+  ;.Call('R_swig_destroy_occupation_network_table', params, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9378,7 +9378,7 @@ defineEnumeration('_DEFAULT_NETWORKS',
 
 `AGE_OCCUPATION_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_AGE_OCCUPATION_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_AGE_OCCUPATION_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -9402,7 +9402,7 @@ function(value, .copy = FALSE)
 
 `NETWORK_TYPE_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_NETWORK_TYPE_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_NETWORK_TYPE_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -9426,7 +9426,7 @@ function(value, .copy = FALSE)
 
 `OCCUPATION_DEFAULT_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_OCCUPATION_DEFAULT_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_OCCUPATION_DEFAULT_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -9450,7 +9450,7 @@ function(value, .copy = FALSE)
 
 `AGE_TYPE_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_AGE_TYPE_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_AGE_TYPE_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -9480,7 +9480,7 @@ function(value, .copy = FALSE)
   
 #  assert(length(s_AGE_TEXT_MAP) >= N_AGE_GROUPS)
   
-  ;.Call('R_swig_AGE_TEXT_MAP_set', s_AGE_TEXT_MAP, PACKAGE='covid19');
+  ;.Call('R_swig_AGE_TEXT_MAP_set', s_AGE_TEXT_MAP, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9492,7 +9492,7 @@ class(`AGE_TEXT_MAP_set`) = c("SWIGFunction", class('AGE_TEXT_MAP_set'))
 
 `AGE_TEXT_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_AGE_TEXT_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_AGE_TEXT_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_char", ref=ans) ;
   
   ans
@@ -9516,7 +9516,7 @@ function(value, .copy = FALSE)
 
 `EVENT_TYPE_TO_WARD_MAP_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_EVENT_TYPE_TO_WARD_MAP_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_EVENT_TYPE_TO_WARD_MAP_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -9546,7 +9546,7 @@ function(value, .copy = FALSE)
   
 #  assert(length(s_DEFAULT_NETWORKS_NAMES) >= N_DEFAULT_NETWORKS)
   
-  ;.Call('R_swig_DEFAULT_NETWORKS_NAMES_set', s_DEFAULT_NETWORKS_NAMES, PACKAGE='covid19');
+  ;.Call('R_swig_DEFAULT_NETWORKS_NAMES_set', s_DEFAULT_NETWORKS_NAMES, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9558,7 +9558,7 @@ class(`DEFAULT_NETWORKS_NAMES_set`) = c("SWIGFunction", class('DEFAULT_NETWORKS_
 
 `DEFAULT_NETWORKS_NAMES_get` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_DEFAULT_NETWORKS_NAMES_get', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_DEFAULT_NETWORKS_NAMES_get', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_char", ref=ans) ;
   
   ans
@@ -9637,7 +9637,7 @@ defineEnumeration('_TRACE_TYPE',
 `rng_set` = function(s_rng)
 {
   if (inherits(s_rng, "ExternalReference")) s_rng = slot(s_rng,"ref") 
-  ;.Call('R_swig_rng_set', s_rng, PACKAGE='covid19');
+  ;.Call('R_swig_rng_set', s_rng, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9649,7 +9649,7 @@ class(`rng_set`) = c("SWIGFunction", class('rng_set'))
 
 `rng_get` = function()
 {
-  ;ans = .Call('R_swig_rng_get', PACKAGE='covid19');
+  ;ans = .Call('R_swig_rng_get', PACKAGE='OpenABMCovid19');
   ans <- new("_p_gsl_rng", ref=ans) ;
   
   ans
@@ -9681,7 +9681,7 @@ function(value)
   };
   
   if (inherits(s_arg3, "ExternalReference")) s_arg3 = slot(s_arg3,"ref") 
-  ;.Call('R_swig_read_command_line_args', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_read_command_line_args', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9694,7 +9694,7 @@ class(`read_command_line_args`) = c("SWIGFunction", class('read_command_line_arg
 `read_param_file` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_read_param_file', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_read_param_file', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9707,7 +9707,7 @@ class(`read_param_file`) = c("SWIGFunction", class('read_param_file'))
 `read_household_demographics_file` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_read_household_demographics_file', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_read_household_demographics_file', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9720,7 +9720,7 @@ class(`read_household_demographics_file`) = c("SWIGFunction", class('read_househ
 `read_hospital_param_file` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_read_hospital_param_file', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_read_hospital_param_file', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9733,7 +9733,7 @@ class(`read_hospital_param_file`) = c("SWIGFunction", class('read_hospital_param
 `set_up_reference_household_memory` = function(params)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_set_up_reference_household_memory', params, PACKAGE='covid19');
+  ;.Call('R_swig_set_up_reference_household_memory', params, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9747,7 +9747,7 @@ class(`set_up_reference_household_memory`) = c("SWIGFunction", class('set_up_ref
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_output_files', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_output_files', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9761,7 +9761,7 @@ class(`write_output_files`) = c("SWIGFunction", class('write_output_files'))
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_individual_file', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_individual_file', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9774,7 +9774,7 @@ class(`write_individual_file`) = c("SWIGFunction", class('write_individual_file'
 `write_interactions` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_write_interactions', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_write_interactions', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9787,7 +9787,7 @@ class(`write_interactions`) = c("SWIGFunction", class('write_interactions'))
 `write_transmissions` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_write_transmissions', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_write_transmissions', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9800,7 +9800,7 @@ class(`write_transmissions`) = c("SWIGFunction", class('write_transmissions'))
 `write_trace_tokens` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_write_trace_tokens', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_write_trace_tokens', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9819,7 +9819,7 @@ class(`write_trace_tokens`) = c("SWIGFunction", class('write_trace_tokens'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_write_trace_tokens_ts', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_trace_tokens_ts', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9833,7 +9833,7 @@ class(`write_trace_tokens_ts`) = c("SWIGFunction", class('write_trace_tokens_ts'
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_quarantine_reasons', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_quarantine_reasons', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9846,7 +9846,7 @@ class(`write_quarantine_reasons`) = c("SWIGFunction", class('write_quarantine_re
 `write_ward_data` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_write_ward_data', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_write_ward_data', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9865,7 +9865,7 @@ class(`write_ward_data`) = c("SWIGFunction", class('write_ward_data'))
     warning("using only the first element of pdx");
   };
   
-  ;.Call('R_swig_get_worker_ward_type', pmodel, pdx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_worker_ward_type', pmodel, pdx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9878,7 +9878,7 @@ class(`get_worker_ward_type`) = c("SWIGFunction", class('get_worker_ward_type'))
 `write_time_step_hospital_data` = function(pmodel)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_write_time_step_hospital_data', pmodel, PACKAGE='covid19');
+  ;.Call('R_swig_write_time_step_hospital_data', pmodel, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9891,7 +9891,7 @@ class(`write_time_step_hospital_data`) = c("SWIGFunction", class('write_time_ste
 `write_hospital_interactions` = function(pmodel)
 {
   if (inherits(pmodel, "ExternalReference")) pmodel = slot(pmodel,"ref") 
-  ;.Call('R_swig_write_hospital_interactions', pmodel, PACKAGE='covid19');
+  ;.Call('R_swig_write_hospital_interactions', pmodel, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9911,7 +9911,7 @@ class(`write_hospital_interactions`) = c("SWIGFunction", class('write_hospital_i
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_write_occupation_network', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_write_occupation_network', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9925,7 +9925,7 @@ class(`write_occupation_network`) = c("SWIGFunction", class('write_occupation_ne
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_household_network', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_household_network', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9939,7 +9939,7 @@ class(`write_household_network`) = c("SWIGFunction", class('write_household_netw
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_random_network', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_random_network', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9953,7 +9953,7 @@ class(`write_random_network`) = c("SWIGFunction", class('write_random_network'))
 {
   s_arg1 = as(s_arg1, "character"); 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_write_network', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_write_network', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9972,7 +9972,7 @@ class(`write_network`) = c("SWIGFunction", class('write_network'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_print_interactions_averages', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_print_interactions_averages', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -9991,7 +9991,7 @@ class(`print_interactions_averages`) = c("SWIGFunction", class('print_interactio
     warning("using only the first element of s_idx");
   };
   
-  ;.Call('R_swig_individual_idx_set', self, s_idx, PACKAGE='covid19');
+  ;.Call('R_swig_individual_idx_set', self, s_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10004,7 +10004,7 @@ class(`individual_idx_set`) = c("SWIGFunction", class('individual_idx_set'))
 `individual_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10023,7 +10023,7 @@ class(`individual_idx_get`) = c("SWIGFunction", class('individual_idx_get'))
     warning("using only the first element of s_house_no");
   };
   
-  ;.Call('R_swig_individual_house_no_set', self, s_house_no, PACKAGE='covid19');
+  ;.Call('R_swig_individual_house_no_set', self, s_house_no, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10036,7 +10036,7 @@ class(`individual_house_no_set`) = c("SWIGFunction", class('individual_house_no_
 `individual_house_no_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_house_no_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_house_no_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10055,7 +10055,7 @@ class(`individual_house_no_get`) = c("SWIGFunction", class('individual_house_no_
     warning("using only the first element of s_age_group");
   };
   
-  ;.Call('R_swig_individual_age_group_set', self, s_age_group, PACKAGE='covid19');
+  ;.Call('R_swig_individual_age_group_set', self, s_age_group, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10068,7 +10068,7 @@ class(`individual_age_group_set`) = c("SWIGFunction", class('individual_age_grou
 `individual_age_group_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_age_group_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_age_group_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10087,7 +10087,7 @@ class(`individual_age_group_get`) = c("SWIGFunction", class('individual_age_grou
     warning("using only the first element of s_age_type");
   };
   
-  ;.Call('R_swig_individual_age_type_set', self, s_age_type, PACKAGE='covid19');
+  ;.Call('R_swig_individual_age_type_set', self, s_age_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10100,7 +10100,7 @@ class(`individual_age_type_set`) = c("SWIGFunction", class('individual_age_type_
 `individual_age_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_age_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_age_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10119,7 +10119,7 @@ class(`individual_age_type_get`) = c("SWIGFunction", class('individual_age_type_
     warning("using only the first element of s_occupation_network");
   };
   
-  ;.Call('R_swig_individual_occupation_network_set', self, s_occupation_network, PACKAGE='covid19');
+  ;.Call('R_swig_individual_occupation_network_set', self, s_occupation_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10132,7 +10132,7 @@ class(`individual_occupation_network_set`) = c("SWIGFunction", class('individual
 `individual_occupation_network_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_occupation_network_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_occupation_network_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10151,7 +10151,7 @@ class(`individual_occupation_network_get`) = c("SWIGFunction", class('individual
     warning("using only the first element of s_base_random_interactions");
   };
   
-  ;.Call('R_swig_individual_base_random_interactions_set', self, s_base_random_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_individual_base_random_interactions_set', self, s_base_random_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10164,7 +10164,7 @@ class(`individual_base_random_interactions_set`) = c("SWIGFunction", class('indi
 `individual_base_random_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_base_random_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_base_random_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10183,7 +10183,7 @@ class(`individual_base_random_interactions_get`) = c("SWIGFunction", class('indi
     warning("using only the first element of s_random_interactions");
   };
   
-  ;.Call('R_swig_individual_random_interactions_set', self, s_random_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_individual_random_interactions_set', self, s_random_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10196,7 +10196,7 @@ class(`individual_random_interactions_set`) = c("SWIGFunction", class('individua
 `individual_random_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_random_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_random_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10213,7 +10213,7 @@ class(`individual_random_interactions_get`) = c("SWIGFunction", class('individua
   
 #  assert(length(s_n_interactions) >= 10)
   
-  ;.Call('R_swig_individual_n_interactions_set', self, s_n_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_individual_n_interactions_set', self, s_n_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10226,7 +10226,7 @@ class(`individual_n_interactions_set`) = c("SWIGFunction", class('individual_n_i
 `individual_n_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_n_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_n_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -10249,7 +10249,7 @@ class(`individual_n_interactions_get`) = c("SWIGFunction", class('individual_n_i
   
 #  assert(length(s_interactions) >= 10)
   
-  ;.Call('R_swig_individual_interactions_set', self, s_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_individual_interactions_set', self, s_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10262,7 +10262,7 @@ class(`individual_interactions_set`) = c("SWIGFunction", class('individual_inter
 `individual_interactions_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_interactions_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_interactions_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_p_interaction", ref=ans) ;
   
   ans
@@ -10284,7 +10284,7 @@ class(`individual_interactions_get`) = c("SWIGFunction", class('individual_inter
     warning("using only the first element of s_status");
   };
   
-  ;.Call('R_swig_individual_status_set', self, s_status, PACKAGE='covid19');
+  ;.Call('R_swig_individual_status_set', self, s_status, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10297,7 +10297,7 @@ class(`individual_status_set`) = c("SWIGFunction", class('individual_status_set'
 `individual_status_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_status_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_status_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10311,7 +10311,7 @@ class(`individual_status_get`) = c("SWIGFunction", class('individual_status_get'
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_individual_hazard_set', self, s_hazard, PACKAGE='covid19');
+  ;.Call('R_swig_individual_hazard_set', self, s_hazard, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10324,7 +10324,7 @@ class(`individual_hazard_set`) = c("SWIGFunction", class('individual_hazard_set'
 `individual_hazard_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_hazard_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_hazard_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10338,7 +10338,7 @@ class(`individual_hazard_get`) = c("SWIGFunction", class('individual_hazard_get'
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_current_disease_event, "ExternalReference")) s_current_disease_event = slot(s_current_disease_event,"ref") 
-  ;.Call('R_swig_individual_current_disease_event_set', self, s_current_disease_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_current_disease_event_set', self, s_current_disease_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10351,7 +10351,7 @@ class(`individual_current_disease_event_set`) = c("SWIGFunction", class('individ
 `individual_current_disease_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_current_disease_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_current_disease_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10368,7 +10368,7 @@ class(`individual_current_disease_event_get`) = c("SWIGFunction", class('individ
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_next_disease_event, "ExternalReference")) s_next_disease_event = slot(s_next_disease_event,"ref") 
-  ;.Call('R_swig_individual_next_disease_event_set', self, s_next_disease_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_next_disease_event_set', self, s_next_disease_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10381,7 +10381,7 @@ class(`individual_next_disease_event_set`) = c("SWIGFunction", class('individual
 `individual_next_disease_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_next_disease_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_next_disease_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10398,7 +10398,7 @@ class(`individual_next_disease_event_get`) = c("SWIGFunction", class('individual
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_infection_events, "ExternalReference")) s_infection_events = slot(s_infection_events,"ref") 
-  ;.Call('R_swig_individual_infection_events_set', self, s_infection_events, PACKAGE='covid19');
+  ;.Call('R_swig_individual_infection_events_set', self, s_infection_events, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10411,7 +10411,7 @@ class(`individual_infection_events_set`) = c("SWIGFunction", class('individual_i
 `individual_infection_events_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_infection_events_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_infection_events_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_infection_event", ref=ans) ;
   
   ans
@@ -10433,7 +10433,7 @@ class(`individual_infection_events_get`) = c("SWIGFunction", class('individual_i
     warning("using only the first element of s_quarantined");
   };
   
-  ;.Call('R_swig_individual_quarantined_set', self, s_quarantined, PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantined_set', self, s_quarantined, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10446,7 +10446,7 @@ class(`individual_quarantined_set`) = c("SWIGFunction", class('individual_quaran
 `individual_quarantined_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_quarantined_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantined_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10460,7 +10460,7 @@ class(`individual_quarantined_get`) = c("SWIGFunction", class('individual_quaran
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_quarantine_event, "ExternalReference")) s_quarantine_event = slot(s_quarantine_event,"ref") 
-  ;.Call('R_swig_individual_quarantine_event_set', self, s_quarantine_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantine_event_set', self, s_quarantine_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10473,7 +10473,7 @@ class(`individual_quarantine_event_set`) = c("SWIGFunction", class('individual_q
 `individual_quarantine_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_quarantine_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_quarantine_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10490,7 +10490,7 @@ class(`individual_quarantine_event_get`) = c("SWIGFunction", class('individual_q
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_quarantine_release_event, "ExternalReference")) s_quarantine_release_event = slot(s_quarantine_release_event,"ref") 
-  ;.Call('R_swig_individual_quarantine_release_event_set', self, s_quarantine_release_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantine_release_event_set', self, s_quarantine_release_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10503,7 +10503,7 @@ class(`individual_quarantine_release_event_set`) = c("SWIGFunction", class('indi
 `individual_quarantine_release_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_quarantine_release_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_quarantine_release_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10525,7 +10525,7 @@ class(`individual_quarantine_release_event_get`) = c("SWIGFunction", class('indi
     warning("using only the first element of s_quarantine_test_result");
   };
   
-  ;.Call('R_swig_individual_quarantine_test_result_set', self, s_quarantine_test_result, PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantine_test_result_set', self, s_quarantine_test_result, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10538,7 +10538,7 @@ class(`individual_quarantine_test_result_set`) = c("SWIGFunction", class('indivi
 `individual_quarantine_test_result_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_quarantine_test_result_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_quarantine_test_result_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10552,7 +10552,7 @@ class(`individual_quarantine_test_result_get`) = c("SWIGFunction", class('indivi
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_trace_tokens, "ExternalReference")) s_trace_tokens = slot(s_trace_tokens,"ref") 
-  ;.Call('R_swig_individual_trace_tokens_set', self, s_trace_tokens, PACKAGE='covid19');
+  ;.Call('R_swig_individual_trace_tokens_set', self, s_trace_tokens, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10565,7 +10565,7 @@ class(`individual_trace_tokens_set`) = c("SWIGFunction", class('individual_trace
 `individual_trace_tokens_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_trace_tokens_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_trace_tokens_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_trace_token", ref=ans) ;
   
   ans
@@ -10582,7 +10582,7 @@ class(`individual_trace_tokens_get`) = c("SWIGFunction", class('individual_trace
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_index_trace_token, "ExternalReference")) s_index_trace_token = slot(s_index_trace_token,"ref") 
-  ;.Call('R_swig_individual_index_trace_token_set', self, s_index_trace_token, PACKAGE='covid19');
+  ;.Call('R_swig_individual_index_trace_token_set', self, s_index_trace_token, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10595,7 +10595,7 @@ class(`individual_index_trace_token_set`) = c("SWIGFunction", class('individual_
 `individual_index_trace_token_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_index_trace_token_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_index_trace_token_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_trace_token", ref=ans) ;
   
   ans
@@ -10612,7 +10612,7 @@ class(`individual_index_trace_token_get`) = c("SWIGFunction", class('individual_
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_index_token_release_event, "ExternalReference")) s_index_token_release_event = slot(s_index_token_release_event,"ref") 
-  ;.Call('R_swig_individual_index_token_release_event_set', self, s_index_token_release_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_index_token_release_event_set', self, s_index_token_release_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10625,7 +10625,7 @@ class(`individual_index_token_release_event_set`) = c("SWIGFunction", class('ind
 `individual_index_token_release_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_index_token_release_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_index_token_release_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10642,7 +10642,7 @@ class(`individual_index_token_release_event_get`) = c("SWIGFunction", class('ind
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   
-  ;.Call('R_swig_individual_traced_on_this_trace_set', self, s_traced_on_this_trace, PACKAGE='covid19');
+  ;.Call('R_swig_individual_traced_on_this_trace_set', self, s_traced_on_this_trace, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10655,7 +10655,7 @@ class(`individual_traced_on_this_trace_set`) = c("SWIGFunction", class('individu
 `individual_traced_on_this_trace_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_traced_on_this_trace_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_traced_on_this_trace_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10674,7 +10674,7 @@ class(`individual_traced_on_this_trace_get`) = c("SWIGFunction", class('individu
     warning("using only the first element of s_app_user");
   };
   
-  ;.Call('R_swig_individual_app_user_set', self, s_app_user, PACKAGE='covid19');
+  ;.Call('R_swig_individual_app_user_set', self, s_app_user, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10687,7 +10687,7 @@ class(`individual_app_user_set`) = c("SWIGFunction", class('individual_app_user_
 `individual_app_user_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_app_user_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_app_user_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10706,7 +10706,7 @@ class(`individual_app_user_get`) = c("SWIGFunction", class('individual_app_user_
     warning("using only the first element of s_ward_idx");
   };
   
-  ;.Call('R_swig_individual_ward_idx_set', self, s_ward_idx, PACKAGE='covid19');
+  ;.Call('R_swig_individual_ward_idx_set', self, s_ward_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10719,7 +10719,7 @@ class(`individual_ward_idx_set`) = c("SWIGFunction", class('individual_ward_idx_
 `individual_ward_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_ward_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_ward_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10738,7 +10738,7 @@ class(`individual_ward_idx_get`) = c("SWIGFunction", class('individual_ward_idx_
     warning("using only the first element of s_ward_type");
   };
   
-  ;.Call('R_swig_individual_ward_type_set', self, s_ward_type, PACKAGE='covid19');
+  ;.Call('R_swig_individual_ward_type_set', self, s_ward_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10751,7 +10751,7 @@ class(`individual_ward_type_set`) = c("SWIGFunction", class('individual_ward_typ
 `individual_ward_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_ward_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_ward_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10770,7 +10770,7 @@ class(`individual_ward_type_get`) = c("SWIGFunction", class('individual_ward_typ
     warning("using only the first element of s_hospital_idx");
   };
   
-  ;.Call('R_swig_individual_hospital_idx_set', self, s_hospital_idx, PACKAGE='covid19');
+  ;.Call('R_swig_individual_hospital_idx_set', self, s_hospital_idx, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10783,7 +10783,7 @@ class(`individual_hospital_idx_set`) = c("SWIGFunction", class('individual_hospi
 `individual_hospital_idx_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_hospital_idx_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_hospital_idx_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10802,7 +10802,7 @@ class(`individual_hospital_idx_get`) = c("SWIGFunction", class('individual_hospi
     warning("using only the first element of s_hospital_state");
   };
   
-  ;.Call('R_swig_individual_hospital_state_set', self, s_hospital_state, PACKAGE='covid19');
+  ;.Call('R_swig_individual_hospital_state_set', self, s_hospital_state, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10815,7 +10815,7 @@ class(`individual_hospital_state_set`) = c("SWIGFunction", class('individual_hos
 `individual_hospital_state_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_hospital_state_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_hospital_state_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10832,7 +10832,7 @@ class(`individual_hospital_state_get`) = c("SWIGFunction", class('individual_hos
   
 #  assert(length(s_disease_progression_predicted) >= N_HOSPITAL_WARD_TYPES)
   
-  ;.Call('R_swig_individual_disease_progression_predicted_set', self, s_disease_progression_predicted, PACKAGE='covid19');
+  ;.Call('R_swig_individual_disease_progression_predicted_set', self, s_disease_progression_predicted, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10845,7 +10845,7 @@ class(`individual_disease_progression_predicted_set`) = c("SWIGFunction", class(
 `individual_disease_progression_predicted_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_disease_progression_predicted_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_disease_progression_predicted_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -10862,7 +10862,7 @@ class(`individual_disease_progression_predicted_get`) = c("SWIGFunction", class(
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_current_hospital_event, "ExternalReference")) s_current_hospital_event = slot(s_current_hospital_event,"ref") 
-  ;.Call('R_swig_individual_current_hospital_event_set', self, s_current_hospital_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_current_hospital_event_set', self, s_current_hospital_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10875,7 +10875,7 @@ class(`individual_current_hospital_event_set`) = c("SWIGFunction", class('indivi
 `individual_current_hospital_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_current_hospital_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_current_hospital_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10892,7 +10892,7 @@ class(`individual_current_hospital_event_get`) = c("SWIGFunction", class('indivi
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_next_hospital_event, "ExternalReference")) s_next_hospital_event = slot(s_next_hospital_event,"ref") 
-  ;.Call('R_swig_individual_next_hospital_event_set', self, s_next_hospital_event, PACKAGE='covid19');
+  ;.Call('R_swig_individual_next_hospital_event_set', self, s_next_hospital_event, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10905,7 +10905,7 @@ class(`individual_next_hospital_event_set`) = c("SWIGFunction", class('individua
 `individual_next_hospital_event_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_individual_next_hospital_event_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_individual_next_hospital_event_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_event", ref=ans) ;
   
   ans
@@ -10927,7 +10927,7 @@ class(`individual_next_hospital_event_get`) = c("SWIGFunction", class('individua
     warning("using only the first element of s_worker_type");
   };
   
-  ;.Call('R_swig_individual_worker_type_set', self, s_worker_type, PACKAGE='covid19');
+  ;.Call('R_swig_individual_worker_type_set', self, s_worker_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10940,7 +10940,7 @@ class(`individual_worker_type_set`) = c("SWIGFunction", class('individual_worker
 `individual_worker_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_individual_worker_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_individual_worker_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -10952,7 +10952,7 @@ class(`individual_worker_type_get`) = c("SWIGFunction", class('individual_worker
 
 `individual` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_individual', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_individual', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_individual", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_individual)
@@ -11084,7 +11084,7 @@ setMethod('copyToC', 'individual', CopyToC_individual);
     warning("using only the first element of s_type");
   };
   
-  ;.Call('R_swig_interaction_type_set', self, s_type, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_type_set', self, s_type, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11097,7 +11097,7 @@ class(`interaction_type_set`) = c("SWIGFunction", class('interaction_type_set'))
 `interaction_type_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_interaction_type_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_interaction_type_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11116,7 +11116,7 @@ class(`interaction_type_get`) = c("SWIGFunction", class('interaction_type_get'))
     warning("using only the first element of s_traceable");
   };
   
-  ;.Call('R_swig_interaction_traceable_set', self, s_traceable, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_traceable_set', self, s_traceable, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11129,7 +11129,7 @@ class(`interaction_traceable_set`) = c("SWIGFunction", class('interaction_tracea
 `interaction_traceable_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_interaction_traceable_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_interaction_traceable_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11148,7 +11148,7 @@ class(`interaction_traceable_get`) = c("SWIGFunction", class('interaction_tracea
     warning("using only the first element of s_manual_traceable");
   };
   
-  ;.Call('R_swig_interaction_manual_traceable_set', self, s_manual_traceable, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_manual_traceable_set', self, s_manual_traceable, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11161,7 +11161,7 @@ class(`interaction_manual_traceable_set`) = c("SWIGFunction", class('interaction
 `interaction_manual_traceable_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_interaction_manual_traceable_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_interaction_manual_traceable_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11175,7 +11175,7 @@ class(`interaction_manual_traceable_get`) = c("SWIGFunction", class('interaction
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_individual, "ExternalReference")) s_individual = slot(s_individual,"ref") 
-  ;.Call('R_swig_interaction_individual_set', self, s_individual, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_individual_set', self, s_individual, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11188,7 +11188,7 @@ class(`interaction_individual_set`) = c("SWIGFunction", class('interaction_indiv
 `interaction_individual_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_interaction_individual_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_interaction_individual_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_individual", ref=ans) ;
   
   ans
@@ -11205,7 +11205,7 @@ class(`interaction_individual_get`) = c("SWIGFunction", class('interaction_indiv
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_interaction__next_set', self, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_interaction__next_set', self, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11218,7 +11218,7 @@ class(`interaction__next_set`) = c("SWIGFunction", class('interaction__next_set'
 `interaction__next_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_interaction__next_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_interaction__next_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction", ref=ans) ;
   
   ans
@@ -11233,7 +11233,7 @@ class(`interaction__next_get`) = c("SWIGFunction", class('interaction__next_get'
 
 `interaction` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_interaction', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_interaction', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_interaction)
@@ -11326,7 +11326,7 @@ setMethod('copyToC', 'interaction', CopyToC_interaction);
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_interactions, "ExternalReference")) s_interactions = slot(s_interactions,"ref") 
-  ;.Call('R_swig_interaction_block_interactions_set', self, s_interactions, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_block_interactions_set', self, s_interactions, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11339,7 +11339,7 @@ class(`interaction_block_interactions_set`) = c("SWIGFunction", class('interacti
 `interaction_block_interactions_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_interaction_block_interactions_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_interaction_block_interactions_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction", ref=ans) ;
   
   ans
@@ -11356,7 +11356,7 @@ class(`interaction_block_interactions_get`) = c("SWIGFunction", class('interacti
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_interaction_block__next_set', self, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_interaction_block__next_set', self, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11369,7 +11369,7 @@ class(`interaction_block__next_set`) = c("SWIGFunction", class('interaction_bloc
 `interaction_block__next_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_interaction_block__next_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_interaction_block__next_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction_block", ref=ans) ;
   
   ans
@@ -11384,7 +11384,7 @@ class(`interaction_block__next_get`) = c("SWIGFunction", class('interaction_bloc
 
 `interaction_block` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_interaction_block', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_interaction_block', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_interaction_block", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_interaction_block)
@@ -11471,7 +11471,7 @@ setMethod('copyToC', 'interaction_block', CopyToC_interaction_block);
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   s_times = as.integer(s_times);
-  ;.Call('R_swig_infection_event_times_set', self, s_times, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_times_set', self, s_times, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11484,7 +11484,7 @@ class(`infection_event_times_set`) = c("SWIGFunction", class('infection_event_ti
 `infection_event_times_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_infection_event_times_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_infection_event_times_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -11501,7 +11501,7 @@ class(`infection_event_times_get`) = c("SWIGFunction", class('infection_event_ti
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_infector, "ExternalReference")) s_infector = slot(s_infector,"ref") 
-  ;.Call('R_swig_infection_event_infector_set', self, s_infector, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_set', self, s_infector, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11514,7 +11514,7 @@ class(`infection_event_infector_set`) = c("SWIGFunction", class('infection_event
 `infection_event_infector_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_infection_event_infector_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_infection_event_infector_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_individual", ref=ans) ;
   
   ans
@@ -11536,7 +11536,7 @@ class(`infection_event_infector_get`) = c("SWIGFunction", class('infection_event
     warning("using only the first element of s_infector_status");
   };
   
-  ;.Call('R_swig_infection_event_infector_status_set', self, s_infector_status, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_status_set', self, s_infector_status, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11549,7 +11549,7 @@ class(`infection_event_infector_status_set`) = c("SWIGFunction", class('infectio
 `infection_event_infector_status_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_infection_event_infector_status_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_status_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11568,7 +11568,7 @@ class(`infection_event_infector_status_get`) = c("SWIGFunction", class('infectio
     warning("using only the first element of s_infector_hospital_state");
   };
   
-  ;.Call('R_swig_infection_event_infector_hospital_state_set', self, s_infector_hospital_state, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_hospital_state_set', self, s_infector_hospital_state, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11581,7 +11581,7 @@ class(`infection_event_infector_hospital_state_set`) = c("SWIGFunction", class('
 `infection_event_infector_hospital_state_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_infection_event_infector_hospital_state_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_hospital_state_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11600,7 +11600,7 @@ class(`infection_event_infector_hospital_state_get`) = c("SWIGFunction", class('
     warning("using only the first element of s_infector_network");
   };
   
-  ;.Call('R_swig_infection_event_infector_network_set', self, s_infector_network, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_network_set', self, s_infector_network, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11613,7 +11613,7 @@ class(`infection_event_infector_network_set`) = c("SWIGFunction", class('infecti
 `infection_event_infector_network_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_infection_event_infector_network_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_infector_network_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11632,7 +11632,7 @@ class(`infection_event_infector_network_get`) = c("SWIGFunction", class('infecti
     warning("using only the first element of s_time_infected_infector");
   };
   
-  ;.Call('R_swig_infection_event_time_infected_infector_set', self, s_time_infected_infector, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_time_infected_infector_set', self, s_time_infected_infector, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11645,7 +11645,7 @@ class(`infection_event_time_infected_infector_set`) = c("SWIGFunction", class('i
 `infection_event_time_infected_infector_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_infection_event_time_infected_infector_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_time_infected_infector_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11659,7 +11659,7 @@ class(`infection_event_time_infected_infector_get`) = c("SWIGFunction", class('i
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_infection_event__next_set', self, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event__next_set', self, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11672,7 +11672,7 @@ class(`infection_event__next_set`) = c("SWIGFunction", class('infection_event__n
 `infection_event__next_get` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_infection_event__next_get', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_infection_event__next_get', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_infection_event", ref=ans) ;
   
   ans
@@ -11694,7 +11694,7 @@ class(`infection_event__next_get`) = c("SWIGFunction", class('infection_event__n
     warning("using only the first element of s_is_case");
   };
   
-  ;.Call('R_swig_infection_event_is_case_set', self, s_is_case, PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_is_case_set', self, s_is_case, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11707,7 +11707,7 @@ class(`infection_event_is_case_set`) = c("SWIGFunction", class('infection_event_
 `infection_event_is_case_get` = function(self, .copy = FALSE)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_infection_event_is_case_get', self, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_infection_event_is_case_get', self, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11719,7 +11719,7 @@ class(`infection_event_is_case_get`) = c("SWIGFunction", class('infection_event_
 
 `infection_event` = function(.copy = FALSE)
 {
-  ;ans = .Call('R_swig_new_infection_event', as.logical(.copy), PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_infection_event', as.logical(.copy), PACKAGE='OpenABMCovid19');
   ans <- new("_p_infection_event", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_infection_event)
@@ -11822,7 +11822,7 @@ setMethod('copyToC', 'infection_event', CopyToC_infection_event);
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_initialize_individual', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_initialize_individual', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11836,7 +11836,7 @@ class(`initialize_individual`) = c("SWIGFunction", class('initialize_individual'
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_initialize_hazard', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_initialize_hazard', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11856,7 +11856,7 @@ class(`initialize_hazard`) = c("SWIGFunction", class('initialize_hazard'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_age_group', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_age_group', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11875,7 +11875,7 @@ class(`set_age_group`) = c("SWIGFunction", class('set_age_group'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_set_house_no', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_set_house_no', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11902,7 +11902,7 @@ class(`set_house_no`) = c("SWIGFunction", class('set_house_no'))
   };
   
   if (inherits(s_arg5, "ExternalReference")) s_arg5 = slot(s_arg5,"ref") 
-  ;.Call('R_swig_set_quarantine_status', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, PACKAGE='covid19');
+  ;.Call('R_swig_set_quarantine_status', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11923,7 +11923,7 @@ class(`set_quarantine_status`) = c("SWIGFunction", class('set_quarantine_status'
   };
   
   if (inherits(s_arg4, "ExternalReference")) s_arg4 = slot(s_arg4,"ref") 
-  ;.Call('R_swig_set_recovered', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='covid19');
+  ;.Call('R_swig_set_recovered', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11943,7 +11943,7 @@ class(`set_recovered`) = c("SWIGFunction", class('set_recovered'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_hospitalised', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_hospitalised', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11963,7 +11963,7 @@ class(`set_hospitalised`) = c("SWIGFunction", class('set_hospitalised'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_hospitalised_recovering', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_hospitalised_recovering', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -11983,7 +11983,7 @@ class(`set_hospitalised_recovering`) = c("SWIGFunction", class('set_hospitalised
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_critical', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_critical', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12003,7 +12003,7 @@ class(`set_critical`) = c("SWIGFunction", class('set_critical'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_dead', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_dead', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12022,7 +12022,7 @@ class(`set_dead`) = c("SWIGFunction", class('set_dead'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_set_case', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_set_case', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12042,7 +12042,7 @@ class(`set_case`) = c("SWIGFunction", class('set_case'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_waiting', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_waiting', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12062,7 +12062,7 @@ class(`set_waiting`) = c("SWIGFunction", class('set_waiting'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_general_admission', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_general_admission', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12082,7 +12082,7 @@ class(`set_general_admission`) = c("SWIGFunction", class('set_general_admission'
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_icu_admission', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_icu_admission', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12102,7 +12102,7 @@ class(`set_icu_admission`) = c("SWIGFunction", class('set_icu_admission'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_mortuary_admission', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_mortuary_admission', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12122,7 +12122,7 @@ class(`set_mortuary_admission`) = c("SWIGFunction", class('set_mortuary_admissio
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_set_discharged', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_set_discharged', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12136,7 +12136,7 @@ class(`set_discharged`) = c("SWIGFunction", class('set_discharged'))
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
   if (inherits(s_arg2, "ExternalReference")) s_arg2 = slot(s_arg2,"ref") 
-  ;.Call('R_swig_update_random_interactions', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_update_random_interactions', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12149,7 +12149,7 @@ class(`update_random_interactions`) = c("SWIGFunction", class('update_random_int
 `count_infection_events` = function(s_arg1, .copy = FALSE)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_count_infection_events', s_arg1, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_count_infection_events', s_arg1, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12162,7 +12162,7 @@ class(`count_infection_events`) = c("SWIGFunction", class('count_infection_event
 `destroy_individual` = function(s_arg1)
 {
   if (inherits(s_arg1, "ExternalReference")) s_arg1 = slot(s_arg1,"ref") 
-  ;.Call('R_swig_destroy_individual', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_destroy_individual', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12181,7 +12181,7 @@ class(`destroy_individual`) = c("SWIGFunction", class('destroy_individual'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_print_individual', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_print_individual', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12194,7 +12194,7 @@ class(`print_individual`) = c("SWIGFunction", class('print_individual'))
 `print_now` = function(s_arg1)
 {
   s_arg1 = as(s_arg1, "character"); 
-  ;.Call('R_swig_print_now', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_print_now', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12207,7 +12207,7 @@ class(`print_now`) = c("SWIGFunction", class('print_now'))
 `print_exit` = function(s_arg1)
 {
   s_arg1 = as(s_arg1, "character"); 
-  ;.Call('R_swig_print_exit', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_print_exit', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12228,7 +12228,7 @@ class(`print_exit`) = c("SWIGFunction", class('print_exit'))
   
   
   
-  ;.Call('R_swig_gamma_draw_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='covid19');
+  ;.Call('R_swig_gamma_draw_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12248,7 +12248,7 @@ class(`gamma_draw_list`) = c("SWIGFunction", class('gamma_draw_list'))
   };
   
   
-  ;.Call('R_swig_bernoulli_draw_list', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_bernoulli_draw_list', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12274,7 +12274,7 @@ class(`bernoulli_draw_list`) = c("SWIGFunction", class('bernoulli_draw_list'))
     warning("using only the first element of s_arg4");
   };
   
-  ;.Call('R_swig_geometric_max_draw_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='covid19');
+  ;.Call('R_swig_geometric_max_draw_list', s_arg1, s_arg2, s_arg3, s_arg4, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12295,7 +12295,7 @@ class(`geometric_max_draw_list`) = c("SWIGFunction", class('geometric_max_draw_l
   
   
   
-  ;.Call('R_swig_gamma_rate_curve', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, PACKAGE='covid19');
+  ;.Call('R_swig_gamma_rate_curve', s_arg1, s_arg2, s_arg3, s_arg4, s_arg5, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12307,7 +12307,7 @@ class(`gamma_rate_curve`) = c("SWIGFunction", class('gamma_rate_curve'))
 
 `negative_binomial_draw` = function(s_arg1, s_arg2, .copy = FALSE)
 {
-  ;.Call('R_swig_negative_binomial_draw', s_arg1, s_arg2, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_negative_binomial_draw', s_arg1, s_arg2, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12326,7 +12326,7 @@ class(`negative_binomial_draw`) = c("SWIGFunction", class('negative_binomial_dra
   };
   
   
-  ;.Call('R_swig_discrete_draw', s_arg1, s_arg2, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_discrete_draw', s_arg1, s_arg2, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12344,7 +12344,7 @@ class(`discrete_draw`) = c("SWIGFunction", class('discrete_draw'))
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_normalize_array', s_arg1, s_arg2, PACKAGE='covid19');
+  ;.Call('R_swig_normalize_array', s_arg1, s_arg2, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12362,7 +12362,7 @@ class(`normalize_array`) = c("SWIGFunction", class('normalize_array'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_copy_array', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_copy_array', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12380,7 +12380,7 @@ class(`copy_array`) = c("SWIGFunction", class('copy_array'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_copy_normalize_array', s_arg1, s_arg2, s_arg3, PACKAGE='covid19');
+  ;.Call('R_swig_copy_normalize_array', s_arg1, s_arg2, s_arg3, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12398,7 +12398,7 @@ class(`copy_normalize_array`) = c("SWIGFunction", class('copy_normalize_array'))
     warning("using only the first element of s_arg3");
   };
   
-  ;.Call('R_swig_sum_square_diff_array', s_arg1, s_arg2, s_arg3, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_sum_square_diff_array', s_arg1, s_arg2, s_arg3, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12417,7 +12417,7 @@ class(`sum_square_diff_array`) = c("SWIGFunction", class('sum_square_diff_array'
     warning("using only the first element of s_arg2");
   };
   
-  ;.Call('R_swig_n_unique_elements', s_arg1, s_arg2, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_n_unique_elements', s_arg1, s_arg2, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12435,7 +12435,7 @@ class(`n_unique_elements`) = c("SWIGFunction", class('n_unique_elements'))
     warning("using only the first element of s_arg1");
   };
   
-  ;.Call('R_swig_setup_gsl_rng', s_arg1, PACKAGE='covid19');
+  ;.Call('R_swig_setup_gsl_rng', s_arg1, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12454,7 +12454,7 @@ class(`setup_gsl_rng`) = c("SWIGFunction", class('setup_gsl_rng'))
     warning("using only the first element of type");
   };
   
-  ;.Call('R_swig_utils_n_current', pmodel, type, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_utils_n_current', pmodel, type, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12473,7 +12473,7 @@ class(`utils_n_current`) = c("SWIGFunction", class('utils_n_current'))
     warning("using only the first element of type");
   };
   
-  ;.Call('R_swig_utils_n_total', pmodel, type, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_utils_n_total', pmodel, type, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12498,7 +12498,7 @@ class(`utils_n_total`) = c("SWIGFunction", class('utils_n_total'))
     warning("using only the first element of age");
   };
   
-  ;.Call('R_swig_utils_n_total_age', pmodel, type, age, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_utils_n_total_age', pmodel, type, age, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12523,7 +12523,7 @@ class(`utils_n_total_age`) = c("SWIGFunction", class('utils_n_total_age'))
     warning("using only the first element of day");
   };
   
-  ;.Call('R_swig_utils_n_daily', pmodel, type, day, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_utils_n_daily', pmodel, type, day, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12536,7 +12536,7 @@ class(`utils_n_daily`) = c("SWIGFunction", class('utils_n_daily'))
 `get_param_quarantine_days` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_days', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_days', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12549,7 +12549,7 @@ class(`get_param_quarantine_days`) = c("SWIGFunction", class('get_param_quaranti
 `get_param_hospital_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_hospital_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_hospital_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12562,7 +12562,7 @@ class(`get_param_hospital_on`) = c("SWIGFunction", class('get_param_hospital_on'
 `get_param_rng_seed` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_rng_seed', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_rng_seed', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12575,7 +12575,7 @@ class(`get_param_rng_seed`) = c("SWIGFunction", class('get_param_rng_seed'))
 `get_param_param_id` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_param_id', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_param_id', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12588,7 +12588,7 @@ class(`get_param_param_id`) = c("SWIGFunction", class('get_param_param_id'))
 `get_param_n_total` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_n_total', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_n_total', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12601,7 +12601,7 @@ class(`get_param_n_total`) = c("SWIGFunction", class('get_param_n_total'))
 `get_param_days_of_interactions` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_days_of_interactions', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_days_of_interactions', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12620,7 +12620,7 @@ class(`get_param_days_of_interactions`) = c("SWIGFunction", class('get_param_day
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_mean_random_interactions', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_random_interactions', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12639,7 +12639,7 @@ class(`get_param_mean_random_interactions`) = c("SWIGFunction", class('get_param
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_sd_random_interactions', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_sd_random_interactions', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12652,7 +12652,7 @@ class(`get_param_sd_random_interactions`) = c("SWIGFunction", class('get_param_s
 `get_param_random_interaction_distribution` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_random_interaction_distribution', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_random_interaction_distribution', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12671,7 +12671,7 @@ class(`get_param_random_interaction_distribution`) = c("SWIGFunction", class('ge
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_mean_work_interactions', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_work_interactions', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12684,7 +12684,7 @@ class(`get_param_mean_work_interactions`) = c("SWIGFunction", class('get_param_m
 `get_param_daily_fraction_work` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_daily_fraction_work', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_daily_fraction_work', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12697,7 +12697,7 @@ class(`get_param_daily_fraction_work`) = c("SWIGFunction", class('get_param_dail
 `get_param_child_network_adults` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_child_network_adults', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_child_network_adults', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12710,7 +12710,7 @@ class(`get_param_child_network_adults`) = c("SWIGFunction", class('get_param_chi
 `get_param_elderly_network_adults` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_elderly_network_adults', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_elderly_network_adults', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12723,7 +12723,7 @@ class(`get_param_elderly_network_adults`) = c("SWIGFunction", class('get_param_e
 `get_param_mean_infectious_period` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_infectious_period', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_infectious_period', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12736,7 +12736,7 @@ class(`get_param_mean_infectious_period`) = c("SWIGFunction", class('get_param_m
 `get_param_sd_infectious_period` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_sd_infectious_period', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_sd_infectious_period', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12749,7 +12749,7 @@ class(`get_param_sd_infectious_period`) = c("SWIGFunction", class('get_param_sd_
 `get_param_infectious_rate` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_infectious_rate', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_infectious_rate', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12768,7 +12768,7 @@ class(`get_param_infectious_rate`) = c("SWIGFunction", class('get_param_infectio
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_relative_susceptibility', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_relative_susceptibility', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12787,7 +12787,7 @@ class(`get_param_relative_susceptibility`) = c("SWIGFunction", class('get_param_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_adjusted_susceptibility', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_adjusted_susceptibility', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12806,7 +12806,7 @@ class(`get_param_adjusted_susceptibility`) = c("SWIGFunction", class('get_param_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_relative_transmission', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_relative_transmission', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12825,7 +12825,7 @@ class(`get_param_relative_transmission`) = c("SWIGFunction", class('get_param_re
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_relative_transmission_used', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_relative_transmission_used', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12844,7 +12844,7 @@ class(`get_param_relative_transmission_used`) = c("SWIGFunction", class('get_par
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_manual_traceable_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_manual_traceable_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12857,7 +12857,7 @@ class(`get_param_manual_traceable_fraction`) = c("SWIGFunction", class('get_para
 `get_param_mean_time_to_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_time_to_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_time_to_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12870,7 +12870,7 @@ class(`get_param_mean_time_to_symptoms`) = c("SWIGFunction", class('get_param_me
 `get_param_sd_time_to_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_sd_time_to_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_sd_time_to_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12889,7 +12889,7 @@ class(`get_param_sd_time_to_symptoms`) = c("SWIGFunction", class('get_param_sd_t
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_hospitalised_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_hospitalised_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12908,7 +12908,7 @@ class(`get_param_hospitalised_fraction`) = c("SWIGFunction", class('get_param_ho
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_critical_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_critical_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12927,7 +12927,7 @@ class(`get_param_critical_fraction`) = c("SWIGFunction", class('get_param_critic
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_fatality_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_fatality_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12940,7 +12940,7 @@ class(`get_param_fatality_fraction`) = c("SWIGFunction", class('get_param_fatali
 `get_param_mean_time_to_hospital` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_time_to_hospital', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_time_to_hospital', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12953,7 +12953,7 @@ class(`get_param_mean_time_to_hospital`) = c("SWIGFunction", class('get_param_me
 `get_param_mean_time_to_critical` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_time_to_critical', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_time_to_critical', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12966,7 +12966,7 @@ class(`get_param_mean_time_to_critical`) = c("SWIGFunction", class('get_param_me
 `get_param_sd_time_to_critical` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_sd_time_to_critical', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_sd_time_to_critical', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12979,7 +12979,7 @@ class(`get_param_sd_time_to_critical`) = c("SWIGFunction", class('get_param_sd_t
 `get_param_mean_time_to_recover` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_time_to_recover', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_time_to_recover', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -12992,7 +12992,7 @@ class(`get_param_mean_time_to_recover`) = c("SWIGFunction", class('get_param_mea
 `get_param_mean_sd_to_recover` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_sd_to_recover', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_sd_to_recover', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13005,7 +13005,7 @@ class(`get_param_mean_sd_to_recover`) = c("SWIGFunction", class('get_param_mean_
 `get_param_mean_time_to_death` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_time_to_death', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_time_to_death', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13018,7 +13018,7 @@ class(`get_param_mean_time_to_death`) = c("SWIGFunction", class('get_param_mean_
 `get_param_mean_sd_to_death` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_sd_to_death', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_sd_to_death', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13037,7 +13037,7 @@ class(`get_param_mean_sd_to_death`) = c("SWIGFunction", class('get_param_mean_sd
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_household_size', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_household_size', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13056,7 +13056,7 @@ class(`get_param_household_size`) = c("SWIGFunction", class('get_param_household
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_population', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_population', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13075,7 +13075,7 @@ class(`get_param_population`) = c("SWIGFunction", class('get_param_population'))
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_fraction_asymptomatic', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_fraction_asymptomatic', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13088,7 +13088,7 @@ class(`get_param_fraction_asymptomatic`) = c("SWIGFunction", class('get_param_fr
 `get_param_asymptomatic_infectious_factor` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_asymptomatic_infectious_factor', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_asymptomatic_infectious_factor', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13101,7 +13101,7 @@ class(`get_param_asymptomatic_infectious_factor`) = c("SWIGFunction", class('get
 `get_param_mean_asymptomatic_to_recover` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_mean_asymptomatic_to_recover', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mean_asymptomatic_to_recover', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13120,7 +13120,7 @@ class(`get_param_mean_asymptomatic_to_recover`) = c("SWIGFunction", class('get_p
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_mild_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_mild_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13133,7 +13133,7 @@ class(`get_param_mild_fraction`) = c("SWIGFunction", class('get_param_mild_fract
 `get_param_sd_asymptomatic_to_recover` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_sd_asymptomatic_to_recover', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_sd_asymptomatic_to_recover', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13146,7 +13146,7 @@ class(`get_param_sd_asymptomatic_to_recover`) = c("SWIGFunction", class('get_par
 `get_param_quarantine_daily_interactions` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_daily_interactions', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_daily_interactions', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13159,7 +13159,7 @@ class(`get_param_quarantine_daily_interactions`) = c("SWIGFunction", class('get_
 `get_param_hospitalised_daily_interactions` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_hospitalised_daily_interactions', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_hospitalised_daily_interactions', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13172,7 +13172,7 @@ class(`get_param_hospitalised_daily_interactions`) = c("SWIGFunction", class('ge
 `get_param_self_quarantine_fraction` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_self_quarantine_fraction', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_self_quarantine_fraction', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13185,7 +13185,7 @@ class(`get_param_self_quarantine_fraction`) = c("SWIGFunction", class('get_param
 `get_param_trace_on_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_trace_on_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_trace_on_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13198,7 +13198,7 @@ class(`get_param_trace_on_symptoms`) = c("SWIGFunction", class('get_param_trace_
 `get_param_trace_on_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_trace_on_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_trace_on_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13211,7 +13211,7 @@ class(`get_param_trace_on_positive`) = c("SWIGFunction", class('get_param_trace_
 `get_param_quarantine_length_self` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_length_self', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_length_self', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13224,7 +13224,7 @@ class(`get_param_quarantine_length_self`) = c("SWIGFunction", class('get_param_q
 `get_param_quarantine_length_traced_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_length_traced_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_length_traced_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13237,7 +13237,7 @@ class(`get_param_quarantine_length_traced_symptoms`) = c("SWIGFunction", class('
 `get_param_quarantine_length_traced_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_length_traced_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_length_traced_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13250,7 +13250,7 @@ class(`get_param_quarantine_length_traced_positive`) = c("SWIGFunction", class('
 `get_param_quarantine_length_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_length_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_length_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13263,7 +13263,7 @@ class(`get_param_quarantine_length_positive`) = c("SWIGFunction", class('get_par
 `get_param_quarantine_dropout_self` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_dropout_self', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_dropout_self', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13276,7 +13276,7 @@ class(`get_param_quarantine_dropout_self`) = c("SWIGFunction", class('get_param_
 `get_param_quarantine_dropout_traced_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_dropout_traced_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_dropout_traced_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13289,7 +13289,7 @@ class(`get_param_quarantine_dropout_traced_positive`) = c("SWIGFunction", class(
 `get_param_quarantine_dropout_traced_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_dropout_traced_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_dropout_traced_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13302,7 +13302,7 @@ class(`get_param_quarantine_dropout_traced_symptoms`) = c("SWIGFunction", class(
 `get_param_quarantine_dropout_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_dropout_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_dropout_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13315,7 +13315,7 @@ class(`get_param_quarantine_dropout_positive`) = c("SWIGFunction", class('get_pa
 `get_param_quarantine_compliance_traced_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_compliance_traced_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_compliance_traced_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13328,7 +13328,7 @@ class(`get_param_quarantine_compliance_traced_symptoms`) = c("SWIGFunction", cla
 `get_param_quarantine_compliance_traced_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_compliance_traced_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_compliance_traced_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13341,7 +13341,7 @@ class(`get_param_quarantine_compliance_traced_positive`) = c("SWIGFunction", cla
 `get_param_quarantine_on_traced` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_on_traced', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_on_traced', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13354,7 +13354,7 @@ class(`get_param_quarantine_on_traced`) = c("SWIGFunction", class('get_param_qua
 `get_param_traceable_interaction_fraction` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_traceable_interaction_fraction', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_traceable_interaction_fraction', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13367,7 +13367,7 @@ class(`get_param_traceable_interaction_fraction`) = c("SWIGFunction", class('get
 `get_param_tracing_network_depth` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_tracing_network_depth', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_tracing_network_depth', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13380,7 +13380,7 @@ class(`get_param_tracing_network_depth`) = c("SWIGFunction", class('get_param_tr
 `get_param_allow_clinical_diagnosis` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_allow_clinical_diagnosis', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_allow_clinical_diagnosis', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13393,7 +13393,7 @@ class(`get_param_allow_clinical_diagnosis`) = c("SWIGFunction", class('get_param
 `get_param_quarantine_household_on_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_household_on_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_household_on_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13406,7 +13406,7 @@ class(`get_param_quarantine_household_on_symptoms`) = c("SWIGFunction", class('g
 `get_param_quarantine_household_on_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_household_on_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_household_on_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13419,7 +13419,7 @@ class(`get_param_quarantine_household_on_positive`) = c("SWIGFunction", class('g
 `get_param_quarantine_household_on_traced_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_household_on_traced_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_household_on_traced_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13432,7 +13432,7 @@ class(`get_param_quarantine_household_on_traced_positive`) = c("SWIGFunction", c
 `get_param_quarantine_household_on_traced_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_household_on_traced_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_household_on_traced_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13445,7 +13445,7 @@ class(`get_param_quarantine_household_on_traced_symptoms`) = c("SWIGFunction", c
 `get_param_quarantine_household_contacts_on_positive` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_quarantine_household_contacts_on_positive', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_quarantine_household_contacts_on_positive', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13458,7 +13458,7 @@ class(`get_param_quarantine_household_contacts_on_positive`) = c("SWIGFunction",
 `get_param_test_on_symptoms` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_on_symptoms', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_on_symptoms', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13471,7 +13471,7 @@ class(`get_param_test_on_symptoms`) = c("SWIGFunction", class('get_param_test_on
 `get_param_test_on_traced` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_on_traced', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_on_traced', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13484,7 +13484,7 @@ class(`get_param_test_on_traced`) = c("SWIGFunction", class('get_param_test_on_t
 `get_param_test_release_on_negative` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_release_on_negative', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_release_on_negative', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13497,7 +13497,7 @@ class(`get_param_test_release_on_negative`) = c("SWIGFunction", class('get_param
 `get_param_test_insensitive_period` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_insensitive_period', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_insensitive_period', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13510,7 +13510,7 @@ class(`get_param_test_insensitive_period`) = c("SWIGFunction", class('get_param_
 `get_param_test_sensitive_period` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_sensitive_period', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_sensitive_period', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13523,7 +13523,7 @@ class(`get_param_test_sensitive_period`) = c("SWIGFunction", class('get_param_te
 `get_param_test_sensitivity` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_sensitivity', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_sensitivity', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13536,7 +13536,7 @@ class(`get_param_test_sensitivity`) = c("SWIGFunction", class('get_param_test_se
 `get_param_test_specificity` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_specificity', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_specificity', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13549,7 +13549,7 @@ class(`get_param_test_specificity`) = c("SWIGFunction", class('get_param_test_sp
 `get_param_test_result_wait` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_result_wait', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_result_wait', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13562,7 +13562,7 @@ class(`get_param_test_result_wait`) = c("SWIGFunction", class('get_param_test_re
 `get_param_test_order_wait` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_order_wait', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_order_wait', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13575,7 +13575,7 @@ class(`get_param_test_order_wait`) = c("SWIGFunction", class('get_param_test_ord
 `get_param_test_order_wait_priority` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_order_wait_priority', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_order_wait_priority', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13588,7 +13588,7 @@ class(`get_param_test_order_wait_priority`) = c("SWIGFunction", class('get_param
 `get_param_test_result_wait_priority` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_test_result_wait_priority', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_test_result_wait_priority', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13607,7 +13607,7 @@ class(`get_param_test_result_wait_priority`) = c("SWIGFunction", class('get_para
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_priority_test_contacts', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_priority_test_contacts', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13626,7 +13626,7 @@ class(`get_param_priority_test_contacts`) = c("SWIGFunction", class('get_param_p
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_app_users_fraction', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_app_users_fraction', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13639,7 +13639,7 @@ class(`get_param_app_users_fraction`) = c("SWIGFunction", class('get_param_app_u
 `get_param_app_turned_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_app_turned_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_app_turned_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13652,7 +13652,7 @@ class(`get_param_app_turned_on`) = c("SWIGFunction", class('get_param_app_turned
 `get_param_app_turn_on_time` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_app_turn_on_time', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_app_turn_on_time', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13665,7 +13665,7 @@ class(`get_param_app_turn_on_time`) = c("SWIGFunction", class('get_param_app_tur
 `get_param_daily_non_cov_symptoms_rate` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_daily_non_cov_symptoms_rate', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_daily_non_cov_symptoms_rate', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13684,7 +13684,7 @@ class(`get_param_daily_non_cov_symptoms_rate`) = c("SWIGFunction", class('get_pa
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_lockdown_occupation_multiplier', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_occupation_multiplier', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13697,7 +13697,7 @@ class(`get_param_lockdown_occupation_multiplier`) = c("SWIGFunction", class('get
 `get_param_lockdown_random_network_multiplier` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_random_network_multiplier', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_random_network_multiplier', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13710,7 +13710,7 @@ class(`get_param_lockdown_random_network_multiplier`) = c("SWIGFunction", class(
 `get_param_lockdown_house_interaction_multiplier` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_house_interaction_multiplier', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_house_interaction_multiplier', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13723,7 +13723,7 @@ class(`get_param_lockdown_house_interaction_multiplier`) = c("SWIGFunction", cla
 `get_param_lockdown_time_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_time_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_time_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13736,7 +13736,7 @@ class(`get_param_lockdown_time_on`) = c("SWIGFunction", class('get_param_lockdow
 `get_param_lockdown_time_off` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_time_off', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_time_off', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13749,7 +13749,7 @@ class(`get_param_lockdown_time_off`) = c("SWIGFunction", class('get_param_lockdo
 `get_param_lockdown_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13762,7 +13762,7 @@ class(`get_param_lockdown_on`) = c("SWIGFunction", class('get_param_lockdown_on'
 `get_param_lockdown_elderly_time_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_elderly_time_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_elderly_time_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13775,7 +13775,7 @@ class(`get_param_lockdown_elderly_time_on`) = c("SWIGFunction", class('get_param
 `get_param_lockdown_elderly_time_off` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_elderly_time_off', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_elderly_time_off', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13788,7 +13788,7 @@ class(`get_param_lockdown_elderly_time_off`) = c("SWIGFunction", class('get_para
 `get_param_lockdown_elderly_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_lockdown_elderly_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_lockdown_elderly_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13801,7 +13801,7 @@ class(`get_param_lockdown_elderly_on`) = c("SWIGFunction", class('get_param_lock
 `get_param_symptoms_time_on` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_symptoms_time_on', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_symptoms_time_on', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13814,7 +13814,7 @@ class(`get_param_symptoms_time_on`) = c("SWIGFunction", class('get_param_symptom
 `get_param_testing_symptoms_time_off` = function(params, .copy = FALSE)
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
-  ;.Call('R_swig_get_param_testing_symptoms_time_off', params, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_testing_symptoms_time_off', params, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13833,7 +13833,7 @@ class(`get_param_testing_symptoms_time_off`) = c("SWIGFunction", class('get_para
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_get_param_location_death_icu', params, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_get_param_location_death_icu', params, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13847,7 +13847,7 @@ class(`get_param_location_death_icu`) = c("SWIGFunction", class('get_param_locat
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_rng_seed', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_rng_seed', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13861,7 +13861,7 @@ class(`set_param_rng_seed`) = c("SWIGFunction", class('set_param_rng_seed'))
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_param_id', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_param_id', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13875,7 +13875,7 @@ class(`set_param_param_id`) = c("SWIGFunction", class('set_param_param_id'))
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_n_total', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_n_total', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13889,7 +13889,7 @@ class(`set_param_n_total`) = c("SWIGFunction", class('set_param_n_total'))
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_days_of_interactions', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_days_of_interactions', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13909,7 +13909,7 @@ class(`set_param_days_of_interactions`) = c("SWIGFunction", class('set_param_day
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_mean_random_interactions', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_random_interactions', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13929,7 +13929,7 @@ class(`set_param_mean_random_interactions`) = c("SWIGFunction", class('set_param
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_sd_random_interactions', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_random_interactions', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13948,7 +13948,7 @@ class(`set_param_sd_random_interactions`) = c("SWIGFunction", class('set_param_s
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_random_interaction_distribution', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_random_interaction_distribution', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13968,7 +13968,7 @@ class(`set_param_random_interaction_distribution`) = c("SWIGFunction", class('se
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_mean_work_interactions', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_work_interactions', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13982,7 +13982,7 @@ class(`set_param_mean_work_interactions`) = c("SWIGFunction", class('set_param_m
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_daily_fraction_work', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_daily_fraction_work', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -13996,7 +13996,7 @@ class(`set_param_daily_fraction_work`) = c("SWIGFunction", class('set_param_dail
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_child_network_adults', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_child_network_adults', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14010,7 +14010,7 @@ class(`set_param_child_network_adults`) = c("SWIGFunction", class('set_param_chi
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_elderly_network_adults', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_elderly_network_adults', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14024,7 +14024,7 @@ class(`set_param_elderly_network_adults`) = c("SWIGFunction", class('set_param_e
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_infectious_period', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_infectious_period', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14038,7 +14038,7 @@ class(`set_param_mean_infectious_period`) = c("SWIGFunction", class('set_param_m
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_sd_infectious_period', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_infectious_period', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14057,7 +14057,7 @@ class(`set_param_sd_infectious_period`) = c("SWIGFunction", class('set_param_sd_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_infectious_rate', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_infectious_rate', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14077,7 +14077,7 @@ class(`set_param_infectious_rate`) = c("SWIGFunction", class('set_param_infectio
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_relative_susceptibility', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_relative_susceptibility', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14097,7 +14097,7 @@ class(`set_param_relative_susceptibility`) = c("SWIGFunction", class('set_param_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_adjusted_susceptibility', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_adjusted_susceptibility', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14117,7 +14117,7 @@ class(`set_param_adjusted_susceptibility`) = c("SWIGFunction", class('set_param_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_relative_transmission', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_relative_transmission', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14137,7 +14137,7 @@ class(`set_param_relative_transmission`) = c("SWIGFunction", class('set_param_re
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_manual_traceable_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_manual_traceable_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14151,7 +14151,7 @@ class(`set_param_manual_traceable_fraction`) = c("SWIGFunction", class('set_para
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_time_to_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_time_to_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14165,7 +14165,7 @@ class(`set_param_mean_time_to_symptoms`) = c("SWIGFunction", class('set_param_me
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_sd_time_to_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_time_to_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14185,7 +14185,7 @@ class(`set_param_sd_time_to_symptoms`) = c("SWIGFunction", class('set_param_sd_t
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_hospitalised_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_hospitalised_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14205,7 +14205,7 @@ class(`set_param_hospitalised_fraction`) = c("SWIGFunction", class('set_param_ho
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_critical_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_critical_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14225,7 +14225,7 @@ class(`set_param_critical_fraction`) = c("SWIGFunction", class('set_param_critic
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_fatality_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_fatality_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14239,7 +14239,7 @@ class(`set_param_fatality_fraction`) = c("SWIGFunction", class('set_param_fatali
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_time_to_hospital', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_time_to_hospital', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14253,7 +14253,7 @@ class(`set_param_mean_time_to_hospital`) = c("SWIGFunction", class('set_param_me
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_time_to_critical', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_time_to_critical', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14267,7 +14267,7 @@ class(`set_param_mean_time_to_critical`) = c("SWIGFunction", class('set_param_me
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_sd_time_to_critical', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_time_to_critical', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14281,7 +14281,7 @@ class(`set_param_sd_time_to_critical`) = c("SWIGFunction", class('set_param_sd_t
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_time_to_recover', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_time_to_recover', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14295,7 +14295,7 @@ class(`set_param_mean_time_to_recover`) = c("SWIGFunction", class('set_param_mea
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_sd_time_to_recover', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_time_to_recover', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14309,7 +14309,7 @@ class(`set_param_sd_time_to_recover`) = c("SWIGFunction", class('set_param_sd_ti
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_time_to_death', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_time_to_death', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14329,7 +14329,7 @@ class(`set_param_mean_time_to_death`) = c("SWIGFunction", class('set_param_mean_
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_household_size', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_household_size', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14349,7 +14349,7 @@ class(`set_param_household_size`) = c("SWIGFunction", class('set_param_household
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_population', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_population', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14369,7 +14369,7 @@ class(`set_param_population`) = c("SWIGFunction", class('set_param_population'))
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_fraction_asymptomatic', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_fraction_asymptomatic', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14383,7 +14383,7 @@ class(`set_param_fraction_asymptomatic`) = c("SWIGFunction", class('set_param_fr
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_asymptomatic_infectious_factor', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_asymptomatic_infectious_factor', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14397,7 +14397,7 @@ class(`set_param_asymptomatic_infectious_factor`) = c("SWIGFunction", class('set
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_mean_asymptomatic_to_recovery', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mean_asymptomatic_to_recovery', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14411,7 +14411,7 @@ class(`set_param_mean_asymptomatic_to_recovery`) = c("SWIGFunction", class('set_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_sd_asymptomatic_to_recovery', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_sd_asymptomatic_to_recovery', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14430,7 +14430,7 @@ class(`set_param_sd_asymptomatic_to_recovery`) = c("SWIGFunction", class('set_pa
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantined_daily_interactions', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantined_daily_interactions', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14449,7 +14449,7 @@ class(`set_param_quarantined_daily_interactions`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_hospitalised_daily_interactions', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_hospitalised_daily_interactions', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14468,7 +14468,7 @@ class(`set_param_hospitalised_daily_interactions`) = c("SWIGFunction", class('se
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_days', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_days', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14482,7 +14482,7 @@ class(`set_param_quarantine_days`) = c("SWIGFunction", class('set_param_quaranti
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_self_quarantine_fraction', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_self_quarantine_fraction', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14501,7 +14501,7 @@ class(`set_param_self_quarantine_fraction`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_trace_on_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_trace_on_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14520,7 +14520,7 @@ class(`set_param_trace_on_symptoms`) = c("SWIGFunction", class('set_param_trace_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_trace_on_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_trace_on_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14539,7 +14539,7 @@ class(`set_param_trace_on_positive`) = c("SWIGFunction", class('set_param_trace_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_length_self', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_length_self', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14558,7 +14558,7 @@ class(`set_param_quarantine_length_self`) = c("SWIGFunction", class('set_param_q
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_length_traced_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_length_traced_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14577,7 +14577,7 @@ class(`set_param_quarantine_length_traced_symptoms`) = c("SWIGFunction", class('
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_length_traced_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_length_traced_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14596,7 +14596,7 @@ class(`set_param_quarantine_length_traced_positive`) = c("SWIGFunction", class('
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_length_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_length_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14610,7 +14610,7 @@ class(`set_param_quarantine_length_positive`) = c("SWIGFunction", class('set_par
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_dropout_self', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_dropout_self', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14624,7 +14624,7 @@ class(`set_param_quarantine_dropout_self`) = c("SWIGFunction", class('set_param_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_dropout_traced_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_dropout_traced_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14638,7 +14638,7 @@ class(`set_param_quarantine_dropout_traced_positive`) = c("SWIGFunction", class(
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_dropout_traced_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_dropout_traced_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14652,7 +14652,7 @@ class(`set_param_quarantine_dropout_traced_symptoms`) = c("SWIGFunction", class(
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_dropout_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_dropout_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14666,7 +14666,7 @@ class(`set_param_quarantine_dropout_positive`) = c("SWIGFunction", class('set_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_compliance_traced_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_compliance_traced_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14680,7 +14680,7 @@ class(`set_param_quarantine_compliance_traced_symptoms`) = c("SWIGFunction", cla
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_quarantine_compliance_traced_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_compliance_traced_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14699,7 +14699,7 @@ class(`set_param_quarantine_compliance_traced_positive`) = c("SWIGFunction", cla
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_on_traced', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_on_traced', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14713,7 +14713,7 @@ class(`set_param_quarantine_on_traced`) = c("SWIGFunction", class('set_param_qua
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_traceable_interaction_fraction', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_traceable_interaction_fraction', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14732,7 +14732,7 @@ class(`set_param_traceable_interaction_fraction`) = c("SWIGFunction", class('set
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_tracing_network_depth', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_tracing_network_depth', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14751,7 +14751,7 @@ class(`set_param_tracing_network_depth`) = c("SWIGFunction", class('set_param_tr
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_allow_clinical_diagnosis', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_allow_clinical_diagnosis', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14770,7 +14770,7 @@ class(`set_param_allow_clinical_diagnosis`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_household_on_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_household_on_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14789,7 +14789,7 @@ class(`set_param_quarantine_household_on_symptoms`) = c("SWIGFunction", class('s
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_household_on_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_household_on_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14808,7 +14808,7 @@ class(`set_param_quarantine_household_on_positive`) = c("SWIGFunction", class('s
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_household_on_traced_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_household_on_traced_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14827,7 +14827,7 @@ class(`set_param_quarantine_household_on_traced_positive`) = c("SWIGFunction", c
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_household_on_traced_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_household_on_traced_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14846,7 +14846,7 @@ class(`set_param_quarantine_household_on_traced_symptoms`) = c("SWIGFunction", c
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_quarantine_household_contacts_on_positive', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_quarantine_household_contacts_on_positive', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14865,7 +14865,7 @@ class(`set_param_quarantine_household_contacts_on_positive`) = c("SWIGFunction",
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_on_symptoms', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_on_symptoms', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14884,7 +14884,7 @@ class(`set_param_test_on_symptoms`) = c("SWIGFunction", class('set_param_test_on
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_on_traced', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_on_traced', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14903,7 +14903,7 @@ class(`set_param_test_on_traced`) = c("SWIGFunction", class('set_param_test_on_t
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_release_on_negative', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_release_on_negative', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14922,7 +14922,7 @@ class(`set_param_test_release_on_negative`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_insensitive_period', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_insensitive_period', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14941,7 +14941,7 @@ class(`set_param_test_insensitive_period`) = c("SWIGFunction", class('set_param_
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_sensitive_period', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_sensitive_period', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14955,7 +14955,7 @@ class(`set_param_test_sensitive_period`) = c("SWIGFunction", class('set_param_te
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_test_sensitivity', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_sensitivity', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14969,7 +14969,7 @@ class(`set_param_test_sensitivity`) = c("SWIGFunction", class('set_param_test_se
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_test_specificity', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_specificity', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -14988,7 +14988,7 @@ class(`set_param_test_specificity`) = c("SWIGFunction", class('set_param_test_sp
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_result_wait', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_result_wait', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15007,7 +15007,7 @@ class(`set_param_test_result_wait`) = c("SWIGFunction", class('set_param_test_re
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_order_wait', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_order_wait', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15026,7 +15026,7 @@ class(`set_param_test_order_wait`) = c("SWIGFunction", class('set_param_test_ord
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_order_wait_priority', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_order_wait_priority', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15045,7 +15045,7 @@ class(`set_param_test_order_wait_priority`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_test_result_wait_priority', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_test_result_wait_priority', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15070,7 +15070,7 @@ class(`set_param_test_result_wait_priority`) = c("SWIGFunction", class('set_para
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_priority_test_contacts', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_priority_test_contacts', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15090,7 +15090,7 @@ class(`set_param_priority_test_contacts`) = c("SWIGFunction", class('set_param_p
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_app_users_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_app_users_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15109,7 +15109,7 @@ class(`set_param_app_users_fraction`) = c("SWIGFunction", class('set_param_app_u
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_app_turn_on_time', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_app_turn_on_time', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15128,7 +15128,7 @@ class(`set_param_app_turn_on_time`) = c("SWIGFunction", class('set_param_app_tur
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_app_turned_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_app_turned_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15142,7 +15142,7 @@ class(`set_param_app_turned_on`) = c("SWIGFunction", class('set_param_app_turned
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_daily_non_cov_symptoms_rate', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_daily_non_cov_symptoms_rate', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15162,7 +15162,7 @@ class(`set_param_daily_non_cov_symptoms_rate`) = c("SWIGFunction", class('set_pa
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_lockdown_occupation_multiplier', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_occupation_multiplier', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15176,7 +15176,7 @@ class(`set_param_lockdown_occupation_multiplier`) = c("SWIGFunction", class('set
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_random_network_multiplier', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_random_network_multiplier', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15190,7 +15190,7 @@ class(`set_param_random_network_multiplier`) = c("SWIGFunction", class('set_para
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_lockdown_house_interaction_multiplier', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_house_interaction_multiplier', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15209,7 +15209,7 @@ class(`set_param_lockdown_house_interaction_multiplier`) = c("SWIGFunction", cla
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_time_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_time_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15228,7 +15228,7 @@ class(`set_param_lockdown_time_on`) = c("SWIGFunction", class('set_param_lockdow
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_time_off', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_time_off', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15247,7 +15247,7 @@ class(`set_param_lockdown_time_off`) = c("SWIGFunction", class('set_param_lockdo
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15266,7 +15266,7 @@ class(`set_param_lockdown_on`) = c("SWIGFunction", class('set_param_lockdown_on'
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_elderly_time_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_elderly_time_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15285,7 +15285,7 @@ class(`set_param_lockdown_elderly_time_on`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_elderly_time_off', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_elderly_time_off', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15304,7 +15304,7 @@ class(`set_param_lockdown_elderly_time_off`) = c("SWIGFunction", class('set_para
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_lockdown_elderly_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_lockdown_elderly_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15323,7 +15323,7 @@ class(`set_param_lockdown_elderly_on`) = c("SWIGFunction", class('set_param_lock
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_testing_symptoms_time_on', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_testing_symptoms_time_on', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15342,7 +15342,7 @@ class(`set_param_testing_symptoms_time_on`) = c("SWIGFunction", class('set_param
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_set_param_testing_symptoms_time_off', params, value, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_testing_symptoms_time_off', params, value, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15362,7 +15362,7 @@ class(`set_param_testing_symptoms_time_off`) = c("SWIGFunction", class('set_para
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_mild_fraction', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_mild_fraction', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15382,7 +15382,7 @@ class(`set_param_mild_fraction`) = c("SWIGFunction", class('set_param_mild_fract
     warning("using only the first element of idx");
   };
   
-  ;.Call('R_swig_set_param_location_death_icu', params, value, idx, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_set_param_location_death_icu', params, value, idx, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15455,7 +15455,7 @@ class(`set_param_location_death_icu`) = c("SWIGFunction", class('set_param_locat
     warning("using only the first element of i_80");
   };
   
-  ;.Call('R_swig_add_household_to_ref_households', params, idx, i_0_9, i_10_19, i_20_29, i_30_39, i_40_49, i_50_59, i_60_69, i_70_79, i_80, PACKAGE='covid19');
+  ;.Call('R_swig_add_household_to_ref_households', params, idx, i_0_9, i_10_19, i_20_29, i_30_39, i_40_49, i_50_59, i_60_69, i_70_79, i_80, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15473,7 +15473,7 @@ class(`add_household_to_ref_households`) = c("SWIGFunction", class('add_househol
     warning("using only the first element of nelements");
   };
   
-  ;ans = .Call('R_swig_new_doubleArray', nelements, PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_doubleArray', nelements, PACKAGE='OpenABMCovid19');
   ans <- new("_p_doubleArray", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_doubleArray)
@@ -15490,7 +15490,7 @@ class(`doubleArray`) = c("SWIGFunction", class('doubleArray'))
 `delete_doubleArray` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_delete_doubleArray', self, PACKAGE='covid19');
+  ;.Call('R_swig_delete_doubleArray', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15509,7 +15509,7 @@ class(`delete_doubleArray`) = c("SWIGFunction", class('delete_doubleArray'))
     warning("using only the first element of index");
   };
   
-  ;.Call('R_swig_doubleArray_getitem', self, index, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_doubleArray_getitem', self, index, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15529,7 +15529,7 @@ class(`doubleArray_getitem`) = c("SWIGFunction", class('doubleArray_getitem'))
   };
   
   
-  ;.Call('R_swig_doubleArray_setitem', self, index, value, PACKAGE='covid19');
+  ;.Call('R_swig_doubleArray_setitem', self, index, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15542,7 +15542,7 @@ class(`doubleArray_setitem`) = c("SWIGFunction", class('doubleArray_setitem'))
 `doubleArray_cast` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_doubleArray_cast', self, PACKAGE='covid19');
+  ;.Call('R_swig_doubleArray_cast', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15554,7 +15554,7 @@ class(`doubleArray_cast`) = c("SWIGFunction", class('doubleArray_cast'))
 
 `doubleArray_frompointer` = function(t)
 {
-  ;ans = .Call('R_swig_doubleArray_frompointer', t, PACKAGE='covid19');
+  ;ans = .Call('R_swig_doubleArray_frompointer', t, PACKAGE='OpenABMCovid19');
   ans <- new("_p_doubleArray", ref=ans) ;
   
   ans
@@ -15614,7 +15614,7 @@ setMethod('copyToC', 'doubleArray', CopyToC_doubleArray);
     warning("using only the first element of nelements");
   };
   
-  ;ans = .Call('R_swig_new_intArray', nelements, PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_intArray', nelements, PACKAGE='OpenABMCovid19');
   ans <- new("_p_intArray", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_intArray)
@@ -15631,7 +15631,7 @@ class(`intArray`) = c("SWIGFunction", class('intArray'))
 `delete_intArray` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_delete_intArray', self, PACKAGE='covid19');
+  ;.Call('R_swig_delete_intArray', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15650,7 +15650,7 @@ class(`delete_intArray`) = c("SWIGFunction", class('delete_intArray'))
     warning("using only the first element of index");
   };
   
-  ;.Call('R_swig_intArray_getitem', self, index, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_intArray_getitem', self, index, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15675,7 +15675,7 @@ class(`intArray_getitem`) = c("SWIGFunction", class('intArray_getitem'))
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_intArray_setitem', self, index, value, PACKAGE='covid19');
+  ;.Call('R_swig_intArray_setitem', self, index, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15688,7 +15688,7 @@ class(`intArray_setitem`) = c("SWIGFunction", class('intArray_setitem'))
 `intArray_cast` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_intArray_cast', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_intArray_cast', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_int", ref=ans) ;
   
   ans
@@ -15704,7 +15704,7 @@ class(`intArray_cast`) = c("SWIGFunction", class('intArray_cast'))
 `intArray_frompointer` = function(t)
 {
   t = as.integer(t);
-  ;ans = .Call('R_swig_intArray_frompointer', t, PACKAGE='covid19');
+  ;ans = .Call('R_swig_intArray_frompointer', t, PACKAGE='OpenABMCovid19');
   ans <- new("_p_intArray", ref=ans) ;
   
   ans
@@ -15764,7 +15764,7 @@ setMethod('copyToC', 'intArray', CopyToC_intArray);
     warning("using only the first element of nelements");
   };
   
-  ;ans = .Call('R_swig_new_longArray', nelements, PACKAGE='covid19');
+  ;ans = .Call('R_swig_new_longArray', nelements, PACKAGE='OpenABMCovid19');
   ans <- new("_p_longArray", ref=ans) ;
   
   reg.finalizer(ans@ref, delete_longArray)
@@ -15781,7 +15781,7 @@ class(`longArray`) = c("SWIGFunction", class('longArray'))
 `delete_longArray` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;.Call('R_swig_delete_longArray', self, PACKAGE='covid19');
+  ;.Call('R_swig_delete_longArray', self, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15800,7 +15800,7 @@ class(`delete_longArray`) = c("SWIGFunction", class('delete_longArray'))
     warning("using only the first element of index");
   };
   
-  ;.Call('R_swig_longArray_getitem', self, index, as.logical(.copy), PACKAGE='covid19');
+  ;.Call('R_swig_longArray_getitem', self, index, as.logical(.copy), PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15825,7 +15825,7 @@ class(`longArray_getitem`) = c("SWIGFunction", class('longArray_getitem'))
     warning("using only the first element of value");
   };
   
-  ;.Call('R_swig_longArray_setitem', self, index, value, PACKAGE='covid19');
+  ;.Call('R_swig_longArray_setitem', self, index, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15838,7 +15838,7 @@ class(`longArray_setitem`) = c("SWIGFunction", class('longArray_setitem'))
 `longArray_cast` = function(self)
 {
   if (inherits(self, "ExternalReference")) self = slot(self,"ref") 
-  ;ans = .Call('R_swig_longArray_cast', self, PACKAGE='covid19');
+  ;ans = .Call('R_swig_longArray_cast', self, PACKAGE='OpenABMCovid19');
   ans <- new("_p_long", ref=ans) ;
   
   ans
@@ -15854,7 +15854,7 @@ class(`longArray_cast`) = c("SWIGFunction", class('longArray_cast'))
 `longArray_frompointer` = function(t)
 {
   t = as.integer(t);
-  ;ans = .Call('R_swig_longArray_frompointer', t, PACKAGE='covid19');
+  ;ans = .Call('R_swig_longArray_frompointer', t, PACKAGE='OpenABMCovid19');
   ans <- new("_p_longArray", ref=ans) ;
   
   ans
@@ -15910,7 +15910,7 @@ setMethod('copyToC', 'longArray', CopyToC_longArray);
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_mean_random_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_mean_random_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15924,7 +15924,7 @@ class(`get_param_array_mean_random_interactions`) = c("SWIGFunction", class('get
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_sd_random_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_sd_random_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15938,7 +15938,7 @@ class(`get_param_array_sd_random_interactions`) = c("SWIGFunction", class('get_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_mean_work_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_mean_work_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15952,7 +15952,7 @@ class(`get_param_array_mean_work_interactions`) = c("SWIGFunction", class('get_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_relative_susceptibility', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_relative_susceptibility', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15966,7 +15966,7 @@ class(`get_param_array_relative_susceptibility`) = c("SWIGFunction", class('get_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_adjusted_susceptibility', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_adjusted_susceptibility', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15980,7 +15980,7 @@ class(`get_param_array_adjusted_susceptibility`) = c("SWIGFunction", class('get_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_relative_transmission', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_relative_transmission', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -15994,7 +15994,7 @@ class(`get_param_array_relative_transmission`) = c("SWIGFunction", class('get_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_relative_transmission_used', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_relative_transmission_used', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16008,7 +16008,7 @@ class(`get_param_array_relative_transmission_used`) = c("SWIGFunction", class('g
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_hospitalised_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_hospitalised_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16022,7 +16022,7 @@ class(`get_param_array_hospitalised_fraction`) = c("SWIGFunction", class('get_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_critical_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_critical_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16036,7 +16036,7 @@ class(`get_param_array_critical_fraction`) = c("SWIGFunction", class('get_param_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_fatality_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_fatality_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16050,7 +16050,7 @@ class(`get_param_array_fatality_fraction`) = c("SWIGFunction", class('get_param_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_household_size', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_household_size', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16064,7 +16064,7 @@ class(`get_param_array_household_size`) = c("SWIGFunction", class('get_param_arr
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_population', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_population', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16078,7 +16078,7 @@ class(`get_param_array_population`) = c("SWIGFunction", class('get_param_array_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_fraction_asymptomatic', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_fraction_asymptomatic', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16092,7 +16092,7 @@ class(`get_param_array_fraction_asymptomatic`) = c("SWIGFunction", class('get_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_mild_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_mild_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16106,7 +16106,7 @@ class(`get_param_array_mild_fraction`) = c("SWIGFunction", class('get_param_arra
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_location_death_icu', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_location_death_icu', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16120,7 +16120,7 @@ class(`get_param_array_location_death_icu`) = c("SWIGFunction", class('get_param
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_get_param_array_app_users_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_get_param_array_app_users_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16134,7 +16134,7 @@ class(`get_param_array_app_users_fraction`) = c("SWIGFunction", class('get_param
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_mean_random_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_mean_random_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16148,7 +16148,7 @@ class(`set_param_array_mean_random_interactions`) = c("SWIGFunction", class('set
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_sd_random_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_sd_random_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16162,7 +16162,7 @@ class(`set_param_array_sd_random_interactions`) = c("SWIGFunction", class('set_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_mean_work_interactions', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_mean_work_interactions', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16176,7 +16176,7 @@ class(`set_param_array_mean_work_interactions`) = c("SWIGFunction", class('set_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_relative_susceptibility', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_relative_susceptibility', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16190,7 +16190,7 @@ class(`set_param_array_relative_susceptibility`) = c("SWIGFunction", class('set_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_adjusted_susceptibility', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_adjusted_susceptibility', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16204,7 +16204,7 @@ class(`set_param_array_adjusted_susceptibility`) = c("SWIGFunction", class('set_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_relative_transmission', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_relative_transmission', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16218,7 +16218,7 @@ class(`set_param_array_relative_transmission`) = c("SWIGFunction", class('set_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_relative_transmission_used', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_relative_transmission_used', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16232,7 +16232,7 @@ class(`set_param_array_relative_transmission_used`) = c("SWIGFunction", class('s
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_hospitalised_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_hospitalised_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16246,7 +16246,7 @@ class(`set_param_array_hospitalised_fraction`) = c("SWIGFunction", class('set_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_critical_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_critical_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16260,7 +16260,7 @@ class(`set_param_array_critical_fraction`) = c("SWIGFunction", class('set_param_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_fatality_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_fatality_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16274,7 +16274,7 @@ class(`set_param_array_fatality_fraction`) = c("SWIGFunction", class('set_param_
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_household_size', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_household_size', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16288,7 +16288,7 @@ class(`set_param_array_household_size`) = c("SWIGFunction", class('set_param_arr
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_population', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_population', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16302,7 +16302,7 @@ class(`set_param_array_population`) = c("SWIGFunction", class('set_param_array_p
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_fraction_asymptomatic', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_fraction_asymptomatic', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16316,7 +16316,7 @@ class(`set_param_array_fraction_asymptomatic`) = c("SWIGFunction", class('set_pa
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_mild_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_mild_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16330,7 +16330,7 @@ class(`set_param_array_mild_fraction`) = c("SWIGFunction", class('set_param_arra
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_app_users_fraction', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_app_users_fraction', params, value, PACKAGE='OpenABMCovid19');
   
 }
 
@@ -16344,7 +16344,7 @@ class(`set_param_array_app_users_fraction`) = c("SWIGFunction", class('set_param
 {
   if (inherits(params, "ExternalReference")) params = slot(params,"ref") 
   
-  ;.Call('R_swig_set_param_array_location_death_icu', params, value, PACKAGE='covid19');
+  ;.Call('R_swig_set_param_array_location_death_icu', params, value, PACKAGE='OpenABMCovid19');
   
 }
 

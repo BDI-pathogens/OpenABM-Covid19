@@ -32,6 +32,9 @@ CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 # Swig's output
 SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
 
+# R Package Name
+R_PKGNAME = OpenABMCovid19
+
 
 # To compile
 install: $(OBJS)
@@ -47,7 +50,7 @@ all: $(OBJS)
 
 clean:
 	$(PYTHON) -m pip uninstall -y covid19
-	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT) $(R_PKG)
+	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT)
 
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@
@@ -55,17 +58,11 @@ clean:
 
 # Generated source file (for R source package)
 update_R_files:
-	swig -r -o covid19_wrap_R.c covid19.i
-	mv covid19.R ../R/covid19.R
+	swig -r -package $(R_PKGNAME) -o covid19_wrap_R.c covid19.i
+	mv $(R_PKGNAME).R ../R/$(R_PKGNAME).R
 
   # Update NAMESPACE & DESCRIPTION files
-	grep '`.*` = function(.*)' ../R/covid19.R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
-  # 'Version' must be only numbers with '.' or '-': edit git-tag to match this
-	sed \
-	  -e "s/@VERSION@/$$(git describe --tags --abbrev=0 | cut -c 2-)/" \
-	  -e "s/@GIT_TAG@/$$(git describe --tags)/" \
-	  -e "s/@DATE@/$$(date +%Y-%m-%d)/" \
-	  DESCRIPTION.in > ../DESCRIPTION
+	grep '`.*` = function(.*)' ../R/$(R_PKGNAME).R | sed 's|`\(.*\)`.*|export( \1 )|' > ../NAMESPACE
 
 
 .PHONY: install dev all clean update_R_files
