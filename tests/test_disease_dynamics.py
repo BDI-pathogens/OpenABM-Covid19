@@ -559,10 +559,10 @@ class TestClass(object):
 
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, 50)
-        params.set_param("n_total", 20000)
+        params.set_param("n_total", 50000)
         params.set_param("n_seed_infection", 200)
-        params.set_param("end_time", 50)
-        params.set_param("infectious_rate", 4.0)
+        params.set_param("end_time", 30)
+        params.set_param("infectious_rate", 6.0)
         params.set_param("hospital_on", 0) #turning off hospital as this affects disease transitions
         params.set_param( test_params )
 

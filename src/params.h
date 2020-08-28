@@ -136,9 +136,9 @@ typedef struct{
 	int test_result_wait_priority;			// number of days to wait for a priority test result
 	int test_order_wait_priority;			// minimum number of days to wait for a priority test to be taken
 	int test_release_on_negative;			// release on a negative test result
-	
+
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
-	
+
 	int test_insensitive_period;			// number of days until a test is sensitive (delay test of recent contacts)
 	int test_sensitive_period;				// number of days post infection in which the test is sensitive
 	double test_sensitivity;				// sensitivity of test
@@ -162,13 +162,13 @@ typedef struct{
 
 	int testing_symptoms_time_on;							// testing symptoms turned on at this time
 	int testing_symptoms_time_off;							// testing symptoms turned off at this time
-		
+
 	int interventions_on;           // should we use interventions
 	int intervention_start_time;	// time at which interventions start
 
 	int sys_write_individual; 		// Should an individual file be written to output?
 	int sys_write_hospital; 		// Should a hospital file be written to output?
-	
+
 	long N_REFERENCE_HOUSEHOLDS;		// Number of households in the household demographics file
 	int **REFERENCE_HOUSEHOLDS;		// Array of reference households
 	demographic_household_table *demo_house; // Pointer to a table of demographic and house numbers (if user specified)
@@ -198,6 +198,7 @@ typedef struct{
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
+int get_model_param_hospital_on(model *model);
 double get_model_param_daily_fraction_work_used(model *model, int idx);
 int get_model_param_quarantine_days(model *model);
 double get_model_param_self_quarantine_fraction(model *model);
@@ -239,6 +240,7 @@ int get_model_param_manual_trace_n_workers( model* model );
 int get_model_param_manual_trace_interviews_per_worker_day( model* model );
 int get_model_param_manual_trace_notifications_per_worker_day( model* model );
 double get_model_param_manual_traceable_fraction( model* model, int );
+double get_model_param_fatality_fraction( model * model, int age_group );
 
 int set_model_param_quarantine_days(model *model, int value);
 int set_model_param_self_quarantine_fraction(model *model, double value);
@@ -282,10 +284,11 @@ int set_model_param_manual_traceable_fraction( model* model, double value, int t
 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
+int set_model_param_fatality_fraction( model * model, double value, int age_group );
 
 int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 int set_occupation_network_table( parameters* params,  long n_total, long n_networks );
-int set_indiv_occupation_network_property( parameters* params, long network, int age_group, double mean_interaction, double lockdown_multiplier, long network_id, const char *network_name );
+int set_indiv_occupation_network_property( parameters* params, long network, int age_type, double mean_interaction, double lockdown_multiplier, long network_id, const char *network_name );
 int set_indiv_occupation_network( parameters* params, long n_total, long *people, long *network );
 void set_up_default_occupation_network_table( parameters *params );
 

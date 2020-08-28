@@ -19,9 +19,9 @@ elderly_network_adults,0.2,,Ratio of adults to elderly in work network for elder
 days_of_interactions,10,,Length of historic interactions traced (days),,Active intervention parameters
 end_time,200,,End time (total number of simulated days),,
 n_seed_infection,5,,Number of infections seeded at simulation start,,Infection parameters
-mean_infectious_period,5.5,&#956;,Mean of the generation time distribution (days),"Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020",Infection parameters
-sd_infectious_period,2.14,&#963;,Standard deviation (days) of infectious period,"Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020",Infection parameters
-infectious_rate,5.64,*R*,Mean number of individuals infected by each infectious individual with moderate to severe symptoms,Derived from calibration,Infection parameters
+mean_infectious_period,5.5,&#956;,Mean of the generation time distribution (days),Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020,Infection parameters
+sd_infectious_period,2.14,&#963;,Standard deviation (days) of infectious period,Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020,Infection parameters
+infectious_rate,5.18,*R*,Mean number of individuals infected by each infectious individual with moderate to severe symptoms,Derived from calibration,Infection parameters
 mean_time_to_symptoms,5.42,&#956;<sub>sym</sub>,Mean time from infection to onset of symptoms (days),McAloon et al.,Disease dynamics parameters
 sd_time_to_symptoms,2.7,&#963;<sub>sym</sub>,Standard deviation of time from infection to onset of symptoms (days),McAloon et al.,Disease dynamics parameters
 mean_time_to_hospital,5.14,&#956;<sub>hosp</sub>,Mean time from symptom onset to hospitalisation (days),"Pellis et al, 2020",Disease dynamics parameters
@@ -31,26 +31,26 @@ mean_time_to_recover,12,&#956;<sub>rec</sub>,Mean time to recovery if hospitalis
 sd_time_to_recover,5,&#963;<sub>rec</sub>,Standard deviation of time to recovery if hospitalisaion is not required (days),Yang et al 2020,Disease dynamics parameters
 mean_time_to_death,11.74,&#956;<sub>death</sub>,Mean time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
 sd_time_to_death,8.79,&#963;<sub>death</sub>,Standard deviation of time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
-fraction_asymptomatic_0_9,0.605,&#966;<sub>asym</sub>(0-9),"Fraction of infected individuals who are asymptomatic, aged 0-9",,Disease dynamics parameters
-fraction_asymptomatic_10_19,0.546,&#966;<sub>asym</sub>(10-19),"Fraction of infected individuals who are asymptomatic, aged 10-19",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_20_29,0.483,&#966;<sub>asym</sub>(20-29),"Fraction of infected individuals who are asymptomatic, aged 20-29",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_30_39,0.418,&#966;<sub>asym</sub>(30-39),"Fraction of infected individuals who are asymptomatic, aged 30-39",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_40_49,0.354,&#966;<sub>asym</sub>(40-49),"Fraction of infected individuals who are asymptomatic, aged 40-49",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_50_59,0.294,&#966;<sub>asym</sub>(50-59),"Fraction of infected individuals who are asymptomatic, aged 50-59",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_60_69,0.242,&#966;<sub>asym</sub>(60-69),"Fraction of infected individuals who are asymptomatic, aged 60-69",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_70_79,0.199,&#966;<sub>asym</sub>(70-79),"Fraction of infected individuals who are asymptomatic, aged 70-79",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-fraction_asymptomatic_80,0.163,&#966;<sub>asym</sub>(80),"Fraction of infected individuals who are asymptomatic, aged 80+",,Disease dynamics parameters
-asymptomatic_infectious_factor,0.29,*A<sub>asym</sub>*,Infectious rate of asymptomatic individuals relative to symptomatic individuals,Luo et al 2020,Infection parameters
-mild_fraction_0_9,0.387,&#966;<sub>mild</sub>(0-9),"Fraction of infected individuals with mild symptoms, aged 0-9",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_10_19,0.435,&#966;<sub>mild</sub>(10-19),"Fraction of infected individuals with mild symptoms, aged 10-19",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_20_29,0.478,&#966;<sub>mild</sub>(20-29),"Fraction of infected individuals with mild symptoms, aged 20-29",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_30_39,0.512,&#966;<sub>mild</sub>(30-39),"Fraction of infected individuals with mild symptoms, aged 30-39",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_40_49,0.532,&#966;<sub>mild</sub>(40-49),"Fraction of infected individuals with mild symptoms, aged 40-49",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_50_59,0.541,&#966;<sub>mild</sub>(50-59),"Fraction of infected individuals with mild symptoms, aged 50-59",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_60_69,0.543,&#966;<sub>mild</sub>(60-69),"Fraction of infected individuals with mild symptoms, aged 60-69",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_70_79,0.541,&#966;<sub>mild</sub>(70-79),"Fraction of infected individuals with mild symptoms, aged 70-79",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_fraction_80,0.534,&#966;<sub>mild</sub>(80),"Fraction of infected individuals with mild symptoms, aged 80+",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
-mild_infectious_factor,0.48,*A<sub>mild</sub>*,Infectious rate of mildly symptomatic individuals relative to symptomatic individuals,Luo et al 2020,Infection parameters
+fraction_asymptomatic_0_9,0.456,&#966;<sub>asym</sub>(0-9),"Fraction of infected individuals who are asymptomatic, aged 0-9",,Disease dynamics parameters
+fraction_asymptomatic_10_19,0.412,&#966;<sub>asym</sub>(10-19),"Fraction of infected individuals who are asymptomatic, aged 10-19",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_20_29,0.370,&#966;<sub>asym</sub>(20-29),"Fraction of infected individuals who are asymptomatic, aged 20-29",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_30_39,0.332,&#966;<sub>asym</sub>(30-39),"Fraction of infected individuals who are asymptomatic, aged 30-39",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_40_49,0.296,&#966;<sub>asym</sub>(40-49),"Fraction of infected individuals who are asymptomatic, aged 40-49",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_50_59,0.265,&#966;<sub>asym</sub>(50-59),"Fraction of infected individuals who are asymptomatic, aged 50-59",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_60_69,0.238,&#966;<sub>asym</sub>(60-69),"Fraction of infected individuals who are asymptomatic, aged 60-69",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_70_79,0.214,&#966;<sub>asym</sub>(70-79),"Fraction of infected individuals who are asymptomatic, aged 70-79",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+fraction_asymptomatic_80,0.192,&#966;<sub>asym</sub>(80),"Fraction of infected individuals who are asymptomatic, aged 80+",,Disease dynamics parameters
+asymptomatic_infectious_factor,0.33,*A<sub>asym</sub>*,Infectious rate of asymptomatic individuals relative to symptomatic individuals,"Personal communication, Sun",Infection parameters
+mild_fraction_0_9,0.533,&#966;<sub>mild</sub>(0-9),"Fraction of infected individuals with mild symptoms, aged 0-9",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_10_19,0.569,&#966;<sub>mild</sub>(10-19),"Fraction of infected individuals with mild symptoms, aged 10-19",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_20_29,0.597,&#966;<sub>mild</sub>(20-29),"Fraction of infected individuals with mild symptoms, aged 20-29",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_30_39,0.614,&#966;<sub>mild</sub>(30-39),"Fraction of infected individuals with mild symptoms, aged 30-39",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_40_49,0.616,&#966;<sub>mild</sub>(40-49),"Fraction of infected individuals with mild symptoms, aged 40-49",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_50_59,0.602,&#966;<sub>mild</sub>(50-59),"Fraction of infected individuals with mild symptoms, aged 50-59",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_60_69,0.571,&#966;<sub>mild</sub>(60-69),"Fraction of infected individuals with mild symptoms, aged 60-69",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_70_79,0.523,&#966;<sub>mild</sub>(70-79),"Fraction of infected individuals with mild symptoms, aged 70-79",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_fraction_80,0.461,&#966;<sub>mild</sub>(80),"Fraction of infected individuals with mild symptoms, aged 80+",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
+mild_infectious_factor,0.72,*A<sub>mild</sub>*,Infectious rate of mildly symptomatic individuals relative to symptomatic individuals,"Personal communction, Sun",Infection parameters
 mean_asymptomatic_to_recovery,15,"&#956;<sub>a,rec</sub>",Mean time from infection to recovery (and no longer infectious) for an asymptomatic individual (days),Yang et al 2020,Disease dynamics parameters
 sd_asymptomatic_to_recovery,5,"&#963;<sub>a,rec</sub>",Standard deviation from infection to recovery for an asymptomatic individual (days),Yang et al 2020,Disease dynamics parameters
 household_size_1,7452,,Number of UK households with 1 person (thousands),ONS UK,Demographic parameters
@@ -81,15 +81,15 @@ relative_susceptibility_80,1.52,*S<sub>80</sub>*,"Relative susceptibility to inf
 relative_transmission_household,2,*B<sub>home</sub>*,Relative infectious rate of household interaction,,Infection parameters
 relative_transmission_occupation,1,*B<sub>occupation</sub>*,Relative infectious rate of workplace interaction,,Infection parameters
 relative_transmission_random,1,*B<sub>random</sub>*,Relative infectious rate of random interaction,,Infection parameters
-hospitalised_fraction_0_9,0.002,&#966;<sub>hosp</sub>(0-9),Fraction of infected individuals with severe symptoms aged 0-9 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_10_19,0.009,&#966;<sub>hosp</sub>(10-19),Fraction of infected individuals with severe symptoms aged 10-19 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_20_29,0.017,&#966;<sub>hosp</sub>(20-29),Fraction of infected individuals with severe symptoms aged 20-29 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_30_39,0.065,&#966;<sub>hosp</sub>(30-39),Fraction of infected individuals with severe symptoms aged 30-39 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_40_49,0.186,&#966;<sub>hosp</sub>(40-49),Fraction of infected individuals with severe symptoms aged 40-49 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_50_59,0.231,&#966;<sub>hosp</sub>(50-59),Fraction of infected individuals with severe symptoms aged 50-59 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_60_69,0.324,&#966;<sub>hosp</sub>(60-69),Fraction of infected individuals with severe symptoms aged 60-69 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_70_79,0.387,&#966;<sub>hosp</sub>(70-79),Fraction of infected individuals with severe symptoms aged 70-79 who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
-hospitalised_fraction_80,0.439,&#966;<sub>hosp</sub>(80),Fraction of infected individuals with severe symptoms aged 80+ who are hospitalised,"Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020",Disease dynamics parameters
+hospitalised_fraction_0_9,0.001,&#966;<sub>hosp</sub>(0-9),Fraction of infected individuals with severe symptoms aged 0-9 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_10_19,0.006,&#966;<sub>hosp</sub>(10-19),Fraction of infected individuals with severe symptoms aged 10-19 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_20_29,0.015,&#966;<sub>hosp</sub>(20-29),Fraction of infected individuals with severe symptoms aged 20-29 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_30_39,0.069,&#966;<sub>hosp</sub>(30-39),Fraction of infected individuals with severe symptoms aged 30-39 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_40_49,0.219,&#966;<sub>hosp</sub>(40-49),Fraction of infected individuals with severe symptoms aged 40-49 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_50_59,0.279,&#966;<sub>hosp</sub>(50-59),Fraction of infected individuals with severe symptoms aged 50-59 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_60_69,0.370,&#966;<sub>hosp</sub>(60-69),Fraction of infected individuals with severe symptoms aged 60-69 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_70_79,0.391,&#966;<sub>hosp</sub>(70-79),Fraction of infected individuals with severe symptoms aged 70-79 who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
+hospitalised_fraction_80,0.379,&#966;<sub>hosp</sub>(80),Fraction of infected individuals with severe symptoms aged 80+ who are hospitalised,Calibration of Riccardo et al. 2020 & Spanish Serology Survey & Ferguson et al. 2020,Disease dynamics parameters
 critical_fraction_0_9,0.05,&#966;<sub>crit</sub>(0-9),Fraction of hospitalised individuals aged 0-9 who need critical care,"Ferguson et al, 2020",Disease dynamics parameters
 critical_fraction_10_19,0.05,&#966;<sub>crit</sub>(10-19),Fraction of hospiatlised individuals aged 10-19 who need critical care,"Ferguson et al, 2020",Disease dynamics parameters
 critical_fraction_20_29,0.05,&#966;<sub>crit</sub>(20-29),Fraction of hospitalised individuals aged 20-29 who need critical care,"Ferguson et al, 2020",Disease dynamics parameters
@@ -179,12 +179,12 @@ app_users_fraction_60_69,0.7,,Maximum fraction of the population with smartphone
 app_users_fraction_70_79,0.48,,Maximum fraction of the population with smartphones aged 70-79,OFCOM 55+ year olds,Active intervention parameters
 app_users_fraction_80,0.32,,Maximum fraction of the population with smartphones aged 80+,OFCOM 55+ year olds,Active intervention parameters
 app_turn_on_time,10000,,Time (days) at which to turn on the app,,
-lockdown_occupation_multiplier_primary_network,0.22,,Relative change in number of occupation network contacts on lockdown for primary age,,Passive intervention parameters
-lockdown_occupation_multiplier_secondary_network,0.22,,Relative change in number of occupation network contacts on lockdown for secondary age,,Passive intervention parameters
-lockdown_occupation_multiplier_working_network,0.22,,Relative change in number of occupation network contacts on lockdown for working age,Based on an estimate of the number of key workers,Passive intervention parameters
-lockdown_occupation_multiplier_retired_network,0.22,,Relative change in number of occupation network contacts on lockdown for retired age,,Passive intervention parameters
-lockdown_occupation_multiplier_elderly_network,0.22,,Relative change in number of occupation network contacts on lockdown for elderly,,Passive intervention parameters
-lockdown_random_network_multiplier,0.22,,Relative change in random network contacts on lockdown,,Passive intervention parameters
+lockdown_occupation_multiplier_primary_network,0.29,,Relative change in number of occupation network contacts on lockdown for primary age,,Passive intervention parameters
+lockdown_occupation_multiplier_secondary_network,0.29,,Relative change in number of occupation network contacts on lockdown for secondary age,,Passive intervention parameters
+lockdown_occupation_multiplier_working_network,0.29,,Relative change in number of occupation network contacts on lockdown for working age,Based on an estimate of the number of key workers,Passive intervention parameters
+lockdown_occupation_multiplier_retired_network,0.29,,Relative change in number of occupation network contacts on lockdown for retired age,,Passive intervention parameters
+lockdown_occupation_multiplier_elderly_network,0.29,,Relative change in number of occupation network contacts on lockdown for elderly,,Passive intervention parameters
+lockdown_random_network_multiplier,0.29,,Relative change in random network contacts on lockdown,,Passive intervention parameters
 lockdown_house_interaction_multiplier,1.5,,Relative change in household network contacts on lockdown,,Passive intervention parameters
 lockdown_time_on,10000,,Time (days) at which to model lockdown starting,,
 lockdown_time_off,10000,,Time (days) at which to model lockdown ending,,
@@ -195,14 +195,14 @@ testing_symptoms_time_off,10000,,Time (days) at which to stop testing on symptom
 intervention_start_time,0,,Time (days) after which interventions can be turned on,,
 hospital_on,0,,"Turn on the hospital module  (0=no, 1=yes)",,
 manual_trace_on,0,,"Turn on manual tracing (0=no, 1=yes)",,Manual tracing parameters
-manual_trace_time_on,10000,,"Time (days) after which manual tracing is turned on",,Manual tracing parameters
-manual_trace_on_hospitalization,1,,"Trace when hospitalized if tested positive (no effect if manual_trace_on_positive is on)",,Manual tracing parameters
-manual_trace_on_positive,0,,"Trace when hospitalized if tested positive (no effect if manual_trace_on_positive is on)",,Manual tracing parameters
-manual_trace_delay,1,,"Delay (days) between triggering manual tracing due to testing/hospitalization and tracing occurring",,Manual tracing parameters
+manual_trace_time_on,10000,,Time (days) after which manual tracing is turned on,,Manual tracing parameters
+manual_trace_on_hospitalization,1,,Trace when hospitalized if tested positive (no effect if manual_trace_on_positive is on),,Manual tracing parameters
+manual_trace_on_positive,0,,Trace when hospitalized if tested positive (no effect if manual_trace_on_positive is on),,Manual tracing parameters
+manual_trace_delay,1,,Delay (days) between triggering manual tracing due to testing/hospitalization and tracing occurring,,Manual tracing parameters
 manual_trace_exclude_app_users,0,,"Whether or not to exclude app users when performing manual tracing (exclude=1, include=0)",,Manual tracing parameters
-manual_trace_n_workers,300,,"Number of Contact Tracing Workers","NACCHO Position Statement, 2020",Manual tracing parameters
-manual_trace_interviews_per_worker_day,6,,"Number of interviews performed per worker per day","https://www.gwhwi.org/estimator-613404.html",Manual tracing parameters
-manual_trace_notifications_per_worker_day,12,,"Number of trace notifications performed per worker per day","https://www.gwhwi.org/estimator-613404.html",Manual tracing parameters
-manual_traceable_fraction_household,1,,"The fraction of household contacts that can be successfully traced",,Manual tracing parameters
-manual_traceable_fraction_occupation,0.8,,"The fraction of occupation contacts that can be successfully traced",,Manual tracing parameters
-manual_traceable_fraction_random,0.05,,"The fraction of random contacts that can be successfully traced",,Manual tracing parameters
+manual_trace_n_workers,300,,Number of Contact Tracing Workers,"NACCHO Position Statement, 2020",Manual tracing parameters
+manual_trace_interviews_per_worker_day,6,,Number of interviews performed per worker per day,https://www.gwhwi.org/estimator-613404.html,Manual tracing parameters
+manual_trace_notifications_per_worker_day,12,,Number of trace notifications performed per worker per day,https://www.gwhwi.org/estimator-613404.html,Manual tracing parameters
+manual_traceable_fraction_household,1,,The fraction of household contacts that can be successfully traced,,Manual tracing parameters
+manual_traceable_fraction_occupation,0.8,,The fraction of occupation contacts that can be successfully traced,,Manual tracing parameters
+manual_traceable_fraction_random,0.05,,The fraction of random contacts that can be successfully traced,,Manual tracing parameters

@@ -206,6 +206,33 @@ void set_up_default_occupation_network_table( parameters *params )
     }
 }
 
+
+
+/*****************************************************************************************
+*  Name: 		get_model_param_hospital_on
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_model_param_hospital_on(model *model)
+{
+
+    return model->params->hospital_on;
+}
+
+
+/*****************************************************************************************
+*  Name: 		get_model_param_fatality_fraction
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_model_param_fatality_fraction(model * model, int age_group)
+{
+
+    if ( age_group >= N_AGE_GROUPS ) return ERROR;
+
+	return model->params->fatality_fraction[age_group];
+}
+
+
+
 /*****************************************************************************************
 *  Name: 		get_model_param_daily_fraction_work_used
 *  Description: Gets the value of a parameter
@@ -812,7 +839,7 @@ int set_model_param_app_users_fraction( model *model, double value )
     int age;
     for( age = 0; age < N_AGE_GROUPS; age++ )
         model->params->app_users_fraction[ age ] = value;
-    
+
     set_up_app_users( model );
     return TRUE;
 }
@@ -1277,6 +1304,19 @@ void check_params( parameters *params )
     	}
     }
 }
+
+/*****************************************************************************************
+*  Name:        set_model_param_fatality_fraction
+*  Description: Allow updates of the fatality fraction
+******************************************************************************************/
+int set_model_param_fatality_fraction(model * model, double value, int age_group)
+{
+	if (age_group >= N_AGE_GROUPS) return ERROR;
+	model->params->fatality_fraction[age_group] = value;
+	return TRUE;
+}
+
+
 
 /*****************************************************************************************
 *  Name:        check_hospital_params
