@@ -396,7 +396,7 @@ class TestClass(object):
             daily_death = model.one_time_step_results()["daily_death"]
 
             sum_daily_deaths_by_age = 0
-            for age in AgeGroupEnum
+            for age in AgeGroupEnum:
                 sum_daily_deaths_by_age += model.one_time_step_results()[f"daily_death{age.name}"]
             assert  daily_death == sum_daily_deaths_by_age
         assert model.one_time_step_results()[f"daily_death{age.name}"] > 0
