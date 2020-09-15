@@ -16,6 +16,12 @@ int utils_n_total_age( model *pmodel, int type, int age ) {
 int utils_n_daily( model *pmodel, int type, int day ) {
     return pmodel->event_lists[type].n_daily_current[day];
 }
+
+int utils_n_daily_age( model *model, int type, int day, int age) {
+    return model->event_lists[type].n_daily_by_age[day][age];
+}
+
+
 %}
 
 

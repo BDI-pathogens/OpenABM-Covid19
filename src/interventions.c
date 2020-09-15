@@ -988,7 +988,10 @@ void intervention_on_positive_result( model *model, individual *indiv )
 		  ( params->manual_trace_on_hospitalization && is_in_hospital( indiv ) ) ) &&
 	    ( params->quarantine_on_traced || params->test_on_traced )
 	)
+	{
 		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay );
+		release_time = max( release_time, model->time + params->manual_trace_delay);
+	}
 
 	if( index_already )
 		intervention_index_case_symptoms_to_positive( model, index_token );

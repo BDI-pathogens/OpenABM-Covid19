@@ -1,4 +1,4 @@
-OpenABM-Covid19: Agent-based model for modelling the Covid-19 
+OpenABM-Covid19: Agent-based model for modelling the Covid-19 epidemic
 ========================================================================
 
 Description
@@ -10,10 +10,10 @@ The infection is transmitted between these contacts and the progression of the d
 Instantaneous contract-tracing and quarantining of contacts is modelled allowing the
 evaluation of the design and configuration of digital contract-tracing mobile phone apps.
 
-A full description of the model can be found [here](https://github.com/roberthinch/OpenABM-Covid19/blob/master/documentation/covid19.md), a dictionary of input parameters can be found [here](./documentation/parameters/parameter_dictionary.md) and a dictionary of output files can be found [here](./documentation/output_files/output_file_dictionary.md).  
+A full description of the model can be found [here](https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19.md), a dictionary of input parameters can be found [here](./documentation/parameters/parameter_dictionary.md) and a dictionary of output files can be found [here](./documentation/output_files/output_file_dictionary.md).  
 A report evaluating the efficacy of various configurations of digital contract-tracing mobile phone apps can be found [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/blob/master/Report%20-%20Effective%20Configurations%20of%20a%20Digital%20Contact%20Tracing%20App.pdf) and the parameters used in the report are documented [here](https://github.com/BDI-pathogens/covid-19_instant_tracing/tree/master/OpenABM-Covid19%20parameters%20April%202020). 
 The model was developed by the Pathogen Dynamics group, at the [Big Data Institute](https://www.bdi.ox.ac.uk/) at the University of Oxford, in conjunction with IBM UK and [Faculty](https://faculty.ai).
-More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).
+More details about our work can be found at [www.coronavirus-fraser-group.org ](https://045.medsci.ox.ac.uk/).  We suggest running from the latest commit in the master branch or from the latest release tag, which are created at major change points.  
 
 ### Economics Model
 

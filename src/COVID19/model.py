@@ -651,6 +651,13 @@ class Model:
         results["daily_death"] = covid19.utils_n_daily(
                 self.c_model, covid19.DEATH, self.c_model.time
             )
+        
+        for age in AgeGroupEnum:
+            key = f"daily_death{age.name}"
+            value = covid19.utils_n_daily_age(self.c_model, covid19.DEATH, self.c_model.time, age.value)
+            results[key] = value
+        
+        
 
         results["n_presymptom"] = covid19.utils_n_current(
             self.c_model, covid19.PRESYMPTOMATIC
