@@ -32,7 +32,6 @@ CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) -O0
 # Swig's output
 SWIG_OUTPUT = covid19_wrap.o covid19_wrap.c covid19.py _covid19.cpython-37m-darwin.so build covid19.egg-info
 
-
 # To compile
 install: $(OBJS)
 install: all;
@@ -53,4 +52,4 @@ clean:
 	$(C) $(CFLAGS) -c $< -o $@
 
 
-.PHONY: install dev all clean update_R_files
+.PHONY: install dev all clean
