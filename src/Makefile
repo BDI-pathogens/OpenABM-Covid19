@@ -51,5 +51,4 @@ clean:
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@
 
-
 .PHONY: install dev all clean
