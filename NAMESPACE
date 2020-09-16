@@ -1,0 +1,6 @@
+importFrom("methods", "as")
+importFrom("methods", "callNextMethod")
+importFrom("methods", "is")
+importFrom("methods", "new")
+importFrom("methods", "setClass")
+importFrom("methods", "slot")

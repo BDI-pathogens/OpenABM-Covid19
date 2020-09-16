@@ -54,7 +54,6 @@ documentation/*.toc
 /OpenABMCovid19_*.zip
 /OpenABMCovid19.tmp/
 DESCRIPTION
-NAMESPACE
 
 # performance related
 performance/*.trace

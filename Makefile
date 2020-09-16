@@ -32,8 +32,9 @@ SWIG_ROUT = R/$(R_PKGNAME).R
 $(SWIG_COUT): $(SWIG_SRC)
 	swig -r -package $(R_PKGNAME) -Isrc -o $(SWIG_COUT) -outdir R src/covid19.i
 $(SWIG_ROUT): $(SWIG_COUT)
-	touch $(SWIG_ROUT)
-
+# edit generated src lines are cause R check warnings.
+	sed -i 's/.Call("R_SWIG_debug_getCallbackFunctionData"/.Call("R_SWIG_debug_getCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
+	sed -i 's/.Call("R_SWIG_R_pushCallbackFunctionData"/.Call("R_SWIG_R_pushCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
 ALL_OUTPUT += $(SWIG_COUT) $(SWIG_ROUT)
 
 
@@ -50,15 +51,8 @@ C_SRC= $(SWIG_COUT) src/constant.c src/constant.h src/demographics.c \
 CONTENT = NAMESPACE DESCRIPTION LICENSE $(R_SRC) $(C_SRC)
 
 
-# R package content rules:
-NAMESPACE: $(SWIG_ROUT)
-	[ -d $(TMPDIR) ] || mkdir -p $(TMPDIR)
-	grep '`.*` = function(.*)' $(SWIG_ROUT) \
-	  | sed 's|`\(.*\)`.*|export( \1 )|' \
-	  > $(TMPDIR)/NAMESPACE
-	[ $$? -eq 0 ] && cp $(TMPDIR)/NAMESPACE NAMESPACE
-ALL_OUTPUT += NAMESPACE
 
+# R package content rules:
 DESCRIPTION: DESCRIPTION.in .git/HEAD
 	[ -d $(TMPDIR) ] || mkdir -p $(TMPDIR)
 	sed \
@@ -94,7 +88,7 @@ Rbuild: $(R_SRC_PKG)
 
 Rinstall: $(R_BIN_PKG)
 
-Rcheck: $(TMPDIR_EXISTS) $(R_SRC_PKG)
+Rcheck: $(R_SRC_PKG)
 	[ -d $(TMPDIR)/Rcheck ] || mkdir -p $(TMPDIR)/Rcheck
 	R CMD check --output=$(TMPDIR)/Rcheck $(R_SRC_PKG)
 
