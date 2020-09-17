@@ -25,6 +25,7 @@ from parameters import ParameterSet
 from model import OccupationNetworkEnum
 from . import constant
 from . import utilities as utils
+import covid19
 
 # from test.test_bufio import lengths
 # from CoreGraphics._CoreGraphics import CGRect_getMidX
@@ -902,6 +903,25 @@ class TestClass(object):
                     test_result_wait = 0,  
                 )
             ),
+        ],
+        "test_tests_completed": [
+            dict(
+                test_params=dict(
+                    n_total=50000,
+                    end_time=25,
+                    infectious_rate=4,
+                    self_quarantine_fraction=1.0,
+                    test_on_symptoms  = True,
+                    daily_non_cov_symptoms_rate=0.0,
+                    test_order_wait  = 0,
+                    test_result_wait = 0,  
+                    trace_on_positive = True,
+                    test_on_traced = True,
+                    quarantine_on_traced = True,
+                    app_turn_on_time = 1
+
+                )
+            )
         ],
     }
     """
@@ -2318,6 +2338,23 @@ class TestClass(object):
                     symp = 0
                 np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
 
-  
-      
+    def test_tests_completed(self, test_params ):
+        """
+        Check that all tests have been processed by the model at the end 
+        of each day (i.e. that immediate recursive testing is working)
+        
+        """
+                
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+            np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_TAKE ), 0, "People still waiting for tests on day they should be processed" );
+            np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_RESULT ), 0, "People still waiting for test results on day they should be processed" );
+            np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.MANUAL_CONTACT_TRACING ), 0, "People still waiting for manual contact tracing on day they should be processed" );
+            
+        
       
