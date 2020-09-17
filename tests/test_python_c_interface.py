@@ -381,6 +381,27 @@ class TestClass(object):
             assert sum(daily_deaths) == model.one_time_step_results()["total_death"]
         assert sum(daily_deaths) > 0
 
+    def test_daily_deaths_by_age(self):
+        params = Parameters(
+            constant.TEST_DATA_TEMPLATE,
+            constant.PARAM_LINE_NUMBER,
+            constant.DATA_DIR_TEST,
+            constant.TEST_HOUSEHOLD_FILE,
+            constant.TEST_HOSPITAL_FILE,
+        )
+        model = Model(params)
+                
+        for step in range(50):
+            model.one_time_step()
+            daily_death = model.one_time_step_results()["daily_death"]
+
+            sum_daily_deaths_by_age = 0
+            for age in AgeGroupEnum:
+                sum_daily_deaths_by_age += model.one_time_step_results()[f"daily_death{age.name}"]
+            assert  daily_death == sum_daily_deaths_by_age
+        assert model.one_time_step_results()[f"daily_death{age.name}"] > 0
+
+
 
     def test_update_fatality_fraction(self):
         params = Parameters(

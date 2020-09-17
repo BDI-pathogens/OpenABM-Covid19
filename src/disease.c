@@ -100,7 +100,14 @@ double estimate_mean_interactions_by_age( model *model, int age )
 *  Description: sets up discrete distributions and functions which are used to
 *  				model events and calculates infectious rate per interaction.
 *
-*  				The infectious rate is adjusted by the total mean interactions
+*				If relative susceptibility by age is a per interaction measure, then
+*  				the infectious rate is adjusted by the total mean interactions.
+*
+*				If relative susceptibility by age is a per day measure, then
+*				the infectious rate per interaction adult is the infectious rate divided
+*  				by the mean number of daily interactions of an adult. Adjustments are calculated
+*  				for children and elderly based upon their difference in the number of daily
+*  				interactions and the relative overall susceptibility.
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -110,10 +117,19 @@ void set_up_infectious_curves( model *model )
 	double infectious_rate, type_factor;
 	int type, group;
 
-	infectious_rate   = params->infectious_rate / model->mean_interactions;
+	if( params->relative_susceptibility_by_interaction )
+	{
+		infectious_rate   = params->infectious_rate / model->mean_interactions;
+		for( group = 0; group < N_AGE_GROUPS; group++ )
+			params->adjusted_susceptibility[group] = params->relative_susceptibility[group];
+	}
+	else
+	{
+		infectious_rate   = params->infectious_rate / model->mean_interactions_by_age[AGE_TYPE_ADULT];
 
-	for( group = 0; group < N_AGE_GROUPS; group++ )
-		params->adjusted_susceptibility[group] = params->relative_susceptibility[group];
+		for( group = 0; group < N_AGE_GROUPS; group++ )
+			params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions_by_age[AGE_TYPE_ADULT] / model->mean_interactions_by_age[AGE_TYPE_MAP[group]];
+	}
 
 	for( type = 0; type < N_INTERACTION_TYPES; type++ )
 	{

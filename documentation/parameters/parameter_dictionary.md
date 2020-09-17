@@ -114,15 +114,15 @@
 | `sd_time_hospitalised_recovery` | 8.75 | &#963;<sub>hosp,rec</sub> | Standard deviation of time to recover if hospitalised | Personal communication with SPI-M; data soon to be published |
 | `mean_time_critical_survive` | 18.8 | &#956;<sub>crit,surv</sub> | Mean time to survive if critical | Personal communication with SPI-M; data soon to be published |
 | `sd_time_critical_survive` | 12.21 | &#963;<sub>crit,surv</sub> | Standard deviation of time to survive if critical | Personal communication with SPI-M; data soon to be published |
-| `location_death_icu_0_9` | 1 | &#966;<sub>ICU</sub>(0-9) | Proportion of deaths in 0-9 year olds which occur in critical care | - |
-| `location_death_icu_10_19` | 1 | &#966;<sub>ICU</sub>(10-19) | Proportion of deaths in 10-19 year olds which occur in critical care | - |
-| `location_death_icu_20_29` | 0.9 | &#966;<sub>ICU</sub>(20-29) | Proportion of deaths in 20-29 year olds which occur in critical care | - |
-| `location_death_icu_30_39` | 0.9 | &#966;<sub>ICU</sub>(30-39) | Proportion of deaths in 30-39 year olds which occur in critical care | - |
-| `location_death_icu_40_49` | 0.8 | &#966;<sub>ICU</sub>(40-49) | Proportion of deaths in 40-49 year olds which occur in critical care | - |
-| `location_death_icu_50_59` | 0.8 | &#966;<sub>ICU</sub>(50-59) | Proportion of deaths in 50-59 year olds which occur in critical care | - |
-| `location_death_icu_60_69` | 0.4 | &#966;<sub>ICU</sub>(60-69) | Proportion of deaths in 60-69 year olds which occur in critical care | - |
-| `location_death_icu_70_79` | 0.4 | &#966;<sub>ICU</sub>(70-79) | Proportion of deaths in 70-79 year olds which occur in critical care | - |
-| `location_death_icu_80` | 0.05 | &#966;<sub>ICU</sub>(80) | Proportion of deaths in 80+ year olds which occur in critical care | - |
+| `location_death_icu_0_9` | 1 | &#966;<sub>ICU</sub>(0-9) | Proportion of individuals in 0-9 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_10_19` | 1 | &#966;<sub>ICU</sub>(10-19) | Proportion of individuals in 10-19 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_20_29` | 0.9 | &#966;<sub>ICU</sub>(20-29) | Proportion of individuals in 20-29 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_30_39` | 0.9 | &#966;<sub>ICU</sub>(30-39) | Proportion of individuals in 30-39 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_40_49` | 0.8 | &#966;<sub>ICU</sub>(40-49) | Proportion of individuals in 40-49 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_50_59` | 0.8 | &#966;<sub>ICU</sub>(50-59) | Proportion of individuals in 50-59 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_60_69` | 0.4 | &#966;<sub>ICU</sub>(60-69) | Proportion of individuals in 60-69 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_70_79` | 0.4 | &#966;<sub>ICU</sub>(70-79) | Proportion of individuals in 70-79 year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
+| `location_death_icu_80` | 0.05 | &#966;<sub>ICU</sub>(80) | Proportion of individuals in 80+ year olds with critical symptoms that reach critical care (the remaining proportion die outside of critical care; note that the remaining proportion are marked as being hospitalised in the transmission and timeseries files) | - |
 | `quarantine_length_self` | 7 | - | Maximum number of days quarantine for individuals self-reporting symptoms | - |
 | `quarantine_length_traced_symptoms` | 14 | - | Maximum number of days quarantine for individuals who are traced after a contact reported symptoms | - |
 | `quarantine_length_traced_positive` | 14 | - | Maximum number of days quarantine for individuals who are traced after a contact tested positive | - |
@@ -208,3 +208,4 @@
 | `manual_traceable_fraction_household` | 1 | - | The fraction of household contacts that can be successfully traced | - |
 | `manual_traceable_fraction_occupation` | 0.8 | - | The fraction of occupation contacts that can be successfully traced | - |
 | `manual_traceable_fraction_random` | 0.05 | - | The fraction of random contacts that can be successfully traced | - |
+| `relative_susceptibility_by_interaction` | 1 | - | Type of relative susceptibility by age group (1 = per interaction; 0 = per day) | - |
