@@ -865,6 +865,44 @@ class TestClass(object):
                 ),
             )
         ],
+        "test_n_tests": [
+            dict(
+                test_params=dict(
+                    n_total=50000,
+                    end_time=25,
+                    infectious_rate=4,
+                    self_quarantine_fraction=1.0,
+                    test_on_symptoms  = True,
+                    daily_non_cov_symptoms_rate=0.0,
+                    test_order_wait  = 1,
+                    test_result_wait = 1,  
+                )
+            ),
+             dict(
+                test_params=dict(
+                    n_total=50000,
+                    end_time=25,
+                    infectious_rate=4,
+                    self_quarantine_fraction=1.0,
+                    test_on_symptoms  = True,
+                    daily_non_cov_symptoms_rate=0.0,
+                    test_order_wait  = 0,
+                    test_result_wait = 2,  
+                )
+            ),
+              dict(
+                test_params=dict(
+                    n_total=50000,
+                    end_time=25,
+                    infectious_rate=4,
+                    self_quarantine_fraction=1.0,
+                    test_on_symptoms  = True,
+                    daily_non_cov_symptoms_rate=0.0,
+                    test_order_wait  = 0,
+                    test_result_wait = 0,  
+                )
+            ),
+        ],
     }
     """
     Test class for checking
@@ -2245,5 +2283,41 @@ class TestClass(object):
         np.testing.assert_equal( len( df_manual_trace ) >50, True, "Insufficient index cases to test" )
         np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
+    def test_n_tests(self, test_params ):
+        """
+        Tests that the reported number of tests is correct
+        
+        Set testing parameters that all (and only those) with covid symptoms
+        are tested and make sure the number of test results is then the 
+        same as new infections with an appropriate delay
+        """
+        
+        total_delay = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ]
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        n_tests = []
+        for time in range( test_params[ "end_time" ] ):
+            model.one_time_step()
+            timeseries = model.one_time_step_results();
+            n_tests.append( timeseries["n_tests"] )
+  
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
+        
+        for time in range( test_params[ "end_time" ] - total_delay ):
+            if time >= total_delay: 
+                symp = df_trans[ df_trans["time_symptomatic" ] == time + 1 ]
+                if len( symp.index ) > 0 :
+                    symp = symp.iloc[ 0,1 ]
+                else :
+                    symp = 0
+                np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
+
+  
       
       

@@ -108,6 +108,7 @@ struct event{
 
 #define n_current( model, type ) ( model->event_lists[type].n_current )
 #define n_total( model, type ) ( model->event_lists[type].n_total )
+#define n_total_by_day( model, type, day ) ( model->event_lists[type].n_daily[day] )
 #define n_total_age( model, type, age ) ( model->event_lists[type].n_total_by_age[age] )
 #define n_daily( model, type, day ) ( model->event_lists[type].n_daily_current[day] )
 
