@@ -34,3 +34,49 @@ int utils_n_daily_age( model *pmodel, int type, int day, int age) {
         destroy_model($self);
     }
 }
+
+/* These destructors shouldn't be used directly (use create_model and
+ * destroy_model). However, SWIG automatically generates R ctors and dtors
+ * for all structs that it can find. This causes `R CMD check` to output
+ * NOTEs such as this:
+ *
+ *   directory: no visible binding for global variable 'delete_directory'
+ *
+ * So add dtors to suppress these messages. The generated SWIG ctor internally
+ * uses calloc(3), so use the free(3) function.
+ */
+%extend directory{
+    ~directory() {
+        free($self);
+    }
+}
+%extend event{
+    ~event() {
+        free($self);
+    }
+}
+%extend event_list{
+    ~event_list() {
+        free($self);
+    }
+}
+%extend individual{
+    ~individual() {
+        free($self);
+    }
+}
+%extend infection_event{
+    ~infection_event() {
+        free($self);
+    }
+}
+%extend interaction{
+    ~interaction() {
+        free($self);
+    }
+}
+%extend interaction_block{
+    ~interaction_block() {
+        free($self);
+    }
+}
