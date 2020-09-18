@@ -1015,9 +1015,17 @@ int one_time_step( model *model )
     }
 
 	flu_infections( model );
-	transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
-	transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
-	transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
+
+	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
+		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||
+		   ( n_daily( model, MANUAL_CONTACT_TRACING, model->time ) > 0 )
+	)
+	{
+		transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
+		transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
+		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
+	}
+
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );
 

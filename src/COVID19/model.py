@@ -668,8 +668,8 @@ class Model:
         results["n_quarantine"] = covid19.utils_n_current(
             self.c_model, covid19.QUARANTINED
         )
-        results["n_tests"] = covid19.utils_n_daily(
-            self.c_model, covid19.TEST_RESULT, int(self.c_model.time) + 1
+        results["n_tests"] = covid19.utils_n_total_by_day(
+            self.c_model, covid19.TEST_RESULT, int(self.c_model.time) 
         )
         results["n_symptoms"] = covid19.utils_n_current(
             self.c_model, covid19.SYMPTOMATIC
