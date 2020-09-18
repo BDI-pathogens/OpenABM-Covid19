@@ -484,4 +484,58 @@ void transition_to_death( model *model, individual *indiv )
 	set_dead( indiv, model->params, model->time );
 }
 
+/*****************************************************************************************
+*  Name:		n_newly_infected
+*  Description: Calculates the total nubmber of newly infected people on a day
+*  Returns:		long
+******************************************************************************************/
+long n_newly_infected( model *model, int time )
+{
+	if( time > model->time )
+		return ERROR;
+
+	int idx;
+	long total = 0;
+
+	for( idx = 0; idx < N_NEWLY_INFECTED_STATES; idx++ )
+		total += n_total_by_day( model, NEWLY_INFECTED_STATES[ idx], time );
+
+	return total;
+}
+
+/*****************************************************************************************
+*  Name:		calculate_R_instanteous
+*  Description: Calculates the instantaneous value of R using time-series of known infections
+*  				and the known generation time distribution
+*
+*  				percentile is the value of the posterior distribution e.g. 0.5 is the median
+*
+*  Returns:		double
+******************************************************************************************/
+double calculate_R_instanteous( model *model, int time, double percentile )
+{
+	if( ( time > model->time ) || ( percentile <= 0 ) || ( percentile >= 1 ) )
+		return ERROR;
+
+	int day;
+	double expected_infections = 0;
+	long actual_infections     = n_newly_infected( model, time );
+	double *generation_dist    = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+
+	gamma_rate_curve( generation_dist, MAX_INFECTIOUS_PERIOD, model->params->mean_infectious_period, model->params->sd_infectious_period, 1);
+
+	day = time-1;
+	while( ( day > 0 ) & ( ( time - day ) < MAX_INFECTIOUS_PERIOD ) )
+	{
+		expected_infections += generation_dist[ time - day - 1 ] * n_newly_infected( model, day );
+		day--;
+	}
+
+	if( ( actual_infections == 0 ) || ( expected_infections == 0 ) )
+		return ERROR;
+
+	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
+}
+
+
 
