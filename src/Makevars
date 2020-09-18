@@ -19,4 +19,4 @@
 
 # Build flags for `R CMD INSTALL`
 PKG_LIBS=   $(BREW_LIBS) -l:libgsl.a -l:libgslcblas.a -lm
-PKG_CFLAGS= $(BREW_CFLAGS)
+PKG_CFLAGS= $(BREW_CFLAGS) -DBUILD_RPKG

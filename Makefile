@@ -45,7 +45,7 @@ C_SRC= $(SWIG_COUT) src/constant.c src/constant.h src/demographics.c \
 	src/demographics.h src/disease.c src/disease.h src/doctor.c src/doctor.h \
 	src/hospital.c src/hospital.h src/individual.c src/individual.h src/input.c \
 	src/input.h src/interventions.c src/interventions.h src/list.c src/list.h \
-	src/main.c src/model.c src/model.h src/network.c src/network.h src/nurse.c \
+	src/model.c src/model.h src/network.c src/network.h src/nurse.c \
 	src/nurse.h src/params.c src/params.h src/structure.h src/utilities.c \
 	src/utilities.h src/ward.c src/ward.h
 DOCS= man/swig_methods.Rd

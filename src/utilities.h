@@ -21,11 +21,13 @@
 #define ring_inc( x, n ) ( ( x ) = ifelse( ( x ) == ( ( n ) -1 ), 0 , ( x ) + 1 ) )
 #define ring_dec( x, n ) ( ( x ) = ifelse( ( x ) == 0 , ( n ) -1 , ( x ) - 1  ) )
 #define sample_draw_list( x ) ( ( x[ gsl_rng_uniform_int( rng, N_DRAW_LIST ) ] ) )
+#define printf(...) printf_w(__VA_ARGS__)
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
+int printf_w( const char*, ... );
 void print_now( char* );
 void print_exit( char* );
 void gamma_draw_list( int*, int, double, double );
