@@ -525,13 +525,13 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 	gamma_rate_curve( generation_dist, MAX_INFECTIOUS_PERIOD, model->params->mean_infectious_period, model->params->sd_infectious_period, 1);
 
 	day = time-1;
-	while( ( day > 0 ) & ( ( time - day ) < MAX_INFECTIOUS_PERIOD ) )
+	while( ( day >= 0 ) & ( ( time - day ) < MAX_INFECTIOUS_PERIOD ) )
 	{
 		expected_infections += generation_dist[ time - day - 1 ] * n_newly_infected( model, day );
 		day--;
 	}
 
-	if( ( actual_infections == 0 ) || ( expected_infections == 0 ) )
+	if( ( actual_infections <= 1 ) || ( expected_infections <= 1 ) )
 		return ERROR;
 
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
