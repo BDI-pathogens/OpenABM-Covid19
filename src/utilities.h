@@ -40,5 +40,8 @@ void copy_normalize_array( double*, double*, int );
 double sum_square_diff_array( double*, double*, int );
 int n_unique_elements( long*, int );
 void setup_gsl_rng( int );
+struct incomplete_gamma_p_params { long n; double percentile; };
+double incomplete_gamma_p( double, void *params );
+double inv_incomplete_gamma_p( double, long );
 
 #endif /* UTILITIES_H_ */

@@ -719,6 +719,10 @@ class Model:
         results["n_quarantine_events_app_user"] = self.c_model.n_quarantine_events_app_user
         results["n_quarantine_release_events_app_user"] = \
             self.c_model.n_quarantine_release_events_app_user
+            
+        results["R_inst"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.5 )
+        results["R_inst_05"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.05 )
+        results["R_inst_95"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.95 )
 
         return results
 
