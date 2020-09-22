@@ -57,4 +57,8 @@
 | `n_quarantine_events` | Daily number of quarantine events |
 | `n_quarantine_release_events` | Daily number of quarantine release events |
 | `n_quarantine_events_app_user` | Daily number of quarantine events of app users |
-| `n_quarantine_release_events_app_user` | Daily number of quarantine release events of app users |
+| `n_quarantine_release_events_app_user` | Daily number of quarantine release events of app users
+| `R_inst` | R(t) calculated from new infections and known generation time - median value (-1 if insufficient data) |
+| `R_inst_05` |  R(t) calculated from new infections and known generation time - 5% confidence boundary (-1 if insufficient data) |
+| `R_inst_95` | R(t) calculated from new infections and known generation time - 95% confidence bound(-1 if insufficient data) |
+|
