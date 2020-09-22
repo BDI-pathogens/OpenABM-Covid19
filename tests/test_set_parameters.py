@@ -1,5 +1,6 @@
 import pytest
-import pandas as pd
+import pandas as pd, numpy as np
+from . import utilities as utils
 from COVID19.model import Parameters, Model, OccupationNetworkEnum  
 
 
@@ -144,3 +145,20 @@ class TestSetObjects:
         model = Model(p)
         model.update_running_params("manual_traceable_fraction_household", 0.4)
         assert model.get_param("manual_traceable_fraction_household") == 0.4
+        
+    def test_set_app_users(self):
+        
+        params = utils.get_params_swig()
+        params.set_param( "n_total", 50000 )
+        model  = utils.get_model_swig( params )
+        
+        change = pd.DataFrame({"ID":[0,3,4,7,9,14,23],"app_user":[0,1,1,0,1,1,0]})
+        model.set_app_users( change )
+        all = model.get_app_users()
+        
+        combined = pd.merge( change, all, on = "ID", how = "inner" )
+        np.testing.assert_array_equal(combined["app_user_x"], combined["app_user_y"], "Failed to set new app users")
+        
+        
+
+        
