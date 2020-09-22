@@ -293,6 +293,10 @@ int set_indiv_occupation_network_property( parameters* params, long network, int
 int set_indiv_occupation_network( parameters* params, long n_total, long *people, long *network );
 void set_up_default_occupation_network_table( parameters *params );
 
+int set_app_users( model*, long*, long, int );
+int get_app_users( model*, long* );
+
+
 void update_work_intervention_state(model *model, int value);
 void update_household_intervention_state(model *model, int value);
 void check_params( parameters* );
