@@ -590,6 +590,50 @@ class Model:
         if ret == 0:
             raise  ModelParameterException( "Failed to set risk score household")
 
+    def get_app_users(self):
+        
+        n_total = self.c_model.params.n_total
+        users   = covid19.longArray(n_total)
+        res     = covid19.get_app_users(self.c_model,users)
+        
+        if res == 0:
+            raise ModelParameterException( "Failed to get risk")
+        
+        list_users = [None]*n_total
+        for idx in range(n_total):
+            list_users[idx]=users[idx]
+        
+        df_users = pd.DataFrame( {'ID':range(n_total), 'app_user':list_users})
+        
+        return df_users
+    
+    def set_app_users(self,df_app_users):
+        
+        if {'ID', 'app_user'}.issubset(df_app_users.columns) == False:
+            raise ModelParameterException( "df_app_user must contain the columns ID and app_user")
+        
+        # first turn on the users in the list
+        app_on  = df_app_users[df_app_users["app_user"]==True]["ID"].to_list()
+        n_users = len(app_on) 
+        if n_users > 0 :
+            users   = covid19.longArray(n_users)
+            for idx in range(n_users):
+                users[idx]=app_on[idx]
+            res = covid19.set_app_users(self.c_model,users,n_users,True)
+            if res == False :
+                raise ModelParameterException( "Failed to update new app_users" )
+        
+        # first turn off the users in the list
+        app_off = df_app_users[df_app_users["app_user"]==False]["ID"].to_list()
+        n_users = len(app_off) 
+        if n_users > 0 :
+            users   = covid19.longArray(n_users)
+            for idx in range(n_users):
+                users[idx]=app_off[idx]
+            res = covid19.set_app_users(self.c_model,users,n_users,False)
+            if res == False :
+                raise ModelParameterException( "Failed to remove old app_users" )
+
     def _create(self):
         """
         Call C function new_model (renamed create_model)
@@ -719,6 +763,10 @@ class Model:
         results["n_quarantine_events_app_user"] = self.c_model.n_quarantine_events_app_user
         results["n_quarantine_release_events_app_user"] = \
             self.c_model.n_quarantine_release_events_app_user
+            
+        results["R_inst"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.5 )
+        results["R_inst_05"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.05 )
+        results["R_inst_95"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.95 )
 
         return results
 

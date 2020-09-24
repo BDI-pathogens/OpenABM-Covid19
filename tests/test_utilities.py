@@ -12,10 +12,11 @@ Author: p-robot
 
 import pytest, numpy as np, covid19
 from scipy.stats import gamma, geom, nbinom, bernoulli, describe
+from scipy.special import gammainc
 
 from . import constant
 from . import utilities as utils
-
+from numpy import percentile
 
 def get_gamma_params(mu, sigma):
     """
@@ -116,7 +117,15 @@ class TestClass(object):
             dict(N = 35, mu = 10.6, sigma = 3.7, factor = 2.5),
             dict(N = 35, mu = 10.6, sigma = 5.7, factor = 0.5),
             dict(N = 500, mu = 10.6, sigma = 7.7, factor = 0.5),
-            dict(N = 500, mu = 10.6, sigma = 3.7, factor = 0.5)]
+            dict(N = 500, mu = 10.6, sigma = 3.7, factor = 0.5)],
+        "test_incomplete_gamma_p" : [
+            dict(N = 5, percentile = 0.05 ),
+            dict(N = 5, percentile = 0.5 ),
+            dict(N = 5, percentile = 0.95 ),
+            dict(N = 5000, percentile = 0.05 ),
+            dict(N = 5000, percentile = 0.5 ),
+            dict(N = 5000, percentile = 0.95 ),
+        ],
     }
     def test_sum_square_diff_array(self):
         N = 1000 
@@ -249,3 +258,13 @@ class TestClass(object):
         array_c = c_array_as_python_list(array_c, N)
         
         np.testing.assert_array_almost_equal(array_c, array_scipy, decimal = 4)
+        
+    def test_incomplete_gamma_p(self, N, percentile):
+        
+        inverse  = covid19.inv_incomplete_gamma_p( percentile ,N ) 
+        forward = gammainc( N, inverse ) 
+        np.testing.assert_almost_equal( percentile, forward, decimal = 6, err_msg = "Forward and inverse calculations of incomplete gamma don't agree" )
+        
+       
+
+

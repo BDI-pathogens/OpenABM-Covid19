@@ -95,6 +95,73 @@ int set_demographic_house_table(
 }
 
 /*****************************************************************************************
+*  Name: 		set_app_users
+*  Description: sets specific users to have or not have the app
+*  Arguments:	model:	  	the model object
+*  				users:    	array of users IDs to change
+*  				n_users:    length of array of users IDs
+*  				on_off:		TRUE turn app on for them, FALSE turn app off for them
+******************************************************************************************/
+int set_app_users(
+	model *model,
+	long *users,
+	long n_users,
+	int on_off
+)
+{
+	long n_total = model->params->n_total;
+	long idx;
+
+	if( n_users < 1 )
+	{
+		print_now( "n_users must be positive" );
+		return FALSE;
+	}
+
+	for( idx = 0; idx < n_users; idx++ )
+	{
+		if( users[ idx ] < 0 || users[ idx ] >= n_total )
+		{
+			print_now( "users must between 0 and n_total" );
+			return FALSE;
+		}
+	}
+
+	if( ( on_off != FALSE ) && ( on_off > TRUE ) )
+	{
+		print_now( "on_off must be TRUE or FALSE" );
+		return FALSE;
+	}
+
+	for( idx = 0; idx < n_users; idx++ )
+		model->population[ users[ idx ] ].app_user = on_off;
+
+	return TRUE;
+}
+
+
+/*****************************************************************************************
+*  Name: 		get_app_users
+*  Description: returns all app users
+*  Arguments:	model:	  	the model object
+*  				users:    	array of users IDs to change
+******************************************************************************************/
+int get_app_users(
+	model *model,
+	long *users
+)
+{
+	long n_total = model->params->n_total;
+	long idx;
+
+	for( idx = 0; idx < n_total; idx++ )
+		users[ idx ] = model->population[ idx ].app_user;
+
+	return TRUE;
+}
+
+
+/*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property
 *  Description: Sets the values of a single occupational network by index
 ******************************************************************************************/
