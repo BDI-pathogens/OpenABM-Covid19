@@ -919,10 +919,10 @@ class TestClass(object):
                     test_on_traced = True,
                     quarantine_on_traced = True,
                     app_turn_on_time = 1
-
                 )
             )
         ],
+        "test_testing_outside_hospitalisation": [dict()]
     }
     """
     Test class for checking
@@ -2355,6 +2355,39 @@ class TestClass(object):
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_TAKE ), 0, "People still waiting for tests on day they should be processed" );
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_RESULT ), 0, "People still waiting for test results on day they should be processed" );
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.MANUAL_CONTACT_TRACING ), 0, "People still waiting for manual contact tracing on day they should be processed" );
-            
+
+    def test_testing_outside_hospitalisation( self ):
+        """
+        Check there can be testing outside of hospitalisation when hospitalisation is 
+        turned off (i.e. fraction_hospitalised == 0 for all ages)
+        """
+
+        params = utils.get_params_swig()
+        params.set_param("n_total", 50000)
+
+         # No hospitalisation
+        utils.set_hospitalisation_fraction_all(params, 0)
+
+        # Everyone has the app and all interactions are traceable
+        params.set_param( "infectious_rate", 7.25 )
+        params.set_param("traceable_interaction_fraction", 1)
+        utils.set_app_users_fraction_all(params, 1)
+        params.set_param( "test_on_symptoms", 1 )
         
-      
+        model  = utils.get_model_swig( params )
+        
+        model.one_time_step()
+        model.update_running_params("app_turned_on", 1 )
+        model.update_running_params("trace_on_symptoms", 1)
+        model.update_running_params("trace_on_positive", 1)
+        model.update_running_params("test_on_traced", 1)
+        
+        n_tests = []; total_infected = []
+        for time in range( 60 ):
+            model.one_time_step()
+            n_tests.append(model.one_time_step_results()["n_tests"])
+            total_infected.append(model.one_time_step_results()["total_infected"])
+        
+        total_tests = np.sum(n_tests)
+        final_infected = total_infected[-1]
+        np.testing.assert_equal( total_tests > 0, True )
