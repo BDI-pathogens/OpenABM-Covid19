@@ -1,0 +1,38 @@
+# -*- mode: conf -*-
+
+# R files
+^\.Rhistory$
+^.*\.Rproj$
+^\.Rproj\.user$
+^.*\.Rcheck$
+
+# R utility scripts
+^R\/demographics\.R$
+^R\/plotting\.R$
+
+# SWIG interface files
+.*\.i$
+
+# Python files
+.*\.py$
+.*\.pyc$
+^examples$
+^performance$
+^python$
+^tests$
+^src\/adapter_covid19$
+
+# Build files
+.*\.in$
+^Makefile$
+^OpenABMCovid19.tmp$
+^OpenABMCovid19_.*\.tar\.gz$
+^OpenABMCovid19_.*\.tgz$
+^OpenABMCovid19_.*\.zip$
+
+# Misc
+^\.github$
+^README\.md$
+^cran-comments\.md$
+^documentation$
+^src\/Makefile$

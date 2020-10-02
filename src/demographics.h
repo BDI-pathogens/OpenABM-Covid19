@@ -47,7 +47,7 @@ void set_up_allocate_default_work_places( model* );
 void set_up_allocate_custom_work_places( model* );
 void build_household_network_from_directroy( network*, directory* );
 void add_reference_household( double *, long , int **);
-void generate_household_distribution( model *model );
+void generate_household_distribution( model *pmodel );
 void assign_household_distribution( model*, demographic_household_table* );
 
 #endif /* DEMOGRAPHICS_H_ */

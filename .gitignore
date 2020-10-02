@@ -46,6 +46,16 @@ documentation/*.toc
 # R-related files
 .Rhistory
 
+# R package build files
+/OpenABMCovid19/
+/OpenABMCovid19.Rcheck/
+/OpenABMCovid19_*.tar.gz
+/OpenABMCovid19_*.tgz
+/OpenABMCovid19_*.zip
+/OpenABMCovid19.tmp/
+DESCRIPTION
+NAMESPACE
+
 # performance related
 performance/*.trace
 performance/*.dtps
@@ -57,8 +67,11 @@ data_test/*
 
 venv/*
 
+# SWIG generated files
 src/covid19.py
 src/covid19_wrap.c
+src/covid19_wrap_R.c
+R/OpenABMCovid19.R
 
 sandbox/*.csv
 examples/*.csv

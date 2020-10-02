@@ -1,0 +1,20 @@
+# macOS: Find Homebrew non-standard installation path
+#
+# By default Homebrew installs files /usr/local, R searches that path when
+# building packages. However, some users might need to install Homebrew files
+# in a different location. Search for `brew` command and add flags if found.
+BREW_PATH= $(shell which brew)
+ifeq (, $(BREW_PATH))
+	BREW_LIBS=
+	BREW_CFLAGS=
+else
+	BREW_ROOT=$(abspath $(dir $(BREW_PATH))/..)
+	BREW_LIBS=   -L$(BREW_ROOT)/lib
+	BREW_CFLAGS= -I$(BREW_ROOT)/include
+endif
+
+
+# Build flags for `R CMD INSTALL`
+#PKG_LIBS=   $(BREW_LIBS) -l:libgsl.a -l:libgslcblas.a -lm
+PKG_LIBS=   $(BREW_LIBS) -lgsl -lgslcblas -lm
+PKG_CFLAGS= $(BREW_CFLAGS)
