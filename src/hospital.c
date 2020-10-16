@@ -95,6 +95,7 @@ void set_up_hospital_networks( model *model )
 		hospital->hospital_workplace_network = new_network( n_healthcare_workers, HOSPITAL_WORK );
 		hospital->hospital_workplace_network->skip_hospitalised = TRUE;
 		hospital->hospital_workplace_network->skip_quarantined  = TRUE;
+		hospital->hospital_workplace_network->construction      = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
 		hospital->hospital_workplace_network->daily_fraction    = 1.0;
 
 		build_watts_strogatz_network( hospital->hospital_workplace_network, n_healthcare_workers, model->params->hcw_mean_work_interactions, model->params->work_network_rewire, FALSE );

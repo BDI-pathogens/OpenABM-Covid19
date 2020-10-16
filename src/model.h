@@ -140,7 +140,10 @@ void return_interactions( model* );
 
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );
-void build_random_network( model* );
-int add_user_network( model*, int, int, int, double, long, long*, long*, char* );
+void build_random_network( model*, network*, long, long* );
+void build_random_network_default( model* );
+void build_random_network_user( model*, network* );
+int add_user_network( model*, int, int, int, int, double, long, long*, long*, char* );
+int add_user_network_random( model*, int, int, long, long*, int*, char* );
 
 #endif /* MODEL_H_ */

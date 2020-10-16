@@ -121,7 +121,13 @@ class OccupationNetworkEnum(enum.Enum):
     _retired_network = 3
     _elderly_network = 4
 
-
+class NETWORK_CONSTRUCTIONS(enum.Enum):
+    NETWORK_CONSTRCUTION_BESPOKE = 0,
+    NETWORK_CONSTRUCTION_HOUSEHOLD = 1,
+    NETWORK_CONSTRUCTION_WATTS_STROGATZ = 2,
+    NETWORK_CONSTRUCTION_RANDOM_DEFAULT = 3,
+    NETWORK_CONSTRUCTION_RANDOM = 4,
+    N_NETWORK_CONSTRUCTIONS = 5
 
 class AgeGroupEnum(enum.Enum):
     _0_9 = 0
@@ -539,7 +545,31 @@ class Model:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
 
-    def add_user_network(self, df_network, interaction_type = 1, skip_hospitalised = True, skip_quarantine = True, daily_fraction = 1.0, name = "user_network" ):
+    def add_user_network(
+            self, 
+            df_network, 
+            interaction_type = covid19.OCCUPATION, 
+            skip_hospitalised = True, 
+            skip_quarantine = True,
+            construction = covid19.NETWORK_CONSTRUCTION_BESPOKE,
+            daily_fraction = 1.0, 
+            name = "user_network" ):
+        
+        """[summary]
+        adds as bespoke user network from a dataframe of edges
+        the network is static with the exception of skipping
+        hospitalised and quarantined people
+
+        Arguments:
+            df_network {[dataframe]}      -- [list of edges, with 2 columns ID_1 and ID_2]
+            interaction {[int]}           -- [type of interaction (e.g. household/occupation/random)]
+            skip_hospitalised {[boolean]} -- [skip interaction if either person is in hospital]
+            skip_quarantine{[boolean]}    -- [skip interaction if either person is in quarantined]
+            construction{[int]}           -- [the method used for network construction]
+            daily_fraction{[double]}      -- [the fraction of edges on the network present each day (i.e. down-sampling the network)]
+            name{[char]}                  -- [the name of the network]
+
+        """
 
         n_edges = len( df_network.index )
         n_total = self._params_obj.get_param("n_total")
@@ -578,8 +608,62 @@ class Model:
             ID_1_c[idx] = ID_1[idx]
             ID_2_c[idx] = ID_2[idx]
 
-        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,construction,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+    
+    def add_user_network_random(
+            self, 
+            df_interactions, 
+            skip_hospitalised = True, 
+            skip_quarantine = True,
+            name = "user_network" ):
+             
+        """[summary]
+        adds a bespoke user random network from a dataframe of people and number of interactions
+        the network is regenerates each day, but the number of interactions per person is statitc
+        hospitalsed and quarantined people can be skipped
 
+        Arguments:
+            df_interactions {[dataframe]} -- [list of indviduals and interactions, with 2 columns ID and N]
+            skip_hospitalised {[boolean]} -- [skip interaction if either person is in hospital]
+            skip_quarantine{[boolean]}    -- [skip interaction if either person is in quarantined]
+            name{[char]}                  -- [the name of the network]
+
+        """
+        
+        n_indiv = len( df_interactions.index )
+        n_total = self._params_obj.get_param("n_total")
+
+        if not 'ID' in df_interactions.columns:
+            raise ParameterException( "df_interactions must have column ID" )
+
+        if not 'N' in df_interactions.columns:
+            raise ParameterException( "df must have column N" )
+
+        if not skip_hospitalised in [ True, False ]:
+            raise ParameterException( "skip_hospitalised must be True or False" )
+
+        if not skip_quarantine in [ True, False ]:
+            raise ParameterException( "skip_quarantine must be True or False" )
+
+        ID = df_interactions[ "ID" ].to_list()
+        N  = df_interactions[ "N" ].to_list()
+
+        if (max( ID) >= n_total) or (min( ID ) < 0):
+            raise ParameterException( "all values of ID must be between 0 and n_total-1" )
+
+        if ( min( N ) < 1):
+            raise ParameterException( "all values of N must be greater than 0" )
+
+        ID_c = covid19.longArray(n_indiv)
+        N_c  = covid19.intArray(n_indiv)
+
+        for idx in range(n_indiv):
+            ID_c[idx] = ID[idx]
+            N_c[idx]  = N[idx]
+
+        covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
+
+    
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
         if ret == 0:
