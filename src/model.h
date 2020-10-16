@@ -145,5 +145,8 @@ void build_random_network_default( model* );
 void build_random_network_user( model*, network* );
 int add_user_network( model*, int, int, int, int, double, long, long*, long*, char* );
 int add_user_network_random( model*, int, int, long, long*, int*, char* );
+network* get_network_by_id( model*, int );
+
+
 
 #endif /* MODEL_H_ */

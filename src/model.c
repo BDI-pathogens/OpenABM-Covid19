@@ -1084,6 +1084,35 @@ int add_user_network_random(
 	return network_id;
 }
 
+/*****************************************************************************************
+*  Name:		get_network_by_id
+*  Description: returns a pointer to a network with a given ID
+*  Returns:		pointer to network
+******************************************************************************************/
+network* get_network_by_id( model *model, int network_id )
+{
+	int idx;
+
+	if( model->random_network->network_id == network_id )
+		return model->random_network;
+	if( model->household_network->network_id == network_id )
+		return model->household_network;
+
+	for( idx = 0; idx < model->n_occupation_networks; idx++ )
+		if( model->occupation_network[ idx ]->network_id == network_id )
+			return model->occupation_network[ idx ];
+
+	network *user_network = model->user_network;
+	while( user_network != NULL )
+	{
+		if( user_network->network_id == network_id )
+			return user_network;
+		user_network = user_network->next_network;
+	};
+
+	return NULL;
+}
+
 
 /*****************************************************************************************
 *  Name:		return_interactions

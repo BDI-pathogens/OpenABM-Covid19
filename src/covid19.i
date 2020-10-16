@@ -26,4 +26,5 @@
 %include "disease.h"
 %include model_utils.i 
 %include params_utils.i
+%include network_utils.i
 
