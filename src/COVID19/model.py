@@ -611,7 +611,8 @@ class Model:
             ID_1_c[idx] = ID_1[idx]
             ID_2_c[idx] = ID_2[idx]
 
-        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,construction,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+        id = covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,construction,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+        return  Network( self.c_model, id )
     
     def add_user_network_random(
             self, 
@@ -664,7 +665,8 @@ class Model:
             ID_c[idx] = ID[idx]
             N_c[idx]  = N[idx]
 
-        return covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
+        id = covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
+        return  Network( self.c_model, id )
 
     
     def set_risk_score(self, day, age_inf, age_sus, value):
@@ -744,13 +746,13 @@ class Model:
             network = Network( self.c_model, ids_c[idx] )
             
             ids[idx]        = ids_c[idx]
-            names[idx]      = network.name
-            n_edges[idx]    = network.n_edges
-            n_vertices[idx] = network.n_vertices  
-            type[idx]       = network.type
-            skip_hospitalised[idx] = network.skip_hospitalised
-            skip_quarantined[idx]  = network.skip_quarantined
-            daily_fraction[idx]    = network.daily_fraction      
+            names[idx]      = network.name()
+            n_edges[idx]    = network.n_edges()
+            n_vertices[idx] = network.n_vertices()  
+            type[idx]       = network.type()
+            skip_hospitalised[idx] = network.skip_hospitalised()
+            skip_quarantined[idx]  = network.skip_quarantined()
+            daily_fraction[idx]    = network.daily_fraction()      
             
         return pd.DataFrame( {
                 'id'                : ids,
