@@ -21,6 +21,7 @@
 \alias{$,_p_longArray-method}
 \alias{$,_p_model-method}
 \alias{$,_p_parameters-method}
+\alias{$,_p_incomplete_gamma_p_params-method}
 \alias{$<-,_p_directory-method}
 \alias{$<-,_p_event-method}
 \alias{$<-,_p_event_list-method}
@@ -30,6 +31,7 @@
 \alias{$<-,_p_interaction_block-method}
 \alias{$<-,_p_model-method}
 \alias{$<-,_p_parameters-method}
+\alias{$<-,_p_incomplete_gamma_p_params-method}
 \alias{[[<-,_p_directory,character-method}
 \alias{[[<-,_p_event,character-method}
 \alias{[[<-,_p_event_list,character-method}
@@ -39,6 +41,7 @@
 \alias{[[<-,_p_interaction_block,character-method}
 \alias{[[<-,_p_model,character-method}
 \alias{[[<-,_p_parameters,character-method}
+\alias{[[<-,_p_incomplete_gamma_p_params,character-method}
 
 %% SWIG helper types
 \alias{[,ExternalReference-method}

@@ -16,3 +16,6 @@
 `OCCUPATION_DEFAULT_MAP_set` = function(s_OCCUPATION_DEFAULT_MAP_set) {
   stop('OCCUPATION_DEFAULT_MAP is read-only')
 }
+`NEWLY_INFECTED_STATES_set` = function(s_NEWLY_INFECTED_STATES_set) {
+  stop('NEWLY_INFECTED_STATES is read-only')
+}

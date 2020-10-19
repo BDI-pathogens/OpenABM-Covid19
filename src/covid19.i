@@ -34,6 +34,8 @@
 %nodefaultdtor interaction;
 %nodefaultctor interaction_block;
 %nodefaultdtor interaction_block;
+%nodefaultctor incomplete_gamma_p_params;
+%nodefaultdtor incomplete_gamma_p_params;
 
 %include "model.h"
 %include "params.h"
