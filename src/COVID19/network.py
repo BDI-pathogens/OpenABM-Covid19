@@ -14,7 +14,7 @@ class Network:
 
     def __init__(self, model, network_id):
         
-        c_network = covid19.get_network_by_id( model, network_id )
+        c_network = covid19.get_network_by_id( model.c_model, network_id )
         self.network_id        = network_id
         self.c_network         = c_network
 

@@ -612,7 +612,7 @@ class Model:
             ID_2_c[idx] = ID_2[idx]
 
         id = covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,construction,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
-        return  Network( self.c_model, id )
+        return  Network( self, id )
     
     def add_user_network_random(
             self, 
@@ -666,7 +666,7 @@ class Model:
             N_c[idx]  = N[idx]
 
         id = covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
-        return  Network( self.c_model, id )
+        return  Network( self, id )
     
     def delete_network(self, network):   
         return covid19.delete_network( self.c_model, network.c_network )
@@ -745,7 +745,7 @@ class Model:
         daily_fraction    = [None] * n_ids
         
         for idx in range( n_ids ) :
-            network = Network( self.c_model, ids_c[idx] )
+            network = Network( self, ids_c[idx] )
             
             ids[idx]        = ids_c[idx]
             names[idx]      = network.name()
