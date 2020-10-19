@@ -10,6 +10,7 @@
   #undef ERROR // mute GCC warning: "ERROR" redefined
 #else
   #include <stdio.h>
+  #include <stdarg.h>
 #endif
 
 #include <stdlib.h>
