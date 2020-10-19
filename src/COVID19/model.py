@@ -667,7 +667,9 @@ class Model:
 
         id = covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
         return  Network( self.c_model, id )
-
+    
+    def delete_network(self, network):   
+        return covid19.delete_network( self.c_model, network.c_network )
     
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)

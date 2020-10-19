@@ -38,6 +38,9 @@ class Network:
     
     def daily_fraction(self):
         return covid19.network_daily_fraction( self.c_network )
+    
+    def update_daily_fraction(self,daily_fraction):
+        return covid19.update_daily_fraction(self.c_network,daily_fraction)
 
     def show(self):
         print( "network_id        = " + str( self.network_id ) )

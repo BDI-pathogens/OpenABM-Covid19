@@ -220,7 +220,7 @@ void set_up_networks( model *model )
 		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
 	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
-	model->random_network        = new_network( n_total, RANDOM );
+	model->random_network        = create_network( n_total, RANDOM );
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 	model->random_network->skip_hospitalised = FALSE;
 	model->random_network->skip_quarantined  = FALSE;
@@ -229,7 +229,7 @@ void set_up_networks( model *model )
 	model->random_network->network_id        = RANDOM_NETWORK;
 	strcpy( model->random_network->name, DEFAULT_NETWORKS_NAMES[RANDOM_NETWORK] );
 
-	model->household_network = new_network( n_total, HOUSEHOLD );
+	model->household_network = create_network( n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 	model->household_network->skip_hospitalised = TRUE;
 	model->household_network->skip_quarantined  = FALSE;
@@ -301,7 +301,7 @@ void set_up_occupation_network( model *model )
             if (model->population[idx].occupation_network == network)
                 people[n_people++] = idx;
 
-        model->occupation_network[network] = new_network( n_people, OCCUPATION );
+        model->occupation_network[network] = create_network( n_people, OCCUPATION );
         model->occupation_network[network]->skip_hospitalised = TRUE;
         model->occupation_network[network]->skip_quarantined  = TRUE;
         model->occupation_network[network]->construction      = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
@@ -660,7 +660,7 @@ void set_up_seed_infection( model *model )
 void build_random_network( model *model, network *network, long n_pos, long* interactions )
 {
 	long idx;
-	if( n_pos == 0 )
+	if( ( n_pos == 0 ) || ( network->daily_fraction < 1e-9 ) )
 		return;
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
@@ -687,6 +687,9 @@ void build_random_network( model *model, network *network, long n_pos, long* int
 ******************************************************************************************/
 void build_random_network_user( model *model, network *network )
 {
+	if( network->daily_fraction < 1e-9 )
+		return;
+
 	long idx, pdx, n_pos;
 	int jdx;
 	individual *indiv;
@@ -710,11 +713,14 @@ void build_random_network_user( model *model, network *network )
 }
 
 /*****************************************************************************************
-*  Name:		build_random_newtork_default
+*  Name:		build_random_network_default
 *  Description: Builds a new random network
 ******************************************************************************************/
 void build_random_network_default( model *model )
 {
+	if( model->random_network->daily_fraction < 1e-9 )
+		return;
+
 	long n_pos, person;
 	int jdx;
 	long *interactions = model->possible_interactions;
@@ -744,6 +750,9 @@ void add_interactions_from_network(
 	double prob_drop      = 1.0 - network->daily_fraction;
 	interaction *inter1, *inter2;
 	individual *indiv1, *indiv2;
+
+	if( network->daily_fraction < 1e-9 )
+		return;
 
 	while( idx < network->n_edges )
 	{
@@ -966,7 +975,7 @@ int add_user_network(
 	}
 	network_id++;
 
-	user_network = new_network( model->params->n_total, type );
+	user_network = create_network( model->params->n_total, type );
 	user_network->edges = calloc(n_edges, sizeof(edge));
 	user_network->n_edges = n_edges;
 	user_network->skip_hospitalised = skip_hospitalised;
@@ -1049,7 +1058,7 @@ int add_user_network_random(
 	network_id++;
 
 	// set on the meta data of the new network
-	user_network = new_network( model->params->n_total, RANDOM );
+	user_network = create_network( model->params->n_total, RANDOM );
 	user_network->skip_hospitalised = skip_hospitalised;
 	user_network->skip_quarantined  = skip_quarantined;
 	user_network->construction      = NETWORK_CONSTRUCTION_RANDOM;
@@ -1083,6 +1092,59 @@ int add_user_network_random(
 
 	return network_id;
 }
+
+/*****************************************************************************************
+*  Name:		delete_network
+*  Description: removes a network from the model
+*  				for user networks these are entirely removed
+*  				for defulat network they are silenced by setting daily fraction to 0
+*  Returns:		TRUE/FALSE
+******************************************************************************************/
+int delete_network( model *model, network *net )
+{
+	int idx;
+	int default_network = FALSE;
+	network *last_network = model->user_network;
+
+	if( ( model->random_network == net ) ||
+		( model->household_network == net ) )
+		default_network = TRUE;
+
+	for( idx = 0; idx < model->n_occupation_networks; idx++ )
+		if( model->occupation_network[ idx ] == net )
+			default_network = TRUE;
+
+	if( default_network )
+	{
+		update_daily_fraction( net, 0.0 );
+		return TRUE;
+	}
+	else
+	{
+		if( net == model->user_network )
+		{
+			model->user_network = net->next_network;
+			destroy_network( net );
+			return TRUE;
+		}
+		else
+		{
+			while( last_network->next_network != NULL )
+			{
+				if( last_network->next_network == net )
+				{
+					last_network = net->next_network;
+					destroy_network( net );
+					return TRUE;
+				}
+				last_network = last_network->next_network;
+			}
+		}
+	}
+	return FALSE;
+}
+
+
 
 /*****************************************************************************************
 *  Name:		get_network_by_id
