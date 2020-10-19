@@ -16,9 +16,14 @@ class Network:
         
         network = covid19.get_network_by_id( model, network_id )
         
-        self.network_id = network_id
-        self.n_edges    = covid19.network_n_edges( network )
-        self.name       = covid19.network_name( network ) 
+        self.network_id        = network_id
+        self.n_edges           = covid19.network_n_edges( network )
+        self.n_vertices        = covid19.network_n_vertices( network )
+        self.name              = covid19.network_name( network ) 
+        self.skip_hospitalised = covid19.network_skip_hospitalised( network )
+        self.skip_quarantined  = covid19.network_skip_quarantined( network )
+        self.type              = covid19.network_type( network )
+        self.daily_fraction    = covid19.network_daily_fraction( network )
 
     def show(self):
         print( "network_id = " + str( self.network_id ) )

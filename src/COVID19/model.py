@@ -5,6 +5,7 @@ from typing import Union
 import pandas as pd
 
 import covid19
+from COVID19.network import Network
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ class ModelParameterException(Exception):
 class ParameterException(Exception):
     pass
 
+class ModelException(Exception):
+    pass
 
 PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_symptoms",
@@ -661,7 +664,7 @@ class Model:
             ID_c[idx] = ID[idx]
             N_c[idx]  = N[idx]
 
-        covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
+        return covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
 
     
     def set_risk_score(self, day, age_inf, age_sus, value):
@@ -718,6 +721,48 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
 
+    def get_network_info(self, max_ids= 1000):
+           
+        if max_ids > 1e6 :
+            raise ModelException( "Maximum number of allowed network is 1e6" )
+        ids_c = covid19.intArray( max_ids )
+        n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
+        
+        if n_ids == 1 :
+            return self.get_network_info( max_ids = max_ids * 10 )
+        
+        ids        = [None] * n_ids
+        names      = [None] * n_ids
+        n_edges    = [None] * n_ids
+        n_vertices = [None] * n_ids
+        type       = [None] * n_ids
+        skip_hospitalised = [None] * n_ids
+        skip_quarantined  = [None] * n_ids
+        daily_fraction    = [None] * n_ids
+        
+        for idx in range( n_ids ) :
+            network = Network( self.c_model, ids_c[idx] )
+            
+            ids[idx]        = ids_c[idx]
+            names[idx]      = network.name
+            n_edges[idx]    = network.n_edges
+            n_vertices[idx] = network.n_vertices  
+            type[idx]       = network.type
+            skip_hospitalised[idx] = network.skip_hospitalised
+            skip_quarantined[idx]  = network.skip_quarantined
+            daily_fraction[idx]    = network.daily_fraction      
+            
+        return pd.DataFrame( {
+                'id'                : ids,
+                'name'              : names,
+                'n_edges'           : n_edges,
+                'n_vertices'        : n_vertices,
+                'type'              : type,
+                'skip_hospitalised' : skip_hospitalised,
+                'skip_quarantined'  : skip_quarantined,
+                'daily_fraction'    : daily_fraction
+            } )
+        
     def _create(self):
         """
         Call C function new_model (renamed create_model)

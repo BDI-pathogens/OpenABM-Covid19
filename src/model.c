@@ -1,4 +1,4 @@
-/*
+	/*
  * model.c
  *
  *  Created on: 5 Mar 2020
@@ -1113,6 +1113,41 @@ network* get_network_by_id( model *model, int network_id )
 	return NULL;
 }
 
+/*****************************************************************************************
+*  Name:		get_network_ids
+*  Description: gets all the network ids
+*  				network ids are set on the array pointer
+*  Returns:		the number of ids
+******************************************************************************************/
+int get_network_ids( model *model, int *ids, int max_ids )
+{
+	int idx;
+	int n_ids = 0;
+	network *user_network;
+
+	ids[ n_ids++ ] = model->household_network->network_id;
+
+	for( idx = 0; idx < model->n_occupation_networks; idx++ )
+	{
+		if( n_ids == max_ids )
+			return -1;
+		ids[ n_ids++ ] = model->occupation_network[ idx ]->network_id;
+	}
+
+	if( n_ids == max_ids )
+		return -1;
+	ids[ n_ids++ ] = model->random_network->network_id;
+
+	user_network = model->user_network;
+	while( user_network != NULL )
+	{
+		if( n_ids == max_ids )
+			return -1;
+		ids[ n_ids++ ] = user_network->network_id;
+		user_network   = user_network->next_network;
+	}
+	return( n_ids );
+}
 
 /*****************************************************************************************
 *  Name:		return_interactions
