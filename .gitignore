@@ -7,6 +7,7 @@ src/**/*.exe
 src/**/*.csv
 !src/adapter_covid19/data/*.csv
 src/**/*.so
+src/**/*.dll
 examples/results/*.csv
 cmake-build-debug/CMakeFiles/**
 
@@ -45,6 +46,8 @@ documentation/*.toc
 
 # R-related files
 .Rhistory
+.RData
+.Rproj.user
 
 # R package build files
 /OpenABMCovid19/
@@ -53,7 +56,6 @@ documentation/*.toc
 /OpenABMCovid19_*.tgz
 /OpenABMCovid19_*.zip
 /OpenABMCovid19.tmp/
-DESCRIPTION
 
 # performance related
 performance/*.trace

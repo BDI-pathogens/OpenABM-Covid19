@@ -25,7 +25,10 @@ ALL_OUTPUT = $(TMPDIR)
 
 
 # SWIG generated files
-SWIG_SRC  = src/covid19.i src/model_utils.i src/params_utils.i
+SWIG_SRC = src/covid19.i 	src/model_utils.i src/params_utils.i src/constant.h \
+	src/demographics.h src/disease.h src/doctor.h src/hospital.h src/individual.h \
+	src/input.h src/interventions.h src/list.h src/model.h src/network.h
+	src/nurse.h src/params.h src/structure.h src/utilities.h src/ward.h
 SWIG_COUT = src/covid19_wrap_R.c
 SWIG_ROUT = R/$(R_PKGNAME).R
 
@@ -53,20 +56,6 @@ CONTENT = NAMESPACE DESCRIPTION LICENSE $(R_SRC) $(C_SRC) $(DOCS)
 
 
 
-# R package content rules:
-DESCRIPTION: DESCRIPTION.in .git/HEAD
-	[ -d $(TMPDIR) ] || mkdir -p $(TMPDIR)
-	sed \
-	  -e "s/@R_PKGNAME@/$(R_PKGNAME)/" \
-	  -e "s/@VERSION@/$(VERSION)/" \
-	  -e "s/@GIT_TAG@/$$(git describe --tags)/" \
-	  -e "s/@DATE@/$$(date +%Y-%m-%d)/" \
-	  DESCRIPTION.in > $(TMPDIR)/DESCRIPTION
-	[ $$? -eq 0 ] && cp $(TMPDIR)/DESCRIPTION DESCRIPTION
-ALL_OUTPUT += DESCRIPTION
-
-
-
 # Build R source package
 R_SRC_PKG = $(R_PKGNAME)_$(VERSION).tar.gz
 $(R_SRC_PKG): .Rbuildignore $(CONTENT)
@@ -85,6 +74,8 @@ ALL_OUTPUT += $(R_BIN_PKG)
 
 
 # Alias target (Phony) for convenience
+Rswig: $(SWIG_COUT) $(SWIG_ROUT)
+
 Rbuild: $(R_SRC_PKG)
 
 Rinstall: $(R_BIN_PKG)
@@ -103,4 +94,4 @@ dry_clean:
 	@echo '`make clean` will run:'
 	@echo rm -fr $(ALL_OUTPUT)
 
-.PHONY: clean dry_clean Rbuild Rcheck Rinstall
+.PHONY: clean dry_clean Rswig Rbuild Rcheck Rinstall

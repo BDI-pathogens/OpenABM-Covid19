@@ -1,7 +1,5 @@
-Package: @R_PKGNAME@
-Version: @VERSION@
-Date: @DATE@
-GitTag: @GIT_TAG@
+Package: OpenABMCovid19
+Version: 0.3
 Title: Agent-based model for modelling the Covid-19
 License: GPL-3 | file LICENSE
 Authors@R:

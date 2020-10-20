@@ -2,6 +2,7 @@
 
 # R files
 ^\.Rhistory$
+^\.RData$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^.*\.Rcheck$

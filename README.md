@@ -98,46 +98,30 @@ Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-start
 R Packaging
 -----------
 
-To build the R source or binary package, you should use the Makefile at the root of the source directory. You must have the following commands included in your `PATH` environment variable.
+To build the R package, you first need to generate the SWIG source files. Do to this, you should use the Makefile at the root of the source directory. You must have the `swig` command included in your `PATH` environment variable. To generate the SWIG source files, run:
 
-- `R`
-- `swig`
-- `git`
-
-The Makefile will automatically run SWIG to generate source code (and other build steps such preprocessing *.in files) before running `R CMD build`.
-
-
-To build the R source package, use:
 ```
-make Rbuild
+make Rswig
 ```
-This will output a source package tar-ball named `OpenABMCovid19_${VERSION}.tar.gz`
 
+If this is succesfull, the following files will be generated (ignored by git):
 
-To build the R binary package, use:
-```
-make Rinstall
-```
-This will output a binary package on your current platform (`.zip` for Window, `.tgz` for macOS).
+- R/OpenABMCovid19.R
+- src/covid19_wrap_R.c
+
+You can then open the OpenABM-Covid19.Rproj file in RStudio and build as normal. Remember to re-run `make Rswig` every time about you modify the C source and/or SWIG interface.
+
+Alternatively, you can also build using the command-line instead of RStudio:
+
+- `make Rbuild`: builds the R source package
+- `make Rinstall`: builds the R binary package
+- `make Rcheck`: check R package for errors
 
 
 ### Requirements for building on Windows
 
 If you're building on Windows, there are additional tools that are needed to build the binary package. This is the recommended setup:
 
-- Download precompiled 32 and 64 bits libraries of GSL (installed in C:\gsl)
-- Install Rtools (in C:\Rtools)
-- Install SWIG via Cygwin64
-
-It's adviced to put Rtools & R bin dir at the start of the `PATH` environment and the git & cygwin bin dir at the end.
-
-Example environment:
-```batch
-@REM R & Rtools at the start
-set PATH=C:\Program Files\R\R-3.6.2\bin\x64;%PATH%
-set PATH=C:\Rtools\bin;%PATH%
-
-@REM git & swig at the end
-set PATH=%PATH%;C:\Program Files\Git\cmd
-set PATH=%PATH%;C:\cygwin64\bin
-```
+- Download precompiled 32 and 64 bits libraries of GSL (installed in C:\gsl).
+- Install Rtools (in C:\Rtools).
+- Install make & SWIG via Cygwin64 (to run `make Rswig`).
