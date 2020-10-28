@@ -27,7 +27,7 @@ ALL_OUTPUT = $(TMPDIR)
 # SWIG generated files
 SWIG_SRC = src/covid19.i 	src/model_utils.i src/params_utils.i src/constant.h \
 	src/demographics.h src/disease.h src/doctor.h src/hospital.h src/individual.h \
-	src/input.h src/interventions.h src/list.h src/model.h src/network.h
+	src/input.h src/interventions.h src/list.h src/model.h src/network.h \
 	src/nurse.h src/params.h src/structure.h src/utilities.h src/ward.h
 SWIG_COUT = src/covid19_wrap_R.c
 SWIG_ROUT = R/$(R_PKGNAME).R
