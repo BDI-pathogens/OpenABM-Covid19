@@ -22,6 +22,7 @@
 ^python$
 ^tests$
 ^src\/adapter_covid19$
+^src\/covid19_wrap\.c$
 
 # Build files
 .*\.in$
