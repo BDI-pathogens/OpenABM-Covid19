@@ -4,3 +4,7 @@ importFrom("methods", "is")
 importFrom("methods", "new")
 importFrom("methods", "setClass")
 importFrom("methods", "slot")
+
+export("parameters")
+
+useDynLib(OpenABMCovid19, .registration = TRUE)
