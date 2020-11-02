@@ -4,8 +4,16 @@ VERSION		= 0.3
 
 ifeq ($(OS),Windows_NT)
 	R_BIN_PKG_EXT=zip
+# Fix a problem where .libPaths() doesn't include the path in My Documents
+# on Windows. On Windows the HOME variable is unset (empty), but Rtools'
+# sh.exe set HOME to /home/${USER}. We can manually set this to an empty
+# variable to fix this. On Unix, this has no affect because we're setting
+# HOME to itself.
+# https://community.rstudio.com/t/rstudio-startup-missing-libpaths/22122/6
+	R_ENV=HOME=
 else
 	R_BIN_PKG_EXT=tgz
+	R_ENV=
 endif
 
 
@@ -59,7 +67,7 @@ CONTENT = NAMESPACE DESCRIPTION LICENSE $(R_SRC) $(C_SRC) $(DOCS)
 # Build R source package
 R_SRC_PKG = $(R_PKGNAME)_$(VERSION).tar.gz
 $(R_SRC_PKG): .Rbuildignore $(CONTENT)
-	R CMD build .
+	$(R_ENV) R CMD build .
 ALL_OUTPUT += $(R_SRC_PKG)
 
 
@@ -68,7 +76,7 @@ ALL_OUTPUT += $(R_SRC_PKG)
 R_BIN_PKG=$(R_PKGNAME)_$(VERSION).$(R_BIN_PKG_EXT)
 $(R_BIN_PKG): $(R_SRC_PKG)
 	[ -d $(TMPDIR)/Rinstall ] || mkdir -p $(TMPDIR)/Rinstall
-	R CMD INSTALL --library=$(TMPDIR)/Rinstall --build $(R_SRC_PKG)
+	$(R_ENV) R CMD INSTALL --library=$(TMPDIR)/Rinstall --build $(R_SRC_PKG)
 ALL_OUTPUT += $(R_BIN_PKG)
 
 
@@ -82,7 +90,7 @@ Rinstall: $(R_BIN_PKG)
 
 Rcheck: $(R_SRC_PKG)
 	[ -d $(TMPDIR)/Rcheck ] || mkdir -p $(TMPDIR)/Rcheck
-	R CMD check --output=$(TMPDIR)/Rcheck $(R_SRC_PKG)
+	$(R_ENV) R CMD check --output=$(TMPDIR)/Rcheck $(R_SRC_PKG)
 
 
 
