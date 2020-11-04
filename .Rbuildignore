@@ -36,3 +36,4 @@
 ^cran-comments\.md$
 ^documentation$
 ^src\/Makefile$
+^src\/main\.c$

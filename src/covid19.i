@@ -17,6 +17,26 @@
 
 %nodefaultdtor;
 
+/* These structs shouldn't be used directly (memory is managed by create_model
+ * and destroy_model). Ignoring these ctors is necessary to suppress NOTEs
+ * from `R CMD check`. */
+%nodefaultctor directory;
+%nodefaultdtor directory;
+%nodefaultctor event;
+%nodefaultdtor event;
+%nodefaultctor event_list;
+%nodefaultdtor event_list;
+%nodefaultctor individual;
+%nodefaultdtor individual;
+%nodefaultctor infection_event;
+%nodefaultdtor infection_event;
+%nodefaultctor interaction;
+%nodefaultdtor interaction;
+%nodefaultctor interaction_block;
+%nodefaultdtor interaction_block;
+%nodefaultctor incomplete_gamma_p_params;
+%nodefaultdtor incomplete_gamma_p_params;
+
 %include "model.h"
 %include "params.h"
 %include "constant.h"

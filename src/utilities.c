@@ -5,7 +5,14 @@
  *      Author: hinchr
  */
 
-#include <stdio.h>
+#ifdef BUILD_RPKG
+  #include <Rdefines.h>
+  #undef ERROR // mute GCC warning: "ERROR" redefined
+#else
+  #include <stdio.h>
+  #include <stdarg.h>
+#endif
+
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_sf_gamma.h>
@@ -13,6 +20,8 @@
 #include <gsl/gsl_math.h>
 #include "constant.h"
 #include "utilities.h"
+
+#undef printf
 
 /*****************************************************************************************
 *  Name:		setup_gsl_rng
@@ -28,13 +37,35 @@ void setup_gsl_rng(int seed)
 }
 
 /*****************************************************************************************
+*  Name:		printf_w
+*  Description: Wrapper for printf / Rprintf
+******************************************************************************************/
+int printf_w( const char* format, ... )
+{
+    int r = 0;
+    va_list args;
+    va_start(args, format);
+#ifdef BUILD_RPKG  /* CRAN packages may not interact with stdout/stderr directly */
+    Rvprintf(format, args );
+#else
+    r = vprintf(format, args );
+#endif
+    va_end(args);
+    return(r);
+}
+
+/*****************************************************************************************
 *  Name:		print_exit
 ******************************************************************************************/
 void print_exit( char *s )
 {
+#ifdef BUILD_RPKG /* CRAN packages may not call exit(); Rf_error uses longjmp() */
+    Rf_error(s);
+#else
     printf("%s\n", s );
     fflush(stdout);
     exit(1);
+#endif
 }
 
 /*****************************************************************************************
@@ -42,7 +73,7 @@ void print_exit( char *s )
 ******************************************************************************************/
 void print_now( char *s )
 {
-    printf("%s\n", s );
+    printf_w("%s\n", s );
     fflush(stdout);
 }
 
