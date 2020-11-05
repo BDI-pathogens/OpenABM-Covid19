@@ -20,7 +20,6 @@
 ^examples$
 ^performance$
 ^python$
-^tests$
 ^src\/adapter_covid19$
 ^src\/covid19_wrap\.c$
 
@@ -31,6 +30,12 @@
 ^OpenABMCovid19_.*\.tar\.gz$
 ^OpenABMCovid19_.*\.tgz$
 ^OpenABMCovid19_.*\.zip$
+
+# Test output
+^src_test$
+^data_test$
+^tests\/src_test$
+^tests\/data_test$
 
 # Misc
 ^\.github$

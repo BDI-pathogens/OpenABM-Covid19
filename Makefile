@@ -51,7 +51,7 @@ ALL_OUTPUT += $(SWIG_COUT) $(SWIG_ROUT)
 
 
 # R package content
-R_SRC= $(SWIG_ROUT)
+R_SRC= $(SWIG_ROUT) R/model.R tests/testthat.R tests/testthat/test-model.R
 C_SRC= $(SWIG_COUT) src/constant.c src/constant.h src/demographics.c \
 	src/demographics.h src/disease.c src/disease.h src/doctor.c src/doctor.h \
 	src/hospital.c src/hospital.h src/individual.c src/individual.h src/input.c \

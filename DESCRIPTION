@@ -15,4 +15,11 @@ Description:
   disease in individuals is modelled. Instantaneous contract-tracing and
   quarantining of contacts is modelled allowing the evaluation of the design and
   configuration of digital contract-tracing mobile phone apps.
+Depends: R6
 Imports: methods
+Collate:
+  OpenABMCovid19.R
+  read-only.R
+  model.R
+Suggests:
+    testthat
