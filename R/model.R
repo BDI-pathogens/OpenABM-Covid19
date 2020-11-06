@@ -1,5 +1,3 @@
-
-
 # check if a double is a whole number, and convert it into an integer.
 # returns NA_integer_ if number is NA.
 make_integer <- function(number) {
@@ -19,6 +17,27 @@ make_integer <- function(number) {
 
 
 
+#' R6Class Parameters
+#'
+#' @description
+#' Wrapper class for the \code{parameters} C struct (\emph{params.h}).
+#'
+#' @details
+#' PLACEHOLDER Some explanations
+#'
+#' @examples
+#' # Load parameters from CSV files.
+#' params <- OpenABMCovid19::Parameters$initialize(
+#'    "input_parameters.csv", 1,
+#'    "out_dir",
+#'    "input_household.csv",
+#'    "hospital_input_parameters.csv", 1
+#' )
+#'
+#' # Edit params
+#' params$c_params$rng_seed = 1234
+#' params$c_params$n_total = 250000
+#'
 Parameters <- R6Class(
   'Parameters',
 
@@ -35,10 +54,20 @@ Parameters <- R6Class(
   ),
 
   public = list(
+    #' @field c_params SWIG pointer to C API struct.
     c_params = NA,
 
+    #' @field household_df Household Data Frame.
     household_df = NA,
 
+    #' @param input_param_file Input parameters CSV file path.
+    #' @param param_line_number Which column of the input param file to read.
+    #' @param output_file_dir Where to write output files to.
+    #' @param input_households Household demographics file (required).
+    #' @param hospital_input_param_file Hospital input parameters CSV file path.
+    #' @param hospital_param_line_number Which column of the hospital input param file to read.
+    #' @param read_param_file A boolean. If \code{TRUE}, read \code{input_param_file}. If \code{FALSE}, ignore \code{input_param_file}.
+    #' @param read_hospital_param_file A boolean. If \code{TRUE}, read \code{hospital_input_param_file}. If \code{FALSE}, ignore \code{hospital_input_param_file}.
     initialize = function(
       input_param_file = NA_character_,
       param_line_number = NA_integer_,
@@ -101,6 +130,25 @@ Parameters <- R6Class(
       if (!is.na(output_file_dir)) {
         self$c_params$sys_write_individual <- 1
       }
+    }
+  )
+)
+
+
+
+#' R6Class Model
+#'
+#' @description
+#' Wrapper class for the \code{model} C struct (\emph{model.h}).
+#'
+Model <- R6Class(
+  'Model',
+
+  public = list(
+
+    #' @param example PLACEHOLDER
+    initialize = function(example)
+    {
     }
   )
 )

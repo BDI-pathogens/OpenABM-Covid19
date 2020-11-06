@@ -61,6 +61,10 @@ src-x64/
 /OpenABMCovid19_*.zip
 /OpenABMCovid19.tmp/
 
+# Roxygen2 generated documentation
+/man/Model.Rd
+/man/Parameters.Rd
+
 # performance related
 performance/*.trace
 performance/*.dtps
