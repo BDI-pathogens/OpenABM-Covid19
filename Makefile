@@ -42,6 +42,8 @@ SWIG_ROUT = R/$(R_PKGNAME).R
 
 $(SWIG_COUT): $(SWIG_SRC)
 	swig -r -package $(R_PKGNAME) -Isrc -o $(SWIG_COUT) -outdir R src/covid19.i
+# edit generated C source to mute R check note.
+	sed -i 's/R_registerRoutines/R_useDynamicSymbols(dll,0);R_registerRoutines/' $(SWIG_COUT)
 $(SWIG_ROUT): $(SWIG_COUT)
 # edit generated src lines are cause R check warnings.
 	sed -i 's/.Call("R_SWIG_debug_getCallbackFunctionData"/.Call("R_SWIG_debug_getCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
