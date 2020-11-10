@@ -49,7 +49,7 @@ Parameters <- R6Class(
 
     read_hospital_param_file = function()
     {
-      # TODO
+      read_hospital_param_file( self$c_params )
     }
   ),
 
@@ -113,9 +113,9 @@ Parameters <- R6Class(
         }
       }
 
-      if (!is.na(hospital_input_param_file) && read_param_file) {
+      if (!is.na(hospital_input_param_file) && read_hospital_param_file) {
         self$c_params$hospital_input_param_file <- hospital_input_param_file
-      } else if (is.na(hospital_input_param_file) && read_param_file) {
+      } else if (is.na(hospital_input_param_file) && read_hospital_param_file) {
         stop("hospital_input_param_file is NA and read_param_file is TRUE")
       }
 
