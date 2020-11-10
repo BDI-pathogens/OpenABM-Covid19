@@ -127,6 +127,7 @@ Parameters <- R6Class(
         private$read_and_check_from_file()
       }
 
+      self$c_params$output_file_dir = output_file_dir
       if (!is.na(output_file_dir)) {
         self$c_params$sys_write_individual <- 1
       }

@@ -52,6 +52,8 @@ $(SWIG_ROUT): $(SWIG_COUT)
 # edit generated src lines are cause R check warnings.
 	sed -i 's/.Call("R_SWIG_debug_getCallbackFunctionData"/.Call("R_SWIG_debug_getCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
 	sed -i 's/.Call("R_SWIG_R_pushCallbackFunctionData"/.Call("R_SWIG_R_pushCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
+# edit generated src that causes errors like: "p_char" is not a defined class
+	sed -i 's/ans <- new("_p_char"/#ans <- new("_p_char"/' $(SWIG_ROUT)
 ALL_OUTPUT += $(SWIG_COUT) $(SWIG_ROUT)
 
 
