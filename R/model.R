@@ -89,7 +89,7 @@ Parameters <- R6Class(
       if (!is.na(input_param_file)) {
         self$c_params$input_param_file <- input_param_file
       } else if (is.na(input_param_file) && read_param_file ) {
-        stop("input_param_file is NA and read_param_file set to TRUE/")
+        stop("input_param_file is NA and read_param_file set to TRUE")
       }
 
       if (!is.na(param_line_number)) {
@@ -131,6 +131,24 @@ Parameters <- R6Class(
       if (!is.na(output_file_dir)) {
         self$c_params$sys_write_individual <- 1
       }
+    },
+
+    #' Get a C parameter by name.
+    #' @param param A string representing the C parameter's name
+    get_param = function(param)
+    {
+      getter <- get( paste("parameters_", param, "_get", sep = "") )
+      result <- getter( self$c_params )
+      return(result)
+    },
+
+    #' Set a C parameter by name.
+    #' @param param A string representing the C parameter's name
+    #' @param value The new value for the C parameter.
+    set_param = function(param, value)
+    {
+      setter <- get( paste("parameters_", param, "_set", sep = "") )
+      setter( self$c_params, value )
     }
   )
 )

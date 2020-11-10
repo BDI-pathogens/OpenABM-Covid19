@@ -81,3 +81,13 @@ test_that("Parameters::initialize (all CSV files)", {
   expect_equal(p$c_params$hospital_input_param_file, "data/hospital_baseline_parameters.csv")
   expect_equal(p$c_params$hospital_param_line_number, 1)
 })
+
+test_that("Parameters:get_param / set_param", {
+  p <- Parameters$new(
+    input_households = "init_value.csv",
+    read_param_file = FALSE)
+
+  expect_equal(p$get_param('input_household_file'), "init_value.csv")
+  p$set_param('input_household_file', "new_value.csv")
+  expect_equal(p$get_param('input_household_file'), "new_value.csv")
+})
