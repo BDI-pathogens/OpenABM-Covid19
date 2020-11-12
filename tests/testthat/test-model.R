@@ -1,6 +1,22 @@
+##-----------------------------------------------------------------------------
+## Setup
+##-----------------------------------------------------------------------------
 library(R6)
 
 setwd("..")
+
+
+
+##-----------------------------------------------------------------------------
+## Test: Parameters
+##-----------------------------------------------------------------------------
+Parameters$set("public", "test_read_household_demographics", function() {
+  private$read_household_demographics()
+})
+
+Parameters$set("public", "test_get_REFERENCE_HOUSEHOLDS", function() {
+  private$get_REFERENCE_HOUSEHOLDS()
+})
 
 test_that("Parameters is R6 class", {
   expect_equal(is.R6Class(Parameters), TRUE)
@@ -86,8 +102,27 @@ test_that("Parameters:get_param / set_param", {
   p <- Parameters$new(
     input_households = "init_value.csv",
     read_param_file = FALSE)
-
   expect_equal(p$get_param('input_household_file'), "init_value.csv")
   p$set_param('input_household_file', "new_value.csv")
   expect_equal(p$get_param('input_household_file'), "new_value.csv")
+})
+
+test_that("Parameters::read_household_demographics (data frame)", {
+  R_df <- read.csv("data/baseline_household_demographics.csv")
+  p <- Parameters$new(
+    input_households = R_df,
+    read_param_file = FALSE, read_hospital_param_file = FALSE)
+  p$test_read_household_demographics()
+  C_df <- p$test_get_REFERENCE_HOUSEHOLDS()
+  expect_true(all.equal(R_df, C_df))
+})
+
+test_that("Parameters::read_household_demographics (file path)", {
+  p <- Parameters$new(
+    input_households = "data/baseline_household_demographics.csv",
+    read_param_file = FALSE, read_hospital_param_file = FALSE)
+  p$test_read_household_demographics()
+  R_df <- read.csv("data/baseline_household_demographics.csv")
+  C_df <- p$test_get_REFERENCE_HOUSEHOLDS()
+  expect_true(all.equal(R_df, C_df))
 })

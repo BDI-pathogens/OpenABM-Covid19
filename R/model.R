@@ -50,6 +50,77 @@ Parameters <- R6Class(
     read_hospital_param_file = function()
     {
       read_hospital_param_file( self$c_params )
+    },
+
+    read_household_demographics = function()
+    {
+      if (self$c_params$N_REFERENCE_HOUSEHOLDS != 0) { return(); }
+
+      if (is.data.frame(self$household_df)) {
+        # Move data from R dataframe to C memory
+        N <- nrow(self$household_df)
+        self$c_params$N_REFERENCE_HOUSEHOLDS <- N
+        set_up_reference_household_memory( self$c_params )
+
+        for (i in 1:N) {
+          add_household_to_ref_households(
+            self$c_params,
+            i - 1,
+            self$household_df[i,1],
+            self$household_df[i,2],
+            self$household_df[i,3],
+            self$household_df[i,4],
+            self$household_df[i,5],
+            self$household_df[i,6],
+            self$household_df[i,7],
+            self$household_df[i,8],
+            self$household_df[i,9]
+          )
+        }
+      }
+      else {
+        # Tell C API to load CSV.
+        self$c_params$N_REFERENCE_HOUSEHOLDS <-
+          nrow(read.csv(self$c_params$input_household_file))
+        read_household_demographics_file(self$c_params)
+      }
+    },
+
+    #' Convert the C param REFERENCE_HOUSEHOLDS (2D int array) into into an R
+    #' data frame.
+    get_REFERENCE_HOUSEHOLDS = function()
+    {
+      # TODO(olegat): get_param('REFERENCE_HOUSEHOLDS') could call this.
+      # Create empty data frame with column names
+      names <- c(
+        "a_0_9",
+        "a_10_19",
+        "a_20_29",
+        "a_30_39",
+        "a_40_49",
+        "a_50_59",
+        "a_60_69",
+        "a_70_79",
+        "a_80")
+      df <- data.frame()
+      for (k in names) df[[k]] <- as.integer()
+
+      # Add rows
+      N <- self$c_params$N_REFERENCE_HOUSEHOLDS
+      for (i in 1:N) {
+        offset <- i - 1
+        df[i,] <- c(
+          get_household_value( self$c_params, offset, 0 ),
+          get_household_value( self$c_params, offset, 1 ),
+          get_household_value( self$c_params, offset, 2 ),
+          get_household_value( self$c_params, offset, 3 ),
+          get_household_value( self$c_params, offset, 4 ),
+          get_household_value( self$c_params, offset, 5 ),
+          get_household_value( self$c_params, offset, 6 ),
+          get_household_value( self$c_params, offset, 7 ),
+          get_household_value( self$c_params, offset, 8 ))
+      }
+      return(df)
     }
   ),
 
