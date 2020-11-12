@@ -87,12 +87,12 @@ Parameters <- R6Class(
     },
 
     #' Convert the C param REFERENCE_HOUSEHOLDS (2D int array) into into an R
-    #' data frame.
+    #' data frame. Currently this function is used just for testing.
     get_REFERENCE_HOUSEHOLDS = function()
     {
       # TODO(olegat): get_param('REFERENCE_HOUSEHOLDS') could call this.
       # Create empty data frame with column names
-      names <- c(
+      ages <- c(
         "a_0_9",
         "a_10_19",
         "a_20_29",
@@ -102,14 +102,13 @@ Parameters <- R6Class(
         "a_60_69",
         "a_70_79",
         "a_80")
-      df <- data.frame()
-      for (k in names) df[[k]] <- as.integer()
 
       # Add rows
       N <- self$c_params$N_REFERENCE_HOUSEHOLDS
+      mat <- matrix(nrow = N, ncol = 9)
       for (i in 1:N) {
         offset <- i - 1
-        df[i,] <- c(
+        mat[i,] <- c(
           get_household_value( self$c_params, offset, 0 ),
           get_household_value( self$c_params, offset, 1 ),
           get_household_value( self$c_params, offset, 2 ),
@@ -120,6 +119,10 @@ Parameters <- R6Class(
           get_household_value( self$c_params, offset, 7 ),
           get_household_value( self$c_params, offset, 8 ))
       }
+
+      # Convert matrix into data.frame
+      df <- as.data.frame(mat)
+      names(df) <- ages
       return(df)
     }
   ),
