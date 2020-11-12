@@ -20,7 +20,7 @@ Imports: methods
 Collate:
   OpenABMCovid19.R
   read-only.R
-  model.R
+  Parameters.R
 Suggests:
     testthat
 RoxygenNote: 7.1.1

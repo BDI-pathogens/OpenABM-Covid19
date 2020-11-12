@@ -66,11 +66,11 @@ ALL_OUTPUT += $(SWIG_COUT) $(SWIG_ROUT)
 ROXYGEN_OUT = man/Parameters.Rd man/Model.Rd
 ROXYGEN_CMD = $(R_ENV) R -e 'devtools::document()'
 
-man/Parameters.Rd: $(SWIG_ROUT) R/model.R
+man/Parameters.Rd: $(SWIG_ROUT) R/Parameters.R
 	rm $(ROXYGEN_OUT)
 	$(ROXYGEN_CMD)
 
-man/Model.Rd: $(SWIG_ROUT) R/model.R man/Parameters.Rd
+man/Model.Rd: $(SWIG_ROUT) R/Model.R man/Parameters.Rd
 	rm $(ROXYGEN_OUT)
 	$(ROXYGEN_CMD)
 
@@ -84,7 +84,8 @@ ALL_OUTPUT += $(ROXYGEN_OUT)
 # Output:        R source package file (.tar.gz)
 #------------------------------------------------------------------------------
 # R package content
-R_SRC= $(SWIG_ROUT) R/model.R tests/testthat.R tests/testthat/test-model.R
+R_SRC= $(SWIG_ROUT) R/Model.R R/Parameters.R tests/testthat.R \
+	tests/testthat/test-Model.R tests/testthat/test-Parameters.R
 C_SRC= $(SWIG_COUT) src/constant.c src/constant.h src/demographics.c \
 	src/demographics.h src/disease.c src/disease.h src/doctor.c src/doctor.h \
 	src/hospital.c src/hospital.h src/individual.c src/individual.h src/input.c \
