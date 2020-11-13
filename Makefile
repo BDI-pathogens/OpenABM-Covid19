@@ -68,9 +68,11 @@ ROXYGEN_CMD = $(R_ENV) R -e 'devtools::document()'
 
 man/Parameters.Rd: $(SWIG_ROUT) R/Parameters.R
 	$(ROXYGEN_CMD)
+	touch $(ROXYGEN_OUT)
 
 man/Model.Rd: $(SWIG_ROUT) R/Model.R man/Parameters.Rd
 	$(ROXYGEN_CMD)
+	touch $(ROXYGEN_OUT)
 
 ALL_OUTPUT += $(ROXYGEN_OUT)
 
