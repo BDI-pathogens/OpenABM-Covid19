@@ -209,14 +209,31 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' Set the \code{demographic_household_table} C struct (defined in
     #' \emph{demographics.h}). This function initializes the
     #' \code{self$c_params$demo_house} member.
-    #' @param df_house_house A data-frame representation of the
+    #' @param df_demo_house A data-frame representation of the
     #' \code{demographic_household_table} C struct. The data-frame must contain
     #' column names \code{c("ID", "age_group", "house_no")} and the number of
     #' rows must be equal to \code{self$c_params$n_total}.
     #' @return \code{TRUE} on success, \code{FALSE} on error.
-    set_demographic_household_table = function(df_house_house)
+    set_demographic_household_table = function(df_demo_house)
     {
-      # TODO(olegat)
+      n_total <- nrow(df_demo_house)
+      if (n_total != self$c_params$n_total ) {
+        stop('df_demo_house must have n_total rows')
+      }
+      for (name in c('ID', 'age_group', 'house_no')) {
+        if ( !hasName(df_demo_house, name)) {
+          stop('df_demo_house must have column ', name)
+        }
+      }
+      n_households <- max(df_demo_house[,'house_no'])
+
+      set_demographic_house_table(
+        self$c_params,
+        n_total,
+        n_households,
+        df_demo_house[,'ID'],
+        df_demo_house[,'age_group'],
+        df_demo_house[,'house_no'])
     },
 
     #' Set the \code{demographic_occupation_network_table} C struct (defined in

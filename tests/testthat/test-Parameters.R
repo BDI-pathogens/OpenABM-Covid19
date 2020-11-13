@@ -146,3 +146,18 @@ test_that("Parameters::set_demographic_household_table (invalid n_total)", {
   df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = ID %/% 4)
   expect_error(p$set_demographic_household_table(df))
 })
+
+test_that("Parameters::set_demographic_household_table (missing columns)", {
+  p <- Parameters$new(
+    input_households = "data/baseline_household_demographics.csv",
+    read_param_file = FALSE, read_hospital_param_file = FALSE)
+  n_total <- 10L
+  p$c_params$n_total <- n_total
+  ID <- seq(from = 1, to = n_total, by = 1)
+  expect_error(p$set_demographic_household_table(data.frame(
+    'age_group' = ID %% 9, 'house_no' = ID %/% 4)))
+  expect_error(p$set_demographic_household_table(data.frame(
+    'ID' = ID, 'house_no' = ID %/% 4)))
+  expect_error(p$set_demographic_household_table(data.frame(
+    'ID' = ID, 'age_group' = ID %% 9)))
+})
