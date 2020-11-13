@@ -1,22 +1,3 @@
-# check if a double is a whole number, and convert it into an integer.
-# returns NA_integer_ if number is NA.
-make_integer <- function(number) {
-  if (is.na(number)) {
-    return(NA_integer_)
-  }
-  if (!is.numeric(number)) {
-    stop(paste(number, "is not numeric"))
-  }
-  whole_part <- as.integer(number)
-  fraction_part <- number - whole_part
-  if (fraction_part != 0) {
-    stop(paste(number,"is not a whole number"))
-  }
-  return(whole_part)
-}
-
-
-
 #' R6Class Parameters
 #'
 #' @description

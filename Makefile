@@ -84,7 +84,7 @@ ALL_OUTPUT += $(ROXYGEN_OUT)
 # Output:        R source package file (.tar.gz)
 #------------------------------------------------------------------------------
 # R package content
-R_SRC= $(SWIG_ROUT) R/Model.R R/Parameters.R tests/testthat.R \
+R_SRC= $(SWIG_ROUT) R/util.R R/Model.R R/Parameters.R tests/testthat.R \
 	tests/testthat/test-Model.R tests/testthat/test-Parameters.R
 C_SRC= $(SWIG_COUT) src/constant.c src/constant.h src/demographics.c \
 	src/demographics.h src/disease.c src/disease.h src/doctor.c src/doctor.h \

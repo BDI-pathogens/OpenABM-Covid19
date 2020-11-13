@@ -19,7 +19,7 @@ Depends: R6
 Imports: methods
 Collate:
   OpenABMCovid19.R
-  read-only.R
+  util.R
   Parameters.R
   Model.R
 Suggests:
