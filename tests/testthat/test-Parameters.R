@@ -118,3 +118,31 @@ test_that("Parameters::read_household_demographics (file path)", {
   C_df <- p$test_get_REFERENCE_HOUSEHOLDS()
   expect_true(all.equal(R_df, C_df))
 })
+
+test_that("Parameters::set_demographic_household_table (success)", {
+  p <- Parameters$new(
+    input_param_file         = "data/baseline_parameters.csv",
+    param_line_number        = 1,
+    output_file_dir          = "data_test",
+    input_households         = "data/baseline_household_demographics.csv",
+    read_param_file          = TRUE,
+    read_hospital_param_file = FALSE)
+  n_total <- 10L
+  p$c_params$n_total <- n_total
+  ID <- seq(from = 1, to = n_total, by = 1)
+  df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = ID %/% 4)
+  p$set_demographic_household_table(df)
+  # TODO(olegat) write proper test expectations:
+  expect_true(TRUE)
+})
+
+test_that("Parameters::set_demographic_household_table (invalid n_total)", {
+  p <- Parameters$new(
+    input_households = "data/baseline_household_demographics.csv",
+    read_param_file = FALSE, read_hospital_param_file = FALSE)
+  n_total <- 10L
+  p$c_params$n_total <- 11L
+  ID <- seq(from = 1, to = n_total, by = 1)
+  df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = ID %/% 4)
+  expect_error(p$set_demographic_household_table(df))
+})

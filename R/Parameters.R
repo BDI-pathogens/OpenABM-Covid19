@@ -204,6 +204,31 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     {
       setter <- get( paste("parameters_", param, "_set", sep = "") )
       setter( self$c_params, value )
+    },
+
+    #' Set the \code{demographic_household_table} C struct (defined in
+    #' \emph{demographics.h}). This function initializes the
+    #' \code{self$c_params$demo_house} member.
+    #' @param df_house_house A data-frame representation of the
+    #' \code{demographic_household_table} C struct. The data-frame must contain
+    #' column names \code{c("ID", "age_group", "house_no")} and the number of
+    #' rows must be equal to \code{self$c_params$n_total}.
+    #' @return \code{TRUE} on success, \code{FALSE} on error.
+    set_demographic_household_table = function(df_house_house)
+    {
+      # TODO(olegat)
+    },
+
+    #' Set the \code{demographic_occupation_network_table} C struct (defined in
+    #' \emph{demographics.h}). This function initializes the
+    #' \code{self$c_params$occupation_network_table} member.
+    #' @param df_occupation_networks TODO(olegat)
+    #' @param df_occupation_network_properties TODO(olegat)
+    set_occupation_network_table = function(
+      df_occupation_networks,
+      df_occupation_network_properties)
+    {
+        # TODO(olegat)
     }
   )
 )
