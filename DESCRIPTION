@@ -21,6 +21,7 @@ Collate:
   OpenABMCovid19.R
   read-only.R
   Parameters.R
+  Model.R
 Suggests:
     testthat
 RoxygenNote: 7.1.1
