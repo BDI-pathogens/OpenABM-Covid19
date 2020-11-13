@@ -7,20 +7,20 @@
 #' PLACEHOLDER Some explanations
 #'
 #' @examples
+#' # TODO(olegat) this fails `R CMD check` because the CSV files do not exist.
 #' # Load parameters from CSV files.
-#' params <- OpenABMCovid19::Parameters$initialize(
-#'    "input_parameters.csv", 1,
-#'    "out_dir",
-#'    "input_household.csv",
-#'    "hospital_input_parameters.csv", 1
-#' )
+#' #params <- OpenABMCovid19::Parameters$new(
+#' #   "input_parameters.csv", 1,
+#' #   "out_dir",
+#' #   "input_household.csv",
+#' #   "hospital_input_parameters.csv", 1
+#' #)
 #'
 #' # Edit params
-#' params$c_params$rng_seed = 1234
-#' params$c_params$n_total = 250000
+#' #params$c_params$rng_seed = 1234
+#' #params$c_params$n_total = 250000
 #'
-Parameters <- R6Class(
-  'Parameters',
+Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
   private = list(
     read_and_check_from_file = function()
@@ -67,8 +67,8 @@ Parameters <- R6Class(
       }
     },
 
-    #' Convert the C param REFERENCE_HOUSEHOLDS (2D int array) into into an R
-    #' data frame. Currently this function is used just for testing.
+    # Convert the C param REFERENCE_HOUSEHOLDS (2D int array) into into an R
+    # data frame. Currently this function is used just for testing.
     get_REFERENCE_HOUSEHOLDS = function()
     {
       # TODO(olegat): get_param('REFERENCE_HOUSEHOLDS') could call this.
