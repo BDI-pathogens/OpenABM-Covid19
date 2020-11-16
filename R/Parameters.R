@@ -1,3 +1,5 @@
+SWIG_set_occupation_network_table = set_occupation_network_table
+
 #' R6Class Parameters
 #'
 #' @description
@@ -120,9 +122,14 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' @param output_file_dir Where to write output files to.
     #' @param input_households Household demographics file (required).
     #' @param hospital_input_param_file Hospital input parameters CSV file path.
-    #' @param hospital_param_line_number Which column of the hospital input param file to read.
-    #' @param read_param_file A boolean. If \code{TRUE}, read \code{input_param_file}. If \code{FALSE}, ignore \code{input_param_file}.
-    #' @param read_hospital_param_file A boolean. If \code{TRUE}, read \code{hospital_input_param_file}. If \code{FALSE}, ignore \code{hospital_input_param_file}.
+    #' @param hospital_param_line_number Which column of the hospital input
+    #' param file to read.
+    #' @param read_param_file A boolean. If \code{TRUE}, read
+    #' \code{input_param_file}. If \code{FALSE}, ignore
+    #' \code{input_param_file}.
+    #' @param read_hospital_param_file A boolean. If \code{TRUE}, read
+    #' \code{hospital_input_param_file}. If \code{FALSE}, ignore
+    #' \code{hospital_input_param_file}.
     initialize = function(
       input_param_file = NA_character_,
       param_line_number = NA_integer_,
@@ -225,15 +232,19 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
           stop('df_demo_house must have column ', name)
         }
       }
-      n_households <- max(df_demo_house[,'house_no'])
+      n_households <- max(df_demo_house[,'house_no']) + 1
 
-      set_demographic_house_table(
+      C_result <- set_demographic_house_table(
         self$c_params,
         n_total,
         n_households,
         df_demo_house[,'ID'],
         df_demo_house[,'age_group'],
         df_demo_house[,'house_no'])
+
+      if (C_result == 0) {
+        stop("C API set_demographic_house_table failed (returned FALSE)")
+      }
     },
 
     #' Set the \code{demographic_occupation_network_table} C struct (defined in
@@ -245,7 +256,39 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       df_occupation_networks,
       df_occupation_network_properties)
     {
-        # TODO(olegat)
+      n_total <- nrow(df_occupation_networks)
+      if (n_total != self$c_params$n_total ) {
+        stop('df_occupation_networks must have n_total rows')
+      }
+
+      # C memory alloc
+      n_networks <- max(df_occupation_networks['network_no']) + 1
+      SWIG_set_occupation_network_table( self$c_params, n_total, n_networks )
+
+      # Write properties to C struct
+      for (row in 1:nrow(df_occupation_network_properties)) {
+        C_result <- set_indiv_occupation_network_property(
+          self$c_params,
+          df_occupation_network_properties[row,'network_no'],
+          df_occupation_network_properties[row,'age_type'],
+          df_occupation_network_properties[row,'mean_work_interaction'],
+          df_occupation_network_properties[row,'lockdown_multiplier'],
+          df_occupation_network_properties[row,'network_id'],
+          df_occupation_network_properties[row,'network_name'])
+        if (C_result == 0) {
+          stop("C API set_indiv_occupation_network_property failed (returned FALSE)")
+        }
+      }
+
+      # Write network assignment to C struct
+      C_result <- set_indiv_occupation_network(
+        self$c_params,
+        n_total,
+        df_occupation_networks[,'ID'],
+        df_occupation_networks[,'network_no'])
+      if (C_result == 0) {
+        stop("C API set_indiv_occupation_network failed (returned FALSE)")
+      }
     }
   )
 )
