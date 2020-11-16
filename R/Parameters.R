@@ -1,4 +1,4 @@
-SWIG_set_occupation_network_table = set_occupation_network_table
+SWIG_set_occupation_network_table <- set_occupation_network_table
 
 #' R6Class Parameters
 #'
@@ -25,6 +25,8 @@ SWIG_set_occupation_network_table = set_occupation_network_table
 Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
   private = list(
+    update_lock = FALSE,
+
     read_and_check_from_file = function()
     {
       read_param_file( self$c_params )
@@ -209,6 +211,9 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' @param value The new value for the C parameter.
     set_param = function(param, value)
     {
+      if (private$update_lock) {
+        stop("Parameters locked, please use Model$update_x functions")
+      }
       setter <- get( paste("parameters_", param, "_set", sep = "") )
       setter( self$c_params, value )
     },
@@ -289,6 +294,24 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       if (C_result == 0) {
         stop("C API set_indiv_occupation_network failed (returned FALSE)")
       }
+    },
+
+    #' Run a check on the parameters and return if the C code doesn't bail.
+    #' This function locks the parameter value (i.e. make this class
+    #' read-only))
+    #' @return self$c_params
+    return_param_object = function() {
+      private$read_household_demographics()
+      check_params(self$c_params)
+
+      private$update_lock <- TRUE
+      # TODO(olegat) find a way to lock write operations through '$<-'
+      # e.g. self$c_params$n_total <- 10
+      #setMethod('$<-', '_p_parameters', function(x, name, value) {
+      #  stop("Parameters locked, please use Model$update_x functions")
+      #})
+
+      return(self$c_params)
     }
   )
 )

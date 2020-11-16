@@ -224,3 +224,29 @@ test_that("Parameters::set_occupation_network_table (invalid n_total)", {
   p$c_params$n_total <- 10
   expect_error(p$set_occupation_network_table(networks, assignments))
 })
+
+test_that("Parameters::return_param_object", {
+  p <- Parameters$new(
+    input_param_file           = "data/baseline_parameters.csv",
+    param_line_number          = 1,
+    output_file_dir            = "data_test",
+    input_households           = "data/baseline_household_demographics.csv",
+    hospital_input_param_file  = "data/hospital_baseline_parameters.csv",
+    hospital_param_line_number = 1,
+    read_param_file            = TRUE,
+    read_hospital_param_file   = TRUE
+  )
+  # Check that parameters are unlocked:
+  p$set_param('n_total', 10)
+  expect_equal(p$get_param('n_total'), 10)
+
+  # Lock parameters:
+  expect_equal(p$return_param_object(), p$c_params)
+
+  # Check that parameters are locked:
+  # TODO(olegat) find a way to lock write operations through '$<-'
+  # expect_error(p$c_params$n_total <- 32)
+  expect_error(p$set_param('n_total', 32))
+  expect_equal(p$c_params$n_total, 10)
+  expect_equal(p$get_param('n_total'), 10)
+})
