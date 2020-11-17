@@ -355,6 +355,34 @@ class TestClass(object):
                 )
             ),
         ],
+        "test_delete_network": [
+            dict( 
+                test_params = dict( 
+                    n_total = 10000
+                ),
+                network_id = 0             
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 10000
+                ),
+                network_id = 1             
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 10000
+                ),
+                network_id = 2             
+            ),
+            dict( 
+                test_params = dict( 
+                    n_total = 10000
+                ),
+                network_id = "custom"            
+            )
+              
+        ]
+
     }
     """
     Test class for checking 
@@ -805,7 +833,6 @@ class TestClass(object):
           the mean number of unique contacts is mean_daily/daily_fraction
         """
 
-
         # Set up user-defined occupation network tables.
         n_total = test_params['n_total']
         IDs = np.arange(n_total, dtype='int32')
@@ -900,3 +927,58 @@ class TestClass(object):
             else:
                 rtol = 0.02
                 np.testing.assert_allclose(actual,expected,rtol=rtol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
+
+    def test_delete_network( self, test_params, network_id ):
+        """
+        Check to see whether after a network is deleted there are no interactions on it
+        """
+        
+        # set up test model
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )    
+        
+        # add a custom network to check for interactions
+        n_total = test_params[ "n_total" ]   
+        df_net = pd.DataFrame({
+            'ID' : range( n_total ),
+            'N'  : np.repeat( 2, n_total )
+        } )      
+        custom_network = model.add_user_network_random( df_net, name = "custom network" )
+        
+        # if checking the custom network then use its id
+        if network_id == "custom" :
+            network_id = custom_network.network_id()
+                   
+        # get the interactions before deleting the network      
+        model.one_time_step()
+        model.write_interactions_file()
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+
+        # check there are interactions on the interaction network
+        n_inter = len( df_inter[ df_inter[ "network_id"] == network_id ] )
+        np.testing.assert_equal( n_inter > test_params[ "n_total" ], True, err_msg = "In sufficient interactions on network to test" )
+        df_old = df_inter.groupby( "network_id").size().reset_index(name="n_old")
+        df_old = df_old[ df_old[ "network_id" ] != network_id ]
+       
+        # now delete the network 
+        network = model.get_network_by_id( network_id )
+        model.delete_network( network )
+        
+        # check there are no new interactions onthe network
+        model.one_time_step()
+        model.write_interactions_file()
+        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        n_inter = len( df_inter[ df_inter[ "network_id"] == network_id ] )
+        np.testing.assert_equal( n_inter , 0, err_msg = "Interactions on the deleted network" )
+        df_new = df_inter.groupby( "network_id").size().reset_index(name="n_new")
+    
+        # finally check we have not deleted other networks
+        df_comp = pd.merge( df_old, df_new, on = "network_id", how = "outer" )
+        
+        # check we have not added/deleted any networks
+        np.testing.assert_equal( df_comp[ "n_old"].isna().sum(), 0, err_msg = "Added new network iteractions" )
+        np.testing.assert_equal( df_comp[ "n_new"].isna().sum(), 0, err_msg = "Removed old network iteractions" )
+        np.testing.assert_allclose( df_comp[ "n_old"], df_comp[ "n_new"], rtol = 0.1, err_msg = "Number of interactions onnetwork changed by too much")
+                   
