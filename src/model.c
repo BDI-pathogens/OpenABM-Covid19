@@ -659,25 +659,42 @@ void set_up_seed_infection( model *model )
 ******************************************************************************************/
 void build_random_network( model *model, network *network, long n_pos, long* interactions )
 {
-	long idx;
+	long idx, temp, skip;
 	if( ( n_pos == 0 ) || ( network->daily_fraction < 1e-9 ) )
 		return;
 
 	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	network->n_edges = 0;
-	idx = 0;
+	idx  = 0;
 	n_pos--;
 	while( idx < n_pos )
 	{
 		if( interactions[ idx ] == interactions[ idx + 1 ] )
 		{
-			idx++;
-			continue;
+			skip = 1;
+			while( ( idx + skip ) < n_pos )
+			{
+				if( interactions[ idx ] != interactions[ idx + 1 + skip ] )
+				{
+					temp = interactions[ idx + 1 + skip ];
+					interactions[ idx + 1 + skip ] = interactions[ idx + 1 ];
+					interactions[ idx + 1 ] = temp;
+					break;
+				}
+				skip++;
+			};
+
+			if( interactions[ idx ] == interactions[ idx + 1  ] )
+			{
+				idx++;
+				continue;
+			}
 		}
 		network->edges[network->n_edges].id1 = interactions[ idx++ ];
 		network->edges[network->n_edges].id2 = interactions[ idx++ ];
 		network->n_edges++;
+		skip = 1;
 	}
 }
 
