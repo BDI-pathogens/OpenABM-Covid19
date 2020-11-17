@@ -647,7 +647,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			new_infection( model, indiv, indiv );
+			new_infection( model, indiv, indiv, -1 );
 			idx++;
 		}
 	}
@@ -775,6 +775,7 @@ void add_interactions_from_network(
 			print_exit( "Run out of interactions tokens!" );
 
 		inter1->type       = network->type;
+		inter1->network_id = network->network_id;
 		inter1->traceable  = UNKNOWN;
 		inter1->manual_traceable  = UNKNOWN;
 		inter1->individual = indiv2;
@@ -783,6 +784,7 @@ void add_interactions_from_network(
 		indiv1->n_interactions[ day ]++;
 
 		inter2->type       = network->type;
+		inter2->network_id = network->network_id;
 		inter2->traceable  = UNKNOWN;
 		inter2->manual_traceable  = UNKNOWN;
 		inter2->individual = indiv1;
@@ -1081,6 +1083,7 @@ int add_user_network_random(
 	// allocate memory for the edges when they are calculated
 	n_edges = ceil( total_interactions * 0.5);
 	user_network->n_edges        = n_edges;
+	user_network->n_vertices     = n_indiv;
 	user_network->edges          = calloc( n_edges, sizeof( edge ) );
 	user_network->opt_long       = total_interactions;
 	user_network->opt_long_array = calloc( total_interactions, sizeof( long ) );

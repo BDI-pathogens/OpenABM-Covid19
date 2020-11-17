@@ -943,7 +943,7 @@ void write_interactions( model *model )
 	ring_dec( day, model->params->days_of_interactions );
 	time = model->time - 1;
 
-	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
+	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,network_id,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -954,13 +954,14 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i,%i,%i,%li\n",
+				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%i,%li,%i,%i,%li,%i,%i,%i,%li\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
+					inter->network_id,
 					inter->individual->idx,
 					inter->individual->age_group,
 					inter->individual->worker_type,
@@ -1063,6 +1064,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "worker_type_recipient,");
 	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
+	fprintf(output_file , "infector_network_id,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
@@ -1096,7 +1098,7 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
@@ -1104,6 +1106,7 @@ void write_transmissions( model *model )
 					indiv->worker_type,
 					indiv->hospital_state,
 					infection_event->infector_network,
+					infection_event->network_id,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,

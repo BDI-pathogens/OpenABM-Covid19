@@ -68,6 +68,7 @@ struct individual{
 
 struct interaction{
 	int type;
+	int network_id;
 	int traceable;
 	int manual_traceable;
 	individual *individual;
@@ -88,6 +89,7 @@ struct infection_event{
 	int time_infected_infector;
 	infection_event *next;
 	int is_case;
+	int network_id;
 };
 
 /************************************************************************/
