@@ -15,7 +15,7 @@ class Network:
     def __init__(self, model, network_id):
         
         c_network = covid19.get_network_by_id( model.c_model, network_id )
-        self.network_id        = network_id
+        self._network_id       = network_id
         self.c_network         = c_network
 
     def n_edges(self):
@@ -26,6 +26,9 @@ class Network:
     
     def name(self):
         return covid19.network_name( self.c_network ) 
+    
+    def network_id(self):
+        return self._network_id   
     
     def skip_hospitalised(self):
         return covid19.network_skip_hospitalised( self.c_network )
@@ -43,7 +46,7 @@ class Network:
         return covid19.update_daily_fraction(self.c_network,daily_fraction)
 
     def show(self):
-        print( "network_id        = " + str( self.network_id ) )
+        print( "network_id        = " + str( self.network_id() ) )
         print( "name              = " + self.name() )
         print( "n_edges           = " + str( self.n_edges() ) )
         print( "n_vertices        = " + str( self.n_vertices() ) )
