@@ -1039,8 +1039,8 @@ class TestClass(object):
         
         # check they are as expected
         df_comb = pd.merge( n_inter, df_net, on = "ID", how = "outer")
-        np.testing.assert_equal( df_comb[ "N"].isna().sum(), 0, err_msg = "Extra people on network" )
-        np.testing.assert_equal( df_comb[ "N_inter"].isna().sum(), 0, err_msg = "Missing people from network" )
+        np.testing.assert_equal( df_comb[ "N"].isna().sum() <= 1, True, err_msg = "Extra people on network" )
+        np.testing.assert_equal( df_comb[ "N_inter"].isna().sum() <= 1, True, err_msg = "Missing people from network" )
         np.testing.assert_equal( np.sum( np.abs( df_comb[ "N"] -  df_comb[ "N_inter"] ) > 0 ) <= 1, True, err_msg = "People with incorrect number of interactions" )    
         
         # step forward one time step and get the connections 
@@ -1052,8 +1052,8 @@ class TestClass(object):
         
         # check they are as expected
         df_comb = pd.merge( df_comb, n_inter2, on = "ID", how = "outer")
-        np.testing.assert_equal( df_comb[ "N"].isna().sum(), 0, err_msg = "Extra people on network" )
-        np.testing.assert_equal( df_comb[ "N_inter2"].isna().sum(), 0, err_msg = "Missing people from network" )
+        np.testing.assert_equal( df_comb[ "N"].isna().sum() <= 1, True, err_msg = "Extra people on network" )
+        np.testing.assert_equal( df_comb[ "N_inter2"].isna().sum() <= 1, True, err_msg = "Missing people from network" )
         np.testing.assert_equal( np.sum( np.abs( df_comb[ "N"] -  df_comb[ "N_inter2"] ) > 0 ) <= 1, True, err_msg = "People with incorrect number of interactions" )
  
         # check the random connections has changed
