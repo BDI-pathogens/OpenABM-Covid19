@@ -6,7 +6,7 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #' Wrapper class for the \code{parameters} C struct (\emph{params.h}).
 #'
 #' @details
-#' PLACEHOLDER Some explanations
+#' TODO(olegat) PLACEHOLDER Some explanations
 #'
 #' @examples
 #' # TODO(olegat) this fails `R CMD check` because the CSV files do not exist.
