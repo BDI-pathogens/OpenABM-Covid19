@@ -16,7 +16,7 @@ import sys
 import numpy as np, pandas as pd
 from scipy import optimize
 from scipy.stats import binom
-from math import sqrt
+from math import sqrt, ceil
 from numpy.core.numeric import NaN
 from random import randrange
 
@@ -1678,7 +1678,7 @@ class TestClass(object):
         n_quar_symp = df_trace_symp_sum.loc[ df_trace_symp_sum["index"]=="quarantined",{"value"}].values[0] 
         comp_symp   = test_params["quarantine_compliance_traced_symptoms"]
         np.testing.assert_equal( n_amber > 100, True, err_msg = "Not sufficient amber messages to test")
-        np.testing.assert_allclose( n_quar_symp, n_amber*comp_symp, atol=tol_sd*sqrt(n_amber*comp_symp*(1-comp_symp)), err_msg="The wrong number quarantined on an amber message")
+        np.testing.assert_allclose( n_quar_symp, n_amber*comp_symp, atol= max( tol_sd*sqrt(n_amber*comp_symp*(1-comp_symp)), 1 ), err_msg="The wrong number quarantined on an amber message")
         
         # get the list of everyone who had an amber message and did not quarantine
         df_trace_amber_nq =  df_trace_symp_t[ df_trace_symp_t["quarantined"]==0].loc[:,{"index_ID","traced_ID"}]
@@ -1699,7 +1699,7 @@ class TestClass(object):
         n_quar_pos  = df_trace_pos_sum.loc[ df_trace_pos_sum["index"]=="quarantined",{"value"}].values[0] 
         comp_pos  = test_params["quarantine_compliance_traced_positive"]
         np.testing.assert_equal( n_red > 100, True, err_msg = "Not sufficient red messages to non-quarantiners to test")
-        np.testing.assert_allclose( n_quar_pos, n_red*comp_pos, atol=max(tol_sd*sqrt(n_red*comp_pos*(1-comp_pos)),0.5), err_msg="The wrong number quarantined on red messages")
+        np.testing.assert_allclose( n_quar_pos, n_red*comp_pos, atol=max(tol_sd*sqrt(n_red*comp_pos*(1-comp_pos)),1), err_msg="The wrong number quarantined on red messages")
 
         del( model )
 
