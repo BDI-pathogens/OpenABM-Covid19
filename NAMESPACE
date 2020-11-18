@@ -6,6 +6,8 @@ importFrom("methods", "setClass")
 importFrom("methods", "slot")
 importFrom("R6", "R6Class")
 
+export("AgeGroups")
 export("Parameters")
+export("Model")
 
 useDynLib(OpenABMCovid19, .registration = TRUE)

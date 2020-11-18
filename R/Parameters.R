@@ -197,7 +197,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
     },
 
-    #' Get a C parameter by name.
+    #' @description Get a C parameter by name.
     #' @param param A string representing the C parameter's name
     get_param = function(param)
     {
@@ -206,7 +206,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       return(result)
     },
 
-    #' Set a C parameter by name.
+    #' @description Set a C parameter by name.
     #' @param param A string representing the C parameter's name
     #' @param value The new value for the C parameter.
     set_param = function(param, value)
@@ -218,6 +218,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       setter( self$c_params, value )
     },
 
+    #' @description
     #' Set the \code{demographic_household_table} C struct (defined in
     #' \emph{demographics.h}). This function initializes the
     #' \code{self$c_params$demo_house} member.
@@ -252,6 +253,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
     },
 
+    #' @description
     #' Set the \code{demographic_occupation_network_table} C struct (defined in
     #' \emph{demographics.h}). This function initializes the
     #' \code{self$c_params$occupation_network_table} member.
@@ -296,6 +298,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
     },
 
+    #' @description
     #' Run a check on the parameters and return if the C code doesn't bail.
     #' This function locks the parameter value (i.e. make this class
     #' read-only))

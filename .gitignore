@@ -62,6 +62,7 @@ src-x64/
 /OpenABMCovid19.tmp/
 
 # Roxygen2 generated documentation
+/man/AgeGroups.Rd
 /man/Model.Rd
 /man/Parameters.Rd
 
