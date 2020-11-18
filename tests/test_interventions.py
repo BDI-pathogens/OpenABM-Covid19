@@ -877,6 +877,7 @@ class TestClass(object):
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 1,
                     test_result_wait = 1,  
+                    test_sensitivity = 1,                
                 )
             ),
              dict(
@@ -889,6 +890,7 @@ class TestClass(object):
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 2,  
+                    test_sensitivity = 1,                
                 )
             ),
               dict(
@@ -901,6 +903,7 @@ class TestClass(object):
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 0,  
+                    test_sensitivity = 1,                
                 )
             ),
         ],
@@ -2324,9 +2327,9 @@ class TestClass(object):
             model.one_time_step()
             timeseries = model.one_time_step_results();
             n_tests.append( timeseries["n_tests"] )
-  
+                
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
         df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
         
         for time in range( test_params[ "end_time" ] - total_delay ):
