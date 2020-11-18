@@ -37,12 +37,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
     },
 
-    #' @description Destroy the C struct
-    finalize = function()
-    {
-      destroy_model(private$c_model)
-    },
-
     #' @description Get a parameter value by name
     #' @param name of param
     #' @return value of stored param
