@@ -1,3 +1,15 @@
+SWIG_one_time_step <- one_time_step
+SWIG_write_output_files <- write_output_files
+SWIG_write_individual_file <- write_individual_file
+SWIG_write_interactions_file <- write_interactions_file
+SWIG_write_trace_tokens <- write_trace_tokens
+SWIG_write_transmissions <- write_transmissions
+SWIG_write_quarantine_reasons <- write_quarantine_reasons
+SWIG_write_occupation_network <- write_occupation_network
+SWIG_write_household_network <- write_household_network
+SWIG_write_random_network <- write_random_network
+SWIG_print_individual <- print_individual
+
 #' R6Class Model
 #'
 #' @description
@@ -166,7 +178,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{one_time_step}.
     one_time_step = function()
     {
-      # TODO(olegat)
+      SWIG_one_time_step(private$c_model)
     },
 
     #' @description Get the results from one-time step.
@@ -180,70 +192,76 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{write_output_files}.
     write_output_files = function()
     {
-      # TODO(olegat)
+      SWIG_write_output_files(private$c_model, private$c_params)
     },
 
     #' @description Write output files
     #' Wrapper for C API \code{write_individual_file}.
     write_individual_file = function()
     {
-      # TODO(olegat)
+      SWIG_write_individual_file(private$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_interactions}.
     write_interactions_file = function()
     {
-      # TODO(olegat)
+      SWIG_write_interactions_file(private$c_model)
     },
 
     #' @description Wrapper for C API \code{write_trace_tokens_ts}.
-    write_trace_tokens_timeseries = function()
+    #' @param init If \code{TRUE}, overwrite the output file and write the
+    #' column names at the start of the file. If \code{FALSE}, append a new
+    #' to the output file.
+    write_trace_tokens_timeseries = function(init = FALSE)
     {
-      # TODO(olegat)
+      if (!is.logical(init)) {
+        stop("param init must be TRUE or FALSE")
+      }
+      write_trace_tokens_ts(private$c_model, as.integer(init))
     },
 
     #' @description Wrapper for C API \code{write_trace_tokens}.
     write_trace_tokens = function()
     {
-      # TODO(olegat)
+      SWIG_write_trace_tokens(private$c_model)
     },
 
     #' @description Wrapper for C API \code{write_transmissions}.
     write_transmissions = function()
     {
-      # TODO(olegat)
+      SWIG_write_transmissions(private$c_model)
     },
 
     #' @description Wrapper for C API \code{write_quarantine_reasons}.
     write_quarantine_reasons = function()
     {
-      # TODO(olegat)
+      SWIG_write_quarantine_reasons(private$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_occupation_network}.
     #' @param idx Network index.
     write_occupation_network = function(idx)
     {
-      # TODO(olegat)
+      SWIG_write_occupation_network(private$c_model, private$c_params, idx)
     },
 
     #' @description Wrapper for C API \code{write_household_network}.
     write_household_network = function()
     {
-      # TODO(olegat)
+      SWIG_write_household_network(private$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_random_network}.
     write_random_network = function()
     {
-      # TODO(olegat)
+      SWIG_write_random_network(private$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{print_individual}.
     #' @param idx Individual index.
     print_individual = function(idx)
     {
-      # TODO(olegat)
+      SWIG_print_individual(private$c_model, idx)
     }
   )
 )
