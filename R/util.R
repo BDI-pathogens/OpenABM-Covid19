@@ -17,6 +17,80 @@ make_integer <- function(number) {
 
 
 
+#' Update-able parameters
+#' @description
+#' This is the list of parameter names can be updated whilst the model is
+#' running (in \code{Model$update_running_params}).
+#' @seealso Model
+SAFE_UPDATE_PARAMS <- c(
+  "test_on_symptoms",
+  "test_on_traced",
+  "quarantine_on_traced",
+  "traceable_interaction_fraction",
+  "tracing_network_depth",
+  "allow_clinical_diagnosis",
+  "quarantine_household_on_positive",
+  "quarantine_household_on_symptoms",
+  "quarantine_household_on_traced_positive",
+  "quarantine_household_on_traced_symptoms",
+  "quarantine_household_contacts_on_positive",
+  "quarantine_household_contacts_on_symptoms",
+  "quarantine_days",
+  "test_order_wait",
+  "test_order_wait_priority",
+  "test_result_wait",
+  "test_result_wait_priority",
+  "self_quarantine_fraction",
+  "lockdown_on",
+  "lockdown_elderly_on",
+  "app_turned_on",
+  "app_users_fraction",
+  "trace_on_symptoms",
+  "trace_on_positive",
+  "lockdown_house_interaction_multiplier",
+  "lockdown_random_network_multiplier",
+  "lockdown_occupation_multiplier_primary_network",
+  "lockdown_occupation_multiplier_secondary_network",
+  "lockdown_occupation_multiplier_working_network",
+  "lockdown_occupation_multiplier_retired_network",
+  "lockdown_occupation_multiplier_elderly_network",
+  "manual_trace_on",
+  "manual_trace_on_hospitalization",
+  "manual_trace_on_positive",
+  "manual_trace_delay",
+  "manual_trace_exclude_app_users",
+  "manual_trace_n_workers",
+  "manual_trace_interviews_per_worker_day",
+  "manual_trace_notifications_per_worker_day",
+  "manual_traceable_fraction_household",
+  "manual_traceable_fraction_occupation",
+  "manual_traceable_fraction_random",
+  "relative_transmission_household",
+  "relative_transmission_occupation",
+  "relative_transmission_random",
+  "priority_test_contacts_0_9",
+  "priority_test_contacts_10_19",
+  "priority_test_contacts_20_29",
+  "priority_test_contacts_30_39",
+  "priority_test_contacts_40_49",
+  "priority_test_contacts_50_59",
+  "priority_test_contacts_60_69",
+  "priority_test_contacts_70_79",
+  "priority_test_contacts_80",
+  "test_release_on_negative",
+  "fatality_fraction_0_9",
+  "fatality_fraction_10_19",
+  "fatality_fraction_20_29",
+  "fatality_fraction_30_39",
+  "fatality_fraction_40_49",
+  "fatality_fraction_50_59",
+  "fatality_fraction_60_69",
+  "fatality_fraction_70_79",
+  "fatality_fraction_80"
+)
+
+
+
 #' Age Group Indices
 #' @description
 #' List of age group indices.

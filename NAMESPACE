@@ -9,5 +9,6 @@ importFrom("R6", "R6Class")
 export("AgeGroupEnum")
 export("Parameters")
 export("Model")
+export("SAFE_UPDATE_PARAMS")
 
 useDynLib(OpenABMCovid19, .registration = TRUE)

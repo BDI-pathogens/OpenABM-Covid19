@@ -30,15 +30,30 @@ test_that("Model::initialize (params_object isn't R6Class)", {
   expect_error(Model$new(10))
 })
 
-test_that("Model::risk_score (set/get)", {
+test_that("Model::get/update param", {
+  m <- Model$new(baseline_params())
+  expect_error(m$update_running_params('hospital_on', 0))
+  expect_error(m$get_param('fatality_fraction_TYPO'))
+
+  m$update_running_params('manual_trace_on', 1)
+  expect_equal(m$get_param('manual_trace_on'), 1)
+  m$update_running_params('manual_trace_on', 0)
+  expect_equal(m$get_param('manual_trace_on'), 0)
+
+  m$update_running_params('fatality_fraction_0_9', 0.5)
+  m$update_running_params('fatality_fraction_20_29', 0.25)
+  m$update_running_params('fatality_fraction_80', 0.75)
+  expect_equal(m$get_param('fatality_fraction_0_9'), 0.5)
+  expect_equal(m$get_param('fatality_fraction_20_29'), 0.25)
+  expect_equal(m$get_param('fatality_fraction_80'), 0.75)
+})
+
+test_that("Model::risk scores (set/get)", {
   m <- Model$new(baseline_params())
   expect_equal(m$get_risk_score(1, ag10_19, ag60_69), 1)
   m$set_risk_score(1, ag10_19, ag60_69, 0.5)
   expect_equal(m$get_risk_score(1, ag10_19, ag60_69), 0.5)
-})
 
-test_that("Model::risk_score_household (set/get)", {
-  m <- Model$new(baseline_params())
   expect_equal(m$get_risk_score_household(ag10_19, ag60_69), 1)
   m$set_risk_score_household(ag10_19, ag60_69, 0.5)
   expect_equal(m$get_risk_score_household(ag10_19, ag60_69), 0.5)

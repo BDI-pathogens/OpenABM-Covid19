@@ -65,6 +65,7 @@ src-x64/
 /man/AgeGroupEnum.Rd
 /man/Model.Rd
 /man/Parameters.Rd
+/man/SAFE_UPDATE_PARAMS.Rd
 
 # performance related
 performance/*.trace

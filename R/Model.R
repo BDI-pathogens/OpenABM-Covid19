@@ -17,7 +17,8 @@ SWIG_print_individual <- print_individual
 #' @details
 #' TODO(olegat) PLACEHOLDER Some explanations
 #'
-#' @seealso AgeGroups
+#' @seealso AgeGroupEnum
+#' @seealso SAFE_UPDATE_PARAMS
 Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
   private = list(
@@ -49,31 +50,55 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     },
 
     #' @description Get a parameter value by name
-    #' @param name name of param
+    #' @param param name of param
     #' @return value of stored param
-    get_param = function(name)
+    get_param = function(param)
     {
-      # TODO(olegat)
+      enum <- get_base_param_from_enum(param)
+      if (!is.null(enum)) {
+        # multi-value parameter (C array)
+        getter <- get(paste("get_model_param_", enum$base_name, sep = ""))
+        result <- getter( private$c_model, enum$index )
+      } else {
+        # single-value parameter
+        getter <- get(paste("get_model_param_", param, sep = ""))
+        result <- getter( private$c_model )
+      }
+      return(result)
     },
 
     #' @description
     #' A subset of parameters may be updated whilst the model is evaluating,
     #' these correspond to events. This function throws an error if
     #' \code{param} isn't safe to update.
-    #' @param param name of parameter
+    #' @param param name of parameter. See SAFE_UPDATE_PARAMS for allowed
+    #' parameter names
     #' @param value value of parameter
     update_running_params = function(param, value)
     {
-      # TODO(olegat)
+      if (! param %in% SAFE_UPDATE_PARAMS) {
+        stop('Cannot update "', param, '" during running')
+      }
+
+      enum <- get_base_param_from_enum(param)
+      if (!is.null(enum)) {
+        # multi-value parameter (C array)
+        setter <- get(paste("set_model_param_", enum$base_name, sep = ""))
+        setter( private$c_model, value, enum$index )
+      } else {
+        # single-value parameter
+        setter <- get(paste("set_model_param_", param, sep = ""))
+        setter( private$c_model, value )
+      }
     },
 
     #' @description Gets the value of the risk score parameter.
     #' Wrapper for C API \code{get_model_param_risk_score}.
     #' @param day Infection day
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @return The risk value.
     get_risk_score = function(day, age_inf, age_sus)
     {
@@ -88,9 +113,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Gets the value of the risk score household parameter.
     #' Wrapper for C API \code{get_model_param_risk_score_household}.
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @return The risk value.
     get_risk_score_household = function(age_inf, age_sus)
     {
@@ -107,9 +132,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{set_model_param_risk_score}.
     #' @param day Infection day
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param value The risk value
     set_risk_score = function(day, age_inf, age_sus, value)
     {
@@ -124,9 +149,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Gets the value of the risk score household parameter.
     #' Wrapper for C API \code{set_model_param_risk_score_household}.
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroups list
+    #' See AgeGroupEnum list
     #' @param value The risk value.
     set_risk_score_household = function(age_inf, age_sus, value)
     {
