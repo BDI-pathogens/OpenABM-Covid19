@@ -201,8 +201,16 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' @param param A string representing the C parameter's name
     get_param = function(param)
     {
-      getter <- get( paste("parameters_", param, "_get", sep = "") )
-      result <- getter( self$c_params )
+      enum <- get_base_param_from_enum(param)
+      if (!is.null(enum)) {
+        # multi-value parameter (C array)
+        getter <- get(paste("get_param_", enum$base_name, sep = ""))
+        result <- getter( self$c_params, enum$index )
+      } else {
+        # single-value parameter
+        getter <- get( paste("parameters_", param, "_get", sep = "") )
+        result <- getter( self$c_params )
+      }
       return(result)
     },
 
@@ -214,8 +222,17 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       if (private$update_lock) {
         stop("Parameters locked, please use Model$update_x functions")
       }
-      setter <- get( paste("parameters_", param, "_set", sep = "") )
-      setter( self$c_params, value )
+
+      enum <- get_base_param_from_enum(param)
+      if (!is.null(enum)) {
+        # multi-value parameter (C array)
+        setter <- get(paste("set_param_", enum$base_name, sep = ""))
+        setter( self$c_params, value, enum$index )
+      } else {
+        # single-value parameter
+        setter <- get( paste("parameters_", param, "_set", sep = "") )
+        setter( self$c_params, value )
+      }
     },
 
     #' @description
