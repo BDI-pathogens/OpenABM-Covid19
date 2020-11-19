@@ -2,15 +2,15 @@ library(R6)
 
 setwd("..")
 
-ag0_9   <- AgeGroups$ag0_9
-ag10_19 <- AgeGroups$ag10_19
-ag20_29 <- AgeGroups$ag20_29
-ag30_39 <- AgeGroups$ag30_39
-ag40_49 <- AgeGroups$ag40_49
-ag50_59 <- AgeGroups$ag50_59
-ag60_69 <- AgeGroups$ag60_69
-ag70_79 <- AgeGroups$ag70_79
-ag80    <- AgeGroups$ag80
+ag0_9   <- AgeGroupEnum[['_0_9']]
+ag10_19 <- AgeGroupEnum[['_10_19']]
+ag20_29 <- AgeGroupEnum[['_20_29']]
+ag30_39 <- AgeGroupEnum[['_30_39']]
+ag40_49 <- AgeGroupEnum[['_40_49']]
+ag50_59 <- AgeGroupEnum[['_50_59']]
+ag60_69 <- AgeGroupEnum[['_60_69']]
+ag70_79 <- AgeGroupEnum[['_70_79']]
+ag80    <- AgeGroupEnum[['_80']]
 
 baseline_params = function()
 {

@@ -6,7 +6,7 @@ importFrom("methods", "setClass")
 importFrom("methods", "slot")
 importFrom("R6", "R6Class")
 
-export("AgeGroups")
+export("AgeGroupEnum")
 export("Parameters")
 export("Model")
 

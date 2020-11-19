@@ -1,7 +1,6 @@
 SWIG_one_time_step <- one_time_step
 SWIG_write_output_files <- write_output_files
 SWIG_write_individual_file <- write_individual_file
-SWIG_write_interactions_file <- write_interactions_file
 SWIG_write_trace_tokens <- write_trace_tokens
 SWIG_write_transmissions <- write_transmissions
 SWIG_write_quarantine_reasons <- write_quarantine_reasons
@@ -50,7 +49,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     },
 
     #' @description Get a parameter value by name
-    #' @param name of param
+    #' @param name name of param
     #' @return value of stored param
     get_param = function(name)
     {
@@ -205,7 +204,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Wrapper for C API \code{write_interactions}.
     write_interactions_file = function()
     {
-      SWIG_write_interactions_file(private$c_model)
+      write_interactions(private$c_model)
     },
 
     #' @description Wrapper for C API \code{write_trace_tokens_ts}.
