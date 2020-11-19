@@ -10,6 +10,7 @@
 #include "individual.h"
 #include "utilities.h"
 #include "disease.h"
+#include "network.h"
 %}
 
 %rename (create_model) new_model(parameters *params);
@@ -44,6 +45,8 @@
 %include "individual.h"
 %include "utilities.h"
 %include "disease.h"
+%include "network.h"
 %include model_utils.i 
 %include params_utils.i
+%include network_utils.i
 
