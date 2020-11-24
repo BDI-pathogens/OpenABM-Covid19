@@ -181,6 +181,8 @@ NETWORK_CONSTRUCTIONS <- list(
   'RANDOM'         = 4
 )
 
+
+
 get_base_param_from_enum <- function(param) {
   allEnums <- c(
     AgeGroupEnum, OccupationNetworkEnum, ChildAdultElderlyEnum,

@@ -56,4 +56,9 @@ test_that("Model::setters and getters", {
   expect_equal(m$get_risk_score_household(ag10_19, ag60_69), 0.5)
 
   # TODO(olegat) test add_user_network()
+
+  df_app_user <- m$get_app_users()
+  df_app_user[['app_user']] <- as.integer(!df_app_user[['app_user']])
+  m$set_app_users(df_app_user)
+  expect_equal(df_app_user, m$get_app_users())
 })

@@ -1,4 +1,5 @@
 SWIG_add_user_network <- add_user_network
+SWIG_set_app_users <- set_app_users
 SWIG_one_time_step <- one_time_step
 SWIG_write_output_files <- write_output_files
 SWIG_write_individual_file <- write_individual_file
@@ -270,19 +271,35 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       # TODO(olegat)
     },
 
-    #' @description Get all app users. Wrapper for C API \code{get_app_user}.
+    #' @description Get all app users. Wrapper for C API \code{get_app_users}.
     #' @return All app users.
     get_app_users = function()
     {
-      # TODO(olegat)
+      n <- private$c_params$n_total
+      users <- integer(n)
+      for (i in 1:n) {
+        users[i] <- get_app_user_by_index(private$c_model, i - 1)
+      }
+      IDs <- seq(from = 0, to = n - 1)
+      result <- data.frame('ID' = IDs, 'app_user' = users)
+      return(result)
     },
 
     #' @description Sets specific users to have or not have the app.
-    #' Wrapper for C API \code{get_app_user}. Throws error on failure.
-    #' @param df_app_users TODO(olegat) PLACEHOLDER
-    set_app_users = function()
+    #' Wrapper for C API \code{set_app_users}. Throws error on failure.
+    #' @param df_app_users A dataframe which includes the names
+    #' \code{c("ID", "app_user")}.
+    set_app_users = function(df_app_users)
     {
-      # TODO(olegat)
+      if (!all(c("ID", "app_user") %in% names(df_app_users))) {
+        stop('df_app_user must contain the columns ID and app_user')
+      }
+
+      for (b in c(TRUE, FALSE)) {
+        # Select users ID where 'app_user' == b
+        IDs <- df_app_users[df_app_users[,'app_user'] == b,] [['ID']]
+        SWIG_set_app_users(private$c_model, IDs, length(IDs), b)
+      }
     },
 
 
