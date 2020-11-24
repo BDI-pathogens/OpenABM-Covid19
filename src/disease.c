@@ -117,15 +117,17 @@ void set_up_infectious_curves( model *model )
 	double infectious_rate, type_factor;
 	int type, group;
 
+	infectious_rate = params->infectious_rate;
 	if( params->relative_susceptibility_by_interaction )
 	{
-		infectious_rate   = params->infectious_rate / model->mean_interactions;
+		if( model->mean_interactions > 0 )
+			infectious_rate /= model->mean_interactions;
 		for( group = 0; group < N_AGE_GROUPS; group++ )
 			params->adjusted_susceptibility[group] = params->relative_susceptibility[group];
 	}
 	else
 	{
-		infectious_rate   = params->infectious_rate / model->mean_interactions_by_age[AGE_TYPE_ADULT];
+		infectious_rate /= model->mean_interactions_by_age[AGE_TYPE_ADULT];
 
 		for( group = 0; group < N_AGE_GROUPS; group++ )
 			params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions_by_age[AGE_TYPE_ADULT] / model->mean_interactions_by_age[AGE_TYPE_MAP[group]];
@@ -208,7 +210,7 @@ void transmit_virus_by_type(
 
 						if( interaction->individual->hazard < 0 )
 						{
-							new_infection( model, interaction->individual, infector );
+							new_infection( model, interaction->individual, infector, interaction->network_id );
 							interaction->individual->infection_events->infector_network = interaction->type;
 						}
 					}
@@ -251,7 +253,8 @@ void transmit_virus( model *model )
 void new_infection(
 	model *model,
 	individual *infected,
-	individual *infector
+	individual *infector,
+	int network_id
 )
 {
 	double draw       = gsl_rng_uniform( rng );
@@ -261,6 +264,7 @@ void new_infection(
 	infected->infection_events->infector = infector;
 	infected->infection_events->infector_status = infector->status;
 	infected->infection_events->infector_hospital_state = infector->hospital_state;
+	infected->infection_events->network_id = network_id;
 
 	if( draw < asymp_frac )
 	{

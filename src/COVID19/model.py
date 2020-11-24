@@ -5,6 +5,7 @@ from typing import Union
 import pandas as pd
 
 import covid19
+from COVID19.network import Network
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +17,8 @@ class ModelParameterException(Exception):
 class ParameterException(Exception):
     pass
 
+class ModelException(Exception):
+    pass
 
 PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_symptoms",
@@ -121,7 +124,13 @@ class OccupationNetworkEnum(enum.Enum):
     _retired_network = 3
     _elderly_network = 4
 
-
+class NETWORK_CONSTRUCTIONS(enum.Enum):
+    NETWORK_CONSTRUCTION_BESPOKE = 0,
+    NETWORK_CONSTRUCTION_HOUSEHOLD = 1,
+    NETWORK_CONSTRUCTION_WATTS_STROGATZ = 2,
+    NETWORK_CONSTRUCTION_RANDOM_DEFAULT = 3,
+    NETWORK_CONSTRUCTION_RANDOM = 4,
+    N_NETWORK_CONSTRUCTIONS = 5
 
 class AgeGroupEnum(enum.Enum):
     _0_9 = 0
@@ -539,7 +548,31 @@ class Model:
             raise  ModelParameterException( "Failed to get risk score household")
         return value
 
-    def add_user_network(self, df_network, interaction_type = 1, skip_hospitalised = True, skip_quarantine = True, daily_fraction = 1.0, name = "user_network" ):
+    def add_user_network(
+            self, 
+            df_network, 
+            interaction_type = covid19.OCCUPATION, 
+            skip_hospitalised = True, 
+            skip_quarantine = True,
+            construction = covid19.NETWORK_CONSTRUCTION_BESPOKE,
+            daily_fraction = 1.0, 
+            name = "user_network" ):
+        
+        """[summary]
+        adds as bespoke user network from a dataframe of edges
+        the network is static with the exception of skipping
+        hospitalised and quarantined people
+
+        Arguments:
+            df_network {[dataframe]}      -- [list of edges, with 2 columns ID_1 and ID_2]
+            interaction {[int]}           -- [type of interaction (e.g. household/occupation/random)]
+            skip_hospitalised {[boolean]} -- [skip interaction if either person is in hospital]
+            skip_quarantine{[boolean]}    -- [skip interaction if either person is in quarantined]
+            construction{[int]}           -- [the method used for network construction]
+            daily_fraction{[double]}      -- [the fraction of edges on the network present each day (i.e. down-sampling the network)]
+            name{[char]}                  -- [the name of the network]
+
+        """
 
         n_edges = len( df_network.index )
         n_total = self._params_obj.get_param("n_total")
@@ -578,8 +611,70 @@ class Model:
             ID_1_c[idx] = ID_1[idx]
             ID_2_c[idx] = ID_2[idx]
 
-        covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+        id = covid19.add_user_network(self.c_model,interaction_type,skip_hospitalised,skip_quarantine,construction,daily_fraction, n_edges,ID_1_c, ID_2_c, name)
+        return  Network( self, id )
+    
+    def add_user_network_random(
+            self, 
+            df_interactions, 
+            skip_hospitalised = True, 
+            skip_quarantine = True,
+            name = "user_network" ):
+             
+        """[summary]
+        adds a bespoke user random network from a dataframe of people and number of interactions
+        the network is regenerates each day, but the number of interactions per person is statitc
+        hospitalsed and quarantined people can be skipped
 
+        Arguments:
+            df_interactions {[dataframe]} -- [list of indviduals and interactions, with 2 columns ID and N]
+            skip_hospitalised {[boolean]} -- [skip interaction if either person is in hospital]
+            skip_quarantine{[boolean]}    -- [skip interaction if either person is in quarantined]
+            name{[char]}                  -- [the name of the network]
+
+        """
+        
+        n_indiv = len( df_interactions.index )
+        n_total = self._params_obj.get_param("n_total")
+
+        if not 'ID' in df_interactions.columns:
+            raise ParameterException( "df_interactions must have column ID" )
+
+        if not 'N' in df_interactions.columns:
+            raise ParameterException( "df must have column N" )
+
+        if not skip_hospitalised in [ True, False ]:
+            raise ParameterException( "skip_hospitalised must be True or False" )
+
+        if not skip_quarantine in [ True, False ]:
+            raise ParameterException( "skip_quarantine must be True or False" )
+
+        ID = df_interactions[ "ID" ].to_list()
+        N  = df_interactions[ "N" ].to_list()
+
+        if (max( ID) >= n_total) or (min( ID ) < 0):
+            raise ParameterException( "all values of ID must be between 0 and n_total-1" )
+
+        if ( min( N ) < 1):
+            raise ParameterException( "all values of N must be greater than 0" )
+
+        ID_c = covid19.longArray(n_indiv)
+        N_c  = covid19.intArray(n_indiv)
+
+        for idx in range(n_indiv):
+            ID_c[idx] = ID[idx]
+            N_c[idx]  = N[idx]
+
+        id = covid19.add_user_network_random(self.c_model,skip_hospitalised,skip_quarantine, n_indiv,ID_c, N_c, name)
+        return  Network( self, id )
+    
+    def get_network_by_id(self, network_id ):
+        return Network( self, network_id )
+    
+    def delete_network(self, network):   
+        res = covid19.delete_network( self.c_model, network.c_network )
+        return res 
+    
     def set_risk_score(self, day, age_inf, age_sus, value):
         ret = covid19.set_model_param_risk_score(self.c_model, day, age_inf, age_sus, value)
         if ret == 0:
@@ -634,6 +729,48 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
 
+    def get_network_info(self, max_ids= 1000):
+           
+        if max_ids > 1e6 :
+            raise ModelException( "Maximum number of allowed network is 1e6" )
+        ids_c = covid19.intArray( max_ids )
+        n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
+        
+        if n_ids == 1 :
+            return self.get_network_info( max_ids = max_ids * 10 )
+        
+        ids        = [None] * n_ids
+        names      = [None] * n_ids
+        n_edges    = [None] * n_ids
+        n_vertices = [None] * n_ids
+        type       = [None] * n_ids
+        skip_hospitalised = [None] * n_ids
+        skip_quarantined  = [None] * n_ids
+        daily_fraction    = [None] * n_ids
+        
+        for idx in range( n_ids ) :
+            network = Network( self, ids_c[idx] )
+            
+            ids[idx]        = ids_c[idx]
+            names[idx]      = network.name()
+            n_edges[idx]    = network.n_edges()
+            n_vertices[idx] = network.n_vertices()  
+            type[idx]       = network.type()
+            skip_hospitalised[idx] = network.skip_hospitalised()
+            skip_quarantined[idx]  = network.skip_quarantined()
+            daily_fraction[idx]    = network.daily_fraction()      
+            
+        return pd.DataFrame( {
+                'id'                : ids,
+                'name'              : names,
+                'n_edges'           : n_edges,
+                'n_vertices'        : n_vertices,
+                'type'              : type,
+                'skip_hospitalised' : skip_hospitalised,
+                'skip_quarantined'  : skip_quarantined,
+                'daily_fraction'    : daily_fraction
+            } )
+        
     def _create(self):
         """
         Call C function new_model (renamed create_model)

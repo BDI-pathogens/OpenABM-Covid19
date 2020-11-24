@@ -12,12 +12,12 @@
 #include "network.h"
 
 /*****************************************************************************************
-*  Name:		new_network
+*  Name:		create_network
 *  Description: Builds a new model object from a number of individuals
 *  				 1. Creates memory for it
 *  Returns:		pointer to model
 ******************************************************************************************/
-network* new_network( long n_total, int type )
+network* create_network( long n_total, int type )
 {	
 	network *network_ptr = NULL;
 	network_ptr = calloc( 1, sizeof( network ) );
@@ -221,6 +221,16 @@ int check_member_or_self(long x, long self, long *array, long length)
 void destroy_network( network *network )
 {
 	free( network->edges );
+
+	if( network->opt_pdx_array != NULL )
+		free( network->opt_pdx_array );
+
+	if( network->opt_int_array != NULL )
+		free( network->opt_int_array );
+
+	if( network->opt_long_array != NULL )
+		free( network->opt_long_array );
+
 	free( network );
 };
 
@@ -238,4 +248,25 @@ void relabel_network( network *network, long *labels )
 		network->edges[idx].id2 = labels[network->edges[idx].id2];
 	}
 };
+
+/*****************************************************************************************
+*  Name:		update_daily_fraction
+*  Description: Updates the daily_fraction on the network
+******************************************************************************************/
+int update_daily_fraction( network *network, double fraction )
+{
+	if( fraction < 0 || fraction > 1 )
+		return FALSE;
+
+	if( ( network->construction == NETWORK_CONSTRUCTION_RANDOM_DEFAULT ) ||
+		( network->construction == NETWORK_CONSTRUCTION_RANDOM ) )
+	{
+		if( ( fraction > 1e-9 ) && ( fraction <  1 - 1e-9 ) )
+			return FALSE;
+	}
+
+	network->daily_fraction = fraction;
+	return TRUE;
+};
+
 
