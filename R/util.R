@@ -157,6 +157,30 @@ TransmissionTypeEnum <- list(
   '_random'     = 2
 )
 
+#' Network construction types
+#' @description
+#' List of network construction types.
+#' Wrapper for \code{enum NETWORK_CONSTRUCTIONS} (in \emph{constant.h}).
+#' \itemize{
+#'   \item{BESPOKE} Wrapper for C enum
+#'     \code{NETWORK_CONSTRUCTION_BESPOKE}
+#'   \item{HOUSEHOLD} Wrapper for C enum
+#'     \code{NETWORK_CONSTRUCTION_HOUSEHOLD}
+#'   \item{WATTS_STROGATZ} Wrapper for C enum
+#'     \code{NETWORK_CONSTRUCTION_WATTS_STROGATZ}
+#'   \item{RANDOM_DEFAULT} Wrapper for C enum
+#'     \code{NETWORK_CONSTRUCTION_RANDOM_DEFAULT}
+#'   \item{RANDOM_DEFAULT} Wrapper for C enum
+#'     \code{NETWORK_CONSTRUCTION_RANDOM}
+#' }
+NETWORK_CONSTRUCTIONS <- list(
+  'BESPOKE'        = 0,
+  'HOUSEHOLD'      = 1,
+  'WATTS_STROGATZ' = 2,
+  'RANDOM_DEFAULT' = 3,
+  'RANDOM'         = 4
+)
+
 get_base_param_from_enum <- function(param) {
   allEnums <- c(
     AgeGroupEnum, OccupationNetworkEnum, ChildAdultElderlyEnum,

@@ -66,6 +66,8 @@ src-x64/
 /man/Model.Rd
 /man/Parameters.Rd
 /man/SAFE_UPDATE_PARAMS.Rd
+/man/NETWORK_CONSTRUCTIONS.Rd
+
 
 # performance related
 performance/*.trace

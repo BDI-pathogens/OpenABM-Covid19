@@ -20,6 +20,7 @@ SWIG_print_individual <- print_individual
 #'
 #' @seealso AgeGroupEnum
 #' @seealso SAFE_UPDATE_PARAMS
+#' @seealso NETWORK_CONSTRUCTION
 Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
   private = list(
@@ -164,19 +165,28 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     },
 
     #' @description
-    #' Creates a new user user network (destroy an old one if it exists).
+    #' Adds as bespoke user network from a dataframe of edges
+    #' the network is static with the exception of skipping
+    #' hospitalised and quarantined people.
     #' Wrapper for C API \code{add_user_network}.
-    #' @param df_network Network data frame.
+    #' @param df_network Network data frame. List of edges, with 2 columns
+    #' \code{ID_1} and \code{ID_2}
     #' @param interaction_type Must 0 (household), 1 (occupation), or 2 (random)
-    #' @param skip_hospitalised If TRUE, skip hospitalisation
-    #' @param skip_quarantine If TRUE, skip quarantine.
-    #' @param daily_fraction Value between 0 and 1.
+    #' @param skip_hospitalised If \code{TRUE}, skip interaction if either
+    #' person is in hospital.
+    #' @param skip_quarantine If \code{TRUE}, skip interaction if either person
+    #' is in quarantined
+    #' @param construction The method used for network construction. Must be a
+    #' number between 0 and 4 (inclusive). See NETWORK_CONSTRUCTION.
+    #' @param daily_fraction The fraction of edges on the network present each
+    #' day (i.e. down-sampling the network). Must be a value between 0 and 1.
     #' @param name Name of the network.
     add_user_network = function(
       df_network,
       interaction_type = 1,
       skip_hospitalised = TRUE,
       skip_quarantine = TRUE,
+      construction = NETWORK_CONSTRUCTION[['BESPOKE']],
       daily_fraction = 1.0,
       name = "user_network")
     {
@@ -215,6 +225,49 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       SWIG_add_user_network( private$c_model, interaction_type,
         skip_hospitalised, skip_quarantine, daily_fraction, n_edges, ID_1,
         ID_2, name)
+    },
+
+    #' @description
+    #' Adds a bespoke user random network from a dataframe of people and number
+    #' of interactions. The network is regenerates each day, but the number of
+    #' interactions per person is static. Hospitalsed and quarantined people
+    #' can be skipped
+    #' @param df_interactions List of indviduals and interactions. Must be a
+    #' dataframe with 2 columns \code{ID} and \code{N}.
+    #' @param skip_hospitalised Skip interaction if either person is in
+    #' hospital. Must a logical value.
+    #' @param skip_quarantine Skip interaction if either person is in
+    #' quarantined. Must a logical value.
+    #' @param name The name of the network.
+    add_user_network_random = function(
+      df_interactions,
+      skip_hospitalised = TRUE,
+      skip_quarantine = TRUE,
+      name = "user_network" )
+    {
+      # TODO(olegat)
+    },
+
+    #' @description Get a network.
+    #' @param network_id The network ID.
+    get_network_by_id = function(network_id)
+    {
+      # TODO(olegat)
+    },
+
+    #' @description Get network info.
+    #' @param max_ids The maximum number of rows to return.
+    get_network_info = function(max_ids = 1000)
+    {
+      # TODO(olegat)
+    },
+
+    #' @description Delete a network.
+    #' Wrapper for C API \code{delete_network}.
+    #' @param network The network to delete.
+    delete_network = function(network)
+    {
+      # TODO(olegat)
     },
 
     #' @description Get all app users. Wrapper for C API \code{get_app_user}.

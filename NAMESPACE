@@ -10,5 +10,6 @@ export("AgeGroupEnum")
 export("Parameters")
 export("Model")
 export("SAFE_UPDATE_PARAMS")
+export("NETWORK_CONSTRUCTIONS")
 
 useDynLib(OpenABMCovid19, .registration = TRUE)
