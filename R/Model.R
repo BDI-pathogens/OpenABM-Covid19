@@ -1,3 +1,4 @@
+SWIG_add_user_network <- add_user_network
 SWIG_one_time_step <- one_time_step
 SWIG_write_output_files <- write_output_files
 SWIG_write_individual_file <- write_individual_file
@@ -179,7 +180,41 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       daily_fraction = 1.0,
       name = "user_network")
     {
-      # TODO(olegat)
+      # Validate input
+      if (!'ID_1' %in% names(df_network)) {
+        stop( "df_network must have column ID_1" )
+      }
+      if (!'ID_2' %in% names(df_network)) {
+        stop( "df_network must have column ID_2" )
+      }
+      if (!interaction_type %in% c(0,1,2)) {
+        stop( "interaction_type must be 0 (household), 1 (occupation) or 2 (random)" )
+      }
+      if ((daily_fraction > 1) || (daily_fraction < 0)) {
+        stop( "daily fraction must be in the range 0 to 1" )
+      }
+      if (!is.logical(skip_hospitalised)) {
+        stop( "skip_hospitalised must be TRUE or FALSE" )
+      }
+      if (!is.logical(skip_quarantine)) {
+        stop( "skip_quarantine must be TRUE or FALSE" )
+      }
+
+      n_edges <- nrow(df_network)
+      n_total <- private$c_params$n_total
+      ID_1 <- df_network[['ID_1']]
+      ID_2 <- df_network[['ID_2']]
+
+      # Validate IDs
+      for (i in list(ID_1, ID_2)) {
+        if ((max(i) >= n_total) || (min(i) < 0)) {
+          stop( "all values of ID_1 and ID_2 must be between 0 and n_total-1" )
+        }
+      }
+
+      SWIG_add_user_network( private$c_model, interaction_type,
+        skip_hospitalised, skip_quarantine, daily_fraction, n_edges, ID_1,
+        ID_2, name)
     },
 
     #' @description Get all app users. Wrapper for C API \code{get_app_user}.

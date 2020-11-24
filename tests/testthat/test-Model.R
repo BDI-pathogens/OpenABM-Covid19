@@ -54,4 +54,6 @@ test_that("Model::setters and getters", {
   expect_equal(m$get_risk_score_household(ag10_19, ag60_69), 1)
   m$set_risk_score_household(ag10_19, ag60_69, 0.5)
   expect_equal(m$get_risk_score_household(ag10_19, ag60_69), 0.5)
+
+  # TODO(olegat) test add_user_network()
 })

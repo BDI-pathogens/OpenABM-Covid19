@@ -142,10 +142,10 @@ Rcheck: $(R_SRC_PKG)
 # Cleaning
 #------------------------------------------------------------------------------
 clean:
-	rm -fr $(ALL_OUTPUT)
+	rm -fr $(ALL_OUTPUT) src/*.o src/*.dll
 
 dry_clean:
 	@echo '`make clean` will run:'
-	@echo rm -fr $(ALL_OUTPUT)
+	@echo 'rm -fr $(ALL_OUTPUT) src/*.o src/*.dll'
 
 .PHONY: clean dry_clean Rswig Rman Rbuild Rcheck Rinstall
