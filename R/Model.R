@@ -3,6 +3,7 @@ SWIG_add_user_network_random <- add_user_network_random
 SWIG_delete_network <- delete_network
 SWIG_set_app_users <- set_app_users
 SWIG_one_time_step <- one_time_step
+SWIG_get_network_by_id <- get_network_by_id
 SWIG_write_output_files <- write_output_files
 SWIG_write_individual_file <- write_individual_file
 SWIG_write_trace_tokens <- write_trace_tokens
@@ -285,10 +286,33 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     },
 
     #' @description Get a network.
+    #' Wrapper for C API \code{get_network_by_id}.
     #' @param network_id The network ID.
     get_network_by_id = function(network_id)
     {
       return(Network$new( private$c_model, network_id ))
+    },
+
+    #' @description Get the list of network IDs
+    #' Wrapper for C API \code{get_network_ids}.
+    #' @param max_ids The maximum number of IDs to return.
+    #' @return The list of the network IDs.
+    get_network_ids = function(max_ids)
+    {
+      if (max_ids < 1) return(NA)
+
+      n <- 0
+      ids <- rep(NA, max_ids)
+      for (offset in 0:(max_ids - 1)) {
+        networkid <- get_network_id_by_index( private$c_model, offset );
+        if (networkid == -1) {
+          break;
+        }
+
+        n <- (n + 1)
+        ids[n] <- networkid
+      }
+      return(ids[1:n])
     },
 
     #' @description Get network info.
@@ -314,7 +338,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       # Initialise each row one-by-one
       for (i in 1:length(ids)) {
-        c_network <- get_network_by_id( private$c_model, ids[i] )
+        c_network <- SWIG_get_network_by_id( private$c_model, ids[i] )
         tmp[i,] <- c(
           ids[i],
           network_name( c_network ),

@@ -57,9 +57,22 @@ test_that("Model::setters and getters", {
 
   # TODO(olegat) test add_user_network()
   # TODO(olegat) test add_user_network_random()
-  # TODO(olegat) test get_network_by_id()
   # TODO(olegat) test get_network_info()
   # TODO(olegat) test delete_network()
+
+  nw <- m$get_network_by_id(3)
+  expect_equal( 3, nw$network_id() )
+  expect_equal( 'Occupation working network (default)', nw$name() )
+  expect_equal( 3920994, nw$n_edges() )
+  expect_equal( 560142, nw$n_vertices() )
+  expect_equal( 1, nw$skip_hospitalised() )
+  expect_equal( 1, nw$skip_quarantined() )
+  expect_equal( 1, nw$type() )
+  expect_equal( 0.5, nw$daily_fraction() )
+
+  expect_equal(NA, m$get_network_ids(0))
+  expect_equal(c(0,1,2), m$get_network_ids(3))
+  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids(100))
 
   df_app_user <- m$get_app_users()
   df_app_user[['app_user']] <- as.integer(!df_app_user[['app_user']])
