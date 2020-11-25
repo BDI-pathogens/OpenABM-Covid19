@@ -1,4 +1,6 @@
 SWIG_add_user_network <- add_user_network
+SWIG_add_user_network_random <- add_user_network_random
+SWIG_delete_network <- delete_network
 SWIG_set_app_users <- set_app_users
 SWIG_one_time_step <- one_time_step
 SWIG_write_output_files <- write_output_files
@@ -17,8 +19,10 @@ SWIG_print_individual <- print_individual
 #' Wrapper class for the \code{model} C struct (\emph{model.h}).
 #'
 #' @details
-#' TODO(olegat) PLACEHOLDER Some explanations
+#' Model used for running the simulation. Initialise the model by creating
+#' a \code{Parameters} instance.
 #'
+#' @seealso Parameters
 #' @seealso AgeGroupEnum
 #' @seealso SAFE_UPDATE_PARAMS
 #' @seealso NETWORK_CONSTRUCTION
@@ -246,29 +250,93 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       skip_quarantine = TRUE,
       name = "user_network" )
     {
-      # TODO(olegat)
+
+      # Validate input
+      if (!'ID' %in% names(df_network)) {
+        stop( "df_interactions must have column ID" )
+      }
+      if (!'N' %in% names(df_network)) {
+        stop( "df_interactions must have column N" )
+      }
+      if (!is.logical(skip_hospitalised)) {
+        stop( "skip_hospitalised must be TRUE or FALSE" )
+      }
+      if (!is.logical(skip_quarantine)) {
+        stop( "skip_quarantine must be TRUE or FALSE" )
+      }
+
+      n_indiv <- nrow(df_interactions)
+      n_total <- private$c_params$n_total
+      ID <- df_interactions[['ID']]
+      N  <- df_interactions[['N']]
+
+      # Validate ID / N
+      if ((max(ID) >= n_total) || (min(ID) < 0)) {
+        stop( "all values of ID must be between 0 and n_total-1" )
+      }
+      if (min(N) < 1) {
+        stop( "all values of N must be greater than 0" )
+      }
+
+      id <- SWIG_add_user_network_random( private$c_model, skip_hospitalised,
+        skip_quarantine, n_indiv, ID, N, name )
+
+      return(Network$new( private$c_model, id ))
     },
 
     #' @description Get a network.
     #' @param network_id The network ID.
     get_network_by_id = function(network_id)
     {
-      # TODO(olegat)
+      return(Network$new( private$c_model, network_id ))
     },
 
     #' @description Get network info.
     #' @param max_ids The maximum number of rows to return.
+    #' @return The network info as a dataframe. The columns are the network
+    #' properties and each row is a network.
     get_network_info = function(max_ids = 1000)
     {
-      # TODO(olegat)
+      if (max_ids > 1e6) {
+        stop("Maximum number of allowed network is 1e6")
+      }
+      ids <- self$get_network_ids( max_ids )
+
+      if (length(ids) == 1) {
+        return(self$get_network_info( max_ids*10 ))
+      }
+
+      # Allocate a matrix the correct size
+      colnames <- c( 'id', 'name', 'n_edges', 'n_vertices', 'type',
+        'skip_hospitalised', 'skip_quarantined', 'daily_fraction')
+      tmp <- matrix( data = NA, nrow = length(ids), ncol = 8,
+        dimnames = list(NULL,colnames))
+
+      # Initialise each row one-by-one
+      for (i in 1:length(ids)) {
+        c_network <- get_network_by_id( private$c_model, ids[i] )
+        tmp[i,] <- c(
+          ids[i],
+          network_name( c_network ),
+          network_n_edges( c_network ),
+          network_n_vertices( c_network ),
+          network_type( c_network ),
+          network_skip_hospitalised( c_network ),
+          network_skip_quarantined( c_network ),
+          network_daily_fraction( c_network ))
+      }
+
+      return(as.data.frame(tmp))
     },
 
     #' @description Delete a network.
     #' Wrapper for C API \code{delete_network}.
     #' @param network The network to delete.
+    #' @return \code{TRUE} on success, \code{FALSE} on failure.
     delete_network = function(network)
     {
-      # TODO(olegat)
+      res <- SWIG_delete_network( private$c_model, network$c_network )
+      return(as.logical(res))
     },
 
     #' @description Get all app users. Wrapper for C API \code{get_app_users}.

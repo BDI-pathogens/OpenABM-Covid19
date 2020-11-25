@@ -21,6 +21,7 @@ Collate:
   OpenABMCovid19.R
   util.R
   Parameters.R
+  Network.R
   Model.R
 Suggests:
     testthat

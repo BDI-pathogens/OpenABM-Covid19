@@ -63,6 +63,7 @@ src-x64/
 
 # Roxygen2 generated documentation
 /man/AgeGroupEnum.Rd
+/man/Network.Rd
 /man/Model.Rd
 /man/Parameters.Rd
 /man/SAFE_UPDATE_PARAMS.Rd

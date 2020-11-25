@@ -161,7 +161,7 @@ test_that("Parameters::set_demographic_household_table (invalid house_no)", {
   ID <- seq(from = 0, to = n_total - 1, by = 1)
   houses <- rep(-1, length(ID))
   df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = houses)
-  # TODO(olegat) this a message to stdout, which is ugly and distracting
+  # TODO(olegat) this prints a message to stdout, which is ugly and distracting
   expect_error(p$set_demographic_household_table(df))
 })
 

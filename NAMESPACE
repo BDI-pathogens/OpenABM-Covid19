@@ -9,6 +9,7 @@ importFrom("R6", "R6Class")
 export("AgeGroupEnum")
 export("Parameters")
 export("Model")
+export("Network")
 export("SAFE_UPDATE_PARAMS")
 export("NETWORK_CONSTRUCTIONS")
 
