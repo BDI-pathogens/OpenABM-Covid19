@@ -75,7 +75,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
       return(network_daily_fraction( self$c_network ))
     },
 
-    #' @description Wrapper for C API \code{SWIG_update_daily_fraction}.
+    #' @description Wrapper for C API \code{update_daily_fraction}.
     #' @return \code{TRUE} on success, \code{FALSE} on failure.
     update_daily_fraction = function(daily_fraction) {
       res <- SWIG_update_daily_fraction( self$c_network, daily_fraction )

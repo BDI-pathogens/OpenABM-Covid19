@@ -79,7 +79,7 @@ test_that("Model::setters and getters", {
   m$set_app_users(df_app_user)
   expect_equal(df_app_user, m$get_app_users())
 
-  one_step_result_t0 <- list(
+  one_step_result_t0 <- c(
     'time' = 0,
     'lockdown' = 0,
     'test_on_symptoms' = 0,
@@ -156,7 +156,7 @@ test_that("Model::setters and getters", {
   m$one_time_step()
   m$one_time_step()
 
-  one_step_result_t3 <- list(
+  one_step_result_t3 <- c(
     'time' = 3,
     'lockdown' = 0,
     'test_on_symptoms' = 0,

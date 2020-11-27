@@ -21,7 +21,8 @@ make_integer <- function(number) {
 #' @description
 #' This is the list of parameter names can be updated whilst the model is
 #' running (in \code{Model$update_running_params}).
-#' @seealso Model
+#' @seealso \code{\link{Model}}
+#' @seealso \code{\link{COVID19IBM}}
 SAFE_UPDATE_PARAMS <- c(
   "test_on_symptoms",
   "test_on_traced",
@@ -118,7 +119,7 @@ SAFE_UPDATE_PARAMS <- c(
 #' ag60_69 <- AgeGroupEnum[['_60_69']]
 #' ag70_79 <- AgeGroupEnum[['_70_79']]
 #' ag80    <- AgeGroupEnum[['_80']]
-AgeGroupEnum <- list(
+AgeGroupEnum <- c(
   '_0_9'   = 0,
   '_10_19' = 1,
   '_20_29' = 2,
@@ -129,7 +130,7 @@ AgeGroupEnum <- list(
   '_70_79' = 7,
   '_80'    = 8)
 
-OccupationNetworkEnum <- list(
+OccupationNetworkEnum <- c(
   '_primary_network'   = 0,
   '_secondary_network' = 1,
   '_working_network'   = 2,
@@ -137,13 +138,13 @@ OccupationNetworkEnum <- list(
   '_elderly_network'   = 4
 )
 
-ChildAdultElderlyEnum <- list(
+ChildAdultElderlyEnum <- c(
   '_child'   = 0,
   '_adult'   = 1,
   '_elderly' = 2
 )
 
-ListIndiciesEnum <- list(
+ListIndiciesEnum <- c(
   '_1' = 0,
   '_2' = 1,
   '_3' = 2,
@@ -152,7 +153,7 @@ ListIndiciesEnum <- list(
   '_6' = 5
 )
 
-TransmissionTypeEnum <- list(
+TransmissionTypeEnum <- c(
   '_household'  = 0,
   '_occupation' = 1,
   '_random'     = 2
@@ -175,7 +176,7 @@ TransmissionTypeEnum <- list(
 #'   \item{RANDOM_DEFAULT} Wrapper for C enum
 #'     \code{NETWORK_CONSTRUCTION_RANDOM}
 #' }
-NETWORK_CONSTRUCTIONS <- list(
+NETWORK_CONSTRUCTIONS <- c(
   'BESPOKE'        = 0,
   'HOUSEHOLD'      = 1,
   'WATTS_STROGATZ' = 2,

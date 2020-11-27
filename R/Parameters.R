@@ -22,6 +22,8 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #' #params$c_params$rng_seed = 1234
 #' #params$c_params$n_total = 250000
 #'
+#' @seealso \code{\link{Model}}
+#'
 Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
   private = list(
@@ -319,7 +321,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' Run a check on the parameters and return if the C code doesn't bail.
     #' This function locks the parameter value (i.e. make this class
     #' read-only))
-    #' @return self$c_params
+    #' @return \code{self$c_params}
     return_param_object = function() {
       private$read_household_demographics()
       check_params(self$c_params)

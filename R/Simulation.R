@@ -64,10 +64,12 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' multiple simulations.
 Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
   public = list(
-    #' @field env Current environment (\code{Environment} R6 class object)
+    #' @field env Current environment
+    #' (\code{\link{Environment}} R6 class object)
     env = NULL,
 
-    #' @field agent Current agent (\code{Agent} R6 class object)
+    #' @field agent Current agent
+    #' (\code{\link{Agent}} R6 class object)
     agent = NULL,
 
     #' @field current_state Current environment state.
@@ -101,8 +103,8 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
 
     #' @description Environment subclass representing a COVID19 outbreak as
     #' defined in the COVID19-IBM model
-    #' @param env Instance of \code{Environment} R6Class
-    #' @param agent Instance of \code{Agent} R6Class
+    #' @param env Instance of \code{\link{Environment}} R6Class
+    #' @param agent Instance of \code{\link{Agent}} R6Class
     #' @param end_time End time for the simulation
     #' @param verbose Log verbosity.
     initialize = function(env, agent = Agent$new(), end_time = NULL,
@@ -207,12 +209,12 @@ COVID19IBM <- R6Class( classname = 'COVID19IBM', cloneable = FALSE,
   inherit = Environment,
 
   public = list(
-    #' @field An R6 \code{Model} class instance.
+    #' @field model An instance of the \code{\link{Model}} class.
     model = NULL,
 
     #' @description Environment subclass representing a COVID19 outbreak as
     #' defined in the COVID19-IBM model
-    #' @param model An R6 \code{Model} class instance.
+    #' @param model An R6 \code{\link{Model}} class instance.
     #' @param ... Parameters to pass to Environment super class.
     initialize = function(model, ...) {
       self$model = model
@@ -232,6 +234,8 @@ COVID19IBM <- R6Class( classname = 'COVID19IBM', cloneable = FALSE,
     },
 
     #' @description Run the simulation through one time step.
+    #' @param action Vector of actions. The vector should contain names from
+    #' \code{\link{SAFE_UPDATE_PARAMS}}
     #' @return The state of the system.
     step = function(action) {
       # If the action is non-empty, then update model parameters in the simulation
@@ -244,7 +248,7 @@ COVID19IBM <- R6Class( classname = 'COVID19IBM', cloneable = FALSE,
       }
 
       self$model$one_time_step()
-      return (self$model$one_time_step_results())
+      return(self$model$one_time_step_results())
     }
   )
 )

@@ -28,12 +28,12 @@ SWIG_calculate_R_instanteous <- calculate_R_instanteous
 #'
 #' @details
 #' Model used for running the simulation. Initialise the model by creating
-#' a \code{Parameters} instance.
+#' a \code{\link{Parameters}} instance.
 #'
-#' @seealso Parameters
-#' @seealso AgeGroupEnum
-#' @seealso SAFE_UPDATE_PARAMS
-#' @seealso NETWORK_CONSTRUCTION
+#' @seealso \code{\link{Parameters}}
+#' @seealso \code{\link{AgeGroupEnum}}
+#' @seealso \code{\link{SAFE_UPDATE_PARAMS}}
+#' @seealso \code{\link{NETWORK_CONSTRUCTIONS}}
 Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
   private = list(
@@ -116,7 +116,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
   ),
 
   public = list(
-    #' @param params_object An object of type \code{Parameters}. The
+    #' @param params_object An object of type \code{\link{Parameters}}. The
     #' constructor will lock the parameter values (ie. \code{params_code}
     #' will become read-only).
     initialize = function(params_object)
@@ -154,8 +154,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' A subset of parameters may be updated whilst the model is evaluating,
     #' these correspond to events. This function throws an error if
     #' \code{param} isn't safe to update.
-    #' @param param name of parameter. See SAFE_UPDATE_PARAMS for allowed
-    #' parameter names
+    #' @param param name of parameter. See \code{\link{SAFE_UPDATE_PARAMS}} for
+    #' allowed parameter names
     #' @param value value of parameter
     update_running_params = function(param, value)
     {
@@ -179,9 +179,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{get_model_param_risk_score}.
     #' @param day Infection day
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @return The risk value.
     get_risk_score = function(day, age_inf, age_sus)
     {
@@ -196,9 +196,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Gets the value of the risk score household parameter.
     #' Wrapper for C API \code{get_model_param_risk_score_household}.
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @return The risk value.
     get_risk_score_household = function(age_inf, age_sus)
     {
@@ -215,9 +215,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{set_model_param_risk_score}.
     #' @param day Infection day
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param value The risk value
     set_risk_score = function(day, age_inf, age_sus, value)
     {
@@ -232,9 +232,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Gets the value of the risk score household parameter.
     #' Wrapper for C API \code{set_model_param_risk_score_household}.
     #' @param age_inf Infector age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param age_sus Susceptible age group index, value between 0 and 8.
-    #' See AgeGroupEnum list
+    #' See \code{\link{AgeGroupEnum}} list
     #' @param value The risk value.
     set_risk_score_household = function(age_inf, age_sus, value)
     {
@@ -258,7 +258,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param skip_quarantine If \code{TRUE}, skip interaction if either person
     #' is in quarantined
     #' @param construction The method used for network construction. Must be a
-    #' number between 0 and 4 (inclusive). See NETWORK_CONSTRUCTION.
+    #' number between 0 and 4 (inclusive).
+    #' See \code{\link{NETWORK_CONSTRUCTIONS}}.
     #' @param daily_fraction The fraction of edges on the network present each
     #' day (i.e. down-sampling the network). Must be a value between 0 and 1.
     #' @param name Name of the network.
@@ -478,7 +479,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     },
 
     #' @description Get the results from one-time step.
-    #' @return A data frame with 1 row (i.e. dictionary).
+    #' @return A vector with names (i.e. dictionary).
     one_time_step_result = function()
     {
       # Get the list of EVENT_TYPES defined by defineEnumeration() in
@@ -498,7 +499,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         critical <- TRANSITION_TO_CRITICAL
       }
 
-      res = list()
+      res = c()
 
       res['time']             <- private$c_model$time
       res['lockdown']         <- private$c_params$lockdown_on
