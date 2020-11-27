@@ -63,11 +63,15 @@ src-x64/
 
 # Roxygen2 generated documentation
 /man/AgeGroupEnum.Rd
-/man/Network.Rd
+/man/Agent.Rd
+/man/COVID19IBM.Rd
+/man/Environment.Rd
 /man/Model.Rd
+/man/NETWORK_CONSTRUCTIONS.Rd
+/man/Network.Rd
 /man/Parameters.Rd
 /man/SAFE_UPDATE_PARAMS.Rd
-/man/NETWORK_CONSTRUCTIONS.Rd
+/man/Simulation.Rd
 
 
 # performance related

@@ -23,6 +23,7 @@ Collate:
   Parameters.R
   Network.R
   Model.R
+  Simulation.R
 Suggests:
     testthat
 RoxygenNote: 7.1.1
