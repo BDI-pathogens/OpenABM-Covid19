@@ -91,6 +91,7 @@ SAFE_UPDATE_PARAMS <- c(
 
 
 
+# TODO(olegat) perhaps the SWIG defineEnumeration() should be in NAMESPACE?
 #' Age Group Indices
 #' @description
 #' List of age group indices.
@@ -157,6 +158,7 @@ TransmissionTypeEnum <- list(
   '_random'     = 2
 )
 
+# TODO(olegat) perhaps the SWIG defineEnumeration() should be in NAMESPACE?
 #' Network construction types
 #' @description
 #' List of network construction types.

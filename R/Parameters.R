@@ -204,11 +204,11 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       enum <- get_base_param_from_enum(param)
       if (!is.null(enum)) {
         # multi-value parameter (C array)
-        getter <- get(paste("get_param_", enum$base_name, sep = ""))
+        getter <- get(paste0("get_param_", enum$base_name))
         result <- getter( self$c_params, enum$index )
       } else {
         # single-value parameter
-        getter <- get( paste("parameters_", param, "_get", sep = "") )
+        getter <- get( paste0("parameters_", param, "_get") )
         result <- getter( self$c_params )
       }
       return(result)
@@ -226,11 +226,11 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       enum <- get_base_param_from_enum(param)
       if (!is.null(enum)) {
         # multi-value parameter (C array)
-        setter <- get(paste("set_param_", enum$base_name, sep = ""))
+        setter <- get(paste0("set_param_", enum$base_name))
         setter( self$c_params, value, enum$index )
       } else {
         # single-value parameter
-        setter <- get( paste("parameters_", param, "_set", sep = "") )
+        setter <- get( paste0("parameters_", param, "_set") )
         setter( self$c_params, value )
       }
     },
