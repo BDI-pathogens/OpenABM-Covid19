@@ -30,7 +30,9 @@ test_that("Model::initialize (params_object isn't R6Class)", {
   expect_error(Model$new(10))
 })
 
-test_that("Model::setters and getters", {
+test_that("Model::baseline_params", {
+  # This test is slow, uncomment the next line to skip this test:
+  # return()
   m <- Model$new(baseline_params())
   expect_error(m$update_running_params('hospital_on', 0))
   expect_error(m$get_param('fatality_fraction_TYPO'))
@@ -79,7 +81,14 @@ test_that("Model::setters and getters", {
   m$set_app_users(df_app_user)
   expect_equal(df_app_user, m$get_app_users())
 
-  one_step_result_t0 <- c(
+
+
+  ##
+  ## Begin rudimentary integration test with Simulation and COVID19IBM:
+  ##
+
+  ## 1) Check initial state at time = 0
+  result_t0 <- c(
     'time' = 0,
     'lockdown' = 0,
     'test_on_symptoms' = 0,
@@ -150,13 +159,17 @@ test_that("Model::setters and getters", {
     'R_inst' = -1,
     'R_inst_05' = -1,
     'R_inst_95' = -1)
-  expect_equal(m$one_time_step_result(), one_step_result_t0)
+  expect_equal(m$one_time_step_results(), result_t0)
 
-  m$one_time_step()
-  m$one_time_step()
-  m$one_time_step()
 
-  one_step_result_t3 <- c(
+  ## 2) Run a simulation until time = 3
+  sim <- Simulation$new( COVID19IBM$new(m) )
+  sim$start_simulation()
+  sim$steps(3)
+
+
+  ## 3) Check the results of simulation
+  result_t3 <- c(
     'time' = 3,
     'lockdown' = 0,
     'test_on_symptoms' = 0,
@@ -227,5 +240,78 @@ test_that("Model::setters and getters", {
     'R_inst' = -1,
     'R_inst_05' = -1,
     'R_inst_95' = -1)
-  expect_equal(m$one_time_step_result(), one_step_result_t3)
+  expect_equal(sim$current_state, result_t3)
+
+  results_expected = list()
+  results_expected$time <- c(1, 2, 3)
+  results_expected$lockdown <- c(0, 0, 0)
+  results_expected$test_on_symptoms <- c(0, 0, 0)
+  results_expected$app_turned_on <- c(0, 0, 0)
+  results_expected$total_infected <- c(5, 5, 8)
+  results_expected$total_infected_0_9 <- c(0, 0, 0)
+  results_expected$total_infected_10_19 <- c(0, 0, 0)
+  results_expected$total_infected_20_29 <- c(0, 0, 0)
+  results_expected$total_infected_30_39 <- c(2, 2, 3)
+  results_expected$total_infected_40_49 <- c(0, 0, 0)
+  results_expected$total_infected_50_59 <- c(2, 2, 2)
+  results_expected$total_infected_60_69 <- c(0, 0, 1)
+  results_expected$total_infected_70_79 <- c(1, 1, 2)
+  results_expected$total_infected_80 <- c(0, 0, 0)
+  results_expected$total_case <- c(0, 0, 0)
+  results_expected$total_case_0_9 <- c(0, 0, 0)
+  results_expected$total_case_10_19 <- c(0, 0, 0)
+  results_expected$total_case_20_29 <- c(0, 0, 0)
+  results_expected$total_case_30_39 <- c(0, 0, 0)
+  results_expected$total_case_40_49 <- c(0, 0, 0)
+  results_expected$total_case_50_59 <- c(0, 0, 0)
+  results_expected$total_case_60_69 <- c(0, 0, 0)
+  results_expected$total_case_70_79 <- c(0, 0, 0)
+  results_expected$total_case_80 <- c(0, 0, 0)
+  results_expected$total_death <- c(0, 0, 0)
+  results_expected$total_death_0_9 <- c(0, 0, 0)
+  results_expected$total_death_10_19 <- c(0, 0, 0)
+  results_expected$total_death_20_29 <- c(0, 0, 0)
+  results_expected$total_death_30_39 <- c(0, 0, 0)
+  results_expected$total_death_40_49 <- c(0, 0, 0)
+  results_expected$total_death_50_59 <- c(0, 0, 0)
+  results_expected$total_death_60_69 <- c(0, 0, 0)
+  results_expected$total_death_70_79 <- c(0, 0, 0)
+  results_expected$total_death_80 <- c(0, 0, 0)
+  results_expected$daily_death <- c(0, 0, 0)
+  results_expected$daily_death_0_9 <- c(0, 0, 0)
+  results_expected$daily_death_10_19 <- c(0, 0, 0)
+  results_expected$daily_death_20_29 <- c(0, 0, 0)
+  results_expected$daily_death_30_39 <- c(0, 0, 0)
+  results_expected$daily_death_40_49 <- c(0, 0, 0)
+  results_expected$daily_death_50_59 <- c(0, 0, 0)
+  results_expected$daily_death_60_69 <- c(0, 0, 0)
+  results_expected$daily_death_70_79 <- c(0, 0, 0)
+  results_expected$daily_death_80 <- c(0, 0, 0)
+  results_expected$n_presymptom <- c(4, 4, 6)
+  results_expected$n_asymptom <- c(1, 1, 1)
+  results_expected$n_quarantine <- c(0, 0, 0)
+  results_expected$n_tests <- c(0, 0, 0)
+  results_expected$n_symptoms <- c(0, 0, 1)
+  results_expected$n_hospital <- c(0, 0, 0)
+  results_expected$n_hospitalised_recovering <- c(0, 0, 0)
+  results_expected$n_critical <- c(0, 0, 0)
+  results_expected$n_death <- c(0, 0, 0)
+  results_expected$n_recovered <- c(0, 0, 0)
+  results_expected$hospital_admissions <- c(0, 0, 0)
+  results_expected$hospital_admissions_total <- c(0, 0, 0)
+  results_expected$hospital_to_critical_daily <- c(0, 0, 0)
+  results_expected$hospital_to_critical_total <- c(0, 0, 0)
+  results_expected$n_quarantine_infected <- c(0, 0, 0)
+  results_expected$n_quarantine_recovered <- c(0, 0, 0)
+  results_expected$n_quarantine_app_user <- c(0, 0, 0)
+  results_expected$n_quarantine_app_user_infected <- c(0, 0, 0)
+  results_expected$n_quarantine_app_user_recovered <- c(0, 0, 0)
+  results_expected$n_quarantine_events <- c(0, 0, 0)
+  results_expected$n_quarantine_release_events <- c(0, 0, 0)
+  results_expected$n_quarantine_events_app_user <- c(0, 0, 0)
+  results_expected$n_quarantine_release_events_app_user <- c(0, 0, 0)
+  results_expected$R_inst <- c(-1 ,-1 ,-1)
+  results_expected$R_inst_05 <- c(-1 ,-1 ,-1)
+  results_expected$R_inst_95 <- c(-1 ,-1 ,-1)
+  expect_equal(sim$results, results_expected)
 })

@@ -10,17 +10,19 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #'
 #' @examples
 #' # TODO(olegat) this fails `R CMD check` because the CSV files do not exist.
-#' # Load parameters from CSV files.
-#' #params <- OpenABMCovid19::Parameters$new(
-#' #   "input_parameters.csv", 1,
-#' #   "out_dir",
-#' #   "input_household.csv",
-#' #   "hospital_input_parameters.csv", 1
-#' #)
+#' ## Not run:
+#'  Load parameters from CSV files.
+#' params <- OpenABMCovid19::Parameters$new(
+#'    "input_parameters.csv", 1,
+#'    "out_dir",
+#'    "input_household.csv",
+#'    "hospital_input_parameters.csv", 1
+#' )
 #'
 #' # Edit params
-#' #params$c_params$rng_seed = 1234
-#' #params$c_params$n_total = 250000
+#' params$c_params$rng_seed = 1234
+#' params$c_params$n_total = 250000
+#' ## End(Not run)
 #'
 #' @seealso \code{\link{Model}}
 #'

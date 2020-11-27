@@ -18,6 +18,9 @@ Environment <- R6Class( classname = 'Environment', cloneable = FALSE,
       return(list(reward = NA, next_state = NA))
     },
 
+    #' @description End the simulation.
+    end_simulation = function() {},
+
     #' @description Initialize the Environment object for the start of a
     #' simulation.
     #' @return Returns the starting state.
@@ -113,6 +116,7 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
       self$env      <- env
       self$agent    <- agent
       self$end_time <- end_time
+      self$verbose  <- verbose
     },
 
     #' @description Initialisation of the simulation; reset the model
@@ -171,11 +175,11 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
         # Save the state of the model
         self$collect_results(next_state, next_action)
 
-        if (self$timestep < self$end_time) {
+        if (is.null(self$end_time) || self$timestep < self$end_time) {
           self$current_state <- next_state
           self$current_action <- next_action
           self$timestep <- (self$timestep + 1)
-        } else {  # if at the end_time of the model then exit
+        } else {# if at the end_time of the model then exit
           self$end_simulation()
           if (self$verbose) {
             cat("Reached end time of simulation before completing all steps\n")
@@ -190,8 +194,8 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
     collect_results = function(state, action) {
       # Save results to a named vector
       for (i in 1:length(state)) {
-        key   <- names(state[1])
-        value <- state[[1]]
+        key   <- names(state[i])
+        value <- state[[i]]
         self$results[[key]] <- append(self$results[[key]], value)
       }
     },
