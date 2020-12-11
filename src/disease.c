@@ -205,7 +205,7 @@ void transmit_virus_by_type(
 				{
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
+						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector->infectiousness_multiplier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
