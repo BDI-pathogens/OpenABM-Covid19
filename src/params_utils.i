@@ -153,6 +153,15 @@ double get_param_infectious_rate(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name: 		get_param_sd_infectiousness_multiplier
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_sd_infectiousness_multiplier(parameters *params)
+{
+    return params->sd_infectiousness_multiplier;
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_relative_susceptibility
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1008,6 +1017,16 @@ int set_param_sd_infectious_period(parameters *params, double value)
 int set_param_infectious_rate(parameters *params, int value)
 {
    params->infectious_rate = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_sd_infectiousness_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_sd_infectiousness_multiplier(parameters *params, int value)
+{
+   params->sd_infectiousness_multiplier = value;
    return TRUE;
 }
 
