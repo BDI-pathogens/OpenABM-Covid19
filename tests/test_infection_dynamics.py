@@ -356,10 +356,10 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 1e4,
-                    n_seed_infection = 10,
-                    end_time = 50,
+                    n_seed_infection = 50,
+                    end_time = 30,
                 ),
-                sd_multipliers = [0, 0.4, 1],
+                sd_multipliers = [0, 0.25, 0.5],
             )
         ],
         "test_infectiousness_multiplier_transmissions_increase_with_multiplier": [
@@ -368,8 +368,9 @@ class TestClass(object):
                     n_total = 1e4,
                     n_seed_infection = 10,
                     end_time = 50,
+                    sd_infectiousness_multiplier = 0.5,
                 ),
-                n_bins = 4,
+                n_bins = 5,
             )
         ],
     }
@@ -1173,23 +1174,24 @@ class TestClass(object):
            Check that the total infected stays the same up to 0.5 SD.
         """
      
-        ordered_multipliers = sorted(sd_multipliers)
+        ordered_multipliers = sorted( sd_multipliers )
         transmissions = []
         total_infected = []
         for sd_multiplier in ordered_multipliers:
           params = utils.get_params_swig()
           for param, value in test_params.items():
               params.set_param( param, value )  
+          params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
           model  = utils.get_model_swig( params )
 
-          for time in range(test_params["end_time"]):
+          for time in range( test_params[ "end_time" ] ):
               model.one_time_step()
 
           results = model.one_time_step_results()
-          model.write_transmissions()
-          df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-          transmissions.append( df_trans )
-          total_infected.append( results["total_infected"] )
+          total_infected.append( results[ "total_infected" ] )
+
+          del model
+          del params
 
         base_infected = total_infected[0]
 
@@ -1218,10 +1220,15 @@ class TestClass(object):
 
         df_indiv.rename( columns = { "ID":"ID_source"}, inplace = True )
 
-        df_indiv["im_bin"] = pd.cut(df["infectiousness_multiplier"], n_bins, labels=False)
+        df_indiv["im_bin"] = pd.qcut(df_indiv["infectiousness_multiplier"], n_bins, labels=False)
 
         source_trans = pd.merge( df_indiv, df_trans, on = "ID_source" )
 
-        is_trans_cnt_increasing = source_trans.groupby( [ "im_bin" ] ).size().diff()[1:] > 0
+        avg_trans = source_trans.groupby( [ "im_bin" ] ).size() / df_indiv.groupby( [ "im_bin" ] ).size()
+        
+        is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
 
+        print(source_trans.groupby( [ "im_bin" ] ).size())
+        print(df_indiv.groupby( [ "im_bin" ] ).size())
+        print(avg_trans)
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
