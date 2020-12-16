@@ -72,8 +72,8 @@ void initialize_individual(
 	indiv->worker_type = NOT_HEALTHCARE_WORKER;
 
 	float sigma_x = params->sd_infectiousness_multiplier;
-	float zeta = log(1/sqrt(1+pow(sigma_x,2)));
-	float sigma = sqrt(log(1+pow(sigma_x,2)));
+	float zeta = log( 1 / sqrt( 1 + pow( sigma_x, 2 ) ) );
+	float sigma = sqrt( log( 1 + pow( sigma_x, 2) ) );
 	indiv->infectiousness_multiplier = gsl_ran_lognormal( rng, zeta, sigma );
 }
 
