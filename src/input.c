@@ -178,6 +178,9 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
 	if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
 
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectiousness_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter sd_infectiousness_multiplier\n"); };
+
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
 
@@ -745,7 +748,7 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"test_status,");
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
-	fprintf(individual_output_file,"infection_count");
+	fprintf(individual_output_file,"infection_count,");
 	fprintf(individual_output_file,"infectiousness_multiplier");
 	fprintf(individual_output_file,"\n");
 
