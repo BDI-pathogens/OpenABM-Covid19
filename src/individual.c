@@ -78,6 +78,10 @@ void initialize_individual(
 		float sigma = sqrt( log( 1 + pow( sigma_x, 2) ) );
 		indiv->infectiousness_multiplier = gsl_ran_lognormal( rng, zeta, sigma );
 	}
+	else
+	{
+		indiv->infectiousness_multiplier = 1;
+	}
 }
 
 /*****************************************************************************************
