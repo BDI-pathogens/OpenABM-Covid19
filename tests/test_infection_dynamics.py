@@ -1228,7 +1228,4 @@ class TestClass(object):
         
         is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
 
-        print(source_trans.groupby( [ "im_bin" ] ).size())
-        print(df_indiv.groupby( [ "im_bin" ] ).size())
-        print(avg_trans)
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
