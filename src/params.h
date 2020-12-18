@@ -41,6 +41,7 @@ typedef struct{
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
+	double sd_infectiousness_multiplier;         // sd of the lognormal used to vary the infectiousness of an individual
 
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
 	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)

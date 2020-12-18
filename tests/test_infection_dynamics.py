@@ -351,7 +351,28 @@ class TestClass(object):
                 n_seed_infection = 1,
                 end_time = 100
             )
-        ]
+        ],
+        "test_infectiousness_multiplier": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 50,
+                    end_time = 30,
+                ),
+                sd_multipliers = [0, 0.25, 0.5],
+            )
+        ],
+        "test_infectiousness_multiplier_transmissions_increase_with_multiplier": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 10,
+                    end_time = 50,
+                    sd_infectiousness_multiplier = 0.5,
+                ),
+                n_bins = 5,
+            )
+        ],
     }
     """
     Test class for checking 
@@ -1059,7 +1080,7 @@ class TestClass(object):
         np.testing.assert_equal( len( df_trans ), test_params["n_seed_infection"], "The number of seed infections is not equal to the size of the transmission file")
         np.testing.assert_equal( sum( df_trans["n_inf_type"] >1 ), 0, "Individuals with more than one type of infections" )
         np.testing.assert_equal( sum( df_trans["n_inf_type"] == 1), test_params["n_seed_infection"], "Number of transmission with more than one type is not equal to the number of seed infections" )
-
+        
         
         
     def test_presymptomatic_symptomatic_transmissions( 
@@ -1147,4 +1168,64 @@ class TestClass(object):
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance) 
 
     
-      
+
+    def test_infectiousness_multiplier( self, test_params, sd_multipliers ):
+        """
+           Check that the total infected stays the same up to 0.5 SD.
+        """
+     
+        ordered_multipliers = sorted( sd_multipliers )
+        transmissions = []
+        total_infected = []
+        for sd_multiplier in ordered_multipliers:
+          params = utils.get_params_swig()
+          for param, value in test_params.items():
+              params.set_param( param, value )  
+          params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
+          model  = utils.get_model_swig( params )
+
+          for time in range( test_params[ "end_time" ] ):
+              model.one_time_step()
+
+          results = model.one_time_step_results()
+          total_infected.append( results[ "total_infected" ] )
+
+          del model
+          del params
+
+        base_infected = total_infected[0]
+
+        np.testing.assert_allclose([total_infected[0]]*len(total_infected), total_infected, rtol=0.05)
+
+    
+
+    def test_infectiousness_multiplier_transmissions_increase_with_multiplier( self, test_params, n_bins ):
+        """
+           Check that the mean number of infected increases across infectiousness bins.
+        """
+     
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+
+        for time in range(test_params["end_time"]):
+            model.one_time_step()
+
+        model.write_transmissions()
+        model.write_individual_file()
+
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+
+        df_indiv.rename( columns = { "ID":"ID_source"}, inplace = True )
+
+        df_indiv["im_bin"] = pd.qcut(df_indiv["infectiousness_multiplier"], n_bins, labels=False)
+
+        source_trans = pd.merge( df_indiv, df_trans, on = "ID_source" )
+
+        avg_trans = source_trans.groupby( [ "im_bin" ] ).size() / df_indiv.groupby( [ "im_bin" ] ).size()
+        
+        is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
+
+        np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )

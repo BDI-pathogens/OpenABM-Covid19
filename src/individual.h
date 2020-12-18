@@ -36,6 +36,7 @@ struct individual{
 
 	int status;
 	double hazard;
+	double infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
