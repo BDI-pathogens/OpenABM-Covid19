@@ -1232,6 +1232,45 @@ int get_network_ids( model *model, int *ids, int max_ids )
 }
 
 /*****************************************************************************************
+*  Name:		get_network_id_by_index
+*  Description: gets a network ids by index
+*  Returns:		the network id
+******************************************************************************************/
+int get_network_id_by_index( model *model, int idx )
+{
+	int offset = 0, remainder;
+	network *user_network;
+
+  if( idx < 0 )
+    print_exit("idx (=%d) must be greater than 0", idx);
+
+  if( idx == 0 )
+    return( model->household_network->network_id );
+  offset += 1;
+
+  if( idx < (offset + model->n_occupation_networks) )
+    return( model->occupation_network[idx - offset]->network_id );
+  offset += model->n_occupation_networks;
+
+  if( idx == offset )
+    return( model->random_network->network_id );
+  offset += 1;
+
+  remainder = idx - offset;
+	user_network = model->user_network;
+	while( user_network != NULL && remainder > 0 )
+  {
+		user_network = user_network->next_network;
+    remainder--;
+  }
+
+  if( user_network != NULL )
+    return( user_network->network_id );
+
+  return( -1 );
+}
+
+/*****************************************************************************************
 *  Name:		return_interactions
 *  Description: returns all the interaction which are being dropped from peoples
 *  				interaction diary to the the stack of usable tokens

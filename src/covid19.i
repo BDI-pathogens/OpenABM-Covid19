@@ -23,6 +23,8 @@
  * from `R CMD check`. */
 %nodefaultctor directory;
 %nodefaultdtor directory;
+%nodefaultctor edge;
+%nodefaultdtor edge;
 %nodefaultctor event;
 %nodefaultdtor event;
 %nodefaultctor event_list;

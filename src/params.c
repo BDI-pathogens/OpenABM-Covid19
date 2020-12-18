@@ -162,6 +162,26 @@ int get_app_users(
 
 
 /*****************************************************************************************
+*  Name: 		get_app_user_by_index
+*  Description: returns a specific app user by index
+*  Arguments:	model:	  	the model object
+*  				users:    	array of users IDs to change
+******************************************************************************************/
+int get_app_user_by_index(
+	model *model,
+	int idx
+)
+{
+	long n_total = model->params->n_total;
+  if (idx < 0 || idx >= n_total) {
+    print_exit("idx (=%i) is out of bound. Allowed range: [0,%li[", idx, n_total);
+  }
+
+  return model->population[ idx ].app_user;
+}
+
+
+/*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property
 *  Description: Sets the values of a single occupational network by index
 ******************************************************************************************/

@@ -11,6 +11,7 @@
 %% OpenABMCovid19 types:
 \alias{$,_p_directory-method}
 \alias{$,_p_doubleArray-method}
+\alias{$,_p_edge-method}
 \alias{$,_p_event-method}
 \alias{$,_p_event_list-method}
 \alias{$,_p_individual-method}
@@ -20,9 +21,11 @@
 \alias{$,_p_interaction_block-method}
 \alias{$,_p_longArray-method}
 \alias{$,_p_model-method}
+\alias{$,_p_network-method}
 \alias{$,_p_parameters-method}
 \alias{$,_p_incomplete_gamma_p_params-method}
 \alias{$<-,_p_directory-method}
+\alias{$<-,_p_edge-method}
 \alias{$<-,_p_event-method}
 \alias{$<-,_p_event_list-method}
 \alias{$<-,_p_individual-method}
@@ -30,9 +33,11 @@
 \alias{$<-,_p_interaction-method}
 \alias{$<-,_p_interaction_block-method}
 \alias{$<-,_p_model-method}
+\alias{$<-,_p_network-method}
 \alias{$<-,_p_parameters-method}
 \alias{$<-,_p_incomplete_gamma_p_params-method}
 \alias{[[<-,_p_directory,character-method}
+\alias{[[<-,_p_edge,character-method}
 \alias{[[<-,_p_event,character-method}
 \alias{[[<-,_p_event_list,character-method}
 \alias{[[<-,_p_individual,character-method}
@@ -40,6 +45,7 @@
 \alias{[[<-,_p_interaction,character-method}
 \alias{[[<-,_p_interaction_block,character-method}
 \alias{[[<-,_p_model,character-method}
+\alias{[[<-,_p_network,character-method}
 \alias{[[<-,_p_parameters,character-method}
 \alias{[[<-,_p_incomplete_gamma_p_params,character-method}
 

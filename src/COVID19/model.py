@@ -580,8 +580,8 @@ class Model:
         if not 'ID_1' in df_network.columns:
             raise ParameterException( "df_network must have column ID_1" )
 
-        if not 'ID_1' in df_network.columns:
-            raise ParameterException( "df_network must have column ID_1" )
+        if not 'ID_2' in df_network.columns:
+            raise ParameterException( "df_network must have column ID_2" )
 
         if not interaction_type in [0,1,2]:
             raise ParameterException( "interaction_type must be 0 (household), 1 (occupation) or 2 (random)" )

@@ -1809,6 +1809,13 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
     params->REFERENCE_HOUSEHOLDS[idx][8] = i_80;
     // return TRUE;
 }
+
+int get_household_value(parameters *params, int row, int col) {
+  if (params && row < params->N_REFERENCE_HOUSEHOLDS && col < 9) {
+    return params->REFERENCE_HOUSEHOLDS[row][col];
+  }
+  return 0;
+}
 %}
 
 %array_class(double, doubleArray);

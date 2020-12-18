@@ -114,7 +114,7 @@ void read_param_file( parameters *params)
 
 	parameter_file = fopen(params->input_param_file, "r");
 	if(parameter_file == NULL)
-		print_exit("Can't open parameter file");
+		print_exit("Can't open parameter file: %s", params->input_param_file);
 
 	// Throw away header (and first `params->param_line_number` lines)
 	for(i = 0; i < params->param_line_number; i++)
