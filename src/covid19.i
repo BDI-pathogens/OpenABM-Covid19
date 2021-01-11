@@ -10,6 +10,7 @@
 #include "individual.h"
 #include "utilities.h"
 #include "disease.h"
+#include "network.h"
 %}
 
 %rename (create_model) new_model(parameters *params);
@@ -22,6 +23,8 @@
  * from `R CMD check`. */
 %nodefaultctor directory;
 %nodefaultdtor directory;
+%nodefaultctor edge;
+%nodefaultdtor edge;
 %nodefaultctor event;
 %nodefaultdtor event;
 %nodefaultctor event_list;
@@ -44,6 +47,8 @@
 %include "individual.h"
 %include "utilities.h"
 %include "disease.h"
+%include "network.h"
 %include model_utils.i 
 %include params_utils.i
+%include network_utils.i
 

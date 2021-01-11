@@ -1,3 +1,3 @@
 # Build flags for 'R CMD INSTALL'
-PKG_LIBS=   -LC:/gsl$(R_ARCH)/lib -lgsl -lgslcblas -lm
+PKG_LIBS=   -LC:/gsl$(R_ARCH)/lib -l:libgsl.a -l:libgslcblas.a -lm
 PKG_CFLAGS= -IC:/gsl$(R_ARCH)/include -DBUILD_RPKG

@@ -114,7 +114,7 @@ void read_param_file( parameters *params)
 
 	parameter_file = fopen(params->input_param_file, "r");
 	if(parameter_file == NULL)
-		print_exit("Can't open parameter file");
+		print_exit("Can't open parameter file: %s", params->input_param_file);
 
 	// Throw away header (and first `params->param_line_number` lines)
 	for(i = 0; i < params->param_line_number; i++)
@@ -177,6 +177,9 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->infectious_rate));
 	if( check < 1){ print_exit("Failed to read parameter infectious_rate\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->sd_infectiousness_multiplier));
+	if( check < 1){ print_exit("Failed to read parameter sd_infectiousness_multiplier\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->mean_time_to_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter mean_time_to_symptoms\n"); };
@@ -751,7 +754,8 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"test_status,");
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
-	fprintf(individual_output_file,"infection_count");
+	fprintf(individual_output_file,"infection_count,");
+	fprintf(individual_output_file,"infectiousness_multiplier");
 	fprintf(individual_output_file,"\n");
 
 	// Loop through all individuals in the simulation
@@ -769,7 +773,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -782,7 +786,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->quarantine_test_result,
 			indiv->app_user,
 			indiv->random_interactions,
-			infection_count
+			infection_count,
+			indiv->infectiousness_multiplier
 			);
 	}
 	fclose(individual_output_file);
@@ -949,7 +954,7 @@ void write_interactions( model *model )
 	ring_dec( day, model->params->days_of_interactions );
 	time = model->time - 1;
 
-	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
+	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,network_id,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
 
@@ -960,13 +965,14 @@ void write_interactions( model *model )
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < indiv->n_interactions[day]; idx++ )
 			{
-				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%li,%i,%i,%li,%i,%i,%i,%li\n",
+				fprintf(output_file ,"%li,%i,%i,%li,%i,%i,%i,%li,%i,%i,%li,%i,%i,%i,%li\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->worker_type,
 					indiv->house_no,
 					indiv->occupation_network,
 					inter->type,
+					inter->network_id,
 					inter->individual->idx,
 					inter->individual->age_group,
 					inter->individual->worker_type,
@@ -1069,6 +1075,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "worker_type_recipient,");
 	fprintf(output_file , "hospital_state_recipient,");
 	fprintf(output_file , "infector_network,");
+	fprintf(output_file , "infector_network_id,");
 	fprintf(output_file , "generation_time,");
 	fprintf(output_file , "ID_source,");
 	fprintf(output_file , "age_group_source,");
@@ -1102,7 +1109,7 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
@@ -1110,6 +1117,7 @@ void write_transmissions( model *model )
 					indiv->worker_type,
 					indiv->hospital_state,
 					infection_event->infector_network,
+					infection_event->network_id,
 					time_infected_infection_event( infection_event ) - infection_event->time_infected_infector,
 					infection_event->infector->idx,
 					infection_event->infector->age_group,

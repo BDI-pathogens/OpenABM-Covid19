@@ -1,7 +1,5 @@
-Package: @R_PKGNAME@
-Version: @VERSION@
-Date: @DATE@
-GitTag: @GIT_TAG@
+Package: OpenABMCovid19
+Version: 0.3
 Title: Agent-based model for modelling the Covid-19
 License: GPL-3 | file LICENSE
 Authors@R:
@@ -17,4 +15,16 @@ Description:
   disease in individuals is modelled. Instantaneous contract-tracing and
   quarantining of contacts is modelled allowing the evaluation of the design and
   configuration of digital contract-tracing mobile phone apps.
+Depends: R6
 Imports: methods
+Collate:
+  OpenABMCovid19.R
+  util.R
+  Parameters.R
+  Network.R
+  Model.R
+  Simulation.R
+Suggests:
+    testthat
+RoxygenNote: 7.1.1
+Encoding: UTF-8

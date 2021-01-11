@@ -153,6 +153,15 @@ double get_param_infectious_rate(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name: 		get_param_sd_infectiousness_multiplier
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+double get_param_sd_infectiousness_multiplier(parameters *params)
+{
+    return params->sd_infectiousness_multiplier;
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_relative_susceptibility
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1012,6 +1021,16 @@ int set_param_infectious_rate(parameters *params, int value)
 }
 
 /*****************************************************************************************
+*  Name:        set_param_sd_infectiousness_multiplier
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_sd_infectiousness_multiplier(parameters *params, int value)
+{
+   params->sd_infectiousness_multiplier = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
 *  Name:        set_param_relative_susceptibility
 *  Description: Sets the value of parameter in array
 ******************************************************************************************/
@@ -1789,6 +1808,13 @@ void add_household_to_ref_households(parameters *params, int idx, int i_0_9, int
     params->REFERENCE_HOUSEHOLDS[idx][7] = i_70_79;
     params->REFERENCE_HOUSEHOLDS[idx][8] = i_80;
     // return TRUE;
+}
+
+int get_household_value(parameters *params, int row, int col) {
+  if (params && row < params->N_REFERENCE_HOUSEHOLDS && col < 9) {
+    return params->REFERENCE_HOUSEHOLDS[row][col];
+  }
+  return 0;
 }
 %}
 

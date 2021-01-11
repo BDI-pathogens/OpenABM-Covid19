@@ -57,12 +57,23 @@ int printf_w( const char* format, ... )
 /*****************************************************************************************
 *  Name:		print_exit
 ******************************************************************************************/
-void print_exit( char *s )
+void print_exit( char *s, ... )
 {
+    /* Don't use malloc() to allocate memory here. Rf_error uses longjmp() so we can't
+     * reliably call free(). Use a temporary 2 KiB local buffer instead. */
+    char buffer[2048] = {0};
+    const size_t n = sizeof(buffer) - 1; /* substract 1 for '\n' */
+
+    /* Parse va_list */
+    va_list ap;
+    va_start(ap, s);
+    vsnprintf(buffer, n, s, ap);
+    va_end(ap);
+
 #ifdef BUILD_RPKG /* CRAN packages may not call exit(); Rf_error uses longjmp() */
-    Rf_error(s);
+    Rf_error("%s",buffer);
 #else
-    printf("%s\n", s );
+    printf("%s\n", buffer);
     fflush(stdout);
     exit(1);
 #endif

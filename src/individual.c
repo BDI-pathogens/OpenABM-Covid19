@@ -70,6 +70,18 @@ void initialize_individual(
 	indiv->disease_progression_predicted[0] = FALSE;
 	indiv->disease_progression_predicted[1] = FALSE;
 	indiv->worker_type = NOT_HEALTHCARE_WORKER;
+
+	float sigma_x = params->sd_infectiousness_multiplier;
+	if ( sigma_x > 0 )
+	{
+		float zeta = log( 1 / sqrt( 1 + pow( sigma_x, 2 ) ) );
+		float sigma = sqrt( log( 1 + pow( sigma_x, 2) ) );
+		indiv->infectiousness_multiplier = gsl_ran_lognormal( rng, zeta, sigma );
+	}
+	else
+	{
+		indiv->infectiousness_multiplier = 1;
+	}
 }
 
 /*****************************************************************************************
@@ -251,8 +263,8 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 {
 	indiv->status        = SUSCEPTIBLE;
 
-	infection_event *infection_event;
-	infection_event = indiv->infection_events;
+	infection_event *infection_event_ptr;
+	infection_event_ptr = indiv->infection_events;
 
 	int jdx;
 	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
@@ -263,13 +275,11 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 	indiv->infection_events->infector_status  = UNKNOWN;
 	indiv->infection_events->infector_network = UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->next =  infection_event;
+	indiv->infection_events->next =  infection_event_ptr;
 	indiv->infection_events->is_case     = FALSE;
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params );
-
-	update_random_interactions( indiv, params );
 }
 
 /*****************************************************************************************

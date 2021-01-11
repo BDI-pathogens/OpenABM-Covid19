@@ -23,13 +23,22 @@
 #define sample_draw_list( x ) ( ( x[ gsl_rng_uniform_int( rng, N_DRAW_LIST ) ] ) )
 #define printf(...) printf_w(__VA_ARGS__)
 
+/* Tell GCC to check printf formats for custom print functions.
+ * https://gcc.gnu.org/onlinedocs/gcc-3.2/gcc/Function-Attributes.html */
+#if __GNUC__ > 3
+  #define _AF_PRINTF( _fmtPos, _valistPos) \
+   __attribute__((format( printf, _fmtPos, _valistPos )))
+#else
+  #define _AF_PRINTF( _fmtPos, _valistPos)
+#endif
+
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-int printf_w( const char*, ... );
+int printf_w( const char*, ... ) _AF_PRINTF(1,2);
 void print_now( char* );
-void print_exit( char* );
+void print_exit( char*, ... ) _AF_PRINTF(1,2);
 void gamma_draw_list( int*, int, double, double );
 void bernoulli_draw_list( int*, int, double );
 void geometric_max_draw_list( int*, int, double, int );

@@ -36,6 +36,7 @@ struct individual{
 
 	int status;
 	double hazard;
+	double infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
@@ -68,6 +69,7 @@ struct individual{
 
 struct interaction{
 	int type;
+	int network_id;
 	int traceable;
 	int manual_traceable;
 	individual *individual;
@@ -88,6 +90,7 @@ struct infection_event{
 	int time_infected_infector;
 	infection_event *next;
 	int is_case;
+	int network_id;
 };
 
 /************************************************************************/
