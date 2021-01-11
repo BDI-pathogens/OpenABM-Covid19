@@ -64,6 +64,8 @@ typedef struct{
 	double sd_time_to_recover;  	// sd time to recovery if hospitalisation is not required (days)
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
+	double mean_time_to_susceptible_after_shift;    // mean time to susceptible after recovered (and after a fixed period of time_to_susceptible_shift)
+	int time_to_susceptible_shift;  // Fixed number of days individuals are immune until waning immunity begins
 
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)

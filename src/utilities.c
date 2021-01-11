@@ -185,6 +185,50 @@ void geometric_max_draw_list(
 }
 
 /*****************************************************************************************
+*  Name:               geometric_draw_list
+*  Description: generates a draw list so that we can efficiently sample
+*                              from a geometric distribution
+*
+*  Arguments:  list:   pointer to draw list to be filled in
+*                              n:              length of draw list
+*                              mean:   mean of  distribution
+******************************************************************************************/
+void geometric_draw_list(
+		int *list,
+		int n,
+		double mean
+)
+{
+		int idx;
+		for( idx = 0; idx < n; idx++ )
+				list[idx] = max( round( gsl_cdf_exponential_Pinv( ( idx + 1.0 )/( n + 1.0 ), mean)), 1 );
+}
+
+/*****************************************************************************************
+*  Name:               shifted_geometric_draw_list
+*  Description: generates a draw list so that we can efficiently sample
+*                              from a geometric distribution, shifted by a certain amount
+*
+*  Arguments:  list:   pointer to draw list to be filled in
+*                              n:              length of draw list
+*                              mean:   mean of  distribution
+*                              shift:  amount by which the distribution is shifted
+******************************************************************************************/
+void shifted_geometric_draw_list(
+		int *list,
+		int n,
+		double mean,
+		int shift
+)
+{
+		geometric_draw_list( list, n, mean );
+
+		int idx;
+		for( idx = 0; idx < n; idx++ )
+				list[idx] = shift + list[idx];
+}
+
+/*****************************************************************************************
 *  Name:		gamma_rate_curve
 *  Description: generates a rate curve for how infectious people are based
 *  				upon a discrete gamma distribution and a multiplier

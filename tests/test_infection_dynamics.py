@@ -337,7 +337,7 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 500000,
+                n_total = 750000,
                 n_seed_infection = 1,
                 end_time = 100
             ),
@@ -351,7 +351,8 @@ class TestClass(object):
                 n_seed_infection = 1,
                 end_time = 100
             )
-        ]
+        ],
+        "test_waning_immunity_multiple_infections": [dict()]
     }
     """
     Test class for checking 
@@ -1146,5 +1147,26 @@ class TestClass(object):
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance) 
 
-    
-      
+    def test_waning_immunity_multiple_infections(self):
+        """
+        Test individuals have multiple infection events when transitions from recovered to
+        susceptible decrease exponentially (with a mean time of 25 days) after 15 days of being
+        fully immune.  
+        """
+
+        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.turn_off_interventions(params, int(params.get_param("end_time")))
+        params.set_param("mean_time_to_susceptible_after_shift", 25)
+        params.set_param("time_to_susceptible_shift", 15)
+        params.set_param("end_time", 100)
+
+        params.write_params(constant.TEST_DATA_FILE)
+        file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        np.testing.assert_equal(np.any(df_indiv.infection_count > 1), True)

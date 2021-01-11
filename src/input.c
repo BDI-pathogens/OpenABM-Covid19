@@ -205,6 +205,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_to_susceptible_after_shift ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_to_susceptible_after_shift\n");};
+
+	check = fscanf(parameter_file, " %i,", &(params->time_to_susceptible_shift ));
+	if( check < 1){ print_exit("Failed to read parameter time_to_susceptible_shift\n"); };
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
