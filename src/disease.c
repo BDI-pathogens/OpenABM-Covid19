@@ -200,12 +200,12 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction = infector->interactions[ model->interaction_day_idx ];
+				hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector->infectiousness_multiplier;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
@@ -246,8 +246,30 @@ void transmit_virus( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		seed_infect_by_idx
+*  Description: infects a new individual from an external source
+*  Returns:		void
+******************************************************************************************/
+short seed_infect_by_idx(
+	model *model,
+	long pdx,
+	float strain_multiplier,
+	int network_id
+)
+{
+	individual *infected = &(model->population[ pdx ]);
+
+	if( infected->status != SUSCEPTIBLE )
+		return FALSE;
+
+	infected->infection_events->strain_multiplier = strain_multiplier;
+	new_infection( model, infected, infected, network_id );
+	return TRUE;
+}
+
+/*****************************************************************************************
 *  Name:		new_infection
-*  Description: infects a new individual
+*  Description: infects a new individual from another individual
 *  Returns:		void
 ******************************************************************************************/
 void new_infection(
@@ -265,6 +287,7 @@ void new_infection(
 	infected->infection_events->infector_status = infector->status;
 	infected->infection_events->infector_hospital_state = infector->hospital_state;
 	infected->infection_events->network_id = network_id;
+	infected->infection_events->strain_multiplier = infector->infection_events->strain_multiplier;
 
 	if( draw < asymp_frac )
 	{

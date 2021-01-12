@@ -357,9 +357,9 @@ class TestClass(object):
                 test_params = dict(
                     n_total = 1e4,
                     n_seed_infection = 50,
-                    end_time = 30,
+                    end_time = 50,
                 ),
-                sd_multipliers = [0, 0.25, 0.5],
+                sd_multipliers = [0, 0.15, 0.3],
             )
         ],
         "test_infectiousness_multiplier_transmissions_increase_with_multiplier": [
@@ -371,6 +371,31 @@ class TestClass(object):
                     sd_infectiousness_multiplier = 0.5,
                 ),
                 n_bins = 5,
+            )
+        ],
+        "test_extra_infections": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 50,
+                    end_time = 30,
+                ),
+                n_extra_infections = 50,
+                t_extra_infections = 10,     
+            )
+        ],
+        "test_multiple_strain_domination": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 5,
+                    end_time = 80,
+                    infectious_rate = 3
+                ),
+                n_extra_infections = 5,
+                t_extra_infections = 20,   
+                t_check_after      = 30, # time after the new strain to check for domination of second strain
+                strain_multiplier  = 2.0
             )
         ],
     }
@@ -1229,3 +1254,88 @@ class TestClass(object):
         is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
 
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
+     
+    def test_extra_infections( self, test_params, n_extra_infections, t_extra_infections ):
+        """
+           Check that we can add extra infections and they infect others
+        """
+     
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+
+        for time in range(t_extra_infections):
+            model.one_time_step()
+   
+        # randomly infect susceptible individual
+        model.write_individual_file()
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ][['ID']].to_numpy()
+        n_susc   = len( idxs )
+        
+        inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
+        for idx in range( n_extra_infections ):
+            inf_id[ idx ] = idxs[ inf_id[ idx ] ]
+        
+        for id in inf_id :
+            np.testing.assert_( model.seed_infect_by_idx(id, strain_multiplier = 2 ), "failed to infect individual" )
+   
+        for time in range(test_params["end_time"] - t_extra_infections):
+            model.one_time_step()
+        
+        # now check the seed infected indviduals are infected at the end
+        model.write_individual_file()
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        for id in inf_id :
+            status = df_indiv[ df_indiv["ID"] == id ].loc[:,["current_status"]].to_numpy()[0,0];
+            np.testing.assert_( status != constant.EVENT_TYPES.SUSCEPTIBLE.value, "seed infected person was not infected")
+
+        # and check they have infected others      
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_seed  = pd.DataFrame( data = { 'ID_source':inf_id })
+        df_seed  = pd.merge( df_seed, df_trans, on = "ID_source", how = "inner" )
+        np.testing.assert_( len( df_seed ) > n_extra_infections, "seed infected people did not infect others")
+        
+    def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, strain_multiplier ):
+        """
+           Check that if a second more transmissible strain is introduced that it will dominate over time
+        """
+     
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+
+        for time in range(t_extra_infections):
+            model.one_time_step()
+   
+        # randomly infect susceptible individual
+        model.write_individual_file()
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
+        n_susc   = len( idxs )
+        
+        inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
+        for idx in range( n_extra_infections ):
+            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_multiplier = strain_multiplier )
+        
+        for time in range(test_params["end_time"] - t_extra_infections):
+            model.one_time_step()
+        
+        # get the new infections for each time step for each strain    
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_n_trans = df_trans.loc[:,["time_infected","strain_multiplier"]]
+        df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_multiplier"], aggfunc=len).fillna(0).reset_index() 
+    
+        # check no new strain infections before it is introduced
+        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_multiplier ].sum(), 0, "new strain cases before seed date" )
+        
+        # check that the new strain dominates after a set period of time
+        n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 1.0 ].sum()
+        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_multiplier ].sum()
+        np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
+
+
