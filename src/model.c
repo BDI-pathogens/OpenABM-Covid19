@@ -1323,6 +1323,7 @@ int one_time_step( model *model )
 	transition_events( model, CRITICAL,          	   &transition_to_critical,         		FALSE );
 	transition_events( model, HOSPITALISED_RECOVERING, &transition_to_hospitalised_recovering,  FALSE );
 	transition_events( model, RECOVERED,         	   &transition_to_recovered,        		 FALSE );
+	transition_events( model, SUSCEPTIBLE,			   &transition_to_susceptible,				FALSE );
 	transition_events( model, DEATH,             	   &transition_to_death,            		 FALSE );
 
 	if( model->params->hospital_on )

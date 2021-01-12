@@ -751,7 +751,7 @@ class TestClass(object):
                     n_total = 100000,
                     n_seed_infection = 4000,
                     end_time = 12,
-                    infectious_rate = 6,
+                    infectious_rate = 7,
                     self_quarantine_fraction = 1.0,
                     quarantine_household_on_symptoms = True,
                     test_on_symptoms = True,

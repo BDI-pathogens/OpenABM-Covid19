@@ -337,7 +337,7 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 500000,
+                n_total = 750000,
                 n_seed_infection = 1,
                 end_time = 100
             ),
@@ -373,6 +373,7 @@ class TestClass(object):
                 n_bins = 5,
             )
         ],
+        "test_waning_immunity_multiple_infections": [dict()]
     }
     """
     Test class for checking 
@@ -1167,8 +1168,6 @@ class TestClass(object):
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance) 
 
-    
-
     def test_infectiousness_multiplier( self, test_params, sd_multipliers ):
         """
            Check that the total infected stays the same up to 0.5 SD.
@@ -1229,3 +1228,32 @@ class TestClass(object):
         is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
 
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
+
+        
+    def test_waning_immunity_multiple_infections(self):
+        """
+        Test individuals have multiple infection events when transitions from recovered to
+        susceptible decrease exponentially (with a mean time of 25 days) after 15 days of being
+        fully immune.  
+        """
+
+        params = utils.get_params_swig()
+        params = utils.turn_off_interventions(params, int(params.get_param("end_time")))
+        params.set_param("mean_time_to_susceptible_after_shift", 25)
+        params.set_param("time_to_susceptible_shift", 15)
+        params.set_param("end_time", 100)
+
+        model  = utils.get_model_swig( params )
+        
+        for time in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans, 
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        np.testing.assert_equal(np.any(df_indiv.infection_count > 1), True)
