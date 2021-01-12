@@ -43,6 +43,7 @@ void transition_to_hospitalised( model*, individual* );
 void transition_to_hospitalised_recovering( model*, individual* );
 void transition_to_critical( model*, individual* );
 void transition_to_recovered( model*, individual* );
+void transition_to_susceptible( model*, individual* );
 void transition_to_death( model*, individual* );
 void transition_one_disese_event( model*, individual*, int, int, int );
 
