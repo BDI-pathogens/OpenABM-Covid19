@@ -337,7 +337,7 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 500000,
+                n_total = 750000,
                 n_seed_infection = 1,
                 end_time = 100
             ),
@@ -1191,9 +1191,7 @@ class TestClass(object):
         N_involved = N_presymptomatics_mild+N_presymptomatics+N_symptomatics_mild+N_symptomatics
         
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
-        np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance) 
-
-    
+        np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance)   
 
     def test_infectiousness_multiplier( self, test_params, sd_multipliers ):
         """
@@ -1255,7 +1253,8 @@ class TestClass(object):
         is_trans_cnt_increasing = avg_trans.diff()[1:] > 0
 
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
-     
+    
+    
     def test_waning_immunity_multiple_infections(self):
         """
         Test individuals have multiple infection events when transitions from recovered to
