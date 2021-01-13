@@ -728,6 +728,18 @@ class Model:
             res = covid19.set_app_users(self.c_model,users,n_users,False)
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
+    
+    def seed_infect_by_idx(self, ID, strain_multiplier = 1, network_id = -1 ):
+        
+        n_total = self._params_obj.get_param("n_total")
+
+        if ( ID < 0 ) | ( ID >= n_total ) :
+            raise ModelParameterException( "ID out of range (0<=ID<n_total)")
+
+        if strain_multiplier < 0 :
+            raise ModelParameterException( "strain_multiplier must be positive")
+
+        return covid19.seed_infect_by_idx( self.c_model, ID, strain_multiplier, network_id );
 
     def get_network_info(self, max_ids= 1000):
            
