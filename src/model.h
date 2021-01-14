@@ -91,6 +91,12 @@ struct model{
 	long n_quarantine_release_events;
 	long n_quarantine_release_events_app_user;
 
+	long n_popualtion_by_age[ N_AGE_GROUPS ];
+	long n_vaccinated_fully;
+	long n_vaccinated_symptoms;
+	long n_vaccinated_fully_by_age[ N_AGE_GROUPS ];
+	long n_vaccinated_symptoms_by_age[ N_AGE_GROUPS ];
+
 	hospital *hospitals;
 };
 
