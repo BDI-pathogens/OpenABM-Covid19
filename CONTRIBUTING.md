@@ -37,7 +37,7 @@ git commit -m "Useful commit message"
 git push origin feature:speed_up_fix
 ```
 
-6. Head to the upstream repository at https://github.com/BDI-pathogens/OpenABM-Covid19 using a browser and a "pull request" button should be available.  Click that and follow the prompts, tagging of or the OpenABM-Covid19 core team in the pull request for review (roberthinch, p-robot, danielmonterocr, brynmathias).  
+6. Head to the upstream repository at https://github.com/BDI-pathogens/OpenABM-Covid19 using a browser and a "pull request" button should be available.  Click that and follow the prompts, tagging of one of the OpenABM-Covid19 core team in the pull request for review (roberthinch, p-robot, danielmonterocr, brynmathias).  
 
 
 **Notes**
