@@ -164,6 +164,13 @@ class TransmissionTypeEnum(enum.Enum):
     _occupation = 1
     _random = 2
 
+class VACCINE_TYPES(enum.Enum):
+    VACCINE_TYPE_FULL = 0
+    VACCINE_TYPE_SYMPTOM = 1
+    
+    @classmethod
+    def has_value(self, value):
+        return value in self._value2member_map_ 
 
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
@@ -782,6 +789,30 @@ class Model:
                 'skip_quarantined'  : skip_quarantined,
                 'daily_fraction'    : daily_fraction
             } )
+       
+    def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
+        """
+        Vaccinates an individual by ID of individual
+        
+        """
+        n_total = self.c_model.params.n_total
+
+        if ( ID < 0 ) | ( ID >= n_total ) :
+            raise ModelParameterException( "ID out of range (0<=ID<n_total)")
+
+        if ( efficacy < 0 ) | ( efficacy > 1 ) :
+            raise ModelParameterException( "efficacy must be between 0 and 1")
+        
+        if time_to_protect < 1 :
+            raise ModelParameterException( "vaccine must take at least one day to take effect" )
+        
+        if vaccine_protection_period <= time_to_protect :
+            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
+    
+        if VACCINE_TYPES.has_value(vaccine_type) == 0 :
+            raise ModelParameterException( "vaccine type must be listed in VACCINE_TYPES" )
+
+        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
         
     def _create(self):
         """

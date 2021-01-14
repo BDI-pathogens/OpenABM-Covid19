@@ -537,6 +537,7 @@ void intervention_test_order( model *model, individual *indiv, int time )
 *  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
 *  				efficacy        - probability the person is successfully vaccinate
 *  				time_to_protect - delay before it takes effect
+*  				vaccine_protection_period - length of time the vaccine provides protection
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -563,7 +564,7 @@ short intervention_vaccinate(
 		add_individual_to_event_list( model, VACCINE_PROTECT, indiv, model->time + time_to_protect );
 		add_individual_to_event_list( model, VACCINE_WANE, indiv, model->time + vaccine_protection_period );
 	} else
-		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, VACCINE_NO_PROTECTION );
+		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, NO_EVENT );
 
 	return TRUE;
 }
@@ -577,6 +578,7 @@ short intervention_vaccinate(
 *  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
 *  				efficacy        - probability the person is successfully vaccinate
 *  				time_to_protect - delay before it takes effect
+*  				vaccine_protection_period - length of time the vaccine provides protection
 *
 *  Returns:		1 if vaccinated 0 if not
 ******************************************************************************************/
