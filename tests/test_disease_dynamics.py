@@ -474,6 +474,7 @@ class TestClass(object):
                 )
             ),
         ],
+        "test_recovered_susceptible_transition_time" : [dict()]
     }
     """
     Test class for checking
@@ -1032,3 +1033,45 @@ class TestClass(object):
             fatality_fraction_weighted,
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
+    
+    def test_recovered_susceptible_transition_time(self):
+        """
+        Test that the recovered-susceptible transition times are as expected.  
+        """
+        
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
+        params.set_param("mean_time_to_susceptible_after_shift", 5)
+        params.set_param("time_to_susceptible_shift", 1)
+        params.set_param("end_time", 200)
+        
+        model  = utils.get_model_swig( params )
+        
+        for time in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
+        
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        
+        # Subset to those 1) ever recovered, 2) have transitioned from recovered->susceptible
+        # at the end of the simulation.  
+        df_sub = df_trans.loc[(df_trans.time_recovered > 0) & \
+            (df_trans.time_susceptible - df_trans.time_recovered >= 0)]
+        
+        obs_recovered_suscept_time_mean = np.mean(df_sub.time_susceptible - df_sub.time_recovered)
+        
+        obs_recovered_suscept_time = np.mean(df_sub.time_susceptible - df_sub.time_recovered)
+        exp_recovered_suscept_time = \
+            params.get_param("mean_time_to_susceptible_after_shift") + \
+            params.get_param("time_to_susceptible_shift")
+        
+        obs_recovered_suscept_time_min = np.min(df_sub.time_susceptible - df_sub.time_recovered)
+        
+        # Minimum time to susecptible (after time_to_susceptible_shift) is 1 day
+        np.testing.assert_equal(obs_recovered_suscept_time_min, \
+            params.get_param("time_to_susceptible_shift") + 1)
+        
+        np.testing.assert_almost_equal(obs_recovered_suscept_time_mean, exp_recovered_suscept_time, 
+            decimal = 1)

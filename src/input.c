@@ -208,6 +208,12 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->sd_time_to_death));
 	if( check < 1){ print_exit("Failed to read parameter sd_time_to_death\n"); };
 
+	check = fscanf(parameter_file, " %lf,", &(params->mean_time_to_susceptible_after_shift ));
+	if( check < 1){ print_exit("Failed to read parameter mean_time_to_susceptible_after_shift\n");};
+
+	check = fscanf(parameter_file, " %i,", &(params->time_to_susceptible_shift ));
+	if( check < 1){ print_exit("Failed to read parameter time_to_susceptible_shift\n"); };
+
 	for( i = 0; i < N_AGE_GROUPS; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->fraction_asymptomatic[i]));
@@ -1093,7 +1099,8 @@ void write_transmissions( model *model )
 	fprintf(output_file , "time_death,");
 	fprintf(output_file , "time_recovered,");
 	fprintf(output_file , "time_susceptible,");
-	fprintf(output_file , "is_case\n");
+	fprintf(output_file , "is_case,");
+	fprintf(output_file , "strain_multiplier\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -1103,7 +1110,7 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.3f\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
@@ -1135,7 +1142,8 @@ void write_transmissions( model *model )
 					infection_event->times[DEATH],
 					infection_event->times[RECOVERED],
 					infection_event->times[SUSCEPTIBLE],
-					infection_event->is_case
+					infection_event->is_case,
+					infection_event->strain_multiplier
 				);
 			infection_event = infection_event->next;
 		}
