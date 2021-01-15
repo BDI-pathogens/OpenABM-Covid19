@@ -977,6 +977,32 @@ class TestClass(object):
                 efficacy = 0.75,
                 time_to_protect = 7
             )
+        ],
+        "test_vaccinate_wane": [
+            dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 7
+                ),
+                n_to_vaccinate = 1000,
+                n_to_seed = 100,
+                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value,
+                vaccine_protection_period = 14,
+            ),
+            dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 7
+                ),
+                n_to_vaccinate = 1000,
+                n_to_seed = 100,
+                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value,
+                vaccine_protection_period = 21
+            )
         ]
     }
 
@@ -2483,6 +2509,8 @@ class TestClass(object):
     def test_vaccinate_efficacy(self, test_params, n_to_vaccinate, n_to_seed, efficacy, time_to_protect ):
         """
         Check the efficacy of the vaccine
+        Make sure the correct proportion of people gain protection and that when the epidemic is
+        allowed to grow out of control those vaccinated without effect can be infected     
         """
         
         vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value
@@ -2508,7 +2536,7 @@ class TestClass(object):
         model.write_individual_file()
         df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
-        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VACCINE_STATUS.NO_VACCINE.value]
+        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VACCINE_STATUS.NO_VACCINE.value ]
         
         n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_NO_PROTECTION.value ] )
         n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_PROTECTED_FULLY.value ] )
@@ -2538,4 +2566,73 @@ class TestClass(object):
         np.testing.assert_equal( n_resp_inf, 0, "vaccinated people who responded became infected")
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
         
+    
+    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, vaccine_type, vaccine_protection_period ):
+        """
+        Check the vaccine wanes over time
+        Make sure that people are protected before it wanes but can be infected after it wanes
+        """
+        
+        efficacy = 1.0
+        time_to_protect = 1
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        n_total        = params.get_param( "n_total" )
+        idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
+
+        # vaccinate people at random
+        for idx in idx_vaccinated :
+            model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+
+        # let the vaccine take effect
+        for time in range(time_to_protect) :
+            model.one_time_step()
+        
+        # seed an infection
+        idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
+        for idx in idx_seed :
+            model.seed_infect_by_idx( idx )  
+
+        # let the go through the whole period it is effective and let it wane
+        for time in range(vaccine_protection_period) :
+            model.one_time_step()
+    
+        # check the correct number of people have had a response to the vaccine
+        model.write_individual_file()
+        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
+        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VACCINE_STATUS.NO_VACCINE.value ]
+        
+        n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_NO_PROTECTION.value ] )
+        n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_PROTECTED_FULLY.value ] )
+        n_waned       = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_WANED.value ] )
+        
+        np.testing.assert_equal( n_response, 0, "people still covered by the vaccine (with protection)")
+        np.testing.assert_equal( n_no_response, 0, "people still covered by the vaccine (without protection)")
+        np.testing.assert_equal( n_waned, n_to_vaccinate, "the vaccine for all those vaccinated should have waned")      
+       
+        # now go to the end of of the pandemic
+        for time in range(  test_params[ "end_time" ] - time_to_protect - vaccine_protection_period) :
+            model.one_time_step()
+        
+        # now get all those who have been infected
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
       
+        df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
+        df_vac_inf = df_vac_inf.loc[:,["time_infected", "time_asymptomatic"]]
+        
+        # if vaccine just protects against symptoms, remove the asymptotic infections
+        if vaccine_type == VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value :
+            df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
+
+        time_wane = time_to_protect + vaccine_protection_period
+        n_inf_protect = len( df_vac_inf[ df_vac_inf[ "time_infected" ] < time_wane ] )
+        n_inf_wane    = len( df_vac_inf[ df_vac_inf[ "time_infected" ] >= time_wane ] )
+
+        np.testing.assert_equal( n_inf_protect, 0, "vaccinated people being infected before the vaccine has waned")
+        np.testing.assert_( n_inf_wane > 0, "vaccinated people being infected before the vaccine has waned")

@@ -263,6 +263,9 @@ void set_vaccine_status( individual* indiv, short current_status, short next_sta
 		if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
 			indiv->status = VACCINE_PROTECT;
 	}
+
+	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT ) )
+		indiv->status = SUSCEPTIBLE;
 }
 
 /*****************************************************************************************
