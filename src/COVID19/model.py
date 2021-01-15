@@ -171,6 +171,13 @@ class VACCINE_TYPES(enum.Enum):
     @classmethod
     def has_value(self, value):
         return value in self._value2member_map_ 
+    
+class VACCINE_STATUS(enum.Enum):
+    NO_VACCINE = 0
+    VACCINE_NO_PROTECTION = 1
+    VACCINE_PROTECTED_FULLY = 2
+    VACCINE_PROTECTED_SYMPTOMS = 3
+    VACCINE_WANED = 4
 
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
