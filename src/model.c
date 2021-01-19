@@ -62,6 +62,7 @@ model* new_model( parameters *params )
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
+	set_up_counters( model_ptr );
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
@@ -78,7 +79,6 @@ model* new_model( parameters *params )
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
 	set_up_risk_scores( model_ptr );
-	set_up_counters( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
