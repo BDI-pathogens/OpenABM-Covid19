@@ -13,7 +13,6 @@ LOGGER = logging.getLogger(__name__)
 class ModelParameterException(Exception):
     pass
 
-
 class ParameterException(Exception):
     pass
 
@@ -192,7 +191,54 @@ def _get_base_param_from_enum(param):
             break
     return base_name, enum_val
 
-
+class vaccine_schedule(object):
+    def __init__(
+        self,
+        frac_0_9   = 0,
+        frac_10_19 = 0,
+        frac_20_29 = 0,
+        frac_30_39 = 0,
+        frac_40_49 = 0,
+        frac_50_59 = 0,
+        frac_60_69 = 0,
+        frac_70_79 = 0,
+        frac_80    = 0,
+        vaccine_type    = 0,
+        efficacy        = 1.0,
+        time_to_protect = 15,
+        vaccine_protection_period = 365
+    ):
+        fraction_to_vaccinate = [
+            frac_0_9,   frac_10_19, frac_20_29, frac_30_39, frac_40_49,
+            frac_50_59, frac_60_69, frac_70_79, frac_80,
+        ]
+    
+        self.c_fraction_to_vaccinate = covid19.doubleArray( 9 )
+        for age in range( 9 ) :
+            self.c_fraction_to_vaccinate[ age ] = fraction_to_vaccinate[ age ]
+        
+        self.vaccine_type    = vaccine_type
+        self.efficacy        = efficacy
+        self.time_to_protect = time_to_protect
+        self.vaccine_protection_period = vaccine_protection_period
+        
+        self.c_total_vaccinated = covid19.longArray( 9 )
+        for age in range( 9 ) :
+            self.c_total_vaccinated[ age ] = 0
+            
+    def total_vaccinated (self):    
+        total_vaccinated   = [0,0,0,0,0,0,0,0,0]
+        for age in range( 9 ) :
+            total_vaccinated[ age ] = self.c_total_vaccinated[ age ]
+        return total_vaccinated
+    
+    def fraction_vaccinated (self):    
+        fraction_vaccinated   = [0,0,0,0,0,0,0,0,0]
+        for age in range( 9 ) :
+            fraction_vaccinated[ age ] = self.c_fraction_vaccinated[ age ]
+        return fractiopn_vaccinated
+            
+        
 class Parameters(object):
     def __init__(
             self,
@@ -820,7 +866,22 @@ class Model:
             raise ModelParameterException( "vaccine type must be listed in VACCINE_TYPES" )
 
         return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
-        
+
+    def vaccinate_schedule(self, schedule ):
+
+        if isinstance( schedule, vaccine_schedule ) == False :
+            ModelException( "argument vaccine_schedule must be an object of type vaccine_schedule")
+            
+        return covid19.intervention_vaccinate_age_group( 
+            self.c_model, 
+            schedule.c_fraction_to_vaccinate, 
+            schedule.vaccine_type,
+            schedule.efficacy,
+            schedule.time_to_protect,
+            schedule.vaccine_protection_period,
+            schedule.c_total_vaccinated
+        )   
+
     def _create(self):
         """
         Call C function new_model (renamed create_model)
