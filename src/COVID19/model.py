@@ -232,11 +232,11 @@ class vaccine_schedule(object):
             total_vaccinated[ age ] = self.c_total_vaccinated[ age ]
         return total_vaccinated
     
-    def fraction_vaccinated (self):    
-        fraction_vaccinated   = [0,0,0,0,0,0,0,0,0]
+    def fraction_to_vaccinate (self):    
+        fraction_to_vaccinate   = [0,0,0,0,0,0,0,0,0]
         for age in range( 9 ) :
-            fraction_vaccinated[ age ] = self.c_fraction_vaccinated[ age ]
-        return fractiopn_vaccinated
+            fraction_to_vaccinate[ age ] = self.c_fraction_to_vaccinate[ age ]
+        return fraction_to_vaccinate
             
         
 class Parameters(object):

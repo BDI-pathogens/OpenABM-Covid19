@@ -2693,12 +2693,16 @@ class TestClass(object):
             time_to_protect = time_to_protect,
             vaccine_protection_period = 365
         )
+        
+        # check the fraction to vaccinate is correct on the schedule object
+        for age in range( constant.N_AGE_GROUPS ) :
+            np.testing.assert_equal( fraction_to_vaccinate[age], schedule.fraction_to_vaccinate()[age], "schedule has not accpeted fraction to vaccinate")
            
         # vaccinate for the required number of days
         for day in range( days_to_vaccinate ) :
             model.vaccinate_schedule( schedule )
             model.one_time_step()
-            
+                        
         for time in range(time_to_protect) :
             model.one_time_step() 
               
