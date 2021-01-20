@@ -75,7 +75,7 @@ void assign_household_distribution( model *model, demographic_household_table *d
 			indiv = &(model->population[pdx]);
 			set_age_group( indiv, model->params, age );
 			set_house_no( indiv, hdx );
-			model->n_popualtion_by_age[age]++;
+			model->n_population_by_age[age]++;
 
 			housesize++;
 			pdx++;

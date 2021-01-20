@@ -163,7 +163,7 @@ class TransmissionTypeEnum(enum.Enum):
     _occupation = 1
     _random = 2
 
-class VACCINE_TYPES(enum.Enum):
+class VaccineTypesEnum(enum.Enum):
     VACCINE_TYPE_FULL = 0
     VACCINE_TYPE_SYMPTOM = 1
     
@@ -171,7 +171,7 @@ class VACCINE_TYPES(enum.Enum):
     def has_value(self, value):
         return value in self._value2member_map_ 
     
-class VACCINE_STATUS(enum.Enum):
+class VaccineStatusEnum(enum.Enum):
     NO_VACCINE = 0
     VACCINE_NO_PROTECTION = 1
     VACCINE_PROTECTED_FULLY = 2
@@ -191,7 +191,7 @@ def _get_base_param_from_enum(param):
             break
     return base_name, enum_val
 
-class vaccine_schedule(object):
+class VaccineSchedule(object):
     def __init__(
         self,
         frac_0_9   = 0,
@@ -213,29 +213,35 @@ class vaccine_schedule(object):
             frac_50_59, frac_60_69, frac_70_79, frac_80,
         ]
     
-        self.c_fraction_to_vaccinate = covid19.doubleArray( 9 )
-        for age in range( 9 ) :
-            self.c_fraction_to_vaccinate[ age ] = fraction_to_vaccinate[ age ]
+        self.c_fraction_to_vaccinate = covid19.doubleArray( len(AgeGroupEnum)  )
+        for age in AgeGroupEnum:
+            self.c_fraction_to_vaccinate[ age.value ] = fraction_to_vaccinate[ age.value ]
         
         self.vaccine_type    = vaccine_type
         self.efficacy        = efficacy
         self.time_to_protect = time_to_protect
         self.vaccine_protection_period = vaccine_protection_period
         
-        self.c_total_vaccinated = covid19.longArray( 9 )
-        for age in range( 9 ) :
-            self.c_total_vaccinated[ age ] = 0
+        self.c_total_vaccinated = covid19.longArray( len(AgeGroupEnum)  )
+        for age in AgeGroupEnum:
+            self.c_total_vaccinated[ age.value ] = 0
             
     def total_vaccinated (self):    
-        total_vaccinated   = [0,0,0,0,0,0,0,0,0]
-        for age in range( 9 ) :
-            total_vaccinated[ age ] = self.c_total_vaccinated[ age ]
+        
+        total_vaccinated = [0]*len(AgeGroupEnum) 
+
+        for age in AgeGroupEnum:
+            total_vaccinated[ age.value ] = self.c_total_vaccinated[ age.value ]
+            
         return total_vaccinated
     
     def fraction_to_vaccinate (self):    
-        fraction_to_vaccinate   = [0,0,0,0,0,0,0,0,0]
-        for age in range( 9 ) :
-            fraction_to_vaccinate[ age ] = self.c_fraction_to_vaccinate[ age ]
+        
+        fraction_to_vaccinate = [0]*len(AgeGroupEnum) 
+
+        for age in AgeGroupEnum:
+            fraction_to_vaccinate[ age.value ] = self.c_fraction_to_vaccinate[age.value]
+     
         return fraction_to_vaccinate
             
         
@@ -862,15 +868,15 @@ class Model:
         if vaccine_protection_period <= time_to_protect :
             raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
     
-        if VACCINE_TYPES.has_value(vaccine_type) == 0 :
-            raise ModelParameterException( "vaccine type must be listed in VACCINE_TYPES" )
+        if not VaccineTypesEnum.has_value(vaccine_type) :
+            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
 
         return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
 
     def vaccinate_schedule(self, schedule ):
 
-        if isinstance( schedule, vaccine_schedule ) == False :
-            ModelException( "argument vaccine_schedule must be an object of type vaccine_schedule")
+        if not isinstance( schedule, VaccineSchedule ) :
+            ModelException( "argument VaccineSchedule must be an object of type VaccineSchedule")
             
         return covid19.intervention_vaccinate_age_group( 
             self.c_model, 

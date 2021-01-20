@@ -553,6 +553,9 @@ short intervention_vaccinate(
 	if( indiv->vaccine_status != NO_VACCINE )
 		return FALSE;
 
+	if( ( indiv->status == DEATH ) | is_in_hospital( indiv ) )
+		return FALSE;
+
 	if( gsl_ran_bernoulli( rng, efficacy ) )
 	{
 		if( vaccine_type == VACCINE_TYPE_FULL )
@@ -626,7 +629,7 @@ long intervention_vaccinate_age_group(
 	total_vaccinated  = 0;
 	for( age = 0; age < N_AGE_GROUPS; age++ )
 	{
-		n_to_vaccinate[ age ] = round( model->n_popualtion_by_age[ age ] * fractions[ age ] );
+		n_to_vaccinate[ age ] = round( model->n_population_by_age[ age ] * fractions[ age ] );
 		n_vaccinated[ age ]   = 0;
 		total_to_vaccinate   += n_to_vaccinate[ age ];
 	}
@@ -641,9 +644,11 @@ long intervention_vaccinate_age_group(
 		if( indiv->vaccine_status != NO_VACCINE )
 			continue;
 
-		intervention_vaccinate( model, indiv, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
-		n_vaccinated[ age ]++;
-		total_vaccinated++;
+		if( intervention_vaccinate( model, indiv, vaccine_type, efficacy, time_to_protect, vaccine_protection_period ) )
+		{
+			n_vaccinated[ age ]++;
+			total_vaccinated++;
+		}
 
 		if( total_to_vaccinate == total_vaccinated )
 			break;

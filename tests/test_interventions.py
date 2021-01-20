@@ -22,7 +22,7 @@ from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import OccupationNetworkEnum, VACCINE_TYPES, VACCINE_STATUS, vaccine_schedule
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule
 from . import constant
 from . import utilities as utils
 import covid19
@@ -936,7 +936,7 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 100,
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
                 time_to_protect = 14
             ),
             dict(
@@ -948,7 +948,7 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 100,
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
                 time_to_protect = 14
             )
         ],
@@ -988,7 +988,7 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 1000,
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
                 vaccine_protection_period = 14,
             ),
             dict(
@@ -1000,7 +1000,7 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 1000,
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
                 vaccine_protection_period = 21
             )
         ],
@@ -1013,7 +1013,7 @@ class TestClass(object):
                     infectious_rate  = 7
                 ),
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 1
             ),
@@ -1025,7 +1025,7 @@ class TestClass(object):
                     infectious_rate  = 7
                 ),
                 n_to_seed = 100,
-                vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 10
             )
@@ -2524,7 +2524,7 @@ class TestClass(object):
 
         # check that vaccinated people have not been infected or did not get symptoms (depending on vaccine type )
         df_vac_inf = pd.merge( df_vaccinated, df_trans_post, left_on = "ID", right_on = "ID_recipient", how = "inner")
-        if vaccine_type == VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value :
+        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
             df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
         np.testing.assert_equal( len( df_vac_inf.index ), 0, "vaccinated people have been effected")
             
@@ -2539,7 +2539,7 @@ class TestClass(object):
         allowed to grow out of control those vaccinated without effect can be infected     
         """
         
-        vaccine_type = VACCINE_TYPES.VACCINE_TYPE_FULL.value
+        vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value
         vaccine_protection_period = test_params[ "end_time" ] + 1
         
         params = utils.get_params_swig()
@@ -2562,10 +2562,10 @@ class TestClass(object):
         model.write_individual_file()
         df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
-        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VACCINE_STATUS.NO_VACCINE.value ]
+        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
-        n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_NO_PROTECTION.value ] )
-        n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_PROTECTED_FULLY.value ] )
+        n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
+        n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
         np.testing.assert_equal( n_response + n_no_response, n_to_vaccinate, "the wrong total number of people were vaccinated")
         
         sample_eff = n_response / ( n_response +  n_no_response )
@@ -2586,8 +2586,8 @@ class TestClass(object):
         df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
         df_vac_inf = df_vac_inf.loc[:,["vaccine_status"]]
         
-        n_no_resp_inf = len( df_vac_inf[ df_vac_inf[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_NO_PROTECTION.value ] )
-        n_resp_inf    = len( df_vac_inf[ df_vac_inf[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_PROTECTED_FULLY.value ] )
+        n_no_resp_inf = len( df_vac_inf[ df_vac_inf[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
+        n_resp_inf    = len( df_vac_inf[ df_vac_inf[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
         
         np.testing.assert_equal( n_resp_inf, 0, "vaccinated people who responded became infected")
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
@@ -2631,11 +2631,11 @@ class TestClass(object):
         model.write_individual_file()
         df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
-        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VACCINE_STATUS.NO_VACCINE.value ]
+        df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
-        n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_NO_PROTECTION.value ] )
-        n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_PROTECTED_FULLY.value ] )
-        n_waned       = len( df_vac[ df_vac[ "vaccine_status" ] == VACCINE_STATUS.VACCINE_WANED.value ] )
+        n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
+        n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
+        n_waned       = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED.value ] )
         
         np.testing.assert_equal( n_response, 0, "people still covered by the vaccine (with protection)")
         np.testing.assert_equal( n_no_response, 0, "people still covered by the vaccine (without protection)")
@@ -2653,7 +2653,7 @@ class TestClass(object):
         df_vac_inf = df_vac_inf.loc[:,["time_infected", "time_asymptomatic"]]
         
         # if vaccine just protects against symptoms, remove the asymptotic infections
-        if vaccine_type == VACCINE_TYPES.VACCINE_TYPE_SYMPTOM.value :
+        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
             df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
 
         time_wane = time_to_protect + vaccine_protection_period
@@ -2678,7 +2678,7 @@ class TestClass(object):
         n_total         = params.get_param( "n_total" )
         end_time        = params.get_param( "end_time" )
         
-        schedule = vaccine_schedule(
+        schedule = VaccineSchedule(
             frac_0_9   = fraction_to_vaccinate[0],
             frac_10_19 = fraction_to_vaccinate[1],
             frac_20_29 = fraction_to_vaccinate[2],

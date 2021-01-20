@@ -272,7 +272,7 @@ void set_up_counters( model *model ){
 	model->n_vaccinated_symptoms = 0;
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 	{
-		model->n_popualtion_by_age[ idx ] = 0;
+		model->n_population_by_age[ idx ] = 0;
 		model->n_vaccinated_fully_by_age[ idx ] = 0;
 		model->n_vaccinated_symptoms_by_age[ idx ] = 0;
 	}
