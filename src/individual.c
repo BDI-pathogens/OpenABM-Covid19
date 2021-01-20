@@ -396,7 +396,7 @@ void print_individual( model *model, long idx)
         if( idx >= model->params->n_total )
         {
             printf("idx higher than n_total; individual does not exist");
-            fflush(stdout);
+            fflush_stdout();
             return;
         }
         
@@ -428,5 +428,5 @@ void print_individual( model *model, long idx)
         }else{
             printf("indiv->index_trace_token: non-NULL\n");
         }
-	fflush(stdout);
+	fflush_stdout();
 }

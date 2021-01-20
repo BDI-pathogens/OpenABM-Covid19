@@ -85,7 +85,17 @@ void print_exit( char *s, ... )
 void print_now( char *s )
 {
     printf_w("%s\n", s );
+    fflush_stdout();
+}
+
+/*****************************************************************************************
+*  Name:		fflush_stdout
+******************************************************************************************/
+void fflush_stdout()
+{
+#ifndef BUILD_RPKG /* Referencing `stdout` can raise a NOTE with `R CMD check` */
     fflush(stdout);
+#endif
 }
 
 /*****************************************************************************************

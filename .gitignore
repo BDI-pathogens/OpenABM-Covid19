@@ -1,6 +1,13 @@
 # Mac-related files
 .DS_Store
 
+# File associated with configure
+config.log
+config.status
+configure
+src/Makevars
+autom4te.cache/
+
 # File associated with compilation/linking
 src/**/*.o
 src/**/*.exe
