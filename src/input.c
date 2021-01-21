@@ -755,7 +755,8 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"app_user,");
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count,");
-	fprintf(individual_output_file,"infectiousness_multiplier");
+	fprintf(individual_output_file,"infectiousness_multiplier,");
+	fprintf(individual_output_file,"vaccine_status");
 	fprintf(individual_output_file,"\n");
 
 	// Loop through all individuals in the simulation
@@ -773,7 +774,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -787,7 +788,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->app_user,
 			indiv->random_interactions,
 			infection_count,
-			indiv->infectiousness_multiplier
+			indiv->infectiousness_multiplier,
+			indiv->vaccine_status
 			);
 	}
 	fclose(individual_output_file);

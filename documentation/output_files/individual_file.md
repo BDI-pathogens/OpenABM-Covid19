@@ -14,3 +14,5 @@
 | `app_user` | Is this individual an app user  (1=Yes; 0=No) |
 | `mean_interactions` | Number of random daily interactions of the individual (the random_interactions attribute of the individual struct) |
 | `infection_count` | Number of times this individual has been infected with SARS-CoV-2 |
+| `infectiousness_multiplier` | An individual multiplier of how infectious somebody is | 
+| `vaccine_status` | The current vaccine status of the individual (0 = none; 1 = not protect; 2 = protected fully; 3 = protected from symptoms; 4 = waned )|

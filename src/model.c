@@ -62,6 +62,7 @@ model* new_model( parameters *params )
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
+	set_up_counters( model_ptr );
 	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
@@ -78,7 +79,6 @@ model* new_model( parameters *params )
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
 	set_up_risk_scores( model_ptr );
-	set_up_counters( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
 
@@ -255,6 +255,8 @@ void set_up_networks( model *model )
 ******************************************************************************************/
 void set_up_counters( model *model ){
 	
+	int idx;
+
 	model->n_quarantine_infected = 0;
 	model->n_quarantine_recovered = 0;
 	model->n_quarantine_app_user = 0;
@@ -265,6 +267,15 @@ void set_up_counters( model *model ){
 	model->n_quarantine_events_app_user = 0;
 	model->n_quarantine_release_events = 0;
 	model->n_quarantine_release_events_app_user = 0;
+
+	model->n_vaccinated_fully = 0;
+	model->n_vaccinated_symptoms = 0;
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	{
+		model->n_population_by_age[ idx ] = 0;
+		model->n_vaccinated_fully_by_age[ idx ] = 0;
+		model->n_vaccinated_symptoms_by_age[ idx ] = 0;
+	}
 }
 
 /*****************************************************************************************
@@ -1351,6 +1362,9 @@ int one_time_step( model *model )
 		transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
 	}
+
+	transition_events( model, VACCINE_PROTECT, &intervention_vaccine_protect, TRUE );
+	transition_events( model, VACCINE_WANE,    &intervention_vaccine_wane, TRUE );
 
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );

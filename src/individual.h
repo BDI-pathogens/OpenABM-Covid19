@@ -65,6 +65,9 @@ struct individual{
 
 	int worker_type;
 
+	short vaccine_status;
+	short vaccine_status_next;
+	event *vaccine_wane_event;
 };
 
 struct interaction{
@@ -105,6 +108,8 @@ struct infection_event{
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
 #define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
+#define vaccine_protected( indiv ) ( (indiv->vaccine_status == VACCINE_PROTECTED_FULLY) || (indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS ) )
+
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
@@ -126,6 +131,8 @@ void set_general_admission( individual*, parameters*, int );
 void set_icu_admission( individual*, parameters*, int );
 void set_mortuary_admission( individual*, parameters*, int );
 void set_discharged( individual*, parameters*, int );
+void set_vaccine_status( individual*, short, short );
+void transition_vaccine_status( individual* );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );
 void destroy_individual( individual* );
