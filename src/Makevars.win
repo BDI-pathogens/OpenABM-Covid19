@@ -1,3 +1,4 @@
-# Build flags for 'R CMD INSTALL'
-PKG_LIBS=   -LC:/gsl$(R_ARCH)/lib -l:libgsl.a -l:libgslcblas.a -lm
-PKG_CFLAGS= -IC:/gsl$(R_ARCH)/include -DBUILD_RPKG
+# To comply with CRAN's build-infrastructure, environment variable LIB_GSL
+# should point to a Windows GNU GSL install.
+PKG_CFLAGS= -I$(LIB_GSL)/include -DBUILD_RPKG
+PKG_LIBS=-L$(LIB_GSL)/lib -lgsl -lgslcblas -lm
