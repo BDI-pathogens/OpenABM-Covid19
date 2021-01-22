@@ -8,6 +8,7 @@
 #include "constant.h"
 #include "input.h"
 #include "individual.h"
+#include "interventions.h"
 #include "utilities.h"
 #include "disease.h"
 #include "network.h"
@@ -39,12 +40,15 @@
 %nodefaultdtor interaction_block;
 %nodefaultctor incomplete_gamma_p_params;
 %nodefaultdtor incomplete_gamma_p_params;
+%nodefaultdtor trace_token;
+%nodefaultdtor trace_token;
 
 %include "model.h"
 %include "params.h"
 %include "constant.h"
 %include "input.h"
 %include "individual.h"
+%include "interventions.h"
 %include "utilities.h"
 %include "disease.h"
 %include "network.h"

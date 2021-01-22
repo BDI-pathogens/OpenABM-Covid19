@@ -36,7 +36,7 @@ void destroy_risk_scores( model* );
 void update_intervention_policy( model*, int );
 
 void set_up_trace_tokens( model* );
-trace_token* new_trace_token( model*, individual*, int );
+trace_token* create_trace_token( model*, individual*, int );
 trace_token* index_trace_token( model*, individual* );
 void remove_one_trace_token( model*, trace_token* );
 void remove_traced_on_this_trace( model*, individual* );
@@ -51,6 +51,12 @@ void intervention_test_result( model*, individual* );
 void intervention_manual_trace( model *, individual *);
 void intervention_notify_contacts( model*, individual*, int, trace_token*, int );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
+
+short intervention_vaccinate( model*, individual*, short, double, short, short );
+short intervention_vaccinate_by_idx( model*, long, short, double, short, short );
+long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], short, double, short, short, long[ N_AGE_GROUPS ] );
+void intervention_vaccine_protect( model*, individual* );
+void intervention_vaccine_wane( model*, individual* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );

@@ -41,6 +41,7 @@ typedef struct{
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
+	double sd_infectiousness_multiplier;         // sd of the lognormal used to vary the infectiousness of an individual
 
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
 	double adjusted_susceptibility[N_AGE_GROUPS]; // adjusted susceptibility of an age group (normalising for interactions)
@@ -64,6 +65,8 @@ typedef struct{
 	double sd_time_to_recover;  	// sd time to recovery if hospitalisation is not required (days)
 	double mean_time_to_death;		// mean time to death after hospital
 	double sd_time_to_death;		// sd time to death after hospital
+	double mean_time_to_susceptible_after_shift;    // mean time to susceptible after recovered (and after a fixed period of time_to_susceptible_shift)
+	int time_to_susceptible_shift;  // Fixed number of days individuals are immune until waning immunity begins
 
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)

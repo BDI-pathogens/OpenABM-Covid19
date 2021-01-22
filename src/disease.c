@@ -49,6 +49,7 @@ void set_up_transition_times( model *model )
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
 	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
+	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, params->mean_time_to_susceptible_after_shift, params->time_to_susceptible_shift );
 
 }
 
@@ -175,7 +176,7 @@ void transmit_virus_by_type(
 {
 	long idx, jdx, n_infected;
 	int day, n_interaction, t_infect;
-	double hazard_rate;
+	double hazard_rate, infector_mult;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
@@ -199,13 +200,14 @@ void transmit_virus_by_type(
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			if( n_interaction > 0 )
 			{
-				interaction = infector->interactions[ model->interaction_day_idx ];
+				interaction   = infector->interactions[ model->interaction_day_idx ];
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						hazard_rate = list->infectious_curve[interaction->type][ t_infect - 1 ];
+						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
                         interaction->individual->hazard -= hazard_rate;
 
 						if( interaction->individual->hazard < 0 )
@@ -246,8 +248,30 @@ void transmit_virus( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		seed_infect_by_idx
+*  Description: infects a new individual from an external source
+*  Returns:		void
+******************************************************************************************/
+short seed_infect_by_idx(
+	model *model,
+	long pdx,
+	float strain_multiplier,
+	int network_id
+)
+{
+	individual *infected = &(model->population[ pdx ]);
+
+	if( infected->status != SUSCEPTIBLE )
+		return FALSE;
+
+	infected->infection_events->strain_multiplier = strain_multiplier;
+	new_infection( model, infected, infected, network_id );
+	return TRUE;
+}
+
+/*****************************************************************************************
 *  Name:		new_infection
-*  Description: infects a new individual
+*  Description: infects a new individual from another individual
 *  Returns:		void
 ******************************************************************************************/
 void new_infection(
@@ -261,10 +285,14 @@ void new_infection(
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
 
+	if( vaccine_protected( infected ) )
+		asymp_frac = 1;
+
 	infected->infection_events->infector = infector;
 	infected->infection_events->infector_status = infector->status;
 	infected->infection_events->infector_hospital_state = infector->hospital_state;
 	infected->infection_events->network_id = network_id;
+	infected->infection_events->strain_multiplier = infector->infection_events->strain_multiplier;
 
 	if( draw < asymp_frac )
 	{
@@ -301,7 +329,7 @@ void transition_one_disese_event(
 {
 	indiv->status           = from;
 
-	if( from != NO_EVENT )
+	if( (from != NO_EVENT) | (from != SUSCEPTIBLE))
 		indiv->infection_events->times[from] = model->time;
 	if( indiv->current_disease_event != NULL )
 		remove_event_from_event_list( model, indiv->current_disease_event );
@@ -464,9 +492,21 @@ void transition_to_recovered( model *model, individual *indiv )
 		}
 	}
 
-	transition_one_disese_event( model, indiv, RECOVERED, NO_EVENT, NO_EDGE );
+	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 	set_recovered( indiv, model->params, model->time, model);
 }
+
+/*****************************************************************************************
+*  Name:               transition_to_susceptible
+*  Description: Transitions recovered to susceptible
+*  Returns:            void
+******************************************************************************************/
+void transition_to_susceptible( model *model, individual *indiv )
+{
+       transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
+       set_susceptible( indiv, model->params, model->time );
+}
+
 
 /*****************************************************************************************
 *  Name:		transition_to_death
@@ -477,7 +517,7 @@ void transition_to_death( model *model, individual *indiv )
 {
 	if( model->params->hospital_on )
 	{
-		if( indiv->hospital_state != NOT_IN_HOSPITAL )
+		if( !not_in_hospital(indiv) )
 		{
 			remove_if_in_waiting_list( indiv, &model->hospitals[indiv->hospital_idx] );
 			transition_one_hospital_event( model, indiv, indiv->hospital_state, MORTUARY, NO_EDGE );

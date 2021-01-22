@@ -36,12 +36,14 @@ void transmit_virus_by_type( model*, int );
 
 // progression of the disease
 void new_infection( model*, individual*, individual*, int );
+short seed_infect_by_idx( model*, long, float, int );
 void transition_to_symptomatic( model*, individual* );
 void transition_to_symptomatic_mild( model*, individual* );
 void transition_to_hospitalised( model*, individual* );
 void transition_to_hospitalised_recovering( model*, individual* );
 void transition_to_critical( model*, individual* );
 void transition_to_recovered( model*, individual* );
+void transition_to_susceptible( model*, individual* );
 void transition_to_death( model*, individual* );
 void transition_one_disese_event( model*, individual*, int, int, int );
 

@@ -70,6 +70,18 @@ void initialize_individual(
 	indiv->disease_progression_predicted[0] = FALSE;
 	indiv->disease_progression_predicted[1] = FALSE;
 	indiv->worker_type = NOT_HEALTHCARE_WORKER;
+
+	float sigma_x = params->sd_infectiousness_multiplier;
+	if ( sigma_x > 0 )
+	{
+		float zeta = log( 1 / sqrt( 1 + pow( sigma_x, 2 ) ) );
+		float sigma = sqrt( log( 1 + pow( sigma_x, 2) ) );
+		indiv->infectiousness_multiplier = gsl_ran_lognormal( rng, zeta, sigma );
+	}
+	else
+	{
+		indiv->infectiousness_multiplier = 1;
+	}
 }
 
 /*****************************************************************************************
@@ -225,6 +237,38 @@ void set_dead( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
+*  Name:		transition_vaccine_status
+*  Description: moves a person to there next vaccine status
+*  Returns:		void
+******************************************************************************************/
+void transition_vaccine_status( individual* indiv )
+{
+	if( indiv->vaccine_status_next != NO_EVENT )
+		set_vaccine_status( indiv, indiv->vaccine_status_next, NO_EVENT );
+}
+
+/*****************************************************************************************
+*  Name:		set_vaccine_status
+*  Description: sets the vaccine status of an individual
+*  Returns:		void
+******************************************************************************************/
+void set_vaccine_status( individual* indiv, short current_status, short next_status )
+{
+    // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
+	indiv->vaccine_status      = current_status;
+	indiv->vaccine_status_next = next_status;
+
+	if( current_status == VACCINE_PROTECTED_FULLY )
+	{
+		if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
+			indiv->status = VACCINE_PROTECT;
+	}
+
+	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT ) )
+		indiv->status = SUSCEPTIBLE;
+}
+
+/*****************************************************************************************
 *  Name:		set_recovered
 *  Description: sets a person to recovered
 *  Returns:		void
@@ -240,6 +284,34 @@ void set_recovered( individual *indiv, parameters* params, int time, model *mode
 	indiv->status        = RECOVERED;
 	indiv->current_disease_event = NULL;
 	update_random_interactions( indiv, params );
+}
+
+/*****************************************************************************************
+*  Name:		set_susceptible
+*  Description: sets a person to susceptible
+*  Returns:		void
+******************************************************************************************/
+void set_susceptible( individual *indiv, parameters* params, int time )
+{
+	indiv->status        = SUSCEPTIBLE;
+
+	infection_event *infection_event_ptr;
+	infection_event_ptr = indiv->infection_events;
+
+	int jdx;
+	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
+	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+		indiv->infection_events->times[jdx] = UNKNOWN;
+
+	indiv->infection_events->infector_status  = UNKNOWN;
+	indiv->infection_events->infector_network = UNKNOWN;
+	indiv->infection_events->time_infected_infector = UNKNOWN;
+	indiv->infection_events->next =  infection_event_ptr;
+	indiv->infection_events->is_case     = FALSE;
+
+	// Reset the hazard for the newly susceptible individual
+	initialize_hazard( indiv, params );
 }
 
 /*****************************************************************************************

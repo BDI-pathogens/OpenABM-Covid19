@@ -22,6 +22,7 @@ n_seed_infection,5,,Number of infections seeded at simulation start,,Infection p
 mean_infectious_period,5.5,&#956;,Mean of the generation time distribution (days),Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020,Infection parameters
 sd_infectious_period,2.14,&#963;,Standard deviation (days) of infectious period,Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020,Infection parameters
 infectious_rate,5.18,*R*,Mean number of individuals infected by each infectious individual with moderate to severe symptoms,Derived from calibration,Infection parameters
+sd_infectiousness_multiplier,0,,SD of the lognormal used to vary the infectiousness of an individual,Derived from calibration,Infection parameters
 mean_time_to_symptoms,5.42,&#956;<sub>sym</sub>,Mean time from infection to onset of symptoms (days),McAloon et al.,Disease dynamics parameters
 sd_time_to_symptoms,2.7,&#963;<sub>sym</sub>,Standard deviation of time from infection to onset of symptoms (days),McAloon et al.,Disease dynamics parameters
 mean_time_to_hospital,5.14,&#956;<sub>hosp</sub>,Mean time from symptom onset to hospitalisation (days),"Pellis et al, 2020",Disease dynamics parameters
@@ -31,6 +32,8 @@ mean_time_to_recover,12,&#956;<sub>rec</sub>,Mean time to recovery if hospitalis
 sd_time_to_recover,5,&#963;<sub>rec</sub>,Standard deviation of time to recovery if hospitalisaion is not required (days),Yang et al 2020,Disease dynamics parameters
 mean_time_to_death,11.74,&#956;<sub>death</sub>,Mean time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
 sd_time_to_death,8.79,&#963;<sub>death</sub>,Standard deviation of time to death after acquiring critical care (days),Personal communication with SPI-M; data soon to be published,Disease dynamics parameters
+mean_time_to_susceptible_after_shift,180,,mean time to susceptible after recovered (and after a fixed period of `time_to_susceptible_shift` days),,Disease dynamics parameters
+time_to_susceptible_shift,10000,,Fixed number of days individuals are immune until waning immunity begins,,Disease dynamics parameters
 fraction_asymptomatic_0_9,0.456,&#966;<sub>asym</sub>(0-9),"Fraction of infected individuals who are asymptomatic, aged 0-9",,Disease dynamics parameters
 fraction_asymptomatic_10_19,0.412,&#966;<sub>asym</sub>(10-19),"Fraction of infected individuals who are asymptomatic, aged 10-19",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
 fraction_asymptomatic_20_29,0.370,&#966;<sub>asym</sub>(20-29),"Fraction of infected individuals who are asymptomatic, aged 20-29",Calibration of Riccardo et al. 2020 & Spanish Serology Survey,Disease dynamics parameters
