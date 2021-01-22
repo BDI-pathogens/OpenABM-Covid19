@@ -89,6 +89,13 @@ The `examples/` directory contains some very simple Python scripts and Jupyter n
 
 _____
 
+
+Contributing
+------------
+
+See document on [contributing](CONTRIBUTING.md) for further guidelines on contributing features and code to OpenABM-Covid19.  
+
+
 Tests
 -----
 
