@@ -474,7 +474,12 @@ class TestClass(object):
                 )
             ),
         ],
-        "test_recovered_susceptible_transition_time" : [dict()]
+        "test_recovered_susceptible_transition_time" : [dict()],
+        "test_get_alive": [dict(
+            test_params=dict(
+                n_total=10000
+            )
+        )]
     }
     """
     Test class for checking
@@ -1075,3 +1080,44 @@ class TestClass(object):
         
         np.testing.assert_almost_equal(obs_recovered_suscept_time_mean, exp_recovered_suscept_time, 
             decimal = 1)
+
+    def test_get_alive( self, test_params ):
+        """
+        Test that a dataframe of alive individuals is concordance with the individual/trans files
+        """
+        
+        n_total = test_params["n_total"]
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        
+        # Simulate for long enough for there to be some COVID-19 related mortality
+        for time in range(100):
+            model.one_time_step()
+        
+        # Return a dataframe of the population that's alive, convert to numpy array
+        df_alive = model.get_alive()
+        array_alive = df_alive.to_numpy()
+        
+        # Write and read individual and transmission files
+        model.write_individual_file()
+        model.write_transmissions()
+        
+        # Find those alive and convert to numpy array
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.merge(df_indiv, df_trans,
+            left_on = "ID", right_on = "ID_recipient", how = "left")
+        
+        df_indiv.time_death = df_indiv.time_death.fillna(-1)
+        df_alive_indiv = df_indiv.loc[
+            df_indiv.time_death == -1, 
+            ["ID", "current_status", "age_group", "occupation_network", "house_no"]
+        ]
+        array_alive_indiv = df_alive_indiv.to_numpy()
+        
+        np.testing.assert_equal(df_alive.shape[0] < n_total, True)
+        np.testing.assert_array_equal(array_alive, array_alive_indiv)

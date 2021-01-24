@@ -180,6 +180,42 @@ int get_app_user_by_index(
   return model->population[ idx ].app_user;
 }
 
+/*****************************************************************************************
+*  Name: 		get_alive
+*  Description: populate input arrays with the population that is currently alive
+*  Arguments:	model:					the model object
+*  				ids:					array of users IDs
+*  				statuses:				array of users current status
+*  				age_groups:				array of users age group
+*  				occupation_networks:	array of users occupation networks
+*  				house_ids:				array of users house id
+
+******************************************************************************************/
+long get_alive(
+	model *model,
+	long *ids,
+	int *statuses,
+	int *age_groups,
+	int *occupation_networks,
+	long *house_ids
+)
+{
+	long n_total = model->params->n_total;
+	long idx, n_alive = 0;
+	
+	for( idx = 0; idx < n_total; idx++ ){
+		if ( model->population[ idx ].status != DEATH ){
+			ids[ n_alive ] = model->population[ idx ].idx;
+			statuses[ n_alive ] = model->population[ idx ].status;
+			age_groups[ n_alive ] = model->population[ idx ].age_group;
+			occupation_networks[ n_alive ] = model->population[ idx ].occupation_network;
+			house_ids[ n_alive ] = model->population[ idx ].house_no;
+			n_alive += 1;
+		}
+	}
+	return n_alive;
+}
+
 
 /*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property

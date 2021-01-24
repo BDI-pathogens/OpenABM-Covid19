@@ -887,7 +887,45 @@ class Model:
             schedule.vaccine_protection_period,
             schedule.c_total_vaccinated
         )   
-
+    
+    def get_alive(self):
+        """
+        Return dataframe of population that is alive
+        """
+        n_total = self.c_model.params.n_total
+        
+        ids   = covid19.longArray(n_total)
+        statuses   = covid19.intArray(n_total)
+        age_groups   = covid19.intArray(n_total)
+        occupation_networks   = covid19.intArray(n_total)
+        house_ids = covid19.longArray(n_total)
+        
+        n_alive = covid19.get_alive(self.c_model, 
+            ids, statuses, age_groups, occupation_networks, house_ids)
+        
+        list_ids = [None]*n_alive
+        list_statuses = [None]*n_alive
+        list_age_groups = [None]*n_alive
+        list_occupation_networks = [None]*n_alive
+        list_house_ids = [None]*n_alive
+        
+        for idx in range(n_alive):
+            list_ids[idx] = ids[idx]
+            list_statuses[idx] = statuses[idx]
+            list_age_groups[idx] = age_groups[idx]
+            list_occupation_networks[idx] = occupation_networks[idx]
+            list_house_ids[idx] = house_ids[idx]
+        
+        df_alive = pd.DataFrame( {
+            'ID': list_ids, 
+            'current_status': list_statuses,
+            'age_group': list_age_groups,
+            'occupation_network': list_occupation_networks,
+            'house_no': list_house_ids,
+        })
+        
+        return df_alive
+    
     def _create(self):
         """
         Call C function new_model (renamed create_model)

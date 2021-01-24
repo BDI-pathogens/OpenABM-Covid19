@@ -300,7 +300,7 @@ int set_app_users( model*, long*, long, int );
 int get_app_users( model*, long* );
 int get_app_user_by_index(model*, int);
 
-
+long get_alive( model *, long *, int *, int *, int * , long *);
 
 void update_work_intervention_state(model *pmodel, int value);
 void update_household_intervention_state(model *pmodel, int value);
