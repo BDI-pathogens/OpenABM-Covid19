@@ -1821,6 +1821,7 @@ int get_household_value(parameters *params, int row, int col) {
 %array_class(double, doubleArray);
 %array_class(int, intArray);
 %array_class(long, longArray);
+%array_class(short, shortArray);
 %inline %{
 /*****************************************************************************************
 *  Name:        get_param_array_mean_random_interactions

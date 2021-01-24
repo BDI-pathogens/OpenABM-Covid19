@@ -197,7 +197,9 @@ long get_alive(
 	int *statuses,
 	int *age_groups,
 	int *occupation_networks,
-	long *house_ids
+	long *house_ids,
+	int *infection_counts,
+	short *vaccine_statuses
 )
 {
 	long n_total = model->params->n_total;
@@ -210,6 +212,8 @@ long get_alive(
 			age_groups[ n_alive ] = model->population[ idx ].age_group;
 			occupation_networks[ n_alive ] = model->population[ idx ].occupation_network;
 			house_ids[ n_alive ] = model->population[ idx ].house_no;
+			infection_counts[ n_alive ] = count_infection_events( &(model->population[ idx ]) );
+			vaccine_statuses[ n_alive ] = model->population[ idx ].vaccine_status;
 			n_alive += 1;
 		}
 	}

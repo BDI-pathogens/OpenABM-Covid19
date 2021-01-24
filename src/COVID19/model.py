@@ -899,15 +899,20 @@ class Model:
         age_groups   = covid19.intArray(n_total)
         occupation_networks   = covid19.intArray(n_total)
         house_ids = covid19.longArray(n_total)
+        infection_counts = covid19.intArray(n_total)
+        vaccine_statuses = covid19.shortArray(n_total)
         
-        n_alive = covid19.get_alive(self.c_model, 
-            ids, statuses, age_groups, occupation_networks, house_ids)
+        n_alive = covid19.get_alive(
+            self.c_model, ids, statuses, age_groups, occupation_networks, 
+            house_ids, infection_counts, vaccine_statuses)
         
         list_ids = [None]*n_alive
         list_statuses = [None]*n_alive
         list_age_groups = [None]*n_alive
         list_occupation_networks = [None]*n_alive
         list_house_ids = [None]*n_alive
+        list_infection_counts = [None]*n_alive
+        list_vaccine_statuses = [None]*n_alive
         
         for idx in range(n_alive):
             list_ids[idx] = ids[idx]
@@ -915,6 +920,8 @@ class Model:
             list_age_groups[idx] = age_groups[idx]
             list_occupation_networks[idx] = occupation_networks[idx]
             list_house_ids[idx] = house_ids[idx]
+            list_infection_counts[idx] = infection_counts[idx]
+            list_vaccine_statuses[idx] = vaccine_statuses[idx]
         
         df_alive = pd.DataFrame( {
             'ID': list_ids, 
@@ -922,6 +929,8 @@ class Model:
             'age_group': list_age_groups,
             'occupation_network': list_occupation_networks,
             'house_no': list_house_ids,
+            'infection_count' : list_infection_counts,
+            'vaccine_status' : list_vaccine_statuses
         })
         
         return df_alive

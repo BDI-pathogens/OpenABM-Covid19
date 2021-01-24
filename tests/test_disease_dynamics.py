@@ -1115,7 +1115,8 @@ class TestClass(object):
         df_indiv.time_death = df_indiv.time_death.fillna(-1)
         df_alive_indiv = df_indiv.loc[
             df_indiv.time_death == -1, 
-            ["ID", "current_status", "age_group", "occupation_network", "house_no"]
+            ["ID", "current_status", "age_group", "occupation_network", "house_no",
+                "infection_count", "vaccine_status"]
         ]
         array_alive_indiv = df_alive_indiv.to_numpy()
         
