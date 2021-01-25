@@ -3,8 +3,8 @@
 # R files
 ^\.Rhistory$
 ^\.RData$
-^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.Rproj$
 ^.*\.Rcheck$
 
 # R utility scripts
@@ -23,19 +23,28 @@
 ^src\/adapter_covid19$
 ^src\/covid19_wrap\.c$
 
+# Conf files
+^autom4te.cache$
+^config\.log$
+^config\.status$
+^src\/Makevars$
+
 # Build files
-.*\.in$
 ^Makefile$
+^package-for-CRAN\.sh$
 ^OpenABMCovid19.tmp$
 ^OpenABMCovid19_.*\.tar\.gz$
 ^OpenABMCovid19_.*\.tgz$
 ^OpenABMCovid19_.*\.zip$
 
-# Test output
+# Test files
 ^src_test$
 ^data_test$
+^tests\/requirements\.txt$
 ^tests\/src_test$
 ^tests\/data_test$
+^tests\/adapter_covid19$
+^tests\/Dockerfile$
 
 # Misc
 ^\.github$
