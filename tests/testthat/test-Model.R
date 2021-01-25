@@ -314,4 +314,9 @@ test_that("Model::baseline_params", {
   results_expected$R_inst_05 <- c(-1 ,-1 ,-1)
   results_expected$R_inst_95 <- c(-1 ,-1 ,-1)
   expect_equal(sim$results, results_expected)
+
+  # test infections / vaccinations.
+  expect_true(m$seed_infect_by_idx(0))
+  expect_true(m$vaccinate_individual(2))
+  expect_false(m$vaccinate_schedule(VaccineSchedule$new()))
 })

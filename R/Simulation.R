@@ -191,6 +191,8 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
 
     #' @description Collect model results at each step;
     #' fixme action is not currently stored
+    #' @param state The state to collect results from.
+    #' @param action Currently unused.
     collect_results = function(state, action) {
       # Save results to a named vector
       for (i in 1:length(state)) {

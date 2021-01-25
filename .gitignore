@@ -72,6 +72,9 @@ src-x64/
 /man/Parameters.Rd
 /man/SAFE_UPDATE_PARAMS.Rd
 /man/Simulation.Rd
+/man/VaccineSchedule.Rd
+/man/VACCINE_STATUS.Rd
+/man/VACCINE_TYPES.Rd
 
 
 # performance related
