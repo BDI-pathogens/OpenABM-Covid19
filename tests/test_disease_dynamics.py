@@ -475,9 +475,10 @@ class TestClass(object):
             ),
         ],
         "test_recovered_susceptible_transition_time" : [dict()],
-        "test_get_alive": [dict(
+        "test_get_individuals": [dict(
             test_params=dict(
-                n_total=10000
+                n_total = 10000,
+                end_time = 200
             )
         )]
     }
@@ -1081,32 +1082,37 @@ class TestClass(object):
         np.testing.assert_almost_equal(obs_recovered_suscept_time_mean, exp_recovered_suscept_time, 
             decimal = 1)
 
-    def test_get_alive( self, test_params ):
+    def test_get_individuals( self, test_params ):
         """
-        Test that a dataframe of alive individuals is concordance with the individual/trans files
+        Test that a dataframe of individuals is concordance with the individual/trans files
         """
         
         n_total = test_params["n_total"]
+        end_time = test_params["end_time"]
         
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
         
+        df_indiv_list = list()
         
         # Simulate for long enough for there to be some COVID-19 related mortality
-        for time in range(100):
+        for time in range(end_time):
+            # Every 5 years, save the dataframe of individuals
+            if time % 5 == 0:
+                
+                df_all = model.get_individuals()
+                df_alive = df_all[df_all.current_status != constant.EVENT_TYPES.DEATH.value]
+                df_indiv_list.append(df_alive)
+            
             model.one_time_step()
-        
-        # Return a dataframe of the population that's alive, convert to numpy array
-        df_alive = model.get_alive()
-        array_alive = df_alive.to_numpy()
         
         # Write and read individual and transmission files
         model.write_individual_file()
         model.write_transmissions()
         
-        # Find those alive and convert to numpy array
+        # Pull individual file and convert to numpy array
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans,
@@ -1118,7 +1124,22 @@ class TestClass(object):
             ["ID", "current_status", "age_group", "occupation_network", "house_no",
                 "infection_count", "vaccine_status"]
         ]
-        array_alive_indiv = df_alive_indiv.to_numpy()
+        # Check some individuals have died
+        np.testing.assert_equal(model.one_time_step_results()["n_death"] > 0, True)
         
-        np.testing.assert_equal(df_alive.shape[0] < n_total, True)
-        np.testing.assert_array_equal(array_alive, array_alive_indiv)
+        cols2compare = ["ID", "age_group", "occupation_network", "house_no"]
+        
+        # Every 5 years, check the number of individuals alive is consistent across
+        # both approaches
+        for time in range(end_time):
+            if time % 5 == 0:
+                # Find alive individuals using the get_alive() method, convert to np array
+                df_alive_t = df_indiv_list[time//5][cols2compare]
+                array_alive = df_alive_t.to_numpy()
+                
+                # Find alive individuals using the individual+transmission file, convert to np array
+                df_alive_indiv = df_indiv.loc[
+                    (df_indiv.time_death > time) | (df_indiv.time_death == -1), cols2compare]
+                array_alive_indiv = df_alive_indiv.to_numpy()
+                
+                np.testing.assert_array_equal(array_alive, array_alive_indiv)

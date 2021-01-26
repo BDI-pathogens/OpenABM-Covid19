@@ -888,9 +888,9 @@ class Model:
             schedule.c_total_vaccinated
         )   
     
-    def get_alive(self):
+    def get_individuals(self):
         """
-        Return dataframe of population that is alive
+        Return dataframe of population
         """
         n_total = self.c_model.params.n_total
         
@@ -902,19 +902,19 @@ class Model:
         infection_counts = covid19.intArray(n_total)
         vaccine_statuses = covid19.shortArray(n_total)
         
-        n_alive = covid19.get_alive(
+        n_total = covid19.get_individuals(
             self.c_model, ids, statuses, age_groups, occupation_networks, 
             house_ids, infection_counts, vaccine_statuses)
         
-        list_ids = [None]*n_alive
-        list_statuses = [None]*n_alive
-        list_age_groups = [None]*n_alive
-        list_occupation_networks = [None]*n_alive
-        list_house_ids = [None]*n_alive
-        list_infection_counts = [None]*n_alive
-        list_vaccine_statuses = [None]*n_alive
+        list_ids = [None]*n_total
+        list_statuses = [None]*n_total
+        list_age_groups = [None]*n_total
+        list_occupation_networks = [None]*n_total
+        list_house_ids = [None]*n_total
+        list_infection_counts = [None]*n_total
+        list_vaccine_statuses = [None]*n_total
         
-        for idx in range(n_alive):
+        for idx in range(n_total):
             list_ids[idx] = ids[idx]
             list_statuses[idx] = statuses[idx]
             list_age_groups[idx] = age_groups[idx]
@@ -923,7 +923,7 @@ class Model:
             list_infection_counts[idx] = infection_counts[idx]
             list_vaccine_statuses[idx] = vaccine_statuses[idx]
         
-        df_alive = pd.DataFrame( {
+        df_popn = pd.DataFrame( {
             'ID': list_ids, 
             'current_status': list_statuses,
             'age_group': list_age_groups,
@@ -933,7 +933,7 @@ class Model:
             'vaccine_status' : list_vaccine_statuses
         })
         
-        return df_alive
+        return df_popn
     
     def _create(self):
         """

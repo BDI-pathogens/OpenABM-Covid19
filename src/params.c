@@ -181,8 +181,8 @@ int get_app_user_by_index(
 }
 
 /*****************************************************************************************
-*  Name: 		get_alive
-*  Description: populate input arrays with the population that is currently alive
+*  Name: 		get_individuals
+*  Description: populate input arrays with the population (including current status)
 *  Arguments:	model:					the model object
 *  				ids:					array of users IDs
 *  				statuses:				array of users current status
@@ -191,7 +191,7 @@ int get_app_user_by_index(
 *  				house_ids:				array of users house id
 
 ******************************************************************************************/
-long get_alive(
+long get_individuals(
 	model *model,
 	long *ids,
 	int *statuses,
@@ -203,21 +203,18 @@ long get_alive(
 )
 {
 	long n_total = model->params->n_total;
-	long idx, n_alive = 0;
+	long idx;
 	
 	for( idx = 0; idx < n_total; idx++ ){
-		if ( model->population[ idx ].status != DEATH ){
-			ids[ n_alive ] = model->population[ idx ].idx;
-			statuses[ n_alive ] = model->population[ idx ].status;
-			age_groups[ n_alive ] = model->population[ idx ].age_group;
-			occupation_networks[ n_alive ] = model->population[ idx ].occupation_network;
-			house_ids[ n_alive ] = model->population[ idx ].house_no;
-			infection_counts[ n_alive ] = count_infection_events( &(model->population[ idx ]) );
-			vaccine_statuses[ n_alive ] = model->population[ idx ].vaccine_status;
-			n_alive += 1;
-		}
+		ids[ idx ] = model->population[ idx ].idx;
+		statuses[ idx ] = model->population[ idx ].status;
+		age_groups[ idx ] = model->population[ idx ].age_group;
+		occupation_networks[ idx ] = model->population[ idx ].occupation_network;
+		house_ids[ idx ] = model->population[ idx ].house_no;
+		infection_counts[ idx ] = count_infection_events( &(model->population[ idx ]) );
+		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
 	}
-	return n_alive;
+	return idx;
 }
 
 
