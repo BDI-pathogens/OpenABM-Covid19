@@ -184,6 +184,42 @@ NETWORK_CONSTRUCTIONS <- c(
   'RANDOM'         = 4
 )
 
+#' Vaccine types
+#' @description
+#' List of vaccine types.
+#' Wrapper for \code{enum VACCINE_TYPES} (in \emph{constant.h}).
+#' \itemize{
+#'   \item{FULL} Wrapper for C enum \code{VACCINE_TYPE_FULL}
+#'   \item{SYMPTOM} Wrapper for C enum \code{VACCINE_TYPE_SYMPTOM}
+#' }
+VACCINE_TYPES <- c(
+  'FULL'    = 0,
+  'SYMPTOM' = 1
+)
+
+#' Vaccine status
+#' @description
+#' List of vaccines statuses.
+#' Wrapper for \code{enum VACCINE_STATUS} (in \emph{constant.h}).
+#' \itemize{
+#'   \item{NO_VACCINE} Wrapper for C enum
+#'     \code{NO_VACCINE}
+#'   \item{VACCINE_NO_PROTECTION} Wrapper for C enum
+#'     \code{VACCINE_NO_PROTECTION}
+#'   \item{VACCINE_PROTECTED_FULLY} Wrapper for C enum
+#'     \code{VACCINE_PROTECTED_FULLY}
+#'   \item{VACCINE_PROTECTED_SYMPTOMS} Wrapper for C enum
+#'     \code{VACCINE_PROTECTED_SYMPTOMS}
+#'   \item{VACCINE_WANED} Wrapper for C enum
+#'     \code{VACCINE_WANED}
+#' }
+VACCINE_STATUS <- c(
+  'NO_VACCINE'                 = 0,
+  'VACCINE_NO_PROTECTION'      = 1,
+  'VACCINE_PROTECTED_FULLY'    = 2,
+  'VACCINE_PROTECTED_SYMPTOMS' = 3,
+  'VACCINE_WANED'              = 4
+)
 
 
 get_base_param_from_enum <- function(param) {

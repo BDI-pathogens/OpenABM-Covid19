@@ -11,9 +11,20 @@ ifeq ($(OS),Windows_NT)
 # HOME to itself.
 # https://community.rstudio.com/t/rstudio-startup-missing-libpaths/22122/6
 	R_ENV=HOME=
+	UNAME=Windows
 else
 	R_BIN_PKG_EXT=tgz
 	R_ENV=
+	UNAME=$(shell uname -s)
+endif
+
+# The 'in-place' flag is different on macOS (BSD) and Linux/minGW.
+# https://linux.die.net/man/1/sed
+# https://www.freebsd.org/cgi/man.cgi?query=sed&sektion=&n=1
+ifeq ($(UNAME),Darwin)
+	SED_I=sed -i ''
+else
+	SED_I=sed -i
 endif
 
 
@@ -48,13 +59,14 @@ SWIG_ROUT = R/$(R_PKGNAME).R
 $(SWIG_COUT): $(SWIG_SRC)
 	swig -r -package $(R_PKGNAME) -Isrc -o $(SWIG_COUT) -outdir R src/covid19.i
 # edit generated C source to mute R check note.
-	sed -i 's/R_registerRoutines/R_useDynamicSymbols(dll,0);R_registerRoutines/' $(SWIG_COUT)
-$(SWIG_ROUT): $(SWIG_COUT)
+	$(SED_I) 's/R_registerRoutines/R_useDynamicSymbols(dll,0);R_registerRoutines/' $(SWIG_COUT)
 # edit generated src lines are cause R check warnings.
-	sed -i 's/.Call("R_SWIG_debug_getCallbackFunctionData"/.Call("R_SWIG_debug_getCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
-	sed -i 's/.Call("R_SWIG_R_pushCallbackFunctionData"/.Call("R_SWIG_R_pushCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
+	$(SED_I) 's/.Call("R_SWIG_debug_getCallbackFunctionData"/.Call("R_SWIG_debug_getCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
+	$(SED_I) 's/.Call("R_SWIG_R_pushCallbackFunctionData"/.Call("R_SWIG_R_pushCallbackFunctionData", PACKAGE="OpenABMCovid19"/' $(SWIG_ROUT)
 # edit generated src that causes errors like: "p_char" is not a defined class
-	sed -i 's/ans <- new("_p_char"/#ans <- new("_p_char"/' $(SWIG_ROUT)
+	$(SED_I) 's/ans <- new("_p_char"/#ans <- new("_p_char"/' $(SWIG_ROUT)
+$(SWIG_ROUT): $(SWIG_COUT)
+
 ALL_OUTPUT += $(SWIG_COUT) $(SWIG_ROUT)
 
 
@@ -171,10 +183,10 @@ Rcheck: $(R_SRC_PKG)
 # Cleaning
 #------------------------------------------------------------------------------
 clean:
-	rm -fr $(ALL_OUTPUT) src/*.o src/*.dll
+	rm -fr $(ALL_OUTPUT) src/*.o src/*.dll src/*.so
 
 dry_clean:
 	@echo '`make clean` will run:'
-	@echo 'rm -fr $(ALL_OUTPUT) src/*.o src/*.dll'
+	@echo 'rm -fr $(ALL_OUTPUT) src/*.o src/*.dll src/*.so'
 
 .PHONY: clean dry_clean Rswig Rman Rbuild Rcheck Rinstall

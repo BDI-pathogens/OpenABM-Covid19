@@ -20,6 +20,7 @@ SWIG_utils_n_total <- utils_n_total
 SWIG_utils_n_total_age <- utils_n_total_age
 SWIG_utils_n_total_by_day <- utils_n_total_by_day
 SWIG_calculate_R_instanteous <- calculate_R_instanteous
+SWIG_seed_infect_by_idx <- seed_infect_by_idx
 
 #' R6Class Model
 #'
@@ -369,6 +370,28 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(Network$new( private$c_model, network_id ))
     },
 
+    #' @description Infects a new individual from an external source.
+    #' Wrapper for C API \code{seed_infect_by_idx}.
+    #' @param ID The ID of the individual.
+    #' @param strain_multiplier The strain multiplier value, must be a
+    #'   positivate number.
+    #' @param network_id The network ID.
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    seed_infect_by_idx = function(ID, strain_multiplier = 1, network_id = -1 )
+    {
+      n_total <- private$c_params$n_total
+
+      if (ID < 0 || ID >= n_total) {
+        stop("ID out of range (0<=ID<n_total)")
+      }
+      if (strain_multiplier < 0) {
+        stop("strain_multiplier must be positive")
+      }
+      res <- SWIG_seed_infect_by_idx(private$c_model, ID, strain_multiplier,
+        network_id)
+      return(as.logical(res))
+    },
+
     #' @description Get the list of network IDs
     #' Wrapper for C API \code{get_network_ids}.
     #' @param max_ids The maximum number of IDs to return.
@@ -427,6 +450,65 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       }
 
       return(as.data.frame(tmp))
+    },
+
+    #' @description Vaccinate an individual.
+    #' Wrapper for C API \code{intervention_vaccinate_by_idx}.
+    #' @param ID The ID of the individual (must be \code{0 <= ID <= n_total}).
+    #' @param vaccine_type The type of vaccine, see \code{\link{VACCINE_TYPES}}.
+    #' @param efficacy Probability that the person is successfully vaccinated
+    #'   (must be \code{0 <= efficacy <= 1}).
+    #' @param time_to_protect Delay before it takes effect (in days).
+    #' @param vaccine_protection_period The duration of the vaccine before it
+    #'   wanes.
+    #' @return Logical value, \code{TRUE} if vaccinated \code{FALSE} otherwise.
+    vaccinate_individual = function(
+      ID,
+      vaccine_type = 0,
+      efficacy = 1.0,
+      time_to_protect = 14,
+      vaccine_protection_period = 1000 )
+    {
+      n_total <- private$c_params$n_total
+
+      if (ID < 0 || ID >= n_total) {
+        stop("ID out of range (0<=ID<n_total)")
+      }
+      if (efficacy < 0 || efficacy > 1) {
+        stop("efficacy must be between 0 and 1")
+      }
+      if (time_to_protect < 1) {
+        stop("vaccine must take at least one day to take effect")
+      }
+      if (vaccine_protection_period <= time_to_protect) {
+        stop("vaccine must protect for longer than it takes to by effective")
+      }
+      if (!is.numeric(vaccine_type) || ! vaccine_type %in% VACCINE_TYPES) {
+        stop("vaccine type must be listed in VaccineTypesEnum")
+      }
+
+      res <- intervention_vaccinate_by_idx(private$c_model, ID, vaccine_type,
+        efficacy, time_to_protect, vaccine_protection_period)
+      return(as.logical(res))
+    },
+
+    #' @description Schedule an age-group vaccionation
+    #' Wrapper for C API \code{intervention_vaccinate_age_group}.
+    #' @param schedule An instance of \code{\link{VaccineSchedule}}.
+    #' @return The total number of people vaccinated.
+    vaccinate_schedule = function(schedule)
+    {
+      if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
+        stop("argument VaccineSchedule must be an object of type VaccineSchedule")
+      }
+      return(as.logical(intervention_vaccinate_age_group(
+        private$c_model,
+        schedule$fraction_to_vaccinate,
+        schedule$vaccine_type,
+        schedule$efficacy,
+        schedule$time_to_protect,
+        schedule$vaccine_protection_period,
+        schedule$total_vaccinated)))
     },
 
     #' @description Delete a network.

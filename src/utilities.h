@@ -39,6 +39,7 @@
 int printf_w( const char*, ... ) _AF_PRINTF(1,2);
 void print_now( char* );
 void print_exit( char*, ... ) _AF_PRINTF(1,2);
+void fflush_stdout();
 void gamma_draw_list( int*, int, double, double );
 void bernoulli_draw_list( int*, int, double );
 void geometric_max_draw_list( int*, int, double, int );

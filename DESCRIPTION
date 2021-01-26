@@ -24,7 +24,9 @@ Collate:
   Network.R
   Model.R
   Simulation.R
+  VaccineSchedule.R
 Suggests:
     testthat
 RoxygenNote: 7.1.1
 Encoding: UTF-8
+SystemRequirements: GNU GSL

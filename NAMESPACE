@@ -14,10 +14,13 @@ export("Environment")
 export("Agent")
 export("Simulation")
 export("COVID19IBM")
+export("VaccineSchedule")
 
 # Enums
 export("AgeGroupEnum")
 export("SAFE_UPDATE_PARAMS")
 export("NETWORK_CONSTRUCTIONS")
+export("VACCINE_TYPES")
+export("VACCINE_STATUS")
 
 useDynLib(OpenABMCovid19, .registration = TRUE)
