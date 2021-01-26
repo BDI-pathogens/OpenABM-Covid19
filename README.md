@@ -132,3 +132,5 @@ If you're building on Windows, there are additional tools that are needed to bui
 - Download precompiled 32 and 64 bits libraries of GSL (installed in C:\gsl).
 - Install Rtools (in C:\Rtools).
 - Install make & SWIG via Cygwin64 (to run `make Rswig`).
+
+You can use the batch script *tests/test_R_INSTALL_win.bat* to build the source package.

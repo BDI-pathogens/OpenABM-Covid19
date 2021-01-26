@@ -12,7 +12,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
   private = list( id = NULL ),
 
   public = list(
-    #' @field External pointer, reference to \code{network} C struct.
+    #' @field c_network External pointer, reference to \code{network} C struct.
     c_network = NULL,
 
     #' @param c_model External pointer, reference to \code{model} C struct.
@@ -76,6 +76,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
     },
 
     #' @description Wrapper for C API \code{update_daily_fraction}.
+    #' @param daily_fraction New fraction value; a value vetween 0 and 1.
     #' @return \code{TRUE} on success, \code{FALSE} on failure.
     update_daily_fraction = function(daily_fraction) {
       res <- SWIG_update_daily_fraction( self$c_network, daily_fraction )
