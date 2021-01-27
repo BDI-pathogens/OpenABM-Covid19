@@ -55,6 +55,9 @@ void initialize_individual(
 	indiv->current_disease_event    = NULL;
 	indiv->next_disease_event       = NULL;
 	indiv->quarantine_test_result   = NO_TEST;
+	indiv->lateral_flow_test_result = NO_TEST;
+	indiv->lateral_flow_test_capacity = 0;
+	indiv->lateral_flow_test_sensitivity = NO_TEST;
 
 	indiv->trace_tokens         = NULL;
 	indiv->index_trace_token    = NULL;

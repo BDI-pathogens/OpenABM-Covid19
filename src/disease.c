@@ -162,6 +162,39 @@ void set_up_infectious_curves( model *model )
 		gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
 	};
+
+	
+	model->event_lists[PRESYMPTOMATIC].infectious_peak_time = curve_peak_time(
+			model->event_lists[PRESYMPTOMATIC].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[PRESYMPTOMATIC_MILD].infectious_peak_time = curve_peak_time(
+			model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[ASYMPTOMATIC].infectious_peak_time = curve_peak_time(
+			model->event_lists[ASYMPTOMATIC].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[SYMPTOMATIC].infectious_peak_time = curve_peak_time(
+			model->event_lists[SYMPTOMATIC].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[SYMPTOMATIC_MILD].infectious_peak_time = curve_peak_time(
+			model->event_lists[SYMPTOMATIC_MILD].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[HOSPITALISED].infectious_peak_time = curve_peak_time(
+			model->event_lists[HOSPITALISED].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[HOSPITALISED_RECOVERING].infectious_peak_time = curve_peak_time(
+			model->event_lists[HOSPITALISED_RECOVERING].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+
+	model->event_lists[CRITICAL].infectious_peak_time = curve_peak_time(
+			model->event_lists[CRITICAL].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type

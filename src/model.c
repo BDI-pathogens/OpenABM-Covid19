@@ -56,6 +56,7 @@ model* new_model( parameters *params )
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
 
+	set_up_population( model_ptr );
 	update_intervention_policy( model_ptr, model_ptr->time );
 
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
@@ -1355,9 +1356,11 @@ int one_time_step( model *model )
 
 	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||
+		   ( n_daily( model, LATERAL_FLOW_TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, MANUAL_CONTACT_TRACING, model->time ) > 0 )
 	)
 	{
+		transition_events( model, LATERAL_FLOW_TEST_TAKE,              &intervention_lateral_flow_test_take,          TRUE );
 		transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
 		transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );

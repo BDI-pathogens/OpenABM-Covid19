@@ -24,6 +24,8 @@ void initialize_params( parameters *params )
 {
 	params->demo_house = NULL;
 	params->occupation_network_table = NULL;
+	params->relative_transmission[LATERAL_FLOW_TEST] = 1;
+	params->relative_transmission_used[LATERAL_FLOW_TEST] = 1;
 }
 
 /*****************************************************************************************
@@ -387,6 +389,15 @@ double get_model_param_self_quarantine_fraction(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_quarantine_compliance_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_quarantine_compliance_positive(model *model)
+{
+    return model->params->quarantine_compliance_positive;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -568,6 +579,60 @@ int get_model_param_priority_test_contacts(model *model, int idx)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_on_symptoms(model *model)
+{
+    return model->params->lateral_flow_test_on_symptoms;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_on_traced
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_on_traced(model *model)
+{
+    return model->params->lateral_flow_test_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_order_wait
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_order_wait(model *model)
+{
+    return model->params->lateral_flow_test_order_wait;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_repeat_count
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_repeat_count(model *model)
+{
+    return model->params->lateral_flow_test_repeat_count;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_only
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lateral_flow_test_only(model *model)
+{
+    return model->params->lateral_flow_test_only;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_lateral_flow_test_fraction
+*  Description: Gets the value of an double parameter
+******************************************************************************************/
+double get_model_param_lateral_flow_test_fraction(model *model)
+{
+    return model->params->lateral_flow_test_fraction;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_app_users_fraction
 *  Description: Gets the value of double parameter
 ******************************************************************************************/
@@ -731,6 +796,16 @@ int set_model_param_quarantine_days(model *model, int value )
 int set_model_param_self_quarantine_fraction(model *model, double value)
 {
     model->params->self_quarantine_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_quarantine_compliance_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_compliance_positive(model *model, double value)
+{
+    model->params->quarantine_compliance_positive = value;
     return TRUE;
 }
 
@@ -909,17 +984,17 @@ int set_model_param_test_order_wait( model *model, int value )
 ******************************************************************************************/
 int set_model_param_test_result_wait_priority( model *model, int value )
 {
-    model->params->test_result_wait_priority = value;
+	model->params->test_result_wait_priority = value;
 
-    if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
-    	model->params->test_order_wait_priority = model->params->test_order_wait;
+	if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
+		model->params->test_order_wait_priority = model->params->test_order_wait;
 
-    if( value == NO_PRIORITY_TEST )
-    	model->params->test_order_wait_priority = NO_PRIORITY_TEST;
+	if( value == NO_PRIORITY_TEST )
+		model->params->test_order_wait_priority = NO_PRIORITY_TEST;
 
-    check_params( model->params );
+	check_params( model->params );
 
-    return TRUE;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -928,17 +1003,17 @@ int set_model_param_test_result_wait_priority( model *model, int value )
 ******************************************************************************************/
 int set_model_param_test_order_wait_priority( model *model, int value )
 {
-    model->params->test_order_wait_priority = value;
+	model->params->test_order_wait_priority = value;
 
-    if( model->params->test_result_wait_priority == NO_PRIORITY_TEST )
-     	model->params->test_result_wait_priority = model->params->test_result_wait;
+	if( model->params->test_result_wait_priority == NO_PRIORITY_TEST )
+		model->params->test_result_wait_priority = model->params->test_result_wait;
 
-     if( value == NO_PRIORITY_TEST )
-     	model->params->test_result_wait_priority = NO_PRIORITY_TEST;
+	if( value == NO_PRIORITY_TEST )
+		model->params->test_result_wait_priority = NO_PRIORITY_TEST;
 
- 	check_params( model->params );
+	check_params( model->params );
 
-    return TRUE;
+	return TRUE;
 }
 
 /*****************************************************************************************
@@ -951,6 +1026,67 @@ int set_model_param_priority_test_contacts( model *model, int value, int idx )
 	model->params->priority_test_contacts[idx] = value;
 	return TRUE;
 }
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_on_symptoms(model *model, int value)
+{
+	model->params->lateral_flow_test_on_symptoms = value;
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_on_traced(model *model, int value)
+{
+    model->params->lateral_flow_test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_order_wait
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_order_wait(model *model, int value)
+{
+    model->params->lateral_flow_test_order_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_repeat_count
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_repeat_count(model *model, int value)
+{
+    model->params->lateral_flow_test_repeat_count = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_only
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_only(model *model, int value)
+{
+    model->params->lateral_flow_test_only = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_model_param_lateral_flow_test_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_lateral_flow_test_fraction(model *model, double value)
+{
+    model->params->lateral_flow_test_fraction = value;
+    return TRUE;
+}
+
 /*****************************************************************************************
 *  Name:		set_model_param_app_users_fraction
 *  Description: Sets the value of parameter
