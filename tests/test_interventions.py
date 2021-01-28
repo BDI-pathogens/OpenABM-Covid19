@@ -2305,6 +2305,9 @@ class TestClass(object):
         del( model )
 
     def test_lateral_flow_interventions_has_tests(self, test_params):
+        """
+        Test that we do have lateral flow tests if they are enabled.
+        """
         end_time  = test_params[ "end_time" ]
 
         params = utils.get_params_swig()
@@ -2316,7 +2319,7 @@ class TestClass(object):
             model.one_time_step()
         results = model.one_time_step_results()
 
-        np.testing.assert_equal(results["n_lateral_flow_tests"] > 0, True, "Expected lateral flow tests not found.")
+        np.testing.assert_equal( results[ "n_lateral_flow_tests" ] > 0, True, "Expected lateral flow tests not found." )
 
         # write files
         model.write_individual_file()
@@ -2324,10 +2327,13 @@ class TestClass(object):
 
         # read CSV's
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        np.testing.assert_equal(sum(df_indiv["lateral_flow_status"] == 0) > 0, True, "No negative Lateral Flow tests found.")
-        np.testing.assert_equal(sum(df_indiv["lateral_flow_status"] == 1) > 0, True, "No positive Lateral Flow tests found.")
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 0 ) > 0, True, "No negative Lateral Flow tests found." )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 1 ) > 0, True, "No positive Lateral Flow tests found." )
 
     def test_lateral_flow_interventions_no_tests(self, test_params):
+        """
+        Test that we do not have lateral flow tests if they are disabled.
+        """
         end_time  = test_params[ "end_time" ]
 
         params = utils.get_params_swig()
@@ -2339,7 +2345,7 @@ class TestClass(object):
             model.one_time_step()
         results = model.one_time_step_results()
 
-        np.testing.assert_equal(results["n_lateral_flow_tests"], 0, "Unexpected lateral flow tests found.")
+        np.testing.assert_equal( results[ "n_lateral_flow_tests" ], 0, "Unexpected lateral flow tests found." )
 
         # write files
         model.write_individual_file()
@@ -2347,11 +2353,11 @@ class TestClass(object):
 
         # read CSV's
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        np.testing.assert_equal(sum(df_indiv["lateral_flow_status"] >= 0), 0, "Unexpected Lateral Flow tests found.")
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] >= 0 ), 0, "Unexpected Lateral Flow tests found." )
 
     def test_lateral_flow_interventions_vs_quarantine(self, test_params, quarantine_expected, quarantine_reason):
         """
-        Test that we have the expected ratio between number of quarantines performed and number of LFA tests performed.
+        Test that we have the expected lateral flow tests and quarantines.
         """
         end_time  = test_params[ "end_time" ]
         max_CI    = 0.99
@@ -2376,17 +2382,17 @@ class TestClass(object):
             df_indiv["time"] = time
 
             df_quar = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = time ), comment="#", sep=",", skipinitialspace=True )
-            df_quar = df_quar[["ID","quarantine_reason"]]
+            df_quar = df_quar[ [ "ID", "quarantine_reason" ] ]
 
-            df_test = pd.merge( df_indiv, df_quar, on = "ID", how = "left")
-            all_test.append(df_test)
+            df_test = pd.merge( df_indiv, df_quar, on = "ID", how = "left" )
+            all_test.append( df_test )
 
         del model
 
-        df_test = pd.concat(all_test)
+        df_test = pd.concat( all_test )
 
         lfa_test  = sum( df_test["lateral_flow_status"] >= 0 )
-        quar = sum( (df_test[ "quarantine_reason" ] == quarantine_reason ) )
+        quar = sum( ( df_test[ "quarantine_reason" ] == quarantine_reason ) )
         np.testing.assert_equal( lfa_test > 0, True, f"Expected existence of LFA tests." )
         np.testing.assert_equal( quar > 0, quarantine_expected, f"Expected existnce of quarantines to be {quarantine_expected}" )
 
@@ -2417,21 +2423,21 @@ class TestClass(object):
             # read CSV's
             df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
             df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-            df_test = df_indiv.loc[:,["ID","lateral_flow_status"]]
-            df_test = df_test[ df_test["lateral_flow_status"] >= 0 ]
-            df_trans = df_trans.loc[:,["ID_recipient","time_infected", "time_symptomatic"]]
+            df_test = df_indiv.loc[ :, [ "ID", "lateral_flow_status" ] ]
+            df_test = df_test[ df_test[ "lateral_flow_status" ] >= 0 ]
+            df_trans = df_trans.loc[ :, [ "ID_recipient", "time_infected", "time_symptomatic" ] ]
             df_test = pd.merge( df_test, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
-            df_test["time"] = time
-            df_test.fillna(-1, inplace=True)
-            all_test.append(df_test)
+            df_test[ "time" ] = time
+            df_test.fillna( -1, inplace=True )
+            all_test.append( df_test )
 
         # find everyone with a test result
-        df_test = pd.concat(all_test)
-        df_test["infected"] = (df_test["time_infected"]>-1)
+        df_test = pd.concat( all_test )
+        df_test["infected"] = ( df_test["time_infected"] > -1 )
 
         # check the specificity of the test
-        true_neg  = sum( ( df_test["infected"] == False ) & ( df_test["lateral_flow_status"] == 0 ) )
-        false_pos = sum( ( df_test["infected"] == False ) & ( df_test["lateral_flow_status"] == 1 ) )
+        true_neg  = sum( ( df_test[ "infected" ] == False ) & ( df_test[ "lateral_flow_status" ] == 0 ) )
+        false_pos = sum( ( df_test[ "infected" ] == False ) & ( df_test[ "lateral_flow_status" ] == 1 ) )
         p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "lateral_flow_test_specificity"] )
         np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
         np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
@@ -2439,27 +2445,27 @@ class TestClass(object):
         np.testing.assert_equal( p_val < upper_CI, True, f"Too many false positives given the test specificity tn={true_neg}, fp={false_pos}, p={p_val}" )
 
         # check the sensitivity is monotonic on each side of the peak.
-        df_test[ "test_sensitive_inf" ]  = ( ( df_test["time_infected"] != - 1 ) & ( df_test["time_infected"] <= df_test["time"] ) )
-        df_test[ "time_since_inf" ]  = ( df_test["time"] - df_test["time_infected"] )
+        df_test[ "test_sensitive_inf" ]  = ( ( df_test[ "time_infected" ] != - 1 ) & ( df_test[ "time_infected" ] <= df_test[ "time" ] ) )
+        df_test[ "time_since_inf" ]  = ( df_test[ "time" ] - df_test[ "time_infected" ] )
 
-        true_pos   = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
-        false_neg  = df_test[ ( df_test["infected"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
-        sens_ratio = true_pos.divide(false_neg.add(true_pos, fill_value=0), fill_value=0)
+        true_pos   = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
         sens_peak  = sens_ratio.argmax()
 
         sens_diff = sens_ratio.diff()
-        is_sens_single_peak = np.all(sens_diff.iloc[2:sens_peak+1] >= 0) & np.all(sens_diff[sens_peak+1:-3] <= 0)
+        is_sens_single_peak = np.all( sens_diff.iloc[ 2 : sens_peak + 1 ] >= 0 ) & np.all( sens_diff[ sens_peak + 1 : -3 ] <= 0 )
         np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_diff}" )
 
         # check the sensitivity at the peak.
         df_test[ "symptomatic" ] = ( df_test["time_symptomatic"] > 0 )
-        true_pos   = df_test[ ( df_test["time_since_inf"] == 3 ) & ( df_test["symptomatic"] == True ) & ( df_test["lateral_flow_status"] == 1 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
-        false_neg  = df_test[ ( df_test["time_since_inf"] == 3 ) & ( df_test["symptomatic"] == True ) & ( df_test["lateral_flow_status"] == 0 ) & ( df_test["test_sensitive_inf"] == True ) ].groupby( [ "time_since_inf" ] ).size()
-        sens_ratio = true_pos.divide(false_neg.add(true_pos, fill_value=0), fill_value=0)
+        true_pos   = df_test[ ( df_test[ "time_since_inf" ] == 3 ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test[ "time_since_inf" ] == 3 ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
         sens_peak_idx  = sens_ratio.idxmax()
 
-        np.testing.assert_equal( false_neg[sens_peak_idx] > 100, True, "In-sufficient false negatives in sensitive period to test" )
-        np.testing.assert_equal( true_pos[sens_peak_idx] > 100, True, "In-sufficient true positives in sensitive period to test" )
+        np.testing.assert_equal( false_neg[ sens_peak_idx ] > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        np.testing.assert_equal( true_pos[ sens_peak_idx ] > 100, True, "In-sufficient true positives in sensitive period to test" )
 
         sd_mult = test_params[ "sd_infectiousness_multiplier" ]
         sens_exp = test_params[ "lateral_flow_test_sensitivity"]
@@ -2468,7 +2474,7 @@ class TestClass(object):
           sens_peak = sens_ratio[sens_peak_idx]
           np.testing.assert_equal( sens_low <= sens_peak <= sens_exp, True, f"Sensitivity outside expected range {sens_low} <= {sens_peak} <= {sens_exp}." )
         else:
-          p_val = binom.cdf( true_pos[sens_peak_idx], ( false_neg[sens_peak_idx] + true_pos[sens_peak_idx]), sens_exp )
+          p_val = binom.cdf( true_pos[ sens_peak_idx ], ( false_neg[ sens_peak_idx ] + true_pos[ sens_peak_idx ] ), sens_exp )
           np.testing.assert_equal( p_val > lower_CI, True, f"Too few true positives in sensitive period given the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
           np.testing.assert_equal( p_val < upper_CI, True, f"Too many true positives in sensitive period the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
         del( model )

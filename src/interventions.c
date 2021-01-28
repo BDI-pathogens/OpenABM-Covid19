@@ -748,12 +748,12 @@ void intervention_test_take( model *model, individual *indiv )
 
 /*****************************************************************************************
 *  Name:		intervention_lateral_flow_test_order
-*  Description: Order a test for either today or a future date
+*  Description: Order a lateral flow test for either today or a future date
 *  Returns:		void
 ******************************************************************************************/
 void intervention_lateral_flow_test_order( model *model, individual *indiv, int time )
 {
-	if( indiv->lateral_flow_test_result != TEST_ORDERED && !(indiv->infection_events->is_case) )
+	if( indiv->lateral_flow_test_result != TEST_ORDERED && !indiv->infection_events->is_case )
 	{
 		indiv->lateral_flow_test_capacity = model->params->lateral_flow_test_repeat_count;
 		add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, time );
@@ -771,7 +771,7 @@ void intervention_lateral_flow_test_order( model *model, individual *indiv, int 
 ******************************************************************************************/
 void intervention_lateral_flow_test_take( model *model, individual *indiv )
 {
-	if (indiv->lateral_flow_test_capacity <= 0) return;
+	if ( indiv->lateral_flow_test_capacity <= 0 ) return;
 	indiv->lateral_flow_test_capacity--;
 
 	int result_time = model->time;
@@ -781,10 +781,10 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 	if( time_infected != UNKNOWN )
 	{
 		int infection_type = 0;
-		for(int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++)
+		for( int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++ )
 		{
-			infection_type = NEWLY_INFECTED_STATES[bucket];
-			if( indiv->infection_events->times[NEWLY_INFECTED_STATES[bucket]] == time_infected )
+			infection_type = NEWLY_INFECTED_STATES[ bucket ];
+			if( indiv->infection_events->times[ NEWLY_INFECTED_STATES[ bucket ] ] == time_infected )
 				break;
 		}
 
@@ -795,8 +795,8 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 		double sensitivity = 0;
 		double I = 0;
 		double V = 0;
-		const int peak_time = model->event_lists[LATERAL_FLOW_TEST].infectious_peak_time;
-		const double *infectious_curve = model->event_lists[infection_type].infectious_curve[LATERAL_FLOW_TEST];
+		const int peak_time = model->event_lists[ LATERAL_FLOW_TEST ].infectious_peak_time;
+		const double *infectious_curve = model->event_lists[ infection_type ].infectious_curve[ LATERAL_FLOW_TEST ];
 		const double g = 1.0/8;
 
 		const double b = 1.0/6;
@@ -810,7 +810,7 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 			I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
 			V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] *
 			                                indiv->infectiousness_multiplier *
-			                                infectious_factor ) * ( 1/g - 1/( g + b ) );
+			                                infectious_factor ) * ( 1 / g - 1 / ( g + b ) );
 		}
 
 		if ( V < 0 )
@@ -853,10 +853,10 @@ double calculate_mean_lfa_sensitivity( model *model, int type )
 	individual * indiv;
 	for( int idx = 0; idx < model->params->n_total; idx++ )
 	{
-		indiv = &(model->population[idx]);
+		indiv = &( model->population[ idx ] );
 		if( indiv->lateral_flow_test_sensitivity >= 0 &&
-		    (type == NO_EVENT ||
-		     indiv->infection_events->times[type] == time_infected( indiv )))
+		    ( type == NO_EVENT ||
+		      indiv->infection_events->times[ type ] == time_infected( indiv )))
 		{
 			total += indiv->lateral_flow_test_sensitivity;
 			cnt++;
@@ -1072,7 +1072,7 @@ void intervention_quarantine_household(
 			if( lateral_flow_test )
 				intervention_lateral_flow_test_order( model, contact, model->time + params->lateral_flow_test_order_wait );
 
-			if( !(lateral_flow_test && params->lateral_flow_test_only) && quarantine && params->test_on_traced && ( index_token->index_status == POSITIVE_TEST ) )
+			if( !( lateral_flow_test && params->lateral_flow_test_only ) && quarantine && params->test_on_traced && ( index_token->index_status == POSITIVE_TEST ) )
 			{
 				time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 				intervention_test_order( model, contact, time_test );
@@ -1154,7 +1154,7 @@ void intervention_index_case_symptoms_to_positive(
 				if( lateral_flow_test )
 					intervention_lateral_flow_test_order( model, contact, model->time + params->lateral_flow_test_order_wait );
 
-				if( !(params->lateral_flow_test_only && lateral_flow_test) && gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_positive  ) )
+				if( !( params->lateral_flow_test_only && lateral_flow_test ) && gsl_ran_bernoulli( rng, params->quarantine_compliance_traced_positive  ) )
 				{
 					time_quarantine = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
 				} else {
@@ -1212,7 +1212,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		trace_token *index_token  = index_trace_token( model, indiv );
 		index_token->index_status = SYMPTOMS_ONLY;
 
-		if (params->lateral_flow_test_only && lateral_flow_test)
+		if ( params->lateral_flow_test_only && lateral_flow_test )
 			time_event = model->time;
 		else
 			time_event = model->time + sample_transition_time( model, SYMPTOMATIC_QUARANTINE );
@@ -1376,7 +1376,7 @@ void intervention_on_traced(
 		int time_event = model->time;
 		int quarantine;
 
-		if (params->lateral_flow_test_only && lateral_flow_test)
+		if ( params->lateral_flow_test_only && lateral_flow_test )
 		{
 			time_event = model->time;
 		}

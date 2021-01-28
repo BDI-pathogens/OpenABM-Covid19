@@ -24,8 +24,8 @@ void initialize_params( parameters *params )
 {
 	params->demo_house = NULL;
 	params->occupation_network_table = NULL;
-	params->relative_transmission[LATERAL_FLOW_TEST] = 1;
-	params->relative_transmission_used[LATERAL_FLOW_TEST] = 1;
+	params->relative_transmission[ LATERAL_FLOW_TEST ] = 1;
+	params->relative_transmission_used[ LATERAL_FLOW_TEST ] = 1;
 }
 
 /*****************************************************************************************
