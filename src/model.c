@@ -64,7 +64,6 @@ model* new_model( parameters *params )
 		set_up_event_list( model_ptr, params, type );
 
 	set_up_counters( model_ptr );
-	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	if( params->hospital_on )
