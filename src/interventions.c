@@ -7,13 +7,13 @@
 
 #include "model.h"
 #include "individual.h"
-#include "gsl/gsl_randist.h"
 #include "utilities.h"
 #include "constant.h"
 #include "params.h"
 #include "network.h"
 #include "disease.h"
 #include "interventions.h"
+#include <gsl/gsl_randist.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
