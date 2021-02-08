@@ -887,7 +887,54 @@ class Model:
             schedule.vaccine_protection_period,
             schedule.c_total_vaccinated
         )   
-
+    
+    def get_individuals(self):
+        """
+        Return dataframe of population
+        """
+        n_total = self.c_model.params.n_total
+        
+        ids   = covid19.longArray(n_total)
+        statuses   = covid19.intArray(n_total)
+        age_groups   = covid19.intArray(n_total)
+        occupation_networks   = covid19.intArray(n_total)
+        house_ids = covid19.longArray(n_total)
+        infection_counts = covid19.intArray(n_total)
+        vaccine_statuses = covid19.shortArray(n_total)
+        
+        n_total = covid19.get_individuals(
+            self.c_model, ids, statuses, age_groups, occupation_networks, 
+            house_ids, infection_counts, vaccine_statuses)
+        
+        list_ids = [None]*n_total
+        list_statuses = [None]*n_total
+        list_age_groups = [None]*n_total
+        list_occupation_networks = [None]*n_total
+        list_house_ids = [None]*n_total
+        list_infection_counts = [None]*n_total
+        list_vaccine_statuses = [None]*n_total
+        
+        for idx in range(n_total):
+            list_ids[idx] = ids[idx]
+            list_statuses[idx] = statuses[idx]
+            list_age_groups[idx] = age_groups[idx]
+            list_occupation_networks[idx] = occupation_networks[idx]
+            list_house_ids[idx] = house_ids[idx]
+            list_infection_counts[idx] = infection_counts[idx]
+            list_vaccine_statuses[idx] = vaccine_statuses[idx]
+        
+        df_popn = pd.DataFrame( {
+            'ID': list_ids, 
+            'current_status': list_statuses,
+            'age_group': list_age_groups,
+            'occupation_network': list_occupation_networks,
+            'house_no': list_house_ids,
+            'infection_count' : list_infection_counts,
+            'vaccine_status' : list_vaccine_statuses
+        })
+        
+        return df_popn
+    
     def _create(self):
         """
         Call C function new_model (renamed create_model)

@@ -180,6 +180,43 @@ int get_app_user_by_index(
   return model->population[ idx ].app_user;
 }
 
+/*****************************************************************************************
+*  Name: 		get_individuals
+*  Description: populate input arrays with the population (including current status)
+*  Arguments:	model:					the model object
+*  				ids:					array of users IDs
+*  				statuses:				array of users current status
+*  				age_groups:				array of users age group
+*  				occupation_networks:	array of users occupation networks
+*  				house_ids:				array of users house id
+
+******************************************************************************************/
+long get_individuals(
+	model *model,
+	long *ids,
+	int *statuses,
+	int *age_groups,
+	int *occupation_networks,
+	long *house_ids,
+	int *infection_counts,
+	short *vaccine_statuses
+)
+{
+	long n_total = model->params->n_total;
+	long idx;
+	
+	for( idx = 0; idx < n_total; idx++ ){
+		ids[ idx ] = model->population[ idx ].idx;
+		statuses[ idx ] = model->population[ idx ].status;
+		age_groups[ idx ] = model->population[ idx ].age_group;
+		occupation_networks[ idx ] = model->population[ idx ].occupation_network;
+		house_ids[ idx ] = model->population[ idx ].house_no;
+		infection_counts[ idx ] = count_infection_events( &(model->population[ idx ]) );
+		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
+	}
+	return idx;
+}
+
 
 /*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property
