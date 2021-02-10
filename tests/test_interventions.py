@@ -2325,6 +2325,8 @@ class TestClass(object):
         model.write_individual_file()
         model.write_transmissions()
 
+        del( model )
+
         # read CSV's
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 0 ) > 0, True, "No negative Lateral Flow tests found." )
@@ -2350,6 +2352,8 @@ class TestClass(object):
         # write files
         model.write_individual_file()
         model.write_transmissions()
+
+        del( model )
 
         # read CSV's
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
@@ -2387,7 +2391,7 @@ class TestClass(object):
             df_test = pd.merge( df_indiv, df_quar, on = "ID", how = "left" )
             all_test.append( df_test )
 
-        del model
+        del( model )
 
         df_test = pd.concat( all_test )
 
@@ -2477,6 +2481,7 @@ class TestClass(object):
           p_val = binom.cdf( true_pos[ sens_peak_idx ], ( false_neg[ sens_peak_idx ] + true_pos[ sens_peak_idx ] ), sens_exp )
           np.testing.assert_equal( p_val > lower_CI, True, f"Too few true positives in sensitive period given the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
           np.testing.assert_equal( p_val < upper_CI, True, f"Too many true positives in sensitive period the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
+
         del( model )
         
     def test_recursive_testing_indirect_release(self, test_params ):
@@ -2540,6 +2545,8 @@ class TestClass(object):
             df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
             all_pos = all_pos.append(df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
         model.write_trace_tokens()
+
+        del( model )
 
         np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
 
