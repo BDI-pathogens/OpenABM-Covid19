@@ -83,7 +83,7 @@ model* new_model( parameters *params )
 	model_ptr->n_quarantine_days = 0;
 
 	return model_ptr;
-};
+}
 
 /*****************************************************************************************
 *  Name:		destroy_model
@@ -147,7 +147,7 @@ void destroy_model( model *model )
     free( model );
 
     gsl_rng_free( rng );
-};
+}
 
 /*****************************************************************************************
 *  Name:		set_up_event_list
@@ -202,7 +202,7 @@ void destroy_event_list( model *model, int type )
 	free( model->event_lists[type].n_total_by_age );
 	free( model->event_lists[type].n_daily_by_age );
 	free( model->event_lists[type].events );
-};
+}
 
 /*****************************************************************************************
 *  Name:		set_up_networks
@@ -867,7 +867,7 @@ void build_daily_network( model *model )
             add_hospital_network_interactions(  model, &(model->hospitals[idx]) );
         }
 	}
-};
+}
 
 /*****************************************************************************************
 *  Name:		transition_events
@@ -1378,4 +1378,4 @@ int one_time_step( model *model )
 	return_interactions( model );
 
 	return 1;
-};
+}

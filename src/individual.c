@@ -437,7 +437,7 @@ void destroy_individual( individual *indiv )
 		infection_event = infection_event->next;
 		free( temporary_infection_event );
 	}
-};
+}
 
 /*****************************************************************************************
 *  Name:		count_infection_events

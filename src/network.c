@@ -165,7 +165,7 @@ void build_watts_strogatz_network(
 	free(edge_mat);
 	free(n_edges_arr);
 	free(node_list);
-};
+}
 
 /*****************************************************************************************
 *  Name:		remove_contact
@@ -183,7 +183,7 @@ void remove_contact(long *current_contacts_arr, long contact_to_remove, long *le
 	}
 	current_contacts_arr[j] = UNKNOWN;
 	--*length;
-};
+}
 
 /*****************************************************************************************
 *  Name:		add_contact
@@ -193,7 +193,7 @@ void add_contact(long *current_contacts_arr, long contact_to_add, long *length)
 {
 	current_contacts_arr[*length] = contact_to_add;
 	++*length;
-};
+}
 
 /*****************************************************************************************
 *  Name:		check_member_or_self
@@ -212,7 +212,7 @@ int check_member_or_self(long x, long self, long *array, long length)
             return 1;
     }
     return 0;
-};
+}
 
 /*****************************************************************************************
 *  Name:		destroy_network
@@ -232,7 +232,7 @@ void destroy_network( network *network )
 		free( network->opt_long_array );
 
 	free( network );
-};
+}
 
 /*****************************************************************************************
 *  Name:		relabel_network
@@ -247,7 +247,7 @@ void relabel_network( network *network, long *labels )
 		network->edges[idx].id1 = labels[network->edges[idx].id1];
 		network->edges[idx].id2 = labels[network->edges[idx].id2];
 	}
-};
+}
 
 /*****************************************************************************************
 *  Name:		update_daily_fraction
@@ -267,6 +267,6 @@ int update_daily_fraction( network *network, double fraction )
 
 	network->daily_fraction = fraction;
 	return TRUE;
-};
+}
 
 

@@ -25,16 +25,16 @@
 void read_command_line_args( parameters *params, int argc, char **argv )
 {
 	int param_line_number, hospital_param_line_number;
-	char input_param_file[ INPUT_CHAR_LEN ];
-	char input_household_file [INPUT_CHAR_LEN ];
-	char hospital_input_param_file[ INPUT_CHAR_LEN ];
-	char output_file_dir[ INPUT_CHAR_LEN ];
+	char input_param_file[ INPUT_CHAR_LEN ] = {0};
+	char input_household_file [INPUT_CHAR_LEN ] = {0};
+	char hospital_input_param_file[ INPUT_CHAR_LEN ] = {0};
+	char output_file_dir[ INPUT_CHAR_LEN ] = {0};
 
 	if(argc > 1)
 	{
-		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN );
+		strncpy(input_param_file, argv[1], INPUT_CHAR_LEN - 1 );
 	}else{
-		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN );
+		strncpy(input_param_file, "../tests/data/baseline_parameters.csv", INPUT_CHAR_LEN - 1);
 	}
 
 	if(argc > 2)
@@ -49,27 +49,27 @@ void read_command_line_args( parameters *params, int argc, char **argv )
 
 	if(argc > 3)
 	{
-		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN );
+		strncpy(output_file_dir, argv[3], INPUT_CHAR_LEN - 1 );
 		params->sys_write_individual = TRUE;
 
 	}else{
-		strncpy(output_file_dir, ".", INPUT_CHAR_LEN );
+		strncpy(output_file_dir, ".", INPUT_CHAR_LEN - 1 );
 		params->sys_write_individual = FALSE;
 	}
 
 	if(argc > 4)
 	{
-		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN );
+		strncpy(input_household_file, argv[4], INPUT_CHAR_LEN - 1 );
 		params->sys_write_hospital = TRUE;
 	}else{
 		strncpy(input_household_file, "../tests/data/baseline_household_demographics.csv",
-			INPUT_CHAR_LEN );
+			INPUT_CHAR_LEN - 1);
 		params->sys_write_hospital = FALSE;
 	}
 
 	if(argc > 5)
 	{
-		strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN );
+		strncpy(hospital_input_param_file, argv[5], INPUT_CHAR_LEN - 1 );
 	}else{
 		strncpy(hospital_input_param_file, "../tests/data/hospital_baseline_parameters.csv",
 			INPUT_CHAR_LEN );
@@ -118,7 +118,7 @@ void read_param_file( parameters *params)
 
 	// Throw away header (and first `params->param_line_number` lines)
 	for(i = 0; i < params->param_line_number; i++)
-		fscanf(parameter_file, "%*[^\n]\n");
+		(void)fscanf(parameter_file, "%*[^\n]\n");
 
 	// Read and attach parameter values to parameter structure
 	check = fscanf(parameter_file, " %li ,", &(params->rng_seed));
@@ -516,7 +516,7 @@ void read_hospital_param_file( parameters *params)
 
 	// Throw away header (and first `params->hospital_param_line_number` lines)
 	for(i = 0; i < params->param_line_number; i++)
-		fscanf(hospital_parameter_file, "%*[^\n]\n");
+		(void)fscanf(hospital_parameter_file, "%*[^\n]\n");
 
 	// Read and attach parameter values to parameter structure
 	check = fscanf(hospital_parameter_file, " %i ,", &(params->n_hospitals));
@@ -906,7 +906,8 @@ void read_household_demographics_file( parameters *params)
 
 	// read in the data (throw away the header line)
 	hh_file = fopen(params->input_household_file, "r");
-	fscanf(hh_file, "%*[^\n]\n");
+	(void) fscanf(hh_file, "%*[^\n]\n");
+
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
 		for(adx = 0; adx < N_AGE_GROUPS; adx++){
 			// Read and attach parameter values to parameter structure
@@ -1367,9 +1368,9 @@ void write_occupation_network(model *model, parameters *params, int network_idx)
 
 	char output_file[INPUT_CHAR_LEN];
 	char param_line_number[10], network_idx_text[10];
-	sprintf(param_line_number, "%d", params->param_line_number);
+	snprintf(param_line_number, 10, "%d", params->param_line_number);
 
-	sprintf(network_idx_text, "%d", network_idx);
+	snprintf(network_idx_text, 10, "%d", network_idx);
 
 	// Concatenate file name
 	strcpy(output_file, params->output_file_dir);

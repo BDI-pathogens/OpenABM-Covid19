@@ -1,6 +1,6 @@
 Package: OpenABMCovid19
 Version: 0.3
-Title: Agent-based model for modelling the Covid-19
+Title: Agent-Based Model for Modelling the COVID-19
 License: GPL-3 | file LICENSE
 Authors@R:
   c(person("Oli", "Legat", role = c("cre"), email = "olegat@google.com"),
@@ -8,7 +8,7 @@ Authors@R:
     person("Will", "Probert", role = "aut"))
 Description:
   OpenABM-Covid19 is an agent-based model (ABM) developed to simulate the spread
-  of Covid-19 in a city and to analyse the effect of both passive and active
+  of COVID-19 in a city and to analyse the effect of both passive and active
   intervention strategies. Interactions between individuals are modelled on
   networks representing households, work-places and random contacts. The
   infection is transmitted between these contacts and the progression of the
@@ -30,3 +30,4 @@ Suggests:
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 SystemRequirements: GNU GSL
+Biarch: FALSE
