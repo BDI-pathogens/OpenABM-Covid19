@@ -6,23 +6,15 @@ Created: 17 April 2020
 Author: roberthinch
 """
 
-import example_utils as utils
-import pandas as pd
+import COVID19.model as abm
 
-# gets the baseline parameters
-params = utils.get_baseline_parameters()
+# get the model overiding a couple of params
+model = abm.Model( params = { "n_total" : 10000, "end_time": 20 } )
 
-# change to run on a small population (much quicker)
-params.set_param( "n_total", 10000 )
-
-# get the simulation object
-sim = utils.get_simulation( params )
-
-# run the simulation for 10 days
-sim.steps( 10 )
+# run the model
+res = model.run()
 
 # print the basic output
-timeseries = pd.DataFrame( sim.results )
-print( timeseries )
+print( res )
 
 
