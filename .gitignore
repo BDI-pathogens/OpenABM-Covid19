@@ -11,7 +11,7 @@ autom4te.cache/
 # File associated with compilation/linking
 src/**/*.o
 src/**/*.exe
-src/**/*.csv
+src/*.csv
 !src/adapter_covid19/data/*.csv
 src/**/*.so
 src/**/*.dll
@@ -102,7 +102,10 @@ src/covid19_wrap_R.c
 R/OpenABMCovid19.R
 
 sandbox/*.csv
+examples/*.png
+examples/images/*
 examples/*.csv
 examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
 /Debug/
+/.pytest_cache/
