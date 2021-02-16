@@ -60,7 +60,7 @@ int check_member_or_self(long , long, long *, long );
 void remove_contact(long *, long , long *);
 void add_contact(long *, long , long *);
 void relabel_network( network*, long*  );
-void destroy_network();
+void destroy_network( network* );
 int update_daily_fraction( network*, double );
 
 #endif /* NETWORK_H_ */
