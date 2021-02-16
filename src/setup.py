@@ -38,6 +38,9 @@ setup(
     ext_modules=[covid19_module],
     packages=["COVID19", "adapter_covid19",],
     py_modules=["covid19",],
+    package_dir  = {"COVID19" : "COVID19"},
+    package_data = {"COVID19" : ["default_params/*.csv"] },
+    include_package_data=True,
     install_requires=[
         "click",
         "matplotlib==3.2.2",

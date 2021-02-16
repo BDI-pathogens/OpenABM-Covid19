@@ -3,6 +3,8 @@ import enum
 from itertools import chain
 from typing import Union
 import pandas as pd
+import pkg_resources
+import sys, time
 
 import covid19
 from COVID19.network import Network
@@ -275,39 +277,38 @@ class Parameters(object):
         """
         self.c_params = covid19.parameters()
         covid19.initialize_params( self.c_params );
-        if input_param_file:
+        
+        # if no input_param_file is given use default
+        if input_param_file == None :
+            input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/baseline_parameters.csv')   
+        if read_param_file :
             self.c_params.input_param_file = input_param_file
-        elif not input_param_file and read_param_file:
-            raise ParameterException(
-                "Input param path is None and read param file set to true"
-            )
         else:
-            LOGGER.info(
-                "Have not passed input file for params, use set_param or set_param_dict"
-            )
+            LOGGER.info( "Have not passed input file for params, use set_param or set_param_dict" )
+            
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
+       
         self.c_params.output_file_dir = output_file_dir
-        if isinstance(input_households, str):
+        
+        if isinstance(input_households, pd.DataFrame):
+            self.household_df = input_households
+        else :
+            if input_households == None :
+                input_households = pkg_resources.resource_filename('COVID19', 'default_params/baseline_household_demographics.csv')
             self.c_params.input_household_file = input_households
             self.household_df = None
-        elif isinstance(input_households, pd.DataFrame):
-            self.household_df = input_households
-        elif not input_households:
-            raise ParameterException("Household data must be supplied as a csv")
+            
         if hospital_param_line_number:
             self.c_params.hospital_param_line_number = int(hospital_param_line_number)
 
-        if hospital_input_param_file and read_hospital_param_file:
+        # if no hospital_input_param_file is given use default
+        if hospital_input_param_file == None :
+            hospital_input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/hospital_baseline_parameters.csv') 
+        if read_hospital_param_file:
             self.c_params.hospital_input_param_file = hospital_input_param_file
-        elif not hospital_input_param_file and read_hospital_param_file:
-            raise ParameterException(
-                "Hospital param path is None and read hospital param file set to true"
-            )
         else:
-            LOGGER.info(
-                "Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this"
-            )
+            LOGGER.info("Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this")
 
         if read_hospital_param_file and hospital_input_param_file != None:
             self._read_hospital_param_file()
@@ -522,7 +523,17 @@ class Parameters(object):
 
 
 class Model:
-    def __init__(self, params_object):
+    def __init__(self, params_object = None, params = None):
+        
+        # use default params if none are given
+        if not params_object :
+            params_object = Parameters()
+        if params :
+            if not isinstance( params, dict ) :
+                raise ModelParameterException( "params must be a dictionary if specified")
+                
+            params_object.set_param_dict( params )
+        
         # Store the params object so it doesn't go out of scope and get freed
         self._params_obj = params_object
         # Create C parameters object
@@ -531,6 +542,7 @@ class Model:
         self._create()
         self._is_running = False
         self.nosocomial = bool(self.get_param("hospital_on"))
+        self.results = []
 
     def __del__(self):
         self._destroy()
@@ -955,6 +967,33 @@ class Model:
         Call C function on_time_step
         """
         covid19.one_time_step(self.c_model)
+        self.results.append( self.one_time_step_results() )
+        
+    def run(self, verbose = True):
+        """
+        Step through to the end of the simulation
+        """
+        n_steps  = self.c_params.end_time - self.c_model.time
+        step     = 0
+        
+        if verbose :
+            print( "Start simulation")
+            start_time = time.process_time()
+            
+                
+        while step < n_steps :
+            step = step + 1;
+                    
+            if verbose : 
+               print("\rStep " + str( step ) + " of " + str( n_steps ), end = "\r", flush = True )
+               
+            self.one_time_step()
+            
+        if verbose :
+            print( "")
+            print( "End simulation in " + "{0:.4g}".format( time.process_time() - start_time ) + "s" )
+        
+        return pd.DataFrame( self.results )
 
     def one_time_step_results(self):
         """
