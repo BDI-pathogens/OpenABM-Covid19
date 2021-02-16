@@ -12,6 +12,7 @@ Author: p-robot
 import sys
 import pandas as pd, numpy as np
 from os.path import join
+from distutils.dir_util import copy_tree
 
 def create_markdown_from_df(df, title = ""):
     """
@@ -83,6 +84,12 @@ if __name__ == "__main__":
     
     # Write parameters in a form readable by the model
     df[["Name", "Value"]].set_index("Name").transpose().to_csv(wide_parameter_file, index = False)
+    
+    # copy files to the defaul_params folder
+    source_dir = join( "tests", "data" )
+    target_dir = join( "src", "COVID19", "default_params")
+    copy_tree( source_dir, target_dir )
+    
     
     # Generate markdown tables for each parameter type (first strip on white space)
     parameter_types = df["Parameter type"].dropna().str.strip().unique()
