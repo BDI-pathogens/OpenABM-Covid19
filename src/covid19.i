@@ -40,7 +40,7 @@
 %nodefaultdtor interaction_block;
 %nodefaultctor incomplete_gamma_p_params;
 %nodefaultdtor incomplete_gamma_p_params;
-%nodefaultdtor trace_token;
+%nodefaultctor trace_token;
 %nodefaultdtor trace_token;
 
 %include "model.h"

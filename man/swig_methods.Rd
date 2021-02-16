@@ -24,6 +24,7 @@
 \alias{$,_p_network-method}
 \alias{$,_p_parameters-method}
 \alias{$,_p_incomplete_gamma_p_params-method}
+\alias{$,_p_trace_token-method}
 \alias{$<-,_p_directory-method}
 \alias{$<-,_p_edge-method}
 \alias{$<-,_p_event-method}
@@ -36,6 +37,7 @@
 \alias{$<-,_p_network-method}
 \alias{$<-,_p_parameters-method}
 \alias{$<-,_p_incomplete_gamma_p_params-method}
+\alias{$<-,_p_trace_token-method}
 \alias{[[<-,_p_directory,character-method}
 \alias{[[<-,_p_edge,character-method}
 \alias{[[<-,_p_event,character-method}
@@ -48,6 +50,7 @@
 \alias{[[<-,_p_network,character-method}
 \alias{[[<-,_p_parameters,character-method}
 \alias{[[<-,_p_incomplete_gamma_p_params,character-method}
+\alias{[[<-,_p_trace_token,character-method}
 
 %% SWIG helper types
 \alias{[,ExternalReference-method}

@@ -47,3 +47,4 @@ git push origin feature:speed_up_fix
 * If the contribution/PR changes the model parameterisation please add the new parameter(s) to `tests/data/baseline_parameters_transpose.csv`, including a description, default value, and reference (if possible) for the new parameters.  Calling `python python/transpose_parameters.py` from the main project directory will create markdown documents of the parameter files and flat files `tests/data/baseline_parameters.csv` that can be included in the PR.  
 * Parameters that wish to be updated via the Python interface need to be added to the list `PYTHON_SAFE_UPDATE_PARAMS` within `OpenABM-Covid19/src/COVID19/model.py`.  
 * If the contribution/PR changes the Python/C interface please include documentation.  
+* Changes to the Python interface should also include changes to the R interface.

@@ -31,6 +31,11 @@ test_that("Model::initialize (params_object isn't R6Class)", {
 })
 
 test_that("Model::baseline_params", {
+  # This test requires more than 4 GiB. So skip it on 32-bit machines.
+  if(.Machine$sizeof.pointer < 8) {
+    return();
+  }
+
   # This test is slow, uncomment the next line to skip this test:
   # return()
   m <- Model$new(baseline_params())

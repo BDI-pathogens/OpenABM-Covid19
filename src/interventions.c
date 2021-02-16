@@ -76,7 +76,7 @@ void set_up_app_users( model *model )
 
 		free( users );
 	}
-};
+}
 
 /*****************************************************************************************
 *  Name:		set_up_risk_scores

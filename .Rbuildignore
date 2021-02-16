@@ -40,6 +40,7 @@
 # Test files
 ^src_test$
 ^data_test$
+^tests\/test_R_INSTALL_win\.bat$
 ^tests\/requirements\.txt$
 ^tests\/src_test$
 ^tests\/data_test$
@@ -49,7 +50,7 @@
 # Misc
 ^\.github$
 ^README\.md$
-^cran-comments\.md$
+^CONTRIBUTING\.md$
 ^documentation$
 ^src\/Makefile$
 ^src\/main\.c$
