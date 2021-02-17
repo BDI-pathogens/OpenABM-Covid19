@@ -542,7 +542,7 @@ class Model:
         self._create()
         self._is_running = False
         self.nosocomial = bool(self.get_param("hospital_on"))
-        self.results = []
+        self._results = []
 
     def __del__(self):
         self._destroy()
@@ -967,7 +967,11 @@ class Model:
         Call C function on_time_step
         """
         covid19.one_time_step(self.c_model)
-        self.results.append( self.one_time_step_results() )
+        self._results.append( self.one_time_step_results() )
+        
+    @property
+    def results(self):
+        return pd.DataFrame(self._results)
         
     def run(self, verbose = True):
         """
@@ -979,7 +983,6 @@ class Model:
         if verbose :
             print( "Start simulation")
             start_time = time.process_time()
-            
                 
         while step < n_steps :
             step = step + 1;
@@ -993,8 +996,6 @@ class Model:
             print( "")
             print( "End simulation in " + "{0:.4g}".format( time.process_time() - start_time ) + "s" )
         
-        return pd.DataFrame( self.results )
-
     def one_time_step_results(self):
         """
         Get results from one time step

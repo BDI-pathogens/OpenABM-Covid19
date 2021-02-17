@@ -12,9 +12,9 @@ import COVID19.model as abm
 model = abm.Model( params = { "n_total" : 10000, "end_time": 20 } )
 
 # run the model
-res = model.run()
+model.run()
 
 # print the basic output
-print( res )
+print( model.results )
 
 
