@@ -3,6 +3,8 @@ import enum
 from itertools import chain
 from typing import Union
 import pandas as pd
+import pkg_resources
+import sys, time
 
 import covid19
 from COVID19.network import Network
@@ -275,39 +277,38 @@ class Parameters(object):
         """
         self.c_params = covid19.parameters()
         covid19.initialize_params( self.c_params );
-        if input_param_file:
+        
+        # if no input_param_file is given use default
+        if not input_param_file :
+            input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/baseline_parameters.csv')   
+        if read_param_file :
             self.c_params.input_param_file = input_param_file
-        elif not input_param_file and read_param_file:
-            raise ParameterException(
-                "Input param path is None and read param file set to true"
-            )
         else:
-            LOGGER.info(
-                "Have not passed input file for params, use set_param or set_param_dict"
-            )
+            LOGGER.info( "Have not passed input file for params, use set_param or set_param_dict" )
+            
         if param_line_number:
             self.c_params.param_line_number = int(param_line_number)
+       
         self.c_params.output_file_dir = output_file_dir
-        if isinstance(input_households, str):
+        
+        if isinstance(input_households, pd.DataFrame):
+            self.household_df = input_households
+        else :
+            if not input_households :
+                input_households = pkg_resources.resource_filename('COVID19', 'default_params/baseline_household_demographics.csv')
             self.c_params.input_household_file = input_households
             self.household_df = None
-        elif isinstance(input_households, pd.DataFrame):
-            self.household_df = input_households
-        elif not input_households:
-            raise ParameterException("Household data must be supplied as a csv")
+            
         if hospital_param_line_number:
             self.c_params.hospital_param_line_number = int(hospital_param_line_number)
 
-        if hospital_input_param_file and read_hospital_param_file:
+        # if no hospital_input_param_file is given use default
+        if not hospital_input_param_file :
+            hospital_input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/hospital_baseline_parameters.csv') 
+        if read_hospital_param_file:
             self.c_params.hospital_input_param_file = hospital_input_param_file
-        elif not hospital_input_param_file and read_hospital_param_file:
-            raise ParameterException(
-                "Hospital param path is None and read hospital param file set to true"
-            )
         else:
-            LOGGER.info(
-                "Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this"
-            )
+            LOGGER.info("Have not passed hospital input file for params, use set_param or set_param_dict// crick todo look into this")
 
         if read_hospital_param_file and hospital_input_param_file != None:
             self._read_hospital_param_file()
@@ -522,7 +523,33 @@ class Parameters(object):
 
 
 class Model:
-    def __init__(self, params_object):
+    """
+    OpenABM-Covid19 is an agent-based model of an epidemic using realistic networks, viral dynamics, 
+    disease progression and both non-pharmaceutical and pharmaceutical interventions.
+    
+    Example:
+        import COVID19.model as abm
+        model = abm.Model( params = { "n_total" : 10000, "end_time": 20 } )
+        model.run()
+        print( model.results )    
+    """
+    def __init__(self, params_object = None, params = None):
+        """
+        Initializes a new model with either specified or default parameters
+        
+        Arguments:
+            params_object{[Parameters()]} - a Parameter object, if None specified uses the default parameters 
+            params{[dict]}                - overrides to default/specified parameters 
+        """
+        # use default params if none are given
+        if not params_object :
+            params_object = Parameters()
+        if params :
+            if not isinstance( params, dict ) :
+                raise ModelParameterException( "params must be a dictionary if specified")
+                
+            params_object.set_param_dict( params )
+        
         # Store the params object so it doesn't go out of scope and get freed
         self._params_obj = params_object
         # Create C parameters object
@@ -531,6 +558,7 @@ class Model:
         self._create()
         self._is_running = False
         self.nosocomial = bool(self.get_param("hospital_on"))
+        self._results = []
 
     def __del__(self):
         self._destroy()
@@ -952,10 +980,52 @@ class Model:
 
     def one_time_step(self):
         """
-        Call C function on_time_step
+        Steps the simulation forward one time step
         """
         covid19.one_time_step(self.c_model)
-
+        self._results.append( self.one_time_step_results() )
+        
+    @property
+    def results(self):
+        """
+        A dataframe of all the time-series results in the simulation so far.
+        Concatanates the return of one_time_step_results from all steps so far.
+        
+        Returns:
+            Panda DataFrame
+        """
+        
+        return pd.DataFrame(self._results)
+        
+    def run(self, verbose = True):
+        """
+        Runs simulation to the end (specified by the parameter end_time)
+        
+        Arguments:
+            verbose{[boolean]} - whether to display progress information (DEFAULT=True)
+            
+        Returns: 
+            None
+        """
+        n_steps  = self.c_params.end_time - self.c_model.time
+        step     = 0
+        
+        if verbose :
+            print( "Start simulation")
+            start_time = time.process_time()
+                
+        while step < n_steps :
+            step = step + 1;
+                    
+            if verbose : 
+               print("\rStep " + str( step ) + " of " + str( n_steps ), end = "\r", flush = True )
+               
+            self.one_time_step()
+            
+        if verbose :
+            print( "")
+            print( "End simulation in " + "{0:.4g}".format( time.process_time() - start_time ) + "s" )
+        
     def one_time_step_results(self):
         """
         Get results from one time step

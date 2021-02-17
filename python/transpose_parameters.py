@@ -11,7 +11,9 @@ Author: p-robot
 
 import sys
 import pandas as pd, numpy as np
+import os, glob, shutil
 from os.path import join
+from distutils.dir_util import copy_tree
 
 def create_markdown_from_df(df, title = ""):
     """
@@ -84,6 +86,17 @@ if __name__ == "__main__":
     # Write parameters in a form readable by the model
     df[["Name", "Value"]].set_index("Name").transpose().to_csv(wide_parameter_file, index = False)
     
+    # copy files to the defaul_params folder
+    source_dir = join( "tests", "data" )
+    target_dir = join( "src", "COVID19", "default_params")
+ 
+    # remove all the old files before copying over the new ones
+    for f in glob.glob( target_dir + "/*" ) :
+        os.remove( f ) 
+    files = [ "baseline_parameters.csv", "baseline_household_demographics.csv", "hospital_baseline_parameters.csv" ]
+    for f in files :
+        shutil.copy( join( source_dir, f ), join( target_dir, f ))
+        
     # Generate markdown tables for each parameter type (first strip on white space)
     parameter_types = df["Parameter type"].dropna().str.strip().unique()
     
