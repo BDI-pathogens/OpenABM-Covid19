@@ -523,8 +523,24 @@ class Parameters(object):
 
 
 class Model:
+    """
+    OpenABM-Covid19 is an agent-based model of an epidemic using realistic networks, viral dynamics, 
+    disease progression and both non-pharmaceutical and pharmaceutical interventions.
+    
+    Example:
+        import COVID19.model as abm
+        model = abm.Model( params = { "n_total" : 10000, "end_time": 20 } )
+        model.run()
+        print( model.results )    
+    """
     def __init__(self, params_object = None, params = None):
+        """
+        Initializes a new model with either specified or default parameters
         
+        Arguments:
+            params_object{[Parameters()]} - a Parameter object, if None specified uses the default parameters 
+            params{[dict]}                - overrides to default/specified parameters 
+        """
         # use default params if none are given
         if not params_object :
             params_object = Parameters()
@@ -964,18 +980,32 @@ class Model:
 
     def one_time_step(self):
         """
-        Call C function on_time_step
+        Steps the simulation forward one time step
         """
         covid19.one_time_step(self.c_model)
         self._results.append( self.one_time_step_results() )
         
     @property
     def results(self):
+        """
+        A dataframe of all the time-series results in the simulation so far.
+        Concatanates the return of one_time_step_results from all steps so far.
+        
+        Returns:
+            Panda DataFrame
+        """
+        
         return pd.DataFrame(self._results)
         
     def run(self, verbose = True):
         """
-        Step through to the end of the simulation
+        Runs simulation to the end (specified by the parameter end_time)
+        
+        Arguments:
+            verbose{[boolean]} - whether to display progress information (DEFAULT=True)
+            
+        Returns: 
+            None
         """
         n_steps  = self.c_params.end_time - self.c_model.time
         step     = 0
