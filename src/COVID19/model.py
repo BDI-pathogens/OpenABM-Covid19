@@ -279,7 +279,7 @@ class Parameters(object):
         covid19.initialize_params( self.c_params );
         
         # if no input_param_file is given use default
-        if input_param_file == None :
+        if not input_param_file :
             input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/baseline_parameters.csv')   
         if read_param_file :
             self.c_params.input_param_file = input_param_file
@@ -294,7 +294,7 @@ class Parameters(object):
         if isinstance(input_households, pd.DataFrame):
             self.household_df = input_households
         else :
-            if input_households == None :
+            if not input_households :
                 input_households = pkg_resources.resource_filename('COVID19', 'default_params/baseline_household_demographics.csv')
             self.c_params.input_household_file = input_households
             self.household_df = None
@@ -303,7 +303,7 @@ class Parameters(object):
             self.c_params.hospital_param_line_number = int(hospital_param_line_number)
 
         # if no hospital_input_param_file is given use default
-        if hospital_input_param_file == None :
+        if not hospital_input_param_file :
             hospital_input_param_file = pkg_resources.resource_filename('COVID19', 'default_params/hospital_baseline_parameters.csv') 
         if read_hospital_param_file:
             self.c_params.hospital_input_param_file = hospital_input_param_file
