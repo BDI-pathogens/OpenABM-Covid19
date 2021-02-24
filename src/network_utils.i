@@ -35,4 +35,18 @@ double network_daily_fraction( network *pnetwork ) {
 	return pnetwork->daily_fraction;
 }
 
+int get_network( network *pnetwork, long *id1_array, long *id2_array) {
+    
+    long idx;
+    
+    // Loop through all edges in the network
+    for(idx = 0; idx < pnetwork->n_edges; idx++)
+    {
+        id1_array[idx] = pnetwork->edges[idx].id1;
+        id2_array[idx] = pnetwork->edges[idx].id2;
+    }
+    
+	return TRUE;
+}
+
 %}
