@@ -5,7 +5,7 @@ Created: 15 October 2020
 Author: roberthinch
 """
 
-import covid19
+import covid19, pandas as pd
 
 class Network:
     """
@@ -54,6 +54,25 @@ class Network:
         print( "skip_quarantined  = " + str( self.skip_quarantined() ) )
         print( "type              = " + str( self.type() ) )
         print( "daily_fraction    = " + str( self.daily_fraction() ) )
+    
+    def get_network(self):
+        """Return pandas.DataFrame of the network"""
+        n_edges = self.n_edges()
+        id1   = covid19.longArray(n_edges)
+        id2   = covid19.longArray(n_edges)
         
+        return_status = covid19.get_network(self.c_network, id1, id2)
 
-   
+        list_id1 = [None]*n_edges
+        list_id2 = [None]*n_edges
+        
+        for idx in range(n_edges):
+            list_id1[idx] = id1[idx]
+            list_id2[idx] = id2[idx]
+        
+        df_network = pd.DataFrame( {
+            'ID1': list_id1, 
+            'ID2': list_id2
+        })
+        
+        return df_network

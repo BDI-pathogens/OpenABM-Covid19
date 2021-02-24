@@ -37,6 +37,8 @@ TEST_OUTPUT_FILE_HOSPITAL_INTERACTIONS = join(DATA_DIR_TEST, "time_step_hospital
 TEST_HOUSEHOLD_TEMPLATE = "./tests/data/baseline_household_demographics.csv"
 TEST_HOUSEHOLD_FILE = join(DATA_DIR_TEST, "test_household_demographics.csv")
 
+TEST_HOUSEHOLD_NETWORK_FILE = join(DATA_DIR_TEST, "household_network_Run1.csv")
+
 class EVENT_TYPES(Enum):
     SUSCEPTIBLE = 0
     PRESYMPTOMATIC = 1

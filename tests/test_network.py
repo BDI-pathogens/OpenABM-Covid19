@@ -404,7 +404,8 @@ class TestClass(object):
                 p_network = 0.1,
                 mean_conn = 10         
             )
-        ]
+        ],
+        "test_get_network": [dict()]
     }
     """
     Test class for checking 
@@ -1067,5 +1068,25 @@ class TestClass(object):
         n_same = np.sum( inter[ "same" ]== True ) 
         n_tot  = len( inter )
         np.testing.assert_allclose( [ n_same / n_tot ], [ 0 ], atol = 0.05, err_msg = "Too many repeated random contacts" )
-                
- 
+    
+    def test_get_network(self):
+
+        network_id = 0
+
+        # Set up test model
+        params = utils.get_params_swig()
+        model = utils.get_model_swig( params )
+        model.one_time_step()
+        
+        # Write network to file
+        model.write_household_network()
+        df_network_written = pd.read_csv(constant.TEST_HOUSEHOLD_NETWORK_FILE)
+
+        # Return network as a dataframe
+        network = model.get_network_by_id( network_id )
+        df_network_returned = network.get_network()
+
+        np.testing.assert_array_equal( 
+            df_network_returned.to_numpy(), 
+            df_network_written.to_numpy() 
+            )
