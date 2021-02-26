@@ -784,7 +784,7 @@ int infectious_state( individual* indiv, int time_infected )
 *
 *				Returns the test sensitivity if the individual is in the
 *				sensitive period, -1 otherwise.
-*  Returns:		double
+*
 ******************************************************************************************/
 double lfa_sensitivity( model *model, individual *indiv )
 {
@@ -793,6 +793,7 @@ double lfa_sensitivity( model *model, individual *indiv )
 
 	time_infected = model->time - time_infected;
 
+	// Used to normalize the infectiousness curve to V(peak_symptomatic) = 1/g.
 	const double infectious_factor = 1/.0802 * exp(1);
 
 	double sensitivity = 0;
