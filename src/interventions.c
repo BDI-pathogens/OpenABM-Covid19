@@ -354,12 +354,15 @@ void update_intervention_policy( model *model, int time )
 		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
 	}
 
-	for( int idx = 0; idx < model->params->n_total; idx++ )
+	if ( model->n_lateral_flow_tests > 0 )
 	{
-		if( model->population[ idx ].lateral_flow_test_result >= 0 )
+		for( int idx = 0; idx < model->params->n_total; idx++ )
 		{
-			model->population[ idx ].lateral_flow_test_result = NO_TEST;
-			model->population[ idx ].lateral_flow_test_sensitivity = NO_TEST;
+			if( model->population[ idx ].lateral_flow_test_result >= 0 )
+			{
+				model->population[ idx ].lateral_flow_test_result = NO_TEST;
+				model->population[ idx ].lateral_flow_test_sensitivity = NO_TEST;
+			}
 		}
 	}
 }
@@ -762,6 +765,66 @@ void intervention_lateral_flow_test_order( model *model, individual *indiv, int 
 }
 
 /*****************************************************************************************
+*  Name:		infectious_state
+*  Description: Get the infectious state for the given time infected.
+*  Returns:		int
+******************************************************************************************/
+int infectious_state( individual* indiv, int time_infected )
+{
+	for( int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++ )
+	{
+		if( indiv->infection_events->times[ NEWLY_INFECTED_STATES[ bucket ] ] == time_infected )
+			return NEWLY_INFECTED_STATES[ bucket ];
+	}
+	return 0;
+}
+/*****************************************************************************************
+*  Name:		lfa_sensitivity
+*  Description: Calculates the lfa sensitivity for a given individual.
+*
+*				Returns the test sensitivity if the individual is in the
+*				sensitive period, -1 otherwise.
+*  Returns:		double
+******************************************************************************************/
+double lfa_sensitivity( model *model, individual *indiv )
+{
+	int time_infected = time_infected( indiv );
+	int infection_type = infectious_state( indiv, time_infected );
+
+	time_infected = model->time - time_infected;
+
+	const double infectious_factor = 1/.0802 * exp(1);
+
+	double sensitivity = 0;
+	double I = 0;
+	double V = 0;
+	const int peak_time = model->event_lists[ LATERAL_FLOW_TEST ].infectious_peak_time;
+	const double *infectious_curve = model->event_lists[ infection_type ].infectious_curve[ LATERAL_FLOW_TEST ];
+	const double g = 1.0/8;
+	const double b = 1.0/6;
+
+	if( time_infected <= peak_time )
+	{
+		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
+		V = log( I ) / g;
+	}
+	else
+	{
+		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
+		V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] *
+		                                indiv->infectiousness_multiplier *
+		                                infectious_factor ) * ( 1 / g - 1 / ( g + b ) );
+	}
+
+	if ( V < 0 )
+		return -1;
+
+	sensitivity = 1 / ( 1 + exp( -V ) );
+	sensitivity = max( 0, min( model->params->lateral_flow_test_sensitivity , sensitivity ) );
+	return sensitivity;
+}
+
+/*****************************************************************************************
 *  Name:		intervention_lateral_flow_test_take
 *  Description: An individual takes a lateral flow test
 *
@@ -773,6 +836,7 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 {
 	if ( indiv->lateral_flow_test_capacity <= 0 ) return;
 	indiv->lateral_flow_test_capacity--;
+	model->n_lateral_flow_tests++;
 
 	int result_time = model->time;
 
@@ -780,47 +844,13 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 
 	if( time_infected != UNKNOWN )
 	{
-		int infection_type = 0;
-		for( int bucket = 0; bucket < N_NEWLY_INFECTED_STATES; bucket++ )
-		{
-			infection_type = NEWLY_INFECTED_STATES[ bucket ];
-			if( indiv->infection_events->times[ NEWLY_INFECTED_STATES[ bucket ] ] == time_infected )
-				break;
-		}
-
-		time_infected = model->time - time_infected;
-
-		const double infectious_factor = 1/.0802 * exp(1);
-
-		double sensitivity = 0;
-		double I = 0;
-		double V = 0;
-		const int peak_time = model->event_lists[ LATERAL_FLOW_TEST ].infectious_peak_time;
-		const double *infectious_curve = model->event_lists[ infection_type ].infectious_curve[ LATERAL_FLOW_TEST ];
-		const double g = 1.0/8;
-
-		const double b = 1.0/6;
-		if( time_infected <= peak_time )
-		{
-			I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
-			V = log( I ) / g;
-		}
-		else
-		{
-			I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
-			V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] *
-			                                indiv->infectiousness_multiplier *
-			                                infectious_factor ) * ( 1 / g - 1 / ( g + b ) );
-		}
-
-		if ( V < 0 )
+		double sensitivity = lfa_sensitivity( model, indiv );
+		if ( sensitivity < 0 )
 		{
 			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, 1 - model->params->lateral_flow_test_specificity );
 		}
 		else
 		{
-			sensitivity = 1 / ( 1 + exp( -V ) );
-			sensitivity = max( 0, min( model->params->lateral_flow_test_sensitivity , sensitivity ) );
 			indiv->lateral_flow_test_sensitivity = sensitivity;
 			indiv->lateral_flow_test_result = gsl_ran_bernoulli( rng, sensitivity );
 		}

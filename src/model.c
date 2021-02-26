@@ -56,6 +56,7 @@ model* new_model( parameters *params )
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
 
+	set_up_counters( model_ptr );
 	set_up_population( model_ptr );
 	update_intervention_policy( model_ptr, model_ptr->time );
 
@@ -63,7 +64,6 @@ model* new_model( parameters *params )
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
-	set_up_counters( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	if( params->hospital_on )
@@ -267,6 +267,7 @@ void set_up_counters( model *model ){
 	model->n_quarantine_events_app_user = 0;
 	model->n_quarantine_release_events = 0;
 	model->n_quarantine_release_events_app_user = 0;
+	model->n_lateral_flow_tests = 0;
 
 	model->n_vaccinated_fully = 0;
 	model->n_vaccinated_symptoms = 0;
@@ -289,6 +290,7 @@ void reset_counters( model *model ){
 	model->n_quarantine_events_app_user = 0;
 	model->n_quarantine_release_events = 0;
 	model->n_quarantine_release_events_app_user = 0;
+	model->n_lateral_flow_tests = 0;
 }
 
 /*****************************************************************************************
@@ -1318,8 +1320,8 @@ void return_interactions( model *model )
 int one_time_step( model *model )
 {
 	(model->time)++;
-	reset_counters( model );
 	update_intervention_policy( model, model->time );
+	reset_counters( model );
 
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
