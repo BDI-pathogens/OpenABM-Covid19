@@ -116,6 +116,13 @@ If this is succesfull, the following files will be generated (ignored by git):
 - R/OpenABMCovid19.R
 - src/covid19_wrap_R.c
 
+On MacOS or Linux systems you will then need to generate and run a configure file (this will need installation of `autoconf` such as using Homebrew on MacOS, `brew install autoconf`).  
+
+```
+autoconf
+./configure
+```
+
 You can then open the OpenABM-Covid19.Rproj file in RStudio and build as normal. Remember to re-run `make Rswig` every time about you modify the C source and/or SWIG interface.
 
 Alternatively, you can also build using the command-line instead of RStudio:
