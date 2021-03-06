@@ -111,12 +111,8 @@ POSIX platform and Windows require different setups for building the R package.
 
 ### POSIX setup
 
-Install
-- autoconf
-- GSL
-- SWIG (version 3.0.12)
+On MacOS or Linux systems you will then need to generate and run a configure file (this will need installation of `autoconf` such as using Homebrew on MacOS, `brew install autoconf`).
 
-Then run:
 ```
 autoconf
 ./configure
