@@ -267,7 +267,6 @@ void set_up_counters( model *model ){
 	model->n_quarantine_events_app_user = 0;
 	model->n_quarantine_release_events = 0;
 	model->n_quarantine_release_events_app_user = 0;
-	model->n_lateral_flow_tests = 0;
 
 	model->n_vaccinated_fully = 0;
 	model->n_vaccinated_symptoms = 0;
@@ -290,7 +289,6 @@ void reset_counters( model *model ){
 	model->n_quarantine_events_app_user = 0;
 	model->n_quarantine_release_events = 0;
 	model->n_quarantine_release_events_app_user = 0;
-	model->n_lateral_flow_tests = 0;
 }
 
 /*****************************************************************************************
@@ -1354,6 +1352,11 @@ int one_time_step( model *model )
     }
 
 	flu_infections( model );
+
+	if ( n_total_by_day( model, LATERAL_FLOW_TEST_TAKE, model->time - 1  ) > 0 )
+	{
+		transition_events( model, LATERAL_FLOW_TEST_CLEAR,              &intervention_lateral_flow_test_clear,          TRUE );
+	}
 
 	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||

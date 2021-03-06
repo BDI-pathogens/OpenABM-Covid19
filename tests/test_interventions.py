@@ -10,6 +10,7 @@ Created: March 2020
 Author: p-robot
 """
 
+import collections
 import pytest
 import subprocess
 import sys
@@ -768,6 +769,38 @@ class TestClass(object):
                 ),
             )
         ],
+        "test_lateral_flow_symptoms_has_tests": [
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_order_wait = 1,
+                    lateral_flow_test_fraction = 1.0,
+                    daily_non_cov_symptoms_rate=0.0,
+                    lateral_flow_test_sensitivity = 0.0,
+                    lateral_flow_test_specificity = 1.0,
+                    lateral_flow_test_repeat_count = 7,
+                ),
+            ),
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_order_wait = 1,
+                    lateral_flow_test_fraction = 1.0,
+                    daily_non_cov_symptoms_rate=0.0,
+                    lateral_flow_test_sensitivity = 0.0,
+                    lateral_flow_test_specificity = 1.0,
+                    lateral_flow_test_repeat_count = 3,
+                ),
+            ),
+        ],
         "test_lateral_flow_interventions_has_tests": [
             dict(
                 test_params = dict(
@@ -780,7 +813,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_seed_infection = 400,
+                    n_seed_infection = 1000,
                     end_time = 10,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
@@ -791,13 +824,13 @@ class TestClass(object):
                     lateral_flow_test_on_symptoms = False,
                     lateral_flow_test_on_traced = True,
                 ),
-            )
+            ),
         ],
         "test_lateral_flow_interventions_no_tests": [
             dict(
                 test_params = dict(
                     n_seed_infection = 400,
-                    end_time = 10,
+                    end_time = 8,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
                     app_turn_on_time = 0,
@@ -815,7 +848,7 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_seed_infection = 100,
-                    end_time = 10,
+                    end_time = 8,
                     infectious_rate = 6,
                     sd_infectiousness_multiplier = 0.4,
                     app_turn_on_time = 0,
@@ -2304,6 +2337,42 @@ class TestClass(object):
 
         del( model )
 
+    def test_lateral_flow_symptoms_has_tests(self, test_params):
+        """
+        Test that we do have lateral flow tests if they are enabled.
+        """
+        end_time  = test_params[ "end_time" ]
+        total_delay = test_params[ "lateral_flow_test_order_wait" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+
+        n_tests = []
+        for time in range( end_time ):
+            model.one_time_step()
+            results = model.one_time_step_results()
+            n_tests.append( results["n_lateral_flow_tests"] )
+
+        # write files
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
+        df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
+
+        symp_hist = collections.deque(maxlen=test_params["lateral_flow_test_repeat_count"])
+        for time in range( test_params[ "end_time" ] - total_delay ):
+          symp = df_trans[ df_trans["time_symptomatic" ] == time + 1 ]
+          if len( symp.index ) > 0 :
+              symp = symp.iloc[ 0,1 ]
+          else :
+              symp = 0
+          symp_hist.append(symp)
+          np.testing.assert_equal( n_tests[time + total_delay ], sum(symp_hist), f"Number of LFA test results not what expected given prior number of new symptomatic infections: {time} + {total_delay}")
+
+        del( model )
+
     def test_lateral_flow_interventions_has_tests(self, test_params):
         """
         Test that we do have lateral flow tests if they are enabled.
@@ -2312,25 +2381,24 @@ class TestClass(object):
 
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )
+            params.set_param( param, value )  
         model = utils.get_model_swig( params )
 
         for time in range( end_time ):
             model.one_time_step()
-        results = model.one_time_step_results()
-
-        np.testing.assert_equal( results[ "n_lateral_flow_tests" ] > 0, True, "Expected lateral flow tests not found." )
 
         # write files
         model.write_individual_file()
-        model.write_transmissions()
-
-        del( model )
 
         # read CSV's
         df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 0 ) > 0, True, "No negative Lateral Flow tests found." )
-        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 1 ) > 0, True, "No positive Lateral Flow tests found." )
+        tot = sum( df_indiv[ "lateral_flow_status" ] >= 0 )
+        pos = sum( df_indiv[ "lateral_flow_status" ] == 1 )
+        neg = sum( df_indiv[ "lateral_flow_status" ] == 0 )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 0 ) > 0, True, f"No negative Lateral Flow tests found. {tot} {pos} {neg}" )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 1 ) > 0, True, f"No positive Lateral Flow tests found. {tot} {pos} {neg}" )
+
+        del( model )
 
     def test_lateral_flow_interventions_no_tests(self, test_params):
         """

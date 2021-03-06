@@ -65,6 +65,7 @@ void intervention_on_positive_result( model*, individual* );
 void intervention_on_traced( model*, individual*, int, int, trace_token*, double, int );
 void intervention_lateral_flow_test_order( model*, individual*, int );
 void intervention_lateral_flow_test_take( model*, individual* );
+void intervention_lateral_flow_test_clear( model*, individual* );
 double calculate_mean_lfa_sensitivity( model *, int );
 
 void intervention_smart_release( model* );

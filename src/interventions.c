@@ -353,18 +353,6 @@ void update_intervention_policy( model *model, int time )
 		model->manual_trace_interview_quota = params->manual_trace_n_workers * params->manual_trace_interviews_per_worker_day;
 		model->manual_trace_notification_quota = params->manual_trace_n_workers * params->manual_trace_notifications_per_worker_day;
 	}
-
-	if ( model->n_lateral_flow_tests > 0 )
-	{
-		for( int idx = 0; idx < model->params->n_total; idx++ )
-		{
-			if( model->population[ idx ].lateral_flow_test_result >= 0 )
-			{
-				model->population[ idx ].lateral_flow_test_result = NO_TEST;
-				model->population[ idx ].lateral_flow_test_sensitivity = NO_TEST;
-			}
-		}
-	}
 }
 
 /*****************************************************************************************
@@ -778,6 +766,17 @@ int infectious_state( individual* indiv, int time_infected )
 	}
 	return 0;
 }
+
+// Parameters for the LFA test.
+const struct {
+	// Used to normalize the infectiousness curve to V(peak_symptomatic) = 1/g.
+	double infectious_factor;
+	// Inverse rate of growth of the viral load curve.
+	double g;
+	// Inverse rate of falloff of the viral load curve.
+	double b;
+} LFA = {1/.0802 * exp(1), 1.0/8, 1.0/6};
+
 /*****************************************************************************************
 *  Name:		lfa_sensitivity
 *  Description: Calculates the lfa sensitivity for a given individual.
@@ -793,28 +792,23 @@ double lfa_sensitivity( model *model, individual *indiv )
 
 	time_infected = model->time - time_infected;
 
-	// Used to normalize the infectiousness curve to V(peak_symptomatic) = 1/g.
-	const double infectious_factor = 1/.0802 * exp(1);
-
 	double sensitivity = 0;
 	double I = 0;
 	double V = 0;
-	const int peak_time = model->event_lists[ LATERAL_FLOW_TEST ].infectious_peak_time;
+	const int peak_time = model->event_lists[ infection_type ].infectious_peak_time;
 	const double *infectious_curve = model->event_lists[ infection_type ].infectious_curve[ LATERAL_FLOW_TEST ];
-	const double g = 1.0/8;
-	const double b = 1.0/6;
 
 	if( time_infected <= peak_time )
 	{
-		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
-		V = log( I ) / g;
+		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * LFA.infectious_factor;
+		V = log( I ) / LFA.g;
 	}
 	else
 	{
-		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * infectious_factor;
-		V = log( I ) / ( g + b ) + log( infectious_curve[ peak_time ] *
-		                                indiv->infectiousness_multiplier *
-		                                infectious_factor ) * ( 1 / g - 1 / ( g + b ) );
+		I = infectious_curve[ time_infected ] * indiv->infectiousness_multiplier * LFA.infectious_factor;
+		V = log( I ) / ( LFA.g + LFA.b ) + log( infectious_curve[ peak_time ] *
+		                                        indiv->infectiousness_multiplier *
+		                                        LFA.infectious_factor ) * ( 1 / LFA.g - 1 / ( LFA.g + LFA.b ) );
 	}
 
 	if ( V < 0 )
@@ -837,7 +831,6 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 {
 	if ( indiv->lateral_flow_test_capacity <= 0 ) return;
 	indiv->lateral_flow_test_capacity--;
-	model->n_lateral_flow_tests++;
 
 	int result_time = model->time;
 
@@ -870,6 +863,18 @@ void intervention_lateral_flow_test_take( model *model, individual *indiv )
 	else if ( indiv->lateral_flow_test_capacity > 0 )
 		add_individual_to_event_list( model, LATERAL_FLOW_TEST_TAKE, indiv, model->time + 1 );
 
+	add_individual_to_event_list( model, LATERAL_FLOW_TEST_CLEAR, indiv, model->time + 1 );
+}
+
+/*****************************************************************************************
+*  Name:		intervention_lateral_flow_test_clear
+*  Description: Clears the results of previous lateral flow tests.
+*  Returns:		void
+******************************************************************************************/
+void intervention_lateral_flow_test_clear( model *model, individual *indiv )
+{
+	indiv->lateral_flow_test_result = NO_TEST;
+	indiv->lateral_flow_test_sensitivity = NO_TEST;
 }
 
 /*****************************************************************************************
