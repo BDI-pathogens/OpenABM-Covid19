@@ -285,6 +285,33 @@ void gamma_rate_curve(
 }
 
 /*****************************************************************************************
+*  Name:		curve_peak_time
+*  Description: returns the first time of the peak value of the provided
+*				curve
+*
+*  Arguments:	list:	pointer to draw list
+*  				n:		length of draw list
+******************************************************************************************/
+int curve_peak_time(
+	double *list,
+	int n
+)
+{
+	int idx = 0;
+	int maxt = 0;
+	double maxv = 0;
+	for( idx = 0; idx < n; idx++ )
+	{
+		if( list[idx] > maxv )
+		{
+			maxv = list[idx];
+			maxt = idx;
+		}
+	}
+	return maxt;
+}
+
+/*****************************************************************************************
 *  Name:		negative_binomial_draw
 *  Description: Draws from a negative binomial distribution with a given mean
 *  				and sd

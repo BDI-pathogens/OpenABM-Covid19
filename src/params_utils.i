@@ -428,6 +428,15 @@ double get_param_self_quarantine_fraction(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:		get_param_quarantine_compliance_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_param_quarantine_compliance_positive(parameters *params)
+{
+    return params->quarantine_compliance_positive;
+}
+
+/*****************************************************************************************
 *  Name:		get_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -724,6 +733,78 @@ int get_param_priority_test_contacts(parameters *params, int idx)
     if (idx >= N_AGE_GROUPS) return ERROR;
 
     return params->priority_test_contacts[idx];
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_on_symptoms
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lateral_flow_test_on_symptoms(parameters *params)
+{
+    return params->lateral_flow_test_on_symptoms;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_on_traced
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lateral_flow_test_on_traced(parameters *params)
+{
+    return params->lateral_flow_test_on_traced;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_sensitivity
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_param_lateral_flow_test_sensitivity(parameters *params)
+{
+    return params->lateral_flow_test_sensitivity;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_specificity
+*  Description: Gets the value of a double parameter
+******************************************************************************************/
+double get_param_lateral_flow_test_specificity(parameters *params)
+{
+    return params->lateral_flow_test_specificity;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_order_wait
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lateral_flow_test_order_wait(parameters *params)
+{
+    return params->lateral_flow_test_order_wait;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_repeat_count
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lateral_flow_test_repeat_count(parameters *params)
+{
+    return params->lateral_flow_test_repeat_count;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_only
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_param_lateral_flow_test_only(parameters *params)
+{
+    return params->lateral_flow_test_only;
+}
+
+/*****************************************************************************************
+*  Name:		get_param_lateral_flow_test_fraction
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_param_lateral_flow_test_fraction(parameters *params)
+{
+    return params->lateral_flow_test_fraction;
 }
 
 /*****************************************************************************************
@@ -1291,6 +1372,16 @@ int set_param_self_quarantine_fraction(parameters *params, double value)
 }
 
 /*****************************************************************************************
+*  Name:        set_param_quarantine_compliance_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_quarantine_compliance_positive(parameters *params, double value)
+{
+    params->quarantine_compliance_positive = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
 *  Name:        set_param_trace_on_symptoms
 *  Description: Sets the value of parameter
 ******************************************************************************************/
@@ -1618,6 +1709,86 @@ int set_param_priority_test_contacts(parameters *params, int value, int idx)
 {
     if (idx >= N_AGE_GROUPS) return ERROR;
     params->priority_test_contacts[idx] = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_on_symptoms
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_on_symptoms(parameters *params, int value)
+{
+   params->lateral_flow_test_on_symptoms = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_on_traced
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_on_traced(parameters *params, int value)
+{
+    params->lateral_flow_test_on_traced = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_sensitivity
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_sensitivity(parameters *params, double value)
+{
+    params->lateral_flow_test_sensitivity = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_specificity
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_specificity(parameters *params, double value)
+{
+    params->lateral_flow_test_specificity = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_order_wait
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_order_wait(parameters *params, int value)
+{
+    params->lateral_flow_test_order_wait = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_repeat_count
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_repeat_count(parameters *params, int value)
+{
+    params->lateral_flow_test_repeat_count = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_only
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_only(parameters *params, int value)
+{
+    params->lateral_flow_test_only = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		set_param_lateral_flow_test_fraction
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_lateral_flow_test_fraction(parameters *params, double value)
+{
+    params->lateral_flow_test_fraction = value;
     return TRUE;
 }
 

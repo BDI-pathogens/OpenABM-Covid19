@@ -235,7 +235,7 @@ void add_reference_household( double *array, long hdx, int **REFERENCE_HOUSEHOLD
 ******************************************************************************************/
 void generate_household_distribution( model *model )
 {
-	int idx, housesize, age;
+	int idx, age;
 	long hdx, n_households, pdx, sample;
 	double error, last_error, acceptance;
 	demographic_household_table *demo_house = calloc( 1, sizeof( demographic_household_table ) );
@@ -336,7 +336,6 @@ void generate_household_distribution( model *model )
 	pdx = 0;
 	for( hdx = 0; hdx < n_households; hdx++ )
 	{
-		housesize = 0;
 		for( age = N_AGE_GROUPS - 1; age >= 0; age-- )
 		{
 			for( idx = 0; idx < model->params->REFERENCE_HOUSEHOLDS[households[hdx]][age]; idx++ )

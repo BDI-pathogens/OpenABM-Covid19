@@ -10,6 +10,7 @@ Created: March 2020
 Author: p-robot
 """
 
+import collections
 import pytest
 import subprocess
 import sys
@@ -110,7 +111,7 @@ class TestClass(object):
         ],
         "test_quarantine_household_on_symptoms": [ 
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 20,
@@ -122,7 +123,7 @@ class TestClass(object):
         ],
         "test_trace_on_symptoms": [ 
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 20,
@@ -139,7 +140,7 @@ class TestClass(object):
         ],
         "test_lockdown_transmission_rates": [ 
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 10000,
                     end_time = 3,
@@ -156,7 +157,7 @@ class TestClass(object):
         ],
          "test_app_users_fraction": [ 
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 20,
@@ -181,7 +182,7 @@ class TestClass(object):
         ],
         "test_risk_score_household": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -193,7 +194,7 @@ class TestClass(object):
                 min_age_sus = 2
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -207,7 +208,7 @@ class TestClass(object):
         ],
         "test_risk_score_age": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -223,7 +224,7 @@ class TestClass(object):
         ],
         "test_risk_score_days_since_contact": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -236,7 +237,7 @@ class TestClass(object):
                 days_since_contact = 2, 
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -251,7 +252,7 @@ class TestClass(object):
         ],
         "test_risk_score_multiple_contact": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -269,7 +270,7 @@ class TestClass(object):
                 required_interactions = 1
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 500,
                     end_time = 10,
@@ -289,7 +290,7 @@ class TestClass(object):
         ],
         "test_quarantine_household_on_trace_positive_not_symptoms": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 100,
                     end_time = 10,
@@ -320,7 +321,7 @@ class TestClass(object):
         ],
         "test_traced_on_symptoms_quarantine_on_positive": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 100,
                     end_time = 15,
@@ -348,7 +349,7 @@ class TestClass(object):
                 tol_sd = 3
             ),
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 100,
                     end_time = 15,
@@ -378,7 +379,7 @@ class TestClass(object):
         ],
         "test_quarantined_have_trace_token" : [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 20000,
                     n_seed_infection = 100,
                     end_time = 20,
@@ -505,7 +506,7 @@ class TestClass(object):
         ],        
         "test_manual_trace_params" : [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 20000,
                     n_seed_infection = 100,
                     end_time = 30,
@@ -747,7 +748,7 @@ class TestClass(object):
         ],
         "test_test_sensitivity": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 4000,
                     end_time = 12,
@@ -765,13 +766,264 @@ class TestClass(object):
                     daily_non_cov_symptoms_rate =0.01,
                     test_specificity = 0.9,
                     test_insensitive_period = 3
-
+                ),
+            )
+        ],
+        "test_lateral_flow_symptoms_has_tests": [
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_order_wait = 1,
+                    lateral_flow_test_fraction = 1.0,
+                    daily_non_cov_symptoms_rate=0.0,
+                    lateral_flow_test_sensitivity = 0.0,
+                    lateral_flow_test_specificity = 1.0,
+                    lateral_flow_test_repeat_count = 7,
+                ),
+            ),
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_order_wait = 1,
+                    lateral_flow_test_fraction = 1.0,
+                    daily_non_cov_symptoms_rate=0.0,
+                    lateral_flow_test_sensitivity = 0.0,
+                    lateral_flow_test_specificity = 1.0,
+                    lateral_flow_test_repeat_count = 3,
+                ),
+            ),
+        ],
+        "test_lateral_flow_interventions_has_tests": [
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    lateral_flow_test_on_symptoms = True,
+                ),
+            ),
+            dict(
+                test_params = dict(
+                    n_seed_infection = 1000,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    app_turn_on_time = 0,
+                    test_on_symptoms = True,
+                    trace_on_positive = True,
+                    quarantine_on_traced = False,
+                    lateral_flow_test_on_symptoms = False,
+                    lateral_flow_test_on_traced = True,
+                ),
+            ),
+        ],
+        "test_lateral_flow_interventions_no_tests": [
+            dict(
+                test_params = dict(
+                    n_seed_infection = 400,
+                    end_time = 8,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    app_turn_on_time = 0,
+                    test_on_symptoms = True,
+                    quarantine_on_traced = True,
+                    trace_on_symptoms = False,
+                    trace_on_positive = False,
+                    lateral_flow_test_on_symptoms = False,
+                    lateral_flow_test_on_traced = True,
+                ),
+            )
+        ],
+        "test_lateral_flow_interventions_vs_quarantine": [
+            # Test on Trace
+            dict(
+                test_params = dict(
+                    n_seed_infection = 100,
+                    end_time = 8,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    app_turn_on_time = 0,
+                    test_on_symptoms = True,
+                    test_order_wait = 0,
+                    test_result_wait = 0,
+                    trace_on_symptoms = False,
+                    trace_on_positive = True,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = False,
+                    lateral_flow_test_on_traced = True,
+                    self_quarantine_fraction = 1.0,
+                    quarantine_on_traced = True,
+                    quarantine_compliance_positive = 1,
+                    quarantine_compliance_traced_positive = 1,
+                    lateral_flow_test_only = 1,
+                    lateral_flow_test_fraction = 0.5,
+                ),
+                quarantine_expected = True,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
+            ),
+            # LFA only on trace
+            dict(
+                test_params = dict(
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    app_turn_on_time = 0,
+                    test_on_symptoms = True,
+                    trace_on_symptoms = False,
+                    trace_on_positive = True,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = False,
+                    lateral_flow_test_on_traced = True,
+                    quarantine_on_traced = True,
+                    self_quarantine_fraction = 1,
+                    quarantine_compliance_positive = 1,
+                    quarantine_compliance_traced_positive = 0.5,
+                    quarantine_dropout_traced_positive = 0,
+                    lateral_flow_test_sensitivity = 1,
+                    lateral_flow_test_specificity = 1,
+                    lateral_flow_test_repeat_count = 1,
+                    lateral_flow_test_only = 1,
+                    lateral_flow_test_fraction = 1,
+                ),
+                quarantine_expected = False,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
+            ),
+            # Both on trace
+            dict(
+                test_params = dict(
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    app_turn_on_time = 0,
+                    test_on_symptoms = True,
+                    trace_on_symptoms = False,
+                    trace_on_positive = True,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = False,
+                    lateral_flow_test_on_traced = True,
+                    self_quarantine_fraction = 1,
+                    quarantine_on_traced = True,
+                    quarantine_compliance_positive = 1,
+                    quarantine_compliance_traced_positive = 1,
+                    quarantine_dropout_traced_positive = 0,
+                    lateral_flow_test_sensitivity = 1,
+                    lateral_flow_test_specificity = 1,
+                    lateral_flow_test_repeat_count = 1,
+                    lateral_flow_test_fraction = 1.0,
+                    lateral_flow_test_only = 0,
+                ),
+                quarantine_expected = True,
+                quarantine_reason = 4, # QR_TRACE_POSITIVE
+            ),
+            # LFA and Quarantine on Symptoms only.
+            dict(
+                test_params = dict(
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    test_on_symptoms = False,
+                    trace_on_symptoms = False,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = True,
+                    quarantine_compliance_positive = 1,
+                    quarantine_dropout_self = 0,
+                    lateral_flow_test_sensitivity = 1,
+                    lateral_flow_test_specificity = 1,
+                    lateral_flow_test_repeat_count = 1,
+                    lateral_flow_test_only = 0,
+                    self_quarantine_fraction = 0.6,
+                    lateral_flow_test_fraction = 0.6,
+                ),
+                quarantine_expected = True,
+                quarantine_reason = 1, # QR_SELF_SYMPTOMS
+            ),
+            # LFA only on Symptoms.
+            dict(
+                test_params = dict(
+                    n_seed_infection = 100,
+                    end_time = 10,
+                    infectious_rate = 6,
+                    sd_infectiousness_multiplier = 0.4,
+                    test_on_symptoms = False,
+                    trace_on_symptoms = False,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_on_symptoms = True,
+                    quarantine_compliance_positive = 1,
+                    quarantine_dropout_self = 0,
+                    lateral_flow_test_sensitivity = 1,
+                    lateral_flow_test_specificity = 1,
+                    lateral_flow_test_repeat_count = 1,
+                    lateral_flow_test_only = 1,
+                    lateral_flow_test_fraction = 1,
+                    self_quarantine_fraction = 1,
+                ),
+                quarantine_expected = False,
+                quarantine_reason = 1, # QR_SELF_SYMPTOMS
+            ),
+        ],
+        "test_lateral_flow_test_sensitivity": [
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 5000,
+                    end_time = 15,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    quarantine_household_on_symptoms = False,
+                    test_on_symptoms = False,
+                    test_on_traced = False,
+                    trace_on_symptoms = False,
+                    quarantine_on_traced = False,
+                    app_turn_on_time = 0,
+                    daily_non_cov_symptoms_rate = 0.01,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_on_traced = True,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_repeat_count = 7,
+                    lateral_flow_test_sensitivity = 0.7,
+                    lateral_flow_test_specificity = 0.9,
+                    sd_infectiousness_multiplier = 0.4,
+                ),
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 100000,
+                    n_seed_infection = 5000,
+                    end_time = 15,
+                    infectious_rate = 6,
+                    self_quarantine_fraction = 1.0,
+                    quarantine_household_on_symptoms = False,
+                    test_on_symptoms = False,
+                    test_on_traced = False,
+                    trace_on_symptoms = False,
+                    quarantine_on_traced = False,
+                    app_turn_on_time = 0,
+                    daily_non_cov_symptoms_rate = 0.01,
+                    lateral_flow_test_on_symptoms = True,
+                    lateral_flow_test_on_traced = True,
+                    lateral_flow_test_order_wait = 0,
+                    lateral_flow_test_repeat_count = 7,
+                    lateral_flow_test_sensitivity = 0.7,
+                    lateral_flow_test_specificity = 0.9,
+                    sd_infectiousness_multiplier = 0.0,
                 ),
             )
         ],
         "test_recursive_testing_indirect_release": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 4000,
                     end_time = 10,
@@ -803,7 +1055,7 @@ class TestClass(object):
         ],
          "test_recursive_testing": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 4000,
                     end_time = 10,
@@ -837,7 +1089,7 @@ class TestClass(object):
         ],
         "test_recursive_testing_household_not_released": [
             dict(
-                test_params = dict( 
+                test_params = dict(
                     n_total = 100000,
                     n_seed_infection = 4000,
                     end_time = 10,
@@ -2065,7 +2317,7 @@ class TestClass(object):
         np.testing.assert_equal( p_val > lower_CI, True, "Too few false positives given the test specificity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too many false positives given the test specificity" )
 
-        # check the sensitivity in the initial period when not sensitive
+        # check the specificity in the initial period when not sensitive
         false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == False ))
         true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == False ))
         p_val      = binom.cdf( false_neg, ( false_neg + true_pos ), test_params[ "test_specificity"] )
@@ -2074,7 +2326,7 @@ class TestClass(object):
         np.testing.assert_equal( p_val > lower_CI, True, "Too true positives in insensitive period given the test specificity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too few true positives in insensitive period the test specificity" )
 
-        # check the sensitivity in the initial period when not sensitive
+        # check the sensitivity in the sensitive period
         false_neg  = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 0 ) & ( df_test["test_sensitive"] == True ))
         true_pos   = sum( ( df_test["infected"] == True ) & ( df_test["test_status"] == 1 ) & ( df_test["test_sensitive"] == True ))
         p_val      = binom.cdf( true_pos, ( false_neg + true_pos ), test_params[ "test_sensitivity"] )
@@ -2082,6 +2334,222 @@ class TestClass(object):
         np.testing.assert_equal( true_pos > 100, True, "In-sufficient true positives in sensitive period to test" )
         np.testing.assert_equal( p_val > lower_CI, True, "Too few true positives in sensitive period given the test sensitivity" )
         np.testing.assert_equal( p_val < upper_CI, True, "Too many true positives in sensitive period the test sensitivity" )
+
+        del( model )
+
+    def test_lateral_flow_symptoms_has_tests(self, test_params):
+        """
+        Test that we do have lateral flow tests if they are enabled.
+        """
+        end_time  = test_params[ "end_time" ]
+        total_delay = test_params[ "lateral_flow_test_order_wait" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+
+        n_tests = []
+        for time in range( end_time ):
+            model.one_time_step()
+            results = model.one_time_step_results()
+            n_tests.append( results["n_lateral_flow_tests"] )
+
+        # write files
+        model.write_individual_file()
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
+        df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
+
+        symp_hist = collections.deque(maxlen=test_params["lateral_flow_test_repeat_count"])
+        for time in range( test_params[ "end_time" ] - total_delay ):
+          symp = df_trans[ df_trans["time_symptomatic" ] == time + 1 ]
+          if len( symp.index ) > 0 :
+              symp = symp.iloc[ 0,1 ]
+          else :
+              symp = 0
+          symp_hist.append(symp)
+          np.testing.assert_equal( n_tests[time + total_delay ], sum(symp_hist), f"Number of LFA test results not what expected given prior number of new symptomatic infections: {time} + {total_delay}")
+
+        del( model )
+
+    def test_lateral_flow_interventions_has_tests(self, test_params):
+        """
+        Test that we do have lateral flow tests if they are enabled.
+        """
+        end_time  = test_params[ "end_time" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+
+        for time in range( end_time ):
+            model.one_time_step()
+
+        # write files
+        model.write_individual_file()
+
+        # read CSV's
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        tot = sum( df_indiv[ "lateral_flow_status" ] >= 0 )
+        pos = sum( df_indiv[ "lateral_flow_status" ] == 1 )
+        neg = sum( df_indiv[ "lateral_flow_status" ] == 0 )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 0 ) > 0, True, f"No negative Lateral Flow tests found. {tot} {pos} {neg}" )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] == 1 ) > 0, True, f"No positive Lateral Flow tests found. {tot} {pos} {neg}" )
+
+        del( model )
+
+    def test_lateral_flow_interventions_no_tests(self, test_params):
+        """
+        Test that we do not have lateral flow tests if they are disabled.
+        """
+        end_time  = test_params[ "end_time" ]
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model = utils.get_model_swig( params )
+
+        for time in range( end_time ):
+            model.one_time_step()
+        results = model.one_time_step_results()
+
+        np.testing.assert_equal( results[ "n_lateral_flow_tests" ], 0, "Unexpected lateral flow tests found." )
+
+        # write files
+        model.write_individual_file()
+        model.write_transmissions()
+
+        del( model )
+
+        # read CSV's
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        np.testing.assert_equal( sum( df_indiv[ "lateral_flow_status" ] >= 0 ), 0, "Unexpected Lateral Flow tests found." )
+
+    def test_lateral_flow_interventions_vs_quarantine(self, test_params, quarantine_expected, quarantine_reason):
+        """
+        Test that we have the expected lateral flow tests and quarantines.
+        """
+        end_time  = test_params[ "end_time" ]
+        max_CI    = 0.99
+        upper_CI  = ( 1 + max_CI ) / 2
+        lower_CI  = ( 1 - max_CI ) / 2
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model = utils.get_model_swig( params )
+
+        all_test = []
+        for time in range( 1, end_time + 1 ):
+            model.one_time_step()
+
+            # write files
+            model.write_individual_file()
+            model.write_quarantine_reasons()
+
+            # read CSV's
+            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_indiv["time"] = time
+
+            df_quar = pd.read_csv( constant.TEST_QUARANTINE_REASONS_FILE.substitute(T = time ), comment="#", sep=",", skipinitialspace=True )
+            df_quar = df_quar[ [ "ID", "quarantine_reason" ] ]
+
+            df_test = pd.merge( df_indiv, df_quar, on = "ID", how = "left" )
+            all_test.append( df_test )
+
+        del( model )
+
+        df_test = pd.concat( all_test )
+
+        lfa_test  = sum( df_test["lateral_flow_status"] >= 0 )
+        quar = sum( ( df_test[ "quarantine_reason" ] == quarantine_reason ) )
+        np.testing.assert_equal( lfa_test > 0, True, f"Expected existence of LFA tests." )
+        np.testing.assert_equal( quar > 0, quarantine_expected, f"Expected existnce of quarantines to be {quarantine_expected}" )
+
+    def test_lateral_flow_test_sensitivity(self, test_params):
+        """
+        Test that the lateral flow tests results have the required sensitivity and specificity
+        Make sure there sufficient true/false pos/neg and then check they
+        lie within the 99% confidence interval
+        """
+        end_time  = test_params[ "end_time" ]
+        max_CI    = 0.99
+        upper_CI  = ( 1 + max_CI ) / 2
+        lower_CI  = ( 1 - max_CI ) / 2
+
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model = utils.get_model_swig( params )
+
+        all_test = []
+        for time in range( end_time ):
+            model.one_time_step()
+
+            # write files
+            model.write_individual_file()
+            model.write_transmissions()
+
+            # read CSV's
+            df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_test = df_indiv.loc[ :, [ "ID", "lateral_flow_status" ] ]
+            df_test = df_test[ df_test[ "lateral_flow_status" ] >= 0 ]
+            df_trans = df_trans.loc[ :, [ "ID_recipient", "time_infected", "time_symptomatic" ] ]
+            df_test = pd.merge( df_test, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+            df_test[ "time" ] = time
+            df_test.fillna( -1, inplace=True )
+            all_test.append( df_test )
+
+        # find everyone with a test result
+        df_test = pd.concat( all_test )
+        df_test["infected"] = ( df_test["time_infected"] > -1 )
+
+        # check the specificity of the test
+        true_neg  = sum( ( df_test[ "infected" ] == False ) & ( df_test[ "lateral_flow_status" ] == 0 ) )
+        false_pos = sum( ( df_test[ "infected" ] == False ) & ( df_test[ "lateral_flow_status" ] == 1 ) )
+        p_val     = binom.cdf( true_neg, ( true_neg + false_pos ), test_params[ "lateral_flow_test_specificity"] )
+        np.testing.assert_equal( true_neg > 100, True, "In-sufficient true negatives cases to test" )
+        np.testing.assert_equal( false_pos > 50, True, "In-sufficient false positives cases to test" )
+        np.testing.assert_equal( p_val > lower_CI, True, f"Too few false positives given the test specificity tn={true_neg}, fp={false_pos}, p={p_val}" )
+        np.testing.assert_equal( p_val < upper_CI, True, f"Too many false positives given the test specificity tn={true_neg}, fp={false_pos}, p={p_val}" )
+
+        # check the sensitivity is monotonic on each side of the peak.
+        df_test[ "test_sensitive_inf" ]  = ( ( df_test[ "time_infected" ] != - 1 ) & ( df_test[ "time_infected" ] <= df_test[ "time" ] ) )
+        df_test[ "time_since_inf" ]  = ( df_test[ "time" ] - df_test[ "time_infected" ] )
+
+        true_pos   = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
+        sens_peak_time  = sens_ratio.argmax()
+
+        sens_diff = sens_ratio.diff()
+        is_sens_single_peak = np.all( sens_diff.iloc[ 2 : sens_peak_time + 1 ] >= 0 ) & np.all( sens_diff[ sens_peak_time + 1 : -3 ] <= 0 )
+        np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_diff}" )
+
+        # check the sensitivity at the peak.
+        df_test[ "symptomatic" ] = ( df_test["time_symptomatic"] > 0 )
+        true_pos   = df_test[ ( df_test[ "time_since_inf" ] == sens_peak_time ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test[ "time_since_inf" ] == sens_peak_time ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
+        sens_peak_idx  = sens_ratio.idxmax()
+
+        np.testing.assert_equal( false_neg[ sens_peak_idx ] > 100, True, "In-sufficient false negatives in sensitive period to test" )
+        np.testing.assert_equal( true_pos[ sens_peak_idx ] > 100, True, "In-sufficient true positives in sensitive period to test" )
+
+        sd_mult = test_params[ "sd_infectiousness_multiplier" ]
+        sens_exp = test_params[ "lateral_flow_test_sensitivity"]
+        if sd_mult:
+          # Low is half of one standard deviation (67.5% / 2).
+          sens_low = sens_exp - 0.675 / 2.0 * sd_mult
+          sens_peak = sens_ratio[sens_peak_idx]
+          np.testing.assert_equal( sens_low <= sens_peak <= sens_exp, True, f"Sensitivity outside expected range {sens_low} <= {sens_peak} <= {sens_exp}." )
+        else:
+          p_val = binom.cdf( true_pos[ sens_peak_idx ], ( false_neg[ sens_peak_idx ] + true_pos[ sens_peak_idx ] ), sens_exp )
+          np.testing.assert_equal( p_val > lower_CI, True, f"Too few true positives in sensitive period given the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
+          np.testing.assert_equal( p_val < upper_CI, True, f"Too many true positives in sensitive period the test sensitivity s={sens_exp}: tn={true_neg}, fp={false_pos}, p={p_val}" )
 
         del( model )
         
@@ -2115,7 +2583,6 @@ class TestClass(object):
         # now get those indirectly traced (i.e. household members of traced)
         df_indirect_trace = df_trace[ ( df_trace[ "index_ID" ] != df_trace[ "traced_from_ID" ] ) & ( df_trace[ "index_ID" ] != df_trace[ "traced_ID" ] )]
         df = pd.merge( df_indirect_trace, df_direct_trace, left_on = ["index_ID", "traced_from_ID"], right_on = ["index_ID", "direct_traced_ID"], how = "left")
-        df.fillna(-1, inplace=True)
 
         # test that everyone who has been indirectly traced, the directly traced person is still on the trace list
         np.testing.assert_equal( len( df_indirect_trace) > 500, True, "In-sufficient indirect-traced to test" )
@@ -2147,6 +2614,8 @@ class TestClass(object):
             df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
             all_pos = all_pos.append(df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
         model.write_trace_tokens()
+
+        del( model )
 
         np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
 
@@ -2734,4 +3203,3 @@ class TestClass(object):
             else :
                 sd = sqrt( expected * max( 1 - expected / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
-                        

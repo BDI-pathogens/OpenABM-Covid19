@@ -5,6 +5,7 @@ from typing import Union
 import pandas as pd
 import pkg_resources
 import sys, time
+import numpy as np
 
 import covid19
 from COVID19.network import Network
@@ -40,12 +41,21 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "test_result_wait_priority",
     "self_quarantine_fraction",
+    "quarantine_compliance_positive",
     "lockdown_on",
     "lockdown_elderly_on",
     "app_turned_on",
     "app_users_fraction",
     "trace_on_symptoms",
     "trace_on_positive",
+    "lateral_flow_test_on_symptoms",
+    "lateral_flow_test_on_traced",
+    "lateral_flow_test_order_wait",
+    "lateral_flow_test_sensitivity",
+    "lateral_flow_test_specificity",
+    "lateral_flow_test_repeat_count",
+    "lateral_flow_test_only",
+    "lateral_flow_test_fraction",
     "lockdown_house_interaction_multiplier",
     "lockdown_random_network_multiplier",
     "lockdown_occupation_multiplier_primary_network",
@@ -1138,6 +1148,20 @@ class Model:
         results["R_inst"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.5 )
         results["R_inst_05"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.05 )
         results["R_inst_95"] = covid19.calculate_R_instanteous( self.c_model, self.c_model.time, 0.95 )
+
+        results["n_lateral_flow_tests"] = covid19.utils_n_total_by_day(
+            self.c_model, covid19.LATERAL_FLOW_TEST_TAKE, int(self.c_model.time)
+        )
+        if results["n_lateral_flow_tests"] > 0:
+            results["mean_lfa_sensitivity"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, covid19.NO_EVENT )
+            results["mean_lfa_sensitivity_asymptom"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, covid19.ASYMPTOMATIC )
+            results["mean_lfa_sensitivity_symptom_mild"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, covid19.PRESYMPTOMATIC_MILD )
+            results["mean_lfa_sensitivity_symptom"] = covid19.calculate_mean_lfa_sensitivity( self.c_model, covid19.PRESYMPTOMATIC )
+        else:
+            results["mean_lfa_sensitivity"] = np.nan
+            results["mean_lfa_sensitivity_asymptom"] = np.nan
+            results["mean_lfa_sensitivity_symptom_mild"] = np.nan
+            results["mean_lfa_sensitivity_symptom"] = np.nan
 
         return results
 

@@ -260,7 +260,7 @@ void read_param_file( parameters *params)
 			if( check < 1){ print_exit("Failed to read parameter relative_susceptibility\n"); };
 		}
 
-	for( i = 0; i < N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i++ )
+	for( i = 0; i < N_NETWORK_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -331,6 +331,9 @@ void read_param_file( parameters *params)
 
 	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_traced_positive));
 	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_traced_positive\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_positive\n"); };
 
 	check = fscanf(parameter_file, " %i ,", &(params->test_on_symptoms));
 	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms\n"); };
@@ -407,8 +410,8 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_order_wait\n"); };
     
-    check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait_priority));
-    if( check < 1){ print_exit("Failed to read parameter test_order_wait_priority\n"); };
+	check = fscanf(parameter_file, " %i , ",   &(params->test_order_wait_priority));
+	if( check < 1){ print_exit("Failed to read parameter test_order_wait_priority\n"); };
 
 	check = fscanf(parameter_file, " %i , ",   &(params->test_result_wait));
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait\n"); };
@@ -417,10 +420,34 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter test_result_wait_priority\n"); };
 
 	for( i = 0; i < N_AGE_GROUPS; i++ )
-    {
-        check = fscanf(parameter_file, " %i ,", &(params->priority_test_contacts[i]));
-        if( check < 1){ print_exit("Failed to read parameter priority_test_contacts\n"); };
-    }
+	{
+		check = fscanf(parameter_file, " %i ,", &(params->priority_test_contacts[i]));
+		if( check < 1){ print_exit("Failed to read parameter priority_test_contacts\n"); };
+	}
+
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_order_wait));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_order_wait\n"); };
+    
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_on_symptoms));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_on_symptoms\n"); };
+	
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_on_traced));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_on_traced\n"); };
+    
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_repeat_count));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_repeat_count\n"); };
+
+	check = fscanf(parameter_file, "%i,",   &(params->lateral_flow_test_only));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_only\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_fraction));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_fraction\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_sensitivity));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_sensitivity\n"); };
+
+	check = fscanf(parameter_file, "%lf,",   &(params->lateral_flow_test_specificity));
+	if( check < 1){ print_exit("Failed to read parameter lateral_flow_test_specificity\n"); };
 
 	check = fscanf(parameter_file, " %lf ,", &(params->self_quarantine_fraction));
 	if( check < 1){ print_exit("Failed to read parameter self_quarantine_fraction\n"); };
@@ -549,7 +576,7 @@ void read_hospital_param_file( parameters *params)
 	check = fscanf( hospital_parameter_file, " %lf ,", &( params->critical_waiting_mod ) );
 	if( check < 1 ){ print_exit( "Failed to read parameter critical_waiting_mod\n" ); };
 
-	for( i = N_INTERACTION_TYPES - N_HOSPITAL_INTERACTION_TYPES; i < N_INTERACTION_TYPES; i++ )
+	for( i = N_NETWORK_INTERACTION_TYPES; i < N_NETWORK_INTERACTION_TYPES + N_HOSPITAL_INTERACTION_TYPES; i++ )
 	{
 		check = fscanf(hospital_parameter_file, " %lf ,", &(params->relative_transmission[i]));
 		if( check < 1){ print_exit("Failed to read parameter relative_transmission_**\n"); };
@@ -756,7 +783,8 @@ void write_individual_file(model *model, parameters *params)
 	fprintf(individual_output_file,"mean_interactions,");
 	fprintf(individual_output_file,"infection_count,");
 	fprintf(individual_output_file,"infectiousness_multiplier,");
-	fprintf(individual_output_file,"vaccine_status");
+	fprintf(individual_output_file,"vaccine_status,");
+	fprintf(individual_output_file,"lateral_flow_status");
 	fprintf(individual_output_file,"\n");
 
 	// Loop through all individuals in the simulation
@@ -774,7 +802,7 @@ void write_individual_file(model *model, parameters *params)
 		infection_count = count_infection_events( indiv );
 
 		fprintf(individual_output_file,
-			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f,%d\n",
+			"%li,%d,%d,%d,%d,%d,%li,%d,%d,%d,%d,%d,%d,%0.4f,%d,%d\n",
 			indiv->idx,
 			indiv->status,
 			indiv->age_group,
@@ -789,7 +817,8 @@ void write_individual_file(model *model, parameters *params)
 			indiv->random_interactions,
 			infection_count,
 			indiv->infectiousness_multiplier,
-			indiv->vaccine_status
+			indiv->vaccine_status,
+			indiv->lateral_flow_test_result
 			);
 	}
 	fclose(individual_output_file);

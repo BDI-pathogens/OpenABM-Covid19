@@ -56,14 +56,14 @@ model* new_model( parameters *params )
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
 
+	set_up_counters( model_ptr );
+	set_up_population( model_ptr );
 	update_intervention_policy( model_ptr, model_ptr->time );
 
 	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
-	set_up_counters( model_ptr );
-	set_up_population( model_ptr );
 	set_up_household_distribution( model_ptr );
 	set_up_allocate_work_places( model_ptr );
 	if( params->hospital_on )
@@ -1318,8 +1318,8 @@ void return_interactions( model *model )
 int one_time_step( model *model )
 {
 	(model->time)++;
-	reset_counters( model );
 	update_intervention_policy( model, model->time );
+	reset_counters( model );
 
 	int idx;
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
@@ -1353,11 +1353,18 @@ int one_time_step( model *model )
 
 	flu_infections( model );
 
+	if ( n_total_by_day( model, LATERAL_FLOW_TEST_TAKE, model->time - 1  ) > 0 )
+	{
+		transition_events( model, LATERAL_FLOW_TEST_CLEAR,              &intervention_lateral_flow_test_clear,          TRUE );
+	}
+
 	while( ( n_daily( model, TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, TEST_RESULT, model->time ) > 0 ) ||
+		   ( n_daily( model, LATERAL_FLOW_TEST_TAKE, model->time ) > 0 ) ||
 		   ( n_daily( model, MANUAL_CONTACT_TRACING, model->time ) > 0 )
 	)
 	{
+		transition_events( model, LATERAL_FLOW_TEST_TAKE,              &intervention_lateral_flow_test_take,          TRUE );
 		transition_events( model, TEST_TAKE,              &intervention_test_take,          TRUE );
 		transition_events( model, TEST_RESULT,            &intervention_test_result,        TRUE );
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );

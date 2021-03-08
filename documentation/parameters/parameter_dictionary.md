@@ -136,6 +136,7 @@
 | `quarantine_dropout_positive` | 0.01 | - | Daily probability of drop out for an individual quarantining after a positive test result | - |
 | `quarantine_compliance_traced_symptoms` | 0.5 | - | Fraction of individuals who initially comply with a quarantine notification after their contact reported symptoms | - |
 | `quarantine_compliance_traced_positive` | 0.9 | - | Fraction of individuals who initially comply with a quarantine notification after their contact tested positive | - |
+| `quarantine_compliance_positive` | 1.0 | - | Fraction of individuals who initially comply with a quarantine after they test positive | - |
 | `test_on_symptoms` | 0 | - | Test individuals who show symptoms (0=no, 1=yes) | - |
 | `test_on_traced` | 0 | - | Test individuals who have been contact-traced (0=no, 1=yes) | - |
 | `test_release_on_negative` | 1 | - | Release individuals following a negative test (0=no, 1=yes) | - |
@@ -173,6 +174,14 @@
 | `priority_test_contacts_60_69` | 1000 | - | Number of contacts that triggers priority test for individuals aged 60-69 years old | - |
 | `priority_test_contacts_70_79` | 1000 | - | Number of contacts that triggers priority test for individuals aged 70-79 years old | - |
 | `priority_test_contacts_80` | 1000 | - | Number of contacts that triggers priority test for individuals aged 80+ years old | - |
+| `lateral_flow_test_order_wait` | 1 | - | Number of days to wait to receive a set of lateral flow tests | - |
+| `lateral_flow_test_on_symptoms` | 0 | - | Test individuals with Lateral Flow Assay who show symptoms (0=no, 1=yes) | - |
+| `lateral_flow_test_on_traced` | 0 | - | Test individuals with Lateral Flow Assay who have been contact-traced (0=no, 1=yes) | - |
+| `lateral_flow_test_repeat_count` | 7 | - | Number of daily Lateral Flow Assay tests to take in a row | - |
+| `lateral_flow_test_only` | 0 | - | If an individual takes Lateral Flow tests, do not take PCR or quarantine until they receive a test result | - |
+| `lateral_flow_test_fraction` | 0.5 | - | The fraction of individuals who take a Lateral Flow Assay test instead of quarantine if offered | - |
+| `lateral_flow_test_sensitivity` | 0.95 | - | Peak sensitivity of Lateral Flow Assay | - |
+| `lateral_flow_test_specificity` | 0.999 | - | Specificity of Lateral Flow Assay (at any time) | - |
 | `self_quarantine_fraction` | 0 | - | Proportion of people who self-quarantine upon symptoms | - |
 | `app_users_fraction_0_9` | 0.09 | - | Maximum fraction of the population with smartphones aged 0-9 | OFCOM 3-5 year olds |
 | `app_users_fraction_10_19` | 0.8 | - | Maximum fraction of the population with smartphones aged 10-19 | OFCOM 5-15 year olds |

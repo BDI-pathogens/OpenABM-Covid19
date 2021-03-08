@@ -162,6 +162,13 @@ void set_up_infectious_curves( model *model )
 		gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
 						  params->sd_infectious_period, infectious_rate * type_factor );
 	};
+
+	for( type = 0; type < N_NEWLY_INFECTED_STATES; type++ )
+	{
+		model->event_lists[NEWLY_INFECTED_STATES[type]].infectious_peak_time = curve_peak_time(
+			model->event_lists[NEWLY_INFECTED_STATES[type]].infectious_curve[LATERAL_FLOW_TEST],
+			MAX_INFECTIOUS_PERIOD );
+	}
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
