@@ -137,7 +137,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     #' \code{hospital_input_param_file}.
     initialize = function(
       input_param_file = NA_character_,
-      param_line_number = NA_integer_,
+      param_line_number = 1,
       output_file_dir = "./",
       input_households = NA_character_,
       hospital_input_param_file = NA_character_,
@@ -153,23 +153,35 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       self$c_params <- parameters()
       initialize_params( self$c_params )
 
-      if (!is.na(input_param_file)) {
+      # if no input_param file is given then use the default file
+      if ( is.na(input_param_file)) {
+        input_param_file <- system.file("default_params",
+                        "baseline_parameters.csv", package = "OpenABMCovid19")
+      }
+      if (read_param_file) {
+        if (!is.character(input_param_file) || !file.exists(input_param_file)) {
+          stop("input_params_file must be a valid file name OR NA (default params)")
+        }
         self$c_params$input_param_file <- input_param_file
-      } else if (is.na(input_param_file) && read_param_file ) {
-        stop("input_param_file is NA and read_param_file set to TRUE")
       }
 
       if (!is.na(param_line_number)) {
         self$c_params$param_line_number <- param_line_number
       }
 
-      if (is.character(input_households)) {
-        self$c_params$input_household_file <- input_households
-        self$household_df = NA
-      } else if (is.data.frame(input_households)) {
+      if (is.data.frame(input_households)) {
         self$household_df <- input_households
-      } else {
-        stop("Household data must be supplied as a CSV")
+      }
+      else {
+        if ( is.na(input_households)) {
+          input_households <- system.file("default_params",
+              "baseline_household_demographics.csv", package = "OpenABMCovid19")
+        }
+        if (!is.character(input_households) || !file.exists(input_households)) {
+          stop("input_households must be a data.frame of household OR a valid file OR left NA (default params)")
+        }
+        self$c_params$input_household_file <- input_households
+        self$household_df <- NA
       }
 
       if (!is.na(hospital_param_line_number)) {
@@ -180,10 +192,16 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         }
       }
 
-      if (!is.na(hospital_input_param_file) && read_hospital_param_file) {
+      if (is.na(hospital_input_param_file)) {
+        hospital_input_param_file <- system.file("default_params",
+               "hospital_baseline_parameters.csv", package = "OpenABMCovid19")
+      }
+
+      if (read_hospital_param_file) {
+        if (!is.character(hospital_input_param_file) || !file.exists(hospital_input_param_file )) {
+          stop("if read_param_file is TRUE then hospital_input_param_file must be a valid file or NA (default params)")
+        }
         self$c_params$hospital_input_param_file <- hospital_input_param_file
-      } else if (is.na(hospital_input_param_file) && read_hospital_param_file) {
-        stop("hospital_input_param_file is NA and read_param_file is TRUE")
       }
 
       if (read_hospital_param_file) {
@@ -236,6 +254,13 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         setter <- get( paste0("parameters_", param, "_set") )
         setter( self$c_params, value )
       }
+    },
+
+    #' @description Set C parameters from a list.
+    #' @param params A named list with the name being the parameter
+    set_param_list = function(params) {
+      for( param in names(params) )
+        self$set_param(param,params[[param]])
     },
 
     #' @description
@@ -338,3 +363,60 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     }
   )
 )
+
+############################################################################
+#
+# Wrapper functions for R users who are not used to using classes
+#
+############################################################################
+
+#' Creates a new OpenABM Parameters object (wrapper for
+#' \code{\link{Parameters}$new()})
+#'
+#' @param input_param_file Input parameters CSV file path.
+#' @param param_line_number Which column of the input param file to read.
+#' @param output_file_dir Where to write output files to.
+#' @param input_households Household demographics file (required).
+#' @param hospital_input_param_file Hospital input parameters CSV file path.
+#' @param hospital_param_line_number Which column of the hospital input
+#' param file to read.
+#' @param read_param_file A boolean. If \code{TRUE}, read
+#' \code{input_param_file}. If \code{FALSE}, ignore
+#' \code{input_param_file}.
+#' @param read_hospital_param_file A boolean. If \code{TRUE}, read
+#' \code{hospital_input_param_file}. If \code{FALSE}, ignore
+#' \code{hospital_input_param_file}.
+#' @return Parameters object (R6 Class)
+Parameters.new = function(
+  input_param_file = NA_character_,
+  param_line_number = 1,
+  output_file_dir = "./",
+  input_households = NA_character_,
+  hospital_input_param_file = NA_character_,
+  hospital_param_line_number = NA_integer_,
+  read_param_file = TRUE,
+  read_hospital_param_file = FALSE
+) {
+  return(Parameters$new(input_param_file,param_line_number,output_file_dir,
+    input_households, hospital_input_param_file, hospital_param_line_number,
+    read_param_file, read_hospital_param_file))
+}
+
+#' Gets the value of a parameter (wrapper for
+#' \code{\link{Parameters}$get_param(param)})
+#' @param parameters A Parameters object
+#' @param param The name of the parameter
+Parameters.get_param = function(parameters,param) {
+  return( parameters$get_param(param))
+}
+
+#' Sets the value of a parameter (wrapper for
+#' \code{\link{Parameters}$set_param(param,value)})
+#' @param parameters A Parameters object
+#' @param param The name of the parameter
+#' @param value The new value
+Parameters.set_param = function(parameters,param,value) {
+  return( parameters$set_param(param,value))
+}
+
+

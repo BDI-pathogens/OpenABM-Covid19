@@ -22,6 +22,7 @@ SWIG_utils_n_total_by_day <- utils_n_total_by_day
 SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
 
+
 #' R6Class Model
 #'
 #' @description
@@ -47,6 +48,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     c_params = NA,
 
     c_model = NA,
+
+    .results = list(),
 
     utils_n_guess = function(key, ...) {
       if (startsWith(key, 'total_')) {
@@ -117,14 +120,25 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
   ),
 
   public = list(
-    #' @param params_object An object of type \code{\link{Parameters}}. The
-    #' constructor will lock the parameter values (ie. \code{params_code}
-    #' will become read-only).
-    initialize = function(params_object)
+    #' @param params_object An object of type \code{\link{Parameters}} or NULL
+    #' (for default params). The constructor will lock the parameter values (ie.
+    #' \code{params_code} will become read-only).
+    #' @param params A named list of parameters fo override (default NULL for no
+    #' overrides).
+    initialize = function(params_object = NULL, params = NULL )
     {
-      if (!is.R6(params_object)) {
-        stop("params_object is an a Parameters R6Class")
+      if (is.null(params_object)) {
+        params_object = Parameters$new()
       }
+      if (!is.R6(params_object)) {
+        stop("params_object is an a Parameters R6Class or NULL (default params")
+      }
+      if (!is.null(params)) {
+        if (!is.list(params))
+          stop("params must be a list of parameters to override or NULL")
+        params_object$set_param_list(params)
+      }
+
       # Store the params object so it doesn't go out of scope and get freed
       private$params_object <- params_object
       # Create C parameters object
@@ -145,8 +159,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         result <- getter( private$c_model, enum$index )
       } else {
         # single-value parameter
-        getter <- get(paste0("get_model_param_", param))
-        result <- getter( private$c_model )
+        getter_str <- paste0("get_model_param_", param)
+        if (exists(getter_str)) {
+          getter <- get(getter_str)
+          result <- getter( private$c_model )
+        } else {
+          result = private$params_object$get_param(param)
+        }
       }
       return(result)
     },
@@ -558,6 +577,48 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     one_time_step = function()
     {
       SWIG_one_time_step(private$c_model)
+      private$.results = append( private$.results,list(self$one_time_step_results()))
+    },
+
+    #' @description  A dataframe of all the time-series results in the
+    #' simulation so far.Concatanates the return of one_time_step_results from
+    #' all steps so far.
+    #' @return A dataframe of the time-series results
+    results = function()
+    {
+      return( as.data.frame(do.call(rbind,private$.results)) )
+    },
+
+    #' @description  Runs simulation to the end (specified by the parameter
+    #' end_time)
+    #' @param verbose - whether to display progress information (DEFAULT=TRUE)
+    #' @return Null
+    run = function( verbose = TRUE)
+    {
+      n_steps  = self$get_param( "end_time" ) - private$c_model$time
+      step     = 0
+
+      start_time = Sys.time()
+      if (verbose)
+        cat( sprintf( "Start simulation at %s\n", format( start_time, "%Y-%m-%d %H:%M:%S") ) )
+
+      start_time = Sys.time()
+
+      while (step < n_steps)
+      {
+        step = step + 1;
+
+        if (verbose)
+          cat( sprintf( "\rStep %d of %d",  step, n_steps ) )
+
+        self$one_time_step()
+      }
+
+      if (verbose) {
+        end_time = Sys.time()
+        cat( sprintf( "\nEnd simulation in %.1fs at %s",
+                      as.numeric( end_time - start_time ), end_time ) )
+      }
     },
 
     #' @description Get the results from one-time step.
@@ -714,3 +775,79 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     }
   )
 )
+
+############################################################################
+#
+# Wrapper functions for R users who are not used to using classes
+#
+############################################################################
+
+#' Creates a new OpenABM Model (wrapper for \code{\link{Model}$new()})
+#'
+#' @description Creates a new OpenABM \code{\link{Model}} instance from a
+#' \code{\link{Parameters}} object and/or a list of parameters overrides.
+#'
+#' @param params_object An object of type \code{\link{Parameters}} or NULL
+#' (for default params). The constructor will lock the parameter values (ie.
+#' \code{params_code} will become read-only).
+#' @param params A named list of parameters fo override (default NULL for no
+#' overrides)
+#' @return Model object (R6 Class)
+Model.new = function(params_object = NULL, params = NULL ) {
+  return (Model$new(params_object = params_object, params = params ))
+}
+
+#' Steps the model forward one time step (wrapper for \code{\link{Model}$one_time_step()})
+#'
+#' @param model The Model object (R6 Class)
+#' @return Null
+Model.one_time_step = function( model ) {
+  return( model$one_time_step() )
+}
+
+#' Gets the simulation results for the current time-step. (wrapper for
+#' \code{\link{Model}$one_time_step_results()})
+#'
+#' @param model The Model object (R6 Class)
+#' @return Vector with names of variables
+Model.one_time_step_results = function( model ) {
+  return( model$one_time_step_results() )
+}
+
+#' Gets the simulation results for all time-steps run so far (wrapper for
+#' \code{\link{Model}$results()})
+#'
+#' @param model The Model object (R6 Class)
+#' @return DataFrame
+Model.results = function( model ) {
+  return( model$results() )
+}
+
+#' Runs the simulation until the \code{end_time} specified in the parameters
+#' (wrapper for  \code{\link{Model}run()})
+#'
+#' @param model The Model object (R6 Class)
+#' @param verbose Show progress of the calculation (default = TRUE)
+#' @return Null
+Model.run = function( model, verbose=TRUE ) {
+  return( model$run() )
+}
+
+#' Gets the value of a parameter (wrapper for \
+#' code{\link{Parameters}$get_param(param)})
+#' @param parameters A Parameters object
+#' @param param The name of the parameter
+Model.get_param = function( model,param ) {
+  return( model$get_param(param) )
+}
+
+#' Update a parameter during a simulation
+#' @description A subset of parameters may be updated whilst the model is
+#' evaluating these correspond to events. This function throws an error if
+#' \code{param} isn't safe to update.
+#' @param param name of parameter. See \code{\link{SAFE_UPDATE_PARAMS}} for
+#' allowed parameter names
+#' @param value value of parameter
+Model.update_running_params = function( model, param, value ) {
+  return( model$update_running_params( param, value ) )
+}

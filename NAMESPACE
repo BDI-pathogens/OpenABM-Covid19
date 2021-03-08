@@ -16,6 +16,18 @@ export("Simulation")
 export("COVID19IBM")
 export("VaccineSchedule")
 
+# wrapper function for R6 calsses
+export("Parameters.new")
+export("Parameters.get_param")
+export("Parameters.set_param")
+export("Model.new")
+export("Model.one_time_step")
+export("Model.one_time_step_results")
+export("Model.results")
+export("Model.run")
+export("Model.get_param")
+export("Model.update_running_params")
+
 # Enums
 export("AgeGroupEnum")
 export("SAFE_UPDATE_PARAMS")
