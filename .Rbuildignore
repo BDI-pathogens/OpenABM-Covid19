@@ -51,6 +51,7 @@
 ^\.github$
 ^README\.md$
 ^CONTRIBUTING\.md$
+^LICENSE$
 ^documentation$
 ^src\/Makefile$
 ^src\/main\.c$
