@@ -31,6 +31,39 @@ SWIG_seed_infect_by_idx <- seed_infect_by_idx
 #' Model used for running the simulation. Initialise the model by creating
 #' a \code{\link{Parameters}} instance.
 #'
+#' For a detailed explanation of the model, please read the
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19.md}{Online Documentation}
+#'
+#' @examples
+#' # Create a model using the baseline parameters included in the package.
+#' data('baseline', package='OpenABMCovid19')
+#' params <- OpenABMCovid19::create.params(
+#'   baseline_household_demographics, baseline_parameters)
+#' model <- OpenABMCovid19::Model$new( params )
+#'
+#' # Get a parameter
+#' model$get_param('manual_trace_on')
+#'
+#' # Change (update) a parameter
+#' model$update_running_params('manual_trace_on', 0)
+#'
+#' # Set / get risk scores. Score are values between 0 and 1.
+#' day <- 1
+#' infectors   <- AgeGroupEnum[['_10_19']]
+#' susceptible <- AgeGroupEnum[['_60_69']]
+#' model$get_risk_score( day, infectors, susceptible )
+#' model$set_risk_score( day, infectors, susceptible, 0.5 )
+#' model$get_risk_score_household( infectors, susceptible )
+#' model$set_risk_score_household( infectors, susceptible, 0.5 )
+#'
+#' # Getting a network
+#' nw <- model$get_network_by_id(3)
+#'
+#' # Set / get app users
+#' users <- model$get_app_users()
+#' users[['app_user']] <- as.integer(!users[['app_user']]) # reverse values
+#' model$set_app_users(users)
+#'
 #' @seealso \code{\link{Parameters}}
 #' @seealso \code{\link{AgeGroupEnum}}
 #' @seealso \code{\link{SAFE_UPDATE_PARAMS}}

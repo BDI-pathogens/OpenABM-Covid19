@@ -7,10 +7,6 @@
 ^.*\.Rproj$
 ^.*\.Rcheck$
 
-# R utility scripts
-^R\/demographics\.R$
-^R\/plotting\.R$
-
 # SWIG interface files
 .*\.i$
 

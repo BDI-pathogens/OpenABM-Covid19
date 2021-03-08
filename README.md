@@ -124,9 +124,9 @@ This will generate a file `src/Makevars` (ignored by git) which includes the nec
 
 - Set the environment variable `LIB_GSL` to install prefix of GSL. (It's recommended to compile and install GSL with [CMake](https://github.com/ampl/gsl/) instead of autotools).
 - Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) and add C:\Rtools\usr\bin to your `PATH` environment variable.
-- Install swig 3 using [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/) and add `swig.exe` to your `PATH` environment variable.
+- Install swig 3 using [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/) and add `swig.exe` to your `PATH` environment variable or set `SWIG3`.
 
-You do not need to generate and run a configure script. R will use `src/Makevar.win` which used the environment variable `LIB_GSL` to find GSL.
+You do not need to generate and run a configure script. R will use `src/Makevar.win` which uses the environment variable `LIB_GSL` to find GSL.
 
 ### All platforms
 
@@ -159,4 +159,6 @@ R console cheat-sheet:
 > devtools::document() # Generate the R documentation files
 > devtools::build()    # Bundle OpenABMCovid19 into a source package tarball
 > devtools::install()  # Install the OpenABMCovid19 package.
+> devtools::test()     # Run tests.
+> devtools::check()    # Check R package.
 ```

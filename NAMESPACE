@@ -23,4 +23,7 @@ export("NETWORK_CONSTRUCTIONS")
 export("VACCINE_TYPES")
 export("VACCINE_STATUS")
 
+# Wrappers
+export("create.params")
+
 useDynLib(OpenABMCovid19, .registration = TRUE)

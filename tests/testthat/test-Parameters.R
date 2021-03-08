@@ -264,3 +264,14 @@ test_that("Parameters::return_param_object", {
   expect_equal(p$c_params$n_total, 10)
   expect_equal(p$get_param('n_total'), 10)
 })
+
+
+test_that("create.params() + data()", {
+  data('baseline', package='OpenABMCovid19')
+  # TODO(olegat) add argument `hospital  = hospital_baseline_parameters`
+  p <- create.params(
+    household = baseline_household_demographics,
+    params    = baseline_parameters
+  )
+  expect_true(is.R6(p))
+})

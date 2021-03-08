@@ -49,9 +49,8 @@ Description:
   disease in individuals is modelled. Instantaneous contract-tracing and
   quarantining of contacts is modelled allowing the evaluation of the design and
   configuration of digital contract-tracing mobile phone apps.
-
-  Robert Hinch, William J M Probert, et al. (2020) doi:https://doi.org/10.1101/2020.09.16.20195925
-Depends: R6
+  Robert Hinch, William J M Probert, et al. (2020) <doi:10.1101/2020.09.16.20195925>.
+Depends: R6, R (>= 3.6)
 Imports: methods
 Collate:
   OpenABMCovid19.R

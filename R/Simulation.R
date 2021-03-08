@@ -3,6 +3,8 @@
 #' R6Class Environment
 #' @description
 #' Class representing an environment object that defines the system.
+#'
+#' See \code{\link{Simulation}} for examples.
 Environment <- R6Class( classname = 'Environment', cloneable = FALSE,
   private = list( .start = FALSE ),
 
@@ -40,6 +42,8 @@ Environment <- R6Class( classname = 'Environment', cloneable = FALSE,
 #' @description
 #' Class representing an Agent object for dictating policy through time and
 #' storing value function (that maps states of the model to actions).
+#'
+#' See \code{\link{Simulation}} for examples.
 Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
   public = list(
     #' @param verbose Log verbosity.
@@ -65,6 +69,29 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' R6Class Simulation
 #' @description Simulation object to run the model and store data across
 #' multiple simulations.
+#' @examples
+#' # Create a model using the baseline parameters included in the package.
+#' data('baseline', package='OpenABMCovid19')
+#' params <- OpenABMCovid19::create.params(
+#'   baseline_household_demographics, baseline_parameters)
+#' model <- OpenABMCovid19::Model$new( params )
+#'
+#' # Begin simulation:
+#' env <- OpenABMCovid19::COVID19IBM$new( model )
+#' sim <- OpenABMCovid19::Simulation$new( env )
+#' sim$start_simulation()
+#' sim$steps(1)
+#'
+#' # Make changes to the model (environment)
+#' model$seed_infect_by_idx(0)
+#' model$vaccinate_individual(2)
+#' model$vaccinate_schedule( OpenABMCovid19::VaccineSchedule$new() )
+#'
+#' # Resume simulation
+#' sim$steps(1)
+#'
+#' # Get results
+#' sim$results
 Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
   public = list(
     #' @field env Current environment
@@ -210,7 +237,9 @@ Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
 
 #' R6Class COVID19IBM
 #' @description Environment subclass representing a COVID19 outbreak as defined
-#' in the COVID19-IBM model
+#' in the COVID19-IBM model.
+#'
+#' See \code{\link{Simulation}} for examples.
 COVID19IBM <- R6Class( classname = 'COVID19IBM', cloneable = FALSE,
   inherit = Environment,
 

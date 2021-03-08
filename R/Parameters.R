@@ -6,24 +6,19 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #' Wrapper class for the \code{parameters} C struct (\emph{params.h}).
 #'
 #' @details
-#' TODO(olegat) PLACEHOLDER Some explanations
+#' For a detailed explanation of the available parameters (including sources
+#' and references), please read the
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 #'
-#' @examples
-#' # TODO(olegat) this fails `R CMD check` because the CSV files do not exist.
-#' # Load parameters from CSV files.
-#' #params <- OpenABMCovid19::Parameters$new(
-#' #  "input_parameters.csv", 1,
-#' #   "out_dir",
-#' #   "input_household.csv",
-#' #   "hospital_input_parameters.csv", 1
-#' #)
-#'
-#' # Edit params
-#' #params$c_params$rng_seed = 1234
-#' #params$c_params$n_total = 250000
-#' ## End(Not run)
+#' For legacy reasons (and to keep feature parity with the Python interace),
+#' this class take data arguments in the form of file paths. To create an
+#' instance using data frames, use \code{\link{create.params}}.
 #'
 #' @seealso \code{\link{Model}}
+#' @seealso \code{\link{create.params}}
+#' @seealso \code{\link{baseline_household_demographics}}
+#' @seealso \code{\link{baseline_parameters}}
+#' @seealso \code{\link{hospital_baseline_parameters}}
 #'
 Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
@@ -338,3 +333,70 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     }
   )
 )
+
+#' @title Parameters initializatoin wrapper
+#' @description
+#' Wrapper for creating \code{\link{Parameters}} instances. For legacy reasons
+#' (to maintain feature-parity with the Python class interface), the constructor
+#' R6 class takes arguments as file paths rather than data frames, this is not
+#' also convenient when working in R. This wrapper function creates model
+#' parameters using data frame arguments by default.
+#'
+#' For a detailed explanation of the available parameters (including sources
+#' and references), please read the
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
+#'
+#' @param household Household demographics. Must be a data frame or a file path.
+#' Required.
+#' @param params Input parameters. Must be a data frame or a file path.
+#' Required.
+#'
+#' @return An \code{\link{Parameters}} R6 instance.
+#'
+#' @examples
+#' # Load data from baseline.rda
+#' data('baseline', package='OpenABMCovid19')
+#'
+#' # Create `Parameters` instance
+#' params <- OpenABMCovid19::create.params(
+#'   household = baseline_household_demographics,
+#'   params    = baseline_parameters
+#' )
+#'
+#' # Edit params: method 1 (recommended, includes error-checking)
+#' params$set_param('rng_seed', 1234)
+#' params$set_param('n_total', 250000)
+#'
+#' # Edit params: method 2 (not recommended, use with caution)
+#' params$c_params$rng_seed = 1234
+#' params$c_params$n_total = 250000
+#'
+#' @seealso \code{\link{baseline_household_demographics}}
+#' @seealso \code{\link{baseline_parameters}}
+create.params <- function( household, params )
+{
+  read_param_file <- !is.data.frame(params)
+
+  input_param_file = NA_character_
+  if (read_param_file) {
+    input_param_file = params
+  }
+
+  # TODO(olegat) add argument `hospital`
+  result <- Parameters$new(
+    input_param_file           = input_param_file,
+    param_line_number          = 1,
+    input_households           = household,
+    hospital_input_param_file  = NA_character_,
+    hospital_param_line_number = 1,
+    read_param_file            = read_param_file,
+    read_hospital_param_file   = FALSE )
+
+  if (is.data.frame(params)) {
+    for (col in names(params)) {
+      result$set_param( col, as.numeric(params[[col]]) )
+    }
+  }
+
+  return (result)
+}
