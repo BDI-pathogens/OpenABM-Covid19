@@ -2523,16 +2523,16 @@ class TestClass(object):
         true_pos   = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
         false_neg  = df_test[ ( df_test[ "infected" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
         sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
-        sens_peak  = sens_ratio.argmax()
+        sens_peak_time  = sens_ratio.argmax()
 
         sens_diff = sens_ratio.diff()
-        is_sens_single_peak = np.all( sens_diff.iloc[ 2 : sens_peak + 1 ] >= 0 ) & np.all( sens_diff[ sens_peak + 1 : -3 ] <= 0 )
+        is_sens_single_peak = np.all( sens_diff.iloc[ 2 : sens_peak_time + 1 ] >= 0 ) & np.all( sens_diff[ sens_peak_time + 1 : -3 ] <= 0 )
         np.testing.assert_equal( is_sens_single_peak, True, f"Sensitivity does not have a single peak: {sens_diff}" )
 
         # check the sensitivity at the peak.
         df_test[ "symptomatic" ] = ( df_test["time_symptomatic"] > 0 )
-        true_pos   = df_test[ ( df_test[ "time_since_inf" ] == 3 ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
-        false_neg  = df_test[ ( df_test[ "time_since_inf" ] == 3 ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        true_pos   = df_test[ ( df_test[ "time_since_inf" ] == sens_peak_time ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 1 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
+        false_neg  = df_test[ ( df_test[ "time_since_inf" ] == sens_peak_time ) & ( df_test[ "symptomatic" ] == True ) & ( df_test[ "lateral_flow_status" ] == 0 ) & ( df_test[ "test_sensitive_inf" ] == True ) ].groupby( [ "time_since_inf" ] ).size()
         sens_ratio = true_pos.divide( false_neg.add( true_pos, fill_value=0 ), fill_value=0 )
         sens_peak_idx  = sens_ratio.idxmax()
 
@@ -2542,6 +2542,7 @@ class TestClass(object):
         sd_mult = test_params[ "sd_infectiousness_multiplier" ]
         sens_exp = test_params[ "lateral_flow_test_sensitivity"]
         if sd_mult:
+          # Low is half of one standard deviation (67.5% / 2).
           sens_low = sens_exp - 0.675 / 2.0 * sd_mult
           sens_peak = sens_ratio[sens_peak_idx]
           np.testing.assert_equal( sens_low <= sens_peak <= sens_exp, True, f"Sensitivity outside expected range {sens_low} <= {sens_peak} <= {sens_exp}." )
