@@ -48,3 +48,4 @@ git push origin feature:speed_up_fix
 * Parameters that wish to be updated via the Python interface need to be added to the list `PYTHON_SAFE_UPDATE_PARAMS` within `OpenABM-Covid19/src/COVID19/model.py`.  
 * If the contribution/PR changes the Python/C interface please include documentation.  
 * Changes to the Python interface should also include changes to the R interface.
+* If you're modifying the R interface, you should run a check on the package to ensure that they aren't any errors or warnings (run `devtools::check()` from R console or `R CMD check --as-cran` from the Unix terminal).

@@ -36,6 +36,7 @@ SWIG_seed_infect_by_idx <- seed_infect_by_idx
 #'
 #' @examples
 #' # Create a model using the baseline parameters included in the package.
+#' # Note: This initialisation can take a few seconds.
 #' data('baseline', package='OpenABMCovid19')
 #' params <- OpenABMCovid19::create.params(
 #'   baseline_household_demographics, baseline_parameters)

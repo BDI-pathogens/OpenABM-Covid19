@@ -71,6 +71,7 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' multiple simulations.
 #' @examples
 #' # Create a model using the baseline parameters included in the package.
+#' # Note: This initialisation can take a few seconds.
 #' data('baseline', package='OpenABMCovid19')
 #' params <- OpenABMCovid19::create.params(
 #'   baseline_household_demographics, baseline_parameters)
@@ -80,7 +81,7 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' env <- OpenABMCovid19::COVID19IBM$new( model )
 #' sim <- OpenABMCovid19::Simulation$new( env )
 #' sim$start_simulation()
-#' sim$steps(1)
+#' sim$steps(1) # Note: slow operation (takes a few seconds).
 #'
 #' # Make changes to the model (environment)
 #' model$seed_infect_by_idx(0)
@@ -88,7 +89,7 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' model$vaccinate_schedule( OpenABMCovid19::VaccineSchedule$new() )
 #'
 #' # Resume simulation
-#' sim$steps(1)
+#' sim$steps(1) # Note: slow operation (takes a few seconds).
 #'
 #' # Get results
 #' sim$results
