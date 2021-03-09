@@ -5,7 +5,14 @@ else
     C = gcc
 endif
 
-ifeq (, $(shell which python3))
+ifeq (Windows_NT, $(OS))
+	WHICH=where
+else
+	WHICH=which
+endif
+
+
+ifeq (, $(shell $(WHICH) python3))
 	PYTHON = python
 else
 	PYTHON = python3
@@ -16,6 +23,7 @@ PIP_FLAGS := --upgrade
 # The 'in-place' flag is different on macOS (BSD) and Linux/minGW.
 # https://linux.die.net/man/1/sed
 # https://www.freebsd.org/cgi/man.cgi?query=sed&sektion=&n=1
+# Note on Windows: install Rtools for 'sed'
 ifeq ($(shell uname),Darwin)
 	SED_I=sed -i ''
 else
@@ -46,7 +54,9 @@ SWIG_OUTPUT_PY = src/covid19_wrap.o src/covid19_wrap.c src/covid19.py src/_covid
 SWIG_OUTPUT_R = src/covid19_wrap_R.c src/covid19_wrap_R.o R/OpenABMCovid19.R src/OpenABMCovid19.so
 SWIG_OUTPUT = $(SWIG_OUTPUT_PY) $(SWIG_OUTPUT_R)
 
-SWIG3 := swig
+ifndef SWIG3
+	SWIG3 = swig
+endif
 
 # Roxygen generated files
 ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd man/Network.Rd man/Agent.Rd man/VaccineSchedule.Rd man/VACCINE_STATUS.Rd man/Model.Rd man/AgeGroupEnum.Rd man/NETWORK_CONSTRUCTIONS.Rd man/COVID19IBM.Rd man/VACCINE_TYPES.Rd man/Simulation.Rd man/create.params.Rd
