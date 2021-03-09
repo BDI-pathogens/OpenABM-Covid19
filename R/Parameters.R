@@ -10,15 +10,7 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #' and references), please read the
 #' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 #'
-#' For legacy reasons (and to keep feature parity with the Python interace),
-#' this class take data arguments in the form of file paths. To create an
-#' instance using data frames, use \code{\link{create.params}}.
-#'
 #' @seealso \code{\link{Model}}
-#' @seealso \code{\link{create.params}}
-#' @seealso \code{\link{baseline_household_demographics}}
-#' @seealso \code{\link{baseline_parameters}}
-#' @seealso \code{\link{hospital_baseline_parameters}}
 #'
 Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
@@ -175,8 +167,13 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
       else {
         if ( is.na(input_households)) {
-          input_households <- system.file("default_params",
+          if(.Machine$sizeof.pointer < 8) {
+            stop("Default household data unsupported on 32-bit systems (model requires more that 4 GiB).")
+          }
+          else {
+            input_households <- system.file("default_params",
               "baseline_household_demographics.csv", package = "OpenABMCovid19")
+          }
         }
         if (!is.character(input_households) || !file.exists(input_households)) {
           stop("input_households must be a data.frame of household OR a valid file OR left NA (default params)")
@@ -393,7 +390,8 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 #' @param read_hospital_param_file A boolean. If \code{TRUE}, read
 #' \code{hospital_input_param_file}. If \code{FALSE}, ignore
 #' \code{hospital_input_param_file}.
-#' @return Parameters object (R6 Class)
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 Parameters.new = function(
   input_param_file = NA_character_,
   param_line_number = 1,
@@ -413,6 +411,8 @@ Parameters.new = function(
 #' \code{\link{Parameters}$get_param(param)})
 #' @param parameters A Parameters object
 #' @param param The name of the parameter
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 Parameters.get_param = function(parameters,param) {
   return( parameters$get_param(param))
 }
@@ -422,6 +422,8 @@ Parameters.get_param = function(parameters,param) {
 #' @param parameters A Parameters object
 #' @param param The name of the parameter
 #' @param value The new value
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 Parameters.set_param = function(parameters,param,value) {
   return( parameters$set_param(param,value))
 }

@@ -92,17 +92,17 @@ test_that("Parameters::initialize (all CSV files)", {
 
 test_that("Parameters:get_param / set_param (single)", {
   p <- Parameters$new(
-    input_households = "init_value.csv",
-    read_param_file = FALSE)
-  expect_equal(p$get_param('input_household_file'), "init_value.csv")
+    input_households = "data/baseline_household_demographics.csv",
+    read_param_file  = FALSE)
+  expect_equal(p$get_param('input_household_file'), "data/baseline_household_demographics.csv")
   p$set_param('input_household_file', "new_value.csv")
   expect_equal(p$get_param('input_household_file'), "new_value.csv")
 })
 
 test_that("Parameters:get_param / set_param (multi)", {
   p <- Parameters$new(
-    input_households = "init_value.csv",
-    read_param_file = FALSE)
+    input_households = "data/baseline_household_demographics.csv",
+    read_param_file  = FALSE)
   expect_error(p$set_param('fatality_fraction_TYPO', 0.75))
   expect_error(p$get_param('fatality_fraction_TYPO'))
   p$set_param('fatality_fraction_0_9', 0.5)

@@ -16,3 +16,6 @@ Parameters.get_param(parameters, param)
 Gets the value of a parameter (wrapper for
 \code{\link{Parameters}$get_param(param)})
 }
+\seealso{
+\href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
+}

@@ -8,9 +8,9 @@ code{\link{Parameters}$get_param(param)})}
 Model.get_param(model, param)
 }
 \arguments{
-\item{param}{The name of the parameter}
+\item{model}{A Model object}
 
-\item{parameters}{A Parameters object}
+\item{param}{The name of the parameter}
 }
 \description{
 Gets the value of a parameter (wrapper for \

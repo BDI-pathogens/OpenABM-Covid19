@@ -72,27 +72,26 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' @examples
 #' # Create a model using the baseline parameters included in the package.
 #' # Note: This initialisation can take a few seconds.
-#' data('baseline', package='OpenABMCovid19')
-#' params <- OpenABMCovid19::create.params(
-#'   baseline_household_demographics, baseline_parameters)
-#' model <- OpenABMCovid19::Model$new( params )
+#' model <- Model.new()
 #'
-#' # Begin simulation:
-#' env <- OpenABMCovid19::COVID19IBM$new( model )
-#' sim <- OpenABMCovid19::Simulation$new( env )
-#' sim$start_simulation()
-#' sim$steps(1) # Note: slow operation (takes a few seconds).
+#' if (!is.null(model)) {
+#'   # Begin simulation:
+#'   env <- COVID19IBM$new( model )
+#'   sim <- Simulation$new( env )
+#'   sim$start_simulation()
+#'   sim$steps(1) # Note: slow operation (takes a few seconds).
 #'
-#' # Make changes to the model (environment)
-#' model$seed_infect_by_idx(0)
-#' model$vaccinate_individual(2)
-#' model$vaccinate_schedule( OpenABMCovid19::VaccineSchedule$new() )
+#'   # Make changes to the model (environment)
+#'   model$seed_infect_by_idx(0)
+#'   model$vaccinate_individual(2)
+#'   model$vaccinate_schedule( VaccineSchedule$new() )
 #'
-#' # Resume simulation
-#' sim$steps(1) # Note: slow operation (takes a few seconds).
+#'   # Resume simulation
+#'   sim$steps(1) # Note: slow operation (takes a few seconds).
 #'
-#' # Get results
-#' sim$results
+#'   # Get results
+#'   sim$results
+#' }
 Simulation <- R6Class( classname = 'Simulation', cloneable = FALSE,
   public = list(
     #' @field env Current environment

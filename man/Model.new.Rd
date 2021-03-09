@@ -15,9 +15,12 @@ Model.new(params_object = NULL, params = NULL)
 overrides)}
 }
 \value{
-Model object (R6 Class)
+Model object (R6 Class), NULL on error or if out-of-memory.
 }
 \description{
 Creates a new OpenABM \code{\link{Model}} instance from a
 \code{\link{Parameters}} object and/or a list of parameters overrides.
+
+Note that model instances are a memory/CPU extensive and this function
+can take a few seconds to complete.
 }
