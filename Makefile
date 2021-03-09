@@ -59,7 +59,7 @@ ifndef SWIG3
 endif
 
 # Roxygen generated files
-ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd man/Network.Rd man/Agent.Rd man/VaccineSchedule.Rd man/VACCINE_STATUS.Rd man/Model.Rd man/AgeGroupEnum.Rd man/NETWORK_CONSTRUCTIONS.Rd man/COVID19IBM.Rd man/VACCINE_TYPES.Rd man/Simulation.Rd man/create.params.Rd
+ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd man/Network.Rd man/Agent.Rd man/VaccineSchedule.Rd man/VACCINE_STATUS.Rd man/Model.Rd man/AgeGroupEnum.Rd man/NETWORK_CONSTRUCTIONS.Rd man/COVID19IBM.Rd man/VACCINE_TYPES.Rd man/Simulation.Rd
 
 # To compile
 install: $(OBJS)
