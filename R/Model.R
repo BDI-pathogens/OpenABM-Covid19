@@ -530,6 +530,18 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         schedule$total_vaccinated)))
     },
 
+    #' @description Gets information about all individuals. Wrapper for
+    #' C API \code{get_individuals}.
+    #' @return DataFrame of basic individual information.
+    get_individuals = function()
+    {
+      c_model_ptr <- private$c_model@ref
+      n_total     <- private$c_params$n_total
+      indiv       <- .Call('R_get_individuals', c_model_ptr, n_total,
+                           PACKAGE='OpenABMCovid19');
+      return(as.data.frame(indiv))
+    },
+
     #' @description Delete a network.
     #' Wrapper for C API \code{delete_network}.
     #' @param network The network to delete.
@@ -544,12 +556,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return All app users.
     get_app_users = function()
     {
-      n <- private$c_params$n_total
-      users <- integer(n)
-      for (i in 1:n) {
-        users[i] <- get_app_user_by_index(private$c_model, i - 1)
-      }
-      IDs <- seq(from = 0, to = n - 1)
+      c_model_ptr <- private$c_model@ref
+      n_total     <- private$c_params$n_total
+      users       <- .Call('R_get_app_users', c_model_ptr, n_total,
+                           PACKAGE='OpenABMCovid19');
+
+      IDs    <- seq(from = 0, to = n_total - 1)
       result <- data.frame('ID' = IDs, 'app_user' = users)
       return(result)
     },
