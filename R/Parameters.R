@@ -42,13 +42,14 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
     read_household_demographics = function()
     {
-      if (self$c_params$N_REFERENCE_HOUSEHOLDS != 0) { return(); }
+      if (self$get_param( "N_REFERENCE_HOUSEHOLDS" ) != 0) { return(); }
 
+      c_params = self$c_params
       if (is.data.frame(self$household_df)) {
         # Move data from R dataframe to C memory
         N <- nrow(self$household_df)
-        self$c_params$N_REFERENCE_HOUSEHOLDS <- N
-        set_up_reference_household_memory( self$c_params )
+        c_params$N_REFERENCE_HOUSEHOLDS <- N
+        set_up_reference_household_memory( c_params )
 
         for (i in 1:N) {
           add_household_to_ref_households(
@@ -68,8 +69,8 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
       else {
         # Tell C API to load CSV.
-        self$c_params$N_REFERENCE_HOUSEHOLDS <-
-          nrow(read.csv(self$c_params$input_household_file))
+        c_params$N_REFERENCE_HOUSEHOLDS <-
+          nrow(read.csv(self$get_param( "input_household_file" ) ) )
         read_household_demographics_file(self$c_params)
       }
     },
@@ -92,7 +93,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         "a_80")
 
       # Add rows
-      N <- self$c_params$N_REFERENCE_HOUSEHOLDS
+      N <- self$get_param( "N_REFERENCE_HOUSEHOLDS" )
       mat <- matrix(nrow = N, ncol = 9)
       for (i in 1:N) {
         offset <- i - 1
@@ -112,12 +113,38 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       df <- as.data.frame(mat)
       names(df) <- ages
       return(df)
+    },
+
+    .c_params   = NA,
+
+    #' the C params R pointer object
+    c_params_ptr = function() {
+      return( private$.c_params()@ref )
+    },
+
+    #' check the C params still exists
+    c_params_valid = function() {
+      return( !is_null_xptr( private$.c_params@ref ))
     }
   ),
 
+  active = list(
+    #' the C param sR pointer object (Swig wrapped)
+    c_params = function( val = NULL )
+    {
+      if( is.null( val ) )
+      {
+        if( private$c_params_valid() )
+          return( private$.c_params )
+        stop( "c_paramsis no longer valid - create a new set of Parameters")
+      }
+      else
+        stop( "cannot set c_params" )
+    }
+  ),
+
+
   public = list(
-    #' @field c_params SWIG pointer to C API struct.
-    c_params = NA,
 
     #' @field household_df Household Data Frame.
     household_df = NA,
@@ -150,7 +177,8 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       hospital_param_line_number <- make_integer(hospital_param_line_number)
 
       ## Initialize the C struct
-      self$c_params <- parameters()
+      c_params = parameters()
+      private$.c_params <- c_params
       initialize_params( self$c_params )
 
       # if no input_param file is given then use the default file
@@ -162,11 +190,11 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(input_param_file) || !file.exists(input_param_file)) {
           stop("input_params_file must be a valid file name OR NA (default params)")
         }
-        self$c_params$input_param_file <- input_param_file
+        c_params$input_param_file <- input_param_file
       }
 
       if (!is.na(param_line_number)) {
-        self$c_params$param_line_number <- param_line_number
+        c_params$param_line_number <- param_line_number
       }
 
       if (is.data.frame(input_households)) {
@@ -180,13 +208,13 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(input_households) || !file.exists(input_households)) {
           stop("input_households must be a data.frame of household OR a valid file OR left NA (default params)")
         }
-        self$c_params$input_household_file <- input_households
+        c_params$input_household_file <- input_households
         self$household_df <- NA
       }
 
       if (!is.na(hospital_param_line_number)) {
         if (is.integer(hospital_param_line_number)) {
-          self$c_params$hospital_param_line_number <- hospital_param_line_number
+          c_params$hospital_param_line_number <- hospital_param_line_number
         } else {
           stop("hospital_param_line_number must be an integer or NA")
         }
@@ -201,7 +229,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(hospital_input_param_file) || !file.exists(hospital_input_param_file )) {
           stop("if read_param_file is TRUE then hospital_input_param_file must be a valid file or NA (default params)")
         }
-        self$c_params$hospital_input_param_file <- hospital_input_param_file
+        c_params$hospital_input_param_file <- hospital_input_param_file
       }
 
       if (read_hospital_param_file) {
@@ -212,9 +240,9 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         private$read_and_check_from_file()
       }
 
-      self$c_params$output_file_dir = output_file_dir
+      c_params$output_file_dir = output_file_dir
       if (!is.na(output_file_dir)) {
-        self$c_params$sys_write_individual <- 1
+        c_params$sys_write_individual <- 1
       }
     },
 
@@ -275,7 +303,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     set_demographic_household_table = function(df_demo_house)
     {
       n_total <- nrow(df_demo_house)
-      if (n_total != self$c_params$n_total ) {
+      if (n_total != self$get_param( "n_total" ) ) {
         stop('df_demo_house must have n_total rows')
       }
       for (name in c('ID', 'age_group', 'house_no')) {
@@ -309,7 +337,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       df_occupation_network_properties)
     {
       n_total <- nrow(df_occupation_networks)
-      if (n_total != self$c_params$n_total ) {
+      if (n_total != self$get_param( "n_total" ) ) {
         stop('df_occupation_networks must have n_total rows')
       }
 

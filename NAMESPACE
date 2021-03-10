@@ -5,6 +5,7 @@ importFrom("methods", "new")
 importFrom("methods", "setClass")
 importFrom("methods", "slot")
 importFrom("R6", "R6Class")
+importFrom("xptr", "is_null_xptr")
 
 # R6 Classes
 export("Parameters")

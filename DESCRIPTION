@@ -16,7 +16,7 @@ Description:
   quarantining of contacts is modelled allowing the evaluation of the design and
   configuration of digital contract-tracing mobile phone apps.
 Depends: R6
-Imports: methods
+Imports: methods, xptr
 Collate:
   OpenABMCovid19.R
   util.R

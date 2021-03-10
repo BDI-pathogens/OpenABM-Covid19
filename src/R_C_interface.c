@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
+#include "model.h"
 #include "params.h"
 
 SEXP R_get_app_users ( SEXP R_c_model, SEXP n_total )
@@ -87,6 +88,31 @@ SEXP R_get_individuals ( SEXP R_c_model, SEXP n_total )
   UNPROTECT(9);
 
   return R_list;
+}
+
+SEXP R_get_network_ids ( SEXP R_c_model, SEXP R_max_ids )
+{
+  // get the point to the model from the R pointer object
+  model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
+  int max_ids = asInteger( R_max_ids );
+
+  // allocate memory to for the function call
+  int *ids = calloc( max_ids, sizeof(int) );
+  int n_ids = get_network_ids(c_model,ids,max_ids);
+
+  if( n_ids == -1 )
+    return( ScalarInteger(-1));
+
+  // convert to R object
+  SEXP R_res = PROTECT(allocVector(INTSXP, n_ids));
+  for( int i = 0; i < n_ids; i++ )
+    INTEGER(R_res)[i] = ids[i];
+
+  // free the memory
+  free(ids);
+  UNPROTECT(1);
+
+  return R_res;
 }
 
 
