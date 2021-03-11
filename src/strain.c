@@ -5,6 +5,7 @@
  *      Author: nikbaya
  */
 
+<<<<<<< HEAD
 #include "strain.h"
 #include "individual.h"
 #include "model.h" // for rng
@@ -120,3 +121,11 @@ void add_to_strain_bin_count(
     	bin_idx = N_STRAIN_BINS - 1;
     strain_bins[bin_idx] += delta;
 }
+=======
+/*****************************************************************************************
+*  Name:		initialize_strain
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+
+>>>>>>> 87b4096... first commit to strain_structure branch
