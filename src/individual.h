@@ -15,6 +15,7 @@
 #include "structure.h"
 #include "params.h"
 #include "constant.h"
+#include "strain.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -95,6 +96,7 @@ struct infection_event{
 	int is_case;
 	int network_id;
 	float strain_multiplier;
+	strain *strain;
 };
 
 /************************************************************************/

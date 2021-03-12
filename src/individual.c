@@ -10,6 +10,7 @@
 #include "constant.h"
 #include "utilities.h"
 #include "model.h"
+#include "strain.h"
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -49,6 +50,10 @@ void initialize_individual(
 	indiv->infection_events->time_infected_infector = UNKNOWN;
 	indiv->infection_events->next =  NULL;
 	indiv->infection_events->is_case     = FALSE;
+
+	// NEW: Allocate space for strain
+	indiv->infection_events->strain = calloc( 1, sizeof( struct strain ) );
+	// indiv->infection_events->strain->strain_multiplier = 1;
 
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
@@ -312,6 +317,7 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params );
+
 }
 
 /*****************************************************************************************

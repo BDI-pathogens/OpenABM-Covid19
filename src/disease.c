@@ -16,9 +16,11 @@
 #include "disease.h"
 #include "structure.h"
 #include "interventions.h"
+#include "strain.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h> // memcpy
 
 /*****************************************************************************************
 *  Name:		set_up_transition_times
@@ -201,7 +203,12 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
+				// infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
+				// printf("infector multiplier: %f\n", infector->infection_events->strain_multiplier);
+				// printf("infector strain multiplier: %f\n", infector->infection_events->strain->strain_multiplier);
+				// printf("%d %f %f\n", infector->idx, infector->infectiousness_multiplier, infector->infection_events->strain->strain_multiplier);
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->strain_multiplier;
+
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -264,7 +271,16 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	infected->infection_events->strain_multiplier = strain_multiplier;
+	infected->infection_events->strain_multiplier 	= strain_multiplier;
+	// strain new_strain;
+	// new_strain.strain_multiplier 					= strain_multiplier;
+	// infected->infection_events->strain 				= calloc( 1, sizeof(struct strain) );
+	// infected->infection_events->strain 				= &new_strain;
+	// infected->infection_events->strain->strain_multiplier = strain_multiplier;
+	int strain_idx = 1;
+	initialize_strain( infected->infection_events->strain, strain_idx, strain_idx, strain_multiplier);
+	printf("seed strain->strain_multiplier: %f\n", 
+		infected->infection_events->strain->strain_multiplier);
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }
@@ -288,11 +304,34 @@ void new_infection(
 	if( vaccine_protected( infected ) )
 		asymp_frac = 1;
 
-	infected->infection_events->infector = infector;
-	infected->infection_events->infector_status = infector->status;
-	infected->infection_events->infector_hospital_state = infector->hospital_state;
-	infected->infection_events->network_id = network_id;
-	infected->infection_events->strain_multiplier = infector->infection_events->strain_multiplier;
+	infected->infection_events->infector 					= infector;
+	infected->infection_events->infector_status 			= infector->status;
+	infected->infection_events->infector_hospital_state 	= infector->hospital_state;
+	infected->infection_events->network_id 					= network_id;
+	infected->infection_events->strain_multiplier 			= infector->infection_events->strain_multiplier;
+	// infected->infection_events->strain 						= calloc( 1, sizeof( struct strain ) );
+	
+	// if ( infected != infector )
+	// {
+	// 	memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
+	// }
+
+	infected->infection_events->strain = infector->infection_events->strain;
+
+	// memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
+	printf("pre-set: %f infects %f\n", 
+		infector->infection_events->strain->strain_multiplier, 
+		infected->infection_events->strain->strain_multiplier);
+	// memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
+	// infected->infection_events->strain->strain_multiplier 	= infector->infection_events->strain->strain_multiplier;
+	printf("strain->strain_multiplier: %f %f\n", 
+		infector->infection_events->strain->strain_multiplier, 
+		infected->infection_events->strain->strain_multiplier);
+	// printf("infector multiplier: %f\n", infector->infection_events->strain_multiplier);
+	// printf("infected multiplier: %f\n", infected->infection_events->strain_multiplier);
+	// printf("strain_multiplier: %f %f\n", 
+	// 	infector->infection_events->strain_multiplier, 
+	// 	infected->infection_events->strain_multiplier);
 
 	if( draw < asymp_frac )
 	{
