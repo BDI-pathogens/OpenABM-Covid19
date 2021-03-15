@@ -20,7 +20,7 @@ typedef struct strain strain;
 
 struct strain{
 	long idx;
-	long parent_idx;
+	strain *parent;
 	float transmission_multiplier;
 };
 
@@ -28,10 +28,10 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialize_strain( strain*, long, long, float );
+void initialize_strain( strain*, long, strain*, float );
 void set_strain_multiplier( strain*, float );
 void set_parent_idx( strain*, long );
-void mutate_strain( strain*, strain* );
+void mutate_strain( strain* );
 
 
 #endif /* STRAIN_H_ */

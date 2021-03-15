@@ -6,7 +6,9 @@
  */
 
 #include "strain.h"
-#include "stdio.h" // for printf
+#include "model.h" // for rng
+#include <stdio.h> // for printf
+
 
 /*****************************************************************************************
 *  Name:		--
@@ -14,16 +16,15 @@
 *  Returns:		void
 ******************************************************************************************/
 void initialize_strain(
-	strain *strain,
+	strain *new,
 	long idx,
-	long parent_idx,
+	strain *parent,
 	float transmission_multiplier
 )
 {
-	strain->idx 					= idx;
-	strain->parent_idx 				= parent_idx;
-	strain->transmission_multiplier	= transmission_multiplier;
-
+	new->idx 						= idx;
+	new->parent 					= parent;
+	new->transmission_multiplier 	= transmission_multiplier;
 }
 
 
@@ -60,14 +61,21 @@ void initialize_strain(
 *  Description: --
 *  Returns:		--
 ******************************************************************************************/
-void mutate_strain(
-	strain *parent,
-	strain *child
-)
-{
-	long child_idx = parent->idx + 1;
-	long parent_idx = parent->idx;
-	float child_transmission_multiplier = parent->transmission_multiplier*1.5;
-	printf("Mutation: parent: %ld, %f\n", parent_idx, child_transmission_multiplier);
-	initialize_strain( child, child_idx, parent_idx, child_transmission_multiplier );
-}
+// void mutate_strain(
+// 	strain *parent
+// )
+// {	
+// 	double mutation_prob = 0.50;
+// 	double mutation_draw = gsl_rng_uniform( rng );
+
+// 	// if( mutation_draw < mutation_prob )
+// 	// {
+// 	// 	long child_idx = parent-idx + 1
+// 	// 	long parent_idx = parent->idx;
+// 	// 	float child_transmission_multiplier = parent->transmission_multiplier*1.5;
+// 	// 	printf("Mutation: parent: %ld, %f\n", parent_idx, child_transmission_multiplier);
+// 	// 	initialize_strain( child, child_idx, parent_idx, child_transmission_multiplier );
+// 	// }
+
+
+// }
