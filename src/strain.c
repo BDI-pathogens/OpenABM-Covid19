@@ -6,6 +6,7 @@
  */
 
 #include "strain.h"
+#include "stdio.h" // for printf
 
 /*****************************************************************************************
 *  Name:		--
@@ -14,41 +15,59 @@
 ******************************************************************************************/
 void initialize_strain(
 	strain *strain,
-	int idx,
-	int parent_idx,
-	float strain_multiplier
+	long idx,
+	long parent_idx,
+	float transmission_multiplier
 )
 {
-	strain->idx 				= idx;
-	strain->parent_idx 			= parent_idx;
-	strain->strain_multiplier 	= strain_multiplier;
+	strain->idx 					= idx;
+	strain->parent_idx 				= parent_idx;
+	strain->transmission_multiplier	= transmission_multiplier;
 
 }
+
+
+// /*****************************************************************************************
+// *  Name:		--
+// *  Description: --
+// *  Returns:		void
+// ******************************************************************************************/
+// void set_strain_multiplier(
+// 	strain *strain,
+// 	float transmission_multiplier
+// )
+// {
+// 	strain->transmission_multiplier = transmission_multiplier;
+// }
+
+
+// /*****************************************************************************************
+// *  Name:		--
+// *  Description: --
+// *  Returns:		void
+// ******************************************************************************************/
+// void set_parent_idx(
+// 	strain *strain,
+// 	long parent_idx
+// )
+// {
+// 	strain->parent_idx = parent_idx;
+// }
 
 
 /*****************************************************************************************
 *  Name:		--
 *  Description: --
-*  Returns:		void
+*  Returns:		--
 ******************************************************************************************/
-void set_strain_multiplier(
-	strain *strain,
-	float strain_multiplier
+void mutate_strain(
+	strain *parent,
+	strain *child
 )
 {
-	strain->strain_multiplier = strain_multiplier;
-}
-
-
-/*****************************************************************************************
-*  Name:		--
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-void set_parent_idx(
-	strain *strain,
-	long parent_idx
-)
-{
-	strain->parent_idx = parent_idx;
+	long child_idx = parent->idx + 1;
+	long parent_idx = parent->idx;
+	float child_transmission_multiplier = parent->transmission_multiplier*1.5;
+	printf("Mutation: parent: %ld, %f\n", parent_idx, child_transmission_multiplier);
+	initialize_strain( child, child_idx, parent_idx, child_transmission_multiplier );
 }

@@ -15,6 +15,7 @@
 #include "interventions.h"
 #include "demographics.h"
 #include "hospital.h"
+#include "strain.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -647,6 +648,12 @@ void set_up_seed_infection( model *model )
 	unsigned long int person;
 	individual *indiv;
 
+	// create initial strain
+	long strain_idx = 1;
+	float transmission_multiplier = 1; // equivalent to the old "strain_multiplier" float
+	strain *seed_strain = calloc( 1, sizeof( struct strain ) );
+	initialize_strain( seed_strain, strain_idx, strain_idx, transmission_multiplier);
+
 	idx = 0;
 	while( idx < params->n_seed_infection )
 	{
@@ -658,7 +665,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, 1, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, seed_strain, -1 ) )
 				idx++;
 		}
 	}

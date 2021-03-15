@@ -207,7 +207,7 @@ void transmit_virus_by_type(
 				// printf("infector multiplier: %f\n", infector->infection_events->strain_multiplier);
 				// printf("infector strain multiplier: %f\n", infector->infection_events->strain->strain_multiplier);
 				// printf("%d %f %f\n", infector->idx, infector->infectiousness_multiplier, infector->infection_events->strain->strain_multiplier);
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->strain_multiplier;
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
 
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
@@ -262,7 +262,7 @@ void transmit_virus( model *model )
 short seed_infect_by_idx(
 	model *model,
 	long pdx,
-	float strain_multiplier,
+	strain *seed_strain,
 	int network_id
 )
 {
@@ -271,16 +271,7 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	infected->infection_events->strain_multiplier 	= strain_multiplier;
-	// strain new_strain;
-	// new_strain.strain_multiplier 					= strain_multiplier;
-	// infected->infection_events->strain 				= calloc( 1, sizeof(struct strain) );
-	// infected->infection_events->strain 				= &new_strain;
-	// infected->infection_events->strain->strain_multiplier = strain_multiplier;
-	int strain_idx = 1;
-	initialize_strain( infected->infection_events->strain, strain_idx, strain_idx, strain_multiplier);
-	printf("seed strain->strain_multiplier: %f\n", 
-		infected->infection_events->strain->strain_multiplier);
+	infected->infection_events->strain = seed_strain;
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }
@@ -308,25 +299,29 @@ void new_infection(
 	infected->infection_events->infector_status 			= infector->status;
 	infected->infection_events->infector_hospital_state 	= infector->hospital_state;
 	infected->infection_events->network_id 					= network_id;
-	infected->infection_events->strain_multiplier 			= infector->infection_events->strain_multiplier;
+	// infected->infection_events->strain_multiplier 			= infector->infection_events->strain_multiplier;
 	// infected->infection_events->strain 						= calloc( 1, sizeof( struct strain ) );
-	
-	// if ( infected != infector )
+
+	// double mutation_draw = gsl_rng_uniform( rng );
+	// double mutation_prob = 0.99;
+	// if( mutation_draw < mutation_prob )
 	// {
-	// 	memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
+	// 	mutate_strain( infector->infection_events->strain, infected->infection_events->strain );
 	// }
 
-	infected->infection_events->strain = infector->infection_events->strain;
+	infected->infection_events->strain 	= infector->infection_events->strain;
 
+
+	printf("%p %p\n", infected->infection_events->strain, infector->infection_events->strain);
 	// memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
 	printf("pre-set: %f infects %f\n", 
-		infector->infection_events->strain->strain_multiplier, 
-		infected->infection_events->strain->strain_multiplier);
+		infector->infection_events->strain->transmission_multiplier, 
+		infected->infection_events->strain->transmission_multiplier);
 	// memcpy( infected->infection_events->strain, infector->infection_events->strain, sizeof( strain ));
 	// infected->infection_events->strain->strain_multiplier 	= infector->infection_events->strain->strain_multiplier;
-	printf("strain->strain_multiplier: %f %f\n", 
-		infector->infection_events->strain->strain_multiplier, 
-		infected->infection_events->strain->strain_multiplier);
+	// printf("strain->strain_multiplier: %f %f\n", 
+	// 	infector->infection_events->strain->strain_multiplier, 
+	// 	infected->infection_events->strain->strain_multiplier);
 	// printf("infector multiplier: %f\n", infector->infection_events->strain_multiplier);
 	// printf("infected multiplier: %f\n", infected->infection_events->strain_multiplier);
 	// printf("strain_multiplier: %f %f\n", 

@@ -52,7 +52,7 @@ void initialize_individual(
 	indiv->infection_events->is_case     = FALSE;
 
 	// NEW: Allocate space for strain
-	indiv->infection_events->strain = calloc( 1, sizeof( struct strain ) );
+	// indiv->infection_events->strain = calloc( 1, sizeof( struct strain ) );
 	// indiv->infection_events->strain->strain_multiplier = 1;
 
 	indiv->quarantine_event         = NULL;
