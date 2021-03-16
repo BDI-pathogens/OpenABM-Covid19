@@ -52,4 +52,7 @@ void transition_one_disese_event( model*, individual*, int, int, int );
 long n_newly_infected( model*, int time );
 double calculate_R_instanteous( model*, int, double );
 
+// count infections caused by strains
+void print_infections_per_strain( model* );
+
 #endif /* DISEASE_H_ */

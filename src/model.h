@@ -18,7 +18,7 @@
 #include "network.h"
 #include "params.h"
 #include "hospital.h"
-// #include "strain.h"
+#include "strain.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -100,7 +100,7 @@ struct model{
 
 	hospital *hospitals;
 
-	// strain *strains;
+	strain *strains;
 };
 
 struct event{

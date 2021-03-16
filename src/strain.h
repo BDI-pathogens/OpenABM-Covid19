@@ -24,8 +24,10 @@ struct strain{
 	strain *parent;
 	float transmission_multiplier;
 	long n_infected;
+	strain *next;
 };
 
+typedef struct model model; // use to avoid having to `#include model.h`, which also requires strain.h
 typedef struct individual individual; // use to avoid having to `#include individual.h`, which also requires strain.h
 
 /************************************************************************/
@@ -35,7 +37,8 @@ typedef struct individual individual; // use to avoid having to `#include indivi
 void initialize_strain( strain*, long, strain*, float, long );
 // void set_strain_multiplier( strain*, float );
 // void set_parent_idx( strain*, long );
-void mutate_strain( individual* );
+void mutate_strain( model*, individual*, double );
+void add_newest_strain( model*, strain* );
 
 
 #endif /* STRAIN_H_ */
