@@ -24,7 +24,7 @@
 | `mean_infectious_period` | 5.5 | &#956; | Mean of the generation time distribution (days) | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `sd_infectious_period` | 2.14 | &#963; | Standard deviation (days) of infectious period | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `infectious_rate` | 5.18 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
-| `sd_infectiousness_multiplier` | 0 | - | SD of the lognormal used to vary the infectiousness of an individual | Derived from calibration |
+| `sd_infectiousness_multiplier` | 1.4 | - | SD of the lognormal used to vary the infectiousness of an individual | Derived from calibration |
 | `mean_time_to_symptoms` | 5.42 | &#956;<sub>sym</sub> | Mean time from infection to onset of symptoms (days) | McAloon et al. |
 | `sd_time_to_symptoms` | 2.7 | &#963;<sub>sym</sub> | Standard deviation of time from infection to onset of symptoms (days) | McAloon et al. |
 | `mean_time_to_hospital` | 5.14 | &#956;<sub>hosp</sub> | Mean time from symptom onset to hospitalisation (days) | Pellis et al, 2020 |
