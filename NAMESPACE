@@ -28,6 +28,7 @@ export("Model.results")
 export("Model.run")
 export("Model.get_param")
 export("Model.update_running_params")
+export("Model.get_transmissions")
 
 # Enums
 export("AgeGroupEnum")

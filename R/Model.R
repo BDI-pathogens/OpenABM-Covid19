@@ -563,6 +563,16 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(as.data.frame(indiv))
     },
 
+    #' @description Gets information about all transmission events. Wrapper for
+    #' C API \code{get_transmissions}.
+    #' @return DataFrame of transmission information.
+    get_transmissions = function()
+    {
+      c_model_ptr <- private$c_model_ptr()
+      trans<-.Call('R_get_transmissions',c_model_ptr,PACKAGE='OpenABMCovid19');
+      return(as.data.frame(trans))
+    },
+
     #' @description Delete a network.
     #' Wrapper for C API \code{delete_network}.
     #' @param network The network to delete.
@@ -884,4 +894,13 @@ Model.get_param = function( model,param ) {
 #' @param value value of parameter
 Model.update_running_params = function( model, param, value ) {
   return( model$update_running_params( param, value ) )
+}
+
+#' Gets all the transmissions until now (wrapper for
+#' \code{\link{Model}$get_transmissions()})
+#'
+#' @param model The Model object (R6 Class)
+#' @return DataFrame
+Model.get_transmissions = function( model ) {
+  return( model$get_transmissions() )
 }
