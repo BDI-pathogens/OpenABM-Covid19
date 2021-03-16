@@ -290,18 +290,19 @@ void new_infection(
 	if( vaccine_protected( infected ) )
 		asymp_frac = 1;
 
-	infected->infection_events->infector 					= infector;
-	infected->infection_events->infector_status 			= infector->status;
-	infected->infection_events->infector_hospital_state 	= infector->hospital_state;
-	infected->infection_events->network_id 					= network_id;
+	infected->infection_events->infector 				= infector;
+	infected->infection_events->infector_status 		= infector->status;
+	infected->infection_events->infector_hospital_state	= infector->hospital_state;
+	infected->infection_events->network_id 				= network_id;
 	
-	// mutate_strain(infector->infection_events->strain);
-	infected->infection_events->strain 	= infector->infection_events->strain;
+	if ( infected != infector ){
+		mutate_strain(infector); // with some probability the strain will mutate, otherwise it stays the same
+	}
+	
+	infected->infection_events->strain 					= infector->infection_events->strain;
+	infected->infection_events->strain->n_infected++;
+	printf("%p: %ld\n", infected->infection_events->strain, infected->infection_events->strain->n_infected);
 
-	printf("%p %p\n", 
-		infected->infection_events->strain, 
-		infector->infection_events->strain);
-	
 	if( draw < asymp_frac )
 	{
 		transition_one_disese_event( model, infected, SUSCEPTIBLE, ASYMPTOMATIC, NO_EDGE );

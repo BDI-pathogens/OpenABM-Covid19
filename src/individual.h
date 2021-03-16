@@ -95,7 +95,6 @@ struct infection_event{
 	infection_event *next;
 	int is_case;
 	int network_id;
-	float strain_multiplier;
 	strain *strain;
 };
 

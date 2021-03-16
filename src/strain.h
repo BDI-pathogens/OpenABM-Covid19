@@ -12,6 +12,7 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 
+
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
@@ -22,16 +23,19 @@ struct strain{
 	long idx;
 	strain *parent;
 	float transmission_multiplier;
+	long n_infected;
 };
+
+typedef struct individual individual; // use to avoid having to `#include individual.h`, which also requires strain.h
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialize_strain( strain*, long, strain*, float );
-void set_strain_multiplier( strain*, float );
-void set_parent_idx( strain*, long );
-void mutate_strain( strain* );
+void initialize_strain( strain*, long, strain*, float, long );
+// void set_strain_multiplier( strain*, float );
+// void set_parent_idx( strain*, long );
+void mutate_strain( individual* );
 
 
 #endif /* STRAIN_H_ */

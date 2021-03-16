@@ -652,7 +652,7 @@ void set_up_seed_infection( model *model )
 	long strain_idx = 1;
 	float transmission_multiplier = 1; // equivalent to the old "strain_multiplier" float
 	strain *seed_strain = calloc( 1, sizeof( struct strain ) );
-	initialize_strain( seed_strain, strain_idx, seed_strain, transmission_multiplier);
+	initialize_strain( seed_strain, strain_idx, seed_strain, transmission_multiplier, 0);
 
 	idx = 0;
 	while( idx < params->n_seed_infection )

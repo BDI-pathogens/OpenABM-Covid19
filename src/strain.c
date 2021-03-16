@@ -6,6 +6,7 @@
  */
 
 #include "strain.h"
+#include "individual.h"
 #include "model.h" // for rng
 #include <stdio.h> // for printf
 
@@ -19,12 +20,15 @@ void initialize_strain(
 	strain *new,
 	long idx,
 	strain *parent,
-	float transmission_multiplier
+	float transmission_multiplier,
+	long n_infected
+
 )
 {
 	new->idx 						= idx;
 	new->parent 					= parent;
 	new->transmission_multiplier 	= transmission_multiplier;
+	new->n_infected					= n_infected;
 }
 
 
@@ -47,12 +51,12 @@ void initialize_strain(
 // *  Description: --
 // *  Returns:		void
 // ******************************************************************************************/
-// void set_parent_idx(
-// 	strain *strain,
-// 	long parent_idx
+// void set_parent(
+// 	strain *child,
+// 	strain *parent
 // )
 // {
-// 	strain->parent_idx = parent_idx;
+// 	child->parent = parent;
 // }
 
 
@@ -61,21 +65,29 @@ void initialize_strain(
 *  Description: --
 *  Returns:		--
 ******************************************************************************************/
-// void mutate_strain(
-// 	strain *parent
-// )
-// {	
-// 	double mutation_prob = 0.50;
-// 	double mutation_draw = gsl_rng_uniform( rng );
+void mutate_strain(
+	individual *infector
+)
+{	
+	double mutation_prob = 0.001; // probability of mutation
+	double mutation_draw = gsl_rng_uniform( rng ); // Note that when we add a new call to the rng, we can't count on the downstream results being exactly as the original version
 
-// 	// if( mutation_draw < mutation_prob )
-// 	// {
-// 	// 	long child_idx = parent-idx + 1
-// 	// 	long parent_idx = parent->idx;
-// 	// 	float child_transmission_multiplier = parent->transmission_multiplier*1.5;
-// 	// 	printf("Mutation: parent: %ld, %f\n", parent_idx, child_transmission_multiplier);
-// 	// 	initialize_strain( child, child_idx, parent_idx, child_transmission_multiplier );
-// 	// }
+	if( mutation_draw < mutation_prob )
+	{
+		strain *parent 		= infector->infection_events->strain;
+		strain *mutated 	= calloc( 1, sizeof( struct strain ) );
+		long mutated_idx	= parent->idx + 1;
+		
+		double sigma 					= 1;  // stdev for distribtion of mutated strain's transmission_multiplier
+		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
+		float transmission_multiplier 	= 100; //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
+
+		printf("Mutation!: %p -> %p\n", parent, mutated);
+		printf("\t%f -> %f\n", parent->transmission_multiplier, transmission_multiplier);
+
+		initialize_strain( mutated, mutated_idx, parent, transmission_multiplier, 1);
+		infector->infection_events->strain = mutated;
+	}
 
 
-// }
+}

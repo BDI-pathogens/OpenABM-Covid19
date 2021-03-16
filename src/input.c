@@ -1103,7 +1103,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "time_recovered,");
 	fprintf(output_file , "time_susceptible,");
 	fprintf(output_file , "is_case,");
-	fprintf(output_file , "strain_multiplier\n");
+	fprintf(output_file , "transmission_multiplier\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -1146,7 +1146,7 @@ void write_transmissions( model *model )
 					infection_event->times[RECOVERED],
 					infection_event->times[SUSCEPTIBLE],
 					infection_event->is_case,
-					infection_event->strain_multiplier
+					infection_event->strain->transmission_multiplier
 				);
 			infection_event = infection_event->next;
 		}

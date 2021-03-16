@@ -18,6 +18,7 @@
 #include "network.h"
 #include "params.h"
 #include "hospital.h"
+// #include "strain.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -98,6 +99,8 @@ struct model{
 	long n_vaccinated_symptoms_by_age[ N_AGE_GROUPS ];
 
 	hospital *hospitals;
+
+	// strain *strains;
 };
 
 struct event{
