@@ -122,29 +122,34 @@ class TestClass(object):
         ],
         "test_monoton_relative_transmission": [
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 transmission_NETWORK = constant.HOUSEHOLD,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 transmission_NETWORK = constant.RANDOM,
                 relative_transmission_values = [0, 0.5, 1, 1.5, 2, 10, 100]
             ),
             dict( # fluctuating list
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 transmission_NETWORK = constant.OCCUPATION,
                 relative_transmission_values = [1.1, 1, 0, 0.1, 0.1, 0.1, 0.3]
             )
         ],
         "test_monoton_fraction_asymptomatic": [
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 fraction_asymptomatic_0_9 = [0, 0.2, 0.5, 0.5, 1, 0.1],
                 fraction_asymptomatic_10_19 = [0, 0.2, 0.5, 0.5, 1, 0.1],
                 fraction_asymptomatic_20_29 = [0, 0.2, 0.5, 0.5, 1, 0.1],
@@ -158,13 +163,15 @@ class TestClass(object):
         ],
         "test_monoton_asymptomatic_infectious_factor": [
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 asymptomatic_infectious_factor = [0, 0.25, 0.5, 0.5, 1, 0.1]
             )
         ],
         "test_monoton_relative_susceptibility": [
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [0, 0.5, 1, 1.5, 2],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -176,7 +183,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [0, 0.5, 1, 1.5, 2],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -188,7 +196,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [0, 0.5, 1, 1.5, 2],
@@ -200,7 +209,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -212,7 +222,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -224,7 +235,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -236,7 +248,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -248,7 +261,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -260,7 +274,8 @@ class TestClass(object):
                 relative_susceptibility_80 = [1, 1, 1, 1, 1]
             ),
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 relative_susceptibility_0_9 = [1, 1, 1, 1, 1],
                 relative_susceptibility_10_19 = [1, 1, 1, 1, 1],
                 relative_susceptibility_20_29 = [1, 1, 1, 1, 1],
@@ -274,7 +289,8 @@ class TestClass(object):
         ],
         "test_monoton_mild_infectious_factor": [
             dict(
-                end_time = 250,
+                n_total = 20000,
+                end_time = 100,
                 mild_fraction_0_9 = 0.8,
                 mild_fraction_10_19= 0.8,
                 mild_fraction_20_29= 0.8,
@@ -329,7 +345,7 @@ class TestClass(object):
         "test_single_seed_infections": [
             dict(
                 test_params = dict(
-                    n_total = 1e4,
+                    n_total = 10000,
                     n_seed_infection = 5e3,
                     infectious_rate = 0.0
                 ),
@@ -355,7 +371,7 @@ class TestClass(object):
         "test_infectiousness_multiplier": [
             dict(
                 test_params = dict(
-                    n_total = 1e4,
+                    n_total = 2e4,
                     n_seed_infection = 50,
                     end_time = 30,
                 ),
@@ -542,6 +558,7 @@ class TestClass(object):
     
     def test_monoton_relative_transmission(
             self,
+            n_total,
             end_time,
             transmission_NETWORK,
             relative_transmission_values
@@ -559,6 +576,7 @@ class TestClass(object):
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
+        params.set_param( "n_total", n_total )
         params.set_param( "relative_transmission_household", 1 )
         params.set_param( "relative_transmission_occupation", 1 )
         params.set_param( "relative_transmission_random", 1 )
@@ -608,6 +626,7 @@ class TestClass(object):
     
     def test_monoton_fraction_asymptomatic(
             self,
+            n_total,
             end_time,
             fraction_asymptomatic_0_9,
             fraction_asymptomatic_10_19,
@@ -628,6 +647,7 @@ class TestClass(object):
         # calculate the total infections for the first entry in the fraction_asymptomatic values
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
+        params.set_param( "n_total", n_total )
         params.set_param( "fraction_asymptomatic_0_9", fraction_asymptomatic_0_9[0] )
         params.set_param( "fraction_asymptomatic_10_19", fraction_asymptomatic_10_19[0] )
         params.set_param( "fraction_asymptomatic_20_29", fraction_asymptomatic_20_29[0] )
@@ -641,7 +661,7 @@ class TestClass(object):
 
         file_output   = open(constant.TEST_OUTPUT_FILE, "w")
         completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")        
         
         # calculate the sum of fraction_asymptomatic for different age groups
         fraction_asymptomatic_current = fraction_asymptomatic_0_9[0] + \
@@ -699,6 +719,7 @@ class TestClass(object):
         
     def test_monoton_asymptomatic_infectious_factor(
             self,
+            n_total,
             end_time,
             asymptomatic_infectious_factor
         ):
@@ -710,6 +731,7 @@ class TestClass(object):
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params.set_param( "n_total", n_total )
         params.set_param( "end_time", end_time )
         params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[0] )
         params.write_params(constant.TEST_DATA_FILE)     
@@ -750,6 +772,7 @@ class TestClass(object):
             
     def test_monoton_relative_susceptibility(
             self,
+            n_total,
             end_time,
             relative_susceptibility_0_9,
             relative_susceptibility_10_19,
@@ -771,6 +794,7 @@ class TestClass(object):
         # set the first parameters
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
+        params.set_param( "n_total", n_total )
         params.set_param( "relative_susceptibility_0_9", relative_susceptibility_0_9[0] )
         params.set_param( "relative_susceptibility_10_19", relative_susceptibility_10_19[0] )
         params.set_param( "relative_susceptibility_20_29", relative_susceptibility_20_29[0] )
@@ -861,6 +885,7 @@ class TestClass(object):
 
     def test_monoton_mild_infectious_factor(
             self,
+            n_total,
             end_time,
             mild_fraction_0_9,
             mild_fraction_10_19,
@@ -882,6 +907,7 @@ class TestClass(object):
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
+        params.set_param( "n_total", n_total )
         params.set_param( "mild_fraction_0_9", mild_fraction_0_9 )
         params.set_param( "mild_fraction_10_19", mild_fraction_10_19 )
         params.set_param( "mild_fraction_20_29", mild_fraction_20_29 )
@@ -905,6 +931,7 @@ class TestClass(object):
         # calculate the total infections for the rest and compare with the current
         for idx in range(1, len(mild_infectious_factor)):
             params.set_param( "end_time", end_time )
+            params.set_param( "n_total", n_total )
             params.set_param( "mild_fraction_0_9", mild_fraction_0_9 )
             params.set_param( "mild_fraction_10_19", mild_fraction_10_19 )
             params.set_param( "mild_fraction_20_29", mild_fraction_20_29 )
