@@ -85,7 +85,7 @@ void mutate_strain(
 		
 		double sigma 					= 0.1;  // stdev for distribtion of mutated strain's transmission_multiplier
 		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
-		float transmission_multiplier 	= max(0, 1 + delta); //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
+		float transmission_multiplier 	= 1; //max(0, 1 + delta); //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
 
 		// printf("Mutation!: %p -> %p\n", parent, mutated);
 		// printf("\t%f -> %f\n", parent->transmission_multiplier, transmission_multiplier);
