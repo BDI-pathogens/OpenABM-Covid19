@@ -72,6 +72,9 @@ void mutate_strain(
 	double mutation_prob
 )
 {	
+	if( mutation_prob == 0 )
+		return;
+	
 	double mutation_draw = gsl_rng_uniform( rng ); // Note that when we add a new call to the rng, we can't count on the downstream results being exactly as the original version
 
 	if( mutation_draw < mutation_prob )
@@ -80,14 +83,14 @@ void mutate_strain(
 		strain *mutated 	= calloc( 1, sizeof( struct strain ) );
 		long mutated_idx	= parent->idx + 1;
 		
-		// double sigma 					= 1;  // stdev for distribtion of mutated strain's transmission_multiplier
-		// float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
-		float transmission_multiplier 	= 1; //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
+		double sigma 					= 0.1;  // stdev for distribtion of mutated strain's transmission_multiplier
+		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
+		float transmission_multiplier 	= max(0, 1 + delta); //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
 
 		// printf("Mutation!: %p -> %p\n", parent, mutated);
 		// printf("\t%f -> %f\n", parent->transmission_multiplier, transmission_multiplier);
 
-		initialize_strain( mutated, mutated_idx, parent, transmission_multiplier, 1);
+		initialize_strain( mutated, mutated_idx, parent, transmission_multiplier, 0);
 		add_newest_strain( model, mutated );
 		infector->infection_events->strain = mutated;
 	}
