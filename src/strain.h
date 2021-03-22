@@ -24,6 +24,7 @@ struct strain{
 	strain *parent;
 	float transmission_multiplier;
 	long n_infected;
+	long total_infected;
 	strain *next;
 };
 
@@ -34,11 +35,11 @@ typedef struct individual individual; // use to avoid having to `#include indivi
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialize_strain( strain*, long, strain*, float, long );
+void initialize_strain( strain*, long, strain*, float, long, long );
 // void set_strain_multiplier( strain*, float );
 // void set_parent_idx( strain*, long );
 void mutate_strain( model*, individual*, double );
-void add_newest_strain( model*, strain* );
+void add_new_strain_to_model( model*, strain* );
 
 
 #endif /* STRAIN_H_ */

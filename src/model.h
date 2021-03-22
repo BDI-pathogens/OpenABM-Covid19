@@ -101,6 +101,9 @@ struct model{
 	hospital *hospitals;
 
 	strain *strains;
+	long n_strains;
+	double total_transmission_multiplier; // use to calculate mean transmission_multiplier across strains
+
 };
 
 struct event{
