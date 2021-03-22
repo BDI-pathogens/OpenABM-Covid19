@@ -21,6 +21,7 @@ SWIG_utils_n_total_age <- utils_n_total_age
 SWIG_utils_n_total_by_day <- utils_n_total_by_day
 SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
+SWIG_destroy_model <- destroy_model
 
 
 #' R6Class Model
@@ -80,7 +81,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     c_params = NA,
 
-    c_model = NA,
+    .c_model = NA,
 
     .results = list(),
 
@@ -103,52 +104,77 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     utils_n_current = function(enums) {
       f <- function(enum) {
-        return(SWIG_utils_n_current( private$c_model, enum ))
+        return(SWIG_utils_n_current( self$c_model, enum ))
       }
       return(sum(sapply(enums,f)))
     },
 
     utils_n_daily = function(enums, time = NA) {
-      if (is.na(time)) { time <- private$c_model$time }
+      if (is.na(time)) { time <- self$c_model$time }
       f <- function(enum) {
-        return(SWIG_utils_n_daily( private$c_model, enum, time ))
+        return(SWIG_utils_n_daily( self$c_model, enum, time ))
       }
       return(sum(sapply(enums,f)))
     },
 
     utils_n_daily_age = function(enums, age, time = NA) {
-      if (is.na(time)) { time <- private$c_model$time }
+      if (is.na(time)) { time <- self$c_model$time }
       f <- function(enum) {
-        return(SWIG_utils_n_daily_age( private$c_model, enum, time, age ))
+        return(SWIG_utils_n_daily_age( self$c_model, enum, time, age ))
       }
       return(sum(sapply(enums,f)))
     },
 
     utils_n_total = function(enums) {
       f <- function(enum) {
-        return(SWIG_utils_n_total( private$c_model, enum ))
+        return(SWIG_utils_n_total( self$c_model, enum ))
       }
       return(sum(sapply(enums,f)))
     },
 
     utils_n_total_age = function(enums, age) {
       f <- function(enum) {
-        return(SWIG_utils_n_total_age( private$c_model, enum, age ))
+        return(SWIG_utils_n_total_age( self$c_model, enum, age ))
       }
       return(sum(sapply(enums,f)))
     },
 
     utils_n_total_by_day = function(enums, time = NA) {
-      if (is.na(time)) { time <- private$c_model$time }
+      if (is.na(time)) { time <- self$c_model$time }
       f <- function(enum) {
-        return(SWIG_utils_n_total_by_day( private$c_model, enum, time ))
+        return(SWIG_utils_n_total_by_day( self$c_model, enum, time ))
       }
       return(sum(sapply(enums,f)))
     },
 
     calculate_R_instanteous = function(percentile, time = NA) {
-      if (is.na(time)) { time <- private$c_model$time }
-      return(SWIG_calculate_R_instanteous( private$c_model, time, percentile ))
+      if (is.na(time)) { time <- self$c_model$time }
+      return(SWIG_calculate_R_instanteous( self$c_model, time, percentile ))
+    },
+
+    #' the C model R pointer object
+    c_model_ptr = function() {
+      return( self$c_model@ref )
+    },
+
+    #' check the C model still exists
+    c_model_valid = function() {
+      return( !is_null_xptr( private$.c_model@ref ))
+    }
+  ),
+
+  active = list(
+    #' the C model R pointer object (Swig wrapped)
+    c_model = function( val = NULL )
+    {
+      if( is.null( val ) )
+      {
+        if( private$c_model_valid() )
+          return( private$.c_model )
+        stop( "c_model is no longer valid - create a new model")
+      }
+      else
+        stop( "cannot set c_model" )
     }
   ),
 
@@ -176,8 +202,16 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$params_object <- params_object
       # Create C parameters object
       private$c_params   <- params_object$return_param_object()
-      private$c_model    <- create_model(private$c_params)
+      private$.c_model   <- create_model(private$c_params)
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
+    },
+
+    #' remove the C model to prevent leakage
+    finalize = function(){
+      if( private$c_model_valid() ) {
+        print( "destroy OpenABM model")
+        SWIG_destroy_model( self$c_model )
+      }
     },
 
     #' @description Get a parameter value by name
@@ -189,13 +223,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (!is.null(enum)) {
         # multi-value parameter (C array)
         getter <- get(paste0("get_model_param_", enum$base_name))
-        result <- getter( private$c_model, enum$index )
+        result <- getter( self$c_model, enum$index )
       } else {
         # single-value parameter
         getter_str <- paste0("get_model_param_", param)
         if (exists(getter_str)) {
           getter <- get(getter_str)
-          result <- getter( private$c_model )
+          result <- getter( self$c_model )
         } else {
           result = private$params_object$get_param(param)
         }
@@ -220,11 +254,11 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (!is.null(enum)) {
         # multi-value parameter (C array)
         setter <- get(paste0("set_model_param_", enum$base_name))
-        setter( private$c_model, value, enum$index )
+        setter( self$c_model, value, enum$index )
       } else {
         # single-value parameter
         setter <- get(paste0("set_model_param_", param))
-        setter( private$c_model, value )
+        setter( self$c_model, value )
       }
     },
 
@@ -239,7 +273,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     get_risk_score = function(day, age_inf, age_sus)
     {
       value <- get_model_param_risk_score(
-        private$c_model, day, age_inf, age_sus)
+        self$c_model, day, age_inf, age_sus)
       if (value < 0) {
         stop( "Failed to get risk score")
       }
@@ -256,7 +290,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     get_risk_score_household = function(age_inf, age_sus)
     {
       value <- get_model_param_risk_score_household(
-        private$c_model, age_inf, age_sus)
+        self$c_model, age_inf, age_sus)
       if (value < 0) {
         stop( "Failed to get risk score household")
       }
@@ -275,7 +309,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     set_risk_score = function(day, age_inf, age_sus, value)
     {
       ret <- set_model_param_risk_score(
-        private$c_model, day, age_inf, age_sus, value)
+        self$c_model, day, age_inf, age_sus, value)
       if (ret == 0) {
         stop( "Failed to set risk score")
       }
@@ -292,7 +326,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     set_risk_score_household = function(age_inf, age_sus, value)
     {
       ret <- set_model_param_risk_score_household(
-        private$c_model, age_inf, age_sus, value)
+        self$c_model, age_inf, age_sus, value)
       if (ret == 0) {
         stop( "Failed to set risk score household")
       }
@@ -357,7 +391,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         }
       }
 
-      SWIG_add_user_network( private$c_model, interaction_type,
+      SWIG_add_user_network( self$c_model, interaction_type,
         skip_hospitalised, skip_quarantine, daily_fraction, n_edges, ID_1,
         ID_2, name)
     },
@@ -408,10 +442,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop( "all values of N must be greater than 0" )
       }
 
-      id <- SWIG_add_user_network_random( private$c_model, skip_hospitalised,
+      id <- SWIG_add_user_network_random( self$c_model, skip_hospitalised,
         skip_quarantine, n_indiv, ID, N, name )
 
-      return(Network$new( private$c_model, id ))
+      return(Network$new( self$c_model, id ))
     },
 
     #' @description Get a network.
@@ -419,7 +453,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param network_id The network ID.
     get_network_by_id = function(network_id)
     {
-      return(Network$new( private$c_model, network_id ))
+      return(Network$new( self, network_id ))
     },
 
     #' @description Infects a new individual from an external source.
@@ -439,7 +473,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (strain_multiplier < 0) {
         stop("strain_multiplier must be positive")
       }
-      res <- SWIG_seed_infect_by_idx(private$c_model, ID, strain_multiplier,
+      res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_multiplier,
         network_id)
       return(as.logical(res))
     },
@@ -448,38 +482,26 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{get_network_ids}.
     #' @param max_ids The maximum number of IDs to return.
     #' @return The list of the network IDs.
-    get_network_ids = function(max_ids)
+    get_network_ids = function(max_ids = 1000)
     {
       if (max_ids < 1) return(NA)
 
-      n <- 0
-      ids <- rep(NA, max_ids)
-      for (offset in 0:(max_ids - 1)) {
-        networkid <- get_network_id_by_index( private$c_model, offset );
-        if (networkid == -1) {
-          break;
-        }
+      c_model_ptr <- private$c_model_ptr()
+      ids = .Call('R_get_network_ids', c_model_ptr, max_ids,
+                  PACKAGE='OpenABMCovid19');
 
-        n <- (n + 1)
-        ids[n] <- networkid
-      }
-      return(ids[1:n])
+      if( length( ids ) == 1 && ids[1] == -1 )
+        return( self$get_network_ids( max_ids = max_ids * 10 ) )
+
+      return( ids )
     },
 
     #' @description Get network info.
-    #' @param max_ids The maximum number of rows to return.
     #' @return The network info as a dataframe. The columns are the network
     #' properties and each row is a network.
-    get_network_info = function(max_ids = 1000)
+    get_network_info = function()
     {
-      if (max_ids > 1e6) {
-        stop("Maximum number of allowed network is 1e6")
-      }
-      ids <- self$get_network_ids( max_ids )
-
-      if (length(ids) == 1) {
-        return(self$get_network_info( max_ids*10 ))
-      }
+      ids <- self$get_network_ids( max_ids = 1000 )
 
       # Allocate a matrix the correct size
       colnames <- c( 'id', 'name', 'n_edges', 'n_vertices', 'type',
@@ -489,7 +511,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       # Initialise each row one-by-one
       for (i in 1:length(ids)) {
-        c_network <- SWIG_get_network_by_id( private$c_model, ids[i] )
+        c_network <- SWIG_get_network_by_id( self$c_model, ids[i] )
         tmp[i,] <- c(
           ids[i],
           network_name( c_network ),
@@ -539,7 +561,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop("vaccine type must be listed in VaccineTypesEnum")
       }
 
-      res <- intervention_vaccinate_by_idx(private$c_model, ID, vaccine_type,
+      res <- intervention_vaccinate_by_idx(self$c_model, ID, vaccine_type,
         efficacy, time_to_protect, vaccine_protection_period)
       return(as.logical(res))
     },
@@ -554,7 +576,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop("argument VaccineSchedule must be an object of type VaccineSchedule")
       }
       return(as.logical(intervention_vaccinate_age_group(
-        private$c_model,
+        self$c_model,
         schedule$fraction_to_vaccinate,
         schedule$vaccine_type,
         schedule$efficacy,
@@ -568,11 +590,21 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return DataFrame of basic individual information.
     get_individuals = function()
     {
-      c_model_ptr <- private$c_model@ref
-      n_total     <- private$c_params$n_total
+      c_model_ptr <- private$c_model_ptr()
+      n_total     <- self$get_param( "n_total" )
       indiv       <- .Call('R_get_individuals', c_model_ptr, n_total,
                            PACKAGE='OpenABMCovid19');
       return(as.data.frame(indiv))
+    },
+
+    #' @description Gets information about all transmission events. Wrapper for
+    #' C API \code{get_transmissions}.
+    #' @return DataFrame of transmission information.
+    get_transmissions = function()
+    {
+      c_model_ptr <- private$c_model_ptr()
+      trans<-.Call('R_get_transmissions',c_model_ptr,PACKAGE='OpenABMCovid19');
+      return(as.data.frame(trans))
     },
 
     #' @description Delete a network.
@@ -581,7 +613,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return \code{TRUE} on success, \code{FALSE} on failure.
     delete_network = function(network)
     {
-      res <- SWIG_delete_network( private$c_model, network$c_network )
+      res <- SWIG_delete_network( self$c_model, network$c_network )
       return(as.logical(res))
     },
 
@@ -589,8 +621,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return All app users.
     get_app_users = function()
     {
-      c_model_ptr <- private$c_model@ref
-      n_total     <- private$c_params$n_total
+      c_model_ptr <- private$c_model_ptr()
+      n_total     <- self$get_param( "n_total" )
       users       <- .Call('R_get_app_users', c_model_ptr, n_total,
                            PACKAGE='OpenABMCovid19');
 
@@ -612,7 +644,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       for (b in c(TRUE, FALSE)) {
         # Select users ID where 'app_user' == b
         IDs <- df_app_users[df_app_users[,'app_user'] == b,] [['ID']]
-        SWIG_set_app_users(private$c_model, IDs, length(IDs), b)
+        SWIG_set_app_users(self$c_model, IDs, length(IDs), b)
       }
     },
 
@@ -621,7 +653,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{one_time_step}.
     one_time_step = function()
     {
-      SWIG_one_time_step(private$c_model)
+      SWIG_one_time_step(self$c_model)
       private$.results = append( private$.results,list(self$one_time_step_results()))
     },
 
@@ -640,7 +672,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return Null
     run = function( verbose = TRUE)
     {
-      n_steps  = self$get_param( "end_time" ) - private$c_model$time
+      n_steps  = self$get_param( "end_time" ) - self$c_model$time
       step     = 0
 
       start_time = Sys.time()
@@ -689,7 +721,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       res = c()
 
-      res['time']             <- private$c_model$time
+      res['time']             <- self$c_model$time
       res['lockdown']         <- private$c_params$lockdown_on
       res['test_on_symptoms'] <- private$c_params$test_on_symptoms
       res['app_turned_on']    <- private$c_params$app_turned_on
@@ -727,15 +759,16 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       res["hospital_to_critical_daily"] <- private$utils_n_daily(critical)
       res["hospital_to_critical_total"] <- private$utils_n_total(critical)
 
-      res['n_quarantine_infected']                <- private$c_model$n_quarantine_infected
-      res['n_quarantine_recovered']               <- private$c_model$n_quarantine_recovered
-      res['n_quarantine_app_user']                <- private$c_model$n_quarantine_app_user
-      res['n_quarantine_app_user_infected']       <- private$c_model$n_quarantine_app_user_infected
-      res['n_quarantine_app_user_recovered']      <- private$c_model$n_quarantine_app_user_recovered
-      res['n_quarantine_events']                  <- private$c_model$n_quarantine_events
-      res['n_quarantine_release_events']          <- private$c_model$n_quarantine_release_events
-      res['n_quarantine_events_app_user']         <- private$c_model$n_quarantine_events_app_user
-      res['n_quarantine_release_events_app_user'] <- private$c_model$n_quarantine_release_events_app_user
+      c_model = self$c_model
+      res['n_quarantine_infected']                <- c_model$n_quarantine_infected
+      res['n_quarantine_recovered']               <- c_model$n_quarantine_recovered
+      res['n_quarantine_app_user']                <- c_model$n_quarantine_app_user
+      res['n_quarantine_app_user_infected']       <- c_model$n_quarantine_app_user_infected
+      res['n_quarantine_app_user_recovered']      <- c_model$n_quarantine_app_user_recovered
+      res['n_quarantine_events']                  <- c_model$n_quarantine_events
+      res['n_quarantine_release_events']          <- c_model$n_quarantine_release_events
+      res['n_quarantine_events_app_user']         <- c_model$n_quarantine_events_app_user
+      res['n_quarantine_release_events_app_user'] <- c_model$n_quarantine_release_events_app_user
 
       res["R_inst"]    <- private$calculate_R_instanteous( 0.5 )
       res["R_inst_05"] <- private$calculate_R_instanteous( 0.05 )
@@ -747,20 +780,20 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{write_output_files}.
     write_output_files = function()
     {
-      SWIG_write_output_files(private$c_model, private$c_params)
+      SWIG_write_output_files(self$c_model, private$c_params)
     },
 
     #' @description Write output files
     #' Wrapper for C API \code{write_individual_file}.
     write_individual_file = function()
     {
-      SWIG_write_individual_file(private$c_model, private$c_params)
+      SWIG_write_individual_file(self$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_interactions}.
     write_interactions_file = function()
     {
-      write_interactions(private$c_model)
+      write_interactions(self$c_model)
     },
 
     #' @description Wrapper for C API \code{write_trace_tokens_ts}.
@@ -772,51 +805,51 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (!is.logical(init)) {
         stop("param init must be TRUE or FALSE")
       }
-      write_trace_tokens_ts(private$c_model, as.integer(init))
+      write_trace_tokens_ts(self$c_model, as.integer(init))
     },
 
     #' @description Wrapper for C API \code{write_trace_tokens}.
     write_trace_tokens = function()
     {
-      SWIG_write_trace_tokens(private$c_model)
+      SWIG_write_trace_tokens(self$c_model)
     },
 
     #' @description Wrapper for C API \code{write_transmissions}.
     write_transmissions = function()
     {
-      SWIG_write_transmissions(private$c_model)
+      SWIG_write_transmissions(self$c_model)
     },
 
     #' @description Wrapper for C API \code{write_quarantine_reasons}.
     write_quarantine_reasons = function()
     {
-      SWIG_write_quarantine_reasons(private$c_model, private$c_params)
+      SWIG_write_quarantine_reasons(self$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_occupation_network}.
     #' @param idx Network index.
     write_occupation_network = function(idx)
     {
-      SWIG_write_occupation_network(private$c_model, private$c_params, idx)
+      SWIG_write_occupation_network(self$c_model, private$c_params, idx)
     },
 
     #' @description Wrapper for C API \code{write_household_network}.
     write_household_network = function()
     {
-      SWIG_write_household_network(private$c_model, private$c_params)
+      SWIG_write_household_network(self$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{write_random_network}.
     write_random_network = function()
     {
-      SWIG_write_random_network(private$c_model, private$c_params)
+      SWIG_write_random_network(self$c_model, private$c_params)
     },
 
     #' @description Wrapper for C API \code{print_individual}.
     #' @param idx Individual index.
     print_individual = function(idx)
     {
-      SWIG_print_individual(private$c_model, idx)
+      SWIG_print_individual(self$c_model, idx)
     }
   )
 )
@@ -918,4 +951,13 @@ Model.update_running_params = function( model, param, value ) {
   if (!is.null(model)) {
     return( model$update_running_params( param, value ) )
   }
+}
+
+#' Gets all the transmissions until now (wrapper for
+#' \code{\link{Model}$get_transmissions()})
+#'
+#' @param model The Model object (R6 Class)
+#' @return DataFrame
+Model.get_transmissions = function( model ) {
+  return( model$get_transmissions() )
 }

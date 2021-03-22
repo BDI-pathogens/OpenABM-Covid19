@@ -537,7 +537,7 @@ class Model:
         """
         Initializes a new model with either specified or default parameters
         
-        Arguments:
+        Arguments: 
             params_object{[Parameters()]} - a Parameter object, if None specified uses the default parameters 
             params{[dict]}                - overrides to default/specified parameters 
         """
@@ -842,7 +842,7 @@ class Model:
         ids_c = covid19.intArray( max_ids )
         n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
         
-        if n_ids == 1 :
+        if n_ids == -1 :
             return self.get_network_info( max_ids = max_ids * 10 )
         
         ids        = [None] * n_ids
@@ -981,7 +981,7 @@ class Model:
     def one_time_step(self):
         """
         Steps the simulation forward one time step
-        """
+        """  
         covid19.one_time_step(self.c_model)
         self._results.append( self.one_time_step_results() )
         

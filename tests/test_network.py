@@ -87,12 +87,12 @@ class TestClass(object):
             ),
             dict( 
                 mean_random_interactions_child   = 1,
-                sd_random_interactions_child     = 2,
+                sd_random_interactions_child     = 1.5,
                 mean_random_interactions_adult   = 1,
-                sd_random_interactions_adult     = 2,
+                sd_random_interactions_adult     = 1.5,
                 mean_random_interactions_elderly = 1,
-                sd_random_interactions_elderly   = 2,
-                n_total                          = 100000
+                sd_random_interactions_elderly   = 1.5,
+                n_total                          = 50000
             ),
                dict( 
                 mean_random_interactions_child   = 0,
@@ -110,7 +110,7 @@ class TestClass(object):
                 sd_random_interactions_adult     = 3,
                 mean_random_interactions_elderly = 2,
                 sd_random_interactions_elderly   = 2,
-                n_total                          = 40000
+                n_total                          = 100000
             ),
             dict( 
                 mean_random_interactions_child   = 8,
@@ -268,7 +268,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_total = 100000,
+                    n_total = 20000,
                     end_time = 15,
                     mean_work_interactions_child   = 6,
                     mean_work_interactions_adult   = 12,
@@ -301,7 +301,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_total = 800,
+                    n_total = 1200,
                     end_time = 15,
                     mean_work_interactions_child   = 6,
                     mean_work_interactions_adult   = 12,
@@ -681,7 +681,7 @@ class TestClass(object):
         """  
       
         # absolute tolerance
-        tolerance = 0.01
+        tolerance = 0.02
 
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)

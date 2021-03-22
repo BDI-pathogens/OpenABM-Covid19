@@ -44,6 +44,9 @@ param file to read.}
 \code{hospital_input_param_file}. If \code{FALSE}, ignore
 \code{hospital_input_param_file}.}
 }
+\value{
+Parameters object (R6 Class)
+}
 \description{
 Creates a new OpenABM Parameters object (wrapper for
 \code{\link{Parameters}$new()})
