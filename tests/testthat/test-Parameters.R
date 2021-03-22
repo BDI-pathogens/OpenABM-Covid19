@@ -144,7 +144,7 @@ test_that("Parameters::set_demographic_household_table (success)", {
     read_param_file          = TRUE,
     read_hospital_param_file = FALSE)
   n_total <- 10L
-  p$c_params$n_total <- n_total
+  p$set_param('n_total', n_total)
   ID <- seq(from = 0, to = n_total - 1, by = 1)
   df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = ID %/% 4)
   p$set_demographic_household_table(df)
@@ -157,7 +157,7 @@ test_that("Parameters::set_demographic_household_table (invalid house_no)", {
     input_households = "data/baseline_household_demographics.csv",
     read_param_file = FALSE, read_hospital_param_file = FALSE)
   n_total <- 10L
-  p$c_params$n_total <- n_total
+  p$set_param('n_total', n_total)
   ID <- seq(from = 0, to = n_total - 1, by = 1)
   houses <- rep(-1, length(ID))
   df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = houses)
@@ -170,7 +170,7 @@ test_that("Parameters::set_demographic_household_table (invalid n_total)", {
     input_households = "data/baseline_household_demographics.csv",
     read_param_file = FALSE, read_hospital_param_file = FALSE)
   n_total <- 10L
-  p$c_params$n_total <- 11L
+  p$set_param('n_total', 11L)
   ID <- seq(from = 0, to = n_total - 1, by = 1)
   df <- data.frame('ID' = ID, 'age_group' = ID %% 9, 'house_no' = ID %/% 4)
   expect_error(p$set_demographic_household_table(df))
@@ -181,7 +181,7 @@ test_that("Parameters::set_demographic_household_table (missing columns)", {
     input_households = "data/baseline_household_demographics.csv",
     read_param_file = FALSE, read_hospital_param_file = FALSE)
   n_total <- 10L
-  p$c_params$n_total <- n_total
+  p$set_param('n_total', n_total)
   ID <- seq(from = 0, to = n_total - 1, by = 1)
   expect_error(p$set_demographic_household_table(data.frame(
     'age_group' = ID %% 9, 'house_no' = ID %/% 4)))
@@ -220,7 +220,7 @@ test_that("Parameters::set_occupation_network_table (success)", {
   occupation_network_assignment <-
     data.frame('ID' = ID, 'network_no' = assignment)
 
-  p$c_params$n_total <- n_total
+  p$set_param('n_total', n_total)
   p$set_occupation_network_table(
     occupation_network_assignment, occupation_networks)
   # TODO(olegat) write proper test expectations:
@@ -235,7 +235,7 @@ test_that("Parameters::set_occupation_network_table (invalid n_total)", {
     'mean_work_interaction' = c(10), 'lockdown_multiplier' = c(0.22),
     'network_id' = c(0), 'network_name' = c('primary'))
   assignments <- data.frame('ID' = c(0), 'network_no' = c(0))
-  p$c_params$n_total <- 10
+  p$set_param('n_total', 10)
   expect_error(p$set_occupation_network_table(networks, assignments))
 })
 
