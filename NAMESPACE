@@ -5,6 +5,7 @@ importFrom("methods", "new")
 importFrom("methods", "setClass")
 importFrom("methods", "slot")
 importFrom("R6", "R6Class")
+importFrom("xptr", "is_null_xptr")
 
 # R6 Classes
 export("Parameters")
@@ -15,6 +16,19 @@ export("Agent")
 export("Simulation")
 export("COVID19IBM")
 export("VaccineSchedule")
+
+# wrapper function for R6 calsses
+export("Parameters.new")
+export("Parameters.get_param")
+export("Parameters.set_param")
+export("Model.new")
+export("Model.one_time_step")
+export("Model.one_time_step_results")
+export("Model.results")
+export("Model.run")
+export("Model.get_param")
+export("Model.update_running_params")
+export("Model.get_transmissions")
 
 # Enums
 export("AgeGroupEnum")
