@@ -36,10 +36,9 @@ typedef struct individual individual; // use to avoid having to `#include indivi
 /************************************************************************/
 
 void initialize_strain( strain*, long, strain*, float, long, long );
-// void set_strain_multiplier( strain*, float );
-// void set_parent_idx( strain*, long );
 void mutate_strain( model*, individual*, double );
 void add_new_strain_to_model( model*, strain* );
+void add_to_strain_bin_count( long*, float, int );
 
 
 #endif /* STRAIN_H_ */

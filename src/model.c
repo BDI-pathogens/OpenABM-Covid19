@@ -648,14 +648,15 @@ void set_up_seed_infection( model *model )
 	unsigned long int person;
 	individual *indiv;
 
+	for ( int bin_idx = 0 ; bin_idx < N_STRAIN_BINS; bin_idx++ )
+		model->strain_bins[bin_idx] = 0;
+
 	// create initial strain
 	long strain_idx = 1;
 	float transmission_multiplier = 1; // equivalent to the old "strain_multiplier" float
 	strain *seed_strain = calloc( 1, sizeof( struct strain ) );
-	initialize_strain( seed_strain, strain_idx, NULL, transmission_multiplier, 0);
-	model->strains = seed_strain;
-	model->n_strains = 1;
-	model->total_transmission_multiplier = seed_strain->transmission_multiplier;
+	initialize_strain( seed_strain, strain_idx, NULL, transmission_multiplier, 0, 0);
+	add_new_strain_to_model( model, seed_strain );
 
 	idx = 0;
 	while( idx < params->n_seed_infection )

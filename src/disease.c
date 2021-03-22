@@ -200,7 +200,7 @@ void transmit_virus_by_type(
 				continue;
 
 			// mutate strain with some probability ( make this occur after checking if past max infectious period )
-			double mutation_prob = 0.; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
+			double mutation_prob = 0.1; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
 			mutate_strain( model, infector, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
 
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
@@ -251,6 +251,7 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
 	// print_infections_per_strain( model );
+	print_strain_bins( model );
 }
 
 /*****************************************************************************************
@@ -271,8 +272,10 @@ short seed_infect_by_idx(
 		return FALSE;
 
 	infected->infection_events->strain = seed_strain;
-	// double mutation_prob = 1; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
-	// mutate_strain( model, infected, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
+	seed_strain->n_infected++;
+	seed_strain->total_infected++;
+	double mutation_prob = 0; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
+	mutate_strain( model, infected, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }
@@ -302,8 +305,12 @@ void new_infection(
 	infected->infection_events->network_id 				= network_id;
 	
 	infected->infection_events->strain 					= infector->infection_events->strain;
-	infected->infection_events->strain->n_infected++;
-	infected->infection_events->strain->total_infected++;
+	if( infector != infected ) 
+	{
+		infected->infection_events->strain->n_infected++;
+		infected->infection_events->strain->total_infected++;
+	}
+	
 
 	if( draw < asymp_frac )
 	{
@@ -602,20 +609,25 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 void print_infections_per_strain( model *model )
 {
 	strain *temp = model->strains;
-	int n_strains = 0;
-	float transmission_multiplier_total = 0;
-	// float transmission_multiplier_weighted_total = 0;
-	// int n_total_infected = 0;
-	while( temp!=NULL )
+	printf("%p\n", temp);
+	while( temp != NULL )
 	{
-		n_strains++;
-		// n_total_infected += temp->n_infected;
-		transmission_multiplier_total += temp->transmission_multiplier;
-		// transmission_multiplier_weighted_total += temp->n_infected * temp->transmission_multiplier;
-		printf("# %p->%p:\t%f\t%ld\n", temp->parent, temp, temp->transmission_multiplier, temp->n_infected );
+		printf("# %p->%p:\t%f\t%li/%li\n", temp->parent, temp, temp->transmission_multiplier, temp->n_infected, temp->total_infected );
 		temp = temp->next;
 	}
-	printf("# Total strains:\t%d\n", n_strains);
-	printf("# Mean t_mul:\t\t%f\n", transmission_multiplier_total / n_strains);
-	// printf("# Weighted mean t_mul:\t%f\n", ( transmission_multiplier_weighted_total / n_strains ) / n_total_infected);
+}
+
+/*****************************************************************************************
+*  Name:		--
+*  Description: --
+*
+*  Returns:		void
+******************************************************************************************/
+void print_strain_bins( model *model )
+{
+	int bin_idx;
+	for( bin_idx = 0; bin_idx < N_STRAIN_BINS; bin_idx++ )
+
+	    printf("%ld\t", model->strain_bins[bin_idx]);
+	printf("\n");
 }

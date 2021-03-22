@@ -232,6 +232,8 @@ enum VACCINE_TYPES{
 #define HOSPITAL_WORK_NETWORK -1
 #define N_HOSPITAL_INTERACTION_TYPES 5
 
+#define N_STRAIN_BINS 9
+
 extern gsl_rng * rng;
 
 #endif /* CONSTANT_H_ */

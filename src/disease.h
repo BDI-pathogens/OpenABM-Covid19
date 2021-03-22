@@ -52,7 +52,8 @@ void transition_one_disese_event( model*, individual*, int, int, int );
 long n_newly_infected( model*, int time );
 double calculate_R_instanteous( model*, int, double );
 
-// count infections caused by strains
+// print strain info
 void print_infections_per_strain( model* );
+void print_strain_bins( model* ); // print number of strains in each bin of transmission_multiplier values
 
 #endif /* DISEASE_H_ */

@@ -8,6 +8,7 @@
 #include "strain.h"
 #include "individual.h"
 #include "model.h" // for rng
+#include "constant.h" // for N_STRAIN_BINS constant
 #include <stdio.h> // for printf
 
 
@@ -33,35 +34,6 @@ void initialize_strain(
 	new->total_infected				= total_infected;
 	new->next						= NULL;
 }
-
-
-// /*****************************************************************************************
-// *  Name:		--
-// *  Description: --
-// *  Returns:		void
-// ******************************************************************************************/
-// void set_strain_multiplier(
-// 	strain *strain,
-// 	float transmission_multiplier
-// )
-// {
-// 	strain->transmission_multiplier = transmission_multiplier;
-// }
-
-
-// /*****************************************************************************************
-// *  Name:		--
-// *  Description: --
-// *  Returns:		void
-// ******************************************************************************************/
-// void set_parent(
-// 	strain *child,
-// 	strain *parent
-// )
-// {
-// 	child->parent = parent;
-// }
-
 
 /*****************************************************************************************
 *  Name:		--
@@ -110,12 +82,40 @@ void add_new_strain_to_model(
 )
 {
 	strain *temp = model->strains;
-	while( temp->next != NULL )
+	if( temp == NULL )
 	{
-		temp = temp->next;
+		model->strains = new;
 	}
-	temp->next = new;
+	else
+	{
+		while( temp->next != NULL )
+		{
+			temp = temp->next;
+		}
+		temp->next = new;
+	}
 	model->n_strains++;
 	model->total_transmission_multiplier += new->transmission_multiplier;
+	add_to_strain_bin_count( model->strain_bins, new->transmission_multiplier, 1);
+    
+}
 
+/*****************************************************************************************
+*  Name:		--
+*  Description: --
+*  Returns:		--
+******************************************************************************************/
+void add_to_strain_bin_count(
+	long* strain_bins,
+	float new_value,
+	int delta
+)
+{
+	int bin_idx;
+    float max_bin_lower_lim = 2; // lower limit of the maximum bin
+    if( new_value < max_bin_lower_lim )
+       	bin_idx = floor(new_value * (N_STRAIN_BINS - 1) / max_bin_lower_lim);
+    else
+    	bin_idx = N_STRAIN_BINS - 1;
+    strain_bins[bin_idx] += delta;
 }
