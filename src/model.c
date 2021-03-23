@@ -648,6 +648,7 @@ void set_up_seed_infection( model *model )
 	unsigned long int person;
 	individual *indiv;
 
+	memset(model->strain_bins, 0, sizeof(model->strain_bins)); // may be necessary to reset array to zeros
 	for ( int bin_idx = 0 ; bin_idx < N_STRAIN_BINS; bin_idx++ )
 		model->strain_bins[bin_idx] = 0;
 

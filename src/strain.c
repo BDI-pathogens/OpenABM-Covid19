@@ -57,7 +57,7 @@ void mutate_strain(
 		strain *mutated 	= calloc( 1, sizeof( struct strain ) );
 		long mutated_idx	= parent->idx + 1;
 		
-		double sigma 					= 0.001;  // stdev for distribtion of mutated strain's transmission_multiplier
+		double sigma 					= 0.1;  // stdev for distribtion of mutated strain's transmission_multiplier
 		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
 		float transmission_multiplier 	= max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
 
@@ -66,6 +66,8 @@ void mutate_strain(
 
 		initialize_strain( mutated, mutated_idx, parent, transmission_multiplier, 1, 1);
 		add_new_strain_to_model( model, mutated );
+		add_to_strain_bin_count( model->strain_bins, mutated->transmission_multiplier, 1);
+		add_to_strain_bin_count( model->strain_bins, parent->transmission_multiplier, -1);
 		infector->infection_events->strain = mutated;
 		parent->n_infected--;
 	}
@@ -96,7 +98,6 @@ void add_new_strain_to_model(
 	}
 	model->n_strains++;
 	model->total_transmission_multiplier += new->transmission_multiplier;
-	add_to_strain_bin_count( model->strain_bins, new->transmission_multiplier, 1);
     
 }
 

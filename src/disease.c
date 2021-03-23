@@ -200,7 +200,7 @@ void transmit_virus_by_type(
 				continue;
 
 			// mutate strain with some probability ( make this occur after checking if past max infectious period )
-			double mutation_prob = 0.1; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
+			double mutation_prob = 0.001; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
 			mutate_strain( model, infector, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
 
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
@@ -252,6 +252,7 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
 	// print_infections_per_strain( model );
 	print_strain_bins( model );
+	printf("%f\n", calculate_R_instanteous( model, model->time, 0.5));
 }
 
 /*****************************************************************************************
@@ -304,6 +305,7 @@ void new_infection(
 	infected->infection_events->infector_hospital_state	= infector->hospital_state;
 	infected->infection_events->network_id 				= network_id;
 	
+	add_to_strain_bin_count( model->strain_bins, infector->infection_events->strain->transmission_multiplier, 1);
 	infected->infection_events->strain 					= infector->infection_events->strain;
 	if( infector != infected ) 
 	{
@@ -627,7 +629,6 @@ void print_strain_bins( model *model )
 {
 	int bin_idx;
 	for( bin_idx = 0; bin_idx < N_STRAIN_BINS; bin_idx++ )
-
 	    printf("%ld\t", model->strain_bins[bin_idx]);
 	printf("\n");
 }
