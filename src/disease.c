@@ -514,6 +514,9 @@ void transition_to_recovered( model *model, individual *indiv )
 
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 	set_recovered( indiv, model->params, model->time, model);
+
+	indiv->infection_events->strain->n_infected--;
+	add_to_strain_bin_count( model->strain_bins, indiv->infection_events->strain->transmission_multiplier, -1);
 }
 
 /*****************************************************************************************
