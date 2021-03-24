@@ -164,7 +164,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
   ),
 
   active = list(
-    #' the C model R pointer object (Swig wrapped)
+    #' @field c_model The C model R pointer object (SWIG wrapped)
     c_model = function( val = NULL )
     {
       if( is.null( val ) )
@@ -206,7 +206,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
     },
 
-    #' remove the C model to prevent leakage
+    #' @description Remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
         print( "destroy OpenABM model")
