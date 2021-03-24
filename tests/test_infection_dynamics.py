@@ -404,15 +404,15 @@ class TestClass(object):
         "test_multiple_strain_domination": [
             dict(
                 test_params = dict(
-                    n_total = 1e4,
-                    n_seed_infection = 5,
+                    n_total = 2e4,
+                    n_seed_infection = 10,
                     end_time = 80,
                     infectious_rate = 3
                 ),
-                n_extra_infections = 5,
-                t_extra_infections = 20,   
+                n_extra_infections = 30,
+                t_extra_infections = 10,   
                 t_check_after      = 30, # time after the new strain to check for domination of second strain
-                strain_multiplier  = 2.0
+                strain_multiplier  = 2.5
             )
         ],
     }
@@ -1394,5 +1394,3 @@ class TestClass(object):
         n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 1.0 ].sum()
         n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_multiplier ].sum()
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
-
-
