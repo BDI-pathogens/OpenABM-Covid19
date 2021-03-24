@@ -7,6 +7,8 @@
 Model.update_running_params(model, param, value)
 }
 \arguments{
+\item{model}{A Model object}
+
 \item{param}{name of parameter. See \code{\link{SAFE_UPDATE_PARAMS}} for
 allowed parameter names}
 

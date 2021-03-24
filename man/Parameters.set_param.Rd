@@ -18,3 +18,6 @@ Parameters.set_param(parameters, param, value)
 Sets the value of a parameter (wrapper for
 \code{\link{Parameters}$set_param(param,value)})
 }
+\seealso{
+\href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
+}

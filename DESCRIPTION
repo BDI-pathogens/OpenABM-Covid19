@@ -1,11 +1,45 @@
 Package: OpenABMCovid19
 Version: 0.3
 Title: Agent-Based Model for Modelling the COVID-19
-License: GPL-3 | file LICENSE
+License: GPL-3
 Authors@R:
-  c(person("Oli", "Legat", role = c("cre"), email = "olegat@google.com"),
-    person("Robert", "Hinch", role = "aut"),
-    person("Will", "Probert", role = "aut"))
+  c(
+    person("Oli", "Legat", role = c("cre"), email = "olegat@google.com"),
+    person("Robert", "Hinch", role = "aut", email = "robert.hinch@gmail.com"),
+    person("Will", "Probert", role = "aut", comment = "a.k.a. p-robot", email = "will@probert.co.nz"),
+    person("Ana", "Bulas Cruz", role = "ctb"),
+    person("Andrea", "Stewart", role = "ctb"),
+    person("Anel", "Nurtay", role = "ctb"),
+    person("Anthony", "Finkelstein", role = "ctb"),
+    person("Ares", "Meroueh", role = "ctb"),
+    person("Arun", "Lobo", role = "ctb"),
+    person("Bryn", "Mathias", role = "ctb"),
+    person("Chris", "Wymant", role = "ctb"),
+    person("Christophe", "Fraser", role = "ctb"),
+    person("Daniel", "Montero", role = "ctb"),
+    person("David", "G Bonsall", role = "ctb"),
+    person("Evan", "Blumgart", role = "ctb"),
+    person("Feifan", "Chen", role = "ctb"),
+    person("Felix", "Breuer", role = "ctb"),
+    person("James", "Lockyer", role = "ctb"),
+    person("James", "Warren", role = "ctb"),
+    person("Katrina", "Lythgoe", role = "ctb"),
+    person("Kelvin", "Van Vurren", role = "ctb"),
+    person("Lele", "Zhao", role = "ctb"),
+    person("Luca", "Ferretti", role = "ctb"),
+    person("Lucie", "Abeler-Dörner", role = "ctb"),
+    person("Matthew", "Abueg", role = "ctb"),
+    person("Matthew", "Hall", role = "ctb"),
+    person("Michelle", "Kendall", role = "ctb"),
+    person("Neo", "Wu", role = "ctb"),
+    person("Nicole", "Mather", role = "ctb"),
+    person("Ross", "Boylan", role = "ctb"),
+    person("Scott", "Stevenson", role = "ctb"),
+    person("Setrak", "Balian", role = "ctb"),
+    person("feldnerd", "", role = "ctb", email = "56836977+feldnerd@users.noreply.github.com"),
+    person("mattea", "", role = "ctb", email = "mattea@users.noreply.github.com"),
+    person("neozwu", "", role = "ctb", email = "neozwu@users.noreply.github.com"),
+    person("rory-improbable", "", role = "ctb", email = "rory@improbable.io"))
 Description:
   OpenABM-Covid19 is an agent-based model (ABM) developed to simulate the spread
   of COVID-19 in a city and to analyse the effect of both passive and active
@@ -15,6 +49,7 @@ Description:
   disease in individuals is modelled. Instantaneous contract-tracing and
   quarantining of contacts is modelled allowing the evaluation of the design and
   configuration of digital contract-tracing mobile phone apps.
+  Robert Hinch, William J M Probert, et al. (2020) <doi:10.1101/2020.09.16.20195925>.
 Depends: R6
 Imports: methods, xptr
 Collate:

@@ -23,6 +23,7 @@ SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
 SWIG_destroy_model <- destroy_model
 
+
 #' R6Class Model
 #'
 #' @description
@@ -31,6 +32,39 @@ SWIG_destroy_model <- destroy_model
 #' @details
 #' Model used for running the simulation. Initialise the model by creating
 #' a \code{\link{Parameters}} instance.
+#'
+#' For a detailed explanation of the model, please read the
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/covid19.md}{Online Documentation}
+#'
+#' @examples
+#' # Create a model using the baseline parameters included in the package.
+#' # Note: This initialisation can take a few seconds.
+#' model <- Model.new( params = list( n_total = 10000, manual_trace_on = 1) )
+#'
+#' # Get a parameter
+#' Model.get_param(model, 'manual_trace_on')
+#'
+#' # Change (update) a parameter
+#' Model.update_running_params(model, 'manual_trace_on', 0)
+#'
+#' if (!is.null(model)) {
+#'   # Set / get risk scores. Score are values between 0 and 1.
+#'   day <- 1
+#'   infectors   <- AgeGroupEnum[['_10_19']]
+#'   susceptible <- AgeGroupEnum[['_60_69']]
+#'   model$get_risk_score( day, infectors, susceptible )
+#'   model$set_risk_score( day, infectors, susceptible, 0.5 )
+#'   model$get_risk_score_household( infectors, susceptible )
+#'   model$set_risk_score_household( infectors, susceptible, 0.5 )
+#'
+#'   # Getting a network
+#'   nw <- model$get_network_by_id(3)
+#'
+#'   # Set / get app users
+#'   users <- model$get_app_users()
+#'   users[['app_user']] <- as.integer(!users[['app_user']]) # reverse values
+#'   model$set_app_users(users)
+#' }
 #'
 #' @seealso \code{\link{Parameters}}
 #' @seealso \code{\link{AgeGroupEnum}}
@@ -831,13 +865,23 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 #' @description Creates a new OpenABM \code{\link{Model}} instance from a
 #' \code{\link{Parameters}} object and/or a list of parameters overrides.
 #'
+#' Note that model instances are a memory/CPU extensive and this function
+#' can take a few seconds to complete.
 #' @param params_object An object of type \code{\link{Parameters}} or NULL
 #' (for default params). The constructor will lock the parameter values (ie.
 #' \code{params_code} will become read-only).
 #' @param params A named list of parameters fo override (default NULL for no
 #' overrides)
-#' @return Model object (R6 Class)
+#' @return Model object (R6 Class), NULL on error or if out-of-memory.
 Model.new = function(params_object = NULL, params = NULL ) {
+  # 32-bit: Default input household data requires more that 4GiB.
+  # Return NULL (error) to avoid R from crashing and losing unsaved work.
+  if (.Machine$sizeof.pointer < 8
+     && is.null(params_object)
+     && (is.null(params) || is.null(params$input_household_file)))
+  {
+    return (NULL)
+  }
   return (Model$new(params_object = params_object, params = params ))
 }
 
@@ -846,7 +890,9 @@ Model.new = function(params_object = NULL, params = NULL ) {
 #' @param model The Model object (R6 Class)
 #' @return Null
 Model.one_time_step = function( model ) {
-  return( model$one_time_step() )
+  if (!is.null(model)) {
+    return( model$one_time_step() )
+  }
 }
 
 #' Gets the simulation results for the current time-step. (wrapper for
@@ -855,7 +901,9 @@ Model.one_time_step = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @return Vector with names of variables
 Model.one_time_step_results = function( model ) {
-  return( model$one_time_step_results() )
+  if (!is.null(model)) {
+    return( model$one_time_step_results() )
+  }
 }
 
 #' Gets the simulation results for all time-steps run so far (wrapper for
@@ -864,7 +912,9 @@ Model.one_time_step_results = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @return DataFrame
 Model.results = function( model ) {
-  return( model$results() )
+  if (!is.null(model)) {
+    return( model$results() )
+  }
 }
 
 #' Runs the simulation until the \code{end_time} specified in the parameters
@@ -874,26 +924,33 @@ Model.results = function( model ) {
 #' @param verbose Show progress of the calculation (default = TRUE)
 #' @return Null
 Model.run = function( model, verbose=TRUE ) {
-  return( model$run() )
+  if (!is.null(model)) {
+    return( model$run() )
+  }
 }
 
 #' Gets the value of a parameter (wrapper for \
 #' code{\link{Parameters}$get_param(param)})
-#' @param parameters A Parameters object
+#' @param model A Model object
 #' @param param The name of the parameter
 Model.get_param = function( model,param ) {
-  return( model$get_param(param) )
+  if (!is.null(model)) {
+    return( model$get_param(param) )
+  }
 }
 
 #' Update a parameter during a simulation
 #' @description A subset of parameters may be updated whilst the model is
 #' evaluating these correspond to events. This function throws an error if
 #' \code{param} isn't safe to update.
+#' @param model A Model object
 #' @param param name of parameter. See \code{\link{SAFE_UPDATE_PARAMS}} for
 #' allowed parameter names
 #' @param value value of parameter
 Model.update_running_params = function( model, param, value ) {
-  return( model$update_running_params( param, value ) )
+  if (!is.null(model)) {
+    return( model$update_running_params( param, value ) )
+  }
 }
 
 #' Gets all the transmissions until now (wrapper for

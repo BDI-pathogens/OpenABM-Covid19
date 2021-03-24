@@ -6,22 +6,9 @@ SWIG_set_occupation_network_table <- set_occupation_network_table
 #' Wrapper class for the \code{parameters} C struct (\emph{params.h}).
 #'
 #' @details
-#' TODO(olegat) PLACEHOLDER Some explanations
-#'
-#' @examples
-#' # TODO(olegat) this fails `R CMD check` because the CSV files do not exist.
-#' # Load parameters from CSV files.
-#' #params <- OpenABMCovid19::Parameters$new(
-#' #  "input_parameters.csv", 1,
-#' #   "out_dir",
-#' #   "input_household.csv",
-#' #   "hospital_input_parameters.csv", 1
-#' #)
-#'
-#' # Edit params
-#' #params$c_params$rng_seed = 1234
-#' #params$c_params$n_total = 250000
-#' ## End(Not run)
+#' For a detailed explanation of the available parameters (including sources
+#' and references), please read the
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 #'
 #' @seealso \code{\link{Model}}
 #'
@@ -150,10 +137,16 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
     household_df = NA,
 
     #' @param input_param_file Input parameters CSV file path.
+    #' Optional, default:
+    #' \code{system.file("default_params", "baseline_parameters.csv", package = "OpenABMCovid19")}
     #' @param param_line_number Which column of the input param file to read.
     #' @param output_file_dir Where to write output files to.
-    #' @param input_households Household demographics file (required).
+    #' @param input_households Household demographics file.
+    #' Optional, default:
+    #' \code{system.file("default_params", "baseline_household_demographics.csv", package = "OpenABMCovid19")}
     #' @param hospital_input_param_file Hospital input parameters CSV file path.
+    #' Optional, default:
+    #' \code{system.file("default_params", "hospital_baseline_parameters.csv", package = "OpenABMCovid19")}
     #' @param hospital_param_line_number Which column of the hospital input
     #' param file to read.
     #' @param read_param_file A boolean. If \code{TRUE}, read
@@ -202,8 +195,13 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       }
       else {
         if ( is.na(input_households)) {
-          input_households <- system.file("default_params",
+          if(.Machine$sizeof.pointer < 8) {
+            stop("Default household data unsupported on 32-bit systems (model requires more that 4 GiB).")
+          }
+          else {
+            input_households <- system.file("default_params",
               "baseline_household_demographics.csv", package = "OpenABMCovid19")
+          }
         }
         if (!is.character(input_households) || !file.exists(input_households)) {
           stop("input_households must be a data.frame of household OR a valid file OR left NA (default params)")
@@ -402,10 +400,16 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 #' \code{\link{Parameters}$new()})
 #'
 #' @param input_param_file Input parameters CSV file path.
+#' Optional, default:
+#' \code{system.file("default_params", "baseline_parameters.csv", package = "OpenABMCovid19")}
 #' @param param_line_number Which column of the input param file to read.
 #' @param output_file_dir Where to write output files to.
-#' @param input_households Household demographics file (required).
+#' @param input_households Household demographics file.
+#' Optional, default:
+#' \code{system.file("default_params", "baseline_household_demographics.csv", package = "OpenABMCovid19")}
 #' @param hospital_input_param_file Hospital input parameters CSV file path.
+#' Optional, default:
+#' \code{system.file("default_params", "hospital_baseline_parameters.csv", package = "OpenABMCovid19")}
 #' @param hospital_param_line_number Which column of the hospital input
 #' param file to read.
 #' @param read_param_file A boolean. If \code{TRUE}, read
@@ -414,6 +418,8 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 #' @param read_hospital_param_file A boolean. If \code{TRUE}, read
 #' \code{hospital_input_param_file}. If \code{FALSE}, ignore
 #' \code{hospital_input_param_file}.
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 #' @return Parameters object (R6 Class)
 Parameters.new = function(
   input_param_file = NA_character_,
@@ -434,6 +440,8 @@ Parameters.new = function(
 #' \code{\link{Parameters}$get_param(param)})
 #' @param parameters A Parameters object
 #' @param param The name of the parameter
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 Parameters.get_param = function(parameters,param) {
   return( parameters$get_param(param))
 }
@@ -443,8 +451,9 @@ Parameters.get_param = function(parameters,param) {
 #' @param parameters A Parameters object
 #' @param param The name of the parameter
 #' @param value The new value
+#' @seealso
+#' \href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 Parameters.set_param = function(parameters,param,value) {
   return( parameters$set_param(param,value))
 }
-
 

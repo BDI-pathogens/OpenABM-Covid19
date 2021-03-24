@@ -17,15 +17,21 @@ Parameters.new(
 )
 }
 \arguments{
-\item{input_param_file}{Input parameters CSV file path.}
+\item{input_param_file}{Input parameters CSV file path.
+Optional, default:
+\code{system.file("default_params", "baseline_parameters.csv", package = "OpenABMCovid19")}}
 
 \item{param_line_number}{Which column of the input param file to read.}
 
 \item{output_file_dir}{Where to write output files to.}
 
-\item{input_households}{Household demographics file (required).}
+\item{input_households}{Household demographics file.
+Optional, default:
+\code{system.file("default_params", "baseline_household_demographics.csv", package = "OpenABMCovid19")}}
 
-\item{hospital_input_param_file}{Hospital input parameters CSV file path.}
+\item{hospital_input_param_file}{Hospital input parameters CSV file path.
+Optional, default:
+\code{system.file("default_params", "hospital_baseline_parameters.csv", package = "OpenABMCovid19")}}
 
 \item{hospital_param_line_number}{Which column of the hospital input
 param file to read.}
@@ -44,4 +50,7 @@ Parameters object (R6 Class)
 \description{
 Creates a new OpenABM Parameters object (wrapper for
 \code{\link{Parameters}$new()})
+}
+\seealso{
+\href{https://github.com/BDI-pathogens/OpenABM-Covid19/blob/master/documentation/parameters/parameter_dictionary.md}{Online Documentation}.
 }

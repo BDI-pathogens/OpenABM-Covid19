@@ -19,7 +19,7 @@ RUN python3 -m pip install -r /requirements.txt
 COPY . /OpenABM-Covid19
 
 WORKDIR /OpenABM-Covid19
-RUN cd src && make clean && make install
+RUN make clean && make install
 
 WORKDIR /OpenABM-Covid19
 ENTRYPOINT ["/usr/local/bin/pytest", "-s"]

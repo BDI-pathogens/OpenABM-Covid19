@@ -5,6 +5,13 @@ SWIG_update_daily_fraction = update_daily_fraction
 #' @description
 #' VaccineSchedule object has information an age-group vaccination plan.
 #'
+#' @examples
+#' # Vaccinate 15% of age group 70-79 and 85% of age group 80+
+#' vaccine.schedule <- OpenABMCovid19::VaccineSchedule$new(
+#'   frac_70_79 = 0.15,
+#'   frac_80    = 0.85,
+#'   vaccine_type = OpenABMCovid19::VACCINE_TYPES[['FULL']]
+#' )
 VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
 
   public = list(

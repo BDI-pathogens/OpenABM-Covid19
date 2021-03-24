@@ -26,7 +26,7 @@ OpenABM-Covid19 requires a C compiler (such as gcc) and the [GSL](https://www.gn
 Python installation requires Python 3.7+
 
 ```bash
-cd OpenABM-Covid19/src
+cd OpenABM-Covid19/
 make all
 ```
 
@@ -105,32 +105,60 @@ Tests are written using [pytest](https://docs.pytest.org/en/latest/getting-start
 R Packaging
 -----------
 
-To build the R package, you first need to generate the SWIG source files. Do to this, you should use the Makefile at the root of the source directory. You must have the `swig` command included in your `PATH` environment variable. To generate the SWIG source files, run:
+**Note:** Due to a bug in SWIG [#1901](https://github.com/swig/swig/issues/1901), SWIG 4 is unsupported. You'll need to install version 3.0.12.
+
+POSIX platform and Windows require different setups for building the R package.
+
+### POSIX setup
+
+On MacOS or Linux systems you will then need to generate and run a configure file (this will need installation of `autoconf` such as using Homebrew on MacOS, `brew install autoconf`).
+
+```
+autoconf
+./configure
+```
+
+This will generate a file `src/Makevars` (ignored by git) which includes the necessary GSL compiler and linker flags that R needs when building the C source.
+
+### Windows setup
+
+- Set the environment variable `LIB_GSL` to install prefix of GSL. (It's recommended to compile and install GSL with [CMake](https://github.com/ampl/gsl/) instead of autotools).
+- Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) and add C:\Rtools\usr\bin to your `PATH` environment variable.
+- Install swig 3 using [Cygwin](https://www.cygwin.com/) or [MSYS2](https://www.msys2.org/) and add `swig.exe` to your `PATH` environment variable or set `SWIG3`.
+
+You do not need to generate and run a configure script. R will use `src/Makevar.win` which uses the environment variable `LIB_GSL` to find GSL.
+
+### All platforms
+
+To build the R package, you first need to generate the SWIG source files:
 
 ```
 make Rswig
 ```
 
-If this is succesfull, the following files will be generated (ignored by git):
+If you have multiple versions of SWIG installed, you can set the `SWIG3` environment variable to the SWIG 3 executable. Example:
+
+```
+SWIG3=$(HOME)/swig-3.0.12/bin/swig make Rswig
+```
+
+If this is succesful, the following files will be generated (ignored by git):
 
 - R/OpenABMCovid19.R
 - src/covid19_wrap_R.c
 
-You can then open the OpenABM-Covid19.Rproj file in RStudio and build as normal. Remember to re-run `make Rswig` every time about you modify the C source and/or SWIG interface.
+After that, YOU can then open the OpenABM-Covid19.Rproj file in RStudio and build as normal. Remember to re-run `make Rswig` every time about you modify the C source and/or SWIG interface.
 
-Alternatively, you can also build using the command-line instead of RStudio:
+You'll need to install some R packages. In the R console, run:
+```
+> install.packages(c("R6", "roxygen2", "devtools"))
+```
 
-- `make Rbuild`: builds the R source package
-- `make Rinstall`: builds the R binary package
-- `make Rcheck`: check R package for errors
-
-
-### Requirements for building on Windows
-
-If you're building on Windows, there are additional tools that are needed to build the binary package. This is the recommended setup:
-
-- Download precompiled 32 and 64 bits libraries of GSL (installed in C:\gsl).
-- Install Rtools (in C:\Rtools).
-- Install make & SWIG via Cygwin64 (to run `make Rswig`).
-
-You can use the batch script *tests/test_R_INSTALL_win.bat* to build the source package.
+R console cheat-sheet:
+```
+> devtools::document() # Generate the R documentation files
+> devtools::build()    # Bundle OpenABMCovid19 into a source package tarball
+> devtools::install()  # Install the OpenABMCovid19 package.
+> devtools::test()     # Run tests.
+> devtools::check()    # Check R package.
+```
