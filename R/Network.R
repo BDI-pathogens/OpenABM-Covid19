@@ -10,10 +10,10 @@ SWIG_update_daily_fraction = update_daily_fraction
 Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
   private = list(
-    #' @field the network ID
+    #' the network ID
     id        = NULL,
 
-    #' @field c_network External pointer, reference to \code{network} C struct.
+    #' .c_network External pointer, reference to \code{network} C struct.
     .c_network = NULL,
 
     #' the C network R pointer object
@@ -28,7 +28,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
   ),
 
   active = list(
-    #' the C network R pointer object (Swig wrapped)
+    #' @field c_network the C network R pointer object (SWIG wrapped)
     c_network = function( val = NULL )
     {
       if( is.null( val ) )
@@ -46,7 +46,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
     #' @param model R6 Model object
     #' @param network_id The network ID.
-    initialize = function( model, network_id, max_ids = 1000 )
+    initialize = function( model, network_id )
     {
       if( !is.R6(model) || !inherits( model, "Model"))
         stop( "model must be a R6 class of type Model")
