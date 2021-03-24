@@ -57,7 +57,7 @@ void mutate_strain(
 		strain *mutated 	= calloc( 1, sizeof( struct strain ) );
 		long mutated_idx	= parent->idx + 1;
 		
-		double sigma 					= 0.1;  // stdev for distribtion of mutated strain's transmission_multiplier
+		double sigma 					= 0.5;  // stdev for distribtion of mutated strain's transmission_multiplier
 		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
 		float transmission_multiplier 	= max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
 
