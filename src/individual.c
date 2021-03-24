@@ -74,9 +74,9 @@ void initialize_individual(
 	float sigma_x = params->sd_infectiousness_multiplier;
 	if ( sigma_x > 0 )
 	{
-		float zeta = log( 1 / sqrt( 1 + pow( sigma_x, 2 ) ) );
-		float sigma = sqrt( log( 1 + pow( sigma_x, 2) ) );
-		indiv->infectiousness_multiplier = gsl_ran_lognormal( rng, zeta, sigma );
+		float b = sigma_x * sigma_x;
+		float a = 1 /b;
+		indiv->infectiousness_multiplier = gsl_ran_gamma( rng, a, b );
 	}
 	else
 	{

@@ -7,10 +7,6 @@
 ^.*\.Rproj$
 ^.*\.Rcheck$
 
-# R utility scripts
-^R\/demographics\.R$
-^R\/plotting\.R$
-
 # SWIG interface files
 .*\.i$
 
@@ -51,6 +47,7 @@
 ^\.github$
 ^README\.md$
 ^CONTRIBUTING\.md$
+^LICENSE$
 ^documentation$
 ^src\/Makefile$
 ^src\/main\.c$
