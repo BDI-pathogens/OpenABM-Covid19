@@ -327,3 +327,48 @@ test_that("Model::baseline_params", {
   expect_true(m$vaccinate_individual(2))
   expect_false(m$vaccinate_schedule(VaccineSchedule$new()))
 })
+
+test_that("Model::default params", {
+  m = Model.new( params = list( n_total = 10000,
+                                end_time = 10,
+                                n_seed_infection = 5 ))
+  Model.run( m, verbose = FALSE  )
+  res = Model.results( m )
+
+  expect_equal( res$time[ 10 ], 10 )
+  expect_gt( res$total_infected[ 10 ], 10 )
+})
+
+test_that("Model::multiple models", {
+  # create one model
+  m1 = Model.new( params = list( n_total = 10000, end_time = 10 ) )
+  m1$one_time_step()
+
+  # create a second modek
+  m2 = Model.new( params = list( n_total = 10000,
+                                 end_time = 10,
+                                 n_seed_infection = 5 ))
+  m2$one_time_step()
+
+  # run the first model again and destroy (force garbage collection)
+  Model.run( m1, verbose = FALSE  )
+  res = Model.results( m1 )
+  expect_equal( res$time[ 10 ], 10 )
+  rm( m1 ); gc()
+
+  # run the second  model again and destroy
+  Model.run( m2, verbose = FALSE  )
+  res = Model.results( m2 )
+  expect_equal( res$time[ 10 ], 10 )
+  rm( m2 );
+
+  # create a third model and run
+  m3 = Model.new( params = list( n_total = 10000, end_time = 10 ) )
+  Model.run( m3, verbose = FALSE  )
+  res = Model.results( m3 )
+  expect_equal( res$time[ 10 ], 10 )
+  rm( m3 ); gc()
+})
+
+
+
