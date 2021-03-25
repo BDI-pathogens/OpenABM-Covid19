@@ -81,6 +81,8 @@ struct interaction{
 
 struct interaction_block{
 	interaction *interactions;
+	long n_interactions;
+	long idx;
 	interaction_block *next;
 };
 

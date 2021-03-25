@@ -92,6 +92,7 @@ model* new_model( parameters *params )
 void destroy_model( model *model )
 {
 	long idx;
+	int ddx;
 	network *network, *next_network;
 	interaction_block *interaction_block, *next_interaction_block;
 
@@ -100,15 +101,19 @@ void destroy_model( model *model )
 	free( model->population );
 	free( model->possible_interactions );
 
-	next_interaction_block = model->interaction_blocks;
-	while( next_interaction_block != NULL )
+	for( ddx = 0; ddx < model->params->days_of_interactions; ddx++ )
 	{
-		interaction_block = next_interaction_block;
-		next_interaction_block = interaction_block->next;
-		if( interaction_block->interactions != NULL )
-			free( interaction_block->interactions );
-		free( interaction_block );
+		next_interaction_block = model->interaction_blocks[ddx];
+		while( next_interaction_block != NULL )
+		{
+			interaction_block = next_interaction_block;
+			next_interaction_block = interaction_block->next;
+			if( interaction_block->interactions != NULL )
+				free( interaction_block->interactions );
+			free( interaction_block );
+		}
 	}
+
 	free( model->events );
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
 		free( model->transition_time_distributions[ idx ] );
@@ -421,26 +426,21 @@ double estimate_total_interactions( model *model )
 ******************************************************************************************/
 void add_interaction_block( model *model, long n_interactions )
 {
-	long( idx );
-	interaction *interactions;
+	long ddx;
 	interaction_block *block;
 
-	block = calloc( 1, sizeof( interaction_block ) );
-	block->interactions = calloc( n_interactions, sizeof( interaction ) );
-	interactions = block->interactions;
+	for( ddx = 0; ddx < model->params->days_of_interactions; ddx++ )
+	{
+		block = calloc( 1, sizeof( interaction_block ) );
+		block->interactions = calloc( n_interactions, sizeof( interaction ) );
+		block->n_interactions = n_interactions;
+		block->idx = 0;
 
-	if( model->interaction_blocks != NULL )
-		block->next = model->interaction_blocks;
-	model->interaction_blocks = block;
+		if( model->interaction_blocks[ddx] != NULL )
+			block->next = model->interaction_blocks[ddx];
 
-	for( idx = 1; idx < n_interactions; idx++ )
-		interactions[idx-1].next = &(interactions[idx]);
-
-	interactions[n_interactions-1].next = model->next_interaction;
-	if( model->next_interaction == NULL )
-		interactions[n_interactions-1].next = &(interactions[n_interactions-1]);
-
-	model->next_interaction = &(interactions[0]);
+		model->interaction_blocks[ddx] = block;
+	}
 }
 
 /*****************************************************************************************
@@ -453,15 +453,12 @@ void set_up_interactions( model *model )
 {
 	parameters *params = model->params;
 	individual *indiv;
-	long idx, n_idx, indiv_idx, n_daily_interactions, n_interactions;
+	long idx, n_idx, indiv_idx, n_daily_interactions;
 
 	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
-	n_interactions       = n_daily_interactions * params->days_of_interactions;
 
-	add_interaction_block( model, n_interactions );
-
-	model->n_interactions        = n_interactions;
-	model->interaction_idx       = 0;
+	model->interaction_blocks = calloc( params->days_of_interactions, sizeof( interaction_block* ) );
+	add_interaction_block( model, n_daily_interactions );
 	model->interaction_day_idx   = 0;
 
 	model->possible_interactions = calloc( n_daily_interactions, sizeof( long ) );
@@ -770,16 +767,27 @@ void add_interactions_from_network(
 )
 {
 	long idx     = 0;
-	long all_idx = model->interaction_idx;
+	long inter_idx, inter_max;
 	int day      = model->interaction_day_idx;
 	int skip_hospitalised = network->skip_hospitalised;
 	int skip_quarantined  = network->skip_quarantined;
 	double prob_drop      = 1.0 - network->daily_fraction;
 	interaction *inter1, *inter2;
+	interaction_block *inter_block = model->interaction_blocks[day];
 	individual *indiv1, *indiv2;
 
 	if( network->daily_fraction < 1e-9 )
 		return;
+
+	// get the latest interaction block (drop the last one since need to get 2 at a time)
+	while( inter_block->idx > ( inter_block->n_interactions -2 ) )
+	{
+		if( inter_block->next == NULL )
+			print_exit( "run out of interactions tokens" );
+		inter_block = inter_block->next;
+	}
+	inter_idx = inter_block->idx;
+	inter_max = inter_block->n_interactions - 2;
 
 	while( idx < network->n_edges )
 	{
@@ -795,12 +803,8 @@ void add_interactions_from_network(
 		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
 			continue;
 
-		inter1 = model->next_interaction;
-		inter2 = inter1->next;
-		model->next_interaction = inter2->next;
-		if( inter2->next == inter2 )
-			print_exit( "Run out of interactions tokens!" );
-
+		inter1 = &(inter_block->interactions[inter_idx++]);
+		inter2 = &(inter_block->interactions[inter_idx++]);
 		inter1->type       = network->type;
 		inter1->network_id = network->network_id;
 		inter1->traceable  = UNKNOWN;
@@ -821,11 +825,20 @@ void add_interactions_from_network(
 
 		model->n_total_intereactions++;
 
-		if( all_idx >= model->n_interactions )
-			all_idx = 0;
-
+		if( inter_idx > inter_max  )
+		{
+			inter_block->idx = inter_idx;
+			while( inter_block->idx > ( inter_block->n_interactions -2 ) )
+			{
+				if( inter_block->next == NULL )
+					print_exit( "run out of interactions tokens (2)" );
+				inter_block = inter_block->next;
+			}
+			inter_idx = inter_block->idx;
+			inter_max = inter_block->n_interactions - 2;
+		}
 	}
-	model->interaction_idx =  all_idx;
+	inter_block->idx = inter_idx;
 }
 
 /*****************************************************************************************
@@ -1022,7 +1035,7 @@ int add_user_network(
 	user_network->next_network = model->user_network;
 	model->user_network        = user_network;
 
-	add_interaction_block( model, n_edges * 2 * model->params->days_of_interactions );
+	add_interaction_block( model, n_edges * 2 );
 
 	return network_id;
 }
@@ -1118,7 +1131,7 @@ int add_user_network_random(
 	// add to lust of networks and allocate memory for the interactions
 	user_network->next_network = model->user_network;
 	model->user_network        = user_network;
-	add_interaction_block( model, total_interactions * model->params->days_of_interactions );
+	add_interaction_block( model, total_interactions );
 
 	return network_id;
 }
@@ -1288,24 +1301,16 @@ int get_network_id_by_index( model *model, int idx )
 ******************************************************************************************/
 void return_interactions( model *model )
 {
-	long pdx;
-	int n_inter, idx;
-	interaction *first_inter, *last_inter;
-	for( pdx = 0; pdx < model->params->n_total; pdx++ )
+	int day_idx  = model->interaction_day_idx;
+	interaction_block *inter_block = model->interaction_blocks[day_idx];
+
+	inter_block->idx = 0;
+	while( inter_block->next != NULL )
 	{
-		n_inter = model->population[pdx].n_interactions[model->interaction_day_idx];
-		if( n_inter )
-		{
-			first_inter = model->population[pdx].interactions[model->interaction_day_idx];
-			last_inter  = first_inter;
-			for( idx = 0; idx < ( n_inter - 1 ); idx++ )
-				last_inter = last_inter->next;
-
-			last_inter->next = model->next_interaction;
-			model->next_interaction = first_inter;
-
-		}
+		inter_block = inter_block->next;
+		inter_block->idx = 0;
 	}
+
 	return;
 }
 

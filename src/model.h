@@ -46,11 +46,8 @@ struct model{
 	individual *population;
 	int time;
 
-	interaction_block *interaction_blocks;
-	interaction *next_interaction;
-	long interaction_idx;
+	interaction_block **interaction_blocks;
 	int interaction_day_idx;
-	long n_interactions;
 	long *possible_interactions;
 	long n_possible_interactions;
 	long n_total_intereactions;
