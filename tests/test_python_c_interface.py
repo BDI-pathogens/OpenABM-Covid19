@@ -85,7 +85,7 @@ class TestClass(object):
         """
         Test the a parameter can be changed in between step runs
         """
-        # Create model object
+        # Cr.eate model object
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
@@ -94,6 +94,7 @@ class TestClass(object):
             constant.TEST_HOSPITAL_FILE,
             constant.HOSPITAL_PARAM_LINE_NUMBER
         )
+        params.set_param( "n_total", 50000 )
         model = Model(params)
 
         # Run steps
@@ -175,6 +176,7 @@ class TestClass(object):
             constant.TEST_HOSPITAL_FILE,
             constant.PARAM_LINE_NUMBER
         )
+        params.set_param( "n_total", 50000 )
         params.set_param( "app_users_fraction", 0.25)
         model = Model(params)
         for _ in range(30):
@@ -193,6 +195,8 @@ class TestClass(object):
             constant.TEST_HOSPITAL_FILE,
             constant.PARAM_LINE_NUMBER
         )
+        params.set_param( "n_total", 50000 )
+
         model = Model(params)
         assert covid19.get_param_lockdown_on(model.c_params) == 0
         for oc_net in OccupationNetworkEnum:
@@ -338,6 +342,7 @@ class TestClass(object):
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
         )
+        params.set_param( "n_total", 50000 )
         model = Model(params)
         daily_hospitalisations = []
         for step in range(50):
@@ -355,6 +360,7 @@ class TestClass(object):
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
         )
+        params.set_param( "n_total", 50000 )
         model = Model(params)
         daily_critical = []
         for step in range(50):
@@ -372,6 +378,7 @@ class TestClass(object):
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
         )
+        params.set_param( "n_total", 50000);
         model = Model(params)
         daily_deaths = []
         for step in range(50):
@@ -389,6 +396,7 @@ class TestClass(object):
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
         )
+        params.set_param( "n_total", 50000 )
         model = Model(params)
                 
         for step in range(50):
@@ -411,6 +419,7 @@ class TestClass(object):
             constant.TEST_HOUSEHOLD_FILE,
             constant.TEST_HOSPITAL_FILE,
         )
+        params.set_param( "n_total", 50000 )
         model = Model(params)
         assert model.get_param("fatality_fraction_80") == 1.0
 
