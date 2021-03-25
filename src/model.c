@@ -105,7 +105,8 @@ void destroy_model( model *model )
 	{
 		interaction_block = next_interaction_block;
 		next_interaction_block = interaction_block->next;
-		free( interaction_block->interactions );
+		if( interaction_block->interactions != NULL )
+			free( interaction_block->interactions );
 		free( interaction_block );
 	}
 	free( model->events );
@@ -145,8 +146,6 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
     free( model );
-
-    gsl_rng_free( rng );
 }
 
 /*****************************************************************************************

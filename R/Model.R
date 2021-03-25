@@ -186,6 +186,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' overrides).
     initialize = function(params_object = NULL, params = NULL )
     {
+      # force run garbage collection to prevent C errors from old models)
+      gc()
+
       if (is.null(params_object)) {
         params_object = Parameters$new()
       }
@@ -209,7 +212,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
-        print( "destroy OpenABM model")
         SWIG_destroy_model( self$c_model )
       }
     },
@@ -925,7 +927,7 @@ Model.results = function( model ) {
 #' @return Null
 Model.run = function( model, verbose=TRUE ) {
   if (!is.null(model)) {
-    return( model$run() )
+    return( model$run( verbose ) )
   }
 }
 
