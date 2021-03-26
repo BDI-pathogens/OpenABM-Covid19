@@ -32,6 +32,8 @@ void initialize_individual(
 	indiv->quarantined = FALSE;
 	indiv->app_user	   = FALSE;
 
+	indiv->n_interactions = calloc( params->days_of_interactions, sizeof( short ) );
+	indiv->interactions   = calloc( params->days_of_interactions, sizeof( interaction* ) );
 	for( day = 0; day < params->days_of_interactions; day++ )
 	{
 		indiv->n_interactions[ day ] = 0;
@@ -39,7 +41,7 @@ void initialize_individual(
 	}
 
 	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short	) );
 	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->infection_events->times[jdx] = UNKNOWN;
 
@@ -437,6 +439,8 @@ void destroy_individual( individual *indiv )
 		infection_event = infection_event->next;
 		free( temporary_infection_event );
 	}
+	free( indiv->n_interactions );
+	free( indiv->interactions );
 }
 
 /*****************************************************************************************

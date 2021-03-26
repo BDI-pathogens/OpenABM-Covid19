@@ -77,7 +77,7 @@ model* new_model( parameters *params )
 	set_up_individual_hazard( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr );
-	set_up_trace_tokens( model_ptr );
+	set_up_trace_tokens( model_ptr, 0.01 );
 	set_up_risk_scores( model_ptr );
 
 	model_ptr->n_quarantine_days = 0;
@@ -95,6 +95,8 @@ void destroy_model( model *model )
 	int ddx;
 	network *network, *next_network;
 	interaction_block *interaction_block, *next_interaction_block;
+	trace_token_block *trace_token_block, *next_trace_token_block;
+	event_block *event_block, *next_event_block;
 
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		destroy_individual( &(model->population[idx] ) );
@@ -114,7 +116,17 @@ void destroy_model( model *model )
 		}
 	}
 
-	free( model->events );
+    next_event_block = model->event_block;
+	while( next_event_block != NULL )
+	{
+		event_block = next_event_block;
+		next_event_block = event_block->next;
+		if( event_block->events != NULL )
+			free( event_block->events );
+		free( event_block );
+	}
+
+
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
 		free( model->transition_time_distributions[ idx ] );
 	free( model->transition_time_distributions );
@@ -142,7 +154,17 @@ void destroy_model( model *model )
     free( model->household_directory->val );
     free( model->household_directory->n_jdx );
     free ( model-> household_directory );
-    free( model->trace_tokens );
+
+    next_trace_token_block = model->trace_token_block;
+	while( next_trace_token_block != NULL )
+	{
+		trace_token_block = next_trace_token_block;
+		next_trace_token_block = trace_token_block->next;
+		if( trace_token_block->trace_tokens != NULL )
+			free( trace_token_block->trace_tokens );
+		free( trace_token_block );
+	}
+
     if( model->params->hospital_on )
     {
     	for( idx = 0; idx < model->params->n_hospitals; idx++)
@@ -350,20 +372,37 @@ void set_up_occupation_network( model *model )
 ******************************************************************************************/
 void set_up_events( model *model )
 {
-	long idx;
-	int types = 6;
-	parameters *params = model->params;
-
-	model->events     = calloc( types * params->n_total, sizeof( event ) );
-	model->next_event = &(model->events[0]);
-	for( idx = 1; idx < types * params->n_total; idx++ )
-	{
-		model->events[idx-1].next = &(model->events[idx]);
-		model->events[idx].last   = &(model->events[idx-1]);
-	}
-	model->events[types * params->n_total - 1].next = model->next_event;
-	model->next_event->last = &(model->events[types * params->n_total - 1] );
+	model->event_block = NULL;
+	model->next_event  = NULL;
+	add_event_block( model, 1.0 );
 }
+
+/*****************************************************************************************
+*  Name:		add_event_block
+*  Description: sets up the event tags
+*  Returns:		void
+******************************************************************************************/
+void add_event_block( model *model, float events_per_person )
+{
+	long idx;
+	long n_events = ceil( model->params->n_total * events_per_person );
+	event_block *block;
+
+	// add a new block
+	block = calloc( 1, sizeof( event_block ) );
+	block->next = model->event_block;
+	model->event_block = block;
+
+	block->events     = calloc( n_events, sizeof( event ) );
+	model->next_event = &(block->events[0]);
+	for( idx = 1; idx < n_events; idx++ )
+	{
+		block->events[idx-1].next = &(block->events[idx]);
+		block->events[idx].last   = &(block->events[idx-1]);
+	}
+	block->events[ n_events - 1].next = NULL;
+}
+
 
 /*****************************************************************************************
 *  Name:		set_up_population
@@ -453,7 +492,7 @@ void set_up_interactions( model *model )
 {
 	parameters *params = model->params;
 	individual *indiv;
-	long idx, n_idx, indiv_idx, n_daily_interactions;
+	long idx, n_idx, indiv_idx, n_daily_interactions, n_random_interactions;
 
 	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
 
@@ -461,7 +500,12 @@ void set_up_interactions( model *model )
 	add_interaction_block( model, n_daily_interactions );
 	model->interaction_day_idx   = 0;
 
-	model->possible_interactions = calloc( n_daily_interactions, sizeof( long ) );
+	// count the number of random interactions
+	n_random_interactions = 0;
+	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
+		n_random_interactions += model->population[ indiv_idx ].random_interactions;
+
+	model->possible_interactions = calloc( ceil( n_random_interactions * 1.1 ), sizeof( long ) );
 	idx = 0;
 	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
 	{
@@ -484,9 +528,15 @@ event* new_event( model *model )
 {
 	event *event = model->next_event;
 
-	model->next_event       = event->next;
-	model->next_event->last = event->last;
-	event->last->next       = model->next_event;
+	if( event->next == NULL )
+	{
+		add_event_block( model, 0.5 );
+	}
+	else
+	{
+		model->next_event       = event->next;
+		model->next_event->last = NULL;
+	}
 
 	event->next = NULL;
 	event->last = NULL;
@@ -602,15 +652,18 @@ void remove_event_from_event_list(
 			}
 		}
 		else
+		{
 			list->events[ time ] = event->next;
+			list->events[ time ]->last = NULL;
+		}
 	}
 	else
 		list->events[time] = NULL;
 
-	model->next_event->last->next = event;
-	event->last = model->next_event->last;
-	event->next = model->next_event;
+	// return to the stack
 	model->next_event->last = event;
+	event->next = model->next_event;
+	model->next_event = event;
 
 	if( time <= model->time )
 		list->n_current--;
