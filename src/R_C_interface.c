@@ -1,8 +1,12 @@
 #include <R.h>
 #include <Rinternals.h>
+
+#pragma push_macro("ERROR")
+#undef ERROR // mute GCC warning: "ERROR" redefined
 #include "model.h"
 #include "input.h"
 #include "params.h"
+#pragma pop_macro("ERROR")
 
 SEXP R_get_app_users ( SEXP R_c_model, SEXP n_total )
 {
@@ -135,7 +139,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
 
   // allocate memory to for the function call
   const int n_names = 33;
-  const char *names[n_names] = { "ID_recipient", "age_group_recipient",
+  const char *names[33] = { "ID_recipient", "age_group_recipient",
     "house_no_recipient","occupation_network_recipient","worker_type_recipient",
     "hospital_state_recipient","infector_network","infector_network_id",
     "generation_time","ID_source","age_group_source",
