@@ -59,7 +59,7 @@ void mutate_strain(
 		
 		double sigma 					= 0.5;  // stdev for distribtion of mutated strain's transmission_multiplier
 		float delta 					= gsl_ran_gaussian( rng, sigma ); // change in transmission_multiplier due to mutation
-		float transmission_multiplier 	= max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
+		float transmission_multiplier 	= 1; //max(0, parent->transmission_multiplier + delta); // new transmission_multiplier for mutation
 
 		// printf("Mutation!: %p -> %p\n", parent, mutated);
 		// printf("\t%f -> %f\n", parent->transmission_multiplier, transmission_multiplier);
@@ -67,7 +67,7 @@ void mutate_strain(
 		initialize_strain( mutated, mutated_idx, parent, transmission_multiplier, 1, 1);
 		add_new_strain_to_model( model, mutated );
 		add_to_strain_bin_count( model->strain_bins, mutated->transmission_multiplier, 1);
-		add_to_strain_bin_count( model->strain_bins, parent->transmission_multiplier, -1);
+		// add_to_strain_bin_count( model->strain_bins, parent->transmission_multiplier, -1);
 		infector->infection_events->strain = mutated;
 		parent->n_infected--;
 	}

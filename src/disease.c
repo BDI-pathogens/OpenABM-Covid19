@@ -200,7 +200,7 @@ void transmit_virus_by_type(
 				continue;
 
 			// mutate strain with some probability ( make this occur after checking if past max infectious period )
-			double mutation_prob = 0.001; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
+			double mutation_prob = 0.01; //0.001; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
 			mutate_strain( model, infector, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
 
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
