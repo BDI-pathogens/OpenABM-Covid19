@@ -116,7 +116,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
   ),
 
   active = list(
-    #' the C param sR pointer object (Swig wrapped)
+    #' @field c_params the C param sR pointer object (SWIG wrapped)
     c_params = function( val = NULL )
     {
       if( is.null( val ) )
