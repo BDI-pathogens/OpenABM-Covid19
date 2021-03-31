@@ -5,6 +5,15 @@ setup.py file for SWIG example
 """
 
 from distutils.core import setup, Extension
+from subprocess import check_output
+
+def gsl_config(flag):
+    out = check_output(['gsl-config'] + [flag]).decode('utf-8')
+    out = out.replace("\n",'') # cut trailing \n
+    return out.split(' ')
+
+CFLAGS  = gsl_config('--cflags')
+LDFLAGS = gsl_config('--libs')
 
 covid19_module = Extension(
     "_covid19",
@@ -26,8 +35,8 @@ covid19_module = Extension(
         "utilities.c",
         "ward.c"
     ],
-    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-I$(INC);", "-O0"],
-    extra_link_args=["-lgsl", "-lgslcblas", "-lm", "-O3"],
+    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O0"] + CFLAGS,
+    extra_link_args=["-lm", "-O3"] + LDFLAGS,
 )
 
 setup(

@@ -9,19 +9,55 @@ SWIG_update_daily_fraction = update_daily_fraction
 #'
 Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
-  private = list( id = NULL ),
+  private = list(
+    #' the network ID
+    id        = NULL,
+
+    #' .c_network External pointer, reference to \code{network} C struct.
+    .c_network = NULL,
+
+    #' the C network R pointer object
+    c_network_ptr = function() {
+      return( private$c_network()@ref )
+    },
+
+    #' check the C network still exists
+    c_network_valid = function() {
+      return( !is_null_xptr( private$.c_network@ref ))
+    }
+  ),
+
+  active = list(
+    #' @field c_network the C network R pointer object (SWIG wrapped)
+    c_network = function( val = NULL )
+    {
+      if( is.null( val ) )
+      {
+        if( private$c_network_valid() )
+          return( private$.c_network )
+        stop( "c_network is no longer valid - create a new netwrok")
+      }
+      else
+        stop( "cannot set c_network" )
+    }
+  ),
 
   public = list(
-    #' @field c_network External pointer, reference to \code{network} C struct.
-    c_network = NULL,
 
-    #' @param c_model External pointer, reference to \code{model} C struct.
+    #' @param model R6 Model object
     #' @param network_id The network ID.
-    initialize = function(c_model, network_id)
+    initialize = function( model, network_id )
     {
-      # TODO(olegat) check for NULL c_network pointer here (R can crash)
-      self$c_network <- get_network_by_id( c_model, network_id )
-      private$id     <- network_id
+      if( !is.R6(model) || !inherits( model, "Model"))
+        stop( "model must be a R6 class of type Model")
+
+      # check we're asking for a valid network
+      n_ids = model$get_network_ids()
+      if( !max( n_ids == network_id ) )
+        stop( "network_id does not exist in this model")
+
+      private$.c_network <- get_network_by_id( model$c_model, network_id )
+      private$id         <- network_id
     },
 
     #' @description Wrapper for C API \code{network_n_edges}.
@@ -84,7 +120,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
     },
 
     #' @description Print the object
-    show = function() {
+    print = function() {
       pad <- function(x) { return(strtrim(paste(x,'                 '),17)) }
       keys <- c(
         'network_id', 'name','n_edges','n_vertices', 'skip_hospitalised',
