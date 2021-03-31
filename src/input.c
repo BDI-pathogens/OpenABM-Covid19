@@ -1087,7 +1087,7 @@ void get_transmissions(
 	int *time_recovered,
 	int *time_susceptible,
 	int *is_case,
-	float *strain_multiplier
+	float *transmission_multiplier
 )
 {
 	individual *indiv;
@@ -1136,7 +1136,7 @@ void get_transmissions(
 				time_recovered[ idx ] = infection_event->times[RECOVERED];
 				time_susceptible[ idx ] = infection_event->times[SUSCEPTIBLE];
 				is_case[ idx ] = infection_event->is_case;
-				strain_multiplier[ idx ] = infection_event->strain_multiplier;
+				transmission_multiplier[ idx ] = infection_event->strain->transmission_multiplier;
 				idx++;
 			}
 			infection_event = infection_event->next;
@@ -1227,7 +1227,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "time_recovered,");
 	fprintf(output_file , "time_susceptible,");
 	fprintf(output_file , "is_case,");
-	fprintf(output_file , "strain_multiplier\n");
+	fprintf(output_file , "transmission_multiplier\n");
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -1270,7 +1270,7 @@ void write_transmissions( model *model )
 					infection_event->times[RECOVERED],
 					infection_event->times[SUSCEPTIBLE],
 					infection_event->is_case,
-					infection_event->strain_multiplier
+					infection_event->strain->transmission_multiplier
 				);
 			infection_event = infection_event->next;
 		}

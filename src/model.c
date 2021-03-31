@@ -75,6 +75,7 @@ model* new_model( parameters *params )
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
+	set_up_strains( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr );
@@ -636,6 +637,21 @@ void update_event_list_counters( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_strains
+*  Description: allocates memory for array of MAX_N_STRAINS strains
+*  Returns:		void
+******************************************************************************************/
+
+void set_up_strains( model *model )
+{
+	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
+
+	// temporary to set up simple two-strain model
+	initialise_strain( model, 0, 1.0 );
+	initialise_strain( model, 1, 2.0 );
+}
+
+/*****************************************************************************************
 *  Name:		set_up_seed_infection
 *  Description: sets up the initial population
 *  Returns:		void
@@ -646,6 +662,8 @@ void set_up_seed_infection( model *model )
 	int idx;
 	unsigned long int person;
 	individual *indiv;
+
+	int seed_strain_idx = 0;
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -658,7 +676,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, 1, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, seed_strain_idx, -1 ) )
 				idx++;
 		}
 	}
