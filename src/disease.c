@@ -16,11 +16,9 @@
 #include "disease.h"
 #include "structure.h"
 #include "interventions.h"
-#include "strain.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h> // memcpy
 
 /*****************************************************************************************
 *  Name:		set_up_transition_times
@@ -199,15 +197,11 @@ void transmit_virus_by_type(
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
 				continue;
 
-			// mutate strain with some probability ( make this occur after checking if past max infectious period )
-			double mutation_prob = 0.01; //0.001; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
-			mutate_strain( model, infector, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
-
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -250,9 +244,7 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
-	// print_infections_per_strain( model );
-	print_strain_bins( model );
-	printf("%f\n", calculate_R_instanteous( model, model->time, 0.5));
+
 }
 
 /*****************************************************************************************
@@ -263,7 +255,7 @@ void transmit_virus( model *model )
 short seed_infect_by_idx(
 	model *model,
 	long pdx,
-	strain *seed_strain,
+	float strain_multiplier,
 	int network_id
 )
 {
@@ -272,11 +264,7 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	infected->infection_events->strain = seed_strain;
-	seed_strain->n_infected++;
-	seed_strain->total_infected++;
-	double mutation_prob = 0; // set to 0 to ensure simulation begins with single strain, set to 1 to ensure it begins with different strains for each seed infection
-	mutate_strain( model, infected, mutation_prob ); // with some probability the strain will mutate, otherwise it stays the same
+	infected->infection_events->strain_multiplier = strain_multiplier;
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }
@@ -300,19 +288,11 @@ void new_infection(
 	if( vaccine_protected( infected ) )
 		asymp_frac = 1;
 
-	infected->infection_events->infector 				= infector;
-	infected->infection_events->infector_status 		= infector->status;
-	infected->infection_events->infector_hospital_state	= infector->hospital_state;
-	infected->infection_events->network_id 				= network_id;
-	
-	add_to_strain_bin_count( model->strain_bins, infector->infection_events->strain->transmission_multiplier, 1);
-	infected->infection_events->strain 					= infector->infection_events->strain;
-	if( infector != infected ) 
-	{
-		infected->infection_events->strain->n_infected++;
-		infected->infection_events->strain->total_infected++;
-	}
-	
+	infected->infection_events->infector = infector;
+	infected->infection_events->infector_status = infector->status;
+	infected->infection_events->infector_hospital_state = infector->hospital_state;
+	infected->infection_events->network_id = network_id;
+	infected->infection_events->strain_multiplier = infector->infection_events->strain_multiplier;
 
 	if( draw < asymp_frac )
 	{
@@ -514,9 +494,6 @@ void transition_to_recovered( model *model, individual *indiv )
 
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 	set_recovered( indiv, model->params, model->time, model);
-
-	indiv->infection_events->strain->n_infected--;
-	add_to_strain_bin_count( model->strain_bins, indiv->infection_events->strain->transmission_multiplier, -1);
 }
 
 /*****************************************************************************************
@@ -602,36 +579,4 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 		return ERROR;
 
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
-}
-
-
-/*****************************************************************************************
-*  Name:		--
-*  Description: --
-*
-*  Returns:		void
-******************************************************************************************/
-void print_infections_per_strain( model *model )
-{
-	strain *temp = model->strains;
-	printf("%p\n", temp);
-	while( temp != NULL )
-	{
-		printf("# %p->%p:\t%f\t%li/%li\n", temp->parent, temp, temp->transmission_multiplier, temp->n_infected, temp->total_infected );
-		temp = temp->next;
-	}
-}
-
-/*****************************************************************************************
-*  Name:		--
-*  Description: --
-*
-*  Returns:		void
-******************************************************************************************/
-void print_strain_bins( model *model )
-{
-	int bin_idx;
-	for( bin_idx = 0; bin_idx < N_STRAIN_BINS; bin_idx++ )
-	    printf("%ld\t", model->strain_bins[bin_idx]);
-	printf("\n");
 }

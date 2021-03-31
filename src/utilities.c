@@ -456,7 +456,3 @@ double inv_incomplete_gamma_p( double percentile, long n )
 
 	return( root );
 }
-
-
-
-

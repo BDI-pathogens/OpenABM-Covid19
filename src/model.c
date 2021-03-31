@@ -15,7 +15,6 @@
 #include "interventions.h"
 #include "demographics.h"
 #include "hospital.h"
-#include "strain.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -106,8 +105,7 @@ void destroy_model( model *model )
 	{
 		interaction_block = next_interaction_block;
 		next_interaction_block = interaction_block->next;
-		if( interaction_block->interactions != NULL )
-			free( interaction_block->interactions );
+		free( interaction_block->interactions );
 		free( interaction_block );
 	}
 	free( model->events );
@@ -147,6 +145,8 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
     free( model );
+
+    gsl_rng_free( rng );
 }
 
 /*****************************************************************************************
@@ -647,17 +647,6 @@ void set_up_seed_infection( model *model )
 	unsigned long int person;
 	individual *indiv;
 
-	memset(model->strain_bins, 0, sizeof(model->strain_bins)); // may be necessary to reset array to zeros
-	for ( int bin_idx = 0 ; bin_idx < N_STRAIN_BINS; bin_idx++ )
-		model->strain_bins[bin_idx] = 0;
-
-	// create initial strain
-	long strain_idx = 1;
-	float transmission_multiplier = 1; // equivalent to the old "strain_multiplier" float
-	strain *seed_strain = calloc( 1, sizeof( struct strain ) );
-	initialize_strain( seed_strain, strain_idx, NULL, transmission_multiplier, 0, 0);
-	add_new_strain_to_model( model, seed_strain );
-
 	idx = 0;
 	while( idx < params->n_seed_infection )
 	{
@@ -669,7 +658,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, seed_strain, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, 1, -1 ) )
 				idx++;
 		}
 	}

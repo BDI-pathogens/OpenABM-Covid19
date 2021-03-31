@@ -269,4 +269,3 @@ int update_daily_fraction( network *network, double fraction )
 	return TRUE;
 }
 
-

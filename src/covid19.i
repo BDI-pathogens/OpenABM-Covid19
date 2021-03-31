@@ -12,7 +12,6 @@
 #include "utilities.h"
 #include "disease.h"
 #include "network.h"
-#include "strain.h"
 %}
 
 %rename (create_model) new_model(parameters *params);
@@ -43,8 +42,6 @@
 %nodefaultdtor incomplete_gamma_p_params;
 %nodefaultctor trace_token;
 %nodefaultdtor trace_token;
-%nodefaultctor strain;
-%nodefaultdtor strain;
 
 %include "model.h"
 %include "params.h"
@@ -55,8 +52,6 @@
 %include "utilities.h"
 %include "disease.h"
 %include "network.h"
-%include "strain.h"
 %include model_utils.i 
 %include params_utils.i
 %include network_utils.i
-

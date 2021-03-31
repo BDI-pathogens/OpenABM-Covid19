@@ -18,7 +18,6 @@
 #include "network.h"
 #include "params.h"
 #include "hospital.h"
-#include "strain.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -99,12 +98,6 @@ struct model{
 	long n_vaccinated_symptoms_by_age[ N_AGE_GROUPS ];
 
 	hospital *hospitals;
-
-	strain *strains;
-	long n_strains;
-	double total_transmission_multiplier; // use to calculate mean transmission_multiplier across strains
-	long strain_bins[ N_STRAIN_BINS ]; 
-
 };
 
 struct event{
@@ -162,5 +155,7 @@ int delete_network( model*, network*n );
 network* get_network_by_id( model*, int );
 int get_network_ids( model*, int*, int );
 int get_network_id_by_index( model*, int );
+
+
 
 #endif /* MODEL_H_ */

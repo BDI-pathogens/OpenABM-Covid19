@@ -17,7 +17,6 @@
 #include "individual.h"
 #include "model.h"
 #include "utilities.h"
-#include "strain.h"
 
 /************************************************************************/
 /******************************  Functions  *****************************/
@@ -37,7 +36,7 @@ void transmit_virus_by_type( model*, int );
 
 // progression of the disease
 void new_infection( model*, individual*, individual*, int );
-short seed_infect_by_idx( model*, long, strain*, int );
+short seed_infect_by_idx( model*, long, float, int );
 void transition_to_symptomatic( model*, individual* );
 void transition_to_symptomatic_mild( model*, individual* );
 void transition_to_hospitalised( model*, individual* );
@@ -51,9 +50,5 @@ void transition_one_disese_event( model*, individual*, int, int, int );
 // calculation of R of disease
 long n_newly_infected( model*, int time );
 double calculate_R_instanteous( model*, int, double );
-
-// print strain info
-void print_infections_per_strain( model* );
-void print_strain_bins( model* ); // print number of strains in each bin of transmission_multiplier values
 
 #endif /* DISEASE_H_ */
