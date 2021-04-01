@@ -146,6 +146,7 @@ void destroy_model( model *model )
     	free( model->hospitals );
     }
     destroy_risk_scores( model );
+    free( model->strains );
     free( model );
 }
 
