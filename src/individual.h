@@ -35,7 +35,7 @@ struct individual{
 	interaction *interactions[MAX_DAILY_INTERACTIONS_KEPT];
 
 	int status;
-	double hazard;
+	double hazard[MAX_N_STRAINS];
 	double infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;

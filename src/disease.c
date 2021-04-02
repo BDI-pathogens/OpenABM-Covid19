@@ -208,9 +208,9 @@ void transmit_virus_by_type(
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
-                        interaction->individual->hazard -= hazard_rate;
+                        interaction->individual->hazard[ infector->infection_events->strain->idx ] -= hazard_rate;
 
-						if( interaction->individual->hazard < 0 )
+						if( interaction->individual->hazard[ infector->infection_events->strain->idx ] < 0 )
 						{
 							new_infection( model, interaction->individual, infector, interaction->network_id );
 							interaction->individual->infection_events->infector_network = interaction->type;

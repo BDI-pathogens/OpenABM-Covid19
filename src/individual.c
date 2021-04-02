@@ -96,7 +96,8 @@ void initialize_hazard(
 	parameters *params
 )
 {
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+	for( int idx = 0; idx < MAX_N_STRAINS; idx++ )
+		indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
 /*****************************************************************************************
@@ -484,7 +485,10 @@ void print_individual( model *model, long idx)
 	printf("indiv->base_random_interactions: %d\n", indiv->base_random_interactions );
 	printf("indiv->random_interactions: %d\n", indiv->random_interactions );
 
-	printf("indiv->hazard: %f\n", indiv->hazard );
+	printf("indiv->hazard:");
+	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+		printf(" %f", indiv->hazard[strain_idx]);
+	printf("\n");
 	printf("indiv->quarantined: %d\n", indiv->quarantined );
 	printf("indiv->quarantine_test_result: %d\n", indiv->quarantine_test_result );
 	
