@@ -146,7 +146,12 @@ void destroy_model( model *model )
     	free( model->hospitals );
     }
     destroy_risk_scores( model );
+
     free( model->strains );
+    for( idx = 0; idx < MAX_N_STRAINS; idx++ )
+		free( model->cross_immunity[idx] );
+	free( model->cross_immunity );
+	
     free( model );
 }
 
@@ -649,6 +654,13 @@ void set_up_strains( model *model )
 	// temporary to set up simple two-strain model
 	initialise_strain( model, 0, 1.0 );
 	initialise_strain( model, 1, 2.0 );
+
+	// Allocate memory for cross_immunity matrix (for large MAX_N_STRAINS)
+	float** cross_immunity;
+	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
+	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
+		cross_immunity[idx] = calloc( MAX_N_STRAINS, sizeof(float) );
+	model->cross_immunity = cross_immunity;
 }
 
 /*****************************************************************************************

@@ -102,6 +102,7 @@ struct model{
 
 	strain *strains;
 	int n_initialised_strains;
+	float **cross_immunity;
 };
 
 struct event{
