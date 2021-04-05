@@ -265,8 +265,11 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	model->strains[ strain_idx ].transmission_multiplier 	= transmission_multiplier;
-	infected->infection_events->strain 						= &(model->strains[ strain_idx ]);
+	if( model->strains[ strain_idx ].idx == -1 ) // if strain is not initialised
+		initialise_strain( model, strain_idx, transmission_multiplier );
+	else
+		model->strains[ strain_idx ].transmission_multiplier = transmission_multiplier;
+	infected->infection_events->strain = &(model->strains[ strain_idx ]);
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }

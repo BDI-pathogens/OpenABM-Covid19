@@ -655,12 +655,11 @@ void set_up_strains( model *model )
 	float** cross_immunity;
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
-		cross_immunity[idx] = calloc( MAX_N_STRAINS, sizeof(float) );
-	model->cross_immunity = cross_immunity;
-
-	// temporarily hard coded to set up simple two-strain model
-	initialise_strain( model, 0, 1.0 );
-	initialise_strain( model, 1, 2.0 );
+	{
+		cross_immunity[idx] = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
+		model->strains[idx].idx = -1; // set strain idx to be -1, to help with checking if strains have been initialised
+	}		
+	model->cross_immunity = cross_immunity;	
 }
 
 /*****************************************************************************************
@@ -671,12 +670,14 @@ void set_up_strains( model *model )
 void set_up_seed_infection( model *model )
 {
 	parameters *params = model->params;
-	int idx;
+	int idx, strain_idx;
+	float transmission_multiplier;
 	unsigned long int person;
 	individual *indiv;
 
-	int seed_strain_idx = 0;
-	float seed_transmission_multiplier = model->strains[seed_strain_idx].transmission_multiplier;
+	strain_idx = 0;
+	transmission_multiplier = 1;
+	initialise_strain( model, strain_idx, transmission_multiplier );
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -689,7 +690,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, seed_strain_idx, seed_transmission_multiplier, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, strain_idx, transmission_multiplier, -1 ) )
 				idx++;
 		}
 	}
