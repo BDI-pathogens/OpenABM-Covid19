@@ -27,4 +27,5 @@ void initialise_strain(
 	strain_ptr->idx 					= idx;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
 	model->n_initialised_strains++;
+	model->cross_immunity[idx][idx] = 1;
 }

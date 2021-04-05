@@ -823,7 +823,7 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
     
-    def seed_infect_by_idx(self, ID, strain_idx = 0, network_id = -1 ):
+    def seed_infect_by_idx(self, ID, strain_idx = 0, transmission_multiplier = 1, network_id = -1 ):
         
         n_total = self._params_obj.get_param("n_total")
 
@@ -834,7 +834,7 @@ class Model:
             print(strain_idx)
             raise ModelParameterException( "strain_idx out of range (0 <= strain_idx < MAX_N_STRAIN)")
 
-        return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+        return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, transmission_multiplier, network_id );
 
     def get_network_info(self, max_ids= 1000):
            

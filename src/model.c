@@ -151,7 +151,7 @@ void destroy_model( model *model )
     for( idx = 0; idx < MAX_N_STRAINS; idx++ )
 		free( model->cross_immunity[idx] );
 	free( model->cross_immunity );
-	
+
     free( model );
 }
 
@@ -651,16 +651,16 @@ void set_up_strains( model *model )
 {
 	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
 
-	// temporary to set up simple two-strain model
-	initialise_strain( model, 0, 1.0 );
-	initialise_strain( model, 1, 2.0 );
-
 	// Allocate memory for cross_immunity matrix (for large MAX_N_STRAINS)
 	float** cross_immunity;
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
 		cross_immunity[idx] = calloc( MAX_N_STRAINS, sizeof(float) );
 	model->cross_immunity = cross_immunity;
+
+	// temporarily hard coded to set up simple two-strain model
+	initialise_strain( model, 0, 1.0 );
+	initialise_strain( model, 1, 2.0 );
 }
 
 /*****************************************************************************************
@@ -676,6 +676,7 @@ void set_up_seed_infection( model *model )
 	individual *indiv;
 
 	int seed_strain_idx = 0;
+	float seed_transmission_multiplier = model->strains[seed_strain_idx].transmission_multiplier;
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -688,7 +689,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, seed_strain_idx, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, seed_strain_idx, seed_transmission_multiplier, -1 ) )
 				idx++;
 		}
 	}
