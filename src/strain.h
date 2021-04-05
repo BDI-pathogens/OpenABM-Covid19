@@ -29,6 +29,6 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_strain( model*, int, float );
+void initialise_strain( model*, long, float );
 
 #endif /* STRAIN_H_ */

@@ -656,8 +656,9 @@ void set_up_strains( model *model )
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
 	{
-		cross_immunity[idx] = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
-		model->strains[idx].idx = -1; // set strain idx to be -1, to help with checking if strains have been initialised
+		cross_immunity[idx] 		= calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
+		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
+		model->strains[idx].idx 	= -1; // set strain idx to be -1 to help with checking if strains have been initialised
 	}		
 	model->cross_immunity = cross_immunity;	
 }
@@ -675,7 +676,7 @@ void set_up_seed_infection( model *model )
 	unsigned long int person;
 	individual *indiv;
 
-	strain_idx = 0;
+	strain_idx 				= 0;
 	transmission_multiplier = 1;
 	initialise_strain( model, strain_idx, transmission_multiplier );
 

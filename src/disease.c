@@ -174,7 +174,7 @@ void transmit_virus_by_type(
 	int type
 )
 {
-	long idx, jdx, n_infected;
+	long idx, jdx, n_infected, strain_idx;
 	int day, n_interaction, t_infect;
 	double hazard_rate, infector_mult;
 	event_list *list = &(model->event_lists[type]);
@@ -202,15 +202,16 @@ void transmit_virus_by_type(
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
+				strain_idx 	  = infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
-                        interaction->individual->hazard[ infector->infection_events->strain->idx ] -= hazard_rate;
+                        interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
-						if( interaction->individual->hazard[ infector->infection_events->strain->idx ] < 0 )
+						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
 							new_infection( model, interaction->individual, infector, interaction->network_id );
 							interaction->individual->infection_events->infector_network = interaction->type;

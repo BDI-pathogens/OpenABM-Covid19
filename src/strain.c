@@ -16,7 +16,7 @@
 ******************************************************************************************/
 void initialise_strain(
 	model *model,
-	int idx,
+	long idx,
 	float transmission_multiplier
 )
 {
