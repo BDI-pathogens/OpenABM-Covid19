@@ -1245,7 +1245,7 @@ class TestClass(object):
 
             total_infected_means.append(np.mean(total_infected))
 
-        base_infected = total_infected_means[0]
+        base_infected_mean = total_infected_means[0]
 
         np.testing.assert_allclose([base_infected_mean]*len(total_infected_means), total_infected_means, rtol=0.05)
 
