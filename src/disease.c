@@ -206,7 +206,7 @@ void transmit_virus_by_type(
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
-					if( interaction->individual->status == SUSCEPTIBLE )
+					if( (interaction->individual->status == SUSCEPTIBLE) && (interaction->individual->time_susceptible[strain_idx] <= model->time ) )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
                         interaction->individual->hazard[ strain_idx ] -= hazard_rate;
@@ -353,8 +353,8 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
+		indiv->infection_events->times[to] = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		indiv->next_disease_event 		   = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
 	}
 }
 
@@ -497,9 +497,23 @@ void transition_to_recovered( model *model, individual *indiv )
 			transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
 		}
 	}
-
-	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
-	set_recovered( indiv, model->params, model->time, model);
+	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, NO_EDGE );
+	
+	int infected_strain_idx, transition_time;
+	infected_strain_idx = indiv->infection_events->strain->idx;
+	for( int strain_idx = 0;  strain_idx < model->n_initialised_strains; strain_idx++ )
+	{
+		transition_time = sample_transition_time( model, RECOVERED_SUSCEPTIBLE );
+		if( strain_idx == infected_strain_idx )
+			indiv->time_susceptible[strain_idx] = model->time + transition_time;
+		else
+		{
+			double draw = gsl_rng_uniform( rng );
+			if( draw < model->cross_immunity[infected_strain_idx][strain_idx] )
+				indiv->time_susceptible[strain_idx] = model->time + transition_time;
+		}
+	}
+	set_recovered( indiv, model->params, model->time, model );
 }
 
 /*****************************************************************************************
