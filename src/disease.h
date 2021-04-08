@@ -51,4 +51,7 @@ void transition_one_disese_event( model*, individual*, int, int, int );
 long n_newly_infected( model*, int time );
 double calculate_R_instanteous( model*, int, double );
 
+// cross-immunity
+void set_cross_immunity_probability( model*, int, int, float );
+
 #endif /* DISEASE_H_ */

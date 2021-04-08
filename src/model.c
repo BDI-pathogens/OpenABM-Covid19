@@ -643,7 +643,8 @@ void update_event_list_counters( model *model, int type )
 
 /*****************************************************************************************
 *  Name:		set_up_strains
-*  Description: allocates memory for array of MAX_N_STRAINS strains
+*  Description: allocates memory for array of MAX_N_STRAINS strains and MAX_N_STRAINS by 
+* 				MAX_N_STRAINS cross_immunity matrix
 *  Returns:		void
 ******************************************************************************************/
 
@@ -656,11 +657,11 @@ void set_up_strains( model *model )
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
 	{
-		cross_immunity[idx] 		= calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
-		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
-		model->strains[idx].idx 	= -1; // set strain idx to be -1 to help with checking if strains have been initialised
+		cross_immunity[idx]  	 = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
+		cross_immunity[idx][idx] = 1; // set probability of cross-immunity to be 1, because the strain is the same
+		model->strains[idx].idx  = -1; // set every strain idx to initially be -1 to help with checking if strains have been initialised
 	}		
-	model->cross_immunity = cross_immunity;	
+	model->cross_immunity = cross_immunity;
 }
 
 /*****************************************************************************************

@@ -586,3 +586,18 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
 }
+
+/*****************************************************************************************
+*  Name:		set_cross_immunity_probability
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+void set_cross_immunity_probability( 
+	model *model, 
+	int caught_idx, 
+	int conferred_idx, 
+	float probability 
+)
+{
+	model->cross_immunity[ caught_idx ][ conferred_idx ] = probability;
+}
