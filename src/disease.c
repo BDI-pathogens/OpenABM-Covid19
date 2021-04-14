@@ -508,8 +508,7 @@ void transition_to_recovered( model *model, individual *indiv )
 			indiv->time_susceptible[strain_idx] = model->time + transition_time;
 		else
 		{
-			double draw = gsl_rng_uniform( rng );
-			if( draw < model->cross_immunity[infected_strain_idx][strain_idx] )
+			if( gsl_ran_bernoulli( rng, model->cross_immunity[infected_strain_idx][strain_idx] ) )
 				indiv->time_susceptible[strain_idx] = model->time + transition_time;
 		}
 	}
