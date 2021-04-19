@@ -57,6 +57,7 @@ short intervention_vaccinate_by_idx( model*, long, short, double, short, short )
 long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], short, double, short, short, long[ N_AGE_GROUPS ] );
 void intervention_vaccine_protect( model*, individual* );
 void intervention_vaccine_wane( model*, individual* );
+void set_vaccine_strain_efficacy( model*, int, int,	float );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );

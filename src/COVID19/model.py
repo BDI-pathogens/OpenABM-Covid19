@@ -929,6 +929,21 @@ class Model:
             schedule.vaccine_protection_period,
             schedule.c_total_vaccinated
         )   
+
+    def set_vaccine_strain_efficacy_matrix(self, vaccine_strain_efficacy ):
+
+        max_n_vaccines = covid19.MAX_N_VACCINES
+        max_n_strains  = covid19.MAX_N_STRAINS
+        if len(vaccine_strain_efficacy) > max_n_vaccines:
+            raise ParameterException( f"Too many rows in vaccine_strain_efficacy (maximum allowed: {max_n_vaccines}" )
+
+        for vaccine_idx in range(len(vaccine_strain_efficacy)):
+            if len(vaccine_strain_efficacy[vaccine_idx]) > max_n_strains:
+                raise ParameterException( f"Too many columns in vaccine_strain_efficacy row with index={i} (maximum allowed: {max_n_strains}" )
+            for strain_idx, efficacy in enumerate(vaccine_strain_efficacy[vaccine_idx]):
+                if ( efficacy < 0 ) | ( efficacy > 1 ):
+                    raise ParameterException( f"Vaccine's strain-specific efficacy must be in the interval [0,1]")
+                covid19.set_vaccine_strain_efficacy( self.c_model, vaccine_idx, strain_idx, efficacy )
     
     def get_individuals(self):
         """

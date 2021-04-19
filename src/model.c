@@ -151,6 +151,9 @@ void destroy_model( model *model )
     for( idx = 0; idx < MAX_N_STRAINS; idx++ )
 		free( model->cross_immunity[idx] );
 	free( model->cross_immunity );
+	for ( idx = 0; idx < MAX_N_VACCINES; idx ++)
+		free( model->vaccine_strain_efficacy[idx] );
+	free( model->vaccine_strain_efficacy );
 
     free( model );
 }
@@ -655,13 +658,23 @@ void set_up_strains( model *model )
 	// Allocate memory for cross_immunity matrix (for large MAX_N_STRAINS)
 	float** cross_immunity;
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
+
+	// Allocate memory for vaccine_strain_efficacy
+	float** vaccine_strain_efficacy;
+	vaccine_strain_efficacy = calloc( MAX_N_VACCINES, sizeof(float *) );
+	for(int idx = 0; idx < MAX_N_VACCINES; idx++)
+		vaccine_strain_efficacy[idx] = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory for each entry in row
+
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
 	{
-		cross_immunity[idx]  	 = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
+		cross_immunity[idx]  	 = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory for each entry in row
 		cross_immunity[idx][idx] = 1; // set probability of cross-immunity to be 1, because the strain is the same
 		model->strains[idx].idx  = -1; // set every strain idx to initially be -1 to help with checking if strains have been initialised
-	}		
+
+		vaccine_strain_efficacy[0][idx] = 1; // set default efficacy of first vaccine for all strains
+	}
 	model->cross_immunity = cross_immunity;
+	model->vaccine_strain_efficacy = vaccine_strain_efficacy;
 }
 
 /*****************************************************************************************
