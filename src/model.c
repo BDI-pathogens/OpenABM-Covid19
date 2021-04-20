@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <gsl/gsl_linalg.h> // for gsl_linalg_cholesky_decomp1
 
 /*****************************************************************************************
 *  Name:		new_model
@@ -151,9 +152,6 @@ void destroy_model( model *model )
     for( idx = 0; idx < MAX_N_STRAINS; idx++ )
 		free( model->cross_immunity[idx] );
 	free( model->cross_immunity );
-	for ( idx = 0; idx < MAX_N_VACCINES; idx ++)
-		free( model->vaccine_strain_efficacy[idx] );
-	free( model->vaccine_strain_efficacy );
 
     free( model );
 }
@@ -645,6 +643,49 @@ void update_event_list_counters( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		set_cross_immunity_draws
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+void set_up_cross_immunity_draws( 
+	model *model, 
+	float rho
+)
+{
+	// Code for MVN sampling taken from https://accserv.lepp.cornell.edu/svn/packages/gsl/randist/test.c
+	size_t d = MAX_N_STRAINS;
+	gsl_vector * mu = gsl_vector_calloc(d);
+	gsl_matrix * Sigma = gsl_matrix_calloc(d, d);
+	gsl_matrix * L = gsl_matrix_calloc(d, d);
+	gsl_vector * sample = gsl_vector_calloc(d);
+	gsl_matrix * cross_immunity_draws = gsl_matrix_calloc(N_DRAW_LIST, d);
+
+	if( rho >= 0 && rho < 1)
+	{
+		gsl_matrix_set_all(Sigma, rho);
+		for( int idx = 0; idx < d; idx ++)
+			gsl_matrix_set(Sigma, idx, idx, 1); // set diagonal to 1
+		gsl_matrix_memcpy(L, Sigma);
+		gsl_linalg_cholesky_decomp1(L);
+	}
+	for ( int idx = 0; idx < N_DRAW_LIST; ++idx) 
+	{
+   		if( rho >= 0 && rho < 1 )
+   			gsl_ran_multivariate_gaussian( rng, mu, L, sample);
+   		else // for rho = 1, rho < 0 will throw an error
+   			gsl_vector_set_all(sample, gsl_ran_ugaussian( rng ));
+    	gsl_matrix_set_row(cross_immunity_draws, idx, sample);
+	}
+		
+	gsl_vector_free(mu);
+	gsl_matrix_free(Sigma);
+	gsl_matrix_free(L);
+	gsl_vector_free(sample);
+
+	model->cross_immunity_draws = cross_immunity_draws;
+}
+
+/*****************************************************************************************
 *  Name:		set_up_strains
 *  Description: allocates memory for array of MAX_N_STRAINS strains and MAX_N_STRAINS by 
 * 				MAX_N_STRAINS cross_immunity matrix
@@ -659,22 +700,16 @@ void set_up_strains( model *model )
 	float** cross_immunity;
 	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
 
-	// Allocate memory for vaccine_strain_efficacy
-	float** vaccine_strain_efficacy;
-	vaccine_strain_efficacy = calloc( MAX_N_VACCINES, sizeof(float *) );
-	for(int idx = 0; idx < MAX_N_VACCINES; idx++)
-		vaccine_strain_efficacy[idx] = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory for each entry in row
-
 	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
 	{
 		cross_immunity[idx]  	 = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory for each entry in row
 		cross_immunity[idx][idx] = 1; // set probability of cross-immunity to be 1, because the strain is the same
 		model->strains[idx].idx  = -1; // set every strain idx to initially be -1 to help with checking if strains have been initialised
-
-		vaccine_strain_efficacy[0][idx] = 1; // set default efficacy of first vaccine for all strains
 	}
 	model->cross_immunity = cross_immunity;
-	model->vaccine_strain_efficacy = vaccine_strain_efficacy;
+
+	float rho = 0; // covariance of cross-immunity, constant for all strain pairs (default: 0)
+	set_up_cross_immunity_draws( model, rho );
 }
 
 /*****************************************************************************************

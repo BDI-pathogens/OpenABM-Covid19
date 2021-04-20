@@ -702,21 +702,6 @@ void intervention_vaccine_wane( model *model, individual *indiv )
 }
 
 /*****************************************************************************************
-*  Name:		set_vaccine_strain_efficacy
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-void set_vaccine_strain_efficacy( 
-	model *model, 
-	int vaccine_idx, 
-	int strain_idx, 
-	float efficacy 
-)
-{
-	model->vaccine_strain_efficacy[ vaccine_idx ][ strain_idx ] = efficacy;
-}
-
-/*****************************************************************************************
 *  Name:		intervention_test_take
 *  Description: An individual takes a test
 *

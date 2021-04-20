@@ -499,19 +499,30 @@ void transition_to_recovered( model *model, individual *indiv )
 	}
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, NO_EDGE );
 	
-	int infected_strain_idx, transition_time;
+	int infected_strain_idx, transition_time, draw_idx;
+	float frac_cross_immunity, sample, pval;
 	infected_strain_idx = indiv->infection_events->strain->idx;
+	draw_idx = gsl_rng_uniform_int( rng, N_DRAW_LIST );
+	printf("ind%ld, strain%d\n", indiv->idx, infected_strain_idx);
+
+	transition_time = sample_transition_time( model, RECOVERED_SUSCEPTIBLE );
 	for( int strain_idx = 0;  strain_idx < model->n_initialised_strains; strain_idx++ )
 	{
-		transition_time = sample_transition_time( model, RECOVERED_SUSCEPTIBLE );
 		if( strain_idx == infected_strain_idx )
 			indiv->time_susceptible[strain_idx] = model->time + transition_time;
 		else
 		{
-			if( gsl_ran_bernoulli( rng, model->cross_immunity[infected_strain_idx][strain_idx] ) )
+			frac_cross_immunity = model->cross_immunity[infected_strain_idx][strain_idx];
+			sample 				= gsl_matrix_get(model->cross_immunity_draws, draw_idx, strain_idx); // strain_idx-th entry from draw_idx-th row, drawn from MVN
+			pval 				= gsl_cdf_ugaussian_P(sample);
+			if( pval < frac_cross_immunity )
+			{
 				indiv->time_susceptible[strain_idx] = model->time + transition_time;
+			}
 		}
+		printf("%f-%ld\t", sample, indiv->time_susceptible[strain_idx]);
 	}
+	printf("\n");
 	set_recovered( indiv, model->params, model->time, model );
 }
 

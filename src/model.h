@@ -103,7 +103,8 @@ struct model{
 	strain *strains;
 	int n_initialised_strains;
 	float **cross_immunity;
-	float **vaccine_strain_efficacy;
+	gsl_matrix *cross_immunity_draws;
+
 };
 
 struct event{
@@ -129,6 +130,7 @@ void set_up_population( model* );
 void set_up_healthcare_workers_and_hospitals( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
+void set_up_cross_immunity_draws( model*, float );
 void set_up_strains( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
