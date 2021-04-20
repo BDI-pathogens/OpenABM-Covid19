@@ -20,7 +20,7 @@
 | `elderly_network_adults` | 0.2 | - | Ratio of adults to elderly in work network for elderly (70+) | Mossong et al, 2008 |
 | `days_of_interactions` | 10 | - | Length of historic interactions traced (days) | - |
 | `end_time` | 200 | - | End time (total number of simulated days) | - |
-| `n_seed_infection` | 5 | - | Number of infections seeded at simulation start | - |
+| `n_seed_infection` | 10 | - | Number of infections seeded at simulation start | - |
 | `mean_infectious_period` | 5.5 | &#956; | Mean of the generation time distribution (days) | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `sd_infectious_period` | 2.14 | &#963; | Standard deviation (days) of infectious period | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `infectious_rate` | 5.8 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
