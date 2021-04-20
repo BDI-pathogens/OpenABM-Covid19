@@ -148,8 +148,9 @@ class MultiRegionModel(object):
             self._seed_inf[j] = 0
             self._seed_strain_mult[j] = 1
             
-            init_params = params[j] 
-            init_params["rng_seed"] = j
+            init_params = params[j]
+            if "rng_seed" not in init_params : 
+                init_params["rng_seed"] = j
             if turn_off_contract_tracing :
                 init_params[ "days_of_interactions" ] = 1
                 init_params[ "quarantine_days" ]      = 1  
