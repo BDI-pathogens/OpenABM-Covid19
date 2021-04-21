@@ -1919,7 +1919,7 @@ class TestClass(object):
         # determine who should get a priority test:
         # 1. get the people who developed symptoms on the last step and have the app  
         test_df_symp = test_df_trans[ ( test_df_trans["time_symptomatic"] == time_prior_symp ) | ( test_df_trans["time_symptomatic"] == time_non_prior_symp  ) ]
-        test_df_symp[ "priority_symp" ] = ( test_df_trans["time_symptomatic"] ==  time_prior_symp ) 
+        test_df_symp.insert(1, "priority_symp", ( test_df_trans["time_symptomatic"] ==  time_prior_symp ) )
         test_df_symp = pd.merge( test_df_symp, test_df_indiv, left_on = "ID_recipient", right_on = "ID", how = "left")
         test_df_symp = test_df_symp[ (test_df_symp["app_user"] == True ) ]
         test_df_symp = pd.merge( test_df_symp, non_prior_symp_df_indiv, left_on = "ID_recipient", right_on = "ID", how = "left")

@@ -46,11 +46,8 @@ struct model{
 	individual *population;
 	int time;
 
-	interaction_block *interaction_blocks;
-	interaction *next_interaction;
-	long interaction_idx;
+	interaction_block **interaction_blocks;
 	int interaction_day_idx;
-	long n_interactions;
 	long *possible_interactions;
 	long n_possible_interactions;
 	long n_total_intereactions;
@@ -68,11 +65,11 @@ struct model{
 	long manual_trace_interview_quota;
 	long manual_trace_notification_quota;
 
-	event *events;
+	event_block *event_block;
 	event *next_event;
 	event_list *event_lists;
 
-	trace_token *trace_tokens;
+	trace_token_block *trace_token_block;
 	trace_token *next_trace_token;
 	long n_trace_tokens_used;
 	long n_trace_tokens;
@@ -100,10 +97,15 @@ struct model{
 	hospital *hospitals;
 };
 
+struct event_block{
+	event *events;
+	event_block *next;
+};
+
 struct event{
 	individual *individual;
-	int type;
-	int time;
+	short type;
+	short time;
 	event *next;
 	event *last;
 };
@@ -123,6 +125,7 @@ void set_up_population( model* );
 void set_up_healthcare_workers_and_hospitals( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
+void add_event_block( model* , float );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
 void set_up_counters( model* );
