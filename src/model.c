@@ -39,6 +39,7 @@ model* new_model( parameters *params )
 	
 	model_ptr->params = params;
 	model_ptr->time   = 0;
+	model_ptr->rebuild_networks = TRUE;
 	model_ptr->user_network = NULL;
     if (params->occupation_network_table == NULL)
     {
@@ -1090,6 +1091,8 @@ int add_user_network(
 
 	add_interaction_block( model, n_edges * 2 );
 
+	model->rebuild_networks = TRUE;
+
 	return network_id;
 }
 
@@ -1186,6 +1189,8 @@ int add_user_network_random(
 	model->user_network        = user_network;
 	add_interaction_block( model, total_interactions );
 
+	model->rebuild_networks = TRUE;
+
 	return network_id;
 }
 
@@ -1237,6 +1242,9 @@ int delete_network( model *model, network *net )
 			}
 		}
 	}
+
+	model->rebuild_networks = TRUE;
+
 	return FALSE;
 }
 
@@ -1382,7 +1390,13 @@ int one_time_step( model *model )
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		update_event_list_counters( model, idx );
 
-	build_daily_network( model );
+	if( model->rebuild_networks ){
+		ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
+		return_interactions( model );
+
+		build_daily_network( model );
+		model->rebuild_networks = model->params->rebuild_networks;
+	}
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );
@@ -1430,9 +1444,6 @@ int one_time_step( model *model )
 		intervention_smart_release( model );
 
 	model->n_quarantine_days += model->event_lists[QUARANTINED].n_current;
-
-	ring_inc( model->interaction_day_idx, model->params->days_of_interactions );
-	return_interactions( model );
 
 	return 1;
 }

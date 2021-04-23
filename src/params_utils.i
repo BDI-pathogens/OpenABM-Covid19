@@ -153,6 +153,16 @@ double get_param_infectious_rate(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name: 		get_param_rebuild_networks
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_param_rebuild_networks(parameters *params)
+{
+    return params->rebuild_networks;
+}
+
+
+/*****************************************************************************************
 *  Name: 		get_param_sd_infectiousness_multiplier
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1017,6 +1027,16 @@ int set_param_sd_infectious_period(parameters *params, double value)
 int set_param_infectious_rate(parameters *params, int value)
 {
    params->infectious_rate = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_rebuild_networks
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_rebuild_networks(parameters *params, int value)
+{
+   params->rebuild_networks = value;
    return TRUE;
 }
 
