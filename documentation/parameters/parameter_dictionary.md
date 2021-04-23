@@ -212,3 +212,4 @@
 | `manual_traceable_fraction_occupation` | 0.8 | - | The fraction of occupation contacts that can be successfully traced | - |
 | `manual_traceable_fraction_random` | 0.05 | - | The fraction of random contacts that can be successfully traced | - |
 | `relative_susceptibility_by_interaction` | 1 | - | Type of relative susceptibility by age group (1 = per interaction; 0 = per day) | - |
+| `rebuild_networks` | 1 | - | Should net works be rebuilt every time step or just on parameter changes | - |

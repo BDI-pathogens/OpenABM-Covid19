@@ -1165,6 +1165,8 @@ int set_model_param_lockdown_on( model *model, int value )
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 		update_random_interactions( &(model->population[pdx]), params );
 
+	model->rebuild_networks = TRUE;
+
 	return TRUE;
 }
 
@@ -1226,6 +1228,8 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			update_random_interactions( indiv, params );
 	}
+
+	model->rebuild_networks = TRUE;
 
 	return TRUE;
 }
