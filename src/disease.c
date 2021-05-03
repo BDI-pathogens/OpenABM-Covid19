@@ -206,16 +206,49 @@ void transmit_virus_by_type(
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
-					if( (interaction->individual->status == SUSCEPTIBLE) && (interaction->individual->time_susceptible[strain_idx] <= model->time ) )
+					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
                         interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
+      //                   float suscept_multiplier = 0.02;
+						// interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
+
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
-							new_infection( model, interaction->individual, infector, interaction->network_id );
-							interaction->individual->infection_events->infector_network = interaction->type;
+							// new_infection( model, interaction->individual, infector, interaction->network_id );
+							// interaction->individual->infection_events->infector_network = interaction->type;
+
+							if( gsl_ran_bernoulli( rng, interaction->individual->susceptibility[strain_idx] )  ) // infection occurs
+							{
+								// if(interaction->individual->immunity[strain_idx] > 0)
+								// {
+								// 	printf("new_infection: ind%d %f\n", interaction->individual->idx, interaction->individual->immunity[strain_idx]);
+								// }
+								new_infection( model, interaction->individual, infector, interaction->network_id );
+								interaction->individual->infection_events->infector_network = interaction->type;
+							}
+							else // challenge, but no infection
+							{
+								interaction->individual->hazard[strain_idx] = 
+									gsl_ran_exponential( rng, 1.0 ) / model->params->adjusted_susceptibility[interaction->individual->age_group]; // reset strain-specific hazard
+
+								// float immunity_multiplier = 0.5; // factor used to adjust immunity conferred when challenge does not result in infection
+								// interaction->individual->immunity[strain_idx] = 
+								// 	1-(1-interaction->individual->immunity[strain_idx])*(1-immunity_multiplier*model->cross_immunity[strain_idx][strain_idx]); // increase immunity to strain
+
+								float suscept_multiplier = 0;
+								interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
+							}
 						}
+						// else
+						// {
+						// 	// float immunity_multiplier = 0.5; // factor used to adjust immunity conferred when challenge does not result in infection
+						// 	// interaction->individual->immunity[strain_idx] = 
+						// 	// 	1-(1-interaction->individual->immunity[strain_idx])*(1-immunity_multiplier*model->cross_immunity[strain_idx][strain_idx]); // increase immunity to strain
+						// 	float suscept_multiplier = 0.001;
+						// 	interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
+						// }
 					}
 					interaction = interaction->next;
 				}
@@ -497,32 +530,16 @@ void transition_to_recovered( model *model, individual *indiv )
 			transition_one_hospital_event( model, indiv, indiv->hospital_state, DISCHARGED, NO_EDGE );
 		}
 	}
+	// transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
+	
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, NO_EDGE );
 	
-	int infected_strain_idx, transition_time, draw_idx;
-	float frac_cross_immunity, sample, pval;
-	infected_strain_idx = indiv->infection_events->strain->idx;
-	draw_idx = gsl_rng_uniform_int( rng, N_DRAW_LIST );
-	printf("ind%ld, strain%d\n", indiv->idx, infected_strain_idx);
+	long infecting_strain = indiv->infection_events->strain->idx;
+	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+		// indiv->immunity[strain_idx] = 1-(1-indiv->immunity[strain_idx])*(1-model->cross_immunity[infecting_strain][strain_idx]);
+		indiv->susceptibility[strain_idx] *= 1 - model->cross_immunity[infecting_strain][strain_idx];
+	// printf("recover: %d %d %f\n", indiv->idx, indiv->status, indiv->immunity[strain_idx]);
 
-	transition_time = sample_transition_time( model, RECOVERED_SUSCEPTIBLE );
-	for( int strain_idx = 0;  strain_idx < model->n_initialised_strains; strain_idx++ )
-	{
-		if( strain_idx == infected_strain_idx )
-			indiv->time_susceptible[strain_idx] = model->time + transition_time;
-		else
-		{
-			frac_cross_immunity = model->cross_immunity[infected_strain_idx][strain_idx];
-			sample 				= gsl_matrix_get(model->cross_immunity_draws, draw_idx, strain_idx); // strain_idx-th entry from draw_idx-th row, drawn from MVN
-			pval 				= gsl_cdf_ugaussian_P(sample);
-			if( pval < frac_cross_immunity )
-			{
-				indiv->time_susceptible[strain_idx] = model->time + transition_time;
-			}
-		}
-		printf("%f-%ld\t", sample, indiv->time_susceptible[strain_idx]);
-	}
-	printf("\n");
 	set_recovered( indiv, model->params, model->time, model );
 }
 
@@ -609,6 +626,36 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 		return ERROR;
 
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
+}
+
+/*****************************************************************************************
+*  Name:		waning_immunity
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+void waning_immunity( model *model )
+{
+	individual *indiv;
+	int strain_idx;
+	int tau = 270; // exponential decay time scale parameter (half-life of 187 days: tau=270, 365 days: tau=526.58)
+	float factor = pow(M_E, -1.0/tau);
+	for( int idx = 0; idx < model->params->n_total; idx++ )
+	{
+		indiv = &(model->population[idx]);
+		if(indiv->status == SUSCEPTIBLE )
+		{
+			for( strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+				if( indiv->susceptibility[strain_idx] < 1 )
+				{
+					// printf("%d %f->%f\n", idx, indiv->immunity[strain_idx], indiv->immunity[strain_idx]*factor);
+					// indiv->immunity[strain_idx] *= factor;
+					indiv->susceptibility[strain_idx] = 1 - (1 - indiv->susceptibility[strain_idx])*factor;
+				}
+		}
+		// if( idx == 2531 )
+		// 	printf("ind%d %d %f\n", idx, indiv->status, indiv->immunity[0]);
+	}
+	
 }
 
 /*****************************************************************************************

@@ -683,6 +683,7 @@ void set_up_cross_immunity_draws(
 	gsl_vector_free(sample);
 
 	model->cross_immunity_draws = cross_immunity_draws;
+	// printf("%f\n", rho);
 }
 
 /*****************************************************************************************
@@ -708,8 +709,19 @@ void set_up_strains( model *model )
 	}
 	model->cross_immunity = cross_immunity;
 
-	float rho = 0; // covariance of cross-immunity, constant for all strain pairs (default: 0)
-	set_up_cross_immunity_draws( model, rho );
+	// for(int idx = 0; idx < MAX_N_STRAINS; idx++)
+	// {
+	// 	for(int jdx = 0; jdx < MAX_N_STRAINS; jdx++)
+	// 	{
+	// 		if( idx != jdx )
+	// 			model->cross_immunity[idx][jdx] = 0.99;
+	// 		printf("%f  ", model->cross_immunity[idx][jdx]);
+	// 	}
+	// 	printf("\n");
+	// }
+
+	// float rho = 0; // covariance of cross-immunity, constant for all strain pairs (default: 0)
+	// set_up_cross_immunity_draws( model, rho );
 }
 
 /*****************************************************************************************
@@ -727,7 +739,7 @@ void set_up_seed_infection( model *model )
 
 	strain_idx 				= 0;
 	transmission_multiplier = 1;
-	initialise_strain( model, strain_idx, transmission_multiplier );
+	// initialise_strain( model, strain_idx, transmission_multiplier );
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -1408,6 +1420,7 @@ int one_time_step( model *model )
 		update_event_list_counters( model, idx );
 
 	build_daily_network( model );
+	waning_immunity( model );
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );

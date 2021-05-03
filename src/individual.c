@@ -84,7 +84,7 @@ void initialize_individual(
 	}
 
 	for( int strain_idx = 0; strain_idx < MAX_N_STRAINS; strain_idx++ )
-		indiv->time_susceptible[strain_idx] = 0;
+		indiv->susceptibility[strain_idx] = 1;
 }
 
 /*****************************************************************************************

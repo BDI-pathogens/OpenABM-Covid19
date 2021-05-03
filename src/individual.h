@@ -40,7 +40,7 @@ struct individual{
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
-	long time_susceptible[MAX_N_STRAINS];
+	float susceptibility[MAX_N_STRAINS];
 
 	int quarantined;
 	event *quarantine_event;

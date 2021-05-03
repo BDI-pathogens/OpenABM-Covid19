@@ -23,7 +23,7 @@ void initialise_strain(
 	strain *strain_ptr;
 	strain_ptr = &(model->strains[ idx ]);
 	if( strain_ptr->idx != -1 )
-		print_exit( "Strains can only be intitialised once!" );
+		print_exit( "Strains can only be initialised once!" );
 	strain_ptr->idx 					= idx;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
 	model->n_initialised_strains++;
