@@ -57,5 +57,6 @@ void setup_gsl_rng( int );
 struct incomplete_gamma_p_params { long n; double percentile; };
 double incomplete_gamma_p( double, void *params );
 double inv_incomplete_gamma_p( double, long );
+int get_triu_idx( int, int );
 
 #endif /* UTILITIES_H_ */

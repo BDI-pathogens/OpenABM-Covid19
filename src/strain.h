@@ -13,6 +13,7 @@
 /************************************************************************/
 
 #include "structure.h"
+#include "constant.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -23,6 +24,7 @@ typedef struct strain strain;
 struct strain{
 	long idx;
 	float transmission_multiplier;
+	float *antigen_phen;
 };
 
 /************************************************************************/
@@ -30,5 +32,7 @@ struct strain{
 /************************************************************************/
 
 void initialise_strain( model*, long, float );
+void set_antigen_phen_distance( model*, strain*, strain*, float );
+float get_antigen_phen_distance( model*, strain*, strain* );
 
 #endif /* STRAIN_H_ */

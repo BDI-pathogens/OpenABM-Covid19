@@ -456,3 +456,15 @@ double inv_incomplete_gamma_p( double percentile, long n )
 
 	return( root );
 }
+
+/*****************************************************************************************
+*  Name:		get_triu_idx
+*  Description: map indices in upper triangular matrix to a vector
+******************************************************************************************/
+int get_triu_idx( int idx, int jdx )
+{
+	int row, col;
+	row = min( idx, jdx );
+	col = max( idx, jdx );
+	return row + ((col-1)*col)/2;
+}

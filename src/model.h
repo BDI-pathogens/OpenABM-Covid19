@@ -102,8 +102,9 @@ struct model{
 
 	strain *strains;
 	int n_initialised_strains;
-	float **cross_immunity;
-	gsl_matrix *cross_immunity_draws;
+	// float **cross_immunity;
+	// gsl_matrix *cross_immunity_draws;
+	float *antigen_phen_distances;
 
 };
 
@@ -116,7 +117,7 @@ struct event{
 };
 
 /************************************************************************/
-/******************************  Functions  *****************************/
+/*******************************  Macros  *******************************/
 /************************************************************************/
 
 #define n_current( model, type ) ( model->event_lists[type].n_current )
@@ -125,12 +126,15 @@ struct event{
 #define n_total_age( model, type, age ) ( model->event_lists[type].n_total_by_age[age] )
 #define n_daily( model, type, day ) ( model->event_lists[type].n_daily_current[day] )
 
+/************************************************************************/
+/******************************  Functions  *****************************/
+/************************************************************************/
+
 model* new_model(parameters *);
 void set_up_population( model* );
 void set_up_healthcare_workers_and_hospitals( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
-void set_up_cross_immunity_draws( model*, float );
 void set_up_strains( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );

@@ -181,6 +181,7 @@ void transmit_virus_by_type(
 	event *event, *next_event;
 	interaction *interaction;
 	individual *infector;
+	float risk_of_infection;
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
@@ -202,7 +203,7 @@ void transmit_virus_by_type(
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx 	  = infector->infection_events->strain->idx;
+				strain_idx    = infector->infectiousness_multiplier * infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -211,44 +212,20 @@ void transmit_virus_by_type(
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
                         interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
-      //                   float suscept_multiplier = 0.02;
-						// interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
-
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
-							// new_infection( model, interaction->individual, infector, interaction->network_id );
-							// interaction->individual->infection_events->infector_network = interaction->type;
-
-							if( gsl_ran_bernoulli( rng, interaction->individual->susceptibility[strain_idx] )  ) // infection occurs
+							risk_of_infection = calc_risk_of_infection( model, interaction->individual, infector->infection_events->strain );
+							if( gsl_ran_bernoulli( rng, risk_of_infection ) ) // infection occurs
 							{
-								// if(interaction->individual->immunity[strain_idx] > 0)
-								// {
-								// 	printf("new_infection: ind%d %f\n", interaction->individual->idx, interaction->individual->immunity[strain_idx]);
-								// }
 								new_infection( model, interaction->individual, infector, interaction->network_id );
 								interaction->individual->infection_events->infector_network = interaction->type;
 							}
-							else // challenge, but no infection
-							{
-								interaction->individual->hazard[strain_idx] = 
-									gsl_ran_exponential( rng, 1.0 ) / model->params->adjusted_susceptibility[interaction->individual->age_group]; // reset strain-specific hazard
-
-								// float immunity_multiplier = 0.5; // factor used to adjust immunity conferred when challenge does not result in infection
-								// interaction->individual->immunity[strain_idx] = 
-								// 	1-(1-interaction->individual->immunity[strain_idx])*(1-immunity_multiplier*model->cross_immunity[strain_idx][strain_idx]); // increase immunity to strain
-
-								float suscept_multiplier = 0;
-								interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
-							}
+							// else // challenge, but no infection
+							// {
+							// 	interaction->individual->hazard[strain_idx] = 
+							// 		gsl_ran_exponential( rng, 1.0 ) / model->params->adjusted_susceptibility[interaction->individual->age_group]; // reset strain-specific hazard
+							// }
 						}
-						// else
-						// {
-						// 	// float immunity_multiplier = 0.5; // factor used to adjust immunity conferred when challenge does not result in infection
-						// 	// interaction->individual->immunity[strain_idx] = 
-						// 	// 	1-(1-interaction->individual->immunity[strain_idx])*(1-immunity_multiplier*model->cross_immunity[strain_idx][strain_idx]); // increase immunity to strain
-						// 	float suscept_multiplier = 0.001;
-						// 	interaction->individual->susceptibility[strain_idx] *= 1 - suscept_multiplier*model->cross_immunity[strain_idx][strain_idx];
-						// }
 					}
 					interaction = interaction->next;
 				}
@@ -279,6 +256,10 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
 
+	individual *indiv;
+	int idx = 0;
+	indiv = &(model->population[idx]);
+	printf("ind%ld %d\n", indiv->idx, indiv->status);
 }
 
 /*****************************************************************************************
@@ -350,6 +331,9 @@ void new_infection(
 	}
 	infected->infection_events->time_infected_infector =
 		time_infected_infection_event(infector->infection_events);
+
+	// if( infected->idx == 0 )
+	// 	printf("ind0 infection: %f %d\n", draw, time_infected_infection_event(infected->infection_events));
 }
 
 /*****************************************************************************************
@@ -534,11 +518,11 @@ void transition_to_recovered( model *model, individual *indiv )
 	
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, NO_EDGE );
 	
-	long infecting_strain = indiv->infection_events->strain->idx;
-	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+	// long infecting_strain = indiv->infection_events->strain->idx;
+	// for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
 		// indiv->immunity[strain_idx] = 1-(1-indiv->immunity[strain_idx])*(1-model->cross_immunity[infecting_strain][strain_idx]);
-		indiv->susceptibility[strain_idx] *= 1 - model->cross_immunity[infecting_strain][strain_idx];
-	// printf("recover: %d %d %f\n", indiv->idx, indiv->status, indiv->immunity[strain_idx]);
+		// indiv->susceptibility[strain_idx] *= 1 - model->cross_immunity[infecting_strain][strain_idx];
+	// printf("recover: ind%ld %d\n", indiv->idx, indiv->status);
 
 	set_recovered( indiv, model->params, model->time, model );
 }
@@ -626,49 +610,4 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 		return ERROR;
 
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
-}
-
-/*****************************************************************************************
-*  Name:		waning_immunity
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-void waning_immunity( model *model )
-{
-	individual *indiv;
-	int strain_idx;
-	int tau = 270; // exponential decay time scale parameter (half-life of 187 days: tau=270, 365 days: tau=526.58)
-	float factor = pow(M_E, -1.0/tau);
-	for( int idx = 0; idx < model->params->n_total; idx++ )
-	{
-		indiv = &(model->population[idx]);
-		if(indiv->status == SUSCEPTIBLE )
-		{
-			for( strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
-				if( indiv->susceptibility[strain_idx] < 1 )
-				{
-					// printf("%d %f->%f\n", idx, indiv->immunity[strain_idx], indiv->immunity[strain_idx]*factor);
-					// indiv->immunity[strain_idx] *= factor;
-					indiv->susceptibility[strain_idx] = 1 - (1 - indiv->susceptibility[strain_idx])*factor;
-				}
-		}
-		// if( idx == 2531 )
-		// 	printf("ind%d %d %f\n", idx, indiv->status, indiv->immunity[0]);
-	}
-	
-}
-
-/*****************************************************************************************
-*  Name:		set_cross_immunity_probability
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-void set_cross_immunity_probability( 
-	model *model, 
-	int caught_idx, 
-	int conferred_idx, 
-	float probability 
-)
-{
-	model->cross_immunity[ caught_idx ][ conferred_idx ] = probability;
 }

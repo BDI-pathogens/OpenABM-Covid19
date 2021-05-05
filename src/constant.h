@@ -233,6 +233,7 @@ enum VACCINE_TYPES{
 #define N_HOSPITAL_INTERACTION_TYPES 5
 
 #define MAX_N_STRAINS 100
+#define ANTIGEN_PHEN_DIM 2
 
 extern gsl_rng * rng;
 

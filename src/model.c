@@ -149,9 +149,7 @@ void destroy_model( model *model )
     destroy_risk_scores( model );
 
     free( model->strains );
-    for( idx = 0; idx < MAX_N_STRAINS; idx++ )
-		free( model->cross_immunity[idx] );
-	free( model->cross_immunity );
+    free( model->antigen_phen_distances );
 
     free( model );
 }
@@ -643,50 +641,6 @@ void update_event_list_counters( model *model, int type )
 }
 
 /*****************************************************************************************
-*  Name:		set_cross_immunity_draws
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-void set_up_cross_immunity_draws( 
-	model *model, 
-	float rho
-)
-{
-	// Code for MVN sampling taken from https://accserv.lepp.cornell.edu/svn/packages/gsl/randist/test.c
-	size_t d = MAX_N_STRAINS;
-	gsl_vector * mu = gsl_vector_calloc(d);
-	gsl_matrix * Sigma = gsl_matrix_calloc(d, d);
-	gsl_matrix * L = gsl_matrix_calloc(d, d);
-	gsl_vector * sample = gsl_vector_calloc(d);
-	gsl_matrix * cross_immunity_draws = gsl_matrix_calloc(N_DRAW_LIST, d);
-
-	if( rho >= 0 && rho < 1)
-	{
-		gsl_matrix_set_all(Sigma, rho);
-		for( int idx = 0; idx < d; idx ++)
-			gsl_matrix_set(Sigma, idx, idx, 1); // set diagonal to 1
-		gsl_matrix_memcpy(L, Sigma);
-		gsl_linalg_cholesky_decomp1(L);
-	}
-	for ( int idx = 0; idx < N_DRAW_LIST; ++idx) 
-	{
-   		if( rho >= 0 && rho < 1 )
-   			gsl_ran_multivariate_gaussian( rng, mu, L, sample);
-   		else // for rho = 1, rho < 0 will throw an error
-   			gsl_vector_set_all(sample, gsl_ran_ugaussian( rng ));
-    	gsl_matrix_set_row(cross_immunity_draws, idx, sample);
-	}
-		
-	gsl_vector_free(mu);
-	gsl_matrix_free(Sigma);
-	gsl_matrix_free(L);
-	gsl_vector_free(sample);
-
-	model->cross_immunity_draws = cross_immunity_draws;
-	// printf("%f\n", rho);
-}
-
-/*****************************************************************************************
 *  Name:		set_up_strains
 *  Description: allocates memory for array of MAX_N_STRAINS strains and MAX_N_STRAINS by 
 * 				MAX_N_STRAINS cross_immunity matrix
@@ -696,32 +650,14 @@ void set_up_cross_immunity_draws(
 void set_up_strains( model *model )
 {
 	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
+	for( int idx = 0; idx < MAX_N_STRAINS; idx++ )
+		model->strains[ idx ].idx = -1; // idx is -1 to indicate strain has not been initialised
 
-	// Allocate memory for cross_immunity matrix (for large MAX_N_STRAINS)
-	float** cross_immunity;
-	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
-
-	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
-	{
-		cross_immunity[idx]  	 = calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory for each entry in row
-		cross_immunity[idx][idx] = 1; // set probability of cross-immunity to be 1, because the strain is the same
-		model->strains[idx].idx  = -1; // set every strain idx to initially be -1 to help with checking if strains have been initialised
-	}
-	model->cross_immunity = cross_immunity;
-
-	// for(int idx = 0; idx < MAX_N_STRAINS; idx++)
-	// {
-	// 	for(int jdx = 0; jdx < MAX_N_STRAINS; jdx++)
-	// 	{
-	// 		if( idx != jdx )
-	// 			model->cross_immunity[idx][jdx] = 0.99;
-	// 		printf("%f  ", model->cross_immunity[idx][jdx]);
-	// 	}
-	// 	printf("\n");
-	// }
-
-	// float rho = 0; // covariance of cross-immunity, constant for all strain pairs (default: 0)
-	// set_up_cross_immunity_draws( model, rho );
+	// set up list of antigen phenotype distances
+	int max_unique_strain_pairs   = (MAX_N_STRAINS)*(MAX_N_STRAINS-1)/2;
+	model->antigen_phen_distances = calloc( max_unique_strain_pairs, sizeof( float ) );
+	for( int idx = 0; idx < max_unique_strain_pairs; idx++ )
+		model->antigen_phen_distances[ idx ] = -1.0; // initialise with -1.0 to indicate distance is yet to be calculated
 }
 
 /*****************************************************************************************
@@ -1420,7 +1356,6 @@ int one_time_step( model *model )
 		update_event_list_counters( model, idx );
 
 	build_daily_network( model );
-	waning_immunity( model );
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );

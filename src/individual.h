@@ -40,7 +40,6 @@ struct individual{
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
-	float susceptibility[MAX_N_STRAINS];
 
 	int quarantined;
 	event *quarantine_event;
@@ -136,6 +135,7 @@ void set_vaccine_status( individual*, short, short );
 void transition_vaccine_status( individual* );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );
+float calc_risk_of_infection( model *, individual *, strain *strain );
 void destroy_individual( individual* );
 void print_individual( model *, long );
 
