@@ -100,15 +100,15 @@ test_that("Model::baseline_params", {
     'lockdown' = 0,
     'test_on_symptoms' = 0,
     'app_turned_on' = 0,
-    'total_infected' = 5,
-    'total_infected_0_9' = 0,
-    'total_infected_10_19' = 0,
-    'total_infected_20_29' = 1,
+    'total_infected' = 10,
+    'total_infected_0_9' = 1,
+    'total_infected_10_19' = 1,
+    'total_infected_20_29' = 3,
     'total_infected_30_39' = 1,
     'total_infected_40_49' = 0,
     'total_infected_50_59' = 1,
     'total_infected_60_69' = 0,
-    'total_infected_70_79' = 1,
+    'total_infected_70_79' = 2,
     'total_infected_80' = 1,
     'total_case' = 0,
     'total_case_0_9' = 0,
@@ -140,8 +140,8 @@ test_that("Model::baseline_params", {
     'daily_death_60_69' = 0,
     'daily_death_70_79' = 0,
     'daily_death_80' = 0,
-    'n_presymptom' = 2,
-    'n_asymptom' = 3,
+    'n_presymptom' = 5,
+    'n_asymptom' = 5,
     'n_quarantine' = 0,
     'n_tests' = 0,
     'n_symptoms' = 0,
@@ -181,14 +181,14 @@ test_that("Model::baseline_params", {
     'lockdown' = 0,
     'test_on_symptoms' = 0,
     'app_turned_on' = 0,
-    'total_infected' = 13,
-    'total_infected_0_9' = 0,
-    'total_infected_10_19' = 0,
-    'total_infected_20_29' = 2,
+    'total_infected' = 18,
+    'total_infected_0_9' = 1,
+    'total_infected_10_19' = 1,
+    'total_infected_20_29' = 3,
     'total_infected_30_39' = 2,
-    'total_infected_40_49' = 0,
+    'total_infected_40_49' = 1,
     'total_infected_50_59' = 3,
-    'total_infected_60_69' = 2,
+    'total_infected_60_69' = 3,
     'total_infected_70_79' = 2,
     'total_infected_80' = 2,
     'total_case' = 0,
@@ -221,11 +221,11 @@ test_that("Model::baseline_params", {
     'daily_death_60_69' = 0,
     'daily_death_70_79' = 0,
     'daily_death_80' = 0,
-    'n_presymptom' = 7,
-    'n_asymptom' = 5,
+    'n_presymptom' = 10,
+    'n_asymptom' = 6,
     'n_quarantine' = 0,
     'n_tests' = 0,
-    'n_symptoms' = 1,
+    'n_symptoms' = 2,
     'n_hospital' = 0,
     'n_hospitalised_recovering' = 0,
     'n_critical' = 0,
@@ -254,16 +254,16 @@ test_that("Model::baseline_params", {
   results_expected$lockdown <- c(0, 0, 0)
   results_expected$test_on_symptoms <- c(0, 0, 0)
   results_expected$app_turned_on <- c(0, 0, 0)
-  results_expected$total_infected <- c( 6,  7, 13)
-  results_expected$total_infected_0_9 <- c(0, 0, 0)
-  results_expected$total_infected_10_19 <- c(0, 0, 0)
-  results_expected$total_infected_20_29 <- c(1, 1, 2)
+  results_expected$total_infected <- c(10, 10, 18)
+  results_expected$total_infected_0_9 <- c(1, 1, 1)
+  results_expected$total_infected_10_19 <- c(1, 1, 1)
+  results_expected$total_infected_20_29 <- c(3, 3, 3)
   results_expected$total_infected_30_39 <- c(1, 1, 2)
-  results_expected$total_infected_40_49 <- c(0, 0, 0)
+  results_expected$total_infected_40_49 <- c(0, 0, 1)
   results_expected$total_infected_50_59 <- c(1, 1, 3)
-  results_expected$total_infected_60_69 <- c(1, 1, 2)
-  results_expected$total_infected_70_79 <- c(1, 1, 2)
-  results_expected$total_infected_80 <- c(1, 2, 2)
+  results_expected$total_infected_60_69 <- c(0, 0, 3)
+  results_expected$total_infected_70_79 <- c(2, 2, 2)
+  results_expected$total_infected_80 <- c(1, 1, 2)
   results_expected$total_case <- c(0, 0, 0)
   results_expected$total_case_0_9 <- c(0, 0, 0)
   results_expected$total_case_10_19 <- c(0, 0, 0)
@@ -294,11 +294,11 @@ test_that("Model::baseline_params", {
   results_expected$daily_death_60_69 <- c(0, 0, 0)
   results_expected$daily_death_70_79 <- c(0, 0, 0)
   results_expected$daily_death_80 <- c(0, 0, 0)
-  results_expected$n_presymptom <- c(3, 3, 7)
-  results_expected$n_asymptom <- c(3, 3, 5)
+  results_expected$n_presymptom <- c(5, 4, 10)
+  results_expected$n_asymptom <- c(5, 5, 6)
   results_expected$n_quarantine <- c(0, 0, 0)
   results_expected$n_tests <- c(0, 0, 0)
-  results_expected$n_symptoms <- c(0, 1, 1)
+  results_expected$n_symptoms <- c(0, 1, 2)
   results_expected$n_hospital <- c(0, 0, 0)
   results_expected$n_hospitalised_recovering <- c(0, 0, 0)
   results_expected$n_critical <- c(0, 0, 0)

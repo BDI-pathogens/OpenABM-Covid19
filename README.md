@@ -151,7 +151,7 @@ After that, YOU can then open the OpenABM-Covid19.Rproj file in RStudio and buil
 
 You'll need to install some R packages. In the R console, run:
 ```
-> install.packages(c("R6", "roxygen2", "devtools"))
+> install.packages(c("R6", "roxygen2", "devtools", "xptr"))
 ```
 
 R console cheat-sheet:
