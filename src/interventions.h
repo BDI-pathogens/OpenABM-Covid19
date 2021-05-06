@@ -14,6 +14,11 @@
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
+struct trace_token_block{
+	trace_token *trace_tokens;
+	trace_token_block *next;
+};
+
 struct trace_token{
 	individual *individual;
 	individual *traced_from;
@@ -35,7 +40,8 @@ void set_up_risk_scores( model* );
 void destroy_risk_scores( model* );
 void update_intervention_policy( model*, int );
 
-void set_up_trace_tokens( model* );
+void set_up_trace_tokens( model*, float );
+void add_trace_tokens( model*, float );
 trace_token* create_trace_token( model*, individual*, int );
 trace_token* index_trace_token( model*, individual* );
 void remove_one_trace_token( model*, trace_token* );

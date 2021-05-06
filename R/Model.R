@@ -186,6 +186,9 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' overrides).
     initialize = function(params_object = NULL, params = NULL )
     {
+      # force run garbage collection to prevent C errors from old models)
+      gc()
+
       if (is.null(params_object)) {
         params_object = Parameters$new()
       }
@@ -209,7 +212,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
-        print( "destroy OpenABM model")
         SWIG_destroy_model( self$c_model )
       }
     },
@@ -355,7 +357,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       interaction_type = 1,
       skip_hospitalised = TRUE,
       skip_quarantine = TRUE,
-      construction = NETWORK_CONSTRUCTION[['BESPOKE']],
+      construction = NETWORK_CONSTRUCTIONS[['BESPOKE']],
       daily_fraction = 1.0,
       name = "user_network")
     {
@@ -392,7 +394,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       }
 
       SWIG_add_user_network( self$c_model, interaction_type,
-        skip_hospitalised, skip_quarantine, daily_fraction, n_edges, ID_1,
+        skip_hospitalised, skip_quarantine, construction, daily_fraction, n_edges, ID_1,
         ID_2, name)
     },
 
@@ -925,7 +927,7 @@ Model.results = function( model ) {
 #' @return Null
 Model.run = function( model, verbose=TRUE ) {
   if (!is.null(model)) {
-    return( model$run() )
+    return( model$run( verbose ) )
   }
 }
 

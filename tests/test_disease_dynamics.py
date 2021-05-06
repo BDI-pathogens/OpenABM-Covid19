@@ -1046,7 +1046,7 @@ class TestClass(object):
         """
         
         params = utils.get_params_swig()
-        params.set_param("n_total", 10000)
+        params.set_param("n_total", 40000)
         params.set_param("mean_time_to_susceptible_after_shift", 5)
         params.set_param("time_to_susceptible_shift", 1)
         params.set_param("end_time", 200)

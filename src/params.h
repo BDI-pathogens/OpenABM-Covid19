@@ -28,6 +28,7 @@ typedef struct{
 	int days_of_interactions;		// the number of days of interactions to keep
 	int end_time;				    // maximum end time
 	int n_seed_infection;			// number of people seeded with the infections
+	int rebuild_networks;			// should net works be rebuilt every time step or just on parameter changes
 
 	double mean_random_interactions[N_AGE_TYPES]; // mean number of random interactions each day
 	double sd_random_interactions[N_AGE_TYPES];   // sd number of random interactions each day

@@ -86,11 +86,12 @@ void set_up_risk_scores( model *model )
 {
 	int idx, jdx, day;
 	parameters *params = model->params;
+	short max_days = params->days_of_interactions;
 
-	params->risk_score = calloc( MAX_DAILY_INTERACTIONS_KEPT, sizeof( double** ) );
-	for( day = 0; day < MAX_DAILY_INTERACTIONS_KEPT; day++ )
+	params->risk_score = calloc( max_days, sizeof( double** ) );
+	for( day = 0; day < max_days; day++ )
 	{
-		params->risk_score[ day] = calloc( MAX_DAILY_INTERACTIONS_KEPT, sizeof( double* ) );
+		params->risk_score[ day] = calloc( N_AGE_GROUPS, sizeof( double* ) );
 		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		{
 			params->risk_score[ day ][ idx ] = calloc( N_AGE_GROUPS, sizeof( double ) );
@@ -117,7 +118,7 @@ void destroy_risk_scores( model *model )
 	int idx, day;
 	parameters *params = model->params;
 
-	for( day = 0; day < MAX_DAILY_INTERACTIONS_KEPT; day++ )
+	for( day = 0; day < params->days_of_interactions; day++ )
 	{
 		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 			free( params->risk_score[ day ][ idx ] );
@@ -127,6 +128,7 @@ void destroy_risk_scores( model *model )
 
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		free( params->risk_score_household[ idx ] );
+
 	free( params->risk_score_household );
 }
 
@@ -136,20 +138,35 @@ void destroy_risk_scores( model *model )
 *  				move to a later date
 *  Returns:		void
 ******************************************************************************************/
-void set_up_trace_tokens( model *model )
+void set_up_trace_tokens( model *model, float tokens_per_person )
 {
-	double tokens_per_person = 3;
-	model->n_trace_tokens = ceil(  model->params->n_total * tokens_per_person );
+	model->trace_token_block = NULL;
+	model->next_trace_token = NULL;
+	add_trace_tokens( model, tokens_per_person );
+}
+
+/*****************************************************************************************
+*  Name:		add_trace_tokens
+*  Description: adds additional trace_tokens note that these get recycled once we
+*  				move to a later date
+*  Returns:		void
+******************************************************************************************/
+void add_trace_tokens( model *model, float tokens_per_person )
+{
+	long n_tokens = ceil(  model->params->n_total * tokens_per_person );
 	long idx;
+	trace_token_block *block;
+	block = calloc( 1, sizeof( trace_token_block ) );
 
-	model->trace_tokens = calloc( model->n_trace_tokens, sizeof( trace_token ) );
+	block->trace_tokens = calloc( n_tokens, sizeof( trace_token ) );
+	block->next = model->trace_token_block;
+	model->trace_token_block = block;
 
-	model->trace_tokens[0].next_index = NULL;
-	for( idx = 1; idx < model->n_trace_tokens; idx++ )
-		model->trace_tokens[idx].next_index = &(model->trace_tokens[idx-1]);
+	block->trace_tokens[0].next_index = model->next_trace_token;
+	for( idx = 1; idx < n_tokens; idx++ )
+		block->trace_tokens[idx].next_index = &(block->trace_tokens[idx-1]);
 
-	model->next_trace_token = &(model->trace_tokens[ model->n_trace_tokens - 1 ]);
-	model->n_trace_tokens_used = 0;
+	model->next_trace_token = &(block->trace_tokens[ n_tokens - 1 ]);
 }
 
 /*****************************************************************************************
@@ -171,10 +188,9 @@ trace_token* create_trace_token( model *model, individual *indiv, int contact_ti
 	token->traced_from = NULL;
 	token->contact_time = contact_time;
 	token->index_status = UNKNOWN;
-	model->n_trace_tokens_used++;
 
-	if( model->n_trace_tokens == model->n_trace_tokens_used)
-		print_exit( "run out of trace tokens");
+	if( model->next_trace_token == NULL )
+		add_trace_tokens( model, 0.25 );
 
 	return token;
 }
@@ -372,7 +388,7 @@ int number_of_traceable_interactions(model *model, individual *indiv)
 
 	// estimate the number of contacts
 	n_contacts = 0;
-	for( ddx = 0; ddx < MAX_DAILY_INTERACTIONS_KEPT; ddx++ )
+	for( ddx = 0; ddx < params->days_of_interactions; ddx++ )
 		n_contacts += indiv->n_interactions[ddx];
 	long *contacts = calloc( n_contacts, sizeof( long ) );
 

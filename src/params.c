@@ -1012,7 +1012,7 @@ double get_model_param_risk_score(
 	int age_susceptible
 )
 {
-	if( (day < 0) | (day >= MAX_DAILY_INTERACTIONS_KEPT) )
+	if( (day < 0) | (day >= model->params->days_of_interactions ) )
 		return UNKNOWN;
 
 	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
@@ -1055,7 +1055,7 @@ int set_model_param_risk_score(
 	double value
 )
 {
-	if( (day < 0) | (day >= MAX_DAILY_INTERACTIONS_KEPT) )
+	if( (day < 0) | (day >= model->params->days_of_interactions) )
 		return FALSE;
 
 	if( (age_infector < 0) | (age_infector >= N_AGE_GROUPS) )
@@ -1165,6 +1165,8 @@ int set_model_param_lockdown_on( model *model, int value )
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 		update_random_interactions( &(model->population[pdx]), params );
 
+	model->rebuild_networks = TRUE;
+
 	return TRUE;
 }
 
@@ -1226,6 +1228,8 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		if( indiv->age_type == AGE_TYPE_ELDERLY )
 			update_random_interactions( indiv, params );
 	}
+
+	model->rebuild_networks = TRUE;
 
 	return TRUE;
 }
@@ -1392,9 +1396,6 @@ int set_model_param_manual_trace_notifications_per_worker_day( model* model, int
 void check_params( parameters *params )
 {
 	int idx;
-
-	if( params->days_of_interactions > MAX_DAILY_INTERACTIONS_KEPT )
-    	print_exit( "BAD PARAM day_of_interaction - can't be greater than MAX_DAILY_INTERACTIONS " );
 
     if( params->end_time > MAX_TIME )
      	print_exit( "BAD PARAM end_time - can't be greater than MAX_TIME " );

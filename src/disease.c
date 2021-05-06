@@ -181,6 +181,7 @@ void transmit_virus_by_type(
 	event *event, *next_event;
 	interaction *interaction;
 	individual *infector;
+	int rebuild_networks = model->params->rebuild_networks;
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
@@ -205,6 +206,16 @@ void transmit_virus_by_type(
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
+					if( !rebuild_networks )
+					{
+						if( infector->house_no != interaction->individual->house_no &&
+							( infector->quarantined || interaction->individual->quarantined ) )
+						{
+							interaction = interaction->next;
+							continue;
+						}
+					}
+
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;

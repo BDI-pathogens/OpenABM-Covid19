@@ -18,6 +18,7 @@ from scipy import optimize
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
+import COVID19.model as abm
 
 from . import constant
 from . import utilities as utils
@@ -405,7 +406,17 @@ class TestClass(object):
                 mean_conn = 10         
             )
         ],
-        "test_get_network": [dict()]
+        "test_get_network": [dict()],
+        "test_static_network": [
+            dict( 
+                test_params = dict( 
+                    n_total = 10000,
+                    rebuild_networks = False,
+                    infectious_rate = 10,
+                    end_time = 20
+                )
+            )
+        ]
     }
     """
     Test class for checking 
@@ -1090,3 +1101,47 @@ class TestClass(object):
             df_network_returned.to_numpy(), 
             df_network_written.to_numpy() 
             )
+        
+    def test_static_network(self, test_params ):
+        
+        """
+        Tests static networks
+        
+        Check to see the interactions are the same at the start and end of a simulation
+        Check that transmissions only occur amongst these intections
+        """
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        
+        # get the intitial interactions
+        model.one_time_step()
+        model.write_interactions_file() 
+        inter_initial = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        
+        # run to the end
+        model.run()
+        model.write_interactions_file() 
+        model.write_transmissions()  
+        inter_final   = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        transmissions = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        
+        # first check that the interactions don't change during the simulation
+        np.testing.assert_( len( inter_initial ) > 100000, "insufficient interactions formed" )
+        np.testing.assert_( len( inter_initial ) == len( inter_final ), "change in number of interactions during simulation" )
+        
+        inter_initial = inter_initial.groupby( ["ID_1", "ID_2" ] ).size().reset_index()
+        inter_final = inter_initial.groupby( ["ID_1", "ID_2" ] ).size().reset_index()
+       
+        inter_shared = pd.merge( inter_initial, inter_final, on = ["ID_1", "ID_2" ], how = "inner" )
+        np.testing.assert_( len( inter_initial ) == len( inter_shared ), "not all interactions at the beginning and end of simulation" )
+        
+        # check that transmissions are only passed via these interactions
+        transmissions = transmissions[ transmissions[ "time_infected" ] > 0 ]
+        transmissions.rename( columns = { "ID_recipient":"ID_1", "ID_source":"ID_2" }, inplace = True )
+        transmissions_inter = pd.merge( transmissions, inter_initial, on = [ "ID_1", "ID_2" ], how = "inner")
+        np.testing.assert_( len( transmissions ) > 100, "insufficient interactions to test" )
+        np.testing.assert_( len( transmissions ) == len( transmissions_inter ), "transmissions not on an initial interaction" )
+               

@@ -1,10 +1,10 @@
 # Table: Infection parameters
 | Name | Value | Symbol | Description | Source | 
 |  ---- | ---- | ---- | ---- | ---- |
-| `n_seed_infection` | 5 | - | Number of infections seeded at simulation start | - |
+| `n_seed_infection` | 10 | - | Number of infections seeded at simulation start | - |
 | `mean_infectious_period` | 5.5 | &#956; | Mean of the generation time distribution (days) | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `sd_infectious_period` | 2.14 | &#963; | Standard deviation (days) of infectious period | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
-| `infectious_rate` | 5.18 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
+| `infectious_rate` | 5.8 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
 | `sd_infectiousness_multiplier` | 1.4 | - | SD of the lognormal used to vary the infectiousness of an individual | Derived from calibration |
 | `asymptomatic_infectious_factor` | 0.33 | *A<sub>asym</sub>* | Infectious rate of asymptomatic individuals relative to symptomatic individuals | Personal communication, Sun |
 | `mild_infectious_factor` | 0.72 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Personal communction, Sun |
