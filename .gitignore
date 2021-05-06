@@ -35,6 +35,8 @@ __pycache__
 *.swp
 .idea
 **/.tags*
+TAGS
+tags
 
 # temp copies
 *~

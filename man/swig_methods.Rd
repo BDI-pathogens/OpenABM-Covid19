@@ -13,6 +13,7 @@
 \alias{$,_p_doubleArray-method}
 \alias{$,_p_edge-method}
 \alias{$,_p_event-method}
+\alias{$,_p_event_block-method}
 \alias{$,_p_event_list-method}
 \alias{$,_p_incomplete_gamma_p_params-method}
 \alias{$,_p_individual-method}
@@ -26,9 +27,11 @@
 \alias{$,_p_parameters-method}
 \alias{$,_p_shortArray-method}
 \alias{$,_p_trace_token-method}
+\alias{$,_p_trace_token_block-method}
 \alias{$<-,_p_directory-method}
 \alias{$<-,_p_edge-method}
 \alias{$<-,_p_event-method}
+\alias{$<-,_p_event_block-method}
 \alias{$<-,_p_event_list-method}
 \alias{$<-,_p_incomplete_gamma_p_params-method}
 \alias{$<-,_p_individual-method}
@@ -39,9 +42,11 @@
 \alias{$<-,_p_network-method}
 \alias{$<-,_p_parameters-method}
 \alias{$<-,_p_trace_token-method}
+\alias{$<-,_p_trace_token_block-method}
 \alias{[[<-,_p_directory,character-method}
 \alias{[[<-,_p_edge,character-method}
 \alias{[[<-,_p_event,character-method}
+\alias{[[<-,_p_event_block,character-method}
 \alias{[[<-,_p_event_list,character-method}
 \alias{[[<-,_p_incomplete_gamma_p_params,character-method}
 \alias{[[<-,_p_individual,character-method}
@@ -52,6 +57,7 @@
 \alias{[[<-,_p_network,character-method}
 \alias{[[<-,_p_parameters,character-method}
 \alias{[[<-,_p_trace_token,character-method}
+\alias{[[<-,_p_trace_token_block,character-method}
 
 %% SWIG helper types
 \alias{[,ExternalReference-method}

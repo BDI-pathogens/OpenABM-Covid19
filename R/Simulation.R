@@ -72,7 +72,7 @@ Agent <- R6Class( classname = 'Agent', cloneable = FALSE,
 #' @examples
 #' # Create a model using the baseline parameters included in the package.
 #' # Note: This initialisation can take a few seconds.
-#' model <- Model.new()
+#' model <- Model.new( params = list( n_total = 10000 ) )
 #'
 #' if (!is.null(model)) {
 #'   # Begin simulation:

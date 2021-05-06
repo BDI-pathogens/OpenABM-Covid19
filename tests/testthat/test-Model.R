@@ -332,6 +332,11 @@ test_that("Model::default params", {
   m = Model.new( params = list( n_total = 10000,
                                 end_time = 10,
                                 n_seed_infection = 5 ))
+
+  if(.Machine$sizeof.pointer < 8) { # skip this test in 32-bit
+    expect_true(is.null(m))
+    return();
+  }
   Model.run( m, verbose = FALSE  )
   res = Model.results( m )
 
@@ -342,12 +347,18 @@ test_that("Model::default params", {
 test_that("Model::multiple models", {
   # create one model
   m1 = Model.new( params = list( n_total = 10000, end_time = 10 ) )
-  m1$one_time_step()
 
   # create a second modek
   m2 = Model.new( params = list( n_total = 10000,
                                  end_time = 10,
                                  n_seed_infection = 5 ))
+
+  if(.Machine$sizeof.pointer < 8) { # skip this test in 32-bit
+    expect_true(is.null(m1))
+    expect_true(is.null(m2))
+    return();
+  }
+  m1$one_time_step()
   m2$one_time_step()
 
   # run the first model again and destroy (force garbage collection)

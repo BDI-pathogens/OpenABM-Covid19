@@ -28,6 +28,8 @@
 %nodefaultdtor edge;
 %nodefaultctor event;
 %nodefaultdtor event;
+%nodefaultctor event_block;
+%nodefaultdtor event_block;
 %nodefaultctor event_list;
 %nodefaultdtor event_list;
 %nodefaultctor individual;
@@ -42,6 +44,8 @@
 %nodefaultdtor incomplete_gamma_p_params;
 %nodefaultctor trace_token;
 %nodefaultdtor trace_token;
+%nodefaultctor trace_token_block;
+%nodefaultdtor trace_token_block;
 
 %include "model.h"
 %include "params.h"
