@@ -198,12 +198,14 @@ void transmit_virus_by_type(
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
 				continue;
 
+			if( gsl_ran_bernoulli( rng, model->params->mutation_rate ) )
+				infector->infection_events->strain = mutate_strain( model, infector->infection_events->strain );
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx    = infector->infectiousness_multiplier * infector->infection_events->strain->idx;
+				strain_idx    = infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -255,11 +257,6 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
-
-	individual *indiv;
-	int idx = 0;
-	indiv = &(model->population[idx]);
-	printf("ind%ld %d\n", indiv->idx, indiv->status);
 }
 
 /*****************************************************************************************

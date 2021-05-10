@@ -197,6 +197,10 @@ typedef struct{
 	//average amount of interactions healthcare workers have with each other per day
 	double hcw_mean_work_interactions;
 
+	// mutation parameters 
+	float mutation_rate; // mutation rate of virus per day, per infection
+	double transmission_multiplier_sigma; // std. dev. of change in mutant's transmission_multiplier
+
 } parameters;
 
 /************************************************************************/
@@ -289,6 +293,9 @@ int set_model_param_manual_traceable_fraction( model *pmodel, double value, int 
 int set_model_param_risk_score( model*, int, int, int, double );
 int set_model_param_risk_score_household( model*, int, int, double );
 int set_model_param_fatality_fraction( model *pmodel, double value, int age_group );
+
+int set_model_param_mutation_rate( model* model, float value );
+int set_model_param_transmission_multiplier_sigma( model* model, double value);
 
 int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 int set_occupation_network_table( parameters* params,  long n_total, long n_networks );

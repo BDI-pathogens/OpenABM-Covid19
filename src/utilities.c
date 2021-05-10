@@ -459,7 +459,7 @@ double inv_incomplete_gamma_p( double percentile, long n )
 
 /*****************************************************************************************
 *  Name:		get_triu_idx
-*  Description: map indices in upper triangular matrix to a vector
+*  Description: map indices in upper triangular matrix (without the diagonal) to a vector
 ******************************************************************************************/
 int get_triu_idx( int idx, int jdx )
 {

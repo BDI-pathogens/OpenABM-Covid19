@@ -1179,6 +1179,12 @@ class Model:
     def write_quarantine_reasons(self):
         covid19.write_quarantine_reasons(self.c_model, self.c_params)
 
+    def write_strains(self):
+        covid19.write_strains(self.c_model)
+
+    def write_antigen_phen_distances(self):
+        covid19.write_antigen_phen_distances(self.c_model)
+
     def write_occupation_network(self, idx):
         covid19.write_occupation_network(self.c_model, self.c_params, idx)
 

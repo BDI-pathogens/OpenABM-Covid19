@@ -658,6 +658,9 @@ void set_up_strains( model *model )
 	model->antigen_phen_distances = calloc( max_unique_strain_pairs, sizeof( float ) );
 	for( int idx = 0; idx < max_unique_strain_pairs; idx++ )
 		model->antigen_phen_distances[ idx ] = -1.0; // initialise with -1.0 to indicate distance is yet to be calculated
+
+	set_model_param_mutation_rate( model, 0 ); // default: 0, default non-zero rate: 5e-5, mutation rate = 1e-4 for influenza (Bedford et al., 2012), SARS-CoV-2 is half that (https://www.nature.com/articles/d41586-020-02544-6)
+	set_model_param_transmission_multiplier_sigma( model, 0 ); // default: 0 (mutant's transmission_multiplier is the same as the parent). sigma > 0 means the change in transmission_multiplier is drawn from N(0, sigma^2)
 }
 
 /*****************************************************************************************
@@ -675,7 +678,6 @@ void set_up_seed_infection( model *model )
 
 	strain_idx 				= 0;
 	transmission_multiplier = 1;
-	// initialise_strain( model, strain_idx, transmission_multiplier );
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -692,6 +694,7 @@ void set_up_seed_infection( model *model )
 				idx++;
 		}
 	}
+	// set_antigen_phen_distance( model, 0, 1, 1.0);
 }
 
 /*****************************************************************************************
