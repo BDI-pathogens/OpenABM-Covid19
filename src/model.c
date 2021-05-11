@@ -675,7 +675,7 @@ void set_up_seed_infection( model *model )
 
 	strain_idx 				= 0;
 	transmission_multiplier = 1;
-	time_multiplier 		= 3;
+	time_multiplier 		= 1;
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
