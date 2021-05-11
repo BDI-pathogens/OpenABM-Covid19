@@ -1386,28 +1386,6 @@ int set_model_param_manual_trace_notifications_per_worker_day( model* model, int
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_mutation_rate
-*  Description: Sets the value of parameter
-******************************************************************************************/
-int set_model_param_mutation_rate( model* model, float value )
-{
-	model->params->mutation_rate = value; 
-
-	return TRUE;
-}
-
-/*****************************************************************************************
-*  Name:        set_model_param_transmission_multiplier_sigma
-*  Description: Sets the value of parameter
-******************************************************************************************/
-int set_model_param_transmission_multiplier_sigma( model* model, double value )
-{
-	model->params->transmission_multiplier_sigma = value;
-
-	return TRUE;
-}
-
-/*****************************************************************************************
 *  Name:		check_params
 *  Description: Carries out checks on the input parameters
 ******************************************************************************************/

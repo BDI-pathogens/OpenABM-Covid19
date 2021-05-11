@@ -477,19 +477,19 @@ void predict_patient_disease_progression( model *model, individual *indiv, doubl
 			if( gsl_ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 			{
 				if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
-					transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
+					transition_one_disease_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 				else
-					transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
+					transition_one_disease_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
 			}
 			else
-				transition_one_disese_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);
+				transition_one_disease_event( model, indiv, HOSPITALISED, RECOVERED, HOSPITALISED_RECOVERED);
 		} 
 		else if( type == COVID_ICU )
 		{
 			if( gsl_ran_bernoulli( rng, min(model->params->fatality_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
-				transition_one_disese_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
+				transition_one_disease_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 			else
-				transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
+				transition_one_disease_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
 		}
 		indiv->disease_progression_predicted[type] = TRUE;
 	}

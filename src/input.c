@@ -1773,7 +1773,6 @@ void write_strains( model *model )
 	char output_file_name[INPUT_CHAR_LEN];
 	FILE *output_file;
 	strain *strain;
-	int jdx;
 
 	char param_line_number[10];
 	sprintf(param_line_number, "%d", model->params->param_line_number);
@@ -1785,61 +1784,16 @@ void write_strains( model *model )
 	strcat(output_file_name, ".csv");
 
 	output_file = fopen(output_file_name, "w");
-	fprintf(output_file , "strain_idx,parent_idx,transmission_multiplier");
-	for( jdx = 0; jdx < ANTIGEN_PHEN_DIM; jdx++ )
-		fprintf(output_file , ",antigen_phen_dim%d", jdx+1);
+	fprintf(output_file , "strain_idx,transmission_multiplier");
 	fprintf(output_file , "\n");
 
 	for( long idx = 0; idx < model->n_initialised_strains; idx++ )
 	{
 		strain = &(model->strains[ idx ]);
-		fprintf(output_file ,"%ld,%ld,%.3f",
+		fprintf(output_file ,"%ld,%.3f\n",
 			strain->idx,
-			strain->parent_idx,
 			strain->transmission_multiplier
 		);
-		for( jdx = 0; jdx < ANTIGEN_PHEN_DIM; jdx++ )
-			fprintf(output_file ,",%f", strain->antigen_phen[ jdx ]);
-		fprintf(output_file, "\n");
-	}
-	fclose(output_file);
-}
-
-/*****************************************************************************************
-*  Name:		write_antigen_phen_distances
-*  Description: Write distances between strain antigenic phenotypes
-******************************************************************************************/
-void write_antigen_phen_distances( model *model )
-{
-	char output_file_name[INPUT_CHAR_LEN];
-	FILE *output_file;
-	double distance;
-
-	char param_line_number[10];
-	sprintf(param_line_number, "%d", model->params->param_line_number);
-
-	// Concatenate file name
-	strcpy(output_file_name, model->params->output_file_dir);
-	strcat(output_file_name, "/antigen_phen_distance_Run");
-	strcat(output_file_name, param_line_number);
-	strcat(output_file_name, ".csv");
-
-	output_file = fopen(output_file_name, "w");
-	fprintf(output_file , "strain1,strain2,distance\n");
-	for( long row = 0; row < model->n_initialised_strains; row++ )
-	{
-		for( long col = row+1; col < model->n_initialised_strains; col++ )
-		{
-			distance = model->antigen_phen_distances[ get_triu_idx( row, col ) ];
-			if( distance != -1 )
-			{
-				fprintf(output_file , "%ld,%ld,%f\n", 
-					row,
-					col,
-					distance
-					);
-			}
-		}
 	}
 	fclose(output_file);
 }

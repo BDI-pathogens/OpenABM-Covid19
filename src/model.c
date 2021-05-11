@@ -149,7 +149,9 @@ void destroy_model( model *model )
     destroy_risk_scores( model );
 
     free( model->strains );
-    free( model->antigen_phen_distances );
+    for( idx = 0; idx < MAX_N_STRAINS; idx++ )
+		free( model->cross_immunity[idx] );
+	free( model->cross_immunity );
 
     free( model );
 }
@@ -650,14 +652,17 @@ void update_event_list_counters( model *model, int type )
 void set_up_strains( model *model )
 {
 	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
-	for( int idx = 0; idx < MAX_N_STRAINS; idx++ )
-		model->strains[ idx ].idx = -1; // idx is -1 to indicate strain has not been initialised
 
-	// set up list of antigen phenotype distances
-	int max_unique_strain_pairs   = (MAX_N_STRAINS)*(MAX_N_STRAINS-1)/2;
-	model->antigen_phen_distances = calloc( max_unique_strain_pairs, sizeof( float ) );
-	for( int idx = 0; idx < max_unique_strain_pairs; idx++ )
-		model->antigen_phen_distances[ idx ] = -1.0; // initialise with -1.0 to indicate distance is yet to be calculated
+	// Allocate memory for cross_immunity matrix (for large MAX_N_STRAINS)
+	float** cross_immunity;
+	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
+	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
+	{
+		cross_immunity[idx] 		= calloc( MAX_N_STRAINS, sizeof(float) ); // allocate memory
+		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
+		model->strains[idx].idx 	= -1; // set strain idx to be -1 to help with checking if strains have been initialised
+	}		
+	model->cross_immunity = cross_immunity;	
 }
 
 /*****************************************************************************************
@@ -668,14 +673,9 @@ void set_up_strains( model *model )
 void set_up_seed_infection( model *model )
 {
 	parameters *params = model->params;
-	int idx, strain_idx;
-	float transmission_multiplier, time_multiplier;
+	int idx;
 	unsigned long int person;
 	individual *indiv;
-
-	strain_idx 				= 0;
-	transmission_multiplier = 1;
-	time_multiplier 		= 1;
 
 	idx = 0;
 	while( idx < params->n_seed_infection )
@@ -688,7 +688,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, strain_idx, transmission_multiplier, time_multiplier, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, 0, 1, -1 ) )
 				idx++;
 		}
 	}

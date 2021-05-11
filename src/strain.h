@@ -23,18 +23,13 @@ typedef struct strain strain;
 
 struct strain{
 	long idx;
-	long parent_idx;
 	float transmission_multiplier;
-	float time_multiplier;
-	double *antigen_phen;
 };
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_strain( model*, long, float, float );
-void set_antigen_phen_distance( model*, long, long, float );
-float get_antigen_phen_distance( model*, strain*, strain* );
+void initialise_strain( model*, long, float );
 
 #endif /* STRAIN_H_ */

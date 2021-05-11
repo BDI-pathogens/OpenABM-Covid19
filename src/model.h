@@ -102,9 +102,7 @@ struct model{
 
 	strain *strains;
 	int n_initialised_strains;
-	// float **cross_immunity;
-	// gsl_matrix *cross_immunity_draws;
-	float *antigen_phen_distances;
+	float **cross_immunity;
 
 };
 
