@@ -17,7 +17,8 @@
 void initialise_strain(
 	model *model,
 	long idx,
-	float transmission_multiplier
+	float transmission_multiplier,
+	float time_multiplier
 )
 {
 	strain *strain_ptr;
@@ -80,47 +81,4 @@ float get_antigen_phen_distance(
 	}
 
 	return model->antigen_phen_distances[ idx ];
-}
-	
-/*****************************************************************************************
-*  Name:		mutate_strain
-*  Description: --
-*  Returns:		void
-******************************************************************************************/
-strain* mutate_strain( 
-	model *model,
-	strain *parent_strain
-)
-{
-	long mutant_idx;
-	float transmission_multiplier, mutation_size;
-	double gamma_a, gamma_b;
-	strain *mutant;
-	
-	mutant_idx = model->n_initialised_strains;
-	transmission_multiplier = parent_strain->transmission_multiplier;
-
-	// draw new transmission_multiplier
-	transmission_multiplier += gsl_ran_gaussian( rng, model->params->transmission_multiplier_sigma );
-	transmission_multiplier = max( 0, transmission_multiplier );
-	// printf("%ld %f\n", mutant_idx, transmission_multiplier);
-
-	initialise_strain( model, mutant_idx, transmission_multiplier );
-	mutant = &(model->strains[ mutant_idx ]);
-	mutant->parent_idx = parent_strain->idx;
-
-	// random unit vector
-	gsl_ran_dir_nd( rng, ANTIGEN_PHEN_DIM, mutant->antigen_phen );
-
-	// mutation size distribution from Bedford et al., 2012
-	gamma_a = 9.0/4;
-	gamma_b = 4.0/15; 
-	mutation_size = gsl_ran_gamma( rng, gamma_a, gamma_b );
-
-	for( int idx = 0; idx < ANTIGEN_PHEN_DIM; idx++ )
-		mutant->antigen_phen[ idx ] = parent_strain->antigen_phen[ idx ] + mutation_size * mutant->antigen_phen[ idx ];
-
-	// printf("mutant%ld: %f\n", mutant_idx, get_antigen_phen_distance( model, parent_strain, mutant ));
-
-	return mutant;
 }

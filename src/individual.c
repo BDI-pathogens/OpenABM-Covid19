@@ -475,7 +475,7 @@ float calc_risk_of_infection( model *model, individual *indiv, strain *strain )
 	infection_event_ptr = indiv->infection_events;
 	tau = 527.0*40; // time-scale param for exponential decay of immunity (half-life of ~1 year: tau = 527)
 	min_risk = 1;
-	risk_multiplier = 0.07; // default used by Bedford et al., 2012 for influenza: 0.07
+	risk_multiplier = 1; // default used by Bedford et al., 2012 for influenza: 0.07
 	while( infection_event_ptr != NULL && min_risk > 0 )
 	{
 		day_recovered = infection_event_ptr->times[RECOVERED]; //time_infected_infection_event( infection_event_ptr ); 
@@ -484,7 +484,8 @@ float calc_risk_of_infection( model *model, individual *indiv, strain *strain )
 			distance = get_antigen_phen_distance( model, strain, infection_event_ptr->strain );
 			risk = risk_multiplier * distance;
 			days_since_recovery = model->time - day_recovered;
-			waning_factor = 1; //exp( -( days_since_recovery / tau ) ); // a value in [0, 1]. <1 means immunity has waned.
+			waning_factor = exp( -( days_since_recovery / tau ) ); // a value in [0, 1]. <1 means immunity has waned.
+			// waning_factor = 1 - days_since_recovery/16000; // in practice, we don't need to account for waning_factor < 0 because days_since_recovery will likely always be <500
 			risk = 1 - ( ( 1 - risk ) * waning_factor );
 			// if( indiv->idx == 0 )
 			// 	printf("ind%ld old%ld new%ld %d %f %f %f\n", indiv->idx, infection_event_ptr->strain->idx, strain->idx,

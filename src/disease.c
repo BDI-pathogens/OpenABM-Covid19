@@ -197,9 +197,6 @@ void transmit_virus_by_type(
 			t_infect = model->time - time_infected_infection_event( infector->infection_events );
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
 				continue;
-
-			if( gsl_ran_bernoulli( rng, model->params->mutation_rate ) )
-				infector->infection_events->strain = mutate_strain( model, infector->infection_events->strain );
 			n_interaction = infector->n_interactions[ model->interaction_day_idx ];
 			if( n_interaction > 0 )
 			{
@@ -216,6 +213,8 @@ void transmit_virus_by_type(
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
+							// new_infection( model, interaction->individual, infector, interaction->network_id );
+							// interaction->individual->infection_events->infector_network = interaction->type;
 							risk_of_infection = calc_risk_of_infection( model, interaction->individual, infector->infection_events->strain );
 							if( gsl_ran_bernoulli( rng, risk_of_infection ) ) // infection occurs
 							{
@@ -269,6 +268,7 @@ short seed_infect_by_idx(
 	long pdx,
 	int strain_idx,
 	float transmission_multiplier,
+	float time_multiplier,
 	int network_id
 )
 {
@@ -278,9 +278,10 @@ short seed_infect_by_idx(
 		return FALSE;
 
 	if( model->strains[ strain_idx ].idx == -1 ) // if strain is not initialised
-		initialise_strain( model, strain_idx, transmission_multiplier );
+		initialise_strain( model, strain_idx, transmission_multiplier, time_multiplier );
 	else
 		model->strains[ strain_idx ].transmission_multiplier = transmission_multiplier;
+		model->strains[ strain_idx ].time_multiplier		 = time_multiplier;
 	infected->infection_events->strain = &(model->strains[ strain_idx ]);
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
@@ -347,6 +348,8 @@ void transition_one_disese_event(
 	int edge
 )
 {
+	int transition_time;
+
 	indiv->status           = from;
 
 	if( (from != NO_EVENT) | (from != SUSCEPTIBLE))
@@ -367,7 +370,10 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to] = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		transition_time = ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ));
+		if( edge >= ASYMPTOMATIC_RECOVERED || edge <= HOSPITALISED_RECOVERING_RECOVERED || edge == RECOVERED_SUSCEPTIBLE )
+			transition_time *= indiv->infection_events->strain->time_multiplier;
+		indiv->infection_events->times[to] = model->time + transition_time;
 		indiv->next_disease_event 		   = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
 	}
 }

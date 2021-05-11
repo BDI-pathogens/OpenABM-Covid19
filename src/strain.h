@@ -25,6 +25,7 @@ struct strain{
 	long idx;
 	long parent_idx;
 	float transmission_multiplier;
+	float time_multiplier;
 	double *antigen_phen;
 };
 
@@ -32,9 +33,8 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_strain( model*, long, float );
+void initialise_strain( model*, long, float, float );
 void set_antigen_phen_distance( model*, long, long, float );
 float get_antigen_phen_distance( model*, strain*, strain* );
-strain* mutate_strain( model*, strain* );
 
 #endif /* STRAIN_H_ */
