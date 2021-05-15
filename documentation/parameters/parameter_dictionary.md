@@ -20,10 +20,10 @@
 | `elderly_network_adults` | 0.2 | - | Ratio of adults to elderly in work network for elderly (70+) | Mossong et al, 2008 |
 | `days_of_interactions` | 10 | - | Length of historic interactions traced (days) | - |
 | `end_time` | 200 | - | End time (total number of simulated days) | - |
-| `n_seed_infection` | 5 | - | Number of infections seeded at simulation start | - |
+| `n_seed_infection` | 10 | - | Number of infections seeded at simulation start | - |
 | `mean_infectious_period` | 5.5 | &#956; | Mean of the generation time distribution (days) | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
 | `sd_infectious_period` | 2.14 | &#963; | Standard deviation (days) of infectious period | Ferretti et al in prep 2020; Ferretti & Wymant et al 2020; Xia et al 2020; He et al 2020; Cheng et al 2020 |
-| `infectious_rate` | 5.18 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
+| `infectious_rate` | 5.8 | *R* | Mean number of individuals infected by each infectious individual with moderate to severe symptoms | Derived from calibration |
 | `sd_infectiousness_multiplier` | 1.4 | - | SD of the lognormal used to vary the infectiousness of an individual | Derived from calibration |
 | `mean_time_to_symptoms` | 5.42 | &#956;<sub>sym</sub> | Mean time from infection to onset of symptoms (days) | McAloon et al. |
 | `sd_time_to_symptoms` | 2.7 | &#963;<sub>sym</sub> | Standard deviation of time from infection to onset of symptoms (days) | McAloon et al. |
@@ -184,12 +184,12 @@
 | `app_users_fraction_70_79` | 0.48 | - | Maximum fraction of the population with smartphones aged 70-79 | OFCOM 55+ year olds |
 | `app_users_fraction_80` | 0.32 | - | Maximum fraction of the population with smartphones aged 80+ | OFCOM 55+ year olds |
 | `app_turn_on_time` | 10000 | - | Time (days) at which to turn on the app | - |
-| `lockdown_occupation_multiplier_primary_network` | 0.29 | - | Relative change in number of occupation network contacts on lockdown for primary age | - |
-| `lockdown_occupation_multiplier_secondary_network` | 0.29 | - | Relative change in number of occupation network contacts on lockdown for secondary age | - |
-| `lockdown_occupation_multiplier_working_network` | 0.29 | - | Relative change in number of occupation network contacts on lockdown for working age | Based on an estimate of the number of key workers |
-| `lockdown_occupation_multiplier_retired_network` | 0.29 | - | Relative change in number of occupation network contacts on lockdown for retired age | - |
-| `lockdown_occupation_multiplier_elderly_network` | 0.29 | - | Relative change in number of occupation network contacts on lockdown for elderly | - |
-| `lockdown_random_network_multiplier` | 0.29 | - | Relative change in random network contacts on lockdown | - |
+| `lockdown_occupation_multiplier_primary_network` | 0.33 | - | Relative change in number of occupation network contacts on lockdown for primary age | - |
+| `lockdown_occupation_multiplier_secondary_network` | 0.33 | - | Relative change in number of occupation network contacts on lockdown for secondary age | - |
+| `lockdown_occupation_multiplier_working_network` | 0.33 | - | Relative change in number of occupation network contacts on lockdown for working age | Based on an estimate of the number of key workers |
+| `lockdown_occupation_multiplier_retired_network` | 0.33 | - | Relative change in number of occupation network contacts on lockdown for retired age | - |
+| `lockdown_occupation_multiplier_elderly_network` | 0.33 | - | Relative change in number of occupation network contacts on lockdown for elderly | - |
+| `lockdown_random_network_multiplier` | 0.33 | - | Relative change in random network contacts on lockdown | - |
 | `lockdown_house_interaction_multiplier` | 1.5 | - | Relative change in household network contacts on lockdown | - |
 | `lockdown_time_on` | 10000 | - | Time (days) at which to model lockdown starting | - |
 | `lockdown_time_off` | 10000 | - | Time (days) at which to model lockdown ending | - |
@@ -212,3 +212,4 @@
 | `manual_traceable_fraction_occupation` | 0.8 | - | The fraction of occupation contacts that can be successfully traced | - |
 | `manual_traceable_fraction_random` | 0.05 | - | The fraction of random contacts that can be successfully traced | - |
 | `relative_susceptibility_by_interaction` | 1 | - | Type of relative susceptibility by age group (1 = per interaction; 0 = per day) | - |
+| `rebuild_networks` | 1 | - | Should net works be rebuilt every time step or just on parameter changes | - |

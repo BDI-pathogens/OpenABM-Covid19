@@ -498,6 +498,9 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_by_interaction\n"); };
 		check = fscanf(parameter_file, " %i ,", &(params->relative_susceptibility_by_interaction));
 
+	if( check < 1){ print_exit("Failed to read parameter rebuild_networks\n"); };
+		check = fscanf(parameter_file, " %i ,", &(params->rebuild_networks));
+
 	fclose(parameter_file);
 }
 /*****************************************************************************************
@@ -826,7 +829,6 @@ void print_interactions_averages(model *model, int header)
 	}
 
 	day_idx = model->interaction_day_idx;
-	ring_dec( day_idx, model->params->days_of_interactions );
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -954,7 +956,6 @@ void write_interactions( model *model )
 	output_file = fopen(output_file_name, "w");
 
 	day = model->interaction_day_idx;
-	ring_dec( day, model->params->days_of_interactions );
 	time = model->time - 1;
 
 	fprintf(output_file ,"ID_1,age_group_1,worker_type_1,house_no_1,occupation_network_1,type,network_id,ID_2,age_group_2,worker_type_2,house_no_2,occupation_network_2,traceable,manual_traceable,time\n");
@@ -1599,7 +1600,6 @@ void write_hospital_interactions( model *model )
     strcat(output_file_name, ".csv");
 
     day = model->interaction_day_idx;
-    ring_dec( day, model->params->days_of_interactions );
 
     // Open outputfile in different mode depending on whether this is the first time step
     if(model->time == 1)
