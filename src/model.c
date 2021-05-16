@@ -76,6 +76,7 @@ model* new_model( parameters *params )
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
+	set_up_strains( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr, 0.01 );
@@ -173,6 +174,12 @@ void destroy_model( model *model )
     	free( model->hospitals );
     }
     destroy_risk_scores( model );
+
+    free( model->strains );
+    for( idx = 0; idx < MAX_N_STRAINS; idx++ )
+		free( model->cross_immunity[idx] );
+	free( model->cross_immunity );
+
     free( model );
 }
 
@@ -686,6 +693,27 @@ void update_event_list_counters( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_strains
+*  Description: allocates memory for strains and cross-immunity matrix
+*  Returns:		void
+******************************************************************************************/
+
+void set_up_strains( model *model )
+{
+	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
+
+	float** cross_immunity;
+	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
+	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
+	{
+		cross_immunity[idx] 		= calloc( MAX_N_STRAINS, sizeof(float) );
+		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
+		model->strains[idx].idx 	= -1; // if idx = -1, strain is uninitialised
+	}		
+	model->cross_immunity = cross_immunity;	
+}
+
+/*****************************************************************************************
 *  Name:		set_up_seed_infection
 *  Description: sets up the initial population
 *  Returns:		void
@@ -708,7 +736,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, 1, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, 0, 1, -1 ) )
 				idx++;
 		}
 	}

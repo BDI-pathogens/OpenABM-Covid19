@@ -174,7 +174,7 @@ void transmit_virus_by_type(
 	int type
 )
 {
-	long idx, jdx, n_infected;
+	long idx, jdx, n_infected, strain_idx;
 	int day, n_interaction, t_infect;
 	double hazard_rate, infector_mult;
 	event_list *list = &(model->event_lists[type]);
@@ -202,7 +202,8 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain_multiplier;
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
+				strain_idx    = infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -266,7 +267,8 @@ void transmit_virus( model *model )
 short seed_infect_by_idx(
 	model *model,
 	long pdx,
-	float strain_multiplier,
+	int strain_idx,
+	float transmission_multiplier,
 	int network_id
 )
 {
@@ -275,7 +277,11 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	infected->infection_events->strain_multiplier = strain_multiplier;
+	if( model->strains[ strain_idx ].idx == -1 ) // if strain is not initialised
+		initialise_strain( model, strain_idx, transmission_multiplier );
+	else
+		model->strains[ strain_idx ].transmission_multiplier = transmission_multiplier;
+	infected->infection_events->strain = &(model->strains[ strain_idx ]);
 	new_infection( model, infected, infected, network_id );
 	return TRUE;
 }
@@ -303,7 +309,7 @@ void new_infection(
 	infected->infection_events->infector_status = infector->status;
 	infected->infection_events->infector_hospital_state = infector->hospital_state;
 	infected->infection_events->network_id = network_id;
-	infected->infection_events->strain_multiplier = infector->infection_events->strain_multiplier;
+	infected->infection_events->strain = infector->infection_events->strain;
 
 	if( draw < asymp_frac )
 	{
