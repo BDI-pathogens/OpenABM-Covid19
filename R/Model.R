@@ -21,6 +21,7 @@ SWIG_utils_n_total_age <- utils_n_total_age
 SWIG_utils_n_total_by_day <- utils_n_total_by_day
 SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
+SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
 
 
@@ -461,23 +462,29 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Infects a new individual from an external source.
     #' Wrapper for C API \code{seed_infect_by_idx}.
     #' @param ID The ID of the individual.
-    #' @param strain_multiplier The strain multiplier value, must be a
-    #'   positivate number.
+    #' @param strain_idx The idx of the strain the person is infected with
     #' @param network_id The network ID.
     #' @return \code{TRUE} on success, \code{FALSE} otherwise.
-    seed_infect_by_idx = function(ID, strain_multiplier = 1, network_id = -1 )
+    seed_infect_by_idx = function(ID, strain_idx = 1, network_id = -1 )
     {
       n_total <- private$c_params$n_total
 
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
-      if (strain_multiplier < 0) {
-        stop("strain_multiplier must be positive")
-      }
-      res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_multiplier,
-        network_id)
+      
+      res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
       return(as.logical(res))
+    },
+
+    #' @description Adds a new strain (variant)
+    #' Wrapper for C API \code{add_new_strain}.
+    #' @param transmission_multiplier The relative transmission rate of the strain
+    #' @return \code{strain_idx} The index assigned to the new strain
+    add_new_strain = function(ID, transmission_multiplier = 1 )
+    {
+      strain_idx <- add_new_strain(self$c_model, transmission_multiplier )
+      return(strain_idx)
     },
 
     #' @description Get the list of network IDs
