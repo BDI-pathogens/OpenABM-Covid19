@@ -1335,8 +1335,9 @@ class TestClass(object):
         for idx in range( n_extra_infections ):
             inf_id[ idx ] = idxs[ inf_id[ idx ] ]
         
+        strain_idx = model.add_new_strain( transmission_multiplier = 2 )
         for id in inf_id :
-            np.testing.assert_( model.seed_infect_by_idx(id, strain_idx = 1, transmission_multiplier = 2 ), "failed to infect individual" )
+            np.testing.assert_( model.seed_infect_by_idx(id, strain_idx = strain_idx ), "failed to infect individual" )
    
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1374,10 +1375,10 @@ class TestClass(object):
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
         n_susc   = len( idxs )
         
-        strain_idx = 1 # new strain idx (original strain idx is 0)
+        strain_idx = model.add_new_strain( transmission_multiplier ) 
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
-            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx, transmission_multiplier = transmission_multiplier )
+            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx )
         
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1387,7 +1388,7 @@ class TestClass(object):
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_n_trans = df_trans.loc[:,["time_infected","strain_idx"]]
         df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
-    
+        
         # check no new strain infections before it is introduced
         np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_idx ].sum(), 0, "new strain cases before seed date" )
         

@@ -268,7 +268,6 @@ short seed_infect_by_idx(
 	model *model,
 	long pdx,
 	int strain_idx,
-	float transmission_multiplier,
 	int network_id
 )
 {
@@ -277,10 +276,9 @@ short seed_infect_by_idx(
 	if( infected->status != SUSCEPTIBLE )
 		return FALSE;
 
-	if( model->strains[ strain_idx ].idx == -1 ) // if strain is not initialised
-		initialise_strain( model, strain_idx, transmission_multiplier );
-	else
-		model->strains[ strain_idx ].transmission_multiplier = transmission_multiplier;
+	if( strain_idx >= model->n_initialised_strains )
+		print_exit( "strain_idx is not known, strains must be initialised before being infected" );
+
 	infected->infection_events->strain = &(model->strains[ strain_idx ]);
 	new_infection( model, infected, infected, network_id );
 	return TRUE;

@@ -1088,7 +1088,7 @@ void get_transmissions(
 	int *time_recovered,
 	int *time_susceptible,
 	int *is_case,
-	long *strain_idx,
+	int *strain_idx,
 	float *transmission_multiplier
 )
 {

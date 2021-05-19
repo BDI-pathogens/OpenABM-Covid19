@@ -30,6 +30,6 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-void initialise_strain( model*, long, float );
+short add_new_strain( model*, float );
 
 #endif /* STRAIN_H_ */

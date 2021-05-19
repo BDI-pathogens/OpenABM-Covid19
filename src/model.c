@@ -721,11 +721,13 @@ void set_up_strains( model *model )
 void set_up_seed_infection( model *model )
 {
 	parameters *params = model->params;
-	int idx;
+	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
 
 	idx = 0;
+	strain_idx = add_new_strain( model, 1 );
+
 	while( idx < params->n_seed_infection )
 	{
 		person = gsl_rng_uniform_int( rng, params->n_total );
@@ -736,7 +738,7 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, 0, 1, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, strain_idx, -1 ) )
 				idx++;
 		}
 	}
