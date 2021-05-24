@@ -40,7 +40,7 @@ struct individual{
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
-	long time_susceptible[MAX_N_STRAINS];
+	short time_susceptible[MAX_N_STRAINS];
 
 	short quarantined;
 	event *quarantine_event;
