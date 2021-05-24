@@ -162,6 +162,15 @@ int get_param_rebuild_networks(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name: 		get_param_max_n_strains
+*  Description: Gets the value of a parameter
+******************************************************************************************/
+int get_param_max_n_strains(parameters *params)
+{
+    return params->max_n_strains;
+}
+
+/*****************************************************************************************
 *  Name: 		get_param_sd_infectiousness_multiplier
 *  Description: Gets the value of a parameter
 ******************************************************************************************/
@@ -1036,6 +1045,16 @@ int set_param_infectious_rate(parameters *params, int value)
 int set_param_rebuild_networks(parameters *params, int value)
 {
    params->rebuild_networks = value;
+   return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_max_n_strains
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_max_n_strains(parameters *params, int value)
+{
+   params->max_n_strains = value;
    return TRUE;
 }
 

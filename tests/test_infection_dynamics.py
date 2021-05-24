@@ -14,6 +14,7 @@ import pytest, sys, subprocess, shutil, os
 import numpy as np, pandas as pd
 from scipy import optimize
 from math import exp, log, fabs
+from numpy.ma.testutils import assert_equal
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
@@ -396,6 +397,7 @@ class TestClass(object):
                     n_total = 1e4,
                     n_seed_infection = 50,
                     end_time = 30,
+                    max_n_strains = 2
                 ),
                 n_extra_infections = 50,
                 t_extra_infections = 10,     
@@ -407,7 +409,8 @@ class TestClass(object):
                     n_total = 2e4,
                     n_seed_infection = 10,
                     end_time = 80,
-                    infectious_rate = 3
+                    infectious_rate = 3,
+                    max_n_strains = 2
                 ),
                 n_extra_infections      = 30,
                 t_extra_infections      = 10,   
@@ -1336,6 +1339,8 @@ class TestClass(object):
             inf_id[ idx ] = idxs[ inf_id[ idx ] ]
         
         strain_idx = model.add_new_strain( transmission_multiplier = 2 )
+        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
+
         for id in inf_id :
             np.testing.assert_( model.seed_infect_by_idx(id, strain_idx = strain_idx ), "failed to infect individual" )
    
@@ -1376,6 +1381,7 @@ class TestClass(object):
         n_susc   = len( idxs )
         
         strain_idx = model.add_new_strain( transmission_multiplier ) 
+        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
             model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx )

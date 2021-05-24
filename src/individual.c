@@ -41,7 +41,7 @@ void initialize_individual(
 	}
 
 	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short	) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short ) );
 	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->infection_events->times[jdx] = UNKNOWN;
 
@@ -85,7 +85,9 @@ void initialize_individual(
 		indiv->infectiousness_multiplier = 1;
 	}
 
-	for( int strain_idx = 0; strain_idx < MAX_N_STRAINS; strain_idx++ )
+	indiv->hazard           = calloc( params->max_n_strains, sizeof( float ) );
+	indiv->time_susceptible = calloc( params->max_n_strains, sizeof( short ) );
+	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 		indiv->time_susceptible[strain_idx] = 0;
 }
 
@@ -101,7 +103,7 @@ void initialize_hazard(
 	parameters *params
 )
 {
-	for( int idx = 0; idx < MAX_N_STRAINS; idx++ )
+	for( int idx = 0; idx < params->max_n_strains; idx++ )
 		indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
@@ -445,6 +447,8 @@ void destroy_individual( individual *indiv )
 	}
 	free( indiv->n_interactions );
 	free( indiv->interactions );
+	free( indiv->hazard );
+	free( indiv->time_susceptible );
 }
 
 /*****************************************************************************************

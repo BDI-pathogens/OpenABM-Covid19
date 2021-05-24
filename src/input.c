@@ -501,6 +501,9 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter rebuild_networks\n"); };
 		check = fscanf(parameter_file, " %i ,", &(params->rebuild_networks));
 
+	if( check < 1){ print_exit("Failed to read parameter max_n_strains\n"); };
+		check = fscanf(parameter_file, " %i ,", &(params->max_n_strains));
+
 	fclose(parameter_file);
 }
 /*****************************************************************************************
