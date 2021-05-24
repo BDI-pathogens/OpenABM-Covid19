@@ -134,7 +134,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   int n_trans = get_n_transmissions(c_model);
 
   // allocate memory to for the function call
-  const int n_names = 33;
+  const int n_names = 34;
   const char *names[n_names] = { "ID_recipient", "age_group_recipient",
     "house_no_recipient","occupation_network_recipient","worker_type_recipient",
     "hospital_state_recipient","infector_network","infector_network_id",
@@ -145,8 +145,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
     "time_presymptomatic_severe","time_symptomatic","time_symptomatic_mild",
     "time_symptomatic_severe","time_asymptomatic","time_hospitalised",
     "time_critical","time_hospitalised_recovering","time_death",
-    "time_recovered","time_susceptible","is_case",
-    "strain_multiplier" };
+    "time_recovered","time_susceptible","is_case", "strain_idx",
+    "transmission_multiplier" };
   long *ID_recipient = calloc( n_trans, sizeof(long) );
   int *age_group_recipient = calloc( n_trans, sizeof(int) );
   long *house_no_recipient = calloc( n_trans, sizeof(long) );
@@ -179,7 +179,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   int *time_recovered = calloc( n_trans, sizeof(int) );
   int *time_susceptible = calloc( n_trans, sizeof(int) );
   int *is_case = calloc( n_trans, sizeof(int) );
-  float *strain_multiplier = calloc( n_trans, sizeof(float) );
+  int *strain_idx = calloc( n_trans, sizeof(int) );
+  float *transmission_multiplier = calloc( n_trans, sizeof(float) );
 
   get_transmissions( c_model, ID_recipient, age_group_recipient,
       house_no_recipient, occupation_network_recipient, worker_type_recipient,
@@ -190,7 +191,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
       time_presymptomatic_mild, time_presymptomatic_severe, time_symptomatic,
       time_symptomatic_mild, time_symptomatic_severe, time_asymptomatic,
       time_hospitalised, time_critical, time_hospitalised_recovering,
-      time_death, time_recovered, time_susceptible, is_case,strain_multiplier );
+      time_death, time_recovered, time_susceptible, is_case, strain_idx,
+      transmission_multiplier );
 
   // convert to R object
   SEXP R_list = PROTECT(allocVector(VECSXP, n_names));
@@ -227,7 +229,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   SEXP R_time_recovered = PROTECT(allocVector(INTSXP, n_trans));
   SEXP R_time_susceptible = PROTECT(allocVector(INTSXP, n_trans));
   SEXP R_is_case = PROTECT(allocVector(INTSXP, n_trans));
-  SEXP R_strain_multiplier = PROTECT(allocVector(REALSXP, n_trans));
+  SEXP R_strain_idx = PROTECT(allocVector(INTSXP, n_trans));
+  SEXP R_transmission_multiplier = PROTECT(allocVector(REALSXP, n_trans));
 
   for( int i = 0; i < n_trans; i++ ) {
     INTEGER(R_ID_recipient)[i] = ID_recipient[i];
@@ -262,7 +265,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
     INTEGER(R_time_recovered)[i] = time_recovered[i];
     INTEGER(R_time_susceptible)[i] = time_susceptible[i];
     INTEGER(R_is_case)[i] = is_case[i];
-    REAL(R_strain_multiplier)[i] = strain_multiplier[i];
+    INTEGER(R_strain_idx)[i] = strain_idx[i];
+    REAL(R_transmission_multiplier)[i] = transmission_multiplier[i];
   }
 
   SET_VECTOR_ELT(R_list, 0, R_ID_recipient);
@@ -297,7 +301,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   SET_VECTOR_ELT(R_list, 29, R_time_recovered);
   SET_VECTOR_ELT(R_list, 30, R_time_susceptible);
   SET_VECTOR_ELT(R_list, 31, R_is_case);
-  SET_VECTOR_ELT(R_list, 32, R_strain_multiplier);
+  SET_VECTOR_ELT(R_list, 32, R_strain_idx);
+  SET_VECTOR_ELT(R_list, 33, R_transmission_multiplier);
 
   for (int i = 0; i < n_names; i++)
     SET_STRING_ELT(R_Names, i, mkChar(names[i]));
@@ -336,7 +341,8 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   free( time_recovered );
   free( time_susceptible );
   free( is_case );
-  free( strain_multiplier );
+  free( strain_idx );
+  free( transmission_multiplier );
   UNPROTECT(n_names+2);
 
   return R_list;
