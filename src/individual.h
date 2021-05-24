@@ -35,11 +35,12 @@ struct individual{
 	interaction **interactions;
 
 	short status;
-	float hazard;
+	float hazard[MAX_N_STRAINS];
 	float infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
+	long time_susceptible[MAX_N_STRAINS];
 
 	short quarantined;
 	event *quarantine_event;

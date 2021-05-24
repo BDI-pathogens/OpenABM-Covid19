@@ -844,6 +844,20 @@ class Model:
 
         return covid19.add_new_strain( self.c_model, transmission_multiplier );
 
+    def set_cross_immunity_matrix(self, cross_immunity ):
+
+        max_n_strains = covid19.MAX_N_STRAINS
+        if len(cross_immunity) > max_n_strains:
+            raise ParameterException( f"Too many rows in cross_immunity (maximum allowed: {max_n_strains}" )
+
+        for caught_idx in range(len(cross_immunity)):
+            if len(cross_immunity) > max_n_strains:
+                raise ParameterException( f"Too many columns in cross_immunity row with index={i} (maximum allowed: {max_n_strains}" )
+            for conferred_idx, probability in enumerate(cross_immunity[caught_idx]):
+                if ( probability < 0 ) | ( probability > 1 ):
+                    raise ParameterException( f"Cross-immunity probability must be in the interval [0,1]")
+                covid19.set_cross_immunity_probability( self.c_model, caught_idx, conferred_idx, probability )
+
     def get_network_info(self, max_ids= 1000):
            
         if max_ids > 1e6 :

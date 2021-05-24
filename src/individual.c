@@ -84,6 +84,9 @@ void initialize_individual(
 	{
 		indiv->infectiousness_multiplier = 1;
 	}
+
+	for( int strain_idx = 0; strain_idx < MAX_N_STRAINS; strain_idx++ )
+		indiv->time_susceptible[strain_idx] = 0;
 }
 
 /*****************************************************************************************
@@ -98,7 +101,8 @@ void initialize_hazard(
 	parameters *params
 )
 {
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+	for( int idx = 0; idx < MAX_N_STRAINS; idx++ )
+		indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
 /*****************************************************************************************
@@ -306,11 +310,11 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->infection_events->times[jdx] = UNKNOWN;
 
-	indiv->infection_events->infector_status  = UNKNOWN;
-	indiv->infection_events->infector_network = UNKNOWN;
+	indiv->infection_events->infector_status  		= UNKNOWN;
+	indiv->infection_events->infector_network 		= UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->next =  infection_event_ptr;
-	indiv->infection_events->is_case     = FALSE;
+	indiv->infection_events->next 					= infection_event_ptr;
+	indiv->infection_events->is_case     			= FALSE;
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params );
@@ -488,7 +492,10 @@ void print_individual( model *model, long idx)
 	printf("indiv->base_random_interactions: %d\n", indiv->base_random_interactions );
 	printf("indiv->random_interactions: %d\n", indiv->random_interactions );
 
-	printf("indiv->hazard: %f\n", indiv->hazard );
+	printf("indiv->hazard:");
+	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+		printf(" %f", indiv->hazard[strain_idx]);
+	printf("\n");
 	printf("indiv->quarantined: %d\n", indiv->quarantined );
 	printf("indiv->quarantine_test_result: %d\n", indiv->quarantine_test_result );
 	

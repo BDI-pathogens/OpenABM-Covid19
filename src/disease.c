@@ -203,7 +203,7 @@ void transmit_virus_by_type(
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx    = infector->infection_events->strain->idx;
+				strain_idx 	  = infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -220,9 +220,9 @@ void transmit_virus_by_type(
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
-                        interaction->individual->hazard -= hazard_rate;
+						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
-						if( interaction->individual->hazard < 0 )
+						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
 							new_infection( model, interaction->individual, infector, interaction->network_id );
 							interaction->individual->infection_events->infector_network = interaction->type;
@@ -596,5 +596,17 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
 }
 
-
-
+/*****************************************************************************************
+*  Name:		set_cross_immunity_probability
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+void set_cross_immunity_probability( 
+	model *model, 
+	int caught_idx, 
+	int conferred_idx, 
+	float probability 
+)
+{
+	model->cross_immunity[ caught_idx ][ conferred_idx ] = probability;
+}

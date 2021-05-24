@@ -903,6 +903,26 @@ class TestClass(object):
         leads to corresponding change (increase, decrease, or equal) in the total infections.
         
         """
+        def mean_total_infected(params, mild_infectious_factor, rng_seed_range=range(1,21)):
+            """
+            Run simulation with parameters `params`, mild_infectious_factor=`mild_infectious_factor`,
+            and for all rng_seed values in `rng_seed_range`. 
+            Returns mean of total_infected from final day of simulation, across 
+            all seeds in `rng_seed_range`.
+            """
+            params.set_param('mild_infectious_factor', mild_infectious_factor)
+            total_infected_list = []
+            for rng_seed in rng_seed_range:
+                params.set_param('rng_seed', rng_seed)
+                params.write_params(constant.TEST_DATA_FILE)     
+                
+                file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+                completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+                df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            
+                total_infected_list.append(df_output[ "total_infected" ].iloc[-1])
+            
+            return np.mean(total_infected_list)
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
@@ -917,51 +937,26 @@ class TestClass(object):
         params.set_param( "mild_fraction_60_69", mild_fraction_60_69 )
         params.set_param( "mild_fraction_70_79", mild_fraction_70_79 )
         params.set_param( "mild_fraction_80", mild_fraction_80 )
-        params.set_param( "mild_infectious_factor", mild_infectious_factor[0] )
-        params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        # save the current mild_infectious_factor value
         mild_infectious_factor_current = mild_infectious_factor[0]
-        total_infected_current = df_output[ "total_infected" ].iloc[-1]
+        mean_total_infected_current = mean_total_infected(params, mild_infectious_factor_current)
         
         # calculate the total infections for the rest and compare with the current
         for idx in range(1, len(mild_infectious_factor)):
-            params.set_param( "end_time", end_time )
-            params.set_param( "n_total", n_total )
-            params.set_param( "mild_fraction_0_9", mild_fraction_0_9 )
-            params.set_param( "mild_fraction_10_19", mild_fraction_10_19 )
-            params.set_param( "mild_fraction_20_29", mild_fraction_20_29 )
-            params.set_param( "mild_fraction_30_39", mild_fraction_30_39 )
-            params.set_param( "mild_fraction_40_49", mild_fraction_40_49 )
-            params.set_param( "mild_fraction_50_59", mild_fraction_50_59 )
-            params.set_param( "mild_fraction_60_69", mild_fraction_60_69 )
-            params.set_param( "mild_fraction_70_79", mild_fraction_70_79 )
-            params.set_param( "mild_fraction_80", mild_fraction_80 )
-            params.set_param("mild_infectious_factor", mild_infectious_factor[idx])
-            params.write_params(constant.TEST_DATA_FILE)
-    
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-            
             mild_infectious_factor_new = mild_infectious_factor[idx]
-            total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
+            mean_total_infected_new = mean_total_infected(params, mild_infectious_factor_new)
     
             # check the total infections
             if mild_infectious_factor_new > mild_infectious_factor_current:
-                np.testing.assert_equal( total_infected_new > total_infected_current, True)
+                np.testing.assert_equal( mean_total_infected_new > mean_total_infected_current, True)
             elif mild_infectious_factor_new < mild_infectious_factor_current:
-                np.testing.assert_equal( total_infected_new < total_infected_current, True)
+                np.testing.assert_equal( mean_total_infected_new < mean_total_infected_current, True)
             elif mild_infectious_factor_new == mild_infectious_factor_current:
-                np.testing.assert_allclose( total_infected_new, total_infected_current, atol = 0.01)
+                np.testing.assert_allclose( mean_total_infected_new, mean_total_infected_current, atol = 0.01)
             
             # refresh current values
             mild_infectious_factor_current = mild_infectious_factor_new
-            total_infected_current = total_infected_new
+            mean_total_infected_current = mean_total_infected_new
 
 
     def test_ratio_presymptomatic_symptomatic( 
@@ -1228,26 +1223,31 @@ class TestClass(object):
      
         ordered_multipliers = sorted( sd_multipliers )
         transmissions = []
-        total_infected = []
+        total_infected_means = []
         for sd_multiplier in ordered_multipliers:
-          params = utils.get_params_swig()
-          for param, value in test_params.items():
-              params.set_param( param, value )  
-          params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
-          model  = utils.get_model_swig( params )
+            total_infected = []
+            for rng_seed in range(1,21):
+                params = utils.get_params_swig()
+                for param, value in test_params.items():
+                    params.set_param( param, value )  
+                params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
+                params.set_param( "rng_seed", rng_seed )
+                model  = utils.get_model_swig( params )
 
-          for time in range( test_params[ "end_time" ] ):
-              model.one_time_step()
+                for time in range( test_params[ "end_time" ] ):
+                    model.one_time_step()
 
-          results = model.one_time_step_results()
-          total_infected.append( results[ "total_infected" ] )
+                results = model.one_time_step_results()
+                total_infected.append( results[ "total_infected" ] )
 
-          del model
-          del params
+                del model
+                del params
 
-        base_infected = total_infected[0]
+            total_infected_means.append(np.mean(total_infected))
 
-        np.testing.assert_allclose([total_infected[0]]*len(total_infected), total_infected, rtol=0.05)
+        base_infected_mean = total_infected_means[0]
+
+        np.testing.assert_allclose([base_infected_mean]*len(total_infected_means), total_infected_means, rtol=0.05)
 
     
 
@@ -1379,7 +1379,7 @@ class TestClass(object):
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
             model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx )
-        
+          
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
         
@@ -1388,11 +1388,12 @@ class TestClass(object):
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_n_trans = df_trans.loc[:,["time_infected","strain_idx"]]
         df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
-        
-        # check no new strain infections before it is introduced
+
+            # check no new strain infections before it is introduced
         np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_idx ].sum(), 0, "new strain cases before seed date" )
         
         # check that the new strain dominates after a set period of time
         n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 0 ].sum()
         n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_idx ].sum()
+        np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
