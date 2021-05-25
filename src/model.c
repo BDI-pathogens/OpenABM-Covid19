@@ -439,7 +439,7 @@ void set_up_individual_hazard( model *model )
 	long idx;
 
 	for( idx = 0; idx < params->n_total; idx++ )
-		initialize_hazard( &(model->population[idx]), params );
+		initialize_hazard( &(model->population[idx]), params, 0 );
 }
 
 /*****************************************************************************************
@@ -698,18 +698,19 @@ void update_event_list_counters( model *model, int type )
 *  Description: allocates memory for strains and cross-immunity matrix
 *  Returns:		void
 ******************************************************************************************/
-
 void set_up_strains( model *model )
 {
 	int max_n_strains = model->params->max_n_strains;
 	model->strains = calloc( max_n_strains, sizeof( strain ) );
 
 	float** cross_immunity;
+	int jdx;
 	cross_immunity = calloc( max_n_strains, sizeof(float *) );
-	for(int idx = 0; idx < max_n_strains; idx++)
+	for( int idx = 0; idx < max_n_strains; idx++)
 	{
 		cross_immunity[idx] 		= calloc( max_n_strains, sizeof(float) );
-		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
+		for( jdx = 0; jdx < max_n_strains; jdx++)
+			cross_immunity[idx][jdx] 	= 1; // set complete cross-immunity
 		model->strains[idx].idx 	= -1; // if idx = -1, strain is uninitialised
 	}		
 	model->cross_immunity = cross_immunity;	

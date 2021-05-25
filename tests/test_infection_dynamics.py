@@ -429,6 +429,24 @@ class TestClass(object):
                 n_equivalent_strains = 10
             )
         ],
+        "test_introduce_new_strain": [
+            dict(
+                test_params = dict(
+                    n_total = 2e4,
+                    n_seed_infection = 100,
+                    end_time = 100
+                ),
+                cross_immunity = 1
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 2e4,
+                    n_seed_infection = 100,
+                    end_time = 100
+                ),
+                cross_immunity = 0
+            )
+        ],
     }
     """
     Test class for checking 
@@ -1439,6 +1457,7 @@ class TestClass(object):
         params.set_param( "max_n_strains",  n_equivalent_strains )
         model  = utils.get_model_swig( params )
 
+        # seed infect people equally with the different strains
         n_seed = round( test_params[ "n_seed_infection" ] / n_equivalent_strains )
         inf_id = np.random.choice( params.get_param( "n_total" ), n_seed * n_equivalent_strains, replace=False)
         inf_id_idx = 0
@@ -1449,8 +1468,8 @@ class TestClass(object):
                 strain_idx = model.add_new_strain( 1.0 )
             
             for jdx in range( n_seed ) :
-                model.seed_infect_by_idx( inf_id_idx, strain_idx = strain_idx )
-                inf_id_idx = inf_id_idx + 1
+                model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = strain_idx )
+                inf_id_idx = inf_id_idx + 1   
         
         model.run( verbose = False )
         model.write_transmissions()
@@ -1463,4 +1482,68 @@ class TestClass(object):
                                     err_msg = "multiple equivalent strains have different numbers of infections")
         np.testing.assert_equal( n_strains, n_equivalent_strains, "not all strains found in infections")
         
+    def test_introduce_new_strain( self, test_params, cross_immunity ):
+        """
+           Check that if a new strain (with equal transmibility) is introduced on a population after 
+           the first wave of one strain has swept throught the population that:
+               1. if cross_immunity = 0 then a new wave of the same size
+               2. if cross_immunity = 1 then no second wave
+        """ 
+                    
+        # add 2 multiple equivalent strains
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value ) 
+        params.set_param( "n_seed_infection", 0 )
+        params.set_param( "max_n_strains", 2 )
+        model  = utils.get_model_swig( params )
         
+        # add a second strain with the same multiplier
+        model.add_new_strain( 1.0 )
+        
+        # add in the cross-immunity matrix
+        cross_immunity_mat = [ 
+            [ 1.0, cross_immunity ], 
+            [ cross_immunity, 1.0 ] 
+        ]
+        model.set_cross_immunity_matrix( cross_immunity_mat )
+        
+        # seed infect people with the first strain
+        n_seed = test_params[ "n_seed_infection" ]
+        inf_id = np.random.choice( params.get_param( "n_total" ), n_seed * 2, replace=False)
+        inf_id_idx = 0
+        
+        for jdx in range( n_seed ) :
+            model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = 0 )
+            inf_id_idx = inf_id_idx + 1
+        
+        for time in range( test_params[ "end_time"] ) :
+            model.one_time_step()      
+            
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_1  = len( df_trans.index )
+    
+        # seed infect people with the second strain and run for the same period of time
+        for jdx in range( n_seed ) :
+            model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = 1 )
+            inf_id_idx = inf_id_idx + 1
+        
+        for time in range( test_params[ "end_time"] ) :
+            model.one_time_step()      
+            
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True ) 
+        n_inf_2 = len( df_trans[ df_trans[ "strain_idx" ] == 1 ].index )
+      
+        if cross_immunity == 1 :
+            # with cross immunity there should not be many new infections 
+            max_factor = 2
+            np.testing.assert_( n_inf_2 < n_seed * max_factor, "too many new infections on a population with herd immunity" )
+        elif cross_immunity == 0 :
+            # without cross immunity there should be roughly the same number of infections in the second wave
+            n_sd = 5 # note distribution is over-dispersed since approx negative binomial
+            np.testing.assert_allclose( n_inf_1, n_inf_2, atol = n_sd * sqrt( max( n_inf_1, n_inf_2) ), 
+                                    err_msg = "multiple equivalent strains have different numbers of infections")
+        else :
+            np.testing.assert_( False, err_msg = "cross_immunity must be 0 or 1 for this test")

@@ -219,6 +219,11 @@ void transmit_virus_by_type(
 
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
+						if( interaction->individual->hazard[ strain_idx ] < 0 ) {
+							interaction = interaction->next;
+							continue;
+						}
+
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
 						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
@@ -498,6 +503,9 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
+	int strain_idx = indiv->infection_events->strain->idx;
+	int time_susceptible, complete_immunity;
+
 	if( model->params->hospital_on )
 	{
 		if( indiv->hospital_state != NOT_IN_HOSPITAL )
@@ -508,7 +516,48 @@ void transition_to_recovered( model *model, individual *indiv )
 	}
 
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
-	set_recovered( indiv, model->params, model->time, model);
+
+	time_susceptible  = indiv->infection_events->times[ SUSCEPTIBLE ];
+	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
+
+	set_recovered( indiv, model->params, model->time, model );
+	if( !complete_immunity ) {
+	    set_susceptible( indiv, model->params, model->time );
+	    indiv->current_disease_event = NULL;
+	    indiv->next_disease_event = NULL;
+	}
+}
+
+/*****************************************************************************************
+*  Name:		apply_cross_immunity
+*  Description: Apply's whether cross-immunity is confered to the other strains based upon
+*  				the polarising cross-immunity model (all or nothing).
+*
+*  				Further, we assume complete correlation in cross-immunity, whereby we draw
+*  				a single U(0,1) variable and all entries in cross-immunity matrix with
+*  				correlation greater than this will have immunity
+*
+*  Returns:		void
+******************************************************************************************/
+short apply_cross_immunity( model *model, individual *indiv, short strain_idx, short time_susceptible )
+{
+	short complete_immunity = TRUE;
+	short sdx;
+	float *cross_immunity = model->cross_immunity[ strain_idx ];
+	float r_unif = gsl_rng_uniform( rng );
+
+	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
+	{
+		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) )
+		{
+			indiv->time_susceptible[ sdx ] = time_susceptible;
+			indiv->hazard[ sdx ]           = -1;
+		}
+		else
+			complete_immunity = FALSE;
+	}
+
+	return complete_immunity;
 }
 
 /*****************************************************************************************

@@ -46,6 +46,7 @@ void transition_to_recovered( model*, individual* );
 void transition_to_susceptible( model*, individual* );
 void transition_to_death( model*, individual* );
 void transition_one_disese_event( model*, individual*, int, int, int );
+short apply_cross_immunity( model*, individual*, short, short );
 
 // calculation of R of disease
 long n_newly_infected( model*, int time );
