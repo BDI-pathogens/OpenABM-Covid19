@@ -13,7 +13,7 @@ Author: p-robot
 import pytest, sys, subprocess, shutil, os
 import numpy as np, pandas as pd
 from scipy import optimize
-from math import exp, log, fabs
+from math import exp, log, fabs, sqrt
 from numpy.ma.testutils import assert_equal
 
 sys.path.append("src/COVID19")
@@ -21,6 +21,7 @@ from parameters import ParameterSet
 
 from . import constant
 from . import utilities as utils
+import COVID19.model as abm
 
 #from test.test_bufio import lengths
 #from CoreGraphics._CoreGraphics import CGRect_getMidX
@@ -416,6 +417,16 @@ class TestClass(object):
                 t_extra_infections      = 10,   
                 t_check_after           = 30, # time after the new strain to check for domination of second strain
                 transmission_multiplier = 2.5
+            )
+        ],
+        "test_equivalent_strains": [
+            dict(
+                test_params = dict(
+                    n_total = 5e4,
+                    n_seed_infection = 100,
+                    end_time = 50
+                ),
+                n_equivalent_strains = 10
             )
         ],
     }
@@ -1403,3 +1414,53 @@ class TestClass(object):
         n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_idx ].sum()
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
+
+    def test_equivalent_strains( self, test_params, n_equivalent_strains ):
+        """
+           Check that if there are multiple equivalent strains then the spread is equally as quick
+        """
+        
+        # run with a single strain
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        model.run( verbose = False )
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_1  = len( df_trans.index )
+             
+        # add n multiple equivalent strains
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        params.set_param( "n_seed_infection", 0 )
+        params.set_param( "max_n_strains",  n_equivalent_strains )
+        model  = utils.get_model_swig( params )
+
+        n_seed = round( test_params[ "n_seed_infection" ] / n_equivalent_strains )
+        inf_id = np.random.choice( params.get_param( "n_total" ), n_seed * n_equivalent_strains, replace=False)
+        inf_id_idx = 0
+        strain_idx = 0
+        for idx in range( n_equivalent_strains ) :
+            
+            if idx != 0 :
+                strain_idx = model.add_new_strain( 1.0 )
+            
+            for jdx in range( n_seed ) :
+                model.seed_infect_by_idx( inf_id_idx, strain_idx = strain_idx )
+                inf_id_idx = inf_id_idx + 1
+        
+        model.run( verbose = False )
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_n   = len( df_trans.index )
+        n_strains = len( df_trans.groupby(["strain_idx"]).size().reset_index(name="n_infections").index )
+    
+        n_sd = 5 # note distribution is over-dispersed since approx negative binomial
+        np.testing.assert_allclose( n_inf_1, n_inf_n, atol = n_sd * sqrt( max( n_inf_1, n_inf_n) ), 
+                                    err_msg = "multiple equivalent strains have different numbers of infections")
+        np.testing.assert_equal( n_strains, n_equivalent_strains, "not all strains found in infections")
+        
+        
