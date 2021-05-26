@@ -89,6 +89,9 @@ void initialize_individual(
 	indiv->time_susceptible = calloc( params->max_n_strains, sizeof( short ) );
 	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 		indiv->time_susceptible[strain_idx] = 0;
+
+	indiv->vaccine_status = NO_VACCINE;
+	indiv->immune_to_symptoms =  NO_IMMUNITY;
 }
 
 /*****************************************************************************************
@@ -262,7 +265,13 @@ void set_vaccine_status( individual* indiv, short current_status )
 			indiv->status = VACCINE_PROTECT_FULL;
 	}
 
-	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
+	if( current_status == VACCINE_PROTECTED_SYMPTOMS )
+		indiv->immune_to_symptoms = TRUE;
+
+	if( current_status == VACCINE_WANED_PROTECTED )
+		indiv->immune_to_symptoms = NO_IMMUNITY;
+
+	if( ( current_status == VACCINE_WANED_FULLY ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
 		indiv->status = SUSCEPTIBLE;
 }
 
