@@ -702,7 +702,7 @@ void intervention_vaccine_wane_full( model *model, individual *indiv )
 	model->n_vaccinated_fully--;
 	model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED );
+	set_vaccine_status( indiv, VACCINE_WANED_FULLY );
 }
 
 /*****************************************************************************************
@@ -730,7 +730,7 @@ void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv )
 	model->n_vaccinated_symptoms--;
 	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED );
+	set_vaccine_status( indiv, VACCINE_WANED_PROTECTED );
 }
 
 /*****************************************************************************************

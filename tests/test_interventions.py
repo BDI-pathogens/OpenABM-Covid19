@@ -2635,8 +2635,12 @@ class TestClass(object):
         
         n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
         n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
-        n_waned       = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED.value ] )
         
+        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_FULL.value :
+            n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_FULLY.value ] )
+        else :
+            n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_SYMPTOMS.value ] )
+            
         np.testing.assert_equal( n_response, 0, "people still covered by the vaccine (with protection)")
         np.testing.assert_equal( n_no_response, 0, "people still covered by the vaccine (without protection)")
         np.testing.assert_equal( n_waned, n_to_vaccinate, "the vaccine for all those vaccinated should have waned")      

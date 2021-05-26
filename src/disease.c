@@ -305,7 +305,7 @@ void new_infection(
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
 
-	if( vaccine_protected( infected ) )
+	if( immune_to_symptoms( infected ) )
 		asymp_frac = 1;
 
 	infected->infection_events->infector = infector;

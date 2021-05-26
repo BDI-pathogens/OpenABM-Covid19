@@ -67,6 +67,7 @@ struct individual{
 	short worker_type;
 
 	short vaccine_status;
+	short immune_to_symptoms;
 };
 
 struct interaction{
@@ -109,7 +110,7 @@ struct infection_event{
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
 #define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
-#define vaccine_protected( indiv ) ( (indiv->vaccine_status == VACCINE_PROTECTED_FULLY) || (indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS ) )
+#define immune_to_symptoms( indiv ) ( ( indiv->immune_to_symptoms != NO_IMMUNITY ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/

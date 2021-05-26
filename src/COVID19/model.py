@@ -178,7 +178,8 @@ class VaccineStatusEnum(enum.Enum):
     VACCINE_NO_PROTECTION = 1
     VACCINE_PROTECTED_FULLY = 2
     VACCINE_PROTECTED_SYMPTOMS = 3
-    VACCINE_WANED = 4
+    VACCINE_WANED_FULLY = 4
+    VACCINE_WANED_SYMPTOMS = 5
 
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
