@@ -561,14 +561,15 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 }
 
 /*****************************************************************************************
-*  Name:               transition_to_susceptible
+*  Name:        transition_to_susceptible
 *  Description: Transitions recovered to susceptible
-*  Returns:            void
+*  Returns:     void
 ******************************************************************************************/
 void transition_to_susceptible( model *model, individual *indiv )
 {
-       transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
-       set_susceptible( indiv, model->params, model->time );
+	// set susceptible needs to know current state, so set on the individual first
+	set_susceptible( indiv, model->params, model->time );
+    transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
 }
 
 

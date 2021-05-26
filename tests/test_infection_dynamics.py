@@ -1325,6 +1325,7 @@ class TestClass(object):
         params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, int(params.get_param("end_time")))
         params.set_param("mean_time_to_susceptible_after_shift", 25)
+        params.set_param("n_total", 50000)
         params.set_param("time_to_susceptible_shift", 15)
         params.set_param("end_time", 100)
 
