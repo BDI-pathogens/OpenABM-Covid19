@@ -112,6 +112,7 @@ struct event{
 	individual *individual;
 	short type;
 	short time;
+	short info_short;
 	event *next;
 	event *last;
 };
@@ -145,12 +146,13 @@ int one_time_step( model* );
 void flu_infections( model* );
 
 event* new_event( model* );
-event* add_individual_to_event_list( model*, int, individual*, int );
+event* add_individual_to_event_list( model*, int, individual*, int, short );
 void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
+void transition_events_info_short( model*, int, void( model*, individual*, short ), int );
 void add_interaction_block( model*, long );
 void return_interactions( model* );
 

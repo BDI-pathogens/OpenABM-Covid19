@@ -477,7 +477,7 @@ int intervention_quarantine_until(
 
 	if( indiv->quarantine_event == NULL )
 	{
-		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time, NO_TIME );
 		set_quarantine_status( indiv, model->params, model->time, TRUE, model );
 	}
 
@@ -489,7 +489,7 @@ int intervention_quarantine_until(
 		remove_event_from_event_list( model, indiv->quarantine_release_event );
 	}
 
-	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time );
+	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time, NO_TIME );
 
 	return TRUE;
 }
@@ -522,7 +522,7 @@ void intervention_test_order( model *model, individual *indiv, int time )
 	{
         if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
         {
-        	add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+        	add_individual_to_event_list( model, TEST_TAKE, indiv, time, NO_TIME );
         	indiv->quarantine_test_result = TEST_ORDERED;
         }
         else
@@ -533,11 +533,11 @@ void intervention_test_order( model *model, individual *indiv, int time )
 			{
 				/* If individual had more than the n contacts, order a priority test */
 				int test_order_wait_priority = model->params->test_order_wait_priority;
-				add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + test_order_wait_priority );
+				add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + test_order_wait_priority, NO_TIME );
 				indiv->quarantine_test_result = TEST_ORDERED_PRIORITY;
 			} else
 			{
-				add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+				add_individual_to_event_list( model, TEST_TAKE, indiv, time, NO_TIME );
 				indiv->quarantine_test_result = TEST_ORDERED;
 			}
         }
@@ -576,18 +576,16 @@ short intervention_vaccinate(
 	{
 		if( vaccine_type == VACCINE_TYPE_FULL )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
-			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + time_to_protect );
-			add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, model->time + vaccine_protection_period );
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, time_to_protect );
+			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + time_to_protect, model->time + vaccine_protection_period );
 		}
 		else if( vaccine_type == VACCINE_TYPE_SYMPTOMS )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
-			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + time_to_protect );
-			add_individual_to_event_list( model, VACCINE_WANE_SYMPTOMS_ONLY, indiv, model->time + vaccine_protection_period );
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, time_to_protect );
+			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + time_to_protect, model->time + vaccine_protection_period);
 		}
 	} else
-		set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
+		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, MAX_TIME );
 
 	return TRUE;
 }
@@ -683,12 +681,14 @@ long intervention_vaccinate_age_group(
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_protect_full( model *model, individual *indiv )
+void intervention_vaccine_protect_full( model *model, individual *indiv, short info_short )
 {
 	model->n_vaccinated_fully++;
 	model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
 
-	set_vaccine_status( indiv, VACCINE_PROTECTED_FULLY );
+	set_vaccine_status( indiv, VACCINE_PROTECTED_FULLY, model->time, info_short );
+
+	add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, info_short, NO_TIME );
 }
 
 /*****************************************************************************************
@@ -697,12 +697,12 @@ void intervention_vaccine_protect_full( model *model, individual *indiv )
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_wane_full( model *model, individual *indiv )
+void intervention_vaccine_wane_full( model *model, individual *indiv, short info_short )
 {
 	model->n_vaccinated_fully--;
 	model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED_FULLY );
+	set_vaccine_status( indiv, VACCINE_WANED_FULLY, model->time, MAX_TIME );
 }
 
 /*****************************************************************************************
@@ -711,12 +711,15 @@ void intervention_vaccine_wane_full( model *model, individual *indiv )
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_protect_symptoms_only( model *model, individual *indiv )
+void intervention_vaccine_protect_symptoms_only( model *model, individual *indiv, short info_short )
 {
 	model->n_vaccinated_symptoms++;
 	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
 
-	set_vaccine_status( indiv, VACCINE_PROTECTED_SYMPTOMS );
+	set_vaccine_status( indiv, VACCINE_PROTECTED_SYMPTOMS, model->time, info_short );
+
+	add_individual_to_event_list( model, VACCINE_WANE_SYMPTOMS_ONLY, indiv, info_short, NO_TIME );
+
 }
 
 /*****************************************************************************************
@@ -725,12 +728,12 @@ void intervention_vaccine_protect_symptoms_only( model *model, individual *indiv
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv )
+void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv, short info_short )
 {
 	model->n_vaccinated_symptoms--;
 	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED_PROTECTED );
+	set_vaccine_status( indiv, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
 }
 
 /*****************************************************************************************
@@ -765,7 +768,7 @@ void intervention_test_take( model *model, individual *indiv )
 		indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
 
 
-	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time );
+	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time, NO_TIME );
 }
 
 /*****************************************************************************************
@@ -796,7 +799,7 @@ void intervention_test_result( model *model, individual *indiv )
 		if( indiv->infection_events->is_case == FALSE )
 		{
 			set_case( indiv, model->time );
-			add_individual_to_event_list( model, CASE, indiv, model->time );
+			add_individual_to_event_list( model, CASE, indiv, model->time, NO_TIME );
 		}
 
 		if( !is_in_hospital( indiv ) || !(model->params->allow_clinical_diagnosis) )
@@ -1117,7 +1120,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		remove_traced_on_this_trace( model, indiv );
 		if( indiv->index_token_release_event != NULL )
 			remove_event_from_event_list( model, indiv->index_token_release_event );
-		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms );
+		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms, NO_TIME );
 	}
 }
 
@@ -1147,7 +1150,7 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 			 model->params->manual_trace_on_hospitalization &&
 			 !model->params->manual_trace_on_positive )
 	{
-		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + model->params->manual_trace_delay );
+		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + model->params->manual_trace_delay, NO_TIME );
 	}
 }
 
@@ -1194,7 +1197,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	    ( params->quarantine_on_traced || params->test_on_traced )
 	)
 	{
-		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay );
+		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay, NO_TIME );
 		release_time = max( release_time, model->time + params->manual_trace_delay);
 	}
 
@@ -1203,7 +1206,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	if( indiv->index_token_release_event != NULL )
 		remove_event_from_event_list( model, indiv->index_token_release_event );
-	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, release_time );
+	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, release_time, NO_TIME );
 
 	remove_traced_on_this_trace( model, indiv );
 }

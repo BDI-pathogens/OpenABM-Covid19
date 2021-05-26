@@ -225,7 +225,7 @@ void transition_one_hospital_event(
 	if( to != NO_EVENT )
 	{
 		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
+		indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NO_TIME );
 	}
 }
 
