@@ -447,6 +447,16 @@ class TestClass(object):
                 cross_immunity = 0
             )
         ],
+        "test_monoton_introduce_new_strain_cross_immunity": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 100,
+                    end_time = 50
+                ),
+                cross_immunity = [ 0, 0.2, 0.4, 0.6, 0.8, 1.0 ]
+            )
+        ],
     }
     """
     Test class for checking 
@@ -1485,8 +1495,8 @@ class TestClass(object):
         
     def test_introduce_new_strain( self, test_params, cross_immunity ):
         """
-           Check that if a new strain (with equal transmibility) is introduced on a population after 
-           the first wave of one strain has swept throught the population that:
+           Check that if a new strain (with equal transmisibility) is introduced on a population after 
+           the first wave of one strain has swept through the population that:
                1. if cross_immunity = 0 then a new wave of the same size
                2. if cross_immunity = 1 then no second wave
         """ 
@@ -1546,5 +1556,20 @@ class TestClass(object):
             n_sd = 5 # note distribution is over-dispersed since approx negative binomial
             np.testing.assert_allclose( n_inf_1, n_inf_2, atol = n_sd * sqrt( max( n_inf_1, n_inf_2) ), 
                                     err_msg = "multiple equivalent strains have different numbers of infections")
-        else :
-            np.testing.assert_( False, err_msg = "cross_immunity must be 0 or 1 for this test")
+      
+        return [ n_inf_1, n_inf_2 ]
+    
+    def test_monoton_introduce_new_strain_cross_immunity( self, test_params, cross_immunity ) :
+        """
+           Check that if a new strain (with equal transmisibility) is introduced on a population after 
+           the first wave of one strain has swept through the population being reinfected decreases
+           montonically with the cross-immunity
+        """ 
+        
+        last_inf = test_params[ "n_total"]
+        for cross_im in cross_immunity :
+            new_inf = self.test_introduce_new_strain(test_params, cross_im)[1]
+            np.testing.assert_( new_inf < last_inf, "new infections not declining monotonically with cross-immunity" )
+            last_inf = new_inf
+        
+        
