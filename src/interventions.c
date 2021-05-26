@@ -575,15 +575,19 @@ short intervention_vaccinate(
 	if( gsl_ran_bernoulli( rng, efficacy ) )
 	{
 		if( vaccine_type == VACCINE_TYPE_FULL )
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, VACCINE_PROTECTED_FULLY );
-
-		if( vaccine_type == VACCINE_TYPE_SYMPTOMS )
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, VACCINE_PROTECTED_SYMPTOMS );
-
-		add_individual_to_event_list( model, VACCINE_PROTECT, indiv, model->time + time_to_protect );
-		add_individual_to_event_list( model, VACCINE_WANE, indiv, model->time + vaccine_protection_period );
+		{
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
+			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + time_to_protect );
+			add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, model->time + vaccine_protection_period );
+		}
+		else if( vaccine_type == VACCINE_TYPE_SYMPTOMS )
+		{
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
+			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + time_to_protect );
+			add_individual_to_event_list( model, VACCINE_WANE_SYMPTOMS_ONLY, indiv, model->time + vaccine_protection_period );
+		}
 	} else
-		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, NO_EVENT );
+		set_vaccine_status( indiv, VACCINE_NO_PROTECTION );
 
 	return TRUE;
 }
@@ -674,47 +678,59 @@ long intervention_vaccinate_age_group(
 }
 
 /*****************************************************************************************
-*  Name:		intervention_vaccine_protect
-*  Description: The vaccine takes effect
+*  Name:		intervention_vaccine_protect_full
+*  Description: The vaccine takes effect (full protection)
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_protect( model *model, individual *indiv )
+void intervention_vaccine_protect_full( model *model, individual *indiv )
 {
-	transition_vaccine_status( indiv );
+	model->n_vaccinated_fully++;
+	model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
 
-	if( indiv->vaccine_status == VACCINE_PROTECTED_FULLY )
-	{
-		model->n_vaccinated_fully++;
-		model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
-	}
-	if( indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
-	{
-		model->n_vaccinated_symptoms++;
-		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
-	}
+	set_vaccine_status( indiv, VACCINE_PROTECTED_FULLY );
 }
 
 /*****************************************************************************************
-*  Name:		intervention_vaccine_wane
-*  Description: The vaccine takes effect
+*  Name:		intervention_vaccine_wane_full
+*  Description: The vaccine wanes (full protection)
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_wane( model *model, individual *indiv )
+void intervention_vaccine_wane_full( model *model, individual *indiv )
 {
-	if( indiv->vaccine_status == VACCINE_PROTECTED_FULLY )
-	{
-		model->n_vaccinated_fully--;
-		model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
-	}
-	if( indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
-	{
-		model->n_vaccinated_symptoms--;
-		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
-	}
+	model->n_vaccinated_fully--;
+	model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED, NO_EVENT );
+	set_vaccine_status( indiv, VACCINE_WANED );
+}
+
+/*****************************************************************************************
+*  Name:		intervention_vaccine_protect_symptoms_only
+*  Description: The vaccine takes effect (symptoms only)
+*
+*  Returns:		void
+******************************************************************************************/
+void intervention_vaccine_protect_symptoms_only( model *model, individual *indiv )
+{
+	model->n_vaccinated_symptoms++;
+	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
+
+	set_vaccine_status( indiv, VACCINE_PROTECTED_SYMPTOMS );
+}
+
+/*****************************************************************************************
+*  Name:		intervention_vaccine_wane_symptoms_only
+*  Description: The vaccine wanes (symptoms only)
+*
+*  Returns:		void
+******************************************************************************************/
+void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv )
+{
+	model->n_vaccinated_symptoms--;
+	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
+
+	set_vaccine_status( indiv, VACCINE_WANED );
 }
 
 /*****************************************************************************************

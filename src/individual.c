@@ -247,34 +247,22 @@ void set_dead( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
-*  Name:		transition_vaccine_status
-*  Description: moves a person to there next vaccine status
-*  Returns:		void
-******************************************************************************************/
-void transition_vaccine_status( individual* indiv )
-{
-	if( indiv->vaccine_status_next != NO_EVENT )
-		set_vaccine_status( indiv, indiv->vaccine_status_next, NO_EVENT );
-}
-
-/*****************************************************************************************
 *  Name:		set_vaccine_status
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, short current_status, short next_status )
+void set_vaccine_status( individual* indiv, short current_status )
 {
     // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
 	indiv->vaccine_status      = current_status;
-	indiv->vaccine_status_next = next_status;
 
 	if( current_status == VACCINE_PROTECTED_FULLY )
 	{
 		if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
-			indiv->status = VACCINE_PROTECT;
+			indiv->status = VACCINE_PROTECT_FULL;
 	}
 
-	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT ) )
+	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
 		indiv->status = SUSCEPTIBLE;
 }
 
