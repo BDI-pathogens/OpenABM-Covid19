@@ -1122,7 +1122,7 @@ class TestClass(object):
         inter_initial = pd.read_csv(constant.TEST_INTERACTION_FILE)
         
         # run to the end
-        model.run()
+        model.run( verbose = False )
         model.write_interactions_file() 
         model.write_transmissions()  
         inter_final   = pd.read_csv(constant.TEST_INTERACTION_FILE)
