@@ -254,7 +254,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, short current_status )
+void set_vaccine_status( individual* indiv, short current_status, short time, short time_until )
 {
     // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
 	indiv->vaccine_status      = current_status;
@@ -266,9 +266,9 @@ void set_vaccine_status( individual* indiv, short current_status )
 	}
 
 	if( current_status == VACCINE_PROTECTED_SYMPTOMS )
-		indiv->immune_to_symptoms = TRUE;
+		indiv->immune_to_symptoms = max( indiv->immune_to_symptoms, time_until );
 
-	if( current_status == VACCINE_WANED_PROTECTED )
+	if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms == time ) )
 		indiv->immune_to_symptoms = NO_IMMUNITY;
 
 	if( ( current_status == VACCINE_WANED_FULLY ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
