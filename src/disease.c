@@ -368,7 +368,7 @@ void transition_one_disese_event(
 	if( to != NO_EVENT )
 	{
 		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NO_TIME );
+		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
 
