@@ -1,5 +1,4 @@
-	/*
- * model.c
+ /* model.c
  *
  *  Created on: 5 Mar 2020
  *      Author: hinchr
@@ -590,7 +589,7 @@ void flu_infections( model *model )
 *  				indiv:	pointer to the individual
 *  				time:	time of the event (int)
 *  				model:	pointer to the model
-*  				info_short: a short which can be passed to the transition function
+*  				info:   a pointer which can be passed to the transition function
 *
 *  Returns:		a pointer to the newly added event
 ******************************************************************************************/
@@ -599,7 +598,7 @@ event* add_individual_to_event_list(
 	int type,
 	individual *indiv,
 	int time,
-	short info_short
+	void *info
 )
 {
 	event_list *list    = &(model->event_lists[ type ]);
@@ -607,7 +606,7 @@ event* add_individual_to_event_list(
 	event->individual   = indiv;
 	event->type         = type;
 	event->time         = time;
-	event->info_short   = info_short;
+	event->info  = info;
 
 	if( time < MAX_TIME){
 		if( list->n_daily_current[time] >0  )
@@ -1003,14 +1002,14 @@ void transition_events(
 }
 
 /*****************************************************************************************
-*  Name:		transition_events_info_short
+*  Name:		transition_events_info
 *  Description: Transitions all people from one type of event
 *  Returns:		void
 ******************************************************************************************/
-void transition_events_info_short(
+void transition_events_info(
 	model *model_ptr,
 	int type,
-	void (*transition_func)( model*, individual*, short ),
+	void (*transition_func)( model*, individual*, void* ),
 	int remove_event
 )
 {
@@ -1026,7 +1025,7 @@ void transition_events_info_short(
 		event      = next_event;
 		next_event = event->next;
 		indiv      = event->individual;
-		transition_func( model_ptr, indiv, event->info_short );
+		transition_func( model_ptr, indiv, event->info );
 
 		if( remove_event )
 			remove_event_from_event_list( model_ptr, event );
@@ -1501,10 +1500,10 @@ int one_time_step( model *model )
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
 	}
 
-	transition_events_info_short( model, VACCINE_PROTECT_FULL,          &intervention_vaccine_protect_full, TRUE );
-	transition_events_info_short( model, VACCINE_WANE_FULL,             &intervention_vaccine_wane_full, TRUE );
-	transition_events_info_short( model, VACCINE_PROTECT_SYMPTOMS_ONLY, &intervention_vaccine_protect_symptoms_only, TRUE );
-	transition_events_info_short( model, VACCINE_WANE_SYMPTOMS_ONLY,    &intervention_vaccine_wane_symptoms_only, TRUE );
+	transition_events_info( model, VACCINE_PROTECT_FULL,          &intervention_vaccine_protect_full, TRUE );
+	transition_events_info( model, VACCINE_WANE_FULL,             &intervention_vaccine_wane_full, TRUE );
+	transition_events_info( model, VACCINE_PROTECT_SYMPTOMS_ONLY, &intervention_vaccine_protect_symptoms_only, TRUE );
+	transition_events_info( model, VACCINE_WANE_SYMPTOMS_ONLY,    &intervention_vaccine_wane_symptoms_only, TRUE );
 
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );

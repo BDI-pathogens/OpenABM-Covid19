@@ -73,10 +73,10 @@ vaccine* get_vaccine_by_id( model*, short );
 short intervention_vaccinate( model*, individual*, vaccine* );
 short intervention_vaccinate_by_idx( model*, long, vaccine* );
 long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], vaccine*, long[ N_AGE_GROUPS ] );
-void intervention_vaccine_protect_full( model*, individual*, short );
-void intervention_vaccine_wane_full( model*, individual*, short );
-void intervention_vaccine_protect_symptoms_only( model*, individual*, short );
-void intervention_vaccine_wane_symptoms_only( model*, individual*, short );
+void intervention_vaccine_protect_full( model*, individual*, void* );
+void intervention_vaccine_wane_full( model*, individual*, void* );
+void intervention_vaccine_protect_symptoms_only( model*, individual*, void* );
+void intervention_vaccine_wane_symptoms_only( model*, individual*, void* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );
