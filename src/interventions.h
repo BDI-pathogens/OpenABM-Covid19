@@ -70,9 +70,9 @@ void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
 short add_vaccine( model*, short, double, short, short );
 vaccine* get_vaccine_by_id( model*, short );
-short intervention_vaccinate( model*, individual*, short, double, short, short );
-short intervention_vaccinate_by_idx( model*, long, short, double, short, short );
-long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], short, double, short, short, long[ N_AGE_GROUPS ] );
+short intervention_vaccinate( model*, individual*, vaccine* );
+short intervention_vaccinate_by_idx( model*, long, vaccine* );
+long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], vaccine*, long[ N_AGE_GROUPS ] );
 void intervention_vaccine_protect_full( model*, individual*, short );
 void intervention_vaccine_wane_full( model*, individual*, short );
 void intervention_vaccine_protect_symptoms_only( model*, individual*, short );

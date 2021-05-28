@@ -207,6 +207,7 @@ class VaccineSchedule(object):
         frac_60_69 = 0,
         frac_70_79 = 0,
         frac_80    = 0,
+        vaccine    = -1,
         vaccine_type    = 0,
         efficacy        = 1.0,
         time_to_protect = 15,
@@ -225,6 +226,7 @@ class VaccineSchedule(object):
         self.efficacy        = efficacy
         self.time_to_protect = time_to_protect
         self.vaccine_protection_period = vaccine_protection_period
+        self.vaccine  = vaccine
         
         self.c_total_vaccinated = covid19.longArray( len(AgeGroupEnum)  )
         for age in AgeGroupEnum:
@@ -930,7 +932,7 @@ class Model:
         idx = covid19.add_vaccine( self.c_model, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
         return Vaccine( self, idx )
  
-    def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
+    def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000, vaccine = -1 ):
         """
         Vaccinates an individual by ID of individual
         
@@ -940,32 +942,40 @@ class Model:
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)")
 
-        if ( efficacy < 0 ) | ( efficacy > 1 ) :
-            raise ModelParameterException( "efficacy must be between 0 and 1")
-        
-        if time_to_protect < 1 :
-            raise ModelParameterException( "vaccine must take at least one day to take effect" )
-        
-        if vaccine_protection_period <= time_to_protect :
-            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
-    
-        if not VaccineTypesEnum.has_value(vaccine_type) :
-            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+        if vaccine == -1 :
 
-        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+            if ( efficacy < 0 ) | ( efficacy > 1 ) :
+                raise ModelParameterException( "efficacy must be between 0 and 1")
+        
+            if time_to_protect < 1 :
+                raise ModelParameterException( "vaccine must take at least one day to take effect" )
+        
+            if vaccine_protection_period <= time_to_protect :
+                raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
+    
+            if not VaccineTypesEnum.has_value(vaccine_type) :
+                raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+            
+            vaccine = self.add_vaccine( vaccine_type = vaccine_type, efficacy = efficacy, time_to_protect = time_to_protect, 
+                                        vaccine_protection_period = vaccine_protection_period )
+
+        if not isinstance( vaccine, Vaccine ) :
+            ModelException( "argument vaccine must be an object of type Vaccine")
+
+        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine.c_vaccine );
 
     def vaccinate_schedule(self, schedule ):
 
         if not isinstance( schedule, VaccineSchedule ) :
             ModelException( "argument VaccineSchedule must be an object of type VaccineSchedule")
+           
+        if schedule.vaccine == -1 :
+            schedule.vaccine = self.add_vaccine( schedule.vaccine_type, schedule.efficacy, schedule.time_to_protect, schedule.vaccine_protection_period )
             
         return covid19.intervention_vaccinate_age_group( 
             self.c_model, 
             schedule.c_fraction_to_vaccinate, 
-            schedule.vaccine_type,
-            schedule.efficacy,
-            schedule.time_to_protect,
-            schedule.vaccine_protection_period,
+            schedule.vaccine.c_vaccine,
             schedule.c_total_vaccinated
         )   
     
