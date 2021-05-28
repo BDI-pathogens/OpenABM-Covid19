@@ -232,7 +232,7 @@ enum VACCINE_TYPES{
 #define N_HOSPITAL_INTERACTION_TYPES 5
 
 #define NO_IMMUNITY -1
-#define NO_TIME -1
+#define ALL_STRAINS -1
 
 extern gsl_rng * rng;
 
