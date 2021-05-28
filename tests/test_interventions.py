@@ -2501,14 +2501,17 @@ class TestClass(object):
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
         df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
 
+        # add the vaccine
+        vaccine = model.add_vaccine(vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+
         # check people are vaccinated
         for idx in idx_vaccinated :
-            vaccinated =  model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
             np.testing.assert_( vaccinated, "failed to vaccinate individual")
 
         # check they can't be vaccinated again
         for idx in idx_vaccinated :
-            vaccinated =  model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
             np.testing.assert_( vaccinated == 0, "vaccinated somebody twice" )
         
         # check the output of the individual file    
@@ -2566,9 +2569,12 @@ class TestClass(object):
         n_total        = params.get_param( "n_total" )
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
+        # add the vaccine
+        vaccine = model.add_vaccine(vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+
         # vaccinate people at random
         for idx in idx_vaccinated :
-            model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            model.vaccinate_individual( idx, vaccine = vaccine )
 
         # let the vaccine take effect
         for time in range(time_to_protect) :
@@ -2626,9 +2632,12 @@ class TestClass(object):
         n_total        = params.get_param( "n_total" )
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
+        # add the vaccine
+        vaccine = model.add_vaccine(vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+
         # vaccinate people at random
         for idx in idx_vaccinated :
-            model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            model.vaccinate_individual( idx, vaccine = vaccine )
 
         # let the vaccine take effect
         for time in range(time_to_protect) :

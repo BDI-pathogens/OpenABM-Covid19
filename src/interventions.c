@@ -604,22 +604,16 @@ vaccine* get_vaccine_by_id( model *model, short vaccine_idx )
 *  Name:		intervention_vaccinate
 *  Description: Vaccinate an individual
 *
-*  Arguments:   model           - pointer to the model
-*  				indiv           - pointer to the individual to be vaccinated
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
-*  				vaccine_protection_period - length of time the vaccine provides protection
+*  Arguments:   model    - pointer to the model
+*  				indiv    - pointer to the individual to be vaccinated
+*  				vaccine  - pointer to the vaccine
 *
 *  Returns:		void
 ******************************************************************************************/
 short intervention_vaccinate(
 	model *model,
 	individual *indiv,
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period
+	vaccine *vaccine
 )
 {
 	if( indiv->vaccine_status != NO_VACCINE )
@@ -628,17 +622,17 @@ short intervention_vaccinate(
 	if( ( indiv->status == DEATH ) | is_in_hospital( indiv ) )
 		return FALSE;
 
-	if( gsl_ran_bernoulli( rng, efficacy ) )
+	if( gsl_ran_bernoulli( rng, vaccine->efficacy ) )
 	{
-		if( vaccine_type == VACCINE_TYPE_FULL )
+		if( vaccine->vaccine_type == VACCINE_TYPE_FULL )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, time_to_protect );
-			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + time_to_protect, model->time + vaccine_protection_period );
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + vaccine->time_to_protect, model->time + vaccine->vaccine_protection_period );
 		}
-		else if( vaccine_type == VACCINE_TYPE_SYMPTOMS )
+		else if( vaccine->vaccine_type == VACCINE_TYPE_SYMPTOMS )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, time_to_protect );
-			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + time_to_protect, model->time + vaccine_protection_period);
+			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + vaccine->time_to_protect, model->time + vaccine->vaccine_protection_period);
 		}
 	} else
 		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, MAX_TIME );
@@ -650,25 +644,19 @@ short intervention_vaccinate(
 *  Name:		intervention_vaccinate_by_idx
 *  Description: Vaccinate an individual
 *
-*  Arguments:   model           - pointer to the model
-*  				idx             - idx of person to vaccinate
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
-*  				vaccine_protection_period - length of time the vaccine provides protection
+*  Arguments:   model     - pointer to the model
+*  				idx       - idx of person to vaccinate
+*  				vaccine   - pointer to a vaccine
 *
 *  Returns:		1 if vaccinated 0 if not
 ******************************************************************************************/
 short intervention_vaccinate_by_idx(
 	model *model,
 	long idx,
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period
+	vaccine *vaccine
 )
 {
-	return intervention_vaccinate( model, &(model->population[idx]), vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+	return intervention_vaccinate( model, &(model->population[idx]), vaccine );
 }
 
 
@@ -676,21 +664,16 @@ short intervention_vaccinate_by_idx(
 *  Name:		intervention_vaccinate_age_groups
 *  Description: Vaccinate a fraction of each age group
 *
-*  Arguments:   model           - pointer to the model
-*  				fractions       - the fraction of the population in each age group to vaccinate
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
+*  Arguments:   model       - pointer to the model
+*  				fractions   - the fraction of the population in each age group to vaccinate
+*  				vaccine     - pointer to the type of vaccine
 *
 *  Returns:		long - the total number of people vaccinated
 ******************************************************************************************/
 long intervention_vaccinate_age_group(
 	model *model,
 	double fractions[ N_AGE_GROUPS ],
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period,
+	vaccine *vaccine,
 	long n_vaccinated[ N_AGE_GROUPS ]
 )
 {
@@ -718,7 +701,7 @@ long intervention_vaccinate_age_group(
 		if( indiv->vaccine_status != NO_VACCINE )
 			continue;
 
-		if( intervention_vaccinate( model, indiv, vaccine_type, efficacy, time_to_protect, vaccine_protection_period ) )
+		if( intervention_vaccinate( model, indiv, vaccine ) )
 		{
 			n_vaccinated[ age ]++;
 			total_vaccinated++;
