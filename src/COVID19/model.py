@@ -835,14 +835,35 @@ class Model:
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)" )
 
-        if ( strain_idx < 0 ) | ( strain_idx >= covid19.MAX_N_STRAINS ) :
-            raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < {covid19.MAX_N_STRAINS})" )
+        n_strains = self.c_model.n_initialised_strains;
+        if ( strain_idx < 0 ) | ( strain_idx >= n_strains ) :
+            raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
 
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
 
     def add_new_strain(self, transmission_multiplier ):       
 
+        n_strains = self.c_model.n_initialised_strains;
+        max_n_strains = self._params_obj.get_param("max_n_strains")
+
+        if n_strains == max_n_strains :
+            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialization of the model" )
+        
         return covid19.add_new_strain( self.c_model, transmission_multiplier );
+
+    def set_cross_immunity_matrix(self, cross_immunity ):
+
+        max_n_strains = self._params_obj.get_param("max_n_strains")
+        if len(cross_immunity) > max_n_strains:
+            raise ParameterException( f"Too many rows in cross_immunity (maximum allowed: {max_n_strains}" )
+
+        for caught_idx in range(len(cross_immunity)):
+            if len(cross_immunity) > max_n_strains:
+                raise ParameterException( f"Too many columns in cross_immunity row with index={i} (maximum allowed: {max_n_strains}" )
+            for conferred_idx, probability in enumerate(cross_immunity[caught_idx]):
+                if ( probability < 0 ) | ( probability > 1 ):
+                    raise ParameterException( f"Cross-immunity probability must be in the interval [0,1]")
+                covid19.set_cross_immunity_probability( self.c_model, caught_idx, conferred_idx, probability )
 
     def get_network_info(self, max_ids= 1000):
            

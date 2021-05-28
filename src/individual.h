@@ -35,11 +35,12 @@ struct individual{
 	interaction **interactions;
 
 	short status;
-	float hazard;
+	float *hazard;
 	float infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
+	short *time_susceptible;
 
 	short quarantined;
 	event *quarantine_event;
@@ -117,7 +118,7 @@ struct infection_event{
 /************************************************************************/
 
 void initialize_individual( individual*, parameters*, long );
-void initialize_hazard( individual*, parameters* );
+void initialize_hazard( individual*, parameters*, int );
 void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
 void set_quarantine_status( individual*, parameters*, int, int, model* );

@@ -399,4 +399,3 @@ void build_household_network_from_directroy( network *network, directory *direct
 			}
 	}
 }
-

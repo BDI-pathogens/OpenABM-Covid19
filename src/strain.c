@@ -21,6 +21,9 @@ short add_new_strain(
 {
 	strain *strain_ptr;
 
+	if( model->n_initialised_strains == model->params->max_n_strains )
+		return ERROR;
+
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;

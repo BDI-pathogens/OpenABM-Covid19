@@ -41,7 +41,7 @@ void initialize_individual(
 	}
 
 	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short	) );
+	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short ) );
 	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 		indiv->infection_events->times[jdx] = UNKNOWN;
 
@@ -84,6 +84,11 @@ void initialize_individual(
 	{
 		indiv->infectiousness_multiplier = 1;
 	}
+
+	indiv->hazard           = calloc( params->max_n_strains, sizeof( float ) );
+	indiv->time_susceptible = calloc( params->max_n_strains, sizeof( short ) );
+	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
+		indiv->time_susceptible[strain_idx] = 0;
 }
 
 /*****************************************************************************************
@@ -95,10 +100,13 @@ void initialize_individual(
 ******************************************************************************************/
 void initialize_hazard(
 	individual *indiv,
-	parameters *params
+	parameters *params,
+	int current_time
 )
 {
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+	for( int idx = 0; idx < params->max_n_strains; idx++ )
+		if( indiv->time_susceptible[ idx ] == current_time )
+			indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 }
 
 /*****************************************************************************************
@@ -295,25 +303,29 @@ void set_recovered( individual *indiv, parameters* params, int time, model *mode
 ******************************************************************************************/
 void set_susceptible( individual *indiv, parameters* params, int time )
 {
-	indiv->status        = SUSCEPTIBLE;
+	int current_status = indiv->status;
+	indiv->status = SUSCEPTIBLE;
 
-	infection_event *infection_event_ptr;
-	infection_event_ptr = indiv->infection_events;
+	if( current_status != SUSCEPTIBLE )
+	{
+		infection_event *infection_event_ptr;
+		infection_event_ptr = indiv->infection_events;
 
-	int jdx;
-	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
-	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-		indiv->infection_events->times[jdx] = UNKNOWN;
+		int jdx;
+		indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
+		indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
+		for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+			indiv->infection_events->times[jdx] = UNKNOWN;
 
-	indiv->infection_events->infector_status  = UNKNOWN;
-	indiv->infection_events->infector_network = UNKNOWN;
-	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->next =  infection_event_ptr;
-	indiv->infection_events->is_case     = FALSE;
+		indiv->infection_events->infector_status  		= UNKNOWN;
+		indiv->infection_events->infector_network 		= UNKNOWN;
+		indiv->infection_events->time_infected_infector = UNKNOWN;
+		indiv->infection_events->next 					= infection_event_ptr;
+		indiv->infection_events->is_case     			= FALSE;
+	}
 
 	// Reset the hazard for the newly susceptible individual
-	initialize_hazard( indiv, params );
+	initialize_hazard( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -441,6 +453,8 @@ void destroy_individual( individual *indiv )
 	}
 	free( indiv->n_interactions );
 	free( indiv->interactions );
+	free( indiv->hazard );
+	free( indiv->time_susceptible );
 }
 
 /*****************************************************************************************
@@ -488,7 +502,10 @@ void print_individual( model *model, long idx)
 	printf("indiv->base_random_interactions: %d\n", indiv->base_random_interactions );
 	printf("indiv->random_interactions: %d\n", indiv->random_interactions );
 
-	printf("indiv->hazard: %f\n", indiv->hazard );
+	printf("indiv->hazard:");
+	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+		printf(" %f", indiv->hazard[strain_idx]);
+	printf("\n");
 	printf("indiv->quarantined: %d\n", indiv->quarantined );
 	printf("indiv->quarantine_test_result: %d\n", indiv->quarantine_test_result );
 	

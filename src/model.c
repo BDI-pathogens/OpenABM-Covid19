@@ -41,6 +41,7 @@ model* new_model( parameters *params )
 	model_ptr->time   = 0;
 	model_ptr->rebuild_networks = TRUE;
 	model_ptr->user_network = NULL;
+	model_ptr->n_initialised_strains = 0;
     if (params->occupation_network_table == NULL)
     {
         model_ptr->use_custom_occupation_networks = 0;
@@ -176,7 +177,7 @@ void destroy_model( model *model )
     destroy_risk_scores( model );
 
     free( model->strains );
-    for( idx = 0; idx < MAX_N_STRAINS; idx++ )
+    for( idx = 0; idx < model->params->max_n_strains; idx++ )
 		free( model->cross_immunity[idx] );
 	free( model->cross_immunity );
 
@@ -438,7 +439,7 @@ void set_up_individual_hazard( model *model )
 	long idx;
 
 	for( idx = 0; idx < params->n_total; idx++ )
-		initialize_hazard( &(model->population[idx]), params );
+		initialize_hazard( &(model->population[idx]), params, 0 );
 }
 
 /*****************************************************************************************
@@ -697,17 +698,19 @@ void update_event_list_counters( model *model, int type )
 *  Description: allocates memory for strains and cross-immunity matrix
 *  Returns:		void
 ******************************************************************************************/
-
 void set_up_strains( model *model )
 {
-	model->strains = calloc( MAX_N_STRAINS, sizeof( strain ) );
+	int max_n_strains = model->params->max_n_strains;
+	model->strains = calloc( max_n_strains, sizeof( strain ) );
 
 	float** cross_immunity;
-	cross_immunity = calloc( MAX_N_STRAINS, sizeof(float *) );
-	for(int idx = 0; idx < MAX_N_STRAINS; idx++)
+	int jdx;
+	cross_immunity = calloc( max_n_strains, sizeof(float *) );
+	for( int idx = 0; idx < max_n_strains; idx++)
 	{
-		cross_immunity[idx] 		= calloc( MAX_N_STRAINS, sizeof(float) );
-		cross_immunity[idx][idx] 	= 1; // set diagonal to 1
+		cross_immunity[idx] 		= calloc( max_n_strains, sizeof(float) );
+		for( jdx = 0; jdx < max_n_strains; jdx++)
+			cross_immunity[idx][jdx] 	= 1; // set complete cross-immunity
 		model->strains[idx].idx 	= -1; // if idx = -1, strain is uninitialised
 	}		
 	model->cross_immunity = cross_immunity;	

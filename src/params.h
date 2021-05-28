@@ -198,6 +198,9 @@ typedef struct{
 	//average amount of interactions healthcare workers have with each other per day
 	double hcw_mean_work_interactions;
 
+	// maximum number of strains allowed
+	int max_n_strains;
+
 } parameters;
 
 /************************************************************************/

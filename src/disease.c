@@ -203,7 +203,7 @@ void transmit_virus_by_type(
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx    = infector->infection_events->strain->idx;
+				strain_idx 	  = infector->infection_events->strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -219,10 +219,15 @@ void transmit_virus_by_type(
 
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
-                        interaction->individual->hazard -= hazard_rate;
+						if( interaction->individual->hazard[ strain_idx ] < 0 ) {
+							interaction = interaction->next;
+							continue;
+						}
 
-						if( interaction->individual->hazard < 0 )
+						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
+						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
+
+						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
 							new_infection( model, interaction->individual, infector, interaction->network_id );
 							interaction->individual->infection_events->infector_network = interaction->type;
@@ -498,6 +503,9 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
+	int strain_idx = indiv->infection_events->strain->idx;
+	int time_susceptible, complete_immunity;
+
 	if( model->params->hospital_on )
 	{
 		if( indiv->hospital_state != NOT_IN_HOSPITAL )
@@ -508,18 +516,60 @@ void transition_to_recovered( model *model, individual *indiv )
 	}
 
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
-	set_recovered( indiv, model->params, model->time, model);
+
+	time_susceptible  = indiv->infection_events->times[ SUSCEPTIBLE ];
+	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
+
+	set_recovered( indiv, model->params, model->time, model );
+	if( !complete_immunity ) {
+	    set_susceptible( indiv, model->params, model->time );
+	    indiv->current_disease_event = NULL;
+	    indiv->next_disease_event = NULL;
+	}
 }
 
 /*****************************************************************************************
-*  Name:               transition_to_susceptible
+*  Name:		apply_cross_immunity
+*  Description: Apply's whether cross-immunity is confered to the other strains based upon
+*  				the polarising cross-immunity model (all or nothing).
+*
+*  				Further, we assume complete correlation in cross-immunity, whereby we draw
+*  				a single U(0,1) variable and all entries in cross-immunity matrix with
+*  				correlation greater than this will have immunity
+*
+*  Returns:		void
+******************************************************************************************/
+short apply_cross_immunity( model *model, individual *indiv, short strain_idx, short time_susceptible )
+{
+	short complete_immunity = TRUE;
+	short sdx;
+	float *cross_immunity = model->cross_immunity[ strain_idx ];
+	float r_unif = gsl_rng_uniform( rng );
+
+	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
+	{
+		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) )
+		{
+			indiv->time_susceptible[ sdx ] = time_susceptible;
+			indiv->hazard[ sdx ]           = -1;
+		}
+		else
+			complete_immunity = FALSE;
+	}
+
+	return complete_immunity;
+}
+
+/*****************************************************************************************
+*  Name:        transition_to_susceptible
 *  Description: Transitions recovered to susceptible
-*  Returns:            void
+*  Returns:     void
 ******************************************************************************************/
 void transition_to_susceptible( model *model, individual *indiv )
 {
-       transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
-       set_susceptible( indiv, model->params, model->time );
+	// set susceptible needs to know current state, so set on the individual first
+	set_susceptible( indiv, model->params, model->time );
+    transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
 }
 
 
@@ -596,5 +646,17 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 	return inv_incomplete_gamma_p( percentile, actual_infections ) / expected_infections;
 }
 
-
-
+/*****************************************************************************************
+*  Name:		set_cross_immunity_probability
+*  Description: --
+*  Returns:		void
+******************************************************************************************/
+void set_cross_immunity_probability( 
+	model *model, 
+	int caught_idx, 
+	int conferred_idx, 
+	float probability 
+)
+{
+	model->cross_immunity[ caught_idx ][ conferred_idx ] = probability;
+}
