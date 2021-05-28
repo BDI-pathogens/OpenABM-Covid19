@@ -8,6 +8,7 @@ import sys, time
 
 import covid19
 from COVID19.network import Network
+from COVID19.vaccine import Vaccine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -907,7 +908,28 @@ class Model:
                 'skip_quarantined'  : skip_quarantined,
                 'daily_fraction'    : daily_fraction
             } )
-       
+      
+          
+    def add_vaccine(self, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
+        """
+        Add a new vaccine type
+        
+        """
+        if ( efficacy < 0 ) | ( efficacy > 1 ) :
+            raise ModelParameterException( "efficacy must be between 0 and 1")
+        
+        if time_to_protect < 1 :
+            raise ModelParameterException( "vaccine must take at least one day to take effect" )
+        
+        if vaccine_protection_period <= time_to_protect :
+            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
+    
+        if not VaccineTypesEnum.has_value(vaccine_type) :
+            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+
+        idx = covid19.add_vaccine( self.c_model, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+        return Vaccine( self, idx )
+ 
     def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
         """
         Vaccinates an individual by ID of individual
