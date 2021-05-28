@@ -304,15 +304,16 @@ void new_infection(
 	double draw       = gsl_rng_uniform( rng );
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
+	strain *strain    = infector->infection_events->strain;
 
-	if( immune_to_symptoms( infected ) )
+	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
 
 	infected->infection_events->infector = infector;
 	infected->infection_events->infector_status = infector->status;
 	infected->infection_events->infector_hospital_state = infector->hospital_state;
 	infected->infection_events->network_id = network_id;
-	infected->infection_events->strain = infector->infection_events->strain;
+	infected->infection_events->strain = strain;
 
 	if( draw < asymp_frac )
 	{

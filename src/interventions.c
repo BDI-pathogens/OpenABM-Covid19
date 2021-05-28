@@ -626,16 +626,16 @@ short intervention_vaccinate(
 	{
 		if( vaccine->vaccine_type == VACCINE_TYPE_FULL )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+			set_vaccine_status( indiv, model->params, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
 			add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + vaccine->time_to_protect, vaccine );
 		}
 		else if( vaccine->vaccine_type == VACCINE_TYPE_SYMPTOMS )
 		{
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+			set_vaccine_status( indiv, model->params, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
 			add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + vaccine->time_to_protect, vaccine );
 		}
 	} else
-		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, model->time, MAX_TIME );
+		set_vaccine_status( indiv, model->params, VACCINE_NO_PROTECTION, model->time, MAX_TIME );
 
 	return TRUE;
 }
@@ -729,7 +729,7 @@ void intervention_vaccine_protect_full( model *model, individual *indiv, void* i
 
 	short time_wane = model->time + vaccine->vaccine_protection_period - vaccine->time_to_protect;
 
-	set_vaccine_status( indiv, VACCINE_PROTECTED_FULLY, model->time, time_wane );
+	set_vaccine_status( indiv, model->params, VACCINE_PROTECTED_FULLY, model->time, time_wane );
 
 	add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, time_wane, NULL );
 }
@@ -745,7 +745,7 @@ void intervention_vaccine_wane_full( model *model, individual *indiv, void* info
 	model->n_vaccinated_fully--;
 	model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED_FULLY, model->time, MAX_TIME );
+	set_vaccine_status( indiv, model->params, VACCINE_WANED_FULLY, model->time, MAX_TIME );
 }
 
 /*****************************************************************************************
@@ -763,7 +763,7 @@ void intervention_vaccine_protect_symptoms_only( model *model, individual *indiv
 
 	short time_wane = model->time + vaccine->vaccine_protection_period - vaccine->time_to_protect;
 
-	set_vaccine_status( indiv, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
+	set_vaccine_status( indiv, model->params, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
 
 	add_individual_to_event_list( model, VACCINE_WANE_SYMPTOMS_ONLY, indiv, time_wane, NULL );
 
@@ -780,7 +780,7 @@ void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv, v
 	model->n_vaccinated_symptoms--;
 	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
 
-	set_vaccine_status( indiv, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
+	set_vaccine_status( indiv, model->params, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
 }
 
 /*****************************************************************************************
