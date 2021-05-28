@@ -545,6 +545,62 @@ void intervention_test_order( model *model, individual *indiv, int time )
 }
 
 /*****************************************************************************************
+*  Name:		add_vaccine
+*  Description: adds a new type of vaccine with specific properties
+*
+*  Arguments:   model           - pointer to the model
+*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
+*  				efficacy        - probability the person is successfully vaccinate
+*  				time_to_protect - delay before it takes effect
+*  				vaccine_protection_period - length of time the vaccine provides protection
+*
+*  Returns:		the index of the vaccine
+******************************************************************************************/
+short add_vaccine(
+	model *model,
+	short vaccine_type,
+	double efficacy,
+	short time_to_protect,
+	short vaccine_protection_period
+)
+{
+	vaccine *new_vaccine = calloc( 1, sizeof( vaccine ) );
+
+	new_vaccine->idx = 0;
+	if( model->vaccines != NULL )
+		new_vaccine->idx = model->vaccines->idx + 1;
+
+	new_vaccine->vaccine_type    = vaccine_type;
+	new_vaccine->efficacy        = efficacy;
+	new_vaccine->time_to_protect = time_to_protect;
+	new_vaccine->vaccine_protection_period = vaccine_protection_period;
+
+	new_vaccine->next = model->vaccines;
+	model->vaccines   = new_vaccine;
+
+	return new_vaccine->idx;
+}
+
+/*****************************************************************************************
+*  Name:		get_vaccine_by_id
+*  Description: returns a pointer to a vaccine a given ID
+*  Returns:		pointer to vaccine
+******************************************************************************************/
+vaccine* get_vaccine_by_id( model *model, short vaccine_idx )
+{
+	vaccine *vaccine = model->vaccines;
+
+	while( vaccine != NULL )
+	{
+		if( vaccine->idx == vaccine_idx )
+			return vaccine;
+		vaccine = vaccine->next;
+	};
+
+	return NULL;
+}
+
+/*****************************************************************************************
 *  Name:		intervention_vaccinate
 *  Description: Vaccinate an individual
 *

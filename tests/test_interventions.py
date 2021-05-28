@@ -1029,6 +1029,22 @@ class TestClass(object):
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 10
             )
+        ],
+        "test_add_vaccine": [ 
+            dict(
+                vaccine0 = dict(
+                    vaccine_type = 0,
+                    efficacy     = 1.0,
+                    time_to_protect = 5,
+                    vaccine_protection_period = 10,
+                ),
+                vaccine1 = dict(
+                    vaccine_type = 1,
+                    efficacy     = 0.5,
+                    time_to_protect = 2,
+                    vaccine_protection_period = 15,
+                ),
+            ) 
         ]
     }
 
@@ -2591,7 +2607,7 @@ class TestClass(object):
         
         np.testing.assert_equal( n_resp_inf, 0, "vaccinated people who responded became infected")
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
-        
+  
     
     def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, vaccine_type, vaccine_protection_period ):
         """
@@ -2738,4 +2754,38 @@ class TestClass(object):
             else :
                 sd = sqrt( expected * max( 1 - expected / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
+    
+    def test_add_vaccine(self, vaccine0, vaccine1 ):    
+        """
+        Check that a vaccine can be added and the correct properties are stored
+        """
+          
+        params = utils.get_params_swig()
+        params.set_param( "n_total", 10000 )
+        model  = utils.get_model_swig( params )
+
+        v0 = model.add_vaccine( 
+            vaccine0["vaccine_type"], 
+            vaccine0["efficacy"],
+            vaccine0["time_to_protect"], 
+            vaccine0["vaccine_protection_period"] )
+        v1 = model.add_vaccine( 
+            vaccine1["vaccine_type"], 
+            vaccine1["efficacy"],
+            vaccine1["time_to_protect"], 
+            vaccine1["vaccine_protection_period"] )
+        
+        np.testing.assert_equal(v0.idx(), 0, "index of first added vaccine should be 0")
+        np.testing.assert_equal(v1.idx(), 1, "index of second added vaccine should be 1")
+        
+        np.testing.assert_equal(v0.vaccine_type(),vaccine0["vaccine_type"], "incorrect vaccine type (vaccine0)")
+        np.testing.assert_equal(v0.efficacy(),vaccine0["efficacy"], "incorrect efficacy (vaccine0)")
+        np.testing.assert_equal(v0.time_to_protect(),vaccine0["time_to_protect"], "incorrect time to protect (vaccine0)")
+        np.testing.assert_equal(v0.vaccine_protection_period(),vaccine0["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine0)")
+  
+        np.testing.assert_equal(v1.vaccine_type(),vaccine1["vaccine_type"], "incorrect vaccine type (vaccine1)")
+        np.testing.assert_equal(v1.efficacy(),vaccine1["efficacy"], "incorrect efficacy (vaccine1)")
+        np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
+        np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
+
                         

@@ -101,6 +101,8 @@ struct model{
 	strain *strains;
 	int n_initialised_strains;
 	float **cross_immunity;
+
+	vaccine *vaccines;
 };
 
 struct event_block{

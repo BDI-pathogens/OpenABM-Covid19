@@ -30,6 +30,16 @@ struct trace_token{
 	int index_status;
 };
 
+struct vaccine{
+	short idx;
+	short vaccine_type;					// type of vaccine (full or symptoms only)
+	float efficacy;						// efficacy
+	short time_to_protect;				// time between having the vaccine and protection starting
+	short vaccine_protection_period;	// time for which protections lasts
+	char name[INPUT_CHAR_LEN]; 			// unique name of the network
+	vaccine *next;
+};
+
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
@@ -58,6 +68,8 @@ void intervention_manual_trace( model *, individual *);
 void intervention_notify_contacts( model*, individual*, int, trace_token*, int );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
+short add_vaccine( model*, short, double, short, short );
+vaccine* get_vaccine_by_id( model*, short );
 short intervention_vaccinate( model*, individual*, short, double, short, short );
 short intervention_vaccinate_by_idx( model*, long, short, double, short, short );
 long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], short, double, short, short, long[ N_AGE_GROUPS ] );
