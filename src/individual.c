@@ -85,13 +85,16 @@ void initialize_individual(
 		indiv->infectiousness_multiplier = 1;
 	}
 
-	indiv->hazard           = calloc( params->max_n_strains, sizeof( float ) );
-	indiv->time_susceptible = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->hazard             = calloc( params->max_n_strains, sizeof( float ) );
+	indiv->time_susceptible   = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_symptoms = calloc( params->max_n_strains, sizeof( short ) );
 	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
-		indiv->time_susceptible[strain_idx] = 0;
+	{
+		indiv->time_susceptible[strain_idx]    = 0;
+		indiv->immune_to_symptoms[strain_idx ] = NO_IMMUNITY;
+	}
 
 	indiv->vaccine_status = NO_VACCINE;
-	indiv->immune_to_symptoms =  NO_IMMUNITY;
 }
 
 /*****************************************************************************************
@@ -254,7 +257,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, short current_status, short time, short time_until )
+void set_vaccine_status( individual* indiv, parameters* params, short current_status, short time, short time_until )
 {
     // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
 	indiv->vaccine_status      = current_status;
@@ -265,11 +268,17 @@ void set_vaccine_status( individual* indiv, short current_status, short time, sh
 			indiv->status = VACCINE_PROTECT_FULL;
 	}
 
-	if( current_status == VACCINE_PROTECTED_SYMPTOMS )
-		indiv->immune_to_symptoms = max( indiv->immune_to_symptoms, time_until );
+	if( current_status == VACCINE_PROTECTED_SYMPTOMS || current_status == VACCINE_WANED_PROTECTED )
+	{
+		for( short strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
+		{
+			if( current_status == VACCINE_PROTECTED_SYMPTOMS )
+				indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
 
-	if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms == time ) )
-		indiv->immune_to_symptoms = NO_IMMUNITY;
+			if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms[ strain_idx ] == time ) )
+				indiv->immune_to_symptoms[ strain_idx ] = NO_IMMUNITY;
+		}
+	}
 
 	if( ( current_status == VACCINE_WANED_FULLY ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
 		indiv->status = SUSCEPTIBLE;
