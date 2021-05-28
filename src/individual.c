@@ -257,7 +257,7 @@ void set_dead( individual *indiv, parameters* params, int time )
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, parameters* params, short current_status, short time, short time_until )
+void set_vaccine_status( individual* indiv, parameters* params, short strain_idx, short current_status, short time, short time_until )
 {
     // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
 	indiv->vaccine_status      = current_status;
@@ -268,17 +268,20 @@ void set_vaccine_status( individual* indiv, parameters* params, short current_st
 			indiv->status = VACCINE_PROTECT_FULL;
 	}
 
-	if( current_status == VACCINE_PROTECTED_SYMPTOMS || current_status == VACCINE_WANED_PROTECTED )
+	if( ( current_status == VACCINE_PROTECTED_SYMPTOMS || current_status == VACCINE_WANED_PROTECTED ) && strain_idx == ALL_STRAINS )
 	{
-		for( short strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
+		for( short idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 		{
 			if( current_status == VACCINE_PROTECTED_SYMPTOMS )
-				indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+				indiv->immune_to_symptoms[ idx ] = max( indiv->immune_to_symptoms[ idx ], time_until );
 
-			if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms[ strain_idx ] == time ) )
-				indiv->immune_to_symptoms[ strain_idx ] = NO_IMMUNITY;
+			if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms[ idx ] == time ) )
+				indiv->immune_to_symptoms[ idx ] = NO_IMMUNITY;
 		}
 	}
+
+	if( current_status == VACCINE_PROTECTED_SYMPTOMS  && strain_idx != ALL_STRAINS )
+		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
 
 	if( ( current_status == VACCINE_WANED_FULLY ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
 		indiv->status = SUSCEPTIBLE;

@@ -1500,9 +1500,9 @@ int one_time_step( model *model )
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
 	}
 
-	transition_events_info( model, VACCINE_PROTECT_FULL,          &intervention_vaccine_protect_full, TRUE );
+	transition_events_info( model, VACCINE_PROTECT_FULL,          &intervention_vaccine_protect, TRUE );
 	transition_events_info( model, VACCINE_WANE_FULL,             &intervention_vaccine_wane_full, TRUE );
-	transition_events_info( model, VACCINE_PROTECT_SYMPTOMS_ONLY, &intervention_vaccine_protect_symptoms_only, TRUE );
+	transition_events_info( model, VACCINE_PROTECT_SYMPTOMS_ONLY, &intervention_vaccine_protect, TRUE );
 	transition_events_info( model, VACCINE_WANE_SYMPTOMS_ONLY,    &intervention_vaccine_wane_symptoms_only, TRUE );
 
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );

@@ -13,11 +13,11 @@ short vaccine_idx( vaccine *pvaccine ) {
 }
 
 short vaccine_vaccine_type( vaccine *pvaccine ) {
-    return pvaccine->vaccine_type;
+    return pvaccine->vaccine_type[ 0 ];
 }
 
 float vaccine_efficacy( vaccine *pvaccine ) {
-    return pvaccine->efficacy;
+    return pvaccine->efficacy[ 0 ];
 }
 
 short vaccine_time_to_protect( vaccine *pvaccine ) {

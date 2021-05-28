@@ -1045,7 +1045,34 @@ class TestClass(object):
                     vaccine_protection_period = 15,
                 ),
             ) 
-        ]
+        ],
+        "test_vaccinate_protection_multi_strain": [
+            dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 5,
+                    max_n_strains = 2
+                ),
+                n_to_vaccinate = 1000,
+                n_to_seed = 100,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
+                time_to_protect = 2
+            ),
+#             dict(
+#                 test_params=dict(
+#                     n_total  = 1e4,
+#                     end_time = 50,
+#                     n_seed_infection = 0,
+#                     infectious_rate  = 7
+#                 ),
+#                 n_to_vaccinate = 100,
+#                 n_to_seed = 100,
+#                 vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
+#                 time_to_protect = 14
+#             )
+        ],
     }
 
     """
@@ -2796,5 +2823,67 @@ class TestClass(object):
         np.testing.assert_equal(v1.efficacy(),vaccine1["efficacy"], "incorrect efficacy (vaccine1)")
         np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
         np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
+
+    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, vaccine_type, time_to_protect ):
+        """
+        Check that in a 2 strain model, if a vaccine is only effective against one of the strains
+        then it will only protect from that strain and not the other
+        """
+        
+        efficacy = [ 1.0, 0 ];
+        vaccine_protection_period = test_params[ "end_time" ] + 1;
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        # add a second strain with the same multiplier
+        model.add_new_strain( 1.0 )
+
+        n_total        = params.get_param( "n_total" )
+        idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
+        df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
+
+        # add the vaccine
+        vaccine = model.add_vaccine(vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+
+        # vaccine some people
+        for idx in idx_vaccinated :
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
+            np.testing.assert_( vaccinated, "failed to vaccinate individual")
+    
+        # now infect a bunch of people with both strains
+        idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
+        for idx in idx_seed :
+            model.seed_infect_by_idx( idx, strain_idx = 0 )
+        idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
+        for idx in idx_seed :
+            model.seed_infect_by_idx( idx, strain_idx = 1 )    
+        model.run( verbose = False )
+            
+        # now get all those who have been infected after the vaccine takes effect
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
+                
+        # make sure sufficient people have been infected to check that the vaccine is effecive
+        n_infected= len( df_trans.index )
+        np.testing.assert_( n_infected * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
+
+        # check that vaccinated people have not been infected or did not get symptoms (depending on vaccine type )
+        # against the strain for which they had protection
+        df_vac_inf = pd.merge( df_vaccinated, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
+       
+        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
+            df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
+             
+        n_inf_strain_0 = sum( df_vac_inf[ "strain_idx" ] == 0 )
+        np.testing.assert_equal( n_inf_strain_0, 0, "vaccinated people have been infected by strain that they should be protected against")
+          
+        # check some were infected by the strain from which they are not protected
+        n_inf_strain_1 = sum( df_vac_inf[ "strain_idx" ] == 1 )
+        np.testing.assert_( n_inf_strain_1 > 0, "no vaccinated people have been infected by strain that they sohuld not be protected against")
+       
 
                         

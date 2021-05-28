@@ -917,19 +917,46 @@ class Model:
         Add a new vaccine type
         
         """
-        if ( efficacy < 0 ) | ( efficacy > 1 ) :
-            raise ModelParameterException( "efficacy must be between 0 and 1")
         
         if time_to_protect < 1 :
             raise ModelParameterException( "vaccine must take at least one day to take effect" )
         
         if vaccine_protection_period <= time_to_protect :
             raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
-    
-        if not VaccineTypesEnum.has_value(vaccine_type) :
-            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
 
-        idx = covid19.add_vaccine( self.c_model, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+        n_strains = self.c_params.max_n_strains;
+
+        if isinstance( vaccine_type, int ) :
+            vaccine_type = [vaccine_type] * n_strains
+        elif isinstance( vaccine_type, list) :
+            if len( vaccine_type ) != n_strains :
+                raise ModelException( "vaccine_type must be an integer or a list of length max_n_strains" )
+        else :
+            raise ModelException( "vaccine_type must be an integer or a list of length max_n_strains" )
+        
+        if isinstance( efficacy, float ) :
+            efficacy = [efficacy] * n_strains
+        elif isinstance( efficacy, list) :
+            if len( efficacy ) != n_strains :
+                raise ModelException( "efficacy must be an integer or a list of length max_n_strains" )
+        else :
+            raise ModelException( "efficacy must be an integer or a list of length max_n_strains" )
+         
+        c_vaccine_type = covid19.shortArray(n_strains)
+        c_efficacy     = covid19.floatArray(n_strains)
+        
+        for idx in range( n_strains ) :
+            
+            if ( efficacy[ idx ] < 0 ) | ( efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "efficacy must be between 0 and 1")
+            
+            if not VaccineTypesEnum.has_value(vaccine_type[idx]) :
+                raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+   
+            c_vaccine_type[ idx ] = vaccine_type[ idx ]
+            c_efficacy[ idx ]     = efficacy[ idx ]
+
+        idx = covid19.add_vaccine( self.c_model, c_vaccine_type, c_efficacy, time_to_protect, vaccine_protection_period );
         return Vaccine( self, idx )
  
     def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000, vaccine = -1 ):
