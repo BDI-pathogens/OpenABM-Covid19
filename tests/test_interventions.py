@@ -1060,18 +1060,19 @@ class TestClass(object):
                 vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
                 time_to_protect = 2
             ),
-#             dict(
-#                 test_params=dict(
-#                     n_total  = 1e4,
-#                     end_time = 50,
-#                     n_seed_infection = 0,
-#                     infectious_rate  = 7
-#                 ),
-#                 n_to_vaccinate = 100,
-#                 n_to_seed = 100,
-#                 vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
-#                 time_to_protect = 14
-#             )
+             dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 7,
+                    max_n_strains = 2
+                ),
+                n_to_vaccinate = 100,
+                n_to_seed = 100,
+                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,                 
+                time_to_protect = 14
+            )
         ],
     }
 
