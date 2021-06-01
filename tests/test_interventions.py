@@ -22,7 +22,7 @@ from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES
 from . import constant
 from . import utilities as utils
 import covid19
@@ -2676,20 +2676,20 @@ class TestClass(object):
             model.seed_infect_by_idx( idx )  
 
         # let the go through the whole period it is effective and let it wane
-        for time in range(vaccine_protection_period) :
+        for time in range(vaccine_protection_period - time_to_protect ) :
             model.one_time_step()
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
         df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
+        df_indiv   = df_indiv.loc[:,["ID","vaccine_status", "current_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
         n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
         n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
         
         if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_FULL.value :
-            n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_FULLY.value ] )
+            n_waned = len( df_vac[ df_vac[ "current_status" ] == EVENT_TYPES.SUSCEPTIBLE.value ] )
         else :
             n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_SYMPTOMS.value ] )
             
@@ -2698,7 +2698,7 @@ class TestClass(object):
         np.testing.assert_equal( n_waned, n_to_vaccinate, "the vaccine for all those vaccinated should have waned")      
        
         # now go to the end of of the pandemic
-        for time in range(  test_params[ "end_time" ] - time_to_protect - vaccine_protection_period) :
+        for time in range(  test_params[ "end_time" ] - vaccine_protection_period) :
             model.one_time_step()
         
         # now get all those who have been infected
@@ -2712,9 +2712,8 @@ class TestClass(object):
         if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
             df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
 
-        time_wane = time_to_protect + vaccine_protection_period
-        n_inf_protect = len( df_vac_inf[ df_vac_inf[ "time_infected" ] < time_wane ] )
-        n_inf_wane    = len( df_vac_inf[ df_vac_inf[ "time_infected" ] >= time_wane ] )
+        n_inf_protect = len( df_vac_inf[ ( df_vac_inf[ "time_infected" ] < vaccine_protection_period ) & ( df_vac_inf[ "time_infected" ] > time_to_protect ) ] )
+        n_inf_wane    = len( df_vac_inf[ df_vac_inf[ "time_infected" ] >= vaccine_protection_period ] )
 
         np.testing.assert_equal( n_inf_protect, 0, "vaccinated people being infected before the vaccine has waned")
         np.testing.assert_( n_inf_wane > 0, "vaccinated people being infected before the vaccine has waned")
@@ -2883,6 +2882,7 @@ class TestClass(object):
           
         # check some were infected by the strain from which they are not protected
         n_inf_strain_1 = sum( df_vac_inf[ "strain_idx" ] == 1 )
+
         np.testing.assert_( n_inf_strain_1 > 0, "no vaccinated people have been infected by strain that they sohuld not be protected against")
        
 

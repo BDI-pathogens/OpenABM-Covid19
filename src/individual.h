@@ -133,6 +133,7 @@ void set_general_admission( individual*, parameters*, int );
 void set_icu_admission( individual*, parameters*, int );
 void set_mortuary_admission( individual*, parameters*, int );
 void set_discharged( individual*, parameters*, int );
+void set_immune( individual*, short, short );
 void set_vaccine_status( individual*, parameters*, short, short, short, short );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );

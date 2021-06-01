@@ -747,11 +747,11 @@ void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 
 	if( vaccine->vaccine_type[ 0 ] == VACCINE_TYPE_FULL )
 	{
-		if( gsl_ran_bernoulli( rng, vaccine->efficacy [ 0 ]) )
-		{
-			set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_PROTECTED_FULLY, model->time, time_wane );
-			add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, time_wane, NULL );
-		}
+		for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
+			if( vaccine->efficacy[ strain_idx ] > r_unif )
+				set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_FULLY, model->time, time_wane );
+
+		add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, time_wane, NULL );
 	}
 	else
 	{

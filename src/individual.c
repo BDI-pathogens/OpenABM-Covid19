@@ -49,6 +49,7 @@ void initialize_individual(
 	indiv->infection_events->infector_network = UNKNOWN;
 	indiv->infection_events->infector_hospital_state = UNKNOWN;
 	indiv->infection_events->time_infected_infector = UNKNOWN;
+	indiv->infection_events->infector = NULL;
 	indiv->infection_events->next =  NULL;
 	indiv->infection_events->is_case     = FALSE;
 
@@ -253,6 +254,17 @@ void set_dead( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
+*  Name:		set_immunue
+*  Description: set
+*  Returns:		void
+******************************************************************************************/
+void set_immune( individual *indiv, short strain_idx, short time_until )
+{
+	indiv->time_susceptible[ strain_idx ] = max( indiv->time_susceptible[ strain_idx ], time_until );
+	indiv->hazard[ strain_idx ]           = -1;
+}
+
+/*****************************************************************************************
 *  Name:		set_vaccine_status
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
@@ -264,9 +276,20 @@ void set_vaccine_status( individual* indiv, parameters* params, short strain_idx
 
 	if( current_status == VACCINE_PROTECTED_FULLY )
 	{
-		if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
-			indiv->status = VACCINE_PROTECT_FULL;
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		set_immune( indiv, strain_idx, time_until );
 	}
+
+	if( current_status == VACCINE_PROTECTED_SYMPTOMS )
+	{
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+	}
+
 
 	if( ( current_status == VACCINE_PROTECTED_SYMPTOMS || current_status == VACCINE_WANED_PROTECTED ) && strain_idx == ALL_STRAINS )
 	{
@@ -280,11 +303,9 @@ void set_vaccine_status( individual* indiv, parameters* params, short strain_idx
 		}
 	}
 
-	if( current_status == VACCINE_PROTECTED_SYMPTOMS  && strain_idx != ALL_STRAINS )
-		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+	if( current_status == VACCINE_WANED_FULLY )
+		set_susceptible( indiv, params, time );
 
-	if( ( current_status == VACCINE_WANED_FULLY ) & ( indiv->status == VACCINE_PROTECT_FULL ) )
-		indiv->status = SUSCEPTIBLE;
 }
 
 /*****************************************************************************************
@@ -315,22 +336,25 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 	int current_status = indiv->status;
 	indiv->status = SUSCEPTIBLE;
 
-	if( current_status != SUSCEPTIBLE )
+	if( current_status == RECOVERED || current_status == SUSCEPTIBLE || current_status == VACCINE_PROTECTED_FULLY )
 	{
-		infection_event *infection_event_ptr;
-		infection_event_ptr = indiv->infection_events;
+		if( indiv->infection_events->infector != NULL )
+		{
 
-		int jdx;
-		indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-		indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
-		for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-			indiv->infection_events->times[jdx] = UNKNOWN;
+			infection_event *new_event = calloc( 1, sizeof( infection_event) );
+			new_event->times = calloc( N_EVENT_TYPES, sizeof(int) );
+			for( int jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+				new_event->times[jdx] = UNKNOWN;
 
-		indiv->infection_events->infector_status  		= UNKNOWN;
-		indiv->infection_events->infector_network 		= UNKNOWN;
-		indiv->infection_events->time_infected_infector = UNKNOWN;
-		indiv->infection_events->next 					= infection_event_ptr;
-		indiv->infection_events->is_case     			= FALSE;
+			new_event->infector 			  = NULL;
+			new_event->infector_status        = UNKNOWN;
+			new_event->infector_network       = UNKNOWN;
+			new_event->time_infected_infector = UNKNOWN;
+			new_event->is_case     			  = FALSE;
+			new_event->next 	              = indiv->infection_events;
+
+			indiv->infection_events = new_event;
+		}
 	}
 
 	// Reset the hazard for the newly susceptible individual

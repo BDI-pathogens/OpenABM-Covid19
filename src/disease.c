@@ -278,7 +278,7 @@ short seed_infect_by_idx(
 {
 	individual *infected = &(model->population[ pdx ]);
 
-	if( infected->status != SUSCEPTIBLE )
+	if( ( infected->status == SUSCEPTIBLE ) && ( infected->hazard[ strain_idx ] < 0 ) )
 		return FALSE;
 
 	if( strain_idx >= model->n_initialised_strains )
@@ -549,12 +549,9 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 
 	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
 	{
-		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) )
-		{
-			indiv->time_susceptible[ sdx ] = time_susceptible;
-			indiv->hazard[ sdx ]           = -1;
-		}
-		else
+		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) ) {
+			set_immune( indiv, sdx, time_susceptible );
+		} else
 			complete_immunity = FALSE;
 	}
 
