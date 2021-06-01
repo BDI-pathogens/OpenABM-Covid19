@@ -40,7 +40,6 @@ struct individual{
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;
-	short *time_susceptible;
 
 	short quarantined;
 	event *quarantine_event;
@@ -67,6 +66,7 @@ struct individual{
 	short worker_type;
 
 	short vaccine_status;
+	short *immune_full;
 	short *immune_to_symptoms;
 };
 
