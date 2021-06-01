@@ -23,7 +23,7 @@ void initialize_individual(
 	long idx
 )
 {
-	int day, jdx;
+	int day;
 	if( indiv->idx != 0 )
 		print_exit( "Individuals can only be intitialized once!" );
 
@@ -40,18 +40,7 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short ) );
-	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-		indiv->infection_events->times[jdx] = UNKNOWN;
-
-	indiv->infection_events->infector_status  = UNKNOWN;
-	indiv->infection_events->infector_network = UNKNOWN;
-	indiv->infection_events->infector_hospital_state = UNKNOWN;
-	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->infector = NULL;
-	indiv->infection_events->next =  NULL;
-	indiv->infection_events->is_case     = FALSE;
+	add_infection_event( indiv, NULL, UNKNOWN );
 
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
@@ -96,6 +85,49 @@ void initialize_individual(
 	}
 
 	indiv->vaccine_status = NO_VACCINE;
+}
+
+/*****************************************************************************************
+*  Name:		add_infection_event
+*  Description: populates an infection event at the time of infection and adds
+*  				a new event for multiple infections
+*  Returns:		void
+******************************************************************************************/
+void add_infection_event(
+	individual *indiv,
+	individual *infector,
+	short network_id
+)
+{
+	infection_event *event = indiv->infection_events;
+
+	if( event == NULL || event->infector != NULL )
+	{
+		indiv->infection_events        = calloc( 1, sizeof( infection_event ) );
+		indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof( short ) );
+		for( int jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+			indiv->infection_events->times[jdx] = UNKNOWN;
+		indiv->infection_events->next = event;
+		event = indiv->infection_events;
+	};
+
+	event->infector = infector;
+	event->infector_network = network_id;
+	if( event->infector != NULL )
+	{
+		event->time_infected_infector  = time_infected_infection_event(infector->infection_events);
+		event->infector_status         = infector->status;
+		event->infector_hospital_state = infector->hospital_state;
+		event->strain                  = infector->infection_events->strain;
+	} else
+	{
+		event->time_infected_infector  = UNKNOWN;
+		event->infector_status         = UNKNOWN;
+		event->infector_hospital_state = UNKNOWN;
+		event->strain                  = NULL;
+	}
+
+	event->is_case     = FALSE;
 }
 
 /*****************************************************************************************
@@ -337,25 +369,7 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 	indiv->status = SUSCEPTIBLE;
 
 	if( current_status == RECOVERED || current_status == SUSCEPTIBLE || current_status == VACCINE_PROTECTED_FULLY )
-	{
-		if( indiv->infection_events->infector != NULL )
-		{
-
-			infection_event *new_event = calloc( 1, sizeof( infection_event) );
-			new_event->times = calloc( N_EVENT_TYPES, sizeof(int) );
-			for( int jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-				new_event->times[jdx] = UNKNOWN;
-
-			new_event->infector 			  = NULL;
-			new_event->infector_status        = UNKNOWN;
-			new_event->infector_network       = UNKNOWN;
-			new_event->time_infected_infector = UNKNOWN;
-			new_event->is_case     			  = FALSE;
-			new_event->next 	              = indiv->infection_events;
-
-			indiv->infection_events = new_event;
-		}
-	}
+		add_infection_event( indiv, NULL, UNKNOWN );
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params, time );

@@ -118,6 +118,7 @@ struct infection_event{
 
 void initialize_individual( individual*, parameters*, long );
 void initialize_hazard( individual*, parameters*, int );
+void add_infection_event( individual*, individual*, short );
 void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
 void set_quarantine_status( individual*, parameters*, int, int, model* );

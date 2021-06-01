@@ -278,7 +278,7 @@ short seed_infect_by_idx(
 {
 	individual *infected = &(model->population[ pdx ]);
 
-	if( ( infected->status == SUSCEPTIBLE ) && ( infected->hazard[ strain_idx ] < 0 ) )
+	if( ( infected->status != SUSCEPTIBLE ) || ( infected->hazard[ strain_idx ] < 0 ) )
 		return FALSE;
 
 	if( strain_idx >= model->n_initialised_strains )
@@ -309,11 +309,7 @@ void new_infection(
 	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
 
-	infected->infection_events->infector = infector;
-	infected->infection_events->infector_status = infector->status;
-	infected->infection_events->infector_hospital_state = infector->hospital_state;
-	infected->infection_events->network_id = network_id;
-	infected->infection_events->strain = strain;
+	add_infection_event( infected, infector, network_id );
 
 	if( draw < asymp_frac )
 	{
@@ -330,8 +326,6 @@ void new_infection(
 		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
-	infected->infection_events->time_infected_infector =
-		time_infected_infection_event(infector->infection_events);
 }
 
 /*****************************************************************************************
