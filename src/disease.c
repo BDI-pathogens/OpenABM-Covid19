@@ -219,7 +219,7 @@ void transmit_virus_by_type(
 
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						if( interaction->individual->hazard[ strain_idx ] < 0 ) {
+						if( immune_full( interaction->individual, strain_idx ) ) {
 							interaction = interaction->next;
 							continue;
 						}

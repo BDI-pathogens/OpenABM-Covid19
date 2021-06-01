@@ -76,11 +76,11 @@ void initialize_individual(
 	}
 
 	indiv->hazard             = calloc( params->max_n_strains, sizeof( float ) );
-	indiv->immune_full   = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_full        = calloc( params->max_n_strains, sizeof( short ) );
 	indiv->immune_to_symptoms = calloc( params->max_n_strains, sizeof( short ) );
 	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 	{
-		indiv->immune_full[strain_idx]    = 0;
+		indiv->immune_full[strain_idx]         = NO_IMMUNITY;
 		indiv->immune_to_symptoms[strain_idx ] = NO_IMMUNITY;
 	}
 
@@ -144,8 +144,11 @@ void initialize_hazard(
 )
 {
 	for( int idx = 0; idx < params->max_n_strains; idx++ )
-		if( indiv->immune_full[ idx ] == current_time )
+		if( indiv->immune_full[ idx ] == current_time || current_time == 0 )
+		{
 			indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+			indiv->immune_full[ idx ] = NO_IMMUNITY;
+		}
 }
 
 /*****************************************************************************************
@@ -502,6 +505,7 @@ void destroy_individual( individual *indiv )
 	free( indiv->interactions );
 	free( indiv->hazard );
 	free( indiv->immune_full );
+	free( indiv->immune_to_symptoms );
 }
 
 /*****************************************************************************************

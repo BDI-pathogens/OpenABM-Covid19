@@ -111,6 +111,7 @@ struct infection_event{
 #define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
 #define immune_to_symptoms( indiv, idx ) ( ( indiv->immune_to_symptoms[ idx ] != NO_IMMUNITY ) )
+#define immune_full( indiv, idx ) ( ( indiv->immune_full[ idx ] != NO_IMMUNITY ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
