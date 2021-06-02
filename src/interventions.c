@@ -595,6 +595,7 @@ short add_vaccine(
 	new_vaccine->is_full     = is_full;
 	new_vaccine->is_symptoms = is_symptoms;
 	new_vaccine->is_severe   = is_severe;
+	new_vaccine->n_strains   = n_strains;
 
 	new_vaccine->next = model->vaccines;
 	model->vaccines   = new_vaccine;

@@ -12,16 +12,28 @@ short vaccine_idx( vaccine *pvaccine ) {
     return pvaccine->idx;
 }
 
-float vaccine_full_efficacy( vaccine *pvaccine ) {
-    return pvaccine->full_efficacy[ 0 ];
+void vaccine_full_efficacy( vaccine *pvaccine, float *efficacy ) {
+ 	
+ 	short n_strains = pvaccine->n_strains;
+ 	
+ 	for( int idx = 0; idx < n_strains; idx++ )
+ 		efficacy[ idx ] = pvaccine->full_efficacy[ idx ];
 }
 
-float vaccine_symptoms_efficacy( vaccine *pvaccine ) {
-    return pvaccine->symptoms_efficacy[ 0 ];
-}
+void vaccine_symptoms_efficacy( vaccine *pvaccine, float *efficacy ) {
 
-float vaccine_severe_efficacy( vaccine *pvaccine ) {
-    return pvaccine->severe_efficacy[ 0 ];
+	short n_strains = pvaccine->n_strains;
+ 	
+ 	for( int idx = 0; idx < n_strains; idx++ )
+ 		efficacy[ idx ] = pvaccine->symptoms_efficacy[ idx ];
+ }
+
+void vaccine_severe_efficacy( vaccine *pvaccine, float *efficacy  ) {
+	
+	short n_strains = pvaccine->n_strains;
+ 	
+ 	for( int idx = 0; idx < n_strains; idx++ )
+ 		efficacy[ idx ] = pvaccine->severe_efficacy[ idx ];
 }
 
 short vaccine_time_to_protect( vaccine *pvaccine ) {
@@ -34,6 +46,10 @@ short vaccine_vaccine_protection_period( vaccine *pvaccine ) {
 
 char *vaccine_name( vaccine *pvaccine ) {
 	return pvaccine->name;
+}
+
+short vaccine_n_strains( vaccine *pvaccine ) {
+    return pvaccine->n_strains;
 }
 
 %}

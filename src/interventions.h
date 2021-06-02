@@ -40,6 +40,7 @@ struct vaccine{
 	short is_full;						// does it have some full protection
 	short is_symptoms;					// does it have some symptoms-only protection
 	short is_severe;					// does it have some severe-only protection
+	short n_strains;					// the number of strains
 	char name[INPUT_CHAR_LEN]; 			// unique name of the network
 	vaccine *next;
 };
