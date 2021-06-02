@@ -32,10 +32,12 @@ struct trace_token{
 
 struct vaccine{
 	short idx;
-	short *vaccine_type;				// type of vaccine (full or symptoms only)
-	float *efficacy;					// efficacy
+	float *full_efficacy;				// efficacy against contracting the virus
+	float *symptoms_efficacy;			// efficacy from preventing symptoms
 	short time_to_protect;				// time between having the vaccine and protection starting
 	short vaccine_protection_period;	// time for which protections lasts
+	short is_full;						// does it have some full protection
+	short is_symptoms;					// does it have some symptoms-only protetion
 	char name[INPUT_CHAR_LEN]; 			// unique name of the network
 	vaccine *next;
 };
@@ -68,14 +70,13 @@ void intervention_manual_trace( model *, individual *);
 void intervention_notify_contacts( model*, individual*, int, trace_token*, int );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
-short add_vaccine( model*, short*, float*, short, short );
+short add_vaccine( model*, float*, float*, short, short );
 vaccine* get_vaccine_by_id( model*, short );
 short intervention_vaccinate( model*, individual*, vaccine* );
 short intervention_vaccinate_by_idx( model*, long, vaccine* );
 long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], vaccine*, long[ N_AGE_GROUPS ] );
 void intervention_vaccine_protect( model*, individual*, void* );
-void intervention_vaccine_wane_full( model*, individual*, void* );
-void intervention_vaccine_wane_symptoms_only( model*, individual*, void* );
+void intervention_vaccine_wane( model*, individual*, void* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );

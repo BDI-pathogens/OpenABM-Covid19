@@ -513,9 +513,10 @@ void transition_to_recovered( model *model, individual *indiv )
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 
 	time_susceptible  = indiv->infection_events->times[ SUSCEPTIBLE ];
-	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
 
+	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
 	set_recovered( indiv, model->params, model->time, model );
+
 	if( !complete_immunity ) {
 	    set_susceptible( indiv, model->params, model->time );
 	    indiv->current_disease_event = NULL;
@@ -561,7 +562,6 @@ void transition_to_susceptible( model *model, individual *indiv )
 {
 	// set susceptible needs to know current state, so set on the individual first
 	set_susceptible( indiv, model->params, model->time );
-    transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
 }
 
 

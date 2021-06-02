@@ -19,13 +19,13 @@ class Vaccine:
         self.c_vaccine   = c_vaccine
         
     def idx(self):
-        return covid19.vaccine_idx( self.c_vaccine )
-        
-    def vaccine_type(self):
-        return covid19.vaccine_vaccine_type( self.c_vaccine )
+        return covid19.vaccine_idx( self.c_vaccine )    
+  
+    def full_efficacy(self):
+        return covid19.vaccine_full_efficacy( self.c_vaccine )
 
-    def efficacy(self):
-        return covid19.vaccine_efficacy( self.c_vaccine )
+    def symptoms_efficacy(self):
+        return covid19.vaccine_symptoms_efficacy( self.c_vaccine )
 
     def time_to_protect(self):
         return covid19.vaccine_time_to_protect( self.c_vaccine )
@@ -39,8 +39,8 @@ class Vaccine:
     def show(self):
         print( "idx               = " + str( self.idx() ) )
         print( "name              = " + self.name() )
-        print( "efficacy          = " + str( self.efficacy() ) )
-        print( "vaccine_type      = " + str( self.vaccine_type() ) )
+        print( "full_efficacy     = " + str( self.full_efficacy() ) )
+        print( "symptoms_efficacy = " + str( self.symptoms_efficacy() ) )
         print( "time_to_protect   = " + str( self.time_to_protect() ) )
         print( "vaccine_protection_period  = " + str( self.vaccine_protection_period() ) )
        
