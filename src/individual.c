@@ -326,14 +326,11 @@ void set_vaccine_status( individual* indiv, parameters* params, short strain_idx
 	}
 
 
-	if( ( current_status == VACCINE_PROTECTED_SYMPTOMS || current_status == VACCINE_WANED_PROTECTED ) && strain_idx == ALL_STRAINS )
+	if( ( current_status == VACCINE_WANED_PROTECTED ) && strain_idx == ALL_STRAINS )
 	{
 		for( short idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 		{
-			if( current_status == VACCINE_PROTECTED_SYMPTOMS )
-				indiv->immune_to_symptoms[ idx ] = max( indiv->immune_to_symptoms[ idx ], time_until );
-
-			if( ( current_status == VACCINE_WANED_PROTECTED ) & ( indiv->immune_to_symptoms[ idx ] == time ) )
+			if( indiv->immune_to_symptoms[ idx ] == time )
 				indiv->immune_to_symptoms[ idx ] = NO_IMMUNITY;
 		}
 	}

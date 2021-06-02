@@ -558,29 +558,36 @@ void intervention_test_order( model *model, individual *indiv, int time )
 ******************************************************************************************/
 short add_vaccine(
 	model *model,
-	short *vaccine_type,
-	float *efficacy,
+	float *full_efficacy,
+	float *symptoms_efficacy,
 	short time_to_protect,
 	short vaccine_protection_period
 )
 {
 	vaccine *new_vaccine = calloc( 1, sizeof( vaccine ) );
 	short n_strains      = model->params->max_n_strains;
+	short is_full 		 = FALSE;
+	short is_symptoms    = FALSE;
 
 	new_vaccine->idx = 0;
 	if( model->vaccines != NULL )
 		new_vaccine->idx = model->vaccines->idx + 1;
 
-	new_vaccine->vaccine_type    = calloc( n_strains, sizeof( short ) );
-	new_vaccine->efficacy        = calloc( n_strains, sizeof( float ) );
-	new_vaccine->time_to_protect = time_to_protect;
+	new_vaccine->full_efficacy     = calloc( n_strains, sizeof( float ) );
+	new_vaccine->symptoms_efficacy = calloc( n_strains, sizeof( float ) );
+	new_vaccine->time_to_protect   = time_to_protect;
 	new_vaccine->vaccine_protection_period = vaccine_protection_period;
 
 	for( int idx = 0; idx < n_strains; idx++ )
 	{
-		new_vaccine->vaccine_type[ idx ] = vaccine_type[ idx ];
-		new_vaccine->efficacy[ idx ]     = efficacy[ idx ];
+		new_vaccine->full_efficacy[ idx ]     = full_efficacy[ idx ];
+		new_vaccine->symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ];
+
+		if( full_efficacy[ idx ] > 0 ) is_full = TRUE;
+		if( symptoms_efficacy[ idx ] > 0 ) is_symptoms = TRUE;
 	}
+	new_vaccine->is_full     = is_full;
+	new_vaccine->is_symptoms = is_symptoms;
 
 	new_vaccine->next = model->vaccines;
 	model->vaccines   = new_vaccine;
@@ -629,18 +636,8 @@ short intervention_vaccinate(
 	if( ( indiv->status == DEATH ) | is_in_hospital( indiv ) )
 		return FALSE;
 
-
-	if( vaccine->vaccine_type[ 0 ] == VACCINE_TYPE_FULL )
-	{
-		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
-		add_individual_to_event_list( model, VACCINE_PROTECT_FULL, indiv, model->time + vaccine->time_to_protect, vaccine );
-	}
-	else if( vaccine->vaccine_type[ 0 ] == VACCINE_TYPE_SYMPTOMS )
-	{
-		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
-
-		add_individual_to_event_list( model, VACCINE_PROTECT_SYMPTOMS_ONLY, indiv, model->time + vaccine->time_to_protect, vaccine );
-	}
+	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+	add_individual_to_event_list( model, VACCINE_PROTECT, indiv, model->time + vaccine->time_to_protect, vaccine );
 
 	return TRUE;
 }
@@ -732,11 +729,12 @@ void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 	short n_strains = model->params->max_n_strains;
 	short strain_idx;
 
-	if( vaccine->vaccine_type[ 0 ] == VACCINE_TYPE_FULL )
+	if( vaccine->is_full )
 	{
 		model->n_vaccinated_fully++;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
-	} else
+	}
+	if( vaccine->is_symptoms )
 	{
 		model->n_vaccinated_symptoms++;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
@@ -744,53 +742,40 @@ void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 
 	short time_wane = model->time + vaccine->vaccine_protection_period - vaccine->time_to_protect;
 
-
-	if( vaccine->vaccine_type[ 0 ] == VACCINE_TYPE_FULL )
+	for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
 	{
-		for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
-			if( vaccine->efficacy[ strain_idx ] > r_unif )
-				set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_FULLY, model->time, time_wane );
+		if( vaccine->full_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_FULLY, model->time, time_wane );
 
-		add_individual_to_event_list( model, VACCINE_WANE_FULL, indiv, time_wane, NULL );
+		if( vaccine->symptoms_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
 	}
-	else
-	{
-		for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
-			if( vaccine->efficacy[ strain_idx ] > r_unif )
-				set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
-
-		add_individual_to_event_list( model, VACCINE_WANE_SYMPTOMS_ONLY, indiv, time_wane, NULL );
-	}
+	add_individual_to_event_list( model, VACCINE_WANE, indiv, time_wane, vaccine );
 }
 
 
 /*****************************************************************************************
-*  Name:		intervention_vaccine_wane_full
-*  Description: The vaccine wanes (full protection)
+*  Name:		intervention_vaccine_wane
+*  Description: The vaccine wanes (all types of protection)
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_wane_full( model *model, individual *indiv, void* info )
+void intervention_vaccine_wane( model *model, individual *indiv, void* info )
 {
-	model->n_vaccinated_fully--;
-	model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
+	vaccine *vaccine = info;
 
-	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_FULLY, model->time, MAX_TIME );
-}
-
-
-/*****************************************************************************************
-*  Name:		intervention_vaccine_wane_symptoms_only
-*  Description: The vaccine wanes (symptoms only)
-*
-*  Returns:		void
-******************************************************************************************/
-void intervention_vaccine_wane_symptoms_only( model *model, individual *indiv, void* info )
-{
-	model->n_vaccinated_symptoms--;
-	model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
-
-	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
+	if( vaccine->is_full )
+	{
+		model->n_vaccinated_fully--;
+		model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
+		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_FULLY, model->time, MAX_TIME );
+	}
+	if( vaccine->is_symptoms )
+	{
+		model->n_vaccinated_symptoms++;
+		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
+		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
+	}
 }
 
 /*****************************************************************************************
