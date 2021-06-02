@@ -548,10 +548,11 @@ void intervention_test_order( model *model, individual *indiv, int time )
 *  Name:		add_vaccine
 *  Description: adds a new type of vaccine with specific properties
 *
-*  Arguments:   model           - pointer to the model
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
+*  Arguments:   model             - pointer to the model
+*  				full_efficacy     - probability the person does not contract the vaccine
+*  				symptoms_efficacy - probability the person does not develop symptoms
+*  				severe_efficacy   - probability the person does not develop severe symptoms
+*  				time_to_protect   - delay before it takes effect
 *  				vaccine_protection_period - length of time the vaccine provides protection
 *
 *  Returns:		the index of the vaccine
@@ -560,6 +561,7 @@ short add_vaccine(
 	model *model,
 	float *full_efficacy,
 	float *symptoms_efficacy,
+	float *severe_efficacy,
 	short time_to_protect,
 	short vaccine_protection_period
 )
@@ -568,6 +570,7 @@ short add_vaccine(
 	short n_strains      = model->params->max_n_strains;
 	short is_full 		 = FALSE;
 	short is_symptoms    = FALSE;
+	short is_severe      = FALSE;
 
 	new_vaccine->idx = 0;
 	if( model->vaccines != NULL )
@@ -575,6 +578,7 @@ short add_vaccine(
 
 	new_vaccine->full_efficacy     = calloc( n_strains, sizeof( float ) );
 	new_vaccine->symptoms_efficacy = calloc( n_strains, sizeof( float ) );
+	new_vaccine->severe_efficacy   = calloc( n_strains, sizeof( float ) );
 	new_vaccine->time_to_protect   = time_to_protect;
 	new_vaccine->vaccine_protection_period = vaccine_protection_period;
 
@@ -582,12 +586,15 @@ short add_vaccine(
 	{
 		new_vaccine->full_efficacy[ idx ]     = full_efficacy[ idx ];
 		new_vaccine->symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ];
+		new_vaccine->severe_efficacy[ idx ]   = severe_efficacy[ idx ];
 
 		if( full_efficacy[ idx ] > 0 ) is_full = TRUE;
 		if( symptoms_efficacy[ idx ] > 0 ) is_symptoms = TRUE;
+		if( severe_efficacy[ idx ] > 0 ) is_severe = TRUE;
 	}
 	new_vaccine->is_full     = is_full;
 	new_vaccine->is_symptoms = is_symptoms;
+	new_vaccine->is_severe   = is_severe;
 
 	new_vaccine->next = model->vaccines;
 	model->vaccines   = new_vaccine;
@@ -749,6 +756,9 @@ void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 
 		if( vaccine->symptoms_efficacy[ strain_idx ] > r_unif )
 			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
+
+		if( vaccine->severe_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SEVERE, model->time, time_wane );
 	}
 	add_individual_to_event_list( model, VACCINE_WANE, indiv, time_wane, vaccine );
 }
@@ -768,14 +778,15 @@ void intervention_vaccine_wane( model *model, individual *indiv, void* info )
 	{
 		model->n_vaccinated_fully--;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
-		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_FULLY, model->time, MAX_TIME );
 	}
 	if( vaccine->is_symptoms )
 	{
 		model->n_vaccinated_symptoms++;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
-		set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED_PROTECTED, model->time, MAX_TIME );
 	}
+
+	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED, model->time, MAX_TIME );
+
 }
 
 /*****************************************************************************************

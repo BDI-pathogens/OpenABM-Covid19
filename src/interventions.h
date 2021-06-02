@@ -33,11 +33,13 @@ struct trace_token{
 struct vaccine{
 	short idx;
 	float *full_efficacy;				// efficacy against contracting the virus
-	float *symptoms_efficacy;			// efficacy from preventing symptoms
+	float *symptoms_efficacy;			// efficacy preventing symptoms
+	float *severe_efficacy;			    // efficacy preventing severe symptoms (i.e. not needing to be hospitalised)
 	short time_to_protect;				// time between having the vaccine and protection starting
 	short vaccine_protection_period;	// time for which protections lasts
 	short is_full;						// does it have some full protection
-	short is_symptoms;					// does it have some symptoms-only protetion
+	short is_symptoms;					// does it have some symptoms-only protection
+	short is_severe;					// does it have some severe-only protection
 	char name[INPUT_CHAR_LEN]; 			// unique name of the network
 	vaccine *next;
 };
@@ -70,7 +72,7 @@ void intervention_manual_trace( model *, individual *);
 void intervention_notify_contacts( model*, individual*, int, trace_token*, int );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
-short add_vaccine( model*, float*, float*, short, short );
+short add_vaccine( model*, float*, float*, float*, short, short );
 vaccine* get_vaccine_by_id( model*, short );
 short intervention_vaccinate( model*, individual*, vaccine* );
 short intervention_vaccinate_by_idx( model*, long, vaccine* );

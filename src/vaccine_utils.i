@@ -20,6 +20,10 @@ float vaccine_symptoms_efficacy( vaccine *pvaccine ) {
     return pvaccine->symptoms_efficacy[ 0 ];
 }
 
+float vaccine_severe_efficacy( vaccine *pvaccine ) {
+    return pvaccine->severe_efficacy[ 0 ];
+}
+
 short vaccine_time_to_protect( vaccine *pvaccine ) {
     return pvaccine->time_to_protect;
 }
