@@ -1044,6 +1044,11 @@ class TestClass(object):
         ],
         "test_add_vaccine": [ 
             dict(
+                 test_params=dict(
+                    n_total  = 1e4,
+                    max_n_strains = 2
+                ),
+                
                 vaccine0 = dict(
                     full_efficacy     = 0.5,
                     symptoms_efficacy = 1.0,
@@ -1053,9 +1058,9 @@ class TestClass(object):
                 ),
                 vaccine1 = dict(
                     vaccine_type = 1,
-                    full_efficacy     = 0.0,
-                    symptoms_efficacy = 0.5,
-                    severe_efficacy   = 0.0,
+                    full_efficacy     = [ 0.0, 0.5 ],
+                    symptoms_efficacy = [ 0.5, 0.75],
+                    severe_efficacy   = [ 0.0, 1.0 ],
                     time_to_protect = 2,
                     vaccine_protection_period = 15,
                 ),
@@ -2806,13 +2811,14 @@ class TestClass(object):
                 sd = sqrt( expected * max( 1 - expected / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
     
-    def test_add_vaccine(self, vaccine0, vaccine1 ):    
+    def test_add_vaccine(self, test_params, vaccine0, vaccine1 ):    
         """
         Check that a vaccine can be added and the correct properties are stored
         """
           
         params = utils.get_params_swig()
-        params.set_param( "n_total", 10000 )
+        for param, value in test_params.items():
+            params.set_param( param, value )
         model  = utils.get_model_swig( params )
 
         v0 = model.add_vaccine( 
@@ -2827,19 +2833,25 @@ class TestClass(object):
             vaccine1["severe_efficacy"],
             vaccine1["time_to_protect"], 
             vaccine1["vaccine_protection_period"] )
-        
+                
         np.testing.assert_equal(v0.idx(), 0, "index of first added vaccine should be 0")
         np.testing.assert_equal(v1.idx(), 1, "index of second added vaccine should be 1")
         
-        np.testing.assert_equal(v0.full_efficacy(),vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
-        np.testing.assert_equal(v0.symptoms_efficacy(),vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
-        np.testing.assert_equal(v0.severe_efficacy(),vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
+        np.testing.assert_equal(v0.full_efficacy()[0],vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
+        np.testing.assert_equal(v0.symptoms_efficacy()[0],vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
+        np.testing.assert_equal(v0.severe_efficacy()[0],vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
+        np.testing.assert_equal(v0.full_efficacy()[1],vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
+        np.testing.assert_equal(v0.symptoms_efficacy()[1],vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
+        np.testing.assert_equal(v0.severe_efficacy()[1],vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
         np.testing.assert_equal(v0.time_to_protect(),vaccine0["time_to_protect"], "incorrect time to protect (vaccine0)")
         np.testing.assert_equal(v0.vaccine_protection_period(),vaccine0["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine0)")
   
-        np.testing.assert_equal(v1.full_efficacy(),vaccine1["full_efficacy"], "incorrect full_efficacy (vaccine1)")
-        np.testing.assert_equal(v1.symptoms_efficacy(),vaccine1["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine1)")
-        np.testing.assert_equal(v1.severe_efficacy(),vaccine1["severe_efficacy"], "incorrect severe efficacy (vaccine1)")
+        np.testing.assert_equal(v1.full_efficacy()[0],vaccine1["full_efficacy"][0], "incorrect full_efficacy (vaccine1)")
+        np.testing.assert_equal(v1.symptoms_efficacy()[0],vaccine1["symptoms_efficacy"][0], "incorrect symptoms efficacy (vaccine1)")
+        np.testing.assert_equal(v1.severe_efficacy()[0],vaccine1["severe_efficacy"][0], "incorrect severe efficacy (vaccine1)")
+        np.testing.assert_equal(v1.full_efficacy()[1],vaccine1["full_efficacy"][1], "incorrect full_efficacy (vaccine1)")
+        np.testing.assert_equal(v1.symptoms_efficacy()[1],vaccine1["symptoms_efficacy"][1], "incorrect symptoms efficacy (vaccine1)")
+        np.testing.assert_equal(v1.severe_efficacy()[1],vaccine1["severe_efficacy"][1], "incorrect severe efficacy (vaccine1)")
         np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
         np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
 
