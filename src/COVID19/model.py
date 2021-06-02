@@ -907,9 +907,10 @@ class Model:
           
     def add_vaccine(
             self, 
-            full_efficacy = 1.0, 
+            full_efficacy     = 1.0, 
             symptoms_efficacy = 1.0, 
-            time_to_protect = 14, 
+            severe_efficacy   = 1.0, 
+            time_to_protect   = 14, 
             vaccine_protection_period = 1000 ):
         """
         Add a new vaccine type
@@ -928,20 +929,29 @@ class Model:
             full_efficacy = [full_efficacy] * n_strains
         elif isinstance( full_efficacy, list) :
             if len( full_efficacy ) != n_strains :
-                raise ModelException( "full_efficacy must be an integer or a list of length max_n_strains" )
+                raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
         else :
-            raise ModelException( "full_efficacy must be an integer or a list of length max_n_strains" )
+            raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
          
         if isinstance( symptoms_efficacy, float ) :
             symptoms_efficacy = [symptoms_efficacy] * n_strains
         elif isinstance( symptoms_efficacy, list) :
             if len( symptoms_efficacy ) != n_strains :
-                raise ModelException( "symptoms_efficacy must be an integer or a list of length max_n_strains" )
+                raise ModelException( "symptoms_efficacy must be a float or a list of length max_n_strains" )
         else :
-            raise ModelException( "symptoms_efficacy must be an integer or a list of length max_n_strains" )
-                  
+            raise ModelException( "symptoms_efficacy must be a floator a list of length max_n_strains" )
+ 
+        if isinstance( severe_efficacy, float ) :
+            severe_efficacy = [severe_efficacy] * n_strains
+        elif isinstance( severe_efficacy, list) :
+            if len( severe_efficacy ) != n_strains :
+                raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+      
         c_full_efficacy     = covid19.floatArray(n_strains)
         c_symptoms_efficacy = covid19.floatArray(n_strains)
+        c_severe_efficacy   = covid19.floatArray(n_strains)
     
         for idx in range( n_strains ) :
             
@@ -951,10 +961,14 @@ class Model:
             if ( symptoms_efficacy[ idx ] < 0 ) | ( symptoms_efficacy[ idx ] > 1 ) :
                 raise ModelParameterException( "symptoms_efficacy must be between 0 and 1")
             
+            if ( severe_efficacy[ idx ] < 0 ) | ( severe_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "severe_efficacy must be between 0 and 1")
+            
             c_full_efficacy[ idx ]     = full_efficacy[ idx ]
             c_symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ]
+            c_severe_efficacy[ idx ]   = severe_efficacy[ idx ]
 
-        idx = covid19.add_vaccine( self.c_model, c_full_efficacy, c_symptoms_efficacy, time_to_protect, vaccine_protection_period );
+        idx = covid19.add_vaccine( self.c_model, c_full_efficacy, c_symptoms_efficacy, c_severe_efficacy, time_to_protect, vaccine_protection_period );
         return Vaccine( self, idx )
  
     def vaccinate_individual(self, ID, vaccine ):

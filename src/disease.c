@@ -381,10 +381,15 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
-		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
-	else
+ 	if( immune_to_severe( indiv, indiv->infection_events->strain->idx ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
+	} else
+	{
+		if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
+			transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
+		else
+			transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
+	}
 
 	intervention_on_symptoms( model, indiv );
 }
@@ -545,7 +550,7 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
 	{
 		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) ) {
-			set_immune( indiv, sdx, time_susceptible );
+			set_immune( indiv, sdx, time_susceptible, IMMUNE_FULL );
 		} else
 			complete_immunity = FALSE;
 	}

@@ -937,7 +937,8 @@ class TestClass(object):
                 n_to_vaccinate = 100,
                 n_to_seed = 100,
                 full_efficacy = 1.0,
-                symptoms_efficacy = 1.0,
+                symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 14
             ),
             dict(
@@ -951,6 +952,7 @@ class TestClass(object):
                 n_to_seed = 100,
                 full_efficacy = 0.0,
                 symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 14
             )
         ],
@@ -992,6 +994,7 @@ class TestClass(object):
                 n_to_seed = 100,
                 full_efficacy = 0.0,
                 symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
                 vaccine_protection_period = 14,
             ),
             dict(
@@ -1005,6 +1008,7 @@ class TestClass(object):
                 n_to_seed = 100,
                 full_efficacy = 1.0,
                 symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
                 vaccine_protection_period = 21
             )
         ],
@@ -1018,7 +1022,8 @@ class TestClass(object):
                 ),
                 n_to_seed = 100,
                 full_efficacy = 0.0,
-                symptoms_efficacy = 1.0,                
+                symptoms_efficacy = 1.0,   
+                severe_efficacy   = 0.0,     
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 1
             ),
@@ -1031,7 +1036,8 @@ class TestClass(object):
                 ),
                 n_to_seed = 100,
                 full_efficacy = 1.0,
-                symptoms_efficacy = 0.0,       
+                symptoms_efficacy = 0.0,  
+                severe_efficacy   = 0.0,
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 10
             )
@@ -1041,6 +1047,7 @@ class TestClass(object):
                 vaccine0 = dict(
                     full_efficacy     = 0.5,
                     symptoms_efficacy = 1.0,
+                    severe_efficacy   = 0.0,
                     time_to_protect   = 5,
                     vaccine_protection_period = 10,
                 ),
@@ -1048,6 +1055,7 @@ class TestClass(object):
                     vaccine_type = 1,
                     full_efficacy     = 0.0,
                     symptoms_efficacy = 0.5,
+                    severe_efficacy   = 0.0,
                     time_to_protect = 2,
                     vaccine_protection_period = 15,
                 ),
@@ -1066,6 +1074,7 @@ class TestClass(object):
                 n_to_seed = 100,
                 full_efficacy = 0.0,
                 symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 2
             ),
              dict(
@@ -1080,6 +1089,7 @@ class TestClass(object):
                 n_to_seed = 100,
                 full_efficacy = 1.0,
                 symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 14
             )
         ],
@@ -2517,7 +2527,7 @@ class TestClass(object):
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_RESULT ), 0, "People still waiting for test results on day they should be processed" );
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.MANUAL_CONTACT_TRACING ), 0, "People still waiting for manual contact tracing on day they should be processed" );      
         
-    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, time_to_protect ):
+    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
         """
         Check that vaccinated people are vaccinated and only get protection after the period
         in which the vaccine is not effective.
@@ -2538,7 +2548,7 @@ class TestClass(object):
         df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
 
         # add the vaccine
-        vaccine = model.add_vaccine(full_efficacy, symptoms_efficacy, time_to_protect, vaccine_protection_period)
+        vaccine = model.add_vaccine(full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
 
         # check people are vaccinated
         for idx in idx_vaccinated :
@@ -2605,7 +2615,7 @@ class TestClass(object):
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
         # add the vaccine
-        vaccine = model.add_vaccine( efficacy, 0.0, time_to_protect, vaccine_protection_period)
+        vaccine = model.add_vaccine( efficacy, 0.0, 0.0, time_to_protect, vaccine_protection_period)
 
         # vaccinate people at random
         for idx in idx_vaccinated :
@@ -2650,7 +2660,7 @@ class TestClass(object):
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
   
     
-    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, vaccine_protection_period ):
+    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, vaccine_protection_period ):
         """
         Check the vaccine wanes over time
         Make sure that people are protected before it wanes but can be infected after it wanes
@@ -2668,7 +2678,7 @@ class TestClass(object):
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
         # add the vaccine
-        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, time_to_protect, vaccine_protection_period)
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
 
         # vaccinate people at random
         for idx in idx_vaccinated :
@@ -2726,7 +2736,7 @@ class TestClass(object):
         np.testing.assert_equal( n_inf_protect, 0, "vaccinated people being infected before the vaccine has waned")
         np.testing.assert_( n_inf_wane > 0, "vaccinated people being infected before the vaccine has waned")
         
-    def test_vaccinate_schedule( self, test_params, n_to_seed, full_efficacy, symptoms_efficacy, fraction_to_vaccinate, days_to_vaccinate):
+    def test_vaccinate_schedule( self, test_params, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, fraction_to_vaccinate, days_to_vaccinate):
         """
         Check that a schedule of people can be vaccinated
         """
@@ -2740,7 +2750,7 @@ class TestClass(object):
         n_total         = params.get_param( "n_total" )
         end_time        = params.get_param( "end_time" )
                
-        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, time_to_protect, 365)
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, 365)
      
         schedule = VaccineSchedule(
             frac_0_9   = fraction_to_vaccinate[0],
@@ -2808,11 +2818,13 @@ class TestClass(object):
         v0 = model.add_vaccine( 
             vaccine0["full_efficacy"],
             vaccine0["symptoms_efficacy"],
+            vaccine0["severe_efficacy"],
             vaccine0["time_to_protect"], 
             vaccine0["vaccine_protection_period"] )
         v1 = model.add_vaccine( 
             vaccine1["full_efficacy"], 
             vaccine1["symptoms_efficacy"],
+            vaccine1["severe_efficacy"],
             vaccine1["time_to_protect"], 
             vaccine1["vaccine_protection_period"] )
         
@@ -2821,15 +2833,17 @@ class TestClass(object):
         
         np.testing.assert_equal(v0.full_efficacy(),vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
         np.testing.assert_equal(v0.symptoms_efficacy(),vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
+        np.testing.assert_equal(v0.severe_efficacy(),vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
         np.testing.assert_equal(v0.time_to_protect(),vaccine0["time_to_protect"], "incorrect time to protect (vaccine0)")
         np.testing.assert_equal(v0.vaccine_protection_period(),vaccine0["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine0)")
   
         np.testing.assert_equal(v1.full_efficacy(),vaccine1["full_efficacy"], "incorrect full_efficacy (vaccine1)")
         np.testing.assert_equal(v1.symptoms_efficacy(),vaccine1["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine1)")
+        np.testing.assert_equal(v1.severe_efficacy(),vaccine1["severe_efficacy"], "incorrect severe efficacy (vaccine1)")
         np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
         np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
 
-    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, time_to_protect ):
+    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
         """
         Check that in a 2 strain model, if a vaccine is only effective against one of the strains
         then it will only protect from that strain and not the other
@@ -2840,6 +2854,7 @@ class TestClass(object):
         
         full_efficacy     = [ full_efficacy, 0.0 ];
         symptoms_efficacy = [ symptoms_efficacy, 0.0 ];
+        severe_efficacy   = [ severe_efficacy, 0.0 ];
         vaccine_protection_period = test_params[ "end_time" ] + 1;
         
         params = utils.get_params_swig()
@@ -2855,7 +2870,7 @@ class TestClass(object):
         df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
 
         # add the vaccine
-        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, time_to_protect, vaccine_protection_period)
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
 
         # vaccine some people
         for idx in idx_vaccinated :

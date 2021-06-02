@@ -26,6 +26,9 @@ class Vaccine:
 
     def symptoms_efficacy(self):
         return covid19.vaccine_symptoms_efficacy( self.c_vaccine )
+    
+    def severe_efficacy(self):
+        return covid19.vaccine_severe_efficacy( self.c_vaccine )
 
     def time_to_protect(self):
         return covid19.vaccine_time_to_protect( self.c_vaccine )

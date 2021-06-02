@@ -78,10 +78,12 @@ void initialize_individual(
 	indiv->hazard             = calloc( params->max_n_strains, sizeof( float ) );
 	indiv->immune_full        = calloc( params->max_n_strains, sizeof( short ) );
 	indiv->immune_to_symptoms = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_severe   = calloc( params->max_n_strains, sizeof( short ) );
 	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 	{
 		indiv->immune_full[strain_idx]         = NO_IMMUNITY;
 		indiv->immune_to_symptoms[strain_idx ] = NO_IMMUNITY;
+		indiv->immune_to_severe[strain_idx ]   = NO_IMMUNITY;
 	}
 
 	indiv->vaccine_status = NO_VACCINE;
@@ -290,13 +292,46 @@ void set_dead( individual *indiv, parameters* params, int time )
 
 /*****************************************************************************************
 *  Name:		set_immunue
-*  Description: set
+*  Description: set the immunity depending upon type
+*
+*  				if currently hold immunity to a strain, the effect of setting can only
+*  				lengthen the immunity
+*
 *  Returns:		void
 ******************************************************************************************/
-void set_immune( individual *indiv, short strain_idx, short time_until )
+void set_immune( individual *indiv, short strain_idx, short time_until, short immune_type )
 {
-	indiv->immune_full[ strain_idx ] = max( indiv->immune_full[ strain_idx ], time_until );
-	indiv->hazard[ strain_idx ]           = -1;
+	if( immune_type == IMMUNE_FULL )
+	{
+		indiv->immune_full[ strain_idx ] = max( indiv->immune_full[ strain_idx ], time_until );
+		indiv->hazard[ strain_idx ]      = -1;
+	} else if( immune_type == IMMUNE_SYMPTOMS  )
+	{
+		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+	} else if( immune_type == IMMUNE_SEVERE )
+	{
+		indiv->immune_to_severe[ strain_idx ] = max( indiv->immune_to_severe[ strain_idx ], time_until );
+	} else
+		print_exit( "do not recognize immune type" );
+}
+
+/*****************************************************************************************
+*  Name:		wane_immunity
+*  Description: checks all types of immunity to all strains and wanes appropriately
+*  Returns:		void
+******************************************************************************************/
+void wane_immunity( individual *indiv, parameters *params, short time )
+{
+	for( short idx = 0; idx < params->max_n_strains; idx++ )
+	{
+		if( indiv->immune_to_symptoms[ idx ] == time )
+			indiv->immune_to_symptoms[ idx ] = NO_IMMUNITY;
+
+		if( indiv->immune_to_severe[ idx ] == time )
+			indiv->immune_to_severe[ idx ] = NO_IMMUNITY;
+	}
+
+	set_susceptible( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -304,40 +339,36 @@ void set_immune( individual *indiv, short strain_idx, short time_until )
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, parameters* params, short strain_idx, short current_status, short time, short time_until )
+void set_vaccine_status( individual* indiv, parameters* params, short strain_idx, short vaccine_status, short time, short time_until )
 {
-    // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
-	indiv->vaccine_status      = current_status;
+	indiv->vaccine_status      = vaccine_status;
 
-	if( current_status == VACCINE_PROTECTED_FULLY )
+	if( vaccine_status == VACCINE_PROTECTED_FULLY )
 	{
 		if( strain_idx == ALL_STRAINS )
 			print_exit( "must specify which strain the vaccine gives protection from" );
 
-		set_immune( indiv, strain_idx, time_until );
+		set_immune( indiv, strain_idx, time_until, IMMUNE_FULL );
 	}
 
-	if( current_status == VACCINE_PROTECTED_SYMPTOMS )
+	if( vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
 	{
 		if( strain_idx == ALL_STRAINS )
 			print_exit( "must specify which strain the vaccine gives protection from" );
 
-		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+		set_immune( indiv, strain_idx, time_until, IMMUNE_SYMPTOMS );
 	}
 
-
-	if( ( current_status == VACCINE_WANED_PROTECTED ) && strain_idx == ALL_STRAINS )
+	if( vaccine_status == VACCINE_PROTECTED_SEVERE )
 	{
-		for( short idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
-		{
-			if( indiv->immune_to_symptoms[ idx ] == time )
-				indiv->immune_to_symptoms[ idx ] = NO_IMMUNITY;
-		}
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		set_immune( indiv, strain_idx, time_until, IMMUNE_SEVERE );
 	}
 
-	if( current_status == VACCINE_WANED_FULLY )
-		set_susceptible( indiv, params, time );
-
+	if( vaccine_status == VACCINE_WANED )
+		wane_immunity( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -503,6 +534,7 @@ void destroy_individual( individual *indiv )
 	free( indiv->hazard );
 	free( indiv->immune_full );
 	free( indiv->immune_to_symptoms );
+	free( indiv->immune_to_severe );
 }
 
 /*****************************************************************************************

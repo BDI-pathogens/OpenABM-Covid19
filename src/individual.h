@@ -68,6 +68,7 @@ struct individual{
 	short vaccine_status;
 	short *immune_full;
 	short *immune_to_symptoms;
+	short *immune_to_severe;
 };
 
 struct interaction{
@@ -111,6 +112,7 @@ struct infection_event{
 #define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
 #define immune_to_symptoms( indiv, idx ) ( ( indiv->immune_to_symptoms[ idx ] != NO_IMMUNITY ) )
+#define immune_to_severe( indiv, idx ) ( ( indiv->immune_to_severe[ idx ] != NO_IMMUNITY ) )
 #define immune_full( indiv, idx ) ( ( indiv->immune_full[ idx ] != NO_IMMUNITY ) )
 
 /************************************************************************/
@@ -135,7 +137,8 @@ void set_general_admission( individual*, parameters*, int );
 void set_icu_admission( individual*, parameters*, int );
 void set_mortuary_admission( individual*, parameters*, int );
 void set_discharged( individual*, parameters*, int );
-void set_immune( individual*, short, short );
+void set_immune( individual*, short, short, short );
+void wane_immunity( individual*, parameters*, short );
 void set_vaccine_status( individual*, parameters*, short, short, short, short );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );
