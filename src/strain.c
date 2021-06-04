@@ -31,3 +31,16 @@ short add_new_strain(
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );
 }
+
+/*****************************************************************************************
+*  Name:		get_strain_by_id
+*  Description: returns a pointer to a strain a given ID
+*  Returns:		pointer to vaccine
+******************************************************************************************/
+strain* get_strain_by_id( model *model, short strain_idx )
+{
+	if( strain_idx >=  model->n_initialised_strains )
+		print_exit( "strain not yet intialised " );
+
+	return &(model->strains[ strain_idx ]);
+}

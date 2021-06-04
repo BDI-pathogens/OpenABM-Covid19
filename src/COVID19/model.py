@@ -9,6 +9,7 @@ import sys, time
 import covid19
 from COVID19.network import Network
 from COVID19.vaccine import Vaccine
+from COVID19.strain  import Strain
 
 LOGGER = logging.getLogger(__name__)
 
@@ -825,18 +826,28 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
     
-    def seed_infect_by_idx(self, ID, strain_idx = 0, network_id = -1 ):
+    def seed_infect_by_idx(self, ID, strain_idx = 0, strain = None, network_id = -1 ):
         
         n_total = self._params_obj.get_param("n_total")
 
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)" )
 
+        if strain != None :
+            if isinstance( strain, Strain ) :
+                strain_idx = strain.idx()
+            else :
+                ModelParameterException( "strain must be of class Strain")
+            
+        if not isinstance( strain_idx, int ) :
+            ModelParameterException( "strain must either be a Strain class or the idx of the strain" )
+
         n_strains = self.c_model.n_initialised_strains;
         if ( strain_idx < 0 ) | ( strain_idx >= n_strains ) :
             raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
-
+       
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+    
 
     def add_new_strain(self, transmission_multiplier ):       
 
@@ -846,7 +857,9 @@ class Model:
         if n_strains == max_n_strains :
             raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialization of the model" )
         
-        return covid19.add_new_strain( self.c_model, transmission_multiplier );
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier );
+        
+        return Strain( self, idx )
 
     def set_cross_immunity_matrix(self, cross_immunity ):
 

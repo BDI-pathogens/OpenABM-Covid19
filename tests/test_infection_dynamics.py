@@ -1377,12 +1377,11 @@ class TestClass(object):
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
             inf_id[ idx ] = idxs[ inf_id[ idx ] ]
-        
-        strain_idx = model.add_new_strain( transmission_multiplier = 2 )
-        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
+        strain = model.add_new_strain( transmission_multiplier = 2 )
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
 
         for id in inf_id :
-            np.testing.assert_( model.seed_infect_by_idx(id, strain_idx = strain_idx ), "failed to infect individual" )
+            np.testing.assert_( model.seed_infect_by_idx(id, strain = strain), "failed to infect individual" )
    
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1420,11 +1419,11 @@ class TestClass(object):
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
         n_susc   = len( idxs )
         
-        strain_idx = model.add_new_strain( transmission_multiplier ) 
-        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
+        strain = model.add_new_strain( transmission_multiplier ) 
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
-            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx )
+            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain = strain )
           
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1436,11 +1435,11 @@ class TestClass(object):
         df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
 
             # check no new strain infections before it is introduced
-        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_idx ].sum(), 0, "new strain cases before seed date" )
+        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain.idx() ].sum(), 0, "new strain cases before seed date" )
         
         # check that the new strain dominates after a set period of time
         n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 0 ].sum()
-        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_idx ].sum()
+        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain.idx() ].sum()
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
 
@@ -1476,7 +1475,7 @@ class TestClass(object):
         for idx in range( n_equivalent_strains ) :
             
             if idx != 0 :
-                strain_idx = model.add_new_strain( 1.0 )
+                strain_idx = model.add_new_strain( 1.0 ).idx()
             
             for jdx in range( n_seed ) :
                 model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = strain_idx )

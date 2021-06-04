@@ -31,5 +31,6 @@ struct strain{
 /************************************************************************/
 
 short add_new_strain( model*, float );
+strain* get_strain_by_id( model*, short );
 
 #endif /* STRAIN_H_ */
