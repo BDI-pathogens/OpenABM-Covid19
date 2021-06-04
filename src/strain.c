@@ -16,7 +16,8 @@
 ******************************************************************************************/
 short add_new_strain(
 	model *model,
-	float transmission_multiplier
+	float transmission_multiplier,
+	double *hospitalised_fraction
 )
 {
 	strain *strain_ptr;
@@ -27,6 +28,9 @@ short add_new_strain(
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
+
+	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
+		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];
 
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );

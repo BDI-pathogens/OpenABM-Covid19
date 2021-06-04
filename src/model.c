@@ -731,7 +731,7 @@ void set_up_seed_infection( model *model )
 	individual *indiv;
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1 );
+	strain_idx = add_new_strain( model, 1, &(params->hospitalised_fraction) );
 
 	while( idx < params->n_seed_infection )
 	{
