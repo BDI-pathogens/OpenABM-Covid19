@@ -381,11 +381,13 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
- 	if( immune_to_severe( indiv, indiv->infection_events->strain->idx ) ) {
+ 	strain *strain = indiv->infection_events->strain;
+
+	if( immune_to_severe( indiv, strain->idx ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 	} else
 	{
-		if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
+		if( gsl_ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 		else
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );

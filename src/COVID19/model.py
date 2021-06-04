@@ -849,16 +849,32 @@ class Model:
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
     
 
-    def add_new_strain(self, transmission_multiplier ):       
+    def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
+        
+        """
+        Add a new strain, note the total number of strains that can be added is set by the initial 
+        parameters max_n_strains
+        
+        transmission_multiplier - the relative transmissibility of the new strain
+        hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
+        
+        """  
 
         n_strains = self.c_model.n_initialised_strains;
         max_n_strains = self._params_obj.get_param("max_n_strains")
 
         if n_strains == max_n_strains :
-            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialization of the model" )
+            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )    
         
-        idx = covid19.add_new_strain( self.c_model, transmission_multiplier );
-        
+        hospitalised_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        if hospitalised_fraction == None :
+            covid19.get_param_array_hospitalised_fraction(self.c_params, hospitalised_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                hospitalised_fraction_c[ idx ] = hospitalised_fraction[ idx ]
+           
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c );
+
         return Strain( self, idx )
 
     def set_cross_immunity_matrix(self, cross_immunity ):
