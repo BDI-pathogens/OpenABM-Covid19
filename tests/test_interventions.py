@@ -2875,7 +2875,7 @@ class TestClass(object):
         model  = utils.get_model_swig( params )
 
         # add a second strain with the same multiplier
-        model.add_new_strain( 1.0 )
+        new_strain = model.add_new_strain( 1.0 )
 
         n_total        = params.get_param( "n_total" )
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
@@ -2895,7 +2895,7 @@ class TestClass(object):
             model.seed_infect_by_idx( idx, strain_idx = 0 )
         idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
         for idx in idx_seed :
-            model.seed_infect_by_idx( idx, strain_idx = 1 )    
+            model.seed_infect_by_idx( idx, strain = new_strain )    
         model.run( verbose = False )
             
         # now get all those who have been infected after the vaccine takes effect
