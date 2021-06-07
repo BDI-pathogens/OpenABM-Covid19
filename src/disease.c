@@ -309,7 +309,7 @@ void new_infection(
 	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
 
-	add_infection_event( infected, infector, network_id );
+	add_infection_event( infected, infector, network_id, model->time );
 
 	if( draw < asymp_frac )
 	{

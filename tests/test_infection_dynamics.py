@@ -111,9 +111,9 @@ class TestClass(object):
         ],
         "test_transmission_pairs": [
             dict( 
-                n_total         = 200000,
+                n_total         = 50000,
                 infectious_rate = 8,
-                end_time        = 150,
+                end_time        = 50,
                 hospitalised_daily_interactions = 5,
                 mean_infectious_period=8.0,
                 sd_infectious_period=5,
@@ -508,7 +508,7 @@ class TestClass(object):
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "generation_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
-        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )        
         
         # check that some people can get infected after one time step
         np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )

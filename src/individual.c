@@ -40,7 +40,7 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	add_infection_event( indiv, NULL, UNKNOWN );
+	add_infection_event( indiv, NULL, UNKNOWN, 0 );
 
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
@@ -98,7 +98,8 @@ void initialize_individual(
 void add_infection_event(
 	individual *indiv,
 	individual *infector,
-	short network_id
+	short network_id,
+	short time
 )
 {
 	infection_event *event = indiv->infection_events;
@@ -128,6 +129,9 @@ void add_infection_event(
 		event->infector_hospital_state = UNKNOWN;
 		event->strain                  = NULL;
 	}
+
+	if( event->infector == indiv )
+		event->time_infected_infector = time;
 
 	event->is_case     = FALSE;
 }
@@ -400,7 +404,7 @@ void set_susceptible( individual *indiv, parameters* params, int time )
 	indiv->status = SUSCEPTIBLE;
 
 	if( current_status == RECOVERED || current_status == SUSCEPTIBLE || current_status == VACCINE_PROTECTED_FULLY )
-		add_infection_event( indiv, NULL, UNKNOWN );
+		add_infection_event( indiv, NULL, UNKNOWN, time );
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params, time );
