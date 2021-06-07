@@ -12,7 +12,7 @@ short strain_idx( strain *pstrain ) {
     return pstrain->idx;
 }
 
-short strain_transmission_multiplier( strain *pstrain ) {
+float strain_transmission_multiplier( strain *pstrain ) {
     return pstrain->transmission_multiplier;
 }
 

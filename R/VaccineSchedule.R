@@ -1,5 +1,3 @@
-SWIG_update_daily_fraction = update_daily_fraction
-
 #' R6Class VaccineSchedule
 #'
 #' @description

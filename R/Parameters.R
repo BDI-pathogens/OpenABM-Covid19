@@ -106,7 +106,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
     #' the C params R pointer object
     c_params_ptr = function() {
-      return( private$.c_params()@ref )
+      return( self$c_params@ref )
     },
 
     #' check the C params still exists

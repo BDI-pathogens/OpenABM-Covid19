@@ -3,6 +3,7 @@
 #include "model.h"
 #include "input.h"
 #include "params.h"
+#include "constant.h"
 
 SEXP R_get_app_users ( SEXP R_c_model, SEXP n_total )
 {
@@ -346,6 +347,26 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   UNPROTECT(n_names+2);
 
   return R_list;
+}
+
+SEXP R_add_new_strain ( SEXP R_c_model, SEXP R_transisition_multiplier,
+                        SEXP R_hospitalised_fraction )
+{
+  // get the point to the model from the R pointer object
+  model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
+
+  // allocate memory to for the function call
+  float transition_multiplier = asReal( R_transisition_multiplier );
+  double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof(double) );
+
+  for( int i = 0; i < N_AGE_GROUPS; i++ )
+    hospitalised_fraction[ i ] = REAL(R_hospitalised_fraction )[ i ];
+
+  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction);
+
+  free( hospitalised_fraction );
+
+  return ScalarInteger( n_strain );
 }
 
 

@@ -225,8 +225,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       enum <- get_base_param_from_enum(param)
       if (!is.null(enum)) {
         # multi-value parameter (C array)
-        getter <- get(paste0("get_model_param_", enum$base_name))
-        result <- getter( self$c_model, enum$index )
+        getter_str = paste0("get_model_param_", enum$base_name)
+        if (exists(getter_str)) {
+          getter <- get(paste0("get_model_param_", enum$base_name))
+          result <- getter( self$c_model, enum$index )
+        } else {
+          result = private$params_object$get_param(param)
+        }
       } else {
         # single-value parameter
         getter_str <- paste0("get_model_param_", param)
@@ -472,7 +477,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
-      
+
       res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
       return(as.logical(res))
     },
@@ -480,11 +485,30 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Adds a new strain (variant)
     #' Wrapper for C API \code{add_new_strain}.
     #' @param transmission_multiplier The relative transmission rate of the strain
-    #' @return \code{strain_idx} The index assigned to the new strain
-    add_new_strain = function(ID, transmission_multiplier = 1 )
+    #' @param hospitalised_fraction the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)]
+    #' @return \code{Strain} A Strain object representing this strain
+    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA )
     {
-      strain_idx <- add_new_strain(self$c_model, transmission_multiplier )
-      return(strain_idx)
+
+      max_n_strains = self$get_param( "max_n_strains" )
+      n_strains = self$c_model$n_initialised_strains;
+
+      if( n_strains == max_n_strains )
+        stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
+
+      if( is.na( hospitalised_fraction ) )
+      {
+        hospitalised_fraction = c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          hospitalised_fraction[ idx ] = self$get_param(
+            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) )
+      }
+
+      c_model_ptr <- private$c_model_ptr()
+      strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,
+                        hospitalised_fraction, PACKAGE='OpenABMCovid19');
+
+      return( Strain$new( self, strain_idx ) )
     },
 
     #' @description Get the list of network IDs
