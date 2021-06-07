@@ -452,3 +452,35 @@ SEXP R_vaccine_symptoms_efficacy ( SEXP R_c_vaccine )
   return R_res;
 }
 
+SEXP R_intervention_vaccinate_age_group ( SEXP R_c_model,
+      SEXP R_fraction_to_vaccinate, SEXP R_c_vaccine, SEXP R_total_vaccinated )
+{
+  // get the point to the model from the R pointer object
+  vaccine *c_vaccine = (vaccine *) R_ExternalPtrAddr(R_c_vaccine);
+  model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
+
+  long *total_vaccinated = calloc( N_AGE_GROUPS, sizeof(long) );
+  double *fraction_to_vaccinate= calloc( N_AGE_GROUPS, sizeof(double) );
+
+  for( int i = 0; i < N_AGE_GROUPS; i++ )
+  {
+    total_vaccinated[ i ]      = INTEGER(R_total_vaccinated)[ i ];
+    fraction_to_vaccinate[ i ] = REAL(R_fraction_to_vaccinate )[ i ];
+  }
+
+  long n_vac =intervention_vaccinate_age_group( c_model, fraction_to_vaccinate,
+                                                c_vaccine, total_vaccinated );
+
+  // convert to R object
+  SEXP R_res = PROTECT(allocVector(INTSXP, N_AGE_GROUPS));
+  for( int i = 0; i < N_AGE_GROUPS; i++ )
+    INTEGER(R_res)[i] = total_vaccinated[i];
+
+  // free the memory
+  free( total_vaccinated );
+  free( fraction_to_vaccinate );
+  UNPROTECT(1);
+
+  return R_res;
+}
+

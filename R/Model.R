@@ -665,40 +665,21 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Vaccinate an individual.
     #' Wrapper for C API \code{intervention_vaccinate_by_idx}.
     #' @param ID The ID of the individual (must be \code{0 <= ID <= n_total}).
-    #' @param vaccine_type The type of vaccine, see \code{\link{VACCINE_TYPES}}.
-    #' @param efficacy Probability that the person is successfully vaccinated
-    #'   (must be \code{0 <= efficacy <= 1}).
-    #' @param time_to_protect Delay before it takes effect (in days).
-    #' @param vaccine_protection_period The duration of the vaccine before it
-    #'   wanes.
+    #' @param vaccine The of vaccine object to be given
     #' @return Logical value, \code{TRUE} if vaccinated \code{FALSE} otherwise.
-    vaccinate_individual = function(
-      ID,
-      vaccine_type = 0,
-      efficacy = 1.0,
-      time_to_protect = 14,
-      vaccine_protection_period = 1000 )
+    vaccinate_individual = function( ID, vaccine )
     {
       n_total <- private$c_params$n_total
 
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
-      if (efficacy < 0 || efficacy > 1) {
-        stop("efficacy must be between 0 and 1")
-      }
-      if (time_to_protect < 1) {
-        stop("vaccine must take at least one day to take effect")
-      }
-      if (vaccine_protection_period <= time_to_protect) {
-        stop("vaccine must protect for longer than it takes to by effective")
-      }
-      if (!is.numeric(vaccine_type) || ! vaccine_type %in% VACCINE_TYPES) {
-        stop("vaccine type must be listed in VaccineTypesEnum")
-      }
 
-      res <- intervention_vaccinate_by_idx(self$c_model, ID, vaccine_type,
-        efficacy, time_to_protect, vaccine_protection_period)
+      if (!is.R6(vaccine) || !('Vaccine' %in% class(vaccine)))
+        stop("argument vaccine must be an object of type Vaccine")
+
+      res <- intervention_vaccinate_by_idx(self$c_model, ID, vaccine$c_vaccine )
+
       return(as.logical(res))
     },
 
@@ -711,14 +692,23 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
         stop("argument VaccineSchedule must be an object of type VaccineSchedule")
       }
-      return(as.logical(intervention_vaccinate_age_group(
-        self$c_model,
-        schedule$fraction_to_vaccinate,
-        schedule$vaccine_type,
-        schedule$efficacy,
-        schedule$time_to_protect,
-        schedule$vaccine_protection_period,
-        schedule$total_vaccinated)))
+
+      vaccine = schedule$vaccine
+      if (!is.R6(vaccine) || !('Vaccine' %in% class(vaccine))) {
+        stop("argument schedule$vaccine must be an object of type Vaccine")
+      }
+
+      c_model_ptr    = private$c_model_ptr()
+      c_vaccine_ptr  = vaccine$c_vaccine@ref
+      total_vaccinated = schedule$total_vaccinated
+      fraction_to_vaccinate = schedule$fraction_to_vaccinate
+
+      n_pre = sum( total_vaccinated )
+      total_vaccinated <-.Call( "R_intervention_vaccinate_age_group",
+            c_model_ptr, fraction_to_vaccinate, c_vaccine_ptr, total_vaccinated )
+      schedule$total_vaccinated = total_vaccinated
+
+      return( sum( total_vaccinated) - n_pre )
     },
 
     #' @description Gets information about all individuals. Wrapper for
