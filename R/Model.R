@@ -596,6 +596,72 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(as.data.frame(tmp))
     },
 
+    #' @description Add a new vaccine.
+    #' Wrapper for C API \code{add_vaccine}.
+    #' @param full_efficacy Probability that the person is successfully vaccinated
+    #'   (must be \code{0 <= efficacy <= 1}).
+    #' @param symptoms_efficacy Probability that the person is successfully vaccinated
+    #'   against getting symptoms (must be \code{0 <= efficacy <= 1}).
+    #' @param sever_efficacy Probability that the person is successfully vaccinated
+    #'   against getting severer symptoms (must be \code{0 <= efficacy <= 1}).
+    #' @param time_to_protect Delay before it takes effect (in days).
+    #' @param vaccine_protection_period The duration of the vaccine before it
+    #'   wanes.
+    #' @return Vaccine object
+    add_vaccine = function(
+      full_efficacy     = 1.0,
+      symptoms_efficacy = 1.0,
+      severe_efficacy   = 1.0,
+      time_to_protect   = 14,
+      vaccine_protection_period = 1000
+    )
+    {
+      if( time_to_protect < 1 )
+        stop( "vaccine must take at least one day to take effect" )
+
+      if( vaccine_protection_period <= time_to_protect )
+        stop( "vaccine must protect for longer than it takes to by effective" )
+
+      n_strains = self$get_param( "max_n_strains" )
+
+      if( length( full_efficacy ) == 1 )
+        full_efficacy = rep( full_efficacy,  n_strains )
+
+      if( length( full_efficacy ) != n_strains )
+        stop( "full_efficacy must be a float or a list of length max_n_strains" )
+
+      if( length( symptoms_efficacy ) == 1 )
+        symptoms_efficacy = rep( symptoms_efficacy,  n_strains )
+
+      if( length( symptoms_efficacy ) != n_strains )
+        stop( "symptoms_efficacy must be a float or a list of length max_n_strains" )
+
+      if( length( severe_efficacy ) == 1 )
+        severe_efficacy = rep( severe_efficacy,  n_strains )
+
+      if( length( severe_efficacy ) != n_strains )
+        stop( "severe_efficacy must be a float or a list of length max_n_strains" )
+
+      for( idx in 1:n_strains )
+      {
+        if( full_efficacy[ idx ] < 0  | full_efficacy[ idx ] > 1 )
+          stop( "full_efficacy must be between 0 and 1" )
+
+        if( symptoms_efficacy[ idx ] < 0  | symptoms_efficacy[ idx ] > 1 )
+          stop( "symptoms_efficacy must be between 0 and 1" )
+
+        if( severe_efficacy[ idx ] < 0  | severe_efficacy[ idx ] > 1 )
+          stop( "severe_efficacy must be between 0 and 1" )
+      }
+
+      c_model_ptr <- private$c_model_ptr()
+      idx<-.Call('R_add_vaccine', c_model_ptr, full_efficacy, symptoms_efficacy,
+                 severe_efficacy, time_to_protect, vaccine_protection_period,
+                 PACKAGE='OpenABMCovid19');
+
+      return( Vaccine$new( self, idx ) )
+    },
+
     #' @description Vaccinate an individual.
     #' Wrapper for C API \code{intervention_vaccinate_by_idx}.
     #' @param ID The ID of the individual (must be \code{0 <= ID <= n_total}).

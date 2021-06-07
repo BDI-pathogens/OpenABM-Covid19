@@ -4,6 +4,7 @@
 #include "input.h"
 #include "params.h"
 #include "constant.h"
+#include "interventions.h"
 
 SEXP R_get_app_users ( SEXP R_c_model, SEXP n_total )
 {
@@ -369,6 +370,85 @@ SEXP R_add_new_strain ( SEXP R_c_model, SEXP R_transisition_multiplier,
   return ScalarInteger( n_strain );
 }
 
+SEXP R_add_vaccine ( SEXP R_c_model, SEXP R_full_efficacy, SEXP R_symptoms_efficacy,
+    SEXP R_severe_efficacy, SEXP R_time_to_protect, SEXP R_vaccine_protection_period )
+{
+  // get the point to the model from the R pointer object
+  model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
 
+  // allocate memory to for the function call
+  short n_strains = c_model->params->max_n_strains;
+  float *full_efficacy = calloc( n_strains, sizeof(float) );
+  float *symptoms_efficacy = calloc( n_strains, sizeof(float) );
+  float *severe_efficacy = calloc( n_strains, sizeof(float) );
+  short time_to_protect = asInteger( R_time_to_protect );
+  short vaccine_protection_period = asInteger( R_vaccine_protection_period );
 
+  for( int i = 0; i < n_strains; i++ )
+  {
+    full_efficacy [ i ] = REAL(R_full_efficacy )[ i ];
+    symptoms_efficacy[ i ] = REAL(R_symptoms_efficacy )[ i ];
+    severe_efficacy[ i ] = REAL(R_severe_efficacy )[ i ];
+  }
+
+  short idx = add_vaccine( c_model,full_efficacy, symptoms_efficacy, severe_efficacy,
+                           time_to_protect,vaccine_protection_period );
+
+  free( full_efficacy  );
+  free( symptoms_efficacy );
+  free( severe_efficacy );
+
+  return ScalarInteger( idx);
+}
+
+SEXP R_vaccine_full_efficacy ( SEXP R_c_vaccine )
+{
+  // get the point to the model from the R pointer object
+  vaccine *c_vaccine = (vaccine *) R_ExternalPtrAddr(R_c_vaccine);
+  int n_strains = c_vaccine->n_strains;
+
+  // convert to R object
+  SEXP R_res = PROTECT(allocVector(REALSXP, n_strains));
+  for( int i = 0; i < n_strains; i++ )
+    REAL(R_res)[i] = c_vaccine->full_efficacy[i];
+
+  // free the memory
+  UNPROTECT(1);
+
+  return R_res;
+}
+
+SEXP R_vaccine_severe_efficacy ( SEXP R_c_vaccine )
+{
+  // get the point to the model from the R pointer object
+  vaccine *c_vaccine = (vaccine *) R_ExternalPtrAddr(R_c_vaccine);
+  int n_strains = c_vaccine->n_strains;
+
+  // convert to R object
+  SEXP R_res = PROTECT(allocVector(REALSXP, n_strains));
+  for( int i = 0; i < n_strains; i++ )
+    REAL(R_res)[i] = c_vaccine->severe_efficacy[i];
+
+  // free the memory
+  UNPROTECT(1);
+
+  return R_res;
+}
+
+SEXP R_vaccine_symptoms_efficacy ( SEXP R_c_vaccine )
+{
+  // get the point to the model from the R pointer object
+  vaccine *c_vaccine = (vaccine *) R_ExternalPtrAddr(R_c_vaccine);
+  int n_strains = c_vaccine->n_strains;
+
+  // convert to R object
+  SEXP R_res = PROTECT(allocVector(REALSXP, n_strains));
+  for( int i = 0; i < n_strains; i++ )
+    REAL(R_res)[i] = c_vaccine->symptoms_efficacy[i];
+
+  // free the memory
+  UNPROTECT(1);
+
+  return R_res;
+}
 

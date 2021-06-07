@@ -17,6 +17,7 @@ export("Simulation")
 export("Strain")
 export("COVID19IBM")
 export("VaccineSchedule")
+export("Vaccine")
 
 # wrapper function for R6 calsses
 export("Parameters.new")
