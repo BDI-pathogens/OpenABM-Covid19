@@ -23,6 +23,7 @@ SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
 SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
+SWIG_set_cross_immunity_probability <- set_cross_immunity_probability
 
 
 #' R6Class Model
@@ -509,6 +510,31 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
                         hospitalised_fraction, PACKAGE='OpenABMCovid19');
 
       return( Strain$new( self, strain_idx ) )
+    },
+
+    #' @description Set the cross_immunity matrix
+    #' Wrapper for C API \code{set_cross_immunity_probability}.
+    #' @param cross_immunity the cross immunity matrix
+    #' @return
+
+    set_cross_immunity_matrix = function( cross_immunity )
+    {
+        max_n_strains = self$get_param("max_n_strains")
+
+        if( !is.matrix( cross_immunity ) )
+          stop( "cross_immunity is a matrix ")
+
+        if( max( nrow( cross_immunity ), ncol( cross_immunity ) ) > max_n_strains )
+          stop( "cross_immunnity matrix is of maximum size max_n_strains")
+
+        for( i in 1:nrow( cross_immunity) )
+          for( j in 1:ncol( cross_immunity) )
+          {
+            if( cross_immunity[i,j] < 0 || cross_immunity[i,j] > 1 )
+              stop( "cross_immunity must be between 0 and 1")
+
+            SWIG_set_cross_immunity_probability( self$c_model, i-1, j-1, cross_immunity[i,j] )
+          }
     },
 
     #' @description Get the list of network IDs
