@@ -471,13 +471,24 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param strain_idx The idx of the strain the person is infected with
     #' @param network_id The network ID.
     #' @return \code{TRUE} on success, \code{FALSE} otherwise.
-    seed_infect_by_idx = function(ID, strain_idx = 1, network_id = -1 )
+    seed_infect_by_idx = function(ID, strain_idx = 0, strain = NULL, network_id = -1 )
     {
       n_total <- private$c_params$n_total
-
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
+
+      if( !is.null( strain ) )
+      {
+        if (!is.R6(strain) || !('Strain' %in% class(strain)))
+          stop("argument strain must be an object of type Strain")
+
+        strain_idx = strain$idx()
+      }
+
+      n_strains = self$c_model$n_initialised_strains;
+      if( strain_idx < 0  || strain_idx >= n_strains )
+        stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
 
       res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
       return(as.logical(res))
