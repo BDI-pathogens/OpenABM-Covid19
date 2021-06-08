@@ -453,7 +453,7 @@ SEXP R_vaccine_symptoms_efficacy ( SEXP R_c_vaccine )
 }
 
 SEXP R_intervention_vaccinate_age_group ( SEXP R_c_model,
-      SEXP R_fraction_to_vaccinate, SEXP R_c_vaccine, SEXP R_total_vaccinated )
+      SEXP R_fraction_to_vaccinate, SEXP R_c_vaccine )
 {
   // get the point to the model from the R pointer object
   vaccine *c_vaccine = (vaccine *) R_ExternalPtrAddr(R_c_vaccine);
@@ -464,7 +464,7 @@ SEXP R_intervention_vaccinate_age_group ( SEXP R_c_model,
 
   for( int i = 0; i < N_AGE_GROUPS; i++ )
   {
-    total_vaccinated[ i ]      = INTEGER(R_total_vaccinated)[ i ];
+    total_vaccinated[ i ]      = 0;
     fraction_to_vaccinate[ i ] = REAL(R_fraction_to_vaccinate )[ i ];
   }
 

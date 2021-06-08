@@ -43,7 +43,7 @@ schedule = VaccineSchedule$new(
 for( t in 1:30 )
 {
   model$one_time_step( )
-  print( model$vaccinate_schedule( schedule ) )
+  model$vaccinate_schedule( schedule )
 }
 
 # Turn off lockdown and run the model for another 50 days and vaccinated

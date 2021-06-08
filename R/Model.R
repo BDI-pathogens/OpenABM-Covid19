@@ -703,12 +703,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       total_vaccinated = schedule$total_vaccinated
       fraction_to_vaccinate = schedule$fraction_to_vaccinate
 
-      n_pre = sum( total_vaccinated )
-      total_vaccinated <-.Call( "R_intervention_vaccinate_age_group",
-            c_model_ptr, fraction_to_vaccinate, c_vaccine_ptr, total_vaccinated )
-      schedule$total_vaccinated = total_vaccinated
+      new_vaccinated <-.Call( "R_intervention_vaccinate_age_group",
+            c_model_ptr, fraction_to_vaccinate, c_vaccine_ptr )
 
-      return( sum( total_vaccinated) - n_pre )
+      schedule$total_vaccinated = total_vaccinated + new_vaccinated
+
+      return( sum( new_vaccinated ) )
     },
 
     #' @description Gets information about all individuals. Wrapper for
