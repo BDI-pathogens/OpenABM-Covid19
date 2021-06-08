@@ -1025,7 +1025,7 @@ class TestClass(object):
                 symptoms_efficacy = 1.0,   
                 severe_efficacy   = 0.0,     
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
-                days_to_vaccinate = 1
+                days_to_vaccinate = 2
             ),
             dict(
                 test_params=dict(
@@ -2808,7 +2808,7 @@ class TestClass(object):
                 np.testing.assert_equal(expected, 0, "nobody vaccinate when some was expected")
     
             else :
-                sd = sqrt( expected * max( 1 - expected / n_age, 0.01 ) )
+                sd = sqrt( expected * max( ( 1 - expected ) / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
     
     def test_add_vaccine(self, test_params, vaccine0, vaccine1 ):    

@@ -401,10 +401,9 @@ void set_recovered( individual *indiv, parameters* params, int time, model *mode
 void set_susceptible( individual *indiv, parameters* params, int time )
 {
 	int current_status = indiv->status;
-	indiv->status = SUSCEPTIBLE;
 
-	if( current_status == RECOVERED || current_status == SUSCEPTIBLE || current_status == VACCINE_PROTECTED_FULLY )
-		add_infection_event( indiv, NULL, UNKNOWN, time );
+	if( current_status == RECOVERED )
+		indiv->status = SUSCEPTIBLE;
 
 	// Reset the hazard for the newly susceptible individual
 	initialize_hazard( indiv, params, time );
