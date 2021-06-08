@@ -40,7 +40,7 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	add_infection_event( indiv, NULL, UNKNOWN, 0 );
+	add_infection_event( indiv, NULL, UNKNOWN, NULL, 0 );
 
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
@@ -99,6 +99,7 @@ void add_infection_event(
 	individual *indiv,
 	individual *infector,
 	short network_id,
+	strain *strain,
 	short time
 )
 {
@@ -116,18 +117,17 @@ void add_infection_event(
 
 	event->infector = infector;
 	event->infector_network = network_id;
+	event->strain = strain;
 	if( event->infector != NULL )
 	{
 		event->time_infected_infector  = time_infected_infection_event(infector->infection_events);
 		event->infector_status         = infector->status;
 		event->infector_hospital_state = infector->hospital_state;
-		event->strain                  = infector->infection_events->strain;
 	} else
 	{
 		event->time_infected_infector  = UNKNOWN;
 		event->infector_status         = UNKNOWN;
 		event->infector_hospital_state = UNKNOWN;
-		event->strain                  = NULL;
 	}
 
 	if( event->infector == indiv )

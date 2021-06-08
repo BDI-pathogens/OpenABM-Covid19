@@ -229,7 +229,7 @@ void transmit_virus_by_type(
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
-							new_infection( model, interaction->individual, infector, interaction->network_id );
+							new_infection( model, interaction->individual, infector, interaction->network_id, infector->infection_events->strain );
 							interaction->individual->infection_events->infector_network = interaction->type;
 						}
 					}
@@ -284,8 +284,7 @@ short seed_infect_by_idx(
 	if( strain_idx >= model->n_initialised_strains )
 		print_exit( "strain_idx is not known, strains must be initialised before being infected" );
 
-	infected->infection_events->strain = &(model->strains[ strain_idx ]);
-	new_infection( model, infected, infected, network_id );
+	new_infection( model, infected, infected, network_id,  &(model->strains[ strain_idx ]) );
 	return TRUE;
 }
 
@@ -298,18 +297,18 @@ void new_infection(
 	model *model,
 	individual *infected,
 	individual *infector,
-	int network_id
+	int network_id,
+	strain *strain
 )
 {
 	double draw       = gsl_rng_uniform( rng );
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
-	strain *strain    = infector->infection_events->strain;
 
 	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
 
-	add_infection_event( infected, infector, network_id, model->time );
+	add_infection_event( infected, infector, network_id, strain, model->time );
 
 	if( draw < asymp_frac )
 	{
