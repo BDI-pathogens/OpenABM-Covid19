@@ -355,19 +355,19 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 750000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 75000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 250000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 25000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 1000000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 50000,
+                n_seed_infection = 20,
+                end_time = 50
             )
         ],
         "test_infectiousness_multiplier": [
@@ -1183,7 +1183,7 @@ class TestClass(object):
         """
         Test that presymptomatic and symptomatic individuals transmit as expected
         """
-        tolerance = 0.05        
+        tolerance = 0.06
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("self_quarantine_fraction", 0)
 
@@ -1205,7 +1205,8 @@ class TestClass(object):
         params.set_param("mean_time_to_hospital", 60)
         params.set_param("mean_time_to_symptoms", 6)
         params.set_param("sd_time_to_symptoms", 2.5)
-        
+        params.set_param("sd_infectiousness_multiplier", 0)
+ 
         params.set_param("relative_transmission_household", 0)
         params.set_param("relative_transmission_occupation", 0)
         
@@ -1240,7 +1241,7 @@ class TestClass(object):
         # give minimal noise. 
         # by Chris Wymant 
         # <<<     
-        fraction_mid_expo_phase = 0.001
+        fraction_mid_expo_phase = 0.01
         df_output  = df_output[ df_output[ "total_infected" ] < ( n_total * fraction_mid_expo_phase ) ].max()
         time_mid_expo_growth = df_output["time"]
         df_trans = df_trans[df_trans["time_infected_source"] < int(time_mid_expo_growth)]
@@ -1254,7 +1255,7 @@ class TestClass(object):
         N_presymptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] )
         N_symptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] )
         N_involved = N_presymptomatics_mild+N_presymptomatics+N_symptomatics_mild+N_symptomatics
-        
+             
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance)   
 
