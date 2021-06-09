@@ -1,5 +1,4 @@
-	/*
- * model.c
+ /* model.c
  *
  *  Created on: 5 Mar 2020
  *      Author: hinchr
@@ -590,6 +589,7 @@ void flu_infections( model *model )
 *  				indiv:	pointer to the individual
 *  				time:	time of the event (int)
 *  				model:	pointer to the model
+*  				info:   a pointer which can be passed to the transition function
 *
 *  Returns:		a pointer to the newly added event
 ******************************************************************************************/
@@ -597,7 +597,8 @@ event* add_individual_to_event_list(
 	model *model,
 	int type,
 	individual *indiv,
-	int time
+	int time,
+	void *info
 )
 {
 	event_list *list    = &(model->event_lists[ type ]);
@@ -605,6 +606,7 @@ event* add_individual_to_event_list(
 	event->individual   = indiv;
 	event->type         = type;
 	event->time         = time;
+	event->info  = info;
 
 	if( time < MAX_TIME){
 		if( list->n_daily_current[time] >0  )
@@ -727,9 +729,13 @@ void set_up_seed_infection( model *model )
 	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
+	double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof( double  ) );
+
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1 );
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
 
 	while( idx < params->n_seed_infection )
 	{
@@ -745,6 +751,8 @@ void set_up_seed_infection( model *model )
 				idx++;
 		}
 	}
+
+	free( hospitalised_fraction );
 }
 
 /*****************************************************************************************
@@ -993,6 +1001,37 @@ void transition_events(
 		next_event = event->next;
 		indiv      = event->individual;
 		transition_func( model_ptr, indiv );
+
+		if( remove_event )
+			remove_event_from_event_list( model_ptr, event );
+	}
+}
+
+/*****************************************************************************************
+*  Name:		transition_events_info
+*  Description: Transitions all people from one type of event
+*  Returns:		void
+******************************************************************************************/
+void transition_events_info(
+	model *model_ptr,
+	int type,
+	void (*transition_func)( model*, individual*, void* ),
+	int remove_event
+)
+{
+	long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
+
+	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
+	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
+
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+		transition_func( model_ptr, indiv, event->info );
 
 		if( remove_event )
 			remove_event_from_event_list( model_ptr, event );
@@ -1467,8 +1506,8 @@ int one_time_step( model *model )
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
 	}
 
-	transition_events( model, VACCINE_PROTECT, &intervention_vaccine_protect, TRUE );
-	transition_events( model, VACCINE_WANE,    &intervention_vaccine_wane, TRUE );
+	transition_events_info( model, VACCINE_PROTECT,          &intervention_vaccine_protect, TRUE );
+	transition_events_info( model, VACCINE_WANE,             &intervention_vaccine_wane, TRUE );
 
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );

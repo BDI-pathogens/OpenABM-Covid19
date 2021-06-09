@@ -101,6 +101,8 @@ struct model{
 	strain *strains;
 	int n_initialised_strains;
 	float **cross_immunity;
+
+	vaccine *vaccines;
 };
 
 struct event_block{
@@ -112,6 +114,7 @@ struct event{
 	individual *individual;
 	short type;
 	short time;
+	void *info;
 	event *next;
 	event *last;
 };
@@ -145,12 +148,13 @@ int one_time_step( model* );
 void flu_infections( model* );
 
 event* new_event( model* );
-event* add_individual_to_event_list( model*, int, individual*, int );
+event* add_individual_to_event_list( model*, int, individual*, int, void* );
 void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
+void transition_events_info( model*, int, void( model*, individual*, void* ), int );
 void add_interaction_block( model*, long );
 void return_interactions( model* );
 

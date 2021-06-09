@@ -16,7 +16,8 @@
 ******************************************************************************************/
 short add_new_strain(
 	model *model,
-	float transmission_multiplier
+	float transmission_multiplier,
+	double *hospitalised_fraction
 )
 {
 	strain *strain_ptr;
@@ -28,6 +29,22 @@ short add_new_strain(
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
 
+	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
+		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];
+
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );
+}
+
+/*****************************************************************************************
+*  Name:		get_strain_by_id
+*  Description: returns a pointer to a strain a given ID
+*  Returns:		pointer to vaccine
+******************************************************************************************/
+strain* get_strain_by_id( model *model, short strain_idx )
+{
+	if( strain_idx >=  model->n_initialised_strains )
+		print_exit( "strain not yet intialised " );
+
+	return &(model->strains[ strain_idx ]);
 }

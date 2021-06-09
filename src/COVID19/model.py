@@ -8,6 +8,8 @@ import sys, time
 
 import covid19
 from COVID19.network import Network
+from COVID19.vaccine import Vaccine
+from COVID19.strain  import Strain
 
 LOGGER = logging.getLogger(__name__)
 
@@ -116,8 +118,6 @@ class EVENT_TYPES(enum.Enum):
     MANUAL_CONTACT_TRACING = 23
     N_EVENT_TYPES = 24
 
-
-
 class OccupationNetworkEnum(enum.Enum):
     _primary_network = 0
     _secondary_network = 1
@@ -178,7 +178,8 @@ class VaccineStatusEnum(enum.Enum):
     VACCINE_NO_PROTECTION = 1
     VACCINE_PROTECTED_FULLY = 2
     VACCINE_PROTECTED_SYMPTOMS = 3
-    VACCINE_WANED = 4
+    VACCINE_WANED_FULLY = 4
+    VACCINE_WANED_SYMPTOMS = 5
 
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
@@ -205,10 +206,7 @@ class VaccineSchedule(object):
         frac_60_69 = 0,
         frac_70_79 = 0,
         frac_80    = 0,
-        vaccine_type    = 0,
-        efficacy        = 1.0,
-        time_to_protect = 15,
-        vaccine_protection_period = 365
+        vaccine    = -1,
     ):
         fraction_to_vaccinate = [
             frac_0_9,   frac_10_19, frac_20_29, frac_30_39, frac_40_49,
@@ -219,10 +217,10 @@ class VaccineSchedule(object):
         for age in AgeGroupEnum:
             self.c_fraction_to_vaccinate[ age.value ] = fraction_to_vaccinate[ age.value ]
         
-        self.vaccine_type    = vaccine_type
-        self.efficacy        = efficacy
-        self.time_to_protect = time_to_protect
-        self.vaccine_protection_period = vaccine_protection_period
+        if not isinstance( vaccine, Vaccine ) :
+            ModelException( "argument vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
+
+        self.vaccine = vaccine
         
         self.c_total_vaccinated = covid19.longArray( len(AgeGroupEnum)  )
         for age in AgeGroupEnum:
@@ -828,28 +826,56 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
     
-    def seed_infect_by_idx(self, ID, strain_idx = 0, network_id = -1 ):
+    def seed_infect_by_idx(self, ID, strain_idx = 0, strain = None, network_id = -1 ):
         
         n_total = self._params_obj.get_param("n_total")
 
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)" )
 
+        if strain != None :
+            if isinstance( strain, Strain ) :
+                strain_idx = strain.idx()
+            else :
+                ModelParameterException( "strain must be of class Strain")
+            
+        if not isinstance( strain_idx, int ) :
+            ModelParameterException( "strain must either be a Strain class or the idx of the strain" )
+
         n_strains = self.c_model.n_initialised_strains;
         if ( strain_idx < 0 ) | ( strain_idx >= n_strains ) :
             raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
-
+       
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+    
 
-    def add_new_strain(self, transmission_multiplier ):       
+    def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
+        
+        """
+        Add a new strain, note the total number of strains that can be added is set by the initial 
+        parameters max_n_strains
+        
+        transmission_multiplier - the relative transmissibility of the new strain
+        hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
+        
+        """  
 
         n_strains = self.c_model.n_initialised_strains;
         max_n_strains = self._params_obj.get_param("max_n_strains")
 
         if n_strains == max_n_strains :
-            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialization of the model" )
+            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )    
         
-        return covid19.add_new_strain( self.c_model, transmission_multiplier );
+        hospitalised_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        if hospitalised_fraction == None :
+            covid19.get_param_array_hospitalised_fraction(self.c_params, hospitalised_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                hospitalised_fraction_c[ idx ] = hospitalised_fraction[ idx ]
+           
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c );
+
+        return Strain( self, idx )
 
     def set_cross_immunity_matrix(self, cross_immunity ):
 
@@ -906,8 +932,75 @@ class Model:
                 'skip_quarantined'  : skip_quarantined,
                 'daily_fraction'    : daily_fraction
             } )
-       
-    def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
+      
+          
+    def add_vaccine(
+            self, 
+            full_efficacy     = 1.0, 
+            symptoms_efficacy = 1.0, 
+            severe_efficacy   = 1.0, 
+            time_to_protect   = 14, 
+            vaccine_protection_period = 1000 ):
+        """
+        Add a new vaccine type
+        
+        """
+        
+        if time_to_protect < 1 :
+            raise ModelParameterException( "vaccine must take at least one day to take effect" )
+        
+        if vaccine_protection_period <= time_to_protect :
+            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
+
+        n_strains = self.c_params.max_n_strains;
+        
+        if isinstance( full_efficacy, float ) :
+            full_efficacy = [full_efficacy] * n_strains
+        elif isinstance( full_efficacy, list) :
+            if len( full_efficacy ) != n_strains :
+                raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
+         
+        if isinstance( symptoms_efficacy, float ) :
+            symptoms_efficacy = [symptoms_efficacy] * n_strains
+        elif isinstance( symptoms_efficacy, list) :
+            if len( symptoms_efficacy ) != n_strains :
+                raise ModelException( "symptoms_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "symptoms_efficacy must be a floator a list of length max_n_strains" )
+ 
+        if isinstance( severe_efficacy, float ) :
+            severe_efficacy = [severe_efficacy] * n_strains
+        elif isinstance( severe_efficacy, list) :
+            if len( severe_efficacy ) != n_strains :
+                raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+      
+        c_full_efficacy     = covid19.floatArray(n_strains)
+        c_symptoms_efficacy = covid19.floatArray(n_strains)
+        c_severe_efficacy   = covid19.floatArray(n_strains)
+    
+        for idx in range( n_strains ) :
+            
+            if ( full_efficacy[ idx ] < 0 ) | ( full_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "full_efficacy must be between 0 and 1")
+            
+            if ( symptoms_efficacy[ idx ] < 0 ) | ( symptoms_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "symptoms_efficacy must be between 0 and 1")
+            
+            if ( severe_efficacy[ idx ] < 0 ) | ( severe_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "severe_efficacy must be between 0 and 1")
+            
+            c_full_efficacy[ idx ]     = full_efficacy[ idx ]
+            c_symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ]
+            c_severe_efficacy[ idx ]   = severe_efficacy[ idx ]
+
+        idx = covid19.add_vaccine( self.c_model, c_full_efficacy, c_symptoms_efficacy, c_severe_efficacy, time_to_protect, vaccine_protection_period );
+        return Vaccine( self, idx )
+ 
+    def vaccinate_individual(self, ID, vaccine ):
         """
         Vaccinates an individual by ID of individual
         
@@ -917,32 +1010,23 @@ class Model:
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)")
 
-        if ( efficacy < 0 ) | ( efficacy > 1 ) :
-            raise ModelParameterException( "efficacy must be between 0 and 1")
-        
-        if time_to_protect < 1 :
-            raise ModelParameterException( "vaccine must take at least one day to take effect" )
-        
-        if vaccine_protection_period <= time_to_protect :
-            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
-    
-        if not VaccineTypesEnum.has_value(vaccine_type) :
-            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+        if not isinstance( vaccine, Vaccine ) :
+            ModelException( "argument vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
 
-        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine.c_vaccine );
 
     def vaccinate_schedule(self, schedule ):
 
         if not isinstance( schedule, VaccineSchedule ) :
             ModelException( "argument VaccineSchedule must be an object of type VaccineSchedule")
-            
+           
+        if not isinstance( schedule.vaccine, Vaccine ) :
+            ModelException( "schedule.vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
+               
         return covid19.intervention_vaccinate_age_group( 
             self.c_model, 
             schedule.c_fraction_to_vaccinate, 
-            schedule.vaccine_type,
-            schedule.efficacy,
-            schedule.time_to_protect,
-            schedule.vaccine_protection_period,
+            schedule.vaccine.c_vaccine,
             schedule.c_total_vaccinated
         )   
     

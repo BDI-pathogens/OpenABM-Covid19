@@ -219,7 +219,7 @@ void transmit_virus_by_type(
 
 					if( interaction->individual->status == SUSCEPTIBLE )
 					{
-						if( interaction->individual->hazard[ strain_idx ] < 0 ) {
+						if( immune_full( interaction->individual, strain_idx ) ) {
 							interaction = interaction->next;
 							continue;
 						}
@@ -229,7 +229,7 @@ void transmit_virus_by_type(
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
 						{
-							new_infection( model, interaction->individual, infector, interaction->network_id );
+							new_infection( model, interaction->individual, infector, interaction->network_id, infector->infection_events->strain );
 							interaction->individual->infection_events->infector_network = interaction->type;
 						}
 					}
@@ -278,14 +278,13 @@ short seed_infect_by_idx(
 {
 	individual *infected = &(model->population[ pdx ]);
 
-	if( infected->status != SUSCEPTIBLE )
+	if( ( infected->status != SUSCEPTIBLE ) || ( infected->hazard[ strain_idx ] < 0 ) )
 		return FALSE;
 
 	if( strain_idx >= model->n_initialised_strains )
 		print_exit( "strain_idx is not known, strains must be initialised before being infected" );
 
-	infected->infection_events->strain = &(model->strains[ strain_idx ]);
-	new_infection( model, infected, infected, network_id );
+	new_infection( model, infected, infected, network_id,  &(model->strains[ strain_idx ]) );
 	return TRUE;
 }
 
@@ -298,21 +297,18 @@ void new_infection(
 	model *model,
 	individual *infected,
 	individual *infector,
-	int network_id
+	int network_id,
+	strain *strain
 )
 {
 	double draw       = gsl_rng_uniform( rng );
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
 
-	if( vaccine_protected( infected ) )
+	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
 
-	infected->infection_events->infector = infector;
-	infected->infection_events->infector_status = infector->status;
-	infected->infection_events->infector_hospital_state = infector->hospital_state;
-	infected->infection_events->network_id = network_id;
-	infected->infection_events->strain = infector->infection_events->strain;
+	add_infection_event( infected, infector, network_id, strain, model->time );
 
 	if( draw < asymp_frac )
 	{
@@ -329,8 +325,6 @@ void new_infection(
 		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
-	infected->infection_events->time_infected_infector =
-		time_infected_infection_event(infector->infection_events);
 }
 
 /*****************************************************************************************
@@ -368,7 +362,7 @@ void transition_one_disese_event(
 	if( to != NO_EVENT )
 	{
 		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
+		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
 
@@ -386,10 +380,17 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
-	if( gsl_ran_bernoulli( rng, model->params->hospitalised_fraction[ indiv->age_group ] ) )
-		transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
-	else
+ 	strain *strain = indiv->infection_events->strain;
+
+	if( immune_to_severe( indiv, strain->idx ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
+	} else
+	{
+		if( gsl_ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
+			transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
+		else
+			transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
+	}
 
 	intervention_on_symptoms( model, indiv );
 }
@@ -518,9 +519,10 @@ void transition_to_recovered( model *model, individual *indiv )
 	transition_one_disese_event( model, indiv, RECOVERED, SUSCEPTIBLE, RECOVERED_SUSCEPTIBLE );
 
 	time_susceptible  = indiv->infection_events->times[ SUSCEPTIBLE ];
-	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
 
+	complete_immunity = apply_cross_immunity( model, indiv, strain_idx, time_susceptible );
 	set_recovered( indiv, model->params, model->time, model );
+
 	if( !complete_immunity ) {
 	    set_susceptible( indiv, model->params, model->time );
 	    indiv->current_disease_event = NULL;
@@ -548,12 +550,9 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 
 	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
 	{
-		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) )
-		{
-			indiv->time_susceptible[ sdx ] = time_susceptible;
-			indiv->hazard[ sdx ]           = -1;
-		}
-		else
+		if( ( sdx == strain_idx ) || ( cross_immunity[ sdx ] > r_unif ) ) {
+			set_immune( indiv, sdx, time_susceptible, IMMUNE_FULL );
+		} else
 			complete_immunity = FALSE;
 	}
 
@@ -569,7 +568,6 @@ void transition_to_susceptible( model *model, individual *indiv )
 {
 	// set susceptible needs to know current state, so set on the individual first
 	set_susceptible( indiv, model->params, model->time );
-    transition_one_disese_event( model, indiv, SUSCEPTIBLE, NO_EVENT, NO_EDGE );
 }
 
 

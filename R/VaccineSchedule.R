@@ -1,5 +1,3 @@
-SWIG_update_daily_fraction = update_daily_fraction
-
 #' R6Class VaccineSchedule
 #'
 #' @description
@@ -10,7 +8,7 @@ SWIG_update_daily_fraction = update_daily_fraction
 #' vaccine.schedule <- OpenABMCovid19::VaccineSchedule$new(
 #'   frac_70_79 = 0.15,
 #'   frac_80    = 0.85,
-#'   vaccine_type = OpenABMCovid19::VACCINE_TYPES[['FULL']]
+#'   vaccine    = Vaccine
 #' )
 VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
 
@@ -21,19 +19,8 @@ VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
     #' @field total_vaccinated The total number of vaccinations per age-group.
     total_vaccinated = NULL,
 
-    #' @field vaccine_type The type of vaccine, see \code{\link{VACCINE_TYPES}}.
-    vaccine_type    = NULL,
-
-    #' @field efficacy Probability that the person is successfully vaccinated
-    #'   (must be \code{0 <= efficacy <= 1}).
-    efficacy        = NULL,
-
-    #' @field time_to_protect Delay before it takes effect (in days).
-    time_to_protect = NULL,
-
-    #' @field vaccine_protection_period The duration of the vaccine before it
-    #'   wanes.
-    vaccine_protection_period = NULL,
+    #' @field vaccinethe R vaccine object
+    vaccine    = NULL,
 
     #' @param frac_0_9 Fraction of age group 0-9.
     #' @param frac_10_19 Fraction of age group 10-19.
@@ -44,11 +31,7 @@ VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
     #' @param frac_60_69 Fraction of age group 60-69.
     #' @param frac_70_79 Fraction of age group 70-79.
     #' @param frac_80 Fraction of age group >80.
-    #' @param vaccine_type The type of vaccine, see \code{\link{VACCINE_TYPES}}.
-    #' @param efficacy Probability that the person is successfully vaccinated
-    #'   (must be \code{0 <= efficacy <= 1}).
-    #' @param time_to_protect Delay before it takes effect (in days).
-    #' @param vaccine_protection_period The duration of the vaccine before it
+    #' @param vaccine A vaccine object
     #'   wanes.
     initialize = function(
       frac_0_9   = 0,
@@ -60,10 +43,8 @@ VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
       frac_60_69 = 0,
       frac_70_79 = 0,
       frac_80    = 0,
-      vaccine_type    = 0,
-      efficacy        = 1.0,
-      time_to_protect = 15,
-      vaccine_protection_period = 365 )
+      vaccine    = -1
+    )
     {
       fractions <- c(frac_0_9, frac_10_19, frac_20_29, frac_30_39, frac_40_49,
                      frac_50_59, frac_60_69, frac_70_79, frac_80)
@@ -72,12 +53,12 @@ VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
         stop("length(AgeGroupEnum) doesn't match VaccineSchedule's age groups")
       }
 
+      if (!is.R6(vaccine) || !('Vaccine' %in% class(vaccine)))
+        stop("argument vaccine must be an object of type Vaccine")
+
       self$fraction_to_vaccinate     <- fractions
       self$total_vaccinated          <- as.integer(rep(0,n))
-      self$vaccine_type              <- vaccine_type
-      self$efficacy                  <- efficacy
-      self$time_to_protect           <- time_to_protect
-      self$vaccine_protection_period <- vaccine_protection_period
+      self$vaccine                   <- vaccine
     }
   )
 )

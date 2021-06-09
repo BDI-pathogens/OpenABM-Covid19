@@ -18,7 +18,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
     #' the C network R pointer object
     c_network_ptr = function() {
-      return( private$c_network()@ref )
+      return( self$c_network@ref )
     },
 
     #' check the C network still exists

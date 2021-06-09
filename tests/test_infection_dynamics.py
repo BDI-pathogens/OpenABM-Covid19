@@ -111,9 +111,9 @@ class TestClass(object):
         ],
         "test_transmission_pairs": [
             dict( 
-                n_total         = 200000,
+                n_total         = 50000,
                 infectious_rate = 8,
-                end_time        = 150,
+                end_time        = 50,
                 hospitalised_daily_interactions = 5,
                 mean_infectious_period=8.0,
                 sd_infectious_period=5,
@@ -355,19 +355,19 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 750000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 75000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 250000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 25000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 1000000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 50000,
+                n_seed_infection = 20,
+                end_time = 50
             )
         ],
         "test_infectiousness_multiplier": [
@@ -508,7 +508,7 @@ class TestClass(object):
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "generation_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
-        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )        
         
         # check that some people can get infected after one time step
         np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )
@@ -1183,7 +1183,7 @@ class TestClass(object):
         """
         Test that presymptomatic and symptomatic individuals transmit as expected
         """
-        tolerance = 0.05        
+        tolerance = 0.06
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("self_quarantine_fraction", 0)
 
@@ -1205,7 +1205,8 @@ class TestClass(object):
         params.set_param("mean_time_to_hospital", 60)
         params.set_param("mean_time_to_symptoms", 6)
         params.set_param("sd_time_to_symptoms", 2.5)
-        
+        params.set_param("sd_infectiousness_multiplier", 0)
+ 
         params.set_param("relative_transmission_household", 0)
         params.set_param("relative_transmission_occupation", 0)
         
@@ -1240,7 +1241,7 @@ class TestClass(object):
         # give minimal noise. 
         # by Chris Wymant 
         # <<<     
-        fraction_mid_expo_phase = 0.001
+        fraction_mid_expo_phase = 0.01
         df_output  = df_output[ df_output[ "total_infected" ] < ( n_total * fraction_mid_expo_phase ) ].max()
         time_mid_expo_growth = df_output["time"]
         df_trans = df_trans[df_trans["time_infected_source"] < int(time_mid_expo_growth)]
@@ -1254,7 +1255,7 @@ class TestClass(object):
         N_presymptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] )
         N_symptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] )
         N_involved = N_presymptomatics_mild+N_presymptomatics+N_symptomatics_mild+N_symptomatics
-        
+             
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance)   
 
@@ -1377,12 +1378,11 @@ class TestClass(object):
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
             inf_id[ idx ] = idxs[ inf_id[ idx ] ]
-        
-        strain_idx = model.add_new_strain( transmission_multiplier = 2 )
-        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
+        strain = model.add_new_strain( transmission_multiplier = 2 )
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
 
         for id in inf_id :
-            np.testing.assert_( model.seed_infect_by_idx(id, strain_idx = strain_idx ), "failed to infect individual" )
+            np.testing.assert_( model.seed_infect_by_idx(id, strain = strain), "failed to infect individual" )
    
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1420,11 +1420,11 @@ class TestClass(object):
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
         n_susc   = len( idxs )
         
-        strain_idx = model.add_new_strain( transmission_multiplier ) 
-        np.testing.assert_equal( strain_idx, 1, "failed to add new strain")
+        strain = model.add_new_strain( transmission_multiplier ) 
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
-            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_idx = strain_idx )
+            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain = strain )
           
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1436,11 +1436,11 @@ class TestClass(object):
         df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
 
             # check no new strain infections before it is introduced
-        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_idx ].sum(), 0, "new strain cases before seed date" )
+        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain.idx() ].sum(), 0, "new strain cases before seed date" )
         
         # check that the new strain dominates after a set period of time
         n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 0 ].sum()
-        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_idx ].sum()
+        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain.idx() ].sum()
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
 
@@ -1476,7 +1476,7 @@ class TestClass(object):
         for idx in range( n_equivalent_strains ) :
             
             if idx != 0 :
-                strain_idx = model.add_new_strain( 1.0 )
+                strain_idx = model.add_new_strain( 1.0 ).idx()
             
             for jdx in range( n_seed ) :
                 model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = strain_idx )
