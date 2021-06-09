@@ -729,9 +729,13 @@ void set_up_seed_infection( model *model )
 	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
+	double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof( double  ) );
+
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, &(params->hospitalised_fraction) );
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
 
 	while( idx < params->n_seed_infection )
 	{
@@ -747,6 +751,8 @@ void set_up_seed_infection( model *model )
 				idx++;
 		}
 	}
+
+	free( hospitalised_fraction );
 }
 
 /*****************************************************************************************
