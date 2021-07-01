@@ -325,6 +325,9 @@ void new_infection(
 		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
+
+	if( !immune_to_symptoms( infected, strain->idx ) && !immune_to_severe( infected, strain->idx ) )
+		infected->infection_events->expected_hospitalisation = strain->hospitalised_fraction[ infected->age_group ] * ( 1 - asymp_frac - mild_frac );
 }
 
 /*****************************************************************************************

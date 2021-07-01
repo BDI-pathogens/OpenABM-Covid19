@@ -134,6 +134,7 @@ void add_infection_event(
 		event->time_infected_infector = time;
 
 	event->is_case     = FALSE;
+	event->expected_hospitalisation = 0;
 }
 
 /*****************************************************************************************
