@@ -43,11 +43,13 @@ VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
       frac_60_69 = 0,
       frac_70_79 = 0,
       frac_80    = 0,
-      vaccine    = -1
+      vaccine    = -1,
+      fractions  = NA
     )
     {
-      fractions <- c(frac_0_9, frac_10_19, frac_20_29, frac_30_39, frac_40_49,
-                     frac_50_59, frac_60_69, frac_70_79, frac_80)
+      if( is.na( fractions ) )
+        fractions <- c(frac_0_9, frac_10_19, frac_20_29, frac_30_39, frac_40_49,
+                       frac_50_59, frac_60_69, frac_70_79, frac_80)
       n <- length(AgeGroupEnum)
       if (n != length(fractions)) {
         stop("length(AgeGroupEnum) doesn't match VaccineSchedule's age groups")
