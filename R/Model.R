@@ -499,7 +499,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param transmission_multiplier The relative transmission rate of the strain
     #' @param hospitalised_fraction the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)]
     #' @return \code{Strain} A Strain object representing this strain
-    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA )
+    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
 
       max_n_strains = self$get_param( "max_n_strains" )
@@ -508,12 +508,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if( n_strains == max_n_strains )
         stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
 
-      if( is.na( hospitalised_fraction ) )
+      if( is.na( hospitalised_fraction[ 1 ] ) )
       {
         hospitalised_fraction = c()
         for( idx in 1:length( AgeGroupEnum ) )
           hospitalised_fraction[ idx ] = self$get_param(
-            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) )
+            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) ) *
+            hospitalised_fraction_multiplier
       }
 
       c_model_ptr <- private$c_model_ptr()
@@ -796,9 +797,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' end_time)
     #' @param verbose - whether to display progress information (DEFAULT=TRUE)
     #' @return Null
-    run = function( verbose = TRUE)
+    run = function( n_steps = NULL, verbose = TRUE)
     {
-      n_steps  = self$get_param( "end_time" ) - self$c_model$time
+      if( is.null( n_steps ) )
+        n_steps  = self$get_param( "end_time" ) - self$c_model$time
       step     = 0
 
       start_time = Sys.time()
@@ -1049,9 +1051,9 @@ Model.results = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @param verbose Show progress of the calculation (default = TRUE)
 #' @return Null
-Model.run = function( model, verbose=TRUE ) {
+Model.run = function( model, n_teps = NULL, verbose=TRUE ) {
   if (!is.null(model)) {
-    return( model$run( verbose ) )
+    return( model$run( n_steps, verbose ) )
   }
 }
 
