@@ -1236,7 +1236,7 @@ void write_transmissions( model *model )
 	fprintf(output_file , "time_susceptible,");
 	fprintf(output_file , "is_case,");
 	fprintf(output_file , "strain_idx,");
-	fprintf(output_file , "transmission_multiplier");
+	fprintf(output_file , "transmission_multiplier,");
 	fprintf(output_file , "expected_hospitalisation\n");
 
 
