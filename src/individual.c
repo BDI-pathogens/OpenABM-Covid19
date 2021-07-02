@@ -116,7 +116,7 @@ void add_infection_event(
 	};
 
 	event->infector = infector;
-	event->infector_network = network_id;
+	event->network_id = network_id;
 	event->strain = strain;
 	if( event->infector != NULL )
 	{
