@@ -1051,7 +1051,7 @@ Model.results = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @param verbose Show progress of the calculation (default = TRUE)
 #' @return Null
-Model.run = function( model, n_teps = NULL, verbose=TRUE ) {
+Model.run = function( model, n_steps = NULL, verbose=TRUE ) {
   if (!is.null(model)) {
     return( model$run( n_steps, verbose ) )
   }
