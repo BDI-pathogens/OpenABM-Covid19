@@ -1089,9 +1089,17 @@ class Model:
         """
         Call C function destroy_model and destroy_params
         """
-        LOGGER.info("Destroying model")
-        covid19.destroy_model(self.c_model)
+        LOGGER.info("Destroying model")         
 
+        if self.c_model != None :
+            covid19.destroy_model(self.c_model)
+            self.c_params = None
+            self.c_model = None
+            
+            params_obj = self._params_obj
+            self._params_obj = None
+            del params_obj
+            
     def one_time_step(self):
         """
         Steps the simulation forward one time step

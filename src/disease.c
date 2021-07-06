@@ -642,6 +642,8 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 		day--;
 	}
 
+	free( generation_dist );
+
 	if( ( actual_infections <= 1 ) || ( expected_infections <= 1 ) )
 		return ERROR;
 

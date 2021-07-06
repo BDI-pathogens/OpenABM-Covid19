@@ -41,7 +41,7 @@ model* new_model( parameters *params )
 	model_ptr->rebuild_networks = TRUE;
 	model_ptr->user_network = NULL;
 	model_ptr->n_initialised_strains = 0;
-    if (params->occupation_network_table == NULL)
+    if (params->occupation_network_table == NULL )
     {
         model_ptr->use_custom_occupation_networks = 0;
         model_ptr->n_occupation_networks = N_DEFAULT_OCCUPATION_NETWORKS;
@@ -117,6 +117,7 @@ void destroy_model( model *model )
 			free( interaction_block );
 		}
 	}
+	free( model->interaction_blocks );
 
     next_event_block = model->event_block;
 	while( next_event_block != NULL )
@@ -376,7 +377,9 @@ void set_up_occupation_network( model *model )
 
     if( model->use_custom_occupation_networks == FALSE )
     {
-    	free( params->occupation_network_table );
+    	if( params->occupation_network_table != NULL )
+    		destroy_occupation_network_table( model->params );
+
     	params->occupation_network_table = NULL;
     }
 }

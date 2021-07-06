@@ -82,7 +82,7 @@ int set_demographic_house_table(
 		}
 		if( (house_nos[pdx] < 0) | (house_nos[pdx] >= params->demo_house->n_households) )
 		{
-			print_now( "The person's nouse_no must be between 0 and n_households" );
+			print_now( "The person's house_no must be between 0 and n_households" );
 			return FALSE;
 		}
 
@@ -1463,6 +1463,10 @@ void check_hospital_params( parameters *params )
         print_exit( "BAD PARAM hcw_mean_work_interactions must be less than or equal to half the total number of healthcare workers" );
 }
 
+/*****************************************************************************************
+*  Name:        destroy_occupation_network_table
+*  Description: Destroy the occupation network table
+******************************************************************************************/
 void destroy_occupation_network_table(parameters *params)
 {
     for (int i = 0; i != params->occupation_network_table->n_networks; ++i)
@@ -1472,6 +1476,8 @@ void destroy_occupation_network_table(parameters *params)
     free(params->occupation_network_table->mean_interactions);
     free(params->occupation_network_table->age_type);
     free(params->occupation_network_table->network_no);
+    free(params->occupation_network_table->lockdown_occupation_multipliers);
+    free(params->occupation_network_table);
 }
 
 /*****************************************************************************************
@@ -1490,9 +1496,11 @@ void destroy_params( parameters *params )
 		free( params->demo_house->age_group );
 		free( params->demo_house->house_no );
 		free( params->demo_house->idx );
+		free( params->demo_house );
 	}
 
 	if ( params->occupation_network_table != NULL )
 	    destroy_occupation_network_table(params);
 
+	free( params );
 }
