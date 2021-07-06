@@ -60,6 +60,10 @@ struct model{
 	network **occupation_network;
 	directory *household_directory;
 	network *user_network;
+
+	int n_networks;
+	network **all_networks;
+
 	double mean_interactions;
 	double mean_interactions_by_age[ N_AGE_TYPES ];
 	int rebuild_networks;

@@ -146,6 +146,7 @@ void destroy_model( model *model )
 		next_network = network->next_network;
 		destroy_network(network);
 	}
+	free( model->all_networks );
 
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		destroy_event_list( model, idx );
@@ -280,6 +281,13 @@ void set_up_networks( model *model )
 	model->mean_interactions = estimate_mean_interactions_by_age( model, -1 );
 	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 		model->mean_interactions_by_age[idx] = estimate_mean_interactions_by_age( model, idx );
+
+	// add an array of pointers to the network objects
+	model->n_networks   = model->n_occupation_networks + 2;
+	model->all_networks = calloc( model->n_networks, sizeof(network*) );
+
+	for( idx = 0; idx < model->n_networks; idx++ )
+		model->all_networks[ idx ] = get_network_by_id( model, idx );
 }
 
 /*****************************************************************************************

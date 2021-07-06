@@ -27,6 +27,7 @@ network* create_network( long n_total, int type )
 	network_ptr->n_edges    = 0;
 	network_ptr->n_vertices = n_total;
 	network_ptr->type       = type;
+	network_ptr->transmission_multiplier = 1;
 	
 	return network_ptr;
 }
