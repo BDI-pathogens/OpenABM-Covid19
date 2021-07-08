@@ -1,5 +1,7 @@
 #include <R.h>
 #include <Rinternals.h>
+#include <string.h>
+
 #include "model.h"
 #include "input.h"
 #include "params.h"
@@ -489,3 +491,50 @@ SEXP R_intervention_vaccinate_age_group ( SEXP R_c_model,
   return R_res;
 }
 
+SEXP R_set_input_param_file( SEXP R_c_params,
+                         SEXP R_input_param_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_param_file = CHAR( asChar( R_input_param_file ) );
+
+  strncpy( c_params->input_param_file, input_param_file, sizeof( c_params->input_param_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_input_household_file( SEXP R_c_params,
+                             SEXP R_input_household_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_household_file = CHAR( asChar( R_input_household_file ) );
+
+  strncpy( c_params->input_household_file, input_household_file, sizeof( c_params->input_household_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_output_file_dir( SEXP R_c_params,
+                            SEXP R_output_file_dir )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* output_file_dir = CHAR( asChar( R_output_file_dir ) );
+
+  strncpy( c_params->output_file_dir, output_file_dir, sizeof( c_params->output_file_dir ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_hospital_input_param_file( SEXP R_c_params,
+                             SEXP R_input_param_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_param_file = CHAR( asChar( R_input_param_file ) );
+
+  strncpy( c_params->hospital_input_param_file, input_param_file, sizeof( c_params->hospital_input_param_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}

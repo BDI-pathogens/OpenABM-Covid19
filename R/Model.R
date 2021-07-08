@@ -24,7 +24,7 @@ SWIG_seed_infect_by_idx <- seed_infect_by_idx
 SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
 SWIG_set_cross_immunity_probability <- set_cross_immunity_probability
-
+SWIG_free_gsl_rng <- free_gsl_rng
 
 #' R6Class Model
 #'
@@ -209,12 +209,24 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$c_params   <- params_object$return_param_object()
       private$.c_model   <- create_model(private$c_params)
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
+
+      # keep a global counter of models made
+      nmodels = getOption("OpenABMCovid19.n_models")
+      if( is.null(nmodels))
+        nmodels = 0;
+      options("OpenABMCovid19.n_models"= nmodels+1)
     },
 
     #' @description Remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
         SWIG_destroy_model( self$c_model )
+
+        nmodels = getOption("OpenABMCovid19.n_models")
+        options("OpenABMCovid19.n_models"= nmodels-1)
+
+        if( nmodels == 1 )
+          SWIG_free_gsl_rng()
       }
     },
 
