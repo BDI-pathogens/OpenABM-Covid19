@@ -563,18 +563,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     #' @description Get the list of network IDs
     #' Wrapper for C API \code{get_network_ids}.
-    #' @param max_ids The maximum number of IDs to return.
     #' @return The list of the network IDs.
-    get_network_ids = function(max_ids = 1000)
+    get_network_ids = function()
     {
-      if (max_ids < 1) return(NA)
-
       c_model_ptr <- private$c_model_ptr()
-      ids = .Call('R_get_network_ids', c_model_ptr, max_ids,
+      ids = .Call('R_get_network_ids', c_model_ptr,
                   PACKAGE='OpenABMCovid19');
-
-      if( length( ids ) == 1 && ids[1] == -1 )
-        return( self$get_network_ids( max_ids = max_ids * 10 ) )
 
       return( ids )
     },
@@ -584,7 +578,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' properties and each row is a network.
     get_network_info = function()
     {
-      ids <- self$get_network_ids( max_ids = 1000 )
+      ids <- self$get_network_ids()
 
       # Allocate a matrix the correct size
       colnames <- c( 'id', 'name', 'n_edges', 'n_vertices', 'type',

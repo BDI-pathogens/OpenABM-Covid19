@@ -162,6 +162,7 @@ void transition_events_info( model*, int, void( model*, individual*, void* ), in
 void add_interaction_block( model*, long );
 void return_interactions( model* );
 
+network* add_new_network( model*, long, int );
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );
 void build_random_network( model*, network*, long, long* );
@@ -171,9 +172,6 @@ int add_user_network( model*, int, int, int, int, double, long, long*, long*, ch
 int add_user_network_random( model*, int, int, long, long*, int*, char* );
 int delete_network( model*, network*n );
 network* get_network_by_id( model*, int );
-int get_network_ids( model*, int*, int );
-int get_network_id_by_index( model*, int );
-
-
+int get_network_ids( model*, int* );
 
 #endif /* MODEL_H_ */

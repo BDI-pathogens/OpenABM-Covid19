@@ -77,9 +77,7 @@ test_that("Model::baseline_params", {
   expect_equal( 1, nw$type() )
   expect_equal( 0.5, nw$daily_fraction() )
 
-  expect_equal(NA, m$get_network_ids(0))
-  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids(3))
-  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids(100))
+  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids())
 
   df_app_user <- m$get_app_users()
   df_app_user[['app_user']] <- as.integer(!df_app_user[['app_user']])

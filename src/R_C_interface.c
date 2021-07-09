@@ -95,15 +95,15 @@ SEXP R_get_individuals ( SEXP R_c_model, SEXP n_total )
   return R_list;
 }
 
-SEXP R_get_network_ids ( SEXP R_c_model, SEXP R_max_ids )
+SEXP R_get_network_ids ( SEXP R_c_model )
 {
   // get the point to the model from the R pointer object
   model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
-  int max_ids = asInteger( R_max_ids );
+  int max_ids = c_model->n_networks;
 
   // allocate memory to for the function call
   int *ids = calloc( max_ids, sizeof(int) );
-  int n_ids = get_network_ids(c_model,ids,max_ids);
+  int n_ids = get_network_ids(c_model,ids);
 
   if( n_ids == -1 )
     return( ScalarInteger(-1));

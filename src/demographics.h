@@ -33,7 +33,6 @@ struct demographic_occupation_network_table {
     long *network_no; // network assigned to each person
     double *mean_interactions;
     double *lockdown_occupation_multipliers;
-    long *network_ids;
     char **network_names;
 };
 

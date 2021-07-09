@@ -489,10 +489,10 @@ class Parameters(object):
         n_networks = df_occupation_networks['network_no'].max() + 1
         covid19.set_occupation_network_table(self.c_params, int(n_total), int(n_networks))
         [covid19.set_indiv_occupation_network_property(
-            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), int(row[4]),
-            str(row[5]))
+            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), 
+            str(row[4]))
             for row in df_occupation_network_properties[[
-            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 'network_id',
+            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 
             'network_name']].values]
 
         ID         = df_occupation_networks['ID'].to_list()
@@ -891,16 +891,12 @@ class Model:
                     raise ParameterException( f"Cross-immunity probability must be in the interval [0,1]")
                 covid19.set_cross_immunity_probability( self.c_model, caught_idx, conferred_idx, probability )
 
-    def get_network_info(self, max_ids= 1000):
+    def get_network_info(self):
            
-        if max_ids > 1e6 :
-            raise ModelException( "Maximum number of allowed network is 1e6" )
-        ids_c = covid19.intArray( max_ids )
-        n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
-        
-        if n_ids == -1 :
-            return self.get_network_info( max_ids = max_ids * 10 )
-        
+   
+        ids_c = covid19.intArray( covid19.MAX_N_NETWORKS )
+        n_ids = covid19.get_network_ids( self.c_model, ids_c )
+              
         ids        = [None] * n_ids
         names      = [None] * n_ids
         n_edges    = [None] * n_ids

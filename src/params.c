@@ -228,7 +228,6 @@ int set_indiv_occupation_network_property(
 	int age_type,
 	double mean_interaction,
 	double lockdown_multiplier,
-	long network_id,
 	const char *network_name
 )
 {
@@ -237,7 +236,6 @@ int set_indiv_occupation_network_property(
 	table->age_type[network]                        = age_type;
     table->mean_interactions[network]               = mean_interaction;
     table->lockdown_occupation_multipliers[network] = lockdown_multiplier;
-    table->network_ids[network]                     = network_id;
 
     if( strlen( network_name ) < 128 )
     {
@@ -268,7 +266,6 @@ int set_occupation_network_table(
 	params->occupation_network_table->age_type = calloc( n_networks, sizeof(int) );
 	params->occupation_network_table->mean_interactions = calloc( n_networks, sizeof(double) );
 	params->occupation_network_table->lockdown_occupation_multipliers = calloc( n_networks, sizeof(double) );
-	params->occupation_network_table->network_ids = calloc( n_networks, sizeof(long) );
 
 	params->occupation_network_table->network_names = calloc( n_networks, sizeof(char *) );
     for( int i = 0; i != n_networks; ++i )
@@ -325,7 +322,6 @@ void set_up_default_occupation_network_table( parameters *params )
         set_indiv_occupation_network_property( params, network, NETWORK_TYPE_MAP[network],
                                                params->mean_work_interactions[NETWORK_TYPE_MAP[network]],
                                                params->lockdown_occupation_multiplier[network],
-                                               OCCUPATION_DEFAULT_MAP[network],
                                                DEFAULT_NETWORKS_NAMES[OCCUPATION_DEFAULT_MAP[network]] );
     }
 }
@@ -1472,7 +1468,6 @@ void destroy_occupation_network_table(parameters *params)
     for (int i = 0; i != params->occupation_network_table->n_networks; ++i)
         free(params->occupation_network_table->network_names[i]);
     free(params->occupation_network_table->network_names);
-    free(params->occupation_network_table->network_ids);
     free(params->occupation_network_table->mean_interactions);
     free(params->occupation_network_table->age_type);
     free(params->occupation_network_table->network_no);

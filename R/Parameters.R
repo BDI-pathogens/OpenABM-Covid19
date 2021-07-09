@@ -352,7 +352,6 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
           df_occupation_network_properties[row,'age_type'],
           df_occupation_network_properties[row,'mean_work_interaction'],
           df_occupation_network_properties[row,'lockdown_multiplier'],
-          df_occupation_network_properties[row,'network_id'],
           df_occupation_network_properties[row,'network_name'])
         if (C_result == 0) {
           stop("C API set_indiv_occupation_network_property failed (returned FALSE)")
