@@ -1107,16 +1107,27 @@ class TestClass(object):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+     
+        params = utils.get_params_swig()
         params = utils.turn_off_quarantine(params)
-        params.set_param("test_order_wait",0)
-        params.set_param("test_result_wait",0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.set_param("n_total",50000)
+        params.set_param("end_time",40)
         
-        # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # test_result_wait is required to be set to 0 due to an edge case with hospitalisation
+        #
+        # 1. on hospitalisation a test is always ordered
+        # 2. the person recovers and leaves hospital prior to the test result coming back
+        # 3. the person is no longer in hospital so is asked to quarantine
+        #
+        # setting result_wait to 0 means that the person is always in hospital when they get
+        # the result (if it is positive), so will not be asked to quarantine since they are 
+        # currently in hospital
+        params.set_param("test_result_wait",0)
+            
+        model  = utils.get_model_swig( params )
+        model.run()
+        
+        df_output = model.results
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
     
     def test_hospitalised_zero(self):
