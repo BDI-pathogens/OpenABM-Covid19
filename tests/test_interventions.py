@@ -1114,6 +1114,15 @@ class TestClass(object):
                 time_off     = 10,
                 networks_off = [ 1,4,5 ] 
             )
+        ],
+        "test_custom_network_transmission_multiplier": [ 
+            dict(
+                test_params = dict( n_total = 1e4, end_time = 50 ),
+                time_add    = 10,
+                age_group   = 3,
+                n_inter     = 10,     
+                transmission_multiplier = 10
+            )
         ]
                                             
     }
@@ -2953,13 +2962,17 @@ class TestClass(object):
        
 
     def test_network_transmission_multiplier(self, test_params, time_off, networks_off ) :   
+        """
+        Check that a transmission_multipler change applied to a single network 
+        is applied to (just) it 
+        """
                     
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
-        
-        if time_off > 0  :
+    
+        if time_off > 0 :
             model.run( n_steps = time_off, verbose = False )
             
         for n_id in networks_off :
@@ -2978,4 +2991,46 @@ class TestClass(object):
             n_net = len( df_trans[ df_trans[ "infector_network_id" ] == n_id ] )
             np.testing.assert_( n_net == 0, "not sufficient transmissions to test")
         
-                             
+    def test_custom_network_transmission_multiplier(self, test_params, time_add, age_group, n_inter, transmission_multiplier) :  
+        """
+        Check that a large transmission_multipler change applied to a single custom network 
+        that it contains huge number of transmission and everyone in that age group is infected
+        """ 
+                        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        if time_add > 0 :
+            model.run( n_steps = time_add, verbose = False )
+                      
+        df_indiv = model.get_individuals()
+        df_indiv = df_indiv[ df_indiv[ "age_group"] == age_group ]
+        
+        n_ids = len( df_indiv )
+        ids   = df_indiv[ "ID" ].to_numpy()
+        
+        df_edges = pd.DataFrame( {
+            "ID_1" : np.random.choice( ids, n_ids * n_inter ),
+            "ID_2" : np.random.choice( ids, n_ids * n_inter )
+        })
+        df_edges = df_edges[ df_edges[ "ID_1"] != df_edges[ "ID_2"] ]
+        
+        net = model.add_user_network( df_edges, name = "age-specific super-spreading network")
+        net.set_network_transmission_multiplier(transmission_multiplier)
+        net_id = net.network_id()
+
+        model.run( verbose = False )
+        
+        df_trans = model.get_transmissions()
+        n_inf_age_group_pre = len( df_trans[ ( df_trans[ "time_infected" ] <= time_add ) & ( df_trans[ "age_group_recipient" ] == age_group ) ] )
+        df_trans = df_trans[ ( df_trans[ "time_infected" ] > time_add ) & ( df_trans[ "age_group_recipient" ] == age_group ) ]
+        
+        
+        n_inf_age_group_post = len( df_trans )
+        n_inf_age_group_post_custom = len( df_trans[ df_trans[ "infector_network_id" ] == net_id] )
+  
+        np.testing.assert_equal( n_ids, n_inf_age_group_post + n_inf_age_group_pre, "not everyone in age group of super spreading net work is infected" )
+        np.testing.assert_( n_inf_age_group_post_custom / n_inf_age_group_post > 0.9, "insufficient proportion of transmissionson the super spreading network" )
+               
