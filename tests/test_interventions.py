@@ -1098,6 +1098,24 @@ class TestClass(object):
                 time_to_protect = 14
             )
         ],
+        "test_network_transmission_multiplier": [ 
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 0,
+                networks_off = [ 0 ] 
+            ),
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 10,
+                networks_off = [ 3 ] 
+            ),
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 10,
+                networks_off = [ 1,4,5 ] 
+            )
+        ]
+                                            
     }
 
     """
@@ -2934,4 +2952,30 @@ class TestClass(object):
         np.testing.assert_( n_inf_strain_1 > 0, "no vaccinated people have been infected by strain that they should not be protected against")
        
 
-                        
+    def test_network_transmission_multiplier(self, test_params, time_off, networks_off ) :   
+                    
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        if time_off > 0  :
+            model.run( n_steps = time_off, verbose = False )
+            
+        for n_id in networks_off :
+            net = model.get_network_by_id( n_id )
+            net.set_network_transmission_multiplier(0)
+            
+        model.run( verbose = False )
+        
+        df_trans = model.get_transmissions()
+        df_trans = df_trans[ df_trans[ "time_infected" ] > time_off ]
+        
+        n_all_inf = len( df_trans )
+        np.testing.assert_( n_all_inf > 50, "not sufficient transmissions to test")
+        
+        for n_id in networks_off :
+            n_net = len( df_trans[ df_trans[ "infector_network_id" ] == n_id ] )
+            np.testing.assert_( n_net == 0, "not sufficient transmissions to test")
+        
+                             
