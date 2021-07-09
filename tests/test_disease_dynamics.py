@@ -484,7 +484,7 @@ class TestClass(object):
         "test_multi_strain_disease_dynamics" : [
             dict(
                 test_params = dict(
-                    n_total  = 1e4,
+                    n_total  = 3e4,
                     end_time = 50,
                     n_seed_infection = 0,
                     infectious_rate  = 7,
