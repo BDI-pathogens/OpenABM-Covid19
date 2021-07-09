@@ -1152,7 +1152,7 @@ class TestClass(object):
         params.set_param("test_result_wait",0)
             
         model  = utils.get_model_swig( params )
-        model.run()
+        model.run( verbose = False )
         
         df_output = model.results
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
