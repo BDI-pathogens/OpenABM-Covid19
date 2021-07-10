@@ -97,6 +97,7 @@ struct infection_event{
 	infection_event *next;
 	short is_case;
 	short network_id;
+	float expected_hospitalisation;
 	strain *strain;
 };
 

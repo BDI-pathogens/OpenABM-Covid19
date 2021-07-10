@@ -24,7 +24,7 @@ SWIG_seed_infect_by_idx <- seed_infect_by_idx
 SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
 SWIG_set_cross_immunity_probability <- set_cross_immunity_probability
-
+SWIG_free_gsl_rng <- free_gsl_rng
 
 #' R6Class Model
 #'
@@ -209,12 +209,24 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$c_params   <- params_object$return_param_object()
       private$.c_model   <- create_model(private$c_params)
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
+
+      # keep a global counter of models made
+      nmodels = getOption("OpenABMCovid19.n_models")
+      if( is.null(nmodels))
+        nmodels = 0;
+      options("OpenABMCovid19.n_models"= nmodels+1)
     },
 
     #' @description Remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
         SWIG_destroy_model( self$c_model )
+
+        nmodels = getOption("OpenABMCovid19.n_models")
+        options("OpenABMCovid19.n_models"= nmodels-1)
+
+        if( nmodels == 1 )
+          SWIG_free_gsl_rng()
       }
     },
 
@@ -499,7 +511,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param transmission_multiplier The relative transmission rate of the strain
     #' @param hospitalised_fraction the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)]
     #' @return \code{Strain} A Strain object representing this strain
-    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA )
+    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
 
       max_n_strains = self$get_param( "max_n_strains" )
@@ -508,12 +520,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if( n_strains == max_n_strains )
         stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
 
-      if( is.na( hospitalised_fraction ) )
+      if( is.na( hospitalised_fraction[ 1 ] ) )
       {
         hospitalised_fraction = c()
         for( idx in 1:length( AgeGroupEnum ) )
           hospitalised_fraction[ idx ] = self$get_param(
-            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) )
+            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) ) *
+            hospitalised_fraction_multiplier
       }
 
       c_model_ptr <- private$c_model_ptr()
@@ -550,18 +563,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     #' @description Get the list of network IDs
     #' Wrapper for C API \code{get_network_ids}.
-    #' @param max_ids The maximum number of IDs to return.
     #' @return The list of the network IDs.
-    get_network_ids = function(max_ids = 1000)
+    get_network_ids = function()
     {
-      if (max_ids < 1) return(NA)
-
       c_model_ptr <- private$c_model_ptr()
-      ids = .Call('R_get_network_ids', c_model_ptr, max_ids,
+      ids = .Call('R_get_network_ids', c_model_ptr,
                   PACKAGE='OpenABMCovid19');
-
-      if( length( ids ) == 1 && ids[1] == -1 )
-        return( self$get_network_ids( max_ids = max_ids * 10 ) )
 
       return( ids )
     },
@@ -571,7 +578,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' properties and each row is a network.
     get_network_info = function()
     {
-      ids <- self$get_network_ids( max_ids = 1000 )
+      ids <- self$get_network_ids()
 
       # Allocate a matrix the correct size
       colnames <- c( 'id', 'name', 'n_edges', 'n_vertices', 'type',
@@ -796,9 +803,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' end_time)
     #' @param verbose - whether to display progress information (DEFAULT=TRUE)
     #' @return Null
-    run = function( verbose = TRUE)
+    run = function( n_steps = NULL, verbose = TRUE)
     {
-      n_steps  = self$get_param( "end_time" ) - self$c_model$time
+      if( is.null( n_steps ) )
+        n_steps  = self$get_param( "end_time" ) - self$c_model$time
       step     = 0
 
       start_time = Sys.time()
@@ -1049,9 +1057,9 @@ Model.results = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @param verbose Show progress of the calculation (default = TRUE)
 #' @return Null
-Model.run = function( model, verbose=TRUE ) {
+Model.run = function( model, n_steps = NULL, verbose=TRUE ) {
   if (!is.null(model)) {
-    return( model$run( verbose ) )
+    return( model$run( n_steps, verbose ) )
   }
 }
 

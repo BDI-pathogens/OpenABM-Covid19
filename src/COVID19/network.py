@@ -44,6 +44,12 @@ class Network:
     
     def update_daily_fraction(self,daily_fraction):
         return covid19.update_daily_fraction(self.c_network,daily_fraction)
+    
+    def set_network_transmission_multiplier(self,multiplier):
+        covid19.set_network_transmission_multiplier(self.c_network,multiplier)
+        
+    def transmission_multiplier(self):
+        return self.c_network.transmission_multiplier
 
     def show(self):
         print( "network_id        = " + str( self.network_id() ) )
@@ -54,6 +60,7 @@ class Network:
         print( "skip_quarantined  = " + str( self.skip_quarantined() ) )
         print( "type              = " + str( self.type() ) )
         print( "daily_fraction    = " + str( self.daily_fraction() ) )
+        print( "transmission_mult = " + str( self.transmission_multiplier() ) )
     
     def get_network(self):
         """Return pandas.DataFrame of the network"""

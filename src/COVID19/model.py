@@ -489,10 +489,10 @@ class Parameters(object):
         n_networks = df_occupation_networks['network_no'].max() + 1
         covid19.set_occupation_network_table(self.c_params, int(n_total), int(n_networks))
         [covid19.set_indiv_occupation_network_property(
-            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), int(row[4]),
-            str(row[5]))
+            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), 
+            str(row[4]))
             for row in df_occupation_network_properties[[
-            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 'network_id',
+            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 
             'network_name']].values]
 
         ID         = df_occupation_networks['ID'].to_list()
@@ -890,17 +890,178 @@ class Model:
                 if ( probability < 0 ) | ( probability > 1 ):
                     raise ParameterException( f"Cross-immunity probability must be in the interval [0,1]")
                 covid19.set_cross_immunity_probability( self.c_model, caught_idx, conferred_idx, probability )
+    
+    def get_transmissions(self):
+        
+        n_trans = covid19.get_n_transmissions(self.c_model);
+        
+        ID_recipient = covid19.longArray( n_trans )
+        age_group_recipient = covid19.intArray( n_trans )
+        house_no_recipient = covid19.longArray( n_trans )
+        occupation_network_recipient = covid19.intArray( n_trans )
+        worker_type_recipient = covid19.intArray( n_trans )
+        hospital_state_recipient = covid19.intArray( n_trans )
+        infector_network = covid19.intArray( n_trans )
+        infector_network_id = covid19.intArray( n_trans )
+        generation_time = covid19.intArray( n_trans )
+        ID_source = covid19.longArray( n_trans )
+        age_group_source = covid19.intArray( n_trans )
+        house_no_source = covid19.longArray( n_trans )
+        occupation_network_source = covid19.intArray( n_trans )
+        worker_type_source = covid19.intArray( n_trans )
+        hospital_state_source = covid19.intArray( n_trans )
+        time_infected_source = covid19.intArray( n_trans )
+        status_source = covid19.intArray( n_trans )
+        time_infected = covid19.intArray( n_trans )
+        time_presymptomatic = covid19.intArray( n_trans )
+        time_presymptomatic_mild = covid19.intArray( n_trans )
+        time_presymptomatic_severe = covid19.intArray( n_trans )
+        time_symptomatic = covid19.intArray( n_trans )
+        time_symptomatic_mild = covid19.intArray( n_trans )
+        time_symptomatic_severe = covid19.intArray( n_trans )
+        time_asymptomatic = covid19.intArray( n_trans )
+        time_hospitalised = covid19.intArray( n_trans )
+        time_critical = covid19.intArray( n_trans )
+        time_hospitalised_recovering = covid19.intArray( n_trans )
+        time_death = covid19.intArray( n_trans )
+        time_recovered = covid19.intArray( n_trans )
+        time_susceptible = covid19.intArray( n_trans )
+        is_case = covid19.intArray( n_trans )
+        strain_idx = covid19.intArray( n_trans )
+        transmission_multiplier = covid19.floatArray( n_trans )
+        expected_hospitalisation = covid19.floatArray( n_trans )
+        
+        covid19.get_transmissions( self.c_model, ID_recipient, age_group_recipient,
+            house_no_recipient, occupation_network_recipient, worker_type_recipient,
+            hospital_state_recipient, infector_network, infector_network_id,
+            generation_time, ID_source, age_group_source, house_no_source,
+            occupation_network_source, worker_type_source, hospital_state_source,
+            time_infected_source, status_source, time_infected, time_presymptomatic,
+            time_presymptomatic_mild, time_presymptomatic_severe, time_symptomatic,
+            time_symptomatic_mild, time_symptomatic_severe, time_asymptomatic,
+            time_hospitalised, time_critical, time_hospitalised_recovering,
+            time_death, time_recovered, time_susceptible, is_case, strain_idx,
+            transmission_multiplier, expected_hospitalisation );
+                
+        p_ID_recipient = [None] * n_trans
+        p_age_group_recipient = [None] * n_trans
+        p_house_no_recipient = [None] * n_trans
+        p_occupation_network_recipient = [None] * n_trans
+        p_worker_type_recipient = [None] * n_trans
+        p_hospital_state_recipient = [None] * n_trans
+        p_infector_network = [None] * n_trans
+        p_infector_network_id = [None] * n_trans
+        p_generation_time = [None] * n_trans
+        p_ID_source = [None] * n_trans
+        p_age_group_source = [None] * n_trans
+        p_house_no_source = [None] * n_trans
+        p_occupation_network_source = [None] * n_trans
+        p_worker_type_source = [None] * n_trans
+        p_hospital_state_source = [None] * n_trans
+        p_time_infected_source = [None] * n_trans
+        p_status_source = [None] * n_trans
+        p_time_infected = [None] * n_trans
+        p_time_presymptomatic = [None] * n_trans
+        p_time_presymptomatic_mild = [None] * n_trans
+        p_time_presymptomatic_severe = [None] * n_trans
+        p_time_symptomatic = [None] * n_trans
+        p_time_symptomatic_mild = [None] * n_trans
+        p_time_symptomatic_severe = [None] * n_trans
+        p_time_asymptomatic = [None] * n_trans
+        p_time_hospitalised = [None] * n_trans
+        p_time_critical = [None] * n_trans
+        p_time_hospitalised_recovering = [None] * n_trans
+        p_time_death = [None] * n_trans
+        p_time_recovered = [None] * n_trans
+        p_time_susceptible = [None] * n_trans
+        p_is_case = [None] * n_trans
+        p_strain_idx = [None] * n_trans
+        p_transmission_multiplier = [None] * n_trans
+        p_expected_hospitalisation = [None] * n_trans
+         
+        for idx in range( n_trans ) :
+            p_ID_recipient[ idx ] = ID_recipient[ idx ] 
+            p_age_group_recipient[ idx ] = age_group_recipient[ idx ]
+            p_house_no_recipient[ idx ] = house_no_recipient[ idx ] 
+            p_occupation_network_recipient[ idx ] = occupation_network_recipient[ idx ]
+            p_worker_type_recipient[ idx ] = worker_type_recipient[ idx ]
+            p_hospital_state_recipient[ idx ] = hospital_state_recipient[ idx ] 
+            p_infector_network[ idx ] = infector_network[ idx ] 
+            p_infector_network_id[ idx ] = infector_network_id[ idx ]
+            p_generation_time[ idx ] = generation_time[ idx ] 
+            p_ID_source[ idx ] = ID_source[ idx ] 
+            p_age_group_source[ idx ] = age_group_source[ idx ] 
+            p_house_no_source[ idx ] = house_no_source[ idx ]
+            p_occupation_network_source[ idx ] = occupation_network_source[ idx ] 
+            p_worker_type_source[ idx ] = worker_type_source[ idx ] 
+            p_hospital_state_source[ idx ] = hospital_state_source[ idx ]
+            p_time_infected_source[ idx ] = time_infected_source[ idx ] 
+            p_status_source[ idx ] = status_source[ idx ] 
+            p_time_infected[ idx ] = time_infected[ idx ] 
+            p_time_presymptomatic[ idx ] = time_presymptomatic[ idx ]
+            p_time_presymptomatic_mild[ idx ] = time_presymptomatic_mild[ idx ] 
+            p_time_presymptomatic_severe[ idx ] = time_presymptomatic_severe[ idx ] 
+            p_time_symptomatic[ idx ] = time_symptomatic[ idx ]
+            p_time_symptomatic_mild[ idx ] = time_symptomatic_mild[ idx ] 
+            p_time_symptomatic_severe[ idx ] = time_symptomatic_severe[ idx ] 
+            p_time_asymptomatic[ idx ] = time_asymptomatic[ idx ]
+            p_time_hospitalised[ idx ] = time_hospitalised[ idx ] 
+            p_time_critical[ idx ] = time_critical[ idx ] 
+            p_time_hospitalised_recovering[ idx ] = time_hospitalised_recovering[ idx ]
+            p_time_death[ idx ] = time_death[ idx ] 
+            p_time_recovered[ idx ] = time_recovered[ idx ] 
+            p_time_susceptible[ idx ] = time_susceptible[ idx ] 
+            p_is_case[ idx ] = is_case[ idx ] 
+            p_strain_idx[ idx ] = strain_idx[ idx ]
+            p_transmission_multiplier[ idx ] = transmission_multiplier[ idx ] 
+            p_expected_hospitalisation[ idx ] = expected_hospitalisation[ idx ] 
+    
+        df_res = pd.DataFrame( {
+            "ID_recipient" : p_ID_recipient,                 
+            "age_group_recipient" : p_age_group_recipient,
+            "house_no_recipient" : p_house_no_recipient, 
+            "occupation_network_recipient" : p_occupation_network_recipient,
+            "worker_type_recipient" : p_worker_type_recipient,
+            "hospital_state_recipient" : p_hospital_state_recipient, 
+            "infector_network" : p_infector_network, 
+            "infector_network_id" : p_infector_network_id,
+            "generation_time" : p_generation_time, 
+            "ID_source" : p_ID_source, 
+            "age_group_source" : p_age_group_source, 
+            "house_no_source" : p_house_no_source,
+            "occupation_network_source" : p_occupation_network_source, 
+            "worker_type_source" : p_worker_type_source, 
+            "hospital_state_source" : p_hospital_state_source,
+            "time_infected_source" : p_time_infected_source, 
+            "status_source" : p_status_source, 
+            "time_infected" : p_time_infected, 
+            "time_presymptomatic" : p_time_presymptomatic,
+            "time_presymptomatic_mild" : p_time_presymptomatic_mild, 
+            "time_presymptomatic_severe" : p_time_presymptomatic_severe, 
+            "time_symptomatic" : p_time_symptomatic,
+            "time_symptomatic_mild" : p_time_symptomatic_mild, 
+            "time_symptomatic_severe" : p_time_symptomatic_severe, 
+            "time_asymptomatic" : p_time_asymptomatic,
+            "time_hospitalised" : p_time_hospitalised, 
+            "time_critical" : p_time_critical,
+            "time_hospitalised_recovering" : p_time_hospitalised_recovering,
+            "time_death" : p_time_death, 
+            "time_recovered" : p_time_recovered,  
+            "time_susceptible" : p_time_susceptible,
+            "is_case" : p_is_case, 
+            "strain_idx" : p_strain_idx,
+            "transmission_multiplier" : p_transmission_multiplier,
+            "expected_hospitalisation" : p_expected_hospitalisation
+        } )
+               
+        return df_res
 
-    def get_network_info(self, max_ids= 1000):
+    def get_network_info(self):
            
-        if max_ids > 1e6 :
-            raise ModelException( "Maximum number of allowed network is 1e6" )
-        ids_c = covid19.intArray( max_ids )
-        n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
-        
-        if n_ids == -1 :
-            return self.get_network_info( max_ids = max_ids * 10 )
-        
+   
+        ids_c = covid19.intArray( covid19.MAX_N_NETWORKS )
+        n_ids = covid19.get_network_ids( self.c_model, ids_c )
+              
         ids        = [None] * n_ids
         names      = [None] * n_ids
         n_edges    = [None] * n_ids
@@ -1089,9 +1250,17 @@ class Model:
         """
         Call C function destroy_model and destroy_params
         """
-        LOGGER.info("Destroying model")
-        covid19.destroy_model(self.c_model)
+        LOGGER.info("Destroying model")         
 
+        if self.c_model != None :
+            covid19.destroy_model(self.c_model)
+            self.c_params = None
+            self.c_model = None
+            
+            params_obj = self._params_obj
+            self._params_obj = None
+            del params_obj
+            
     def one_time_step(self):
         """
         Steps the simulation forward one time step
@@ -1111,7 +1280,7 @@ class Model:
         
         return pd.DataFrame(self._results)
         
-    def run(self, verbose = True):
+    def run(self, verbose = True, n_steps = None ):
         """
         Runs simulation to the end (specified by the parameter end_time)
         
@@ -1121,7 +1290,8 @@ class Model:
         Returns: 
             None
         """
-        n_steps  = self.c_params.end_time - self.c_model.time
+        if n_steps == None :
+            n_steps  = self.c_params.end_time - self.c_model.time
         step     = 0
         
         if verbose :

@@ -39,6 +39,7 @@ struct network{
 	double daily_fraction;  	// fraction of the daily network sampled
 	int network_id;				// unique network ID
 	char name[INPUT_CHAR_LEN]; 	// unique name of the network
+	float transmission_multiplier; // bespoke transmission multiplier for network
 
 	int construction;			// method used to construct the network
 	long opt_n_indiv;			// (OPTIONAL) number of distinct individuals on an network

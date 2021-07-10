@@ -35,6 +35,14 @@ double network_daily_fraction( network *pnetwork ) {
 	return pnetwork->daily_fraction;
 }
 
+float network_transmission_multiplier( network *pnetwork ) {
+	return pnetwork->transmission_multiplier;
+} 
+
+void set_network_transmission_multiplier( network *pnetwork, float val ) {
+	pnetwork->transmission_multiplier = val;
+}
+
 int get_network( network *pnetwork, long *id1_array, long *id2_array) {
     
     long idx;

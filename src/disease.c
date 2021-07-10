@@ -176,7 +176,7 @@ void transmit_virus_by_type(
 {
 	long idx, jdx, n_infected, strain_idx;
 	int day, n_interaction, t_infect;
-	double hazard_rate, infector_mult;
+	double hazard_rate, infector_mult, network_mult;
 	event_list *list = &(model->event_lists[type]);
 	event *event, *next_event;
 	interaction *interaction;
@@ -224,7 +224,8 @@ void transmit_virus_by_type(
 							continue;
 						}
 
-						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult;
+						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier;
+						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult * network_mult;
 						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
@@ -325,6 +326,9 @@ void new_infection(
 		transition_one_disese_event( model, infected, SUSCEPTIBLE, PRESYMPTOMATIC, NO_EDGE );
 		transition_one_disese_event( model, infected, PRESYMPTOMATIC, SYMPTOMATIC, PRESYMPTOMATIC_SYMPTOMATIC );
 	}
+
+	if( !immune_to_symptoms( infected, strain->idx ) && !immune_to_severe( infected, strain->idx ) )
+		infected->infection_events->expected_hospitalisation = strain->hospitalised_fraction[ infected->age_group ] * ( 1 - asymp_frac - mild_frac );
 }
 
 /*****************************************************************************************
@@ -637,6 +641,8 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 		expected_infections += generation_dist[ time - day - 1 ] * n_newly_infected( model, day );
 		day--;
 	}
+
+	free( generation_dist );
 
 	if( ( actual_infections <= 1 ) || ( expected_infections <= 1 ) )
 		return ERROR;

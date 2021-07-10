@@ -1,5 +1,7 @@
 #include <R.h>
 #include <Rinternals.h>
+#include <string.h>
+
 #include "model.h"
 #include "input.h"
 #include "params.h"
@@ -93,15 +95,15 @@ SEXP R_get_individuals ( SEXP R_c_model, SEXP n_total )
   return R_list;
 }
 
-SEXP R_get_network_ids ( SEXP R_c_model, SEXP R_max_ids )
+SEXP R_get_network_ids ( SEXP R_c_model )
 {
   // get the point to the model from the R pointer object
   model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
-  int max_ids = asInteger( R_max_ids );
+  int max_ids = c_model->n_networks;
 
   // allocate memory to for the function call
   int *ids = calloc( max_ids, sizeof(int) );
-  int n_ids = get_network_ids(c_model,ids,max_ids);
+  int n_ids = get_network_ids(c_model,ids);
 
   if( n_ids == -1 )
     return( ScalarInteger(-1));
@@ -136,7 +138,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   int n_trans = get_n_transmissions(c_model);
 
   // allocate memory to for the function call
-  const int n_names = 34;
+  const int n_names = 35;
   const char *names[n_names] = { "ID_recipient", "age_group_recipient",
     "house_no_recipient","occupation_network_recipient","worker_type_recipient",
     "hospital_state_recipient","infector_network","infector_network_id",
@@ -148,7 +150,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
     "time_symptomatic_severe","time_asymptomatic","time_hospitalised",
     "time_critical","time_hospitalised_recovering","time_death",
     "time_recovered","time_susceptible","is_case", "strain_idx",
-    "transmission_multiplier" };
+    "transmission_multiplier", "expected_hospitalisation" };
   long *ID_recipient = calloc( n_trans, sizeof(long) );
   int *age_group_recipient = calloc( n_trans, sizeof(int) );
   long *house_no_recipient = calloc( n_trans, sizeof(long) );
@@ -183,6 +185,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   int *is_case = calloc( n_trans, sizeof(int) );
   int *strain_idx = calloc( n_trans, sizeof(int) );
   float *transmission_multiplier = calloc( n_trans, sizeof(float) );
+  float *expected_hospitalisation = calloc( n_trans, sizeof(float) );
 
   get_transmissions( c_model, ID_recipient, age_group_recipient,
       house_no_recipient, occupation_network_recipient, worker_type_recipient,
@@ -194,7 +197,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
       time_symptomatic_mild, time_symptomatic_severe, time_asymptomatic,
       time_hospitalised, time_critical, time_hospitalised_recovering,
       time_death, time_recovered, time_susceptible, is_case, strain_idx,
-      transmission_multiplier );
+      transmission_multiplier, expected_hospitalisation );
 
   // convert to R object
   SEXP R_list = PROTECT(allocVector(VECSXP, n_names));
@@ -233,6 +236,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   SEXP R_is_case = PROTECT(allocVector(INTSXP, n_trans));
   SEXP R_strain_idx = PROTECT(allocVector(INTSXP, n_trans));
   SEXP R_transmission_multiplier = PROTECT(allocVector(REALSXP, n_trans));
+  SEXP R_expected_hospitalisation = PROTECT(allocVector(REALSXP, n_trans));
 
   for( int i = 0; i < n_trans; i++ ) {
     INTEGER(R_ID_recipient)[i] = ID_recipient[i];
@@ -269,6 +273,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
     INTEGER(R_is_case)[i] = is_case[i];
     INTEGER(R_strain_idx)[i] = strain_idx[i];
     REAL(R_transmission_multiplier)[i] = transmission_multiplier[i];
+    REAL(R_expected_hospitalisation)[i] = expected_hospitalisation[i];
   }
 
   SET_VECTOR_ELT(R_list, 0, R_ID_recipient);
@@ -305,6 +310,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   SET_VECTOR_ELT(R_list, 31, R_is_case);
   SET_VECTOR_ELT(R_list, 32, R_strain_idx);
   SET_VECTOR_ELT(R_list, 33, R_transmission_multiplier);
+  SET_VECTOR_ELT(R_list, 34, R_expected_hospitalisation);
 
   for (int i = 0; i < n_names; i++)
     SET_STRING_ELT(R_Names, i, mkChar(names[i]));
@@ -345,6 +351,7 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   free( is_case );
   free( strain_idx );
   free( transmission_multiplier );
+  free( expected_hospitalisation );
   UNPROTECT(n_names+2);
 
   return R_list;
@@ -484,3 +491,50 @@ SEXP R_intervention_vaccinate_age_group ( SEXP R_c_model,
   return R_res;
 }
 
+SEXP R_set_input_param_file( SEXP R_c_params,
+                         SEXP R_input_param_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_param_file = CHAR( asChar( R_input_param_file ) );
+
+  strncpy( c_params->input_param_file, input_param_file, sizeof( c_params->input_param_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_input_household_file( SEXP R_c_params,
+                             SEXP R_input_household_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_household_file = CHAR( asChar( R_input_household_file ) );
+
+  strncpy( c_params->input_household_file, input_household_file, sizeof( c_params->input_household_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_output_file_dir( SEXP R_c_params,
+                            SEXP R_output_file_dir )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* output_file_dir = CHAR( asChar( R_output_file_dir ) );
+
+  strncpy( c_params->output_file_dir, output_file_dir, sizeof( c_params->output_file_dir ) - 1 );
+
+  return ScalarInteger( 1 );
+}
+
+SEXP R_set_hospital_input_param_file( SEXP R_c_params,
+                             SEXP R_input_param_file )
+{
+  parameters *c_params = (parameters *) R_ExternalPtrAddr(R_c_params);
+
+  const char* input_param_file = CHAR( asChar( R_input_param_file ) );
+
+  strncpy( c_params->hospital_input_param_file, input_param_file, sizeof( c_params->hospital_input_param_file ) - 1 );
+
+  return ScalarInteger( 1 );
+}
