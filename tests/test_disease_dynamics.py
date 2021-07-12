@@ -18,10 +18,10 @@ from math import sqrt
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES, AgeGroupEnum
 from . import constant
 from . import utilities as utils
-
+import covid19
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -480,7 +480,46 @@ class TestClass(object):
                 n_total = 10000,
                 end_time = 200
             )
-        )]
+        )],
+        "test_multi_strain_disease_dynamics" : [
+            dict(
+                test_params = dict(
+                    n_total  = 3e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 7,
+                    max_n_strains = 2,
+                    fraction_asymptomatic_0_9   = 0.00,
+                    fraction_asymptomatic_10_19 = 0.00,
+                    fraction_asymptomatic_20_29 = 0.00,
+                    fraction_asymptomatic_30_39 = 0.00,
+                    fraction_asymptomatic_40_49 = 0.00,
+                    fraction_asymptomatic_50_59 = 0.00,
+                    fraction_asymptomatic_60_69 = 0.00,
+                    fraction_asymptomatic_70_79 = 0.00,
+                    fraction_asymptomatic_80    = 0.00,
+                    mild_fraction_0_9           = 0.00,
+                    mild_fraction_10_19         = 0.00,
+                    mild_fraction_20_29         = 0.00,
+                    mild_fraction_30_39         = 0.00,
+                    mild_fraction_40_49         = 0.00,
+                    mild_fraction_50_59         = 0.00,
+                    mild_fraction_60_69         = 0.00,
+                    mild_fraction_70_79         = 0.00,
+                    mild_fraction_80            = 0.00,
+                    hospitalised_fraction_0_9  =0.2,
+                    hospitalised_fraction_10_19=0.2,
+                    hospitalised_fraction_20_29=0.2,
+                    hospitalised_fraction_30_39=0.2,
+                    hospitalised_fraction_40_49=0.2,
+                    hospitalised_fraction_50_59=0.2,
+                    hospitalised_fraction_60_69=0.2,
+                    hospitalised_fraction_70_79=0.2,
+                    hospitalised_fraction_80   =0.2
+                ),
+                hospitalised_fraction_strain_1 = [ 0, 0, 0, 0, 0, 0.8, 0.8, 0.8, 0.8 ]
+            ),
+        ]
     }
     """
     Test class for checking
@@ -1143,3 +1182,65 @@ class TestClass(object):
                 array_alive_indiv = df_alive_indiv.to_numpy()
                 
                 np.testing.assert_array_equal(array_alive, array_alive_indiv)
+                
+    def test_multi_strain_disease_dynamics(self, test_params, hospitalised_fraction_strain_1 ) :
+        """
+        Test that checks the hospitalised fraction for the correct strain is realised
+        """
+        sd_tol = 3
+  
+        hospitalised_fraction_strain_0 = [ 
+            test_params[ "hospitalised_fraction_0_9" ],
+            test_params[ "hospitalised_fraction_10_19" ],
+            test_params[ "hospitalised_fraction_20_29" ],
+            test_params[ "hospitalised_fraction_30_39" ],
+            test_params[ "hospitalised_fraction_40_49" ],
+            test_params[ "hospitalised_fraction_50_59" ],
+            test_params[ "hospitalised_fraction_60_69" ],
+            test_params[ "hospitalised_fraction_70_79" ],
+            test_params[ "hospitalised_fraction_80" ],
+        ]
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        new_strain = model.add_new_strain( 1, hospitalised_fraction = hospitalised_fraction_strain_1 )
+
+        n_seed_infection = 10
+        n_total  = params.get_param( "n_total" )
+        seeds    = np.random.choice( n_total, n_seed_infection * 2, replace=False)
+        for idx in range( n_seed_infection ) :
+            model.seed_infect_by_idx( seeds[ idx ] )
+            model.seed_infect_by_idx( seeds[ idx + n_seed_infection], strain = new_strain )
+            
+        model.run( verbose = False )
+        model.write_transmissions()
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_trans[ "hospitalised" ] = ( df_trans[ "time_hospitalised" ] > 0 )
+              
+        for age in range( len( AgeGroupEnum) ) :
+            n_inf_0  = sum( ( df_trans[ "strain_idx"] == 0 ) & (df_trans[ "age_group_recipient" ] == age ) )
+            n_hosp_0 = sum( ( df_trans[ "strain_idx"] == 0 ) & (df_trans[ "age_group_recipient" ] == age ) & df_trans[ "hospitalised" ] )
+        
+            mu_hosp_0 = n_hosp_0 / n_inf_0
+            sd_hosp_0 = sqrt( hospitalised_fraction_strain_0[ age ] * ( 1 -  hospitalised_fraction_strain_0[ age ] ) / n_hosp_0 )
+                    
+            np.testing.assert_(n_inf_0 > 100, "insufficient infections to test properly")
+            np.testing.assert_allclose(mu_hosp_0, hospitalised_fraction_strain_0[ age ], atol = sd_tol * sd_hosp_0, 
+                                       err_msg = "incorrect fraction of hospitalisation for base strain in age group")        
+
+            n_inf_1  = sum( ( df_trans[ "strain_idx"] == 1 ) & (df_trans[ "age_group_recipient" ] == age ) )
+            n_hosp_1 = sum( ( df_trans[ "strain_idx"] == 1 ) & (df_trans[ "age_group_recipient" ] == age ) & df_trans[ "hospitalised" ] )
+        
+            mu_hosp_1 = n_hosp_1 / n_inf_1
+            sd_hosp_1 = sqrt( hospitalised_fraction_strain_1[ age ] * ( 1 -  hospitalised_fraction_strain_1[ age ] ) / n_hosp_0 )
+                    
+            np.testing.assert_(n_inf_0 > 100, "insufficient infections to test properly")
+            np.testing.assert_allclose(mu_hosp_1, hospitalised_fraction_strain_1[ age ], atol = sd_tol * sd_hosp_1, 
+                                       err_msg = "incorrect fraction of hospitalisation for base strain in age group")
+
+        
+            
+        

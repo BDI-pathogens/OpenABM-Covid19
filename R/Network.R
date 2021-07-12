@@ -18,7 +18,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
     #' the C network R pointer object
     c_network_ptr = function() {
-      return( private$c_network()@ref )
+      return( self$c_network@ref )
     },
 
     #' check the C network still exists
@@ -111,8 +111,24 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
       return(network_daily_fraction( self$c_network ))
     },
 
+    #' @description Wrapper for C API \code{network_transmission_multiplier.
+    #' @return The transmission multiplier for this network
+    transmission_multiplier = function() {
+      return(network_transmission_multiplier( self$c_network ))
+    },
+
+    #' @description Wrapper for C API \code{set_network_transmission_multiplier.
+    #' @return Sets the transmission multiplier for this network
+    set_transmission_multiplier = function( val ) {
+
+      if( !is.numeric( val ) || val < 0 )
+        stop( "tranmsission multiplier must be non-negative")
+
+      return(set_network_transmission_multiplier( self$c_network, val ))
+    },
+
     #' @description Wrapper for C API \code{update_daily_fraction}.
-    #' @param daily_fraction New fraction value; a value vetween 0 and 1.
+    #' @param daily_fraction New fraction value; a value between 0 and 1.
     #' @return \code{TRUE} on success, \code{FALSE} on failure.
     update_daily_fraction = function(daily_fraction) {
       res <- SWIG_update_daily_fraction( self$c_network, daily_fraction )

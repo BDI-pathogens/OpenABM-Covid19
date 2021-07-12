@@ -198,6 +198,9 @@ typedef struct{
 	//average amount of interactions healthcare workers have with each other per day
 	double hcw_mean_work_interactions;
 
+	// maximum number of strains allowed
+	int max_n_strains;
+
 } parameters;
 
 /************************************************************************/
@@ -293,7 +296,7 @@ int set_model_param_fatality_fraction( model *pmodel, double value, int age_grou
 
 int set_demographic_house_table( parameters*, long, long, long*, long*, long* );
 int set_occupation_network_table( parameters* params,  long n_total, long n_networks );
-int set_indiv_occupation_network_property( parameters* params, long network, int age_type, double mean_interaction, double lockdown_multiplier, long network_id, const char *network_name );
+int set_indiv_occupation_network_property( parameters* params, long network, int age_type, double mean_interaction, double lockdown_multiplier, const char *network_name );
 int set_indiv_occupation_network( parameters* params, long n_total, long *people, long *network );
 void set_up_default_occupation_network_table( parameters *params );
 

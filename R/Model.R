@@ -21,8 +21,10 @@ SWIG_utils_n_total_age <- utils_n_total_age
 SWIG_utils_n_total_by_day <- utils_n_total_by_day
 SWIG_calculate_R_instanteous <- calculate_R_instanteous
 SWIG_seed_infect_by_idx <- seed_infect_by_idx
+SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
-
+SWIG_set_cross_immunity_probability <- set_cross_immunity_probability
+SWIG_free_gsl_rng <- free_gsl_rng
 
 #' R6Class Model
 #'
@@ -207,12 +209,24 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$c_params   <- params_object$return_param_object()
       private$.c_model   <- create_model(private$c_params)
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
+
+      # keep a global counter of models made
+      nmodels = getOption("OpenABMCovid19.n_models")
+      if( is.null(nmodels))
+        nmodels = 0;
+      options("OpenABMCovid19.n_models"= nmodels+1)
     },
 
     #' @description Remove the C model to prevent leakage
     finalize = function(){
       if( private$c_model_valid() ) {
         SWIG_destroy_model( self$c_model )
+
+        nmodels = getOption("OpenABMCovid19.n_models")
+        options("OpenABMCovid19.n_models"= nmodels-1)
+
+        if( nmodels == 1 )
+          SWIG_free_gsl_rng()
       }
     },
 
@@ -224,8 +238,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       enum <- get_base_param_from_enum(param)
       if (!is.null(enum)) {
         # multi-value parameter (C array)
-        getter <- get(paste0("get_model_param_", enum$base_name))
-        result <- getter( self$c_model, enum$index )
+        getter_str = paste0("get_model_param_", enum$base_name)
+        if (exists(getter_str)) {
+          getter <- get(paste0("get_model_param_", enum$base_name))
+          result <- getter( self$c_model, enum$index )
+        } else {
+          result = private$params_object$get_param(param)
+        }
       } else {
         # single-value parameter
         getter_str <- paste0("get_model_param_", param)
@@ -461,39 +480,95 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @description Infects a new individual from an external source.
     #' Wrapper for C API \code{seed_infect_by_idx}.
     #' @param ID The ID of the individual.
-    #' @param strain_multiplier The strain multiplier value, must be a
-    #'   positivate number.
+    #' @param strain_idx The idx of the strain the person is infected with
     #' @param network_id The network ID.
     #' @return \code{TRUE} on success, \code{FALSE} otherwise.
-    seed_infect_by_idx = function(ID, strain_multiplier = 1, network_id = -1 )
+    seed_infect_by_idx = function(ID, strain_idx = 0, strain = NULL, network_id = -1 )
     {
       n_total <- private$c_params$n_total
-
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
-      if (strain_multiplier < 0) {
-        stop("strain_multiplier must be positive")
+
+      if( !is.null( strain ) )
+      {
+        if (!is.R6(strain) || !('Strain' %in% class(strain)))
+          stop("argument strain must be an object of type Strain")
+
+        strain_idx = strain$idx()
       }
-      res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_multiplier,
-        network_id)
+
+      n_strains = self$c_model$n_initialised_strains;
+      if( strain_idx < 0  || strain_idx >= n_strains )
+        stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
+
+      res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
       return(as.logical(res))
+    },
+
+    #' @description Adds a new strain (variant)
+    #' Wrapper for C API \code{add_new_strain}.
+    #' @param transmission_multiplier The relative transmission rate of the strain
+    #' @param hospitalised_fraction the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)]
+    #' @return \code{Strain} A Strain object representing this strain
+    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
+    {
+
+      max_n_strains = self$get_param( "max_n_strains" )
+      n_strains = self$c_model$n_initialised_strains;
+
+      if( n_strains == max_n_strains )
+        stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
+
+      if( is.na( hospitalised_fraction[ 1 ] ) )
+      {
+        hospitalised_fraction = c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          hospitalised_fraction[ idx ] = self$get_param(
+            sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) ) *
+            hospitalised_fraction_multiplier
+      }
+
+      c_model_ptr <- private$c_model_ptr()
+      strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,
+                        hospitalised_fraction, PACKAGE='OpenABMCovid19');
+
+      return( Strain$new( self, strain_idx ) )
+    },
+
+    #' @description Set the cross_immunity matrix
+    #' Wrapper for C API \code{set_cross_immunity_probability}.
+    #' @param cross_immunity the cross immunity matrix
+    #' @return
+
+    set_cross_immunity_matrix = function( cross_immunity )
+    {
+        max_n_strains = self$get_param("max_n_strains")
+
+        if( !is.matrix( cross_immunity ) )
+          stop( "cross_immunity is a matrix ")
+
+        if( max( nrow( cross_immunity ), ncol( cross_immunity ) ) > max_n_strains )
+          stop( "cross_immunnity matrix is of maximum size max_n_strains")
+
+        for( i in 1:nrow( cross_immunity) )
+          for( j in 1:ncol( cross_immunity) )
+          {
+            if( cross_immunity[i,j] < 0 || cross_immunity[i,j] > 1 )
+              stop( "cross_immunity must be between 0 and 1")
+
+            SWIG_set_cross_immunity_probability( self$c_model, i-1, j-1, cross_immunity[i,j] )
+          }
     },
 
     #' @description Get the list of network IDs
     #' Wrapper for C API \code{get_network_ids}.
-    #' @param max_ids The maximum number of IDs to return.
     #' @return The list of the network IDs.
-    get_network_ids = function(max_ids = 1000)
+    get_network_ids = function()
     {
-      if (max_ids < 1) return(NA)
-
       c_model_ptr <- private$c_model_ptr()
-      ids = .Call('R_get_network_ids', c_model_ptr, max_ids,
+      ids = .Call('R_get_network_ids', c_model_ptr,
                   PACKAGE='OpenABMCovid19');
-
-      if( length( ids ) == 1 && ids[1] == -1 )
-        return( self$get_network_ids( max_ids = max_ids * 10 ) )
 
       return( ids )
     },
@@ -503,7 +578,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' properties and each row is a network.
     get_network_info = function()
     {
-      ids <- self$get_network_ids( max_ids = 1000 )
+      ids <- self$get_network_ids()
 
       # Allocate a matrix the correct size
       colnames <- c( 'id', 'name', 'n_edges', 'n_vertices', 'type',
@@ -528,43 +603,90 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(as.data.frame(tmp))
     },
 
-    #' @description Vaccinate an individual.
-    #' Wrapper for C API \code{intervention_vaccinate_by_idx}.
-    #' @param ID The ID of the individual (must be \code{0 <= ID <= n_total}).
-    #' @param vaccine_type The type of vaccine, see \code{\link{VACCINE_TYPES}}.
-    #' @param efficacy Probability that the person is successfully vaccinated
+    #' @description Add a new vaccine.
+    #' Wrapper for C API \code{add_vaccine}.
+    #' @param full_efficacy Probability that the person is successfully vaccinated
     #'   (must be \code{0 <= efficacy <= 1}).
+    #' @param symptoms_efficacy Probability that the person is successfully vaccinated
+    #'   against getting symptoms (must be \code{0 <= efficacy <= 1}).
+    #' @param sever_efficacy Probability that the person is successfully vaccinated
+    #'   against getting severer symptoms (must be \code{0 <= efficacy <= 1}).
     #' @param time_to_protect Delay before it takes effect (in days).
     #' @param vaccine_protection_period The duration of the vaccine before it
     #'   wanes.
+    #' @return Vaccine object
+    add_vaccine = function(
+      full_efficacy     = 1.0,
+      symptoms_efficacy = 1.0,
+      severe_efficacy   = 1.0,
+      time_to_protect   = 14,
+      vaccine_protection_period = 1000
+    )
+    {
+      if( time_to_protect < 1 )
+        stop( "vaccine must take at least one day to take effect" )
+
+      if( vaccine_protection_period <= time_to_protect )
+        stop( "vaccine must protect for longer than it takes to by effective" )
+
+      n_strains = self$get_param( "max_n_strains" )
+
+      if( length( full_efficacy ) == 1 )
+        full_efficacy = rep( full_efficacy,  n_strains )
+
+      if( length( full_efficacy ) != n_strains )
+        stop( "full_efficacy must be a float or a list of length max_n_strains" )
+
+      if( length( symptoms_efficacy ) == 1 )
+        symptoms_efficacy = rep( symptoms_efficacy,  n_strains )
+
+      if( length( symptoms_efficacy ) != n_strains )
+        stop( "symptoms_efficacy must be a float or a list of length max_n_strains" )
+
+      if( length( severe_efficacy ) == 1 )
+        severe_efficacy = rep( severe_efficacy,  n_strains )
+
+      if( length( severe_efficacy ) != n_strains )
+        stop( "severe_efficacy must be a float or a list of length max_n_strains" )
+
+      for( idx in 1:n_strains )
+      {
+        if( full_efficacy[ idx ] < 0  | full_efficacy[ idx ] > 1 )
+          stop( "full_efficacy must be between 0 and 1" )
+
+        if( symptoms_efficacy[ idx ] < 0  | symptoms_efficacy[ idx ] > 1 )
+          stop( "symptoms_efficacy must be between 0 and 1" )
+
+        if( severe_efficacy[ idx ] < 0  | severe_efficacy[ idx ] > 1 )
+          stop( "severe_efficacy must be between 0 and 1" )
+      }
+
+      c_model_ptr <- private$c_model_ptr()
+      idx<-.Call('R_add_vaccine', c_model_ptr, full_efficacy, symptoms_efficacy,
+                 severe_efficacy, time_to_protect, vaccine_protection_period,
+                 PACKAGE='OpenABMCovid19');
+
+      return( Vaccine$new( self, idx ) )
+    },
+
+    #' @description Vaccinate an individual.
+    #' Wrapper for C API \code{intervention_vaccinate_by_idx}.
+    #' @param ID The ID of the individual (must be \code{0 <= ID <= n_total}).
+    #' @param vaccine The of vaccine object to be given
     #' @return Logical value, \code{TRUE} if vaccinated \code{FALSE} otherwise.
-    vaccinate_individual = function(
-      ID,
-      vaccine_type = 0,
-      efficacy = 1.0,
-      time_to_protect = 14,
-      vaccine_protection_period = 1000 )
+    vaccinate_individual = function( ID, vaccine )
     {
       n_total <- private$c_params$n_total
 
       if (ID < 0 || ID >= n_total) {
         stop("ID out of range (0<=ID<n_total)")
       }
-      if (efficacy < 0 || efficacy > 1) {
-        stop("efficacy must be between 0 and 1")
-      }
-      if (time_to_protect < 1) {
-        stop("vaccine must take at least one day to take effect")
-      }
-      if (vaccine_protection_period <= time_to_protect) {
-        stop("vaccine must protect for longer than it takes to by effective")
-      }
-      if (!is.numeric(vaccine_type) || ! vaccine_type %in% VACCINE_TYPES) {
-        stop("vaccine type must be listed in VaccineTypesEnum")
-      }
 
-      res <- intervention_vaccinate_by_idx(self$c_model, ID, vaccine_type,
-        efficacy, time_to_protect, vaccine_protection_period)
+      if (!is.R6(vaccine) || !('Vaccine' %in% class(vaccine)))
+        stop("argument vaccine must be an object of type Vaccine")
+
+      res <- intervention_vaccinate_by_idx(self$c_model, ID, vaccine$c_vaccine )
+
       return(as.logical(res))
     },
 
@@ -577,14 +699,23 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
         stop("argument VaccineSchedule must be an object of type VaccineSchedule")
       }
-      return(as.logical(intervention_vaccinate_age_group(
-        self$c_model,
-        schedule$fraction_to_vaccinate,
-        schedule$vaccine_type,
-        schedule$efficacy,
-        schedule$time_to_protect,
-        schedule$vaccine_protection_period,
-        schedule$total_vaccinated)))
+
+      vaccine = schedule$vaccine
+      if (!is.R6(vaccine) || !('Vaccine' %in% class(vaccine))) {
+        stop("argument schedule$vaccine must be an object of type Vaccine")
+      }
+
+      c_model_ptr    = private$c_model_ptr()
+      c_vaccine_ptr  = vaccine$c_vaccine@ref
+      total_vaccinated = schedule$total_vaccinated
+      fraction_to_vaccinate = schedule$fraction_to_vaccinate
+
+      new_vaccinated <-.Call( "R_intervention_vaccinate_age_group",
+            c_model_ptr, fraction_to_vaccinate, c_vaccine_ptr )
+
+      schedule$total_vaccinated = total_vaccinated + new_vaccinated
+
+      return( sum( new_vaccinated ) )
     },
 
     #' @description Gets information about all individuals. Wrapper for
@@ -672,9 +803,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' end_time)
     #' @param verbose - whether to display progress information (DEFAULT=TRUE)
     #' @return Null
-    run = function( verbose = TRUE)
+    run = function( n_steps = NULL, verbose = TRUE)
     {
-      n_steps  = self$get_param( "end_time" ) - self$c_model$time
+      if( is.null( n_steps ) )
+        n_steps  = self$get_param( "end_time" ) - self$c_model$time
       step     = 0
 
       start_time = Sys.time()
@@ -925,9 +1057,9 @@ Model.results = function( model ) {
 #' @param model The Model object (R6 Class)
 #' @param verbose Show progress of the calculation (default = TRUE)
 #' @return Null
-Model.run = function( model, verbose=TRUE ) {
+Model.run = function( model, n_steps = NULL, verbose=TRUE ) {
   if (!is.null(model)) {
-    return( model$run( verbose ) )
+    return( model$run( n_steps, verbose ) )
   }
 }
 

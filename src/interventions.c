@@ -477,7 +477,7 @@ int intervention_quarantine_until(
 
 	if( indiv->quarantine_event == NULL )
 	{
-		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time );
+		indiv->quarantine_event = add_individual_to_event_list( model, QUARANTINED, indiv, model->time, NULL );
 		set_quarantine_status( indiv, model->params, model->time, TRUE, model );
 	}
 
@@ -489,7 +489,7 @@ int intervention_quarantine_until(
 		remove_event_from_event_list( model, indiv->quarantine_release_event );
 	}
 
-	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time );
+	indiv->quarantine_release_event = add_individual_to_event_list( model, QUARANTINE_RELEASE, indiv, time, NULL );
 
 	return TRUE;
 }
@@ -522,7 +522,7 @@ void intervention_test_order( model *model, individual *indiv, int time )
 	{
         if( model->params->test_order_wait_priority == NO_PRIORITY_TEST )
         {
-        	add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+        	add_individual_to_event_list( model, TEST_TAKE, indiv, time, NULL );
         	indiv->quarantine_test_result = TEST_ORDERED;
         }
         else
@@ -533,11 +533,11 @@ void intervention_test_order( model *model, individual *indiv, int time )
 			{
 				/* If individual had more than the n contacts, order a priority test */
 				int test_order_wait_priority = model->params->test_order_wait_priority;
-				add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + test_order_wait_priority );
+				add_individual_to_event_list( model, TEST_TAKE, indiv, model->time + test_order_wait_priority, NULL );
 				indiv->quarantine_test_result = TEST_ORDERED_PRIORITY;
 			} else
 			{
-				add_individual_to_event_list( model, TEST_TAKE, indiv, time );
+				add_individual_to_event_list( model, TEST_TAKE, indiv, time, NULL );
 				indiv->quarantine_test_result = TEST_ORDERED;
 			}
         }
@@ -545,25 +545,97 @@ void intervention_test_order( model *model, individual *indiv, int time )
 }
 
 /*****************************************************************************************
+*  Name:		add_vaccine
+*  Description: adds a new type of vaccine with specific properties
+*
+*  Arguments:   model             - pointer to the model
+*  				full_efficacy     - probability the person does not contract the vaccine
+*  				symptoms_efficacy - probability the person does not develop symptoms
+*  				severe_efficacy   - probability the person does not develop severe symptoms
+*  				time_to_protect   - delay before it takes effect
+*  				vaccine_protection_period - length of time the vaccine provides protection
+*
+*  Returns:		the index of the vaccine
+******************************************************************************************/
+short add_vaccine(
+	model *model,
+	float *full_efficacy,
+	float *symptoms_efficacy,
+	float *severe_efficacy,
+	short time_to_protect,
+	short vaccine_protection_period
+)
+{
+	vaccine *new_vaccine = calloc( 1, sizeof( vaccine ) );
+	short n_strains      = model->params->max_n_strains;
+	short is_full 		 = FALSE;
+	short is_symptoms    = FALSE;
+	short is_severe      = FALSE;
+
+	new_vaccine->idx = 0;
+	if( model->vaccines != NULL )
+		new_vaccine->idx = model->vaccines->idx + 1;
+
+	new_vaccine->full_efficacy     = calloc( n_strains, sizeof( float ) );
+	new_vaccine->symptoms_efficacy = calloc( n_strains, sizeof( float ) );
+	new_vaccine->severe_efficacy   = calloc( n_strains, sizeof( float ) );
+	new_vaccine->time_to_protect   = time_to_protect;
+	new_vaccine->vaccine_protection_period = vaccine_protection_period;
+
+	for( int idx = 0; idx < n_strains; idx++ )
+	{
+		new_vaccine->full_efficacy[ idx ]     = full_efficacy[ idx ];
+		new_vaccine->symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ];
+		new_vaccine->severe_efficacy[ idx ]   = severe_efficacy[ idx ];
+
+		if( full_efficacy[ idx ] > 0 ) is_full = TRUE;
+		if( symptoms_efficacy[ idx ] > 0 ) is_symptoms = TRUE;
+		if( severe_efficacy[ idx ] > 0 ) is_severe = TRUE;
+	}
+	new_vaccine->is_full     = is_full;
+	new_vaccine->is_symptoms = is_symptoms;
+	new_vaccine->is_severe   = is_severe;
+	new_vaccine->n_strains   = n_strains;
+
+	new_vaccine->next = model->vaccines;
+	model->vaccines   = new_vaccine;
+
+	return new_vaccine->idx;
+}
+
+/*****************************************************************************************
+*  Name:		get_vaccine_by_id
+*  Description: returns a pointer to a vaccine a given ID
+*  Returns:		pointer to vaccine
+******************************************************************************************/
+vaccine* get_vaccine_by_id( model *model, short vaccine_idx )
+{
+	vaccine *vaccine = model->vaccines;
+
+	while( vaccine != NULL )
+	{
+		if( vaccine->idx == vaccine_idx )
+			return vaccine;
+		vaccine = vaccine->next;
+	};
+
+	return NULL;
+}
+
+/*****************************************************************************************
 *  Name:		intervention_vaccinate
 *  Description: Vaccinate an individual
 *
-*  Arguments:   model           - pointer to the model
-*  				indiv           - pointer to the individual to be vaccinated
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
-*  				vaccine_protection_period - length of time the vaccine provides protection
+*  Arguments:   model    - pointer to the model
+*  				indiv    - pointer to the individual to be vaccinated
+*  				vaccine  - pointer to the vaccine
 *
 *  Returns:		void
 ******************************************************************************************/
 short intervention_vaccinate(
 	model *model,
 	individual *indiv,
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period
+	vaccine *vaccine
 )
 {
 	if( indiv->vaccine_status != NO_VACCINE )
@@ -572,18 +644,8 @@ short intervention_vaccinate(
 	if( ( indiv->status == DEATH ) | is_in_hospital( indiv ) )
 		return FALSE;
 
-	if( gsl_ran_bernoulli( rng, efficacy ) )
-	{
-		if( vaccine_type == VACCINE_TYPE_FULL )
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, VACCINE_PROTECTED_FULLY );
-
-		if( vaccine_type == VACCINE_TYPE_SYMPTOMS )
-			set_vaccine_status( indiv, VACCINE_NO_PROTECTION, VACCINE_PROTECTED_SYMPTOMS );
-
-		add_individual_to_event_list( model, VACCINE_PROTECT, indiv, model->time + time_to_protect );
-		add_individual_to_event_list( model, VACCINE_WANE, indiv, model->time + vaccine_protection_period );
-	} else
-		set_vaccine_status( indiv, VACCINE_NO_PROTECTION, NO_EVENT );
+	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_NO_PROTECTION, model->time, vaccine->time_to_protect );
+	add_individual_to_event_list( model, VACCINE_PROTECT, indiv, model->time + vaccine->time_to_protect, vaccine );
 
 	return TRUE;
 }
@@ -592,25 +654,19 @@ short intervention_vaccinate(
 *  Name:		intervention_vaccinate_by_idx
 *  Description: Vaccinate an individual
 *
-*  Arguments:   model           - pointer to the model
-*  				idx             - idx of person to vaccinate
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
-*  				vaccine_protection_period - length of time the vaccine provides protection
+*  Arguments:   model     - pointer to the model
+*  				idx       - idx of person to vaccinate
+*  				vaccine   - pointer to a vaccine
 *
 *  Returns:		1 if vaccinated 0 if not
 ******************************************************************************************/
 short intervention_vaccinate_by_idx(
 	model *model,
 	long idx,
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period
+	vaccine *vaccine
 )
 {
-	return intervention_vaccinate( model, &(model->population[idx]), vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+	return intervention_vaccinate( model, &(model->population[idx]), vaccine );
 }
 
 
@@ -618,21 +674,16 @@ short intervention_vaccinate_by_idx(
 *  Name:		intervention_vaccinate_age_groups
 *  Description: Vaccinate a fraction of each age group
 *
-*  Arguments:   model           - pointer to the model
-*  				fractions       - the fraction of the population in each age group to vaccinate
-*  				vaccine_type    - whether the vaccine is FULL or SYMTOMS_ONLY
-*  				efficacy        - probability the person is successfully vaccinate
-*  				time_to_protect - delay before it takes effect
+*  Arguments:   model       - pointer to the model
+*  				fractions   - the fraction of the population in each age group to vaccinate
+*  				vaccine     - pointer to the type of vaccine
 *
 *  Returns:		long - the total number of people vaccinated
 ******************************************************************************************/
 long intervention_vaccinate_age_group(
 	model *model,
 	double fractions[ N_AGE_GROUPS ],
-	short vaccine_type,
-	double efficacy,
-	short time_to_protect,
-	short vaccine_protection_period,
+	vaccine *vaccine,
 	long n_vaccinated[ N_AGE_GROUPS ]
 )
 {
@@ -660,7 +711,7 @@ long intervention_vaccinate_age_group(
 		if( indiv->vaccine_status != NO_VACCINE )
 			continue;
 
-		if( intervention_vaccinate( model, indiv, vaccine_type, efficacy, time_to_protect, vaccine_protection_period ) )
+		if( intervention_vaccinate( model, indiv, vaccine ) )
 		{
 			n_vaccinated[ age ]++;
 			total_vaccinated++;
@@ -679,42 +730,64 @@ long intervention_vaccinate_age_group(
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_protect( model *model, individual *indiv )
+void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 {
-	transition_vaccine_status( indiv );
+	vaccine *vaccine = info;
+	float r_unif = gsl_rng_uniform( rng );
+	short n_strains = model->params->max_n_strains;
+	short strain_idx;
 
-	if( indiv->vaccine_status == VACCINE_PROTECTED_FULLY )
+	if( vaccine->is_full )
 	{
 		model->n_vaccinated_fully++;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
 	}
-	if( indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
+	if( vaccine->is_symptoms )
 	{
 		model->n_vaccinated_symptoms++;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
 	}
+
+	short time_wane = model->time + vaccine->vaccine_protection_period - vaccine->time_to_protect;
+
+	for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
+	{
+		if( vaccine->full_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_FULLY, model->time, time_wane );
+
+		if( vaccine->symptoms_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
+
+		if( vaccine->severe_efficacy[ strain_idx ] > r_unif )
+			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SEVERE, model->time, time_wane );
+	}
+	add_individual_to_event_list( model, VACCINE_WANE, indiv, time_wane, vaccine );
 }
+
 
 /*****************************************************************************************
 *  Name:		intervention_vaccine_wane
-*  Description: The vaccine takes effect
+*  Description: The vaccine wanes (all types of protection)
 *
 *  Returns:		void
 ******************************************************************************************/
-void intervention_vaccine_wane( model *model, individual *indiv )
+void intervention_vaccine_wane( model *model, individual *indiv, void* info )
 {
-	if( indiv->vaccine_status == VACCINE_PROTECTED_FULLY )
+	vaccine *vaccine = info;
+
+	if( vaccine->is_full )
 	{
 		model->n_vaccinated_fully--;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 	}
-	if( indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
+	if( vaccine->is_symptoms )
 	{
-		model->n_vaccinated_symptoms--;
+		model->n_vaccinated_symptoms++;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
 	}
 
-	set_vaccine_status( indiv, VACCINE_WANED, NO_EVENT );
+	set_vaccine_status( indiv, model->params, ALL_STRAINS, VACCINE_WANED, model->time, MAX_TIME );
+
 }
 
 /*****************************************************************************************
@@ -749,7 +822,7 @@ void intervention_test_take( model *model, individual *indiv )
 		indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
 
 
-	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time );
+	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time, NULL );
 }
 
 /*****************************************************************************************
@@ -780,7 +853,7 @@ void intervention_test_result( model *model, individual *indiv )
 		if( indiv->infection_events->is_case == FALSE )
 		{
 			set_case( indiv, model->time );
-			add_individual_to_event_list( model, CASE, indiv, model->time );
+			add_individual_to_event_list( model, CASE, indiv, model->time, NULL );
 		}
 
 		if( !is_in_hospital( indiv ) || !(model->params->allow_clinical_diagnosis) )
@@ -1101,7 +1174,7 @@ void intervention_on_symptoms( model *model, individual *indiv )
 		remove_traced_on_this_trace( model, indiv );
 		if( indiv->index_token_release_event != NULL )
 			remove_event_from_event_list( model, indiv->index_token_release_event );
-		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms );
+		indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, model->time + params->quarantine_length_traced_symptoms, NULL );
 	}
 }
 
@@ -1131,7 +1204,7 @@ void intervention_on_hospitalised( model *model, individual *indiv )
 			 model->params->manual_trace_on_hospitalization &&
 			 !model->params->manual_trace_on_positive )
 	{
-		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + model->params->manual_trace_delay );
+		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + model->params->manual_trace_delay, NULL );
 	}
 }
 
@@ -1178,7 +1251,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	    ( params->quarantine_on_traced || params->test_on_traced )
 	)
 	{
-		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay );
+		add_individual_to_event_list( model, MANUAL_CONTACT_TRACING, indiv, model->time + params->manual_trace_delay, NULL );
 		release_time = max( release_time, model->time + params->manual_trace_delay);
 	}
 
@@ -1187,7 +1260,7 @@ void intervention_on_positive_result( model *model, individual *indiv )
 
 	if( indiv->index_token_release_event != NULL )
 		remove_event_from_event_list( model, indiv->index_token_release_event );
-	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, release_time );
+	indiv->index_token_release_event = add_individual_to_event_list( model, TRACE_TOKEN_RELEASE, indiv, release_time, NULL );
 
 	remove_traced_on_this_trace( model, indiv );
 }

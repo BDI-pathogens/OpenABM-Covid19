@@ -23,7 +23,7 @@ void initialize_individual(
 	long idx
 )
 {
-	int day, jdx;
+	int day;
 	if( indiv->idx != 0 )
 		print_exit( "Individuals can only be intitialized once!" );
 
@@ -40,17 +40,7 @@ void initialize_individual(
 		indiv->interactions[ day ]   = NULL;
 	}
 
-	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(short	) );
-	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-		indiv->infection_events->times[jdx] = UNKNOWN;
-
-	indiv->infection_events->infector_status  = UNKNOWN;
-	indiv->infection_events->infector_network = UNKNOWN;
-	indiv->infection_events->infector_hospital_state = UNKNOWN;
-	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->next =  NULL;
-	indiv->infection_events->is_case     = FALSE;
+	add_infection_event( indiv, NULL, UNKNOWN, NULL, 0 );
 
 	indiv->quarantine_event         = NULL;
 	indiv->quarantine_release_event = NULL;
@@ -84,6 +74,67 @@ void initialize_individual(
 	{
 		indiv->infectiousness_multiplier = 1;
 	}
+
+	indiv->hazard             = calloc( params->max_n_strains, sizeof( float ) );
+	indiv->immune_full        = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_symptoms = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_severe   = calloc( params->max_n_strains, sizeof( short ) );
+	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
+	{
+		indiv->immune_full[strain_idx]         = NO_IMMUNITY;
+		indiv->immune_to_symptoms[strain_idx ] = NO_IMMUNITY;
+		indiv->immune_to_severe[strain_idx ]   = NO_IMMUNITY;
+	}
+
+	indiv->vaccine_status = NO_VACCINE;
+}
+
+/*****************************************************************************************
+*  Name:		add_infection_event
+*  Description: populates an infection event at the time of infection and adds
+*  				a new event for multiple infections
+*  Returns:		void
+******************************************************************************************/
+void add_infection_event(
+	individual *indiv,
+	individual *infector,
+	short network_id,
+	strain *strain,
+	short time
+)
+{
+	infection_event *event = indiv->infection_events;
+
+	if( event == NULL || event->infector != NULL )
+	{
+		indiv->infection_events        = calloc( 1, sizeof( infection_event ) );
+		indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof( short ) );
+		for( int jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
+			indiv->infection_events->times[jdx] = UNKNOWN;
+		indiv->infection_events->next = event;
+		event = indiv->infection_events;
+	};
+
+	event->infector = infector;
+	event->network_id = network_id;
+	event->strain = strain;
+	if( event->infector != NULL )
+	{
+		event->time_infected_infector  = time_infected_infection_event(infector->infection_events);
+		event->infector_status         = infector->status;
+		event->infector_hospital_state = infector->hospital_state;
+	} else
+	{
+		event->time_infected_infector  = UNKNOWN;
+		event->infector_status         = UNKNOWN;
+		event->infector_hospital_state = UNKNOWN;
+	}
+
+	if( event->infector == indiv )
+		event->time_infected_infector = time;
+
+	event->is_case     = FALSE;
+	event->expected_hospitalisation = 0;
 }
 
 /*****************************************************************************************
@@ -95,10 +146,16 @@ void initialize_individual(
 ******************************************************************************************/
 void initialize_hazard(
 	individual *indiv,
-	parameters *params
+	parameters *params,
+	int current_time
 )
 {
-	indiv->hazard = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+	for( int idx = 0; idx < params->max_n_strains; idx++ )
+		if( indiv->immune_full[ idx ] == current_time || current_time == 0 )
+		{
+			indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+			indiv->immune_full[ idx ] = NO_IMMUNITY;
+		}
 }
 
 /*****************************************************************************************
@@ -239,14 +296,47 @@ void set_dead( individual *indiv, parameters* params, int time )
 }
 
 /*****************************************************************************************
-*  Name:		transition_vaccine_status
-*  Description: moves a person to there next vaccine status
+*  Name:		set_immunue
+*  Description: set the immunity depending upon type
+*
+*  				if currently hold immunity to a strain, the effect of setting can only
+*  				lengthen the immunity
+*
 *  Returns:		void
 ******************************************************************************************/
-void transition_vaccine_status( individual* indiv )
+void set_immune( individual *indiv, short strain_idx, short time_until, short immune_type )
 {
-	if( indiv->vaccine_status_next != NO_EVENT )
-		set_vaccine_status( indiv, indiv->vaccine_status_next, NO_EVENT );
+	if( immune_type == IMMUNE_FULL )
+	{
+		indiv->immune_full[ strain_idx ] = max( indiv->immune_full[ strain_idx ], time_until );
+		indiv->hazard[ strain_idx ]      = -1;
+	} else if( immune_type == IMMUNE_SYMPTOMS  )
+	{
+		indiv->immune_to_symptoms[ strain_idx ] = max( indiv->immune_to_symptoms[ strain_idx ], time_until );
+	} else if( immune_type == IMMUNE_SEVERE )
+	{
+		indiv->immune_to_severe[ strain_idx ] = max( indiv->immune_to_severe[ strain_idx ], time_until );
+	} else
+		print_exit( "do not recognize immune type" );
+}
+
+/*****************************************************************************************
+*  Name:		wane_immunity
+*  Description: checks all types of immunity to all strains and wanes appropriately
+*  Returns:		void
+******************************************************************************************/
+void wane_immunity( individual *indiv, parameters *params, short time )
+{
+	for( short idx = 0; idx < params->max_n_strains; idx++ )
+	{
+		if( indiv->immune_to_symptoms[ idx ] == time )
+			indiv->immune_to_symptoms[ idx ] = NO_IMMUNITY;
+
+		if( indiv->immune_to_severe[ idx ] == time )
+			indiv->immune_to_severe[ idx ] = NO_IMMUNITY;
+	}
+
+	set_susceptible( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -254,20 +344,36 @@ void transition_vaccine_status( individual* indiv )
 *  Description: sets the vaccine status of an individual
 *  Returns:		void
 ******************************************************************************************/
-void set_vaccine_status( individual* indiv, short current_status, short next_status )
+void set_vaccine_status( individual* indiv, parameters* params, short strain_idx, short vaccine_status, short time, short time_until )
 {
-    // FIXME: need some additional logic to make sure that vaccination status is not made worse by a second vaccine
-	indiv->vaccine_status      = current_status;
-	indiv->vaccine_status_next = next_status;
+	indiv->vaccine_status      = vaccine_status;
 
-	if( current_status == VACCINE_PROTECTED_FULLY )
+	if( vaccine_status == VACCINE_PROTECTED_FULLY )
 	{
-		if( indiv->status == SUSCEPTIBLE || indiv->status == RECOVERED )
-			indiv->status = VACCINE_PROTECT;
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		set_immune( indiv, strain_idx, time_until, IMMUNE_FULL );
 	}
 
-	if( ( current_status == VACCINE_WANED ) & ( indiv->status == VACCINE_PROTECT ) )
-		indiv->status = SUSCEPTIBLE;
+	if( vaccine_status == VACCINE_PROTECTED_SYMPTOMS )
+	{
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		set_immune( indiv, strain_idx, time_until, IMMUNE_SYMPTOMS );
+	}
+
+	if( vaccine_status == VACCINE_PROTECTED_SEVERE )
+	{
+		if( strain_idx == ALL_STRAINS )
+			print_exit( "must specify which strain the vaccine gives protection from" );
+
+		set_immune( indiv, strain_idx, time_until, IMMUNE_SEVERE );
+	}
+
+	if( vaccine_status == VACCINE_WANED )
+		wane_immunity( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -295,25 +401,13 @@ void set_recovered( individual *indiv, parameters* params, int time, model *mode
 ******************************************************************************************/
 void set_susceptible( individual *indiv, parameters* params, int time )
 {
-	indiv->status        = SUSCEPTIBLE;
+	int current_status = indiv->status;
 
-	infection_event *infection_event_ptr;
-	infection_event_ptr = indiv->infection_events;
-
-	int jdx;
-	indiv->infection_events = calloc( 1, sizeof(struct infection_event) );
-	indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof(int) );
-	for( jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
-		indiv->infection_events->times[jdx] = UNKNOWN;
-
-	indiv->infection_events->infector_status  = UNKNOWN;
-	indiv->infection_events->infector_network = UNKNOWN;
-	indiv->infection_events->time_infected_infector = UNKNOWN;
-	indiv->infection_events->next =  infection_event_ptr;
-	indiv->infection_events->is_case     = FALSE;
+	if( current_status == RECOVERED )
+		indiv->status = SUSCEPTIBLE;
 
 	// Reset the hazard for the newly susceptible individual
-	initialize_hazard( indiv, params );
+	initialize_hazard( indiv, params, time );
 }
 
 /*****************************************************************************************
@@ -441,6 +535,10 @@ void destroy_individual( individual *indiv )
 	}
 	free( indiv->n_interactions );
 	free( indiv->interactions );
+	free( indiv->hazard );
+	free( indiv->immune_full );
+	free( indiv->immune_to_symptoms );
+	free( indiv->immune_to_severe );
 }
 
 /*****************************************************************************************
@@ -488,7 +586,10 @@ void print_individual( model *model, long idx)
 	printf("indiv->base_random_interactions: %d\n", indiv->base_random_interactions );
 	printf("indiv->random_interactions: %d\n", indiv->random_interactions );
 
-	printf("indiv->hazard: %f\n", indiv->hazard );
+	printf("indiv->hazard:");
+	for( int strain_idx = 0; strain_idx < model->n_initialised_strains; strain_idx++ )
+		printf(" %f", indiv->hazard[strain_idx]);
+	printf("\n");
 	printf("indiv->quarantined: %d\n", indiv->quarantined );
 	printf("indiv->quarantine_test_result: %d\n", indiv->quarantine_test_result );
 	

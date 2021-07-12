@@ -501,6 +501,9 @@ void read_param_file( parameters *params)
 	if( check < 1){ print_exit("Failed to read parameter rebuild_networks\n"); };
 		check = fscanf(parameter_file, " %i ,", &(params->rebuild_networks));
 
+	if( check < 1){ print_exit("Failed to read parameter max_n_strains\n"); };
+		check = fscanf(parameter_file, " %i ,", &(params->max_n_strains));
+
 	fclose(parameter_file);
 }
 /*****************************************************************************************
@@ -1088,7 +1091,9 @@ void get_transmissions(
 	int *time_recovered,
 	int *time_susceptible,
 	int *is_case,
-	float *strain_multiplier
+	int *strain_idx,
+	float *transmission_multiplier,
+	float *expected_hospitalisation
 )
 {
 	individual *indiv;
@@ -1137,7 +1142,9 @@ void get_transmissions(
 				time_recovered[ idx ] = infection_event->times[RECOVERED];
 				time_susceptible[ idx ] = infection_event->times[SUSCEPTIBLE];
 				is_case[ idx ] = infection_event->is_case;
-				strain_multiplier[ idx ] = infection_event->strain_multiplier;
+				strain_idx[ idx ] = infection_event->strain->idx;
+				transmission_multiplier[ idx ] = infection_event->strain->transmission_multiplier;
+				expected_hospitalisation[ idx ] = infection_event->expected_hospitalisation;
 				idx++;
 			}
 			infection_event = infection_event->next;
@@ -1228,7 +1235,10 @@ void write_transmissions( model *model )
 	fprintf(output_file , "time_recovered,");
 	fprintf(output_file , "time_susceptible,");
 	fprintf(output_file , "is_case,");
-	fprintf(output_file , "strain_multiplier\n");
+	fprintf(output_file , "strain_idx,");
+	fprintf(output_file , "transmission_multiplier,");
+	fprintf(output_file , "expected_hospitalisation\n");
+
 
 	for( pdx = 0; pdx < model->params->n_total; pdx++ )
 	{
@@ -1238,7 +1248,7 @@ void write_transmissions( model *model )
 		while(infection_event != NULL)
 		{
 			if( time_infected_infection_event(infection_event) != UNKNOWN )
-				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.3f\n",
+				fprintf(output_file ,"%li,%i,%li,%i,%i,%i,%i,%i,%i,%li,%i,%li,%i,%i,%i,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%li,%.3f,%.4f\n",
 					indiv->idx,
 					indiv->age_group,
 					indiv->house_no,
@@ -1271,7 +1281,9 @@ void write_transmissions( model *model )
 					infection_event->times[RECOVERED],
 					infection_event->times[SUSCEPTIBLE],
 					infection_event->is_case,
-					infection_event->strain_multiplier
+					infection_event->strain->idx,
+					infection_event->strain->transmission_multiplier,
+					infection_event->expected_hospitalisation
 				);
 			infection_event = infection_event->next;
 		}

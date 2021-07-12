@@ -28,12 +28,21 @@
 *  Description: Setup the GSL random seed so that the utilities functions that use
 *               random number generation can be called.  
 ******************************************************************************************/
-
 void setup_gsl_rng(int seed)
 {
 	gsl_rng_env_setup();
 	rng = gsl_rng_alloc ( gsl_rng_default);
 	gsl_rng_set( rng, seed );
+}
+
+/*****************************************************************************************
+*  Name:		free_gsl_rng
+*  Description: frees the memory allocated to the gsl_rng
+*  				USE WITH CARE SINCE IS SESSION SINGLETON
+******************************************************************************************/
+void free_gsl_rng()
+{
+	gsl_rng_free( rng );
 }
 
 /*****************************************************************************************
@@ -456,7 +465,3 @@ double inv_incomplete_gamma_p( double percentile, long n )
 
 	return( root );
 }
-
-
-
-

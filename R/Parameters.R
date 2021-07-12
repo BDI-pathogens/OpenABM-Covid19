@@ -106,7 +106,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
     #' the C params R pointer object
     c_params_ptr = function() {
-      return( private$.c_params()@ref )
+      return( self$c_params@ref )
     },
 
     #' check the C params still exists
@@ -173,6 +173,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
       c_params = parameters()
       private$.c_params <- c_params
       initialize_params( self$c_params )
+      c_params_ptr = private$c_params_ptr()
 
       # if no input_param file is given then use the default file
       if ( is.na(input_param_file)) {
@@ -183,7 +184,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(input_param_file) || !file.exists(input_param_file)) {
           stop("input_params_file must be a valid file name OR NA (default params)")
         }
-        c_params$input_param_file <- input_param_file
+        success <-.Call( "R_set_input_param_file", c_params_ptr, input_param_file )
       }
 
       if (!is.na(param_line_number)) {
@@ -206,7 +207,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(input_households) || !file.exists(input_households)) {
           stop("input_households must be a data.frame of household OR a valid file OR left NA (default params)")
         }
-        c_params$input_household_file <- input_households
+        success <-.Call( "R_set_input_household_file", c_params_ptr, input_households )
         self$household_df <- NA
       }
 
@@ -227,7 +228,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         if (!is.character(hospital_input_param_file) || !file.exists(hospital_input_param_file )) {
           stop("if read_param_file is TRUE then hospital_input_param_file must be a valid file or NA (default params)")
         }
-        c_params$hospital_input_param_file <- hospital_input_param_file
+        success <-.Call( "R_set_hospital_input_param_file", c_params_ptr, hospital_input_param_file )
       }
 
       if (read_hospital_param_file) {
@@ -238,7 +239,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         private$read_and_check_from_file()
       }
 
-      c_params$output_file_dir = output_file_dir
+      success <-.Call( "R_set_output_file_dir", c_params_ptr, output_file_dir )
       if (!is.na(output_file_dir)) {
         c_params$sys_write_individual <- 1
       }
@@ -351,7 +352,6 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
           df_occupation_network_properties[row,'age_type'],
           df_occupation_network_properties[row,'mean_work_interaction'],
           df_occupation_network_properties[row,'lockdown_multiplier'],
-          df_occupation_network_properties[row,'network_id'],
           df_occupation_network_properties[row,'network_name'])
         if (C_result == 0) {
           stop("C API set_indiv_occupation_network_property failed (returned FALSE)")

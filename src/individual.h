@@ -35,7 +35,7 @@ struct individual{
 	interaction **interactions;
 
 	short status;
-	float hazard;
+	float *hazard;
 	float infectiousness_multiplier;
 	event *current_disease_event;
 	event *next_disease_event;
@@ -66,8 +66,9 @@ struct individual{
 	short worker_type;
 
 	short vaccine_status;
-	short vaccine_status_next;
-	event *vaccine_wane_event;
+	short *immune_full;
+	short *immune_to_symptoms;
+	short *immune_to_severe;
 };
 
 struct interaction{
@@ -96,7 +97,8 @@ struct infection_event{
 	infection_event *next;
 	short is_case;
 	short network_id;
-	float strain_multiplier;
+	float expected_hospitalisation;
+	strain *strain;
 };
 
 /************************************************************************/
@@ -110,14 +112,17 @@ struct infection_event{
 #define is_in_hospital( indiv ) ( ( indiv->status == HOSPITALISED || indiv->status == CRITICAL || indiv->status == HOSPITALISED_RECOVERING ) )
 #define not_in_hospital( indiv ) ( (indiv->hospital_state == NOT_IN_HOSPITAL) || (indiv->hospital_state == DISCHARGED) )
 
-#define vaccine_protected( indiv ) ( (indiv->vaccine_status == VACCINE_PROTECTED_FULLY) || (indiv->vaccine_status == VACCINE_PROTECTED_SYMPTOMS ) )
+#define immune_to_symptoms( indiv, idx ) ( ( indiv->immune_to_symptoms[ idx ] != NO_IMMUNITY ) )
+#define immune_to_severe( indiv, idx ) ( ( indiv->immune_to_severe[ idx ] != NO_IMMUNITY ) )
+#define immune_full( indiv, idx ) ( ( indiv->immune_full[ idx ] != NO_IMMUNITY ) )
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
 void initialize_individual( individual*, parameters*, long );
-void initialize_hazard( individual*, parameters* );
+void initialize_hazard( individual*, parameters*, int );
+void add_infection_event( individual*, individual*, short, strain*, short );
 void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
 void set_quarantine_status( individual*, parameters*, int, int, model* );
@@ -133,8 +138,9 @@ void set_general_admission( individual*, parameters*, int );
 void set_icu_admission( individual*, parameters*, int );
 void set_mortuary_admission( individual*, parameters*, int );
 void set_discharged( individual*, parameters*, int );
-void set_vaccine_status( individual*, short, short );
-void transition_vaccine_status( individual* );
+void set_immune( individual*, short, short, short );
+void wane_immunity( individual*, parameters*, short );
+void set_vaccine_status( individual*, parameters*, short, short, short, short );
 void update_random_interactions( individual*, parameters* );
 int count_infection_events( individual * );
 void destroy_individual( individual* );

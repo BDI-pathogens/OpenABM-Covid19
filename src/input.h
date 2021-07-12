@@ -49,7 +49,7 @@ void get_transmissions( model*,
 	long*, int*,  long*, int*,  int*,  int*,  int*,  int*,  int*,
 	long*,  int*, long*, int*, int*, int*,  int*, int*,  int*,
 	int*,  int*,  int*,  int*,  int*,  int*,  int*,  int*,
-	int*,  int*,  int*,  int*,  int*,  int*,  float*
+	int*,  int*,  int*,  int*,  int*,  int*,  int*, float*, float*
 );
 
 #endif /* INPUT_H_ */

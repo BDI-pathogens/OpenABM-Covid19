@@ -27,6 +27,7 @@ network* create_network( long n_total, int type )
 	network_ptr->n_edges    = 0;
 	network_ptr->n_vertices = n_total;
 	network_ptr->type       = type;
+	network_ptr->transmission_multiplier = 1;
 	
 	return network_ptr;
 }
@@ -268,5 +269,4 @@ int update_daily_fraction( network *network, double fraction )
 	network->daily_fraction = fraction;
 	return TRUE;
 }
-
 

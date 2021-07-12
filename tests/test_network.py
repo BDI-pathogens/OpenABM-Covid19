@@ -888,7 +888,6 @@ class TestClass(object):
 
         lockdown_multiplier = np.ones(10) * 0.2
 
-        network_id = np.arange(10)
         network_name = ['primary', 'secondary', 'adult_1', 'adult_2', 'adult_3', 'adult_4',
                         'adult_5', 'adult_6', 'elderly_1', 'elderly_2']
 
@@ -898,7 +897,6 @@ class TestClass(object):
             'age_type': age_type,
             'mean_work_interaction': mean_work_interaction,
             'lockdown_multiplier': lockdown_multiplier,
-            'network_id': network_id,
             'network_name': network_name})
 
         params = utils.get_params_swig()
@@ -1082,8 +1080,6 @@ class TestClass(object):
     
     def test_get_network(self):
 
-        network_id = 0
-
         # Set up test model
         params = utils.get_params_swig()
         model = utils.get_model_swig( params )
@@ -1092,6 +1088,10 @@ class TestClass(object):
         # Write network to file
         model.write_household_network()
         df_network_written = pd.read_csv(constant.TEST_HOUSEHOLD_NETWORK_FILE)
+
+        # get the network_id for the household table from the info
+        network_info = model.get_network_info()
+        network_id = network_info[ network_info[ "type"] == constant.HOUSEHOLD ].iloc[0]["id"]
 
         # Return network as a dataframe
         network = model.get_network_by_id( network_id )
@@ -1122,7 +1122,7 @@ class TestClass(object):
         inter_initial = pd.read_csv(constant.TEST_INTERACTION_FILE)
         
         # run to the end
-        model.run()
+        model.run( verbose = False )
         model.write_interactions_file() 
         model.write_transmissions()  
         inter_final   = pd.read_csv(constant.TEST_INTERACTION_FILE)

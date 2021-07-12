@@ -13,13 +13,15 @@ Author: p-robot
 import pytest, sys, subprocess, shutil, os
 import numpy as np, pandas as pd
 from scipy import optimize
-from math import exp, log, fabs
+from math import exp, log, fabs, sqrt
+from numpy.ma.testutils import assert_equal
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
 
 from . import constant
 from . import utilities as utils
+import COVID19.model as abm
 
 #from test.test_bufio import lengths
 #from CoreGraphics._CoreGraphics import CGRect_getMidX
@@ -109,9 +111,9 @@ class TestClass(object):
         ],
         "test_transmission_pairs": [
             dict( 
-                n_total         = 200000,
+                n_total         = 50000,
                 infectious_rate = 8,
-                end_time        = 150,
+                end_time        = 50,
                 hospitalised_daily_interactions = 5,
                 mean_infectious_period=8.0,
                 sd_infectious_period=5,
@@ -353,19 +355,19 @@ class TestClass(object):
         ],
         "test_presymptomatic_symptomatic_transmissions": [
             dict(
-                n_total = 750000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 75000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 250000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 25000,
+                n_seed_infection = 20,
+                end_time = 50
             ),
             dict(
-                n_total = 1000000,
-                n_seed_infection = 1,
-                end_time = 100
+                n_total = 50000,
+                n_seed_infection = 20,
+                end_time = 50
             )
         ],
         "test_infectiousness_multiplier": [
@@ -396,6 +398,7 @@ class TestClass(object):
                     n_total = 1e4,
                     n_seed_infection = 50,
                     end_time = 30,
+                    max_n_strains = 2
                 ),
                 n_extra_infections = 50,
                 t_extra_infections = 10,     
@@ -407,12 +410,51 @@ class TestClass(object):
                     n_total = 2e4,
                     n_seed_infection = 10,
                     end_time = 80,
-                    infectious_rate = 3
+                    infectious_rate = 3,
+                    max_n_strains = 2
                 ),
-                n_extra_infections = 30,
-                t_extra_infections = 10,   
-                t_check_after      = 30, # time after the new strain to check for domination of second strain
-                strain_multiplier  = 2.5
+                n_extra_infections      = 30,
+                t_extra_infections      = 10,   
+                t_check_after           = 30, # time after the new strain to check for domination of second strain
+                transmission_multiplier = 2.5
+            )
+        ],
+        "test_equivalent_strains": [
+            dict(
+                test_params = dict(
+                    n_total = 5e4,
+                    n_seed_infection = 100,
+                    end_time = 50
+                ),
+                n_equivalent_strains = 10
+            )
+        ],
+        "test_introduce_new_strain": [
+            dict(
+                test_params = dict(
+                    n_total = 2e4,
+                    n_seed_infection = 100,
+                    end_time = 100
+                ),
+                cross_immunity = 1
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 2e4,
+                    n_seed_infection = 100,
+                    end_time = 100
+                ),
+                cross_immunity = 0
+            )
+        ],
+        "test_monoton_introduce_new_strain_cross_immunity": [
+            dict(
+                test_params = dict(
+                    n_total = 1e4,
+                    n_seed_infection = 100,
+                    end_time = 50
+                ),
+                cross_immunity = [ 0, 0.2, 0.4, 0.6, 0.8, 1.0 ]
             )
         ],
     }
@@ -466,7 +508,7 @@ class TestClass(object):
  
         # check the only people who were infected by someone after 0 time are the seed infections
         np.testing.assert_equal( min( df_trans[ "generation_time" ] ), 0, "the minimum infected time at transmission must be 0 (the seed infection")
-        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )
+        np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 0 ] ), int( params.get_param( "n_seed_infection" ) ), "only the seed infection are infected by someone after 0 days" )        
         
         # check that some people can get infected after one time step
         np.testing.assert_equal( len( df_trans[ df_trans[ "generation_time" ] == 1 ] ) > 0, True, "nobody is infected by someone who is infected by for one unit of time" )
@@ -903,6 +945,26 @@ class TestClass(object):
         leads to corresponding change (increase, decrease, or equal) in the total infections.
         
         """
+        def mean_total_infected(params, mild_infectious_factor, rng_seed_range=range(1,21)):
+            """
+            Run simulation with parameters `params`, mild_infectious_factor=`mild_infectious_factor`,
+            and for all rng_seed values in `rng_seed_range`. 
+            Returns mean of total_infected from final day of simulation, across 
+            all seeds in `rng_seed_range`.
+            """
+            params.set_param('mild_infectious_factor', mild_infectious_factor)
+            total_infected_list = []
+            for rng_seed in rng_seed_range:
+                params.set_param('rng_seed', rng_seed)
+                params.write_params(constant.TEST_DATA_FILE)     
+                
+                file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+                completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+                df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            
+                total_infected_list.append(df_output[ "total_infected" ].iloc[-1])
+            
+            return np.mean(total_infected_list)
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
@@ -917,51 +979,26 @@ class TestClass(object):
         params.set_param( "mild_fraction_60_69", mild_fraction_60_69 )
         params.set_param( "mild_fraction_70_79", mild_fraction_70_79 )
         params.set_param( "mild_fraction_80", mild_fraction_80 )
-        params.set_param( "mild_infectious_factor", mild_infectious_factor[0] )
-        params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        # save the current mild_infectious_factor value
         mild_infectious_factor_current = mild_infectious_factor[0]
-        total_infected_current = df_output[ "total_infected" ].iloc[-1]
+        mean_total_infected_current = mean_total_infected(params, mild_infectious_factor_current)
         
         # calculate the total infections for the rest and compare with the current
         for idx in range(1, len(mild_infectious_factor)):
-            params.set_param( "end_time", end_time )
-            params.set_param( "n_total", n_total )
-            params.set_param( "mild_fraction_0_9", mild_fraction_0_9 )
-            params.set_param( "mild_fraction_10_19", mild_fraction_10_19 )
-            params.set_param( "mild_fraction_20_29", mild_fraction_20_29 )
-            params.set_param( "mild_fraction_30_39", mild_fraction_30_39 )
-            params.set_param( "mild_fraction_40_49", mild_fraction_40_49 )
-            params.set_param( "mild_fraction_50_59", mild_fraction_50_59 )
-            params.set_param( "mild_fraction_60_69", mild_fraction_60_69 )
-            params.set_param( "mild_fraction_70_79", mild_fraction_70_79 )
-            params.set_param( "mild_fraction_80", mild_fraction_80 )
-            params.set_param("mild_infectious_factor", mild_infectious_factor[idx])
-            params.write_params(constant.TEST_DATA_FILE)
-    
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-            
             mild_infectious_factor_new = mild_infectious_factor[idx]
-            total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
+            mean_total_infected_new = mean_total_infected(params, mild_infectious_factor_new)
     
             # check the total infections
             if mild_infectious_factor_new > mild_infectious_factor_current:
-                np.testing.assert_equal( total_infected_new > total_infected_current, True)
+                np.testing.assert_equal( mean_total_infected_new > mean_total_infected_current, True)
             elif mild_infectious_factor_new < mild_infectious_factor_current:
-                np.testing.assert_equal( total_infected_new < total_infected_current, True)
+                np.testing.assert_equal( mean_total_infected_new < mean_total_infected_current, True)
             elif mild_infectious_factor_new == mild_infectious_factor_current:
-                np.testing.assert_allclose( total_infected_new, total_infected_current, atol = 0.01)
+                np.testing.assert_allclose( mean_total_infected_new, mean_total_infected_current, atol = 0.01)
             
             # refresh current values
             mild_infectious_factor_current = mild_infectious_factor_new
-            total_infected_current = total_infected_new
+            mean_total_infected_current = mean_total_infected_new
 
 
     def test_ratio_presymptomatic_symptomatic( 
@@ -1146,7 +1183,7 @@ class TestClass(object):
         """
         Test that presymptomatic and symptomatic individuals transmit as expected
         """
-        tolerance = 0.05        
+        tolerance = 0.06
         params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
         params.set_param("self_quarantine_fraction", 0)
 
@@ -1168,7 +1205,8 @@ class TestClass(object):
         params.set_param("mean_time_to_hospital", 60)
         params.set_param("mean_time_to_symptoms", 6)
         params.set_param("sd_time_to_symptoms", 2.5)
-        
+        params.set_param("sd_infectiousness_multiplier", 0)
+ 
         params.set_param("relative_transmission_household", 0)
         params.set_param("relative_transmission_occupation", 0)
         
@@ -1203,7 +1241,7 @@ class TestClass(object):
         # give minimal noise. 
         # by Chris Wymant 
         # <<<     
-        fraction_mid_expo_phase = 0.001
+        fraction_mid_expo_phase = 0.01
         df_output  = df_output[ df_output[ "total_infected" ] < ( n_total * fraction_mid_expo_phase ) ].max()
         time_mid_expo_growth = df_output["time"]
         df_trans = df_trans[df_trans["time_infected_source"] < int(time_mid_expo_growth)]
@@ -1217,7 +1255,7 @@ class TestClass(object):
         N_presymptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.PRESYMPTOMATIC_MILD.value] )
         N_symptomatics_mild = len( df_trans[ df_trans[ "status_source" ] == constant.EVENT_TYPES.SYMPTOMATIC_MILD.value] )
         N_involved = N_presymptomatics_mild+N_presymptomatics+N_symptomatics_mild+N_symptomatics
-        
+             
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance)   
 
@@ -1228,26 +1266,31 @@ class TestClass(object):
      
         ordered_multipliers = sorted( sd_multipliers )
         transmissions = []
-        total_infected = []
+        total_infected_means = []
         for sd_multiplier in ordered_multipliers:
-          params = utils.get_params_swig()
-          for param, value in test_params.items():
-              params.set_param( param, value )  
-          params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
-          model  = utils.get_model_swig( params )
+            total_infected = []
+            for rng_seed in range(1,21):
+                params = utils.get_params_swig()
+                for param, value in test_params.items():
+                    params.set_param( param, value )  
+                params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
+                params.set_param( "rng_seed", rng_seed )
+                model  = utils.get_model_swig( params )
 
-          for time in range( test_params[ "end_time" ] ):
-              model.one_time_step()
+                for time in range( test_params[ "end_time" ] ):
+                    model.one_time_step()
 
-          results = model.one_time_step_results()
-          total_infected.append( results[ "total_infected" ] )
+                results = model.one_time_step_results()
+                total_infected.append( results[ "total_infected" ] )
 
-          del model
-          del params
+                del model
+                del params
 
-        base_infected = total_infected[0]
+            total_infected_means.append(np.mean(total_infected))
 
-        np.testing.assert_allclose([total_infected[0]]*len(total_infected), total_infected, rtol=0.05)
+        base_infected_mean = total_infected_means[0]
+
+        np.testing.assert_allclose([base_infected_mean]*len(total_infected_means), total_infected_means, rtol=0.05)
 
     
 
@@ -1293,6 +1336,7 @@ class TestClass(object):
         params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, int(params.get_param("end_time")))
         params.set_param("mean_time_to_susceptible_after_shift", 25)
+        params.set_param("n_total", 50000)
         params.set_param("time_to_susceptible_shift", 15)
         params.set_param("end_time", 100)
 
@@ -1334,9 +1378,11 @@ class TestClass(object):
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
             inf_id[ idx ] = idxs[ inf_id[ idx ] ]
-        
+        strain = model.add_new_strain( transmission_multiplier = 2 )
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
+
         for id in inf_id :
-            np.testing.assert_( model.seed_infect_by_idx(id, strain_multiplier = 2 ), "failed to infect individual" )
+            np.testing.assert_( model.seed_infect_by_idx(id, strain = strain), "failed to infect individual" )
    
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
@@ -1355,7 +1401,7 @@ class TestClass(object):
         df_seed  = pd.merge( df_seed, df_trans, on = "ID_source", how = "inner" )
         np.testing.assert_( len( df_seed ) > n_extra_infections, "seed infected people did not infect others")
         
-    def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, strain_multiplier ):
+    def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, transmission_multiplier ):
         """
            Check that if a second more transmissible strain is introduced that it will dominate over time
         """
@@ -1374,23 +1420,156 @@ class TestClass(object):
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
         n_susc   = len( idxs )
         
+        strain = model.add_new_strain( transmission_multiplier ) 
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
         inf_id = np.random.choice( n_susc, n_extra_infections, replace=False)
         for idx in range( n_extra_infections ):
-            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain_multiplier = strain_multiplier )
-        
+            model.seed_infect_by_idx( idxs[ inf_id[ idx ] ], strain = strain )
+          
         for time in range(test_params["end_time"] - t_extra_infections):
             model.one_time_step()
         
         # get the new infections for each time step for each strain    
         model.write_transmissions()
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-        df_n_trans = df_trans.loc[:,["time_infected","strain_multiplier"]]
-        df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_multiplier"], aggfunc=len).fillna(0).reset_index() 
-    
-        # check no new strain infections before it is introduced
-        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain_multiplier ].sum(), 0, "new strain cases before seed date" )
+        df_n_trans = df_trans.loc[:,["time_infected","strain_idx"]]
+        df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
+
+            # check no new strain infections before it is introduced
+        np.testing.assert_equal( df_n_trans[ df_n_trans["time_infected"] < t_extra_infections ][ strain.idx() ].sum(), 0, "new strain cases before seed date" )
         
         # check that the new strain dominates after a set period of time
-        n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 1.0 ].sum()
-        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain_multiplier ].sum()
+        n_base = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ 0 ].sum()
+        n_new  = df_n_trans[ df_n_trans["time_infected"] > t_extra_infections + t_check_after][ strain.idx() ].sum()
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
+        np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
+
+    def test_equivalent_strains( self, test_params, n_equivalent_strains ):
+        """
+           Check that if there are multiple equivalent strains then the spread is equally as quick
+        """
+        
+        # run with a single strain
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
+        
+        model.run( verbose = False )
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_1  = len( df_trans.index )
+             
+        # add n multiple equivalent strains
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        params.set_param( "n_seed_infection", 0 )
+        params.set_param( "max_n_strains",  n_equivalent_strains )
+        model  = utils.get_model_swig( params )
+
+        # seed infect people equally with the different strains
+        n_seed = round( test_params[ "n_seed_infection" ] / n_equivalent_strains )
+        inf_id = np.random.choice( params.get_param( "n_total" ), n_seed * n_equivalent_strains, replace=False)
+        inf_id_idx = 0
+        strain_idx = 0
+        for idx in range( n_equivalent_strains ) :
+            
+            if idx != 0 :
+                strain_idx = model.add_new_strain( 1.0 ).idx()
+            
+            for jdx in range( n_seed ) :
+                model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = strain_idx )
+                inf_id_idx = inf_id_idx + 1   
+        
+        model.run( verbose = False )
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_n   = len( df_trans.index )
+        n_strains = len( df_trans.groupby(["strain_idx"]).size().reset_index(name="n_infections").index )
+    
+        n_sd = 5 # note distribution is over-dispersed since approx negative binomial
+        np.testing.assert_allclose( n_inf_1, n_inf_n, atol = n_sd * sqrt( max( n_inf_1, n_inf_n) ), 
+                                    err_msg = "multiple equivalent strains have different numbers of infections")
+        np.testing.assert_equal( n_strains, n_equivalent_strains, "not all strains found in infections")
+        
+    def test_introduce_new_strain( self, test_params, cross_immunity ):
+        """
+           Check that if a new strain (with equal transmisibility) is introduced on a population after 
+           the first wave of one strain has swept through the population that:
+               1. if cross_immunity = 0 then a new wave of the same size
+               2. if cross_immunity = 1 then no second wave
+        """ 
+                    
+        # add 2 multiple equivalent strains
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value ) 
+        params.set_param( "n_seed_infection", 0 )
+        params.set_param( "max_n_strains", 2 )
+        model  = utils.get_model_swig( params )
+        
+        # add a second strain with the same multiplier
+        model.add_new_strain( 1.0 )
+        
+        # add in the cross-immunity matrix
+        cross_immunity_mat = [ 
+            [ 1.0, cross_immunity ], 
+            [ cross_immunity, 1.0 ] 
+        ]
+        model.set_cross_immunity_matrix( cross_immunity_mat )
+        
+        # seed infect people with the first strain
+        n_seed = test_params[ "n_seed_infection" ]
+        inf_id = np.random.choice( params.get_param( "n_total" ), n_seed * 2, replace=False)
+        inf_id_idx = 0
+        
+        for jdx in range( n_seed ) :
+            model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = 0 )
+            inf_id_idx = inf_id_idx + 1
+        
+        for time in range( test_params[ "end_time"] ) :
+            model.one_time_step()      
+            
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        n_inf_1  = len( df_trans.index )
+    
+        # seed infect people with the second strain and run for the same period of time
+        for jdx in range( n_seed ) :
+            model.seed_infect_by_idx( inf_id[ inf_id_idx ], strain_idx = 1 )
+            inf_id_idx = inf_id_idx + 1
+        
+        for time in range( test_params[ "end_time"] ) :
+            model.one_time_step()      
+            
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True ) 
+        n_inf_2 = len( df_trans[ df_trans[ "strain_idx" ] == 1 ].index )
+      
+        if cross_immunity == 1 :
+            # with cross immunity there should not be many new infections 
+            max_factor = 2
+            np.testing.assert_( n_inf_2 < n_seed * max_factor, "too many new infections on a population with herd immunity" )
+        elif cross_immunity == 0 :
+            # without cross immunity there should be roughly the same number of infections in the second wave
+            n_sd = 5 # note distribution is over-dispersed since approx negative binomial
+            np.testing.assert_allclose( n_inf_1, n_inf_2, atol = n_sd * sqrt( max( n_inf_1, n_inf_2) ), 
+                                    err_msg = "multiple equivalent strains have different numbers of infections")
+      
+        return [ n_inf_1, n_inf_2 ]
+    
+    def test_monoton_introduce_new_strain_cross_immunity( self, test_params, cross_immunity ) :
+        """
+           Check that if a new strain (with equal transmisibility) is introduced on a population after 
+           the first wave of one strain has swept through the population being reinfected decreases
+           montonically with the cross-immunity
+        """ 
+        
+        last_inf = test_params[ "n_total"]
+        for cross_im in cross_immunity :
+            new_inf = self.test_introduce_new_strain(test_params, cross_im)[1]
+            np.testing.assert_( new_inf < last_inf, "new infections not declining monotonically with cross-immunity" )
+            last_inf = new_inf
+        
+        

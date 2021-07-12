@@ -86,13 +86,13 @@ void set_up_hospital_networks( model *model )
 				for( hcw_idx = 0; hcw_idx < hospital->wards[ward_type][ward_idx].n_worker[NURSE]; hcw_idx++ )
 					healthcare_workers[n_healthcare_workers++] = hospital->wards[ward_type][ward_idx].nurses[hcw_idx].pdx;
 
-				set_up_ward_networks( &(hospital->wards[ward_type][ward_idx]), model->params->max_hcw_daily_interactions );
+				set_up_ward_networks( model, &(hospital->wards[ward_type][ward_idx]), model->params->max_hcw_daily_interactions );
 			}
 		}
 
 		//Setup HCW workplace network.
 		hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
-		hospital->hospital_workplace_network = create_network( n_healthcare_workers, HOSPITAL_WORK );
+		hospital->hospital_workplace_network = add_new_network( model, n_healthcare_workers, HOSPITAL_WORK );
 		hospital->hospital_workplace_network->skip_hospitalised = TRUE;
 		hospital->hospital_workplace_network->skip_quarantined  = TRUE;
 		hospital->hospital_workplace_network->construction      = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
@@ -225,7 +225,7 @@ void transition_one_hospital_event(
 	if( to != NO_EVENT )
 	{
 		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
-		indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to] );
+		indiv->next_hospital_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
 

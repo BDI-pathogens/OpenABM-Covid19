@@ -210,15 +210,19 @@ VACCINE_TYPES <- c(
 #'     \code{VACCINE_PROTECTED_FULLY}
 #'   \item{VACCINE_PROTECTED_SYMPTOMS} Wrapper for C enum
 #'     \code{VACCINE_PROTECTED_SYMPTOMS}
-#'   \item{VACCINE_WANED} Wrapper for C enum
-#'     \code{VACCINE_WANED}
+#'   \item{VACCINE_WANED_FULLY} Wrapper for C enum
+#'     \code{VACCINE_WANED_FULLY}
+#'   \item{VACCINE_WANED_SYMPTOMS} Wrapper for C enum
+#'     \code{VACCINE_WANED_SYMPTOMS}
 #' }
 VACCINE_STATUS <- c(
   'NO_VACCINE'                 = 0,
   'VACCINE_NO_PROTECTION'      = 1,
   'VACCINE_PROTECTED_FULLY'    = 2,
   'VACCINE_PROTECTED_SYMPTOMS' = 3,
-  'VACCINE_WANED'              = 4
+  'VACCINE_WANED_FULLY'        = 4,
+  'VACCINE_WANED_SYMPTOMS'     = 5,
+  'VACCINE_WANED'              = 6
 )
 
 

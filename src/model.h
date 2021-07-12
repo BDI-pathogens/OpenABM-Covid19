@@ -18,6 +18,7 @@
 #include "network.h"
 #include "params.h"
 #include "hospital.h"
+#include "strain.h"
 
 /************************************************************************/
 /****************************** Structures  *****************************/
@@ -59,6 +60,10 @@ struct model{
 	network **occupation_network;
 	directory *household_directory;
 	network *user_network;
+
+	int n_networks;
+	network **all_networks;
+
 	double mean_interactions;
 	double mean_interactions_by_age[ N_AGE_TYPES ];
 	int rebuild_networks;
@@ -96,6 +101,12 @@ struct model{
 	long n_vaccinated_symptoms_by_age[ N_AGE_GROUPS ];
 
 	hospital *hospitals;
+
+	strain *strains;
+	int n_initialised_strains;
+	float **cross_immunity;
+
+	vaccine *vaccines;
 };
 
 struct event_block{
@@ -107,6 +118,7 @@ struct event{
 	individual *individual;
 	short type;
 	short time;
+	void *info;
 	event *next;
 	event *last;
 };
@@ -127,6 +139,7 @@ void set_up_healthcare_workers_and_hospitals( model* );
 void set_up_interactions( model* );
 void set_up_events( model* );
 void add_event_block( model* , float );
+void set_up_strains( model* );
 void set_up_seed_infection( model* );
 void set_up_networks( model* );
 void set_up_counters( model* );
@@ -139,15 +152,17 @@ int one_time_step( model* );
 void flu_infections( model* );
 
 event* new_event( model* );
-event* add_individual_to_event_list( model*, int, individual*, int );
+event* add_individual_to_event_list( model*, int, individual*, int, void* );
 void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
 void update_event_list_counters(  model*, int );
 void transition_events( model*, int, void( model*, individual* ), int );
+void transition_events_info( model*, int, void( model*, individual*, void* ), int );
 void add_interaction_block( model*, long );
 void return_interactions( model* );
 
+network* add_new_network( model*, long, int );
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );
 void build_random_network( model*, network*, long, long* );
@@ -157,9 +172,6 @@ int add_user_network( model*, int, int, int, int, double, long, long*, long*, ch
 int add_user_network_random( model*, int, int, long, long*, int*, char* );
 int delete_network( model*, network*n );
 network* get_network_by_id( model*, int );
-int get_network_ids( model*, int*, int );
-int get_network_id_by_index( model*, int );
-
-
+int get_network_ids( model*, int* );
 
 #endif /* MODEL_H_ */

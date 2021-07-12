@@ -22,7 +22,7 @@ from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES
 from . import constant
 from . import utilities as utils
 import covid19
@@ -936,7 +936,9 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 100,
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
+                full_efficacy = 1.0,
+                symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 14
             ),
             dict(
@@ -948,7 +950,9 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 100,
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
+                full_efficacy = 0.0,
+                symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
                 time_to_protect = 14
             )
         ],
@@ -988,7 +992,9 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 1000,
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
+                full_efficacy = 0.0,
+                symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
                 vaccine_protection_period = 14,
             ),
             dict(
@@ -1000,7 +1006,9 @@ class TestClass(object):
                 ),
                 n_to_vaccinate = 1000,
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value,
+                full_efficacy = 1.0,
+                symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
                 vaccine_protection_period = 21
             )
         ],
@@ -1013,9 +1021,11 @@ class TestClass(object):
                     infectious_rate  = 7
                 ),
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
+                full_efficacy = 0.0,
+                symptoms_efficacy = 1.0,   
+                severe_efficacy   = 0.0,     
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
-                days_to_vaccinate = 1
+                days_to_vaccinate = 2
             ),
             dict(
                 test_params=dict(
@@ -1025,11 +1035,96 @@ class TestClass(object):
                     infectious_rate  = 7
                 ),
                 n_to_seed = 100,
-                vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value,
+                full_efficacy = 1.0,
+                symptoms_efficacy = 0.0,  
+                severe_efficacy   = 0.0,
                 fraction_to_vaccinate = [ 0,0,0,0,0,0,0.05,0.1,0.2],
                 days_to_vaccinate = 10
             )
+        ],
+        "test_add_vaccine": [ 
+            dict(
+                 test_params=dict(
+                    n_total  = 1e4,
+                    max_n_strains = 2
+                ),
+                
+                vaccine0 = dict(
+                    full_efficacy     = 0.5,
+                    symptoms_efficacy = 1.0,
+                    severe_efficacy   = 0.0,
+                    time_to_protect   = 5,
+                    vaccine_protection_period = 10,
+                ),
+                vaccine1 = dict(
+                    vaccine_type = 1,
+                    full_efficacy     = [ 0.0, 0.5 ],
+                    symptoms_efficacy = [ 0.5, 0.75],
+                    severe_efficacy   = [ 0.0, 1.0 ],
+                    time_to_protect = 2,
+                    vaccine_protection_period = 15,
+                ),
+            ) 
+        ],
+        "test_vaccinate_protection_multi_strain": [
+            dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 5,
+                    max_n_strains = 2
+                ),
+                n_to_vaccinate = 1000,
+                n_to_seed = 100,
+                full_efficacy = 0.0,
+                symptoms_efficacy = 1.0,
+                severe_efficacy   = 0.0,
+                time_to_protect = 2
+            ),
+             dict(
+                test_params=dict(
+                    n_total  = 1e4,
+                    end_time = 50,
+                    n_seed_infection = 0,
+                    infectious_rate  = 7,
+                    max_n_strains = 2
+                ),
+                n_to_vaccinate = 100,
+                n_to_seed = 100,
+                full_efficacy = 1.0,
+                symptoms_efficacy = 0.0,
+                severe_efficacy   = 0.0,
+                time_to_protect = 14
+            )
+        ],
+        "test_network_transmission_multiplier": [ 
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 0,
+                networks_off = [ 0 ] 
+            ),
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 10,
+                networks_off = [ 3 ] 
+            ),
+            dict(
+                test_params  = dict( n_total = 1e4, end_time = 50 ),
+                time_off     = 10,
+                networks_off = [ 1,4,5 ] 
+            )
+        ],
+        "test_custom_network_transmission_multiplier": [ 
+            dict(
+                test_params = dict( n_total = 1e4, end_time = 50 ),
+                time_add    = 10,
+                age_group   = 3,
+                n_inter     = 10,     
+                transmission_multiplier = 10
+            )
         ]
+                                            
     }
 
     """
@@ -1039,16 +1134,27 @@ class TestClass(object):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+     
+        params = utils.get_params_swig()
         params = utils.turn_off_quarantine(params)
-        params.set_param("test_order_wait",0)
-        params.set_param("test_result_wait",0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.set_param("n_total",50000)
+        params.set_param("end_time",40)
         
-        # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # test_result_wait is required to be set to 0 due to an edge case with hospitalisation
+        #
+        # 1. on hospitalisation a test is always ordered
+        # 2. the person recovers and leaves hospital prior to the test result coming back
+        # 3. the person is no longer in hospital so is asked to quarantine
+        #
+        # setting result_wait to 0 means that the person is always in hospital when they get
+        # the result (if it is positive), so will not be asked to quarantine since they are 
+        # currently in hospital
+        params.set_param("test_result_wait",0)
+            
+        model  = utils.get_model_swig( params )
+        model.run( verbose = False )
+        
+        df_output = model.results
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
     
     def test_hospitalised_zero(self):
@@ -2464,7 +2570,7 @@ class TestClass(object):
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_RESULT ), 0, "People still waiting for test results on day they should be processed" );
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.MANUAL_CONTACT_TRACING ), 0, "People still waiting for manual contact tracing on day they should be processed" );      
         
-    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, vaccine_type, time_to_protect ):
+    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
         """
         Check that vaccinated people are vaccinated and only get protection after the period
         in which the vaccine is not effective.
@@ -2473,7 +2579,6 @@ class TestClass(object):
         vaccinated individsuals would be infected if not vaccinated.
         """
         
-        efficacy = 1.0;
         vaccine_protection_period = test_params[ "end_time" ] + 1;
         
         params = utils.get_params_swig()
@@ -2485,14 +2590,17 @@ class TestClass(object):
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
         df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
 
+        # add the vaccine
+        vaccine = model.add_vaccine(full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
+
         # check people are vaccinated
         for idx in idx_vaccinated :
-            vaccinated =  model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
             np.testing.assert_( vaccinated, "failed to vaccinate individual")
 
         # check they can't be vaccinated again
         for idx in idx_vaccinated :
-            vaccinated =  model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
             np.testing.assert_( vaccinated == 0, "vaccinated somebody twice" )
         
         # check the output of the individual file    
@@ -2524,7 +2632,7 @@ class TestClass(object):
 
         # check that vaccinated people have not been infected or did not get symptoms (depending on vaccine type )
         df_vac_inf = pd.merge( df_vaccinated, df_trans_post, left_on = "ID", right_on = "ID_recipient", how = "inner")
-        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
+        if full_efficacy == 0 :
             df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
         np.testing.assert_equal( len( df_vac_inf.index ), 0, "vaccinated people have been effected")
             
@@ -2539,7 +2647,6 @@ class TestClass(object):
         allowed to grow out of control those vaccinated without effect can be infected     
         """
         
-        vaccine_type = VaccineTypesEnum.VACCINE_TYPE_FULL.value
         vaccine_protection_period = test_params[ "end_time" ] + 1
         
         params = utils.get_params_swig()
@@ -2550,9 +2657,12 @@ class TestClass(object):
         n_total        = params.get_param( "n_total" )
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
+        # add the vaccine
+        vaccine = model.add_vaccine( efficacy, 0.0, 0.0, time_to_protect, vaccine_protection_period)
+
         # vaccinate people at random
         for idx in idx_vaccinated :
-            model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            model.vaccinate_individual( idx, vaccine = vaccine )
 
         # let the vaccine take effect
         for time in range(time_to_protect) :
@@ -2591,9 +2701,9 @@ class TestClass(object):
         
         np.testing.assert_equal( n_resp_inf, 0, "vaccinated people who responded became infected")
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
-        
+  
     
-    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, vaccine_type, vaccine_protection_period ):
+    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, vaccine_protection_period ):
         """
         Check the vaccine wanes over time
         Make sure that people are protected before it wanes but can be infected after it wanes
@@ -2610,9 +2720,12 @@ class TestClass(object):
         n_total        = params.get_param( "n_total" )
         idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
 
+        # add the vaccine
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
+
         # vaccinate people at random
         for idx in idx_vaccinated :
-            model.vaccinate_individual( idx, vaccine_type, efficacy, time_to_protect, vaccine_protection_period)
+            model.vaccinate_individual( idx, vaccine = vaccine )
 
         # let the vaccine take effect
         for time in range(time_to_protect) :
@@ -2624,25 +2737,29 @@ class TestClass(object):
             model.seed_infect_by_idx( idx )  
 
         # let the go through the whole period it is effective and let it wane
-        for time in range(vaccine_protection_period) :
+        for time in range(vaccine_protection_period - time_to_protect ) :
             model.one_time_step()
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
         df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
+        df_indiv   = df_indiv.loc[:,["ID","vaccine_status", "current_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
         n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
         n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
-        n_waned       = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED.value ] )
         
+        if full_efficacy > 0 :
+            n_waned = len( df_vac[ df_vac[ "current_status" ] == EVENT_TYPES.SUSCEPTIBLE.value ] )
+        else :
+            n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_SYMPTOMS.value ] )
+            
         np.testing.assert_equal( n_response, 0, "people still covered by the vaccine (with protection)")
         np.testing.assert_equal( n_no_response, 0, "people still covered by the vaccine (without protection)")
         np.testing.assert_equal( n_waned, n_to_vaccinate, "the vaccine for all those vaccinated should have waned")      
        
         # now go to the end of of the pandemic
-        for time in range(  test_params[ "end_time" ] - time_to_protect - vaccine_protection_period) :
+        for time in range(  test_params[ "end_time" ] - vaccine_protection_period) :
             model.one_time_step()
         
         # now get all those who have been infected
@@ -2653,17 +2770,16 @@ class TestClass(object):
         df_vac_inf = df_vac_inf.loc[:,["time_infected", "time_asymptomatic"]]
         
         # if vaccine just protects against symptoms, remove the asymptotic infections
-        if vaccine_type == VaccineTypesEnum.VACCINE_TYPE_SYMPTOM.value :
+        if full_efficacy == 0 :
             df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
 
-        time_wane = time_to_protect + vaccine_protection_period
-        n_inf_protect = len( df_vac_inf[ df_vac_inf[ "time_infected" ] < time_wane ] )
-        n_inf_wane    = len( df_vac_inf[ df_vac_inf[ "time_infected" ] >= time_wane ] )
+        n_inf_protect = len( df_vac_inf[ ( df_vac_inf[ "time_infected" ] < vaccine_protection_period ) & ( df_vac_inf[ "time_infected" ] > time_to_protect ) ] )
+        n_inf_wane    = len( df_vac_inf[ df_vac_inf[ "time_infected" ] >= vaccine_protection_period ] )
 
         np.testing.assert_equal( n_inf_protect, 0, "vaccinated people being infected before the vaccine has waned")
         np.testing.assert_( n_inf_wane > 0, "vaccinated people being infected before the vaccine has waned")
         
-    def test_vaccinate_schedule( self, test_params, n_to_seed, vaccine_type, fraction_to_vaccinate, days_to_vaccinate):
+    def test_vaccinate_schedule( self, test_params, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, fraction_to_vaccinate, days_to_vaccinate):
         """
         Check that a schedule of people can be vaccinated
         """
@@ -2673,11 +2789,12 @@ class TestClass(object):
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
         
-        
         time_to_protect = 15
         n_total         = params.get_param( "n_total" )
         end_time        = params.get_param( "end_time" )
-        
+               
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, 365)
+     
         schedule = VaccineSchedule(
             frac_0_9   = fraction_to_vaccinate[0],
             frac_10_19 = fraction_to_vaccinate[1],
@@ -2688,10 +2805,7 @@ class TestClass(object):
             frac_60_69 = fraction_to_vaccinate[6],
             frac_70_79 = fraction_to_vaccinate[7],
             frac_80    = fraction_to_vaccinate[8],
-            vaccine_type    = vaccine_type,
-            efficacy        = 1.0,
-            time_to_protect = time_to_protect,
-            vaccine_protection_period = 365
+            vaccine    = vaccine
         )
         
         # check the fraction to vaccinate is correct on the schedule object
@@ -2732,6 +2846,191 @@ class TestClass(object):
                 np.testing.assert_equal(expected, 0, "nobody vaccinate when some was expected")
     
             else :
-                sd = sqrt( expected * max( 1 - expected / n_age, 0.01 ) )
+                sd = sqrt( expected * max( ( 1 - expected ) / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
+    
+    def test_add_vaccine(self, test_params, vaccine0, vaccine1 ):    
+        """
+        Check that a vaccine can be added and the correct properties are stored
+        """
+          
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        v0 = model.add_vaccine( 
+            vaccine0["full_efficacy"],
+            vaccine0["symptoms_efficacy"],
+            vaccine0["severe_efficacy"],
+            vaccine0["time_to_protect"], 
+            vaccine0["vaccine_protection_period"] )
+        v1 = model.add_vaccine( 
+            vaccine1["full_efficacy"], 
+            vaccine1["symptoms_efficacy"],
+            vaccine1["severe_efficacy"],
+            vaccine1["time_to_protect"], 
+            vaccine1["vaccine_protection_period"] )
+                
+        np.testing.assert_equal(v0.idx(), 0, "index of first added vaccine should be 0")
+        np.testing.assert_equal(v1.idx(), 1, "index of second added vaccine should be 1")
+        
+        np.testing.assert_equal(v0.full_efficacy()[0],vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
+        np.testing.assert_equal(v0.symptoms_efficacy()[0],vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
+        np.testing.assert_equal(v0.severe_efficacy()[0],vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
+        np.testing.assert_equal(v0.full_efficacy()[1],vaccine0["full_efficacy"], "incorrect full_efficacy (vaccine0)")
+        np.testing.assert_equal(v0.symptoms_efficacy()[1],vaccine0["symptoms_efficacy"], "incorrect symptoms efficacy (vaccine0)")
+        np.testing.assert_equal(v0.severe_efficacy()[1],vaccine0["severe_efficacy"], "incorrect severe efficacy (vaccine0)")
+        np.testing.assert_equal(v0.time_to_protect(),vaccine0["time_to_protect"], "incorrect time to protect (vaccine0)")
+        np.testing.assert_equal(v0.vaccine_protection_period(),vaccine0["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine0)")
+  
+        np.testing.assert_equal(v1.full_efficacy()[0],vaccine1["full_efficacy"][0], "incorrect full_efficacy (vaccine1)")
+        np.testing.assert_equal(v1.symptoms_efficacy()[0],vaccine1["symptoms_efficacy"][0], "incorrect symptoms efficacy (vaccine1)")
+        np.testing.assert_equal(v1.severe_efficacy()[0],vaccine1["severe_efficacy"][0], "incorrect severe efficacy (vaccine1)")
+        np.testing.assert_equal(v1.full_efficacy()[1],vaccine1["full_efficacy"][1], "incorrect full_efficacy (vaccine1)")
+        np.testing.assert_equal(v1.symptoms_efficacy()[1],vaccine1["symptoms_efficacy"][1], "incorrect symptoms efficacy (vaccine1)")
+        np.testing.assert_equal(v1.severe_efficacy()[1],vaccine1["severe_efficacy"][1], "incorrect severe efficacy (vaccine1)")
+        np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
+        np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
+
+    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
+        """
+        Check that in a 2 strain model, if a vaccine is only effective against one of the strains
+        then it will only protect from that strain and not the other
+        """
+        
+        if ( full_efficacy > 0.0 ) & ( symptoms_efficacy > 0.0 ) :
+            raise "can only test full or symptoms only"
+        
+        full_efficacy     = [ full_efficacy, 0.0 ];
+        symptoms_efficacy = [ symptoms_efficacy, 0.0 ];
+        severe_efficacy   = [ severe_efficacy, 0.0 ];
+        vaccine_protection_period = test_params[ "end_time" ] + 1;
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+
+        # add a second strain with the same multiplier
+        new_strain = model.add_new_strain( 1.0 )
+
+        n_total        = params.get_param( "n_total" )
+        idx_vaccinated = np.random.choice( n_total, n_to_vaccinate, replace=False)
+        df_vaccinated  = pd.DataFrame( data = { 'ID' : idx_vaccinated })
+
+        # add the vaccine
+        vaccine = model.add_vaccine( full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, vaccine_protection_period)
+
+        # vaccine some people
+        for idx in idx_vaccinated :
+            vaccinated =  model.vaccinate_individual( idx, vaccine = vaccine )
+            np.testing.assert_( vaccinated, "failed to vaccinate individual")
+    
+        # now infect a bunch of people with both strains
+        idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
+        for idx in idx_seed :
+            model.seed_infect_by_idx( idx, strain_idx = 0 )
+        idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
+        for idx in idx_seed :
+            model.seed_infect_by_idx( idx, strain = new_strain )    
+        model.run( verbose = False )
+            
+        # now get all those who have been infected after the vaccine takes effect
+        model.write_transmissions()
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
+                
+        # make sure sufficient people have been infected to check that the vaccine is effecive
+        n_infected= len( df_trans.index )
+        np.testing.assert_( n_infected * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
+
+        # check that vaccinated people have not been infected or did not get symptoms (depending on vaccine type )
+        # against the strain for which they had protection
+        df_vac_inf = pd.merge( df_vaccinated, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
+       
+        if symptoms_efficacy[0] > 0 :
+            df_vac_inf = df_vac_inf[ df_vac_inf[ "time_asymptomatic" ] == -1 ]
+             
+        n_inf_strain_0 = sum( df_vac_inf[ "strain_idx" ] == 0 )
+        np.testing.assert_equal( n_inf_strain_0, 0, "vaccinated people have been infected by strain that they should be protected against")
+          
+        # check some were infected by the strain from which they are not protected
+        n_inf_strain_1 = sum( df_vac_inf[ "strain_idx" ] == 1 )
+
+        np.testing.assert_( n_inf_strain_1 > 0, "no vaccinated people have been infected by strain that they should not be protected against")
+       
+
+    def test_network_transmission_multiplier(self, test_params, time_off, networks_off ) :   
+        """
+        Check that a transmission_multipler change applied to a single network 
+        is applied to (just) it 
+        """
+                    
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+    
+        if time_off > 0 :
+            model.run( n_steps = time_off, verbose = False )
+            
+        for n_id in networks_off :
+            net = model.get_network_by_id( n_id )
+            net.set_network_transmission_multiplier(0)
+            
+        model.run( verbose = False )
+        
+        df_trans = model.get_transmissions()
+        df_trans = df_trans[ df_trans[ "time_infected" ] > time_off ]
+        
+        n_all_inf = len( df_trans )
+        np.testing.assert_( n_all_inf > 50, "not sufficient transmissions to test")
+        
+        for n_id in networks_off :
+            n_net = len( df_trans[ df_trans[ "infector_network_id" ] == n_id ] )
+            np.testing.assert_( n_net == 0, "not sufficient transmissions to test")
+        
+    def test_custom_network_transmission_multiplier(self, test_params, time_add, age_group, n_inter, transmission_multiplier) :  
+        """
+        Check that a large transmission_multipler change applied to a single custom network 
+        that it contains huge number of transmission and everyone in that age group is infected
+        """ 
                         
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        if time_add > 0 :
+            model.run( n_steps = time_add, verbose = False )
+                      
+        df_indiv = model.get_individuals()
+        df_indiv = df_indiv[ df_indiv[ "age_group"] == age_group ]
+        
+        n_ids = len( df_indiv )
+        ids   = df_indiv[ "ID" ].to_numpy()
+        
+        df_edges = pd.DataFrame( {
+            "ID_1" : np.random.choice( ids, n_ids * n_inter ),
+            "ID_2" : np.random.choice( ids, n_ids * n_inter )
+        })
+        df_edges = df_edges[ df_edges[ "ID_1"] != df_edges[ "ID_2"] ]
+        
+        net = model.add_user_network( df_edges, name = "age-specific super-spreading network")
+        net.set_network_transmission_multiplier(transmission_multiplier)
+        net_id = net.network_id()
+
+        model.run( verbose = False )
+        
+        df_trans = model.get_transmissions()
+        n_inf_age_group_pre = len( df_trans[ ( df_trans[ "time_infected" ] <= time_add ) & ( df_trans[ "age_group_recipient" ] == age_group ) ] )
+        df_trans = df_trans[ ( df_trans[ "time_infected" ] > time_add ) & ( df_trans[ "age_group_recipient" ] == age_group ) ]
+        
+        
+        n_inf_age_group_post = len( df_trans )
+        n_inf_age_group_post_custom = len( df_trans[ df_trans[ "infector_network_id" ] == net_id] )
+  
+        np.testing.assert_equal( n_ids, n_inf_age_group_post + n_inf_age_group_pre, "not everyone in age group of super spreading net work is infected" )
+        np.testing.assert_( n_inf_age_group_post_custom / n_inf_age_group_post > 0.9, "insufficient proportion of transmissionson the super spreading network" )
+               

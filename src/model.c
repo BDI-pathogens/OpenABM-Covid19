@@ -1,5 +1,4 @@
-	/*
- * model.c
+ /* model.c
  *
  *  Created on: 5 Mar 2020
  *      Author: hinchr
@@ -41,7 +40,8 @@ model* new_model( parameters *params )
 	model_ptr->time   = 0;
 	model_ptr->rebuild_networks = TRUE;
 	model_ptr->user_network = NULL;
-    if (params->occupation_network_table == NULL)
+	model_ptr->n_initialised_strains = 0;
+    if (params->occupation_network_table == NULL )
     {
         model_ptr->use_custom_occupation_networks = 0;
         model_ptr->n_occupation_networks = N_DEFAULT_OCCUPATION_NETWORKS;
@@ -76,6 +76,7 @@ model* new_model( parameters *params )
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
+	set_up_strains( model_ptr );
 	set_up_seed_infection( model_ptr );
 	set_up_app_users( model_ptr );
 	set_up_trace_tokens( model_ptr, 0.01 );
@@ -116,6 +117,7 @@ void destroy_model( model *model )
 			free( interaction_block );
 		}
 	}
+	free( model->interaction_blocks );
 
     next_event_block = model->event_block;
 	while( next_event_block != NULL )
@@ -145,6 +147,7 @@ void destroy_model( model *model )
 		next_network = network->next_network;
 		destroy_network(network);
 	}
+	free( model->all_networks );
 
 	for( idx = 0; idx < N_EVENT_TYPES; idx++ )
 		destroy_event_list( model, idx );
@@ -173,6 +176,12 @@ void destroy_model( model *model )
     	free( model->hospitals );
     }
     destroy_risk_scores( model );
+
+    free( model->strains );
+    for( idx = 0; idx < model->params->max_n_strains; idx++ )
+		free( model->cross_immunity[idx] );
+	free( model->cross_immunity );
+
     free( model );
 }
 
@@ -232,6 +241,24 @@ void destroy_event_list( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		add_new_network
+*  Description: creates and setups a new network
+*  Returns:		void
+******************************************************************************************/
+network* add_new_network( model *model, long n_total, int type )
+{
+	network *net = create_network( n_total, type );
+
+	net->network_id = model->n_networks;
+
+	if( model->n_networks < MAX_N_NETWORKS )
+		model->all_networks[ model->n_networks ] = net;
+
+	model->n_networks++;
+	return( net );
+}
+
+/*****************************************************************************************
 *  Name:		set_up_networks
 *  Description: sets up then networks
 *  Returns:		void
@@ -243,26 +270,27 @@ void set_up_networks( model *model )
 	long n_random_interactions;
 	double mean_interactions  = 0;
 
+	model->n_networks = 0;
+	model->all_networks = calloc( MAX_N_NETWORKS, sizeof(network*) );
+
 	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
 	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
-	model->random_network        = create_network( n_total, RANDOM );
+	model->random_network        = add_new_network( model, n_total, RANDOM );
 	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
 	model->random_network->skip_hospitalised = FALSE;
 	model->random_network->skip_quarantined  = FALSE;
 	model->random_network->construction      = NETWORK_CONSTRUCTION_RANDOM_DEFAULT;
 	model->random_network->daily_fraction    = 1.0;
-	model->random_network->network_id        = RANDOM_NETWORK;
 	strcpy( model->random_network->name, DEFAULT_NETWORKS_NAMES[RANDOM_NETWORK] );
 
-	model->household_network = create_network( n_total, HOUSEHOLD );
+	model->household_network = add_new_network( model, n_total, HOUSEHOLD );
 	build_household_network_from_directroy( model->household_network, model->household_directory );
 	model->household_network->skip_hospitalised = TRUE;
 	model->household_network->skip_quarantined  = FALSE;
 	model->household_network->construction      = NETWORK_CONSTRUCTION_HOUSEHOLD;
 	model->household_network->daily_fraction    = 1.0;
-	model->household_network->network_id        = HOUSEHOLD_NETWORK;
 	strcpy( model->household_network->name, DEFAULT_NETWORKS_NAMES[HOUSEHOLD_NETWORK] );
 
     set_up_occupation_network( model );
@@ -339,12 +367,11 @@ void set_up_occupation_network( model *model )
             if (model->population[idx].occupation_network == network)
                 people[n_people++] = idx;
 
-        model->occupation_network[network] = create_network( n_people, OCCUPATION );
+        model->occupation_network[network] = add_new_network(model, n_people, OCCUPATION );
         model->occupation_network[network]->skip_hospitalised = TRUE;
         model->occupation_network[network]->skip_quarantined  = TRUE;
         model->occupation_network[network]->construction      = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
         model->occupation_network[network]->daily_fraction = model->params->daily_fraction_work;
-        model->occupation_network[network]->network_id = params->occupation_network_table->network_ids[network];
         model->occupation_network[network]->n_edges = 0;
         strcpy( model->occupation_network[network]->name, params->occupation_network_table->network_names[network] );
         n_interactions = params->occupation_network_table->mean_interactions[network] / params->daily_fraction_work;
@@ -361,7 +388,9 @@ void set_up_occupation_network( model *model )
 
     if( model->use_custom_occupation_networks == FALSE )
     {
-    	free( params->occupation_network_table );
+    	if( params->occupation_network_table != NULL )
+    		destroy_occupation_network_table( model->params );
+
     	params->occupation_network_table = NULL;
     }
 }
@@ -431,7 +460,7 @@ void set_up_individual_hazard( model *model )
 	long idx;
 
 	for( idx = 0; idx < params->n_total; idx++ )
-		initialize_hazard( &(model->population[idx]), params );
+		initialize_hazard( &(model->population[idx]), params, 0 );
 }
 
 /*****************************************************************************************
@@ -582,6 +611,7 @@ void flu_infections( model *model )
 *  				indiv:	pointer to the individual
 *  				time:	time of the event (int)
 *  				model:	pointer to the model
+*  				info:   a pointer which can be passed to the transition function
 *
 *  Returns:		a pointer to the newly added event
 ******************************************************************************************/
@@ -589,7 +619,8 @@ event* add_individual_to_event_list(
 	model *model,
 	int type,
 	individual *indiv,
-	int time
+	int time,
+	void *info
 )
 {
 	event_list *list    = &(model->event_lists[ type ]);
@@ -597,6 +628,7 @@ event* add_individual_to_event_list(
 	event->individual   = indiv;
 	event->type         = type;
 	event->time         = time;
+	event->info  = info;
 
 	if( time < MAX_TIME){
 		if( list->n_daily_current[time] >0  )
@@ -686,6 +718,29 @@ void update_event_list_counters( model *model, int type )
 }
 
 /*****************************************************************************************
+*  Name:		set_up_strains
+*  Description: allocates memory for strains and cross-immunity matrix
+*  Returns:		void
+******************************************************************************************/
+void set_up_strains( model *model )
+{
+	int max_n_strains = model->params->max_n_strains;
+	model->strains = calloc( max_n_strains, sizeof( strain ) );
+
+	float** cross_immunity;
+	int jdx;
+	cross_immunity = calloc( max_n_strains, sizeof(float *) );
+	for( int idx = 0; idx < max_n_strains; idx++)
+	{
+		cross_immunity[idx] 		= calloc( max_n_strains, sizeof(float) );
+		for( jdx = 0; jdx < max_n_strains; jdx++)
+			cross_immunity[idx][jdx] 	= 1; // set complete cross-immunity
+		model->strains[idx].idx 	= -1; // if idx = -1, strain is uninitialised
+	}		
+	model->cross_immunity = cross_immunity;	
+}
+
+/*****************************************************************************************
 *  Name:		set_up_seed_infection
 *  Description: sets up the initial population
 *  Returns:		void
@@ -693,11 +748,17 @@ void update_event_list_counters( model *model, int type )
 void set_up_seed_infection( model *model )
 {
 	parameters *params = model->params;
-	int idx;
+	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
+	double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof( double  ) );
+
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
+
 	while( idx < params->n_seed_infection )
 	{
 		person = gsl_rng_uniform_int( rng, params->n_total );
@@ -708,10 +769,12 @@ void set_up_seed_infection( model *model )
 
 		if( !params->hospital_on || indiv->worker_type == NOT_HEALTHCARE_WORKER )
 		{
-			if( seed_infect_by_idx( model, indiv->idx, 1, -1 ) )
+			if( seed_infect_by_idx( model, indiv->idx, strain_idx, -1 ) )
 				idx++;
 		}
 	}
+
+	free( hospitalised_fraction );
 }
 
 /*****************************************************************************************
@@ -967,6 +1030,37 @@ void transition_events(
 }
 
 /*****************************************************************************************
+*  Name:		transition_events_info
+*  Description: Transitions all people from one type of event
+*  Returns:		void
+******************************************************************************************/
+void transition_events_info(
+	model *model_ptr,
+	int type,
+	void (*transition_func)( model*, individual*, void* ),
+	int remove_event
+)
+{
+	long idx, n_events;
+	event *event, *next_event;
+	individual *indiv;
+
+	n_events    = model_ptr->event_lists[type].n_daily_current[ model_ptr->time ];
+	next_event  = model_ptr->event_lists[type].events[ model_ptr->time ];
+
+	for( idx = 0; idx < n_events; idx++ )
+	{
+		event      = next_event;
+		next_event = event->next;
+		indiv      = event->individual;
+		transition_func( model_ptr, indiv, event->info );
+
+		if( remove_event )
+			remove_event_from_event_list( model_ptr, event );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		set_up_healthcare_workers
 *  Description: randomly pick individuals from population between ages 20 - 69 to be doctors
 *               and nurses
@@ -1043,7 +1137,6 @@ int add_user_network(
 {
 	long idx;
 	long n_total   = model->params->n_total;
-	int network_id;
 	network *user_network;
 
 	// check to see that the edges all make sense
@@ -1061,23 +1154,12 @@ int add_user_network(
 		}
 	}
 
-	// get the next free network_id
-	network_id = model->n_occupation_networks + 1;
-	user_network = model->user_network;
-	while( user_network != NULL )
-	{
-		network_id   = max( network_id, user_network->network_id );
-		user_network = user_network->next_network;
-	}
-	network_id++;
-
-	user_network = create_network( model->params->n_total, type );
+	user_network = add_new_network( model, model->params->n_total, type );
 	user_network->edges = calloc(n_edges, sizeof(edge));
 	user_network->n_edges = n_edges;
 	user_network->skip_hospitalised = skip_hospitalised;
 	user_network->skip_quarantined  = skip_quarantined;
 	user_network->daily_fraction    = daily_fraction;
-	user_network->network_id		= network_id;
 	strcpy( user_network->name, name );
 
 	for( idx = 0; idx < n_edges; idx++ )
@@ -1093,7 +1175,7 @@ int add_user_network(
 
 	model->rebuild_networks = TRUE;
 
-	return network_id;
+	return user_network->network_id;
 }
 
 /*****************************************************************************************
@@ -1121,7 +1203,6 @@ int add_user_network_random(
 {
 	long idx, total_interactions, n_edges;
 	long n_total   = model->params->n_total;
-	int network_id;
 	network *user_network;
 
 	// check to see that the  all make sense
@@ -1145,23 +1226,12 @@ int add_user_network_random(
 		}
 	}
 
-	// get the next free network_id
-	network_id = model->n_occupation_networks + 1;
-	user_network = model->user_network;
-	while( user_network != NULL )
-	{
-		network_id   = max( network_id, user_network->network_id );
-		user_network = user_network->next_network;
-	}
-	network_id++;
-
 	// set on the meta data of the new network
-	user_network = create_network( model->params->n_total, RANDOM );
+	user_network = add_new_network( model, model->params->n_total, RANDOM );
 	user_network->skip_hospitalised = skip_hospitalised;
 	user_network->skip_quarantined  = skip_quarantined;
 	user_network->construction      = NETWORK_CONSTRUCTION_RANDOM;
 	user_network->daily_fraction    = 1;
-	user_network->network_id		= network_id;
 	strcpy( user_network->name, name );
 
 	// set on the people and the number of interactions
@@ -1191,7 +1261,7 @@ int add_user_network_random(
 
 	model->rebuild_networks = TRUE;
 
-	return network_id;
+	return user_network->network_id;
 }
 
 /*****************************************************************************************
@@ -1257,24 +1327,8 @@ int delete_network( model *model, network *net )
 ******************************************************************************************/
 network* get_network_by_id( model *model, int network_id )
 {
-	int idx;
-
-	if( model->random_network->network_id == network_id )
-		return model->random_network;
-	if( model->household_network->network_id == network_id )
-		return model->household_network;
-
-	for( idx = 0; idx < model->n_occupation_networks; idx++ )
-		if( model->occupation_network[ idx ]->network_id == network_id )
-			return model->occupation_network[ idx ];
-
-	network *user_network = model->user_network;
-	while( user_network != NULL )
-	{
-		if( user_network->network_id == network_id )
-			return user_network;
-		user_network = user_network->next_network;
-	};
+	if( network_id < model->n_networks )
+		return( model->all_networks[ network_id ] );
 
 	return NULL;
 }
@@ -1285,73 +1339,18 @@ network* get_network_by_id( model *model, int network_id )
 *  				network ids are set on the array pointer
 *  Returns:		the number of ids
 ******************************************************************************************/
-int get_network_ids( model *model, int *ids, int max_ids )
+int get_network_ids( model *model, int *ids )
 {
 	int idx;
 	int n_ids = 0;
-	network *user_network;
 
-	ids[ n_ids++ ] = model->household_network->network_id;
-
-	for( idx = 0; idx < model->n_occupation_networks; idx++ )
+	for( idx = 0; idx < model->n_networks; idx ++ )
 	{
-		if( n_ids == max_ids )
-			return -1;
-		ids[ n_ids++ ] = model->occupation_network[ idx ]->network_id;
+		if( model->all_networks[ idx ] != NULL )
+			ids[ n_ids++ ] = idx;
 	}
 
-	if( n_ids == max_ids )
-		return -1;
-	ids[ n_ids++ ] = model->random_network->network_id;
-
-	user_network = model->user_network;
-	while( user_network != NULL )
-	{
-		if( n_ids == max_ids )
-			return -1;
-		ids[ n_ids++ ] = user_network->network_id;
-		user_network   = user_network->next_network;
-	}
 	return( n_ids );
-}
-
-/*****************************************************************************************
-*  Name:		get_network_id_by_index
-*  Description: gets a network ids by index
-*  Returns:		the network id
-******************************************************************************************/
-int get_network_id_by_index( model *model, int idx )
-{
-	int offset = 0, remainder;
-	network *user_network;
-
-  if( idx < 0 )
-    print_exit("idx (=%d) must be greater than 0", idx);
-
-  if( idx == 0 )
-    return( model->household_network->network_id );
-  offset += 1;
-
-  if( idx < (offset + model->n_occupation_networks) )
-    return( model->occupation_network[idx - offset]->network_id );
-  offset += model->n_occupation_networks;
-
-  if( idx == offset )
-    return( model->random_network->network_id );
-  offset += 1;
-
-  remainder = idx - offset;
-	user_network = model->user_network;
-	while( user_network != NULL && remainder > 0 )
-  {
-		user_network = user_network->next_network;
-    remainder--;
-  }
-
-  if( user_network != NULL )
-    return( user_network->network_id );
-
-  return( -1 );
 }
 
 /*****************************************************************************************
@@ -1434,8 +1433,8 @@ int one_time_step( model *model )
 		transition_events( model, MANUAL_CONTACT_TRACING, &intervention_manual_trace,       TRUE );
 	}
 
-	transition_events( model, VACCINE_PROTECT, &intervention_vaccine_protect, TRUE );
-	transition_events( model, VACCINE_WANE,    &intervention_vaccine_wane, TRUE );
+	transition_events_info( model, VACCINE_PROTECT,          &intervention_vaccine_protect, TRUE );
+	transition_events_info( model, VACCINE_WANE,             &intervention_vaccine_wane, TRUE );
 
 	transition_events( model, QUARANTINE_RELEASE,     &intervention_quarantine_release, FALSE );
 	transition_events( model, TRACE_TOKEN_RELEASE,    &intervention_trace_token_release,FALSE );

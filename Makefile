@@ -30,7 +30,7 @@ else
 	SED_I=sed -i
 endif
 
-OBJS = src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o
+OBJS = src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
 
 GSLFLAGS= -lgsl -lgslcblas -lm -O3
 LFLAGS = $(GSLFLAGS)
@@ -47,7 +47,7 @@ CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(shell gsl-config --cflags) -O0
 LDFLAGS = -L$(LIB) $(shell gsl-config --libs)
 
 # Swig's input
-SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h
+SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h
 
 # Swig's output
 SWIG_OUTPUT_PY = src/covid19_wrap.o src/covid19_wrap.c src/covid19.py src/_covid19.cpython-37m-darwin.so src/build src/covid19.egg-info

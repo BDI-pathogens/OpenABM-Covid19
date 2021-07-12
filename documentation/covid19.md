@@ -163,6 +163,38 @@ For patients receiving intensive care treatment, a fraction  &#966;<sub>death</s
 Patients who require critical care and do not receive intensive care treatment are assumed to die upon developing critical symptoms.
 Patients who survive critical symptoms remain in hospital for &#964;<sub>hosp,rec</sub> before recovering.
 
+## Immunity Model
+
+The ABM supports 3 types of immunity from SARS-CoV-2:
+
+1. *Full* - someone with full immunity cannot contract the virus so cannot transmit it.
+2. *From Symptoms* - someone with immunity from symptoms can contract the virus but does not develop symptoms, however, can transmit the virus to others. In the ABM this is modelled by forcing the individual down the asymptomatic disease pathway. Note that people who are asymptomatic are assumed to have a lower rate of infectiousness compared to those with symptomatic disease.
+3. *From Severe Symptoms* - someone with immunity from severe symptoms can contract the virus, they can develop symptoms and they can transmit the virus to others. However, they cannot develop severe symptoms so will not be hopsitalised or die from the disease. In the ABM this is modelled by preventing the person going down the hopsitalised path in the disease model (i.e. set (&#966;<sub>hosp</sub>(age) =0)). Note that split between asymptomatic/mild-symptoms/symptoms is the same as someone with no immunity, so the mean transmission rate is the same as someone without immunity.
+
+On recovering from an infection, everybody gains immunity for a period of time, which is assumed to be *full* immunity. 
+Immunity wanes over time according to the shifted exponential distribution (default parameters in the model assume no waning). 
+Immunity is assumed to be polarised, in that if the individual gains a certain type of immunity they will have that level of immunity each time they are challenged by the virus, until they gain additional immunity or it wanes.
+
+## Multiple Strains
+
+The ABM also supports the option to model multiple variants of the virus. 
+Each strain of the virus can have different levels of transmisibility, modelled as a multipler which is applied to the overall infectious rate.
+Additionally, the strains can have different virulence, which is modelled by modifying the fraction of people with moderate symptoms who are hospitalised (&#966;<sub>hosp</sub>(age) ).
+Multiple simultaneous infections are not allowed *i.e.* once somebody has been infected by a virus and enters the disease cascade, they are not able to contract another variant until they recover.
+Upon recovering from the an infection, cross-immunity to other strains can be conferred upon the individual according to a cross-immunity matrix. 
+If cross-immunity is conferred to a strain, it is polarising (i.e. the same for multiple challenges) and wanes at the same time that the immunity wanes to the strain that the person was infected.
+With more than three strains, cross-immunity between strains is assumed to be fully correlated *i.e.* if somebody gains immunity to a strain where the cross-immunity is 60%, then they will also have immunity to all strains where the cross-immunity is greater than 60%.
+Immunity gained via infection from another strain of the virus is assumed to be full immunity.
+If immunity to a particular strain is conferred multiple times due to cross-infections, then the time at which the immunity wanes is assumed to be the maximum across all infections.
+
+## Vaccination
+
+The ABM supports the option vaccinate individuals in the population.
+Each type of vaccine has the ability to confer each type of immunity (full, from symptoms or from severe symptoms) to each strain at different levels of efficacy.
+It is assumed that the immune response is fully correlated, such that if one type of immunity (e.g. full immunity to alpha strain) is conferred where the vaccine has a 60% efficacy, then all other types of immunity with efficacy greater than 60% will also be conferred (e.g. immunity from severe symptoms to the delta strain).
+Immediately after a vaccine is given, there is period of time before immunity is conferred, and then immunity will wane after a set time.
+Vaccines can only ever increase immunity, therefore if immunity has be conferred due to an earlier infection, then vaccination can only ever increase the level/type of immunity and for longer.
+
 ## Passive Interventions
 
 The ABM has the ability to model both passive and active non-pharmaceutical interventions.  Interventions are designed to reduce the rate of transmission but have the potential to quarantine significant numbers of people.  We define passive interventions to be those which do not involve testing or contact tracing. Here we provide details on each of the passive interventions and their impact on the contact network.  Table [Passive intervention parameters](./parameters/passive_intervention_parameters.md) summarises the parameters in the model associated with passive interventions.  

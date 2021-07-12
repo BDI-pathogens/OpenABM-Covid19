@@ -59,7 +59,9 @@ Collate:
   Network.R
   Model.R
   Simulation.R
+  Strain.R
   VaccineSchedule.R
+  Vaccine.R
 Suggests:
     testthat
 RoxygenNote: 7.1.1

@@ -22,5 +22,7 @@ typedef struct trace_token trace_token;
 typedef struct trace_token_block trace_token_block;
 typedef struct demographic_household_table demographic_household_table;
 typedef struct demographic_occupation_network_table demographic_occupation_network_table;
+typedef struct strain strain;
+typedef struct vaccine vaccine;
 
 #endif /* STRUCTURE_H_ */

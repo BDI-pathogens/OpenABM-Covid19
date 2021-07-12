@@ -8,6 +8,8 @@ import sys, time
 
 import covid19
 from COVID19.network import Network
+from COVID19.vaccine import Vaccine
+from COVID19.strain  import Strain
 
 LOGGER = logging.getLogger(__name__)
 
@@ -116,8 +118,6 @@ class EVENT_TYPES(enum.Enum):
     MANUAL_CONTACT_TRACING = 23
     N_EVENT_TYPES = 24
 
-
-
 class OccupationNetworkEnum(enum.Enum):
     _primary_network = 0
     _secondary_network = 1
@@ -178,7 +178,8 @@ class VaccineStatusEnum(enum.Enum):
     VACCINE_NO_PROTECTION = 1
     VACCINE_PROTECTED_FULLY = 2
     VACCINE_PROTECTED_SYMPTOMS = 3
-    VACCINE_WANED = 4
+    VACCINE_WANED_FULLY = 4
+    VACCINE_WANED_SYMPTOMS = 5
 
 def _get_base_param_from_enum(param):
     base_name, enum_val = None, None
@@ -205,10 +206,7 @@ class VaccineSchedule(object):
         frac_60_69 = 0,
         frac_70_79 = 0,
         frac_80    = 0,
-        vaccine_type    = 0,
-        efficacy        = 1.0,
-        time_to_protect = 15,
-        vaccine_protection_period = 365
+        vaccine    = -1,
     ):
         fraction_to_vaccinate = [
             frac_0_9,   frac_10_19, frac_20_29, frac_30_39, frac_40_49,
@@ -219,10 +217,10 @@ class VaccineSchedule(object):
         for age in AgeGroupEnum:
             self.c_fraction_to_vaccinate[ age.value ] = fraction_to_vaccinate[ age.value ]
         
-        self.vaccine_type    = vaccine_type
-        self.efficacy        = efficacy
-        self.time_to_protect = time_to_protect
-        self.vaccine_protection_period = vaccine_protection_period
+        if not isinstance( vaccine, Vaccine ) :
+            ModelException( "argument vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
+
+        self.vaccine = vaccine
         
         self.c_total_vaccinated = covid19.longArray( len(AgeGroupEnum)  )
         for age in AgeGroupEnum:
@@ -491,10 +489,10 @@ class Parameters(object):
         n_networks = df_occupation_networks['network_no'].max() + 1
         covid19.set_occupation_network_table(self.c_params, int(n_total), int(n_networks))
         [covid19.set_indiv_occupation_network_property(
-            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), int(row[4]),
-            str(row[5]))
+            self.c_params, int(row[0]),  int(row[1]), float(row[2]), float(row[3]), 
+            str(row[4]))
             for row in df_occupation_network_properties[[
-            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 'network_id',
+            'network_no',  'age_type', 'mean_work_interaction', 'lockdown_multiplier', 
             'network_name']].values]
 
         ID         = df_occupation_networks['ID'].to_list()
@@ -828,28 +826,242 @@ class Model:
             if res == False :
                 raise ModelParameterException( "Failed to remove old app_users" )
     
-    def seed_infect_by_idx(self, ID, strain_multiplier = 1, network_id = -1 ):
+    def seed_infect_by_idx(self, ID, strain_idx = 0, strain = None, network_id = -1 ):
         
         n_total = self._params_obj.get_param("n_total")
 
         if ( ID < 0 ) | ( ID >= n_total ) :
-            raise ModelParameterException( "ID out of range (0<=ID<n_total)")
+            raise ModelParameterException( "ID out of range (0<=ID<n_total)" )
 
-        if strain_multiplier < 0 :
-            raise ModelParameterException( "strain_multiplier must be positive")
+        if strain != None :
+            if isinstance( strain, Strain ) :
+                strain_idx = strain.idx()
+            else :
+                ModelParameterException( "strain must be of class Strain")
+            
+        if not isinstance( strain_idx, int ) :
+            ModelParameterException( "strain must either be a Strain class or the idx of the strain" )
 
-        return covid19.seed_infect_by_idx( self.c_model, ID, strain_multiplier, network_id );
+        n_strains = self.c_model.n_initialised_strains;
+        if ( strain_idx < 0 ) | ( strain_idx >= n_strains ) :
+            raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
+       
+        return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+    
 
-    def get_network_info(self, max_ids= 1000):
+    def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
+        
+        """
+        Add a new strain, note the total number of strains that can be added is set by the initial 
+        parameters max_n_strains
+        
+        transmission_multiplier - the relative transmissibility of the new strain
+        hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
+        
+        """  
+
+        n_strains = self.c_model.n_initialised_strains;
+        max_n_strains = self._params_obj.get_param("max_n_strains")
+
+        if n_strains == max_n_strains :
+            raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )    
+        
+        hospitalised_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        if hospitalised_fraction == None :
+            covid19.get_param_array_hospitalised_fraction(self.c_params, hospitalised_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                hospitalised_fraction_c[ idx ] = hospitalised_fraction[ idx ]
            
-        if max_ids > 1e6 :
-            raise ModelException( "Maximum number of allowed network is 1e6" )
-        ids_c = covid19.intArray( max_ids )
-        n_ids = covid19.get_network_ids( self.c_model, ids_c, max_ids )
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c );
+
+        return Strain( self, idx )
+
+    def set_cross_immunity_matrix(self, cross_immunity ):
+
+        max_n_strains = self._params_obj.get_param("max_n_strains")
+        if len(cross_immunity) > max_n_strains:
+            raise ParameterException( f"Too many rows in cross_immunity (maximum allowed: {max_n_strains}" )
+
+        for caught_idx in range(len(cross_immunity)):
+            if len(cross_immunity) > max_n_strains:
+                raise ParameterException( f"Too many columns in cross_immunity row with index={i} (maximum allowed: {max_n_strains}" )
+            for conferred_idx, probability in enumerate(cross_immunity[caught_idx]):
+                if ( probability < 0 ) | ( probability > 1 ):
+                    raise ParameterException( f"Cross-immunity probability must be in the interval [0,1]")
+                covid19.set_cross_immunity_probability( self.c_model, caught_idx, conferred_idx, probability )
+    
+    def get_transmissions(self):
         
-        if n_ids == -1 :
-            return self.get_network_info( max_ids = max_ids * 10 )
+        n_trans = covid19.get_n_transmissions(self.c_model);
         
+        ID_recipient = covid19.longArray( n_trans )
+        age_group_recipient = covid19.intArray( n_trans )
+        house_no_recipient = covid19.longArray( n_trans )
+        occupation_network_recipient = covid19.intArray( n_trans )
+        worker_type_recipient = covid19.intArray( n_trans )
+        hospital_state_recipient = covid19.intArray( n_trans )
+        infector_network = covid19.intArray( n_trans )
+        infector_network_id = covid19.intArray( n_trans )
+        generation_time = covid19.intArray( n_trans )
+        ID_source = covid19.longArray( n_trans )
+        age_group_source = covid19.intArray( n_trans )
+        house_no_source = covid19.longArray( n_trans )
+        occupation_network_source = covid19.intArray( n_trans )
+        worker_type_source = covid19.intArray( n_trans )
+        hospital_state_source = covid19.intArray( n_trans )
+        time_infected_source = covid19.intArray( n_trans )
+        status_source = covid19.intArray( n_trans )
+        time_infected = covid19.intArray( n_trans )
+        time_presymptomatic = covid19.intArray( n_trans )
+        time_presymptomatic_mild = covid19.intArray( n_trans )
+        time_presymptomatic_severe = covid19.intArray( n_trans )
+        time_symptomatic = covid19.intArray( n_trans )
+        time_symptomatic_mild = covid19.intArray( n_trans )
+        time_symptomatic_severe = covid19.intArray( n_trans )
+        time_asymptomatic = covid19.intArray( n_trans )
+        time_hospitalised = covid19.intArray( n_trans )
+        time_critical = covid19.intArray( n_trans )
+        time_hospitalised_recovering = covid19.intArray( n_trans )
+        time_death = covid19.intArray( n_trans )
+        time_recovered = covid19.intArray( n_trans )
+        time_susceptible = covid19.intArray( n_trans )
+        is_case = covid19.intArray( n_trans )
+        strain_idx = covid19.intArray( n_trans )
+        transmission_multiplier = covid19.floatArray( n_trans )
+        expected_hospitalisation = covid19.floatArray( n_trans )
+        
+        covid19.get_transmissions( self.c_model, ID_recipient, age_group_recipient,
+            house_no_recipient, occupation_network_recipient, worker_type_recipient,
+            hospital_state_recipient, infector_network, infector_network_id,
+            generation_time, ID_source, age_group_source, house_no_source,
+            occupation_network_source, worker_type_source, hospital_state_source,
+            time_infected_source, status_source, time_infected, time_presymptomatic,
+            time_presymptomatic_mild, time_presymptomatic_severe, time_symptomatic,
+            time_symptomatic_mild, time_symptomatic_severe, time_asymptomatic,
+            time_hospitalised, time_critical, time_hospitalised_recovering,
+            time_death, time_recovered, time_susceptible, is_case, strain_idx,
+            transmission_multiplier, expected_hospitalisation );
+                
+        p_ID_recipient = [None] * n_trans
+        p_age_group_recipient = [None] * n_trans
+        p_house_no_recipient = [None] * n_trans
+        p_occupation_network_recipient = [None] * n_trans
+        p_worker_type_recipient = [None] * n_trans
+        p_hospital_state_recipient = [None] * n_trans
+        p_infector_network = [None] * n_trans
+        p_infector_network_id = [None] * n_trans
+        p_generation_time = [None] * n_trans
+        p_ID_source = [None] * n_trans
+        p_age_group_source = [None] * n_trans
+        p_house_no_source = [None] * n_trans
+        p_occupation_network_source = [None] * n_trans
+        p_worker_type_source = [None] * n_trans
+        p_hospital_state_source = [None] * n_trans
+        p_time_infected_source = [None] * n_trans
+        p_status_source = [None] * n_trans
+        p_time_infected = [None] * n_trans
+        p_time_presymptomatic = [None] * n_trans
+        p_time_presymptomatic_mild = [None] * n_trans
+        p_time_presymptomatic_severe = [None] * n_trans
+        p_time_symptomatic = [None] * n_trans
+        p_time_symptomatic_mild = [None] * n_trans
+        p_time_symptomatic_severe = [None] * n_trans
+        p_time_asymptomatic = [None] * n_trans
+        p_time_hospitalised = [None] * n_trans
+        p_time_critical = [None] * n_trans
+        p_time_hospitalised_recovering = [None] * n_trans
+        p_time_death = [None] * n_trans
+        p_time_recovered = [None] * n_trans
+        p_time_susceptible = [None] * n_trans
+        p_is_case = [None] * n_trans
+        p_strain_idx = [None] * n_trans
+        p_transmission_multiplier = [None] * n_trans
+        p_expected_hospitalisation = [None] * n_trans
+         
+        for idx in range( n_trans ) :
+            p_ID_recipient[ idx ] = ID_recipient[ idx ] 
+            p_age_group_recipient[ idx ] = age_group_recipient[ idx ]
+            p_house_no_recipient[ idx ] = house_no_recipient[ idx ] 
+            p_occupation_network_recipient[ idx ] = occupation_network_recipient[ idx ]
+            p_worker_type_recipient[ idx ] = worker_type_recipient[ idx ]
+            p_hospital_state_recipient[ idx ] = hospital_state_recipient[ idx ] 
+            p_infector_network[ idx ] = infector_network[ idx ] 
+            p_infector_network_id[ idx ] = infector_network_id[ idx ]
+            p_generation_time[ idx ] = generation_time[ idx ] 
+            p_ID_source[ idx ] = ID_source[ idx ] 
+            p_age_group_source[ idx ] = age_group_source[ idx ] 
+            p_house_no_source[ idx ] = house_no_source[ idx ]
+            p_occupation_network_source[ idx ] = occupation_network_source[ idx ] 
+            p_worker_type_source[ idx ] = worker_type_source[ idx ] 
+            p_hospital_state_source[ idx ] = hospital_state_source[ idx ]
+            p_time_infected_source[ idx ] = time_infected_source[ idx ] 
+            p_status_source[ idx ] = status_source[ idx ] 
+            p_time_infected[ idx ] = time_infected[ idx ] 
+            p_time_presymptomatic[ idx ] = time_presymptomatic[ idx ]
+            p_time_presymptomatic_mild[ idx ] = time_presymptomatic_mild[ idx ] 
+            p_time_presymptomatic_severe[ idx ] = time_presymptomatic_severe[ idx ] 
+            p_time_symptomatic[ idx ] = time_symptomatic[ idx ]
+            p_time_symptomatic_mild[ idx ] = time_symptomatic_mild[ idx ] 
+            p_time_symptomatic_severe[ idx ] = time_symptomatic_severe[ idx ] 
+            p_time_asymptomatic[ idx ] = time_asymptomatic[ idx ]
+            p_time_hospitalised[ idx ] = time_hospitalised[ idx ] 
+            p_time_critical[ idx ] = time_critical[ idx ] 
+            p_time_hospitalised_recovering[ idx ] = time_hospitalised_recovering[ idx ]
+            p_time_death[ idx ] = time_death[ idx ] 
+            p_time_recovered[ idx ] = time_recovered[ idx ] 
+            p_time_susceptible[ idx ] = time_susceptible[ idx ] 
+            p_is_case[ idx ] = is_case[ idx ] 
+            p_strain_idx[ idx ] = strain_idx[ idx ]
+            p_transmission_multiplier[ idx ] = transmission_multiplier[ idx ] 
+            p_expected_hospitalisation[ idx ] = expected_hospitalisation[ idx ] 
+    
+        df_res = pd.DataFrame( {
+            "ID_recipient" : p_ID_recipient,                 
+            "age_group_recipient" : p_age_group_recipient,
+            "house_no_recipient" : p_house_no_recipient, 
+            "occupation_network_recipient" : p_occupation_network_recipient,
+            "worker_type_recipient" : p_worker_type_recipient,
+            "hospital_state_recipient" : p_hospital_state_recipient, 
+            "infector_network" : p_infector_network, 
+            "infector_network_id" : p_infector_network_id,
+            "generation_time" : p_generation_time, 
+            "ID_source" : p_ID_source, 
+            "age_group_source" : p_age_group_source, 
+            "house_no_source" : p_house_no_source,
+            "occupation_network_source" : p_occupation_network_source, 
+            "worker_type_source" : p_worker_type_source, 
+            "hospital_state_source" : p_hospital_state_source,
+            "time_infected_source" : p_time_infected_source, 
+            "status_source" : p_status_source, 
+            "time_infected" : p_time_infected, 
+            "time_presymptomatic" : p_time_presymptomatic,
+            "time_presymptomatic_mild" : p_time_presymptomatic_mild, 
+            "time_presymptomatic_severe" : p_time_presymptomatic_severe, 
+            "time_symptomatic" : p_time_symptomatic,
+            "time_symptomatic_mild" : p_time_symptomatic_mild, 
+            "time_symptomatic_severe" : p_time_symptomatic_severe, 
+            "time_asymptomatic" : p_time_asymptomatic,
+            "time_hospitalised" : p_time_hospitalised, 
+            "time_critical" : p_time_critical,
+            "time_hospitalised_recovering" : p_time_hospitalised_recovering,
+            "time_death" : p_time_death, 
+            "time_recovered" : p_time_recovered,  
+            "time_susceptible" : p_time_susceptible,
+            "is_case" : p_is_case, 
+            "strain_idx" : p_strain_idx,
+            "transmission_multiplier" : p_transmission_multiplier,
+            "expected_hospitalisation" : p_expected_hospitalisation
+        } )
+               
+        return df_res
+
+    def get_network_info(self):
+           
+   
+        ids_c = covid19.intArray( covid19.MAX_N_NETWORKS )
+        n_ids = covid19.get_network_ids( self.c_model, ids_c )
+              
         ids        = [None] * n_ids
         names      = [None] * n_ids
         n_edges    = [None] * n_ids
@@ -881,8 +1093,75 @@ class Model:
                 'skip_quarantined'  : skip_quarantined,
                 'daily_fraction'    : daily_fraction
             } )
-       
-    def vaccinate_individual(self, ID, vaccine_type = 0, efficacy = 1.0, time_to_protect = 14, vaccine_protection_period = 1000 ):
+      
+          
+    def add_vaccine(
+            self, 
+            full_efficacy     = 1.0, 
+            symptoms_efficacy = 1.0, 
+            severe_efficacy   = 1.0, 
+            time_to_protect   = 14, 
+            vaccine_protection_period = 1000 ):
+        """
+        Add a new vaccine type
+        
+        """
+        
+        if time_to_protect < 1 :
+            raise ModelParameterException( "vaccine must take at least one day to take effect" )
+        
+        if vaccine_protection_period <= time_to_protect :
+            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
+
+        n_strains = self.c_params.max_n_strains;
+        
+        if isinstance( full_efficacy, float ) :
+            full_efficacy = [full_efficacy] * n_strains
+        elif isinstance( full_efficacy, list) :
+            if len( full_efficacy ) != n_strains :
+                raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "full_efficacy must be a float or a list of length max_n_strains" )
+         
+        if isinstance( symptoms_efficacy, float ) :
+            symptoms_efficacy = [symptoms_efficacy] * n_strains
+        elif isinstance( symptoms_efficacy, list) :
+            if len( symptoms_efficacy ) != n_strains :
+                raise ModelException( "symptoms_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "symptoms_efficacy must be a floator a list of length max_n_strains" )
+ 
+        if isinstance( severe_efficacy, float ) :
+            severe_efficacy = [severe_efficacy] * n_strains
+        elif isinstance( severe_efficacy, list) :
+            if len( severe_efficacy ) != n_strains :
+                raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+        else :
+            raise ModelException( "severe_efficacy must be a float or a list of length max_n_strains" )
+      
+        c_full_efficacy     = covid19.floatArray(n_strains)
+        c_symptoms_efficacy = covid19.floatArray(n_strains)
+        c_severe_efficacy   = covid19.floatArray(n_strains)
+    
+        for idx in range( n_strains ) :
+            
+            if ( full_efficacy[ idx ] < 0 ) | ( full_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "full_efficacy must be between 0 and 1")
+            
+            if ( symptoms_efficacy[ idx ] < 0 ) | ( symptoms_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "symptoms_efficacy must be between 0 and 1")
+            
+            if ( severe_efficacy[ idx ] < 0 ) | ( severe_efficacy[ idx ] > 1 ) :
+                raise ModelParameterException( "severe_efficacy must be between 0 and 1")
+            
+            c_full_efficacy[ idx ]     = full_efficacy[ idx ]
+            c_symptoms_efficacy[ idx ] = symptoms_efficacy[ idx ]
+            c_severe_efficacy[ idx ]   = severe_efficacy[ idx ]
+
+        idx = covid19.add_vaccine( self.c_model, c_full_efficacy, c_symptoms_efficacy, c_severe_efficacy, time_to_protect, vaccine_protection_period );
+        return Vaccine( self, idx )
+ 
+    def vaccinate_individual(self, ID, vaccine ):
         """
         Vaccinates an individual by ID of individual
         
@@ -892,32 +1171,23 @@ class Model:
         if ( ID < 0 ) | ( ID >= n_total ) :
             raise ModelParameterException( "ID out of range (0<=ID<n_total)")
 
-        if ( efficacy < 0 ) | ( efficacy > 1 ) :
-            raise ModelParameterException( "efficacy must be between 0 and 1")
-        
-        if time_to_protect < 1 :
-            raise ModelParameterException( "vaccine must take at least one day to take effect" )
-        
-        if vaccine_protection_period <= time_to_protect :
-            raise ModelParameterException( "vaccine must protect for longer than it takes to by effective" )
-    
-        if not VaccineTypesEnum.has_value(vaccine_type) :
-            raise ModelParameterException( "vaccine type must be listed in VaccineTypesEnum" )
+        if not isinstance( vaccine, Vaccine ) :
+            ModelException( "argument vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
 
-        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine_type, efficacy, time_to_protect, vaccine_protection_period );
+        return covid19.intervention_vaccinate_by_idx( self.c_model, ID, vaccine.c_vaccine );
 
     def vaccinate_schedule(self, schedule ):
 
         if not isinstance( schedule, VaccineSchedule ) :
             ModelException( "argument VaccineSchedule must be an object of type VaccineSchedule")
-            
+           
+        if not isinstance( schedule.vaccine, Vaccine ) :
+            ModelException( "schedule.vaccine must be an object of type Vaccine, add one using model.add_vaccine()")
+               
         return covid19.intervention_vaccinate_age_group( 
             self.c_model, 
             schedule.c_fraction_to_vaccinate, 
-            schedule.vaccine_type,
-            schedule.efficacy,
-            schedule.time_to_protect,
-            schedule.vaccine_protection_period,
+            schedule.vaccine.c_vaccine,
             schedule.c_total_vaccinated
         )   
     
@@ -980,9 +1250,17 @@ class Model:
         """
         Call C function destroy_model and destroy_params
         """
-        LOGGER.info("Destroying model")
-        covid19.destroy_model(self.c_model)
+        LOGGER.info("Destroying model")         
 
+        if self.c_model != None :
+            covid19.destroy_model(self.c_model)
+            self.c_params = None
+            self.c_model = None
+            
+            params_obj = self._params_obj
+            self._params_obj = None
+            del params_obj
+            
     def one_time_step(self):
         """
         Steps the simulation forward one time step
@@ -1002,7 +1280,7 @@ class Model:
         
         return pd.DataFrame(self._results)
         
-    def run(self, verbose = True):
+    def run(self, verbose = True, n_steps = None ):
         """
         Runs simulation to the end (specified by the parameter end_time)
         
@@ -1012,7 +1290,8 @@ class Model:
         Returns: 
             None
         """
-        n_steps  = self.c_params.end_time - self.c_model.time
+        if n_steps == None :
+            n_steps  = self.c_params.end_time - self.c_model.time
         step     = 0
         
         if verbose :

@@ -72,16 +72,12 @@ test_that("Model::baseline_params", {
   nw <- m$get_network_by_id(3)
   expect_equal( 3, nw$network_id() )
   expect_equal( 'Occupation working network (default)', nw$name() )
-  expect_equal( 3916906, nw$n_edges() )
-  expect_equal( 559558, nw$n_vertices() )
   expect_equal( 1, nw$skip_hospitalised() )
   expect_equal( 1, nw$skip_quarantined() )
   expect_equal( 1, nw$type() )
   expect_equal( 0.5, nw$daily_fraction() )
 
-  expect_equal(NA, m$get_network_ids(0))
-  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids(3))
-  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids(100))
+  expect_equal(c(0,1,2,3,4,5,6), m$get_network_ids())
 
   df_app_user <- m$get_app_users()
   df_app_user[['app_user']] <- as.integer(!df_app_user[['app_user']])
@@ -89,10 +85,10 @@ test_that("Model::baseline_params", {
   expect_equal(df_app_user, m$get_app_users())
 
 
-
   ##
   ## Begin rudimentary integration test with Simulation and COVID19IBM:
   ##
+
 
   ## 1) Check initial state at time = 0
   result_t0 <- c(

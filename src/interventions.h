@@ -30,6 +30,21 @@ struct trace_token{
 	int index_status;
 };
 
+struct vaccine{
+	short idx;
+	float *full_efficacy;				// efficacy against contracting the virus
+	float *symptoms_efficacy;			// efficacy preventing symptoms
+	float *severe_efficacy;			    // efficacy preventing severe symptoms (i.e. not needing to be hospitalised)
+	short time_to_protect;				// time between having the vaccine and protection starting
+	short vaccine_protection_period;	// time for which protections lasts
+	short is_full;						// does it have some full protection
+	short is_symptoms;					// does it have some symptoms-only protection
+	short is_severe;					// does it have some severe-only protection
+	short n_strains;					// the number of strains
+	char name[INPUT_CHAR_LEN]; 			// unique name of the network
+	vaccine *next;
+};
+
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
@@ -58,11 +73,13 @@ void intervention_manual_trace( model *, individual *);
 void intervention_notify_contacts( model*, individual*, int, trace_token*, int );
 void intervention_index_case_symptoms_to_positive( model*, trace_token* );
 
-short intervention_vaccinate( model*, individual*, short, double, short, short );
-short intervention_vaccinate_by_idx( model*, long, short, double, short, short );
-long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], short, double, short, short, long[ N_AGE_GROUPS ] );
-void intervention_vaccine_protect( model*, individual* );
-void intervention_vaccine_wane( model*, individual* );
+short add_vaccine( model*, float*, float*, float*, short, short );
+vaccine* get_vaccine_by_id( model*, short );
+short intervention_vaccinate( model*, individual*, vaccine* );
+short intervention_vaccinate_by_idx( model*, long, vaccine* );
+long intervention_vaccinate_age_group( model*, double[ N_AGE_GROUPS ], vaccine*, long[ N_AGE_GROUPS ] );
+void intervention_vaccine_protect( model*, individual*, void* );
+void intervention_vaccine_wane( model*, individual*, void* );
 
 void intervention_on_symptoms( model*, individual* );
 void intervention_on_hospitalised( model*, individual* );

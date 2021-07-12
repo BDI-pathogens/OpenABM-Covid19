@@ -32,6 +32,7 @@ covid19_module = Extension(
         "network.c",
         "nurse.c",
         "params.c",
+        "strain.c",
         "utilities.c",
         "ward.c"
     ],
