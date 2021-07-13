@@ -7,6 +7,10 @@
 ^.*\.Rproj$
 ^.*\.Rcheck$
 
+# Emacs / Vim files
+TAGS$
+tags$
+
 # SWIG interface files
 .*\.i$
 
