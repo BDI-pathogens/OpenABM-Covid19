@@ -6,6 +6,11 @@ importFrom("methods", "setClass")
 importFrom("methods", "slot")
 importFrom("R6", "R6Class")
 importFrom("xptr", "is_null_xptr")
+importFrom("parallel", "makeCluster")
+importFrom("parallel", "stopCluster")
+importFrom("parallel", "clusterApply")
+importFrom("parallel", "detectCores")
+import("data.table")
 
 # R6 Classes
 export("Parameters")
@@ -18,6 +23,7 @@ export("Strain")
 export("COVID19IBM")
 export("VaccineSchedule")
 export("Vaccine")
+export("MetaModel")
 
 # wrapper function for R6 calsses
 export("Parameters.new")
