@@ -71,13 +71,15 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         abms        <<- vector( mode = "list", length = length( nodes ))
         node_list   <<- nodes
         n_node_list <<- length( node_list )
+        params      <<- vector( mode = "list", length = length( nodes ))
 
         for( nidx in 1:n_node_list )
         {
-          params <- base_params
-          params[[ "rng_seed"]] <- params[[ "rng_seed"]] + node_list[ nidx ]
+          ps <- base_params
+          ps[[ "rng_seed"]] <- ps[[ "rng_seed"]] + node_list[ nidx ]
 
-          abms[[ nidx ]] <<- Model.new(params = params)
+          params[[ nidx ]] <<- ps
+          abms[[ nidx ]]   <<- Model.new(params = ps)
         }
       }
       clusterApply( private$.cluster(), private$.node_list, start_func )
@@ -114,7 +116,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       {
         results <- vector( mode = "list", length = n_node_list )
         for( nidx in 1:n_node_list )
-          results[[ nidx ]] = abms[[ nidx ]]$results()
+          results[[ nidx ]] <- abms[[ nidx ]]$results()
         return( results )
       }
 
@@ -129,6 +131,41 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( t )
     },
 
+    one_time_step_results = function()
+    {
+      results_func = function( data  )
+      {
+        results <- vector( mode = "list", length = n_node_list )
+        for( nidx in 1:n_node_list ) {
+          results[[ nidx ]] <- abms[[ nidx ]]$one_time_step_results()
+          results[[ nidx ]][[ "n_region" ]] <- node_list[[ nidx ]]
+        }
+        return( results )
+      }
+
+      t <- clusterApply( private$.cluster(), private$.node_list, results_func )
+      return( t )
+    },
+
+    time = function()
+    {
+      results_func = function( data  )
+      {
+        results <- vector( mode = "numeric", length = n_node_list )
+        for( nidx in 1:n_node_list ) {
+          results[ nidx ] <- abms[[ nidx ]]$c_model$time
+        }
+        return( results )
+      }
+
+      t <- clusterApply( private$.cluster(), private$.node_list, results_func )
+      t <- unique( unlist( t ) )
+      if( length( t ) != 1 )
+        stop( "underlying ABMs are out of synch" )
+
+      return( t )
+    },
+
     run = function( n_steps = NULL )
     {
       run_func = function( n_steps  )
@@ -140,6 +177,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         }
       }
       clusterApply( private$.cluster(), private$.node_list, run_func( n_steps ) )
+
       return()
     }
   ),
