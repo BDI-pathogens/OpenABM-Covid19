@@ -172,13 +172,26 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       {
         function( data  )
         {
+          results <- vector( mode = "numeric", length = n_node_list )
           for( nidx in 1:n_node_list )
+          {
+            start <- abms[[ nidx ]]$one_time_step_results()[[ "total_infected" ]]
             abms[[ nidx ]]$run( n_steps, verbose = FALSE)
+            results[ nidx ] <- abms[[ nidx ]]$one_time_step_results()[[ "total_infected" ]] - start
+          }
+          return( results )
         }
       }
-      clusterApply( private$.cluster(), private$.node_list, run_func( n_steps ) )
 
-      return()
+      node_list <- private$.node_list
+      res_list  <- clusterApply( private$.cluster(), node_list, run_func( n_steps ) )
+
+      results <- vector( mode = "numeric", length = self$n_regions )
+
+      for( ndx in 1:length( node_list ) )
+        results[ node_list[[ ndx ]] ] <- res_list[[ ndx ]]
+
+      return(results )
     }
   ),
 
