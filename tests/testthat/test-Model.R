@@ -69,8 +69,8 @@ test_that("Model::baseline_params", {
   # TODO(olegat) test get_network_info()
   # TODO(olegat) test delete_network()
 
-  nw <- m$get_network_by_id(3)
-  expect_equal( 3, nw$network_id() )
+  nw <- m$get_network_by_id(4)
+  expect_equal( 4, nw$network_id() )
   expect_equal( 'Occupation working network (default)', nw$name() )
   expect_equal( 1, nw$skip_hospitalised() )
   expect_equal( 1, nw$skip_quarantined() )
@@ -319,9 +319,10 @@ test_that("Model::baseline_params", {
   expect_equal(sim$results, results_expected)
 
   # test infections / vaccinations.
+  vaccine = m$add_vaccine( full_efficacy = 0.6, symptoms_efficacy = 0.8, severe_efficacy = 0.95 )
   expect_true(m$seed_infect_by_idx(0))
-  expect_true(m$vaccinate_individual(2))
-  expect_false(m$vaccinate_schedule(VaccineSchedule$new()))
+  expect_equal(m$vaccinate_schedule(VaccineSchedule$new( vaccine = vaccine)), 0 )
+  expect_true(m$vaccinate_individual(2, vaccine))
 })
 
 test_that("Model::default params", {
@@ -336,8 +337,8 @@ test_that("Model::default params", {
   Model.run( m, verbose = FALSE  )
   res = Model.results( m )
 
-  expect_equal( res$time[ 10 ], 10 )
-  expect_gt( res$total_infected[ 10 ], 10 )
+  expect_equal( res$time[ 11 ], 10 )
+  expect_gt( res$total_infected[ 11 ], 10 )
 })
 
 test_that("Model::multiple models", {
@@ -360,20 +361,20 @@ test_that("Model::multiple models", {
   # run the first model again and destroy (force garbage collection)
   Model.run( m1, verbose = FALSE  )
   res = Model.results( m1 )
-  expect_equal( res$time[ 10 ], 10 )
+  expect_equal( res$time[ 11 ], 10 )
   rm( m1 ); gc()
 
   # run the second  model again and destroy
   Model.run( m2, verbose = FALSE  )
   res = Model.results( m2 )
-  expect_equal( res$time[ 10 ], 10 )
+  expect_equal( res$time[ 11 ], 10 )
   rm( m2 );
 
   # create a third model and run
   m3 = Model.new( params = list( n_total = 10000, end_time = 10 ) )
   Model.run( m3, verbose = FALSE  )
   res = Model.results( m3 )
-  expect_equal( res$time[ 10 ], 10 )
+  expect_equal( res$time[ 11 ], 10 )
   rm( m3 ); gc()
 })
 
