@@ -7,6 +7,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .node_list   = NULL,
     .clusterObj  = NULL,
     .base_params = NULL,
+    .n_strains   = NULL,
 
     .staticReturn = function( val, name )
     {
@@ -52,7 +53,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         rng_seed = 0,
         days_of_interactions = 1,
         quarantine_days      = 1,
-        rebuild_networks     = 0
+        rebuild_networks     = 0,
+        max_n_strains        = 1
       )
 
       for( name in names( base_params ) )
@@ -105,6 +107,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       private$.setBaseParams( base_params )
       private$.initializeSubModels()
+      private$.n_strains = 1
 
     },
 
@@ -154,15 +157,17 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     {
       infect_func = function( n_infections  )
       {
+        n_strains = ncol( n_infections )
+
         for( nidx in 1:n_node_list )
         {
-
-          if( n_infections[ nidx ] > 0 )
-          {
-            p_infect = floor( runif( n_infections[ nidx ] ) * params[[ nidx ]]$n_total )
-             for( pdx in p_infect )
-               abms[[ nidx ]]$seed_infect_by_idx( pdx )
-          }
+          for( strain_idx in 1:n_strains )
+            if( n_infections[ nidx, strain_idx ] > 0 )
+            {
+              p_infect = floor( runif( n_infections[ nidx, strain_idx ] ) * params[[ nidx ]]$n_total )
+               for( pdx in p_infect )
+                 abms[[ nidx ]]$seed_infect_by_idx( pdx, strain_idx = strain_idx - 1 )
+            }
         }
         return()
       }
@@ -170,7 +175,14 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       if( length( n_infections ) == 1 )
         n_infections <- rep( n_infections, self$n_regions )
 
-      infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs ] )
+      if( is.matrix( n_infections ) )
+      {
+        if( ncol( n_infections) > self$n_strains )
+          stop( "n_infections has more columns than strains in the model" )
+        infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs, ] )
+      } else
+        infections_list <- lapply( private$.node_list, function( ndxs) matrix( n_infections[ ndxs ], ncol = 1 ) )
+
       clusterApply( private$.cluster(), infections_list, infect_func )
       return()
     },
@@ -263,6 +275,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
+        if( self$n_strains == self$base_params[[ "max_n_strains" ]] )
+          stop( "max_n_strains strains have been added already" )
+
         add_new_strain_func = function( data  )
         {
           strain_idx = 0
@@ -285,6 +300,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         data <- replicate( self$n_nodes, data, simplify = FALSE )
 
         t <- clusterApply( private$.cluster(), data, add_new_strain_func )
+        private$.n_strains = t[[ 1 ]] + 1
+
         return( t[[ 1 ]]);
     },
 
@@ -319,7 +336,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
   active = list(
     n_nodes     = function( val = NULL ) private$.staticReturn( val, "n_nodes" ),
     n_regions   = function( val = NULL ) private$.staticReturn( val, "n_regions" ),
-    base_params = function( val = NULL ) private$.staticReturn( val, "base_params" )
+    base_params = function( val = NULL ) private$.staticReturn( val, "base_params" ),
+    n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" )
   )
 )
 
