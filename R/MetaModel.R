@@ -200,7 +200,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
-    migration_infect_run = function( n_infections, n_steps )
+    combine_run = function( n_infections, n_steps )
     {
       infect_func = function( data )
       {
