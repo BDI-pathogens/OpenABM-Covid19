@@ -80,6 +80,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
           params[[ nidx ]] <<- ps
           abms[[ nidx ]]   <<- Model.new(params = ps)
+          params[[ nidx ]][[ "n_total" ]] <<- abms[[ nidx ]]$get_param( "n_total" )
         }
       }
       clusterApply( private$.cluster(), private$.node_list, start_func )
@@ -94,6 +95,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       base_params  = list()
     )
     {
+      # clean destroyed models
+      gc()
 
       n_nodes <- min( n_nodes, n_regions ) # no point making unused nodes
       private$.n_regions <- n_regions
@@ -147,6 +150,74 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( t )
     },
 
+    migration_infect = function( n_infections )
+    {
+      infect_func = function( n_infections  )
+      {
+        for( nidx in 1:n_node_list )
+        {
+
+          if( n_infections[ nidx ] > 0 )
+          {
+            p_infect = floor( runif( n_infections[ nidx ] ) * params[[ nidx ]]$n_total )
+             for( pdx in p_infect )
+               abms[[ nidx ]]$seed_infect_by_idx( pdx )
+          }
+        }
+        return()
+      }
+
+      if( length( n_infections ) == 1 )
+        n_infections <- rep( n_infections, self$n_regions )
+
+      infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs ] )
+      clusterApply( private$.cluster(), infections_list, infect_func )
+      return()
+    },
+
+    migration_infect_run = function( n_infections, n_steps )
+    {
+      infect_func = function( data )
+      {
+        results <- vector( mode = "numeric", length = n_node_list )
+
+        n_infections = data$n_infect
+        n_steps      = data$n_steps
+
+        for( nidx in 1:n_node_list )
+        {
+          if( n_infections[ nidx ] > 0 )
+          {
+            p_infect = floor( runif( n_infections[ nidx ] ) * params[[ nidx ]]$n_total )
+            for( pdx in p_infect )
+              abms[[ nidx ]]$seed_infect_by_idx( pdx )
+          }
+          start <- abms[[ nidx ]]$one_time_step_results()[[ "total_infected" ]]
+          abms[[ nidx ]]$run( n_steps, verbose = FALSE)
+          results[ nidx ] <- abms[[ nidx ]]$one_time_step_results()[[ "total_infected" ]] - start
+
+        }
+        return( results )
+      }
+
+      # build input data
+      if( length( n_infections ) == 1 )
+        n_infections <- rep( n_infections, self$n_regions )
+
+      infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs ] )
+      for( ndx in 1:length( infections_list) )
+        infections_list[[ ndx ]] <- list( n_infect = infections_list[[ ndx ]], n_steps = n_steps )
+
+      res_list  <- clusterApply( private$.cluster(), infections_list, infect_func )
+      results   <- vector( mode = "numeric", length = self$n_regions )
+      node_list <- private$.node_list
+
+      for( ndx in 1:length( node_list ) )
+        results[ node_list[[ ndx ]] ] <- res_list[[ ndx ]]
+
+      return(results )
+    },
+
     time = function()
     {
       results_func = function( data  )
@@ -185,8 +256,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       node_list <- private$.node_list
       res_list  <- clusterApply( private$.cluster(), node_list, run_func( n_steps ) )
-
-      results <- vector( mode = "numeric", length = self$n_regions )
+      results   <- vector( mode = "numeric", length = self$n_regions )
 
       for( ndx in 1:length( node_list ) )
         results[ node_list[[ ndx ]] ] <- res_list[[ ndx ]]
