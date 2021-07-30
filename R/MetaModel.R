@@ -296,7 +296,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         add_new_strain_func = function( data  )
         {
           for( nidx in 1:n_node_list ) {
-            strain = abms[[ nidx ]]$add_new_strain(
+            strain <- abms[[ nidx ]]$add_new_strain(
               transmission_multiplier = data$transmission_multiplier ,
               hospitalised_fraction   = data$hospitalised_fraction,
               hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier
@@ -319,6 +319,20 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         private$.n_strains = t[[ 1 ]] + 1
 
         return( t[[ 1 ]]);
+    },
+
+    set_cross_immunity_matrix = function( cross_immunity )
+    {
+      set_cross_immunity_matrix_func = function( cross_immunity  )
+      {
+        for( nidx in 1:n_node_list )
+          abms[[ nidx ]]$set_cross_immunity_matrix( cross_immunity )
+      }
+
+      cross_immunity <- replicate( self$n_nodes, cross_immunity, simplify = FALSE )
+
+      clusterApply( private$.cluster(), cross_immunity, set_cross_immunity_matrix_func )
+      return()
     },
 
     run = function( n_steps = NULL )
