@@ -67,6 +67,12 @@ Strain <- R6Class( classname = 'Strain', cloneable = FALSE,
          return(strain_transmission_multiplier( self$c_strain ))
       },
 
+      #' @description Wrapper for C API \code{strain$total_infected()}.
+      #' @return the total number of people infected with the strain
+      total_infected = function() {
+         return(strain_total_infected( self$c_strain ))
+      },
+
       #' @description Wrapper for C API \code{strain$hospitalised_fraction()}.
       #' @return the hospitalised fraction for the strain
       hospitalised_fraction = function()

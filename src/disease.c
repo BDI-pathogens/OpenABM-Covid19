@@ -310,6 +310,7 @@ void new_infection(
 		asymp_frac = 1;
 
 	add_infection_event( infected, infector, network_id, strain, model->time );
+	strain->total_infected++;
 
 	if( draw < asymp_frac )
 	{
