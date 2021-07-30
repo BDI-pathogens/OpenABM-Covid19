@@ -229,6 +229,7 @@ VACCINE_STATUS <- c(
   'VACCINE_WANED'              = 6
 )
 
+MAX_TIME <- 1000
 
 get_base_param_from_enum <- function(param) {
   allEnums <- c(

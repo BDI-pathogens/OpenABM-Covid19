@@ -87,6 +87,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     .results = list(),
 
+    .strains        = NA,
+    .time           = 0,
+    .total_infected = NA,
+
     utils_n_guess = function(key, ...) {
       if (startsWith(key, 'total_')) {
         if (all(!endsWith(key, names(AgeGroupEnum)))) {
@@ -240,6 +244,15 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       res["R_inst_05"] <- private$calculate_R_instanteous( 0.05 )
       res["R_inst_95"] <- private$calculate_R_instanteous( 0.95 )
       return(res)
+    },
+
+    .staticReturn = function( val, name )
+    {
+      if( !is.null( val ) )
+        stop( sprintf( "cannot set %s", name ) )
+
+      privateName <- sprintf( ".%s", name )
+      return( private[[ privateName ]])
     }
 
   ),
@@ -256,6 +269,30 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       }
       else
         stop( "cannot set c_model" )
+    },
+
+    #' @field The current time in the model
+    time = function( val = NULL ) private$.staticReturn( val, "time" ),
+
+    #' @field The number of initialized strains
+    n_strains = function( val = NULL )
+    {
+      if( !is.null( val ) ) stop( "n_strains cannot be set" )
+      return( self$c_model$n_initialised_strains )
+    },
+
+    #' @field The total infected by strain at each time step
+    total_infected = function( val = NULL )
+    {
+      t_inf <- private$.staticReturn( val, "total_infected" )
+      return( t_inf[ 1:(self$time + 1), ] )
+    },
+
+    #' @field A lost of all strains in the model
+    strains = function( val = NULL )
+    {
+      strains <- private$.staticReturn( val, "strains" )
+      return( strains[ 1:self$n_strains ] )
     }
   ),
 
@@ -289,6 +326,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       private$.c_model   <- create_model(private$c_params)
       private$nosocomial <- as.logical(self$get_param('hospital_on'))
       private$.results   <- list(private$.one_time_step_results())
+      private$.total_infected <- matrix( 0, nrow = MAX_TIME, ncol = self$get_param('max_n_strains'))
+      private$.total_infected[ 1, 1 ] <- self$get_param('n_seed_infection')
+      private$.strains        <- vector( mode = "list", length = self$get_param('max_n_strains') )
+      private$.strains[[ 1 ]] <- Strain$new( self, 0 )
 
       # keep a global counter of models made
       nmodels = getOption("OpenABMCovid19.n_models")
@@ -583,6 +624,11 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
 
       res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
+
+      if( res )
+        private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
+          private$.total_infected[ private$.time + 1, strain_idx + 1 ] + 1
+
       return(as.logical(res))
     },
 
@@ -613,7 +659,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,
                         hospitalised_fraction, PACKAGE='OpenABMCovid19');
 
-      return( Strain$new( self, strain_idx ) )
+      private$.strains[[ strain_idx + 1 ]] <- Strain$new( self, strain_idx )
+      return( private$.strains[[ strain_idx + 1 ]] )
     },
 
     #' @description Set the cross_immunity matrix
@@ -867,7 +914,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     one_time_step = function()
     {
       SWIG_one_time_step(self$c_model)
-      private$.results = append( private$.results,list(private$.one_time_step_results()))
+      private$.time    <- private$.time + 1
+      private$.results <- append( private$.results,list(private$.one_time_step_results()))
+
+      strains = self$strains
+      for( sdx in 1:self$n_strains )
+        private$.total_infected[ private$.time + 1, sdx ] = strains[[ sdx ]]$total_infected()
     },
 
     #' @description Get the results from the most recent time step step.
