@@ -175,6 +175,31 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
+    update_running_params = function( param, values )
+    {
+      update_func = function( params  )
+      {
+        param  = params$param
+        values = params$values
+
+        for( ndx in 1:n_node_list )
+        {
+          if( !is.na( values[ ndx ] ) )
+              abms[[ ndx ]]$update_running_params( param, values[ ndx ] )
+        }
+        return()
+      }
+
+      if( length( values ) == 1 )
+        values <- rep( values, self$n_regions )
+
+      values <- lapply( private$.node_list, function( ndxs) values[ ndxs ] )
+      params <- lapply( values, function( v ) list( param = param, values = v ))
+
+      clusterApply( private$.cluster(), params, update_func )
+      return()
+    },
+
     migration_infect_run = function( n_infections, n_steps )
     {
       infect_func = function( data )
@@ -205,8 +230,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         n_infections <- rep( n_infections, self$n_regions )
 
       infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs ] )
-      for( ndx in 1:length( infections_list) )
-        infections_list[[ ndx ]] <- list( n_infect = infections_list[[ ndx ]], n_steps = n_steps )
+      infections_list <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
 
       res_list  <- clusterApply( private$.cluster(), infections_list, infect_func )
       results   <- vector( mode = "numeric", length = self$n_regions )
