@@ -261,6 +261,33 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( t )
     },
 
+    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
+    {
+        add_new_strain_func = function( data  )
+        {
+          strain_idx = 0
+          for( nidx in 1:n_node_list ) {
+            strain = abms[[ nidx ]]$add_new_strain(
+              transmission_multiplier = data$transmission_multiplier ,
+              hospitalised_fraction   = data$hospitalised_fraction,
+              hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier
+            )
+            strain_idx = strain$idx()
+          }
+          return( strain_idx )
+        }
+
+        data <- list(
+          transmission_multiplier = transmission_multiplier ,
+          hospitalised_fraction   = hospitalised_fraction,
+          hospitalised_fraction_multiplier = hospitalised_fraction_multiplier
+        )
+        data <- replicate( self$n_nodes, data, simplify = FALSE )
+
+        t <- clusterApply( private$.cluster(), data, add_new_strain_func )
+        return( t[[ 1 ]]);
+    },
+
     run = function( n_steps = NULL )
     {
       run_func = function( n_steps  )
