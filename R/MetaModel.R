@@ -8,6 +8,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .clusterObj  = NULL,
     .base_params = NULL,
     .n_strains   = NULL,
+    .network_names = NULL,
 
     .staticReturn = function( val, name )
     {
@@ -76,6 +77,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         params      <<- vector( mode = "list", length = length( nodes ))
         strains     <<- vector( mode = "list", length = length( nodes ))
         strains     <<- lapply( strains, function(x) vector( mode = "list", length = base_params$max_n_strains ) )
+        networks    <<- vector( mode = "list", length = length( nodes ) )
 
         for( nidx in 1:n_node_list )
         {
@@ -86,9 +88,20 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           abms[[ nidx ]]   <<- Model.new(params = ps)
           params[[ nidx ]][[ "n_total" ]] <<- abms[[ nidx ]]$get_param( "n_total" )
           strains[[ nidx ]][[ 1 ]] <<- Strain$new( abms[[ nidx]], 0 )
+
+          networks[[ nidx ]] <<- list()
+          network_ids <- abms[[ nidx]]$get_network_ids()
+          for( network_id in network_ids )
+          {
+            net <- abms[[ nidx]]$get_network_by_id( network_id )
+            networks[[ nidx ]][[ net$name() ]] <<- net
+          }
         }
+        return( list( network_names = names( networks[[ 1 ]] ) ) )
       }
-      clusterApply( private$.cluster(), private$.node_list, start_func )
+      res = clusterApply( private$.cluster(), private$.node_list, start_func )
+
+      private$.network_names <- unique( unlist( lapply( res, function( y ) y[[ "network_names"]]) ) )
     },
 
     .prepare_n_infections = function( n_infections )
@@ -127,7 +140,6 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setBaseParams( base_params )
       private$.initializeSubModels()
       private$.n_strains = 1
-
     },
 
     finalize = function()
@@ -243,6 +255,48 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       params <- lapply( values, function( v ) list( param = param, values = v ))
 
       clusterApply( private$.cluster(), params, update_func )
+      return()
+    },
+
+    set_network_transmission_multiplier = function( multipliers )
+    {
+      update_func = function( mults  )
+      {
+        network_names = names( mults )
+        for( mdx in 1:length( mults ) )
+        {
+          name = network_names[ mdx ]
+          for( ndx in 1:n_node_list )
+          {
+            net = networks[[ ndx ]][[ name ]]
+            if( is.R6( net ) )
+              net$set_transmission_multiplier( mults[[ name ]][ ndx] )
+          }
+        }
+        return()
+      }
+
+      # check to see if networks are known
+      if( is.null( names( multipliers ) ) )
+        stop( "Multipliers must be named list of networks")
+
+      known_networks <- self$network_names
+      if( length( setdiff( names( multipliers), known_networks ) ) > 0 )
+        stop( "Not all networks names are recognised")
+
+      # update the same for all
+      n_regions   <- self$n_regions
+      multipliers <- lapply( multipliers, function( x ) if( length( x ) == 1 ) rep( x, n_regions) else x )
+      lapply( multipliers, function( x ) if( length( x ) != n_regions ) stop( "multipliers must be length 1 or n_regions") )
+
+      # map on to node|_list
+      n_nodes   <- self$n_nodes
+      node_list <- private$.node_list
+      mults     <- vector( mode = "list", length = n_nodes )
+      for( ndx in 1:n_nodes )
+        mults[[ ndx ]] <- lapply( multipliers, function( m ) m[ node_list[[ ndx ]] ] )
+
+      clusterApply( private$.cluster(), mults, update_func )
       return()
     },
 
@@ -395,7 +449,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_nodes     = function( val = NULL ) private$.staticReturn( val, "n_nodes" ),
     n_regions   = function( val = NULL ) private$.staticReturn( val, "n_regions" ),
     base_params = function( val = NULL ) private$.staticReturn( val, "base_params" ),
-    n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" )
+    n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
+    network_names = function( val = NULL ) private$.staticReturn( val, "network_names" )
   )
 )
 
