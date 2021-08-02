@@ -156,6 +156,30 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( t )
     },
 
+    total_infected = function()
+    {
+      results_func = function( data  )
+      {
+        results <- vector( mode = "list", length = n_node_list )
+        for( nidx in 1:n_node_list )
+          results[[ nidx ]] <- abms[[ nidx ]]$total_infected
+        return( results )
+      }
+
+      t <- clusterApply( private$.cluster(), private$.node_list, results_func )
+      max_time <- nrow( t[[ 1]][[1]] )
+      t <- rbindlist(lapply( t, function( r ) rbindlist( lapply( r, as.data.table ), use.names = TRUE )), use.names = TRUE )
+      setnames( t, sprintf( "total_infected_strain_%d", 0:(self$base_params[[ "max_n_strains"]] - 1 ) ) )
+
+      if( t[,.N] != max_time * self$n_regions )
+        stop( "the wrong number of results from sub-popualtions")
+
+      t[ , n_region := rep( unlist( private$.node_list), each = max_time ) ]
+      t[ , time := rep( 0:(max_time-1), self$n_regions )]
+
+      return( t )
+    },
+
     one_time_step_results = function()
     {
       results_func = function( data  )
