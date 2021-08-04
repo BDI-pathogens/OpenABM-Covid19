@@ -11,6 +11,10 @@ importFrom("parallel", "stopCluster")
 importFrom("parallel", "clusterApply")
 importFrom("parallel", "detectCores")
 import("data.table")
+importFrom( "plotly", "plot_ly" )
+importFrom( "plotly", "layout" )
+importFrom( "plotly", "animation_opts" )
+importFrom( "plotly", "%>%" )
 
 # R6 Classes
 export("Parameters")

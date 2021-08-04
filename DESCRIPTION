@@ -51,7 +51,7 @@ Description:
   configuration of digital contract-tracing mobile phone apps.
   Robert Hinch, William J M Probert, et al. (2020) <doi:10.1101/2020.09.16.20195925>.
 Depends: R6
-Imports: methods, xptr, parallel, data.table
+Imports: methods, xptr, parallel, data.table, plotly
 Collate:
   OpenABMCovid19.R
   util.R
