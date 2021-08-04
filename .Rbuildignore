@@ -55,3 +55,4 @@ tags$
 ^documentation$
 ^src\/Makefile$
 ^src\/main\.c$
+^R\MetaModelUtils\*

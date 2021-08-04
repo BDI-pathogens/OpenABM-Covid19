@@ -9,6 +9,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .base_params = NULL,
     .n_strains   = NULL,
     .network_names = NULL,
+    .meta_data     = NULL,
+    .map_data      = NULL,
+    .xrange        = NULL,
+    .yrange        = NULL,
 
     .staticReturn = function( val, name )
     {
@@ -52,6 +56,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     {
       default_params = list(
         rng_seed = 0,
+        n_total              = 1e4,
         days_of_interactions = 1,
         quarantine_days      = 1,
         rebuild_networks     = 0,
@@ -61,7 +66,31 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       for( name in names( base_params ) )
         default_params[[ name ]] <- base_params[[ name ]]
 
-      private$.base_params <- default_params
+      n_regions <- self$n_regions
+      if( length( default_params[[ "rng_seed" ]] ) == 1 )
+        default_params[[ "rng_seed" ]] <- default_params[[ "rng_seed" ]] * n_regions + seq( 1, n_regions )
+
+      for( name in names( default_params ) )
+      {
+        n_p <- length( default_params[[ name ]] );
+
+        if( !( n_p %in% c( 1, n_regions ) ) )
+          stop( "parameters must be length 1 for global values are length of n_regions")
+
+        if( n_p == 1 )
+          default_params[[ name ]] <- rep(default_params[[ name ]], n_regions );
+      }
+
+      # convert to list of lists
+      param_list = vector( mode = "list", length = n_regions )
+      f_convert = function( name, vals )
+      {
+        for( idx in 1:n_regions )
+          param_list[[ idx ]][[ name ]] <<- vals[ idx ]
+      }
+      mapply( f_convert, names( default_params ),default_params  )
+
+      private$.base_params <- param_list
     },
 
     .initializeSubModels = function()
@@ -76,16 +105,13 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         n_node_list <<- length( node_list )
         params      <<- vector( mode = "list", length = length( nodes ))
         strains     <<- vector( mode = "list", length = length( nodes ))
-        strains     <<- lapply( strains, function(x) vector( mode = "list", length = base_params$max_n_strains ) )
+        strains     <<- lapply( strains, function(x) vector( mode = "list", length = base_params[[ 1 ]]$max_n_strains ) )
         networks    <<- vector( mode = "list", length = length( nodes ) )
 
         for( nidx in 1:n_node_list )
         {
-          ps <- base_params
-          ps[[ "rng_seed"]] <- ps[[ "rng_seed"]] + node_list[ nidx ]
-
-          params[[ nidx ]] <<- ps
-          abms[[ nidx ]]   <<- Model.new(params = ps)
+          params[[ nidx ]] <<- base_params[[ nidx ]]
+          abms[[ nidx ]]   <<- Model.new(params = params[[ nidx ]] )
           params[[ nidx ]][[ "n_total" ]] <<- abms[[ nidx ]]$get_param( "n_total" )
           strains[[ nidx ]][[ 1 ]] <<- Strain$new( abms[[ nidx]], 0 )
 
@@ -118,7 +144,92 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         infections_list <- lapply( private$.node_list, function( ndxs) matrix( n_infections[ ndxs ], ncol = 1 ) )
 
       return( infections_list )
-    }
+    },
+
+    .setMetaData = function( meta_data )
+    {
+      if( !is.null( meta_data ) )
+      {
+        reqCols = c( "n_region", "x", "y", "population", "name" )
+
+        error_msg <- paste( "meta_data must be a data.table with a row for each region",
+                            "and columns [", paste( reqCols, collapse = ", " ), "]" )
+
+        if( !is.data.table( meta_data ) || length( setdiff( reqCols, names( meta_data)) ) )
+          stop( error_msg )
+
+        if( meta_data[ ,.N ] != self$n_regions )
+          stop( error_msg )
+
+        if( length( setdiff( seq( 1, self$n_regions ), meta_data[ , n_region ] ) ) )
+          stop( "column n_region must have an entry for 1..n_region")
+
+        meta_data = meta_data[ order( n_region ) ]
+        meta_data[ , n_total := unlist( lapply( self$base_params, function( x ) x[[ "n_total" ]]) ) ]
+
+        private$.meta_data <- meta_data
+
+        private$.xrange = c( meta_data[ , min(x ) ], meta_data[ , max( x) ] )
+        private$.yrange = c( meta_data[ , min(y ) ], meta_data[ , max( y) ] )
+      }
+    },
+
+    .setMapData = function( map_data )
+    {
+      if( !is.null( map_data ) )
+      {
+        reqCols <- c( "n_region", "n_p", "xs", "ys" )
+
+        error_msg <- paste( "map_data must be a data.table with columns [", paste( reqCols, collapse = ", " ), "]" )
+
+        if( !is.data.table( map_data ) || length( setdiff( reqCols, names( map_data)) ) )
+          stop( error_msg )
+
+        # set the ranges for the graphs
+        xrange <- c( map_data[ , min( xs) ],  map_data[ , max( xs) ] )
+        yrange <- c( map_data[ , min( ys) ],  map_data[ , max( ys) ] )
+        if( is.null( private$.xrange ) )
+        {
+          private$.xrange <= xrange
+          private$.yrange <- yrange
+        }
+        else
+        {
+          private$.xrange <- c( min(private$.xrange[1] ,xrange[1]), max(private$.xrange[2] ,xrange[2]))
+          private$.yrange <- c( min(private$.yrange[1] ,yrange[1]), max(private$.yrange[2] ,yrange[2]))
+        }
+
+        # build the map for plotly
+        map_data <- map_data[ , lapply( .SD, function( x ) return( list(x) )), by = c( "n_region", "n_p" ), .SDcols = c("xs", "ys")]
+
+        rect <- list(
+          xref = "x",
+          yref = "y",
+          type = "path",
+          line = list(width = 1, color = "black")
+        )
+        f_rect <- function( xs, ys)
+        {
+          l = rect;
+          l[[ "path" ]] <- paste( c( sprintf( "%s %.2f %.2f ", c( "M", rep( "L", length( xs ) - 1) ), xs, ys), "Z"), collapse = " ")
+          l
+        }
+        map_data[ , plotly_rect := mapply( f_rect, map_data[,xs], map_data[,ys], SIMPLIFY = FALSE) ]
+
+        private$.map_data <- map_data
+      }
+    },
+
+    .get_range = function( range, pad )
+    {
+      diff <- range[ 2 ] - range[ 1 ]
+      range[1] <- range[ 1 ] - diff * pad
+      range[2] <- range[ 2 ] + diff * pad
+      return( range )
+    },
+
+    xrange = function( pad = 0.05 ) private$.get_range( private$.xrange, pad ),
+    yrange = function( pad = 0.05 ) private$.get_range( private$.yrange, pad )
 
   ),
 
@@ -126,7 +237,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     initialize = function(
       n_regions,
       n_nodes = parallel::detectCores(),
-      base_params  = list()
+      base_params  = list(),
+      meta_data = NULL,
+      map_data  = NULL
     )
     {
       # clean destroyed models
@@ -138,6 +251,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.makeCluster()
 
       private$.setBaseParams( base_params )
+      private$.setMetaData( meta_data )
+      private$.setMapData( map_data )
       private$.initializeSubModels()
       private$.n_strains = 1
     },
@@ -181,7 +296,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       t <- clusterApply( private$.cluster(), private$.node_list, results_func )
       max_time <- nrow( t[[ 1]][[1]] )
       t <- rbindlist(lapply( t, function( r ) rbindlist( lapply( r, as.data.table ), use.names = TRUE )), use.names = TRUE )
-      setnames( t, sprintf( "total_infected_strain_%d", 0:(self$base_params[[ "max_n_strains"]] - 1 ) ) )
+      setnames( t, sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) ) )
 
       if( t[,.N] != max_time * self$n_regions )
         stop( "the wrong number of results from sub-popualtions")
@@ -368,7 +483,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
-        if( self$n_strains == self$base_params[[ "max_n_strains" ]] )
+        if( self$n_strains == self$base_params[[ 1 ]][[ "max_n_strains" ]] )
           stop( "max_n_strains strains have been added already" )
 
         add_new_strain_func = function( data  )
@@ -442,6 +557,54 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         results[ node_list[[ ndx ]], ] <- res_list[[ ndx ]]
 
       return(results )
+    },
+
+    plot = function( time = NULL, height = 800 )
+    {
+      if( !is.null( time ) )
+        stop( "single time not implemented" )
+
+      if( is.null( self$meta_data ) )
+        stop( "plot requires meta_data to be specified")
+
+      results   <- self$results()
+      meta_data <- self$meta_data
+
+      results <- results[ ,.( time, n_region, total_infected ) ]
+      results <- meta_data[ results, on = "n_region" ]
+      results = results[ order( n_region, time ) ]
+      results[ , new_infections := ifelse( n_region == shift( n_region, fill = 1 ),
+                                           total_infected - shift( total_infected, fill = 0 ),
+                                           total_infected ) ]
+      results[ , percent_infections := new_infections / n_total * 100 ]
+
+
+      xrange <- private$xrange()
+      yrange <- private$yrange()
+
+      width  = round( height * diff( xrange ) / diff( yrange ) )
+
+      p = plot_ly(
+        results,
+        x = ~x,
+        y = ~y,
+        frame = ~time,
+        color = ~percent_infections,
+        text = ~name,
+        type = "scatter",
+        mode = "markers",
+        height = height,
+        width = width,
+        marker = list(size = 10)
+      ) %>%
+        layout(
+          shapes = self$map_data[ , plotly_rect ],
+          xaxis  = list( range = xrange, title = "", visible = F),
+          yaxis  = list( range = yrange, title = "", visible = F)
+        )%>%
+        animation_opts( 100, easing = "linear")
+
+      return( p )
     }
   ),
 
@@ -450,7 +613,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_regions   = function( val = NULL ) private$.staticReturn( val, "n_regions" ),
     base_params = function( val = NULL ) private$.staticReturn( val, "base_params" ),
     n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
-    network_names = function( val = NULL ) private$.staticReturn( val, "network_names" )
+    network_names = function( val = NULL ) private$.staticReturn( val, "network_names" ),
+    meta_data    = function( val = NULL ) private$.staticReturn( val, "meta_data" ),
+    map_data    = function( val = NULL ) private$.staticReturn( val, "map_data" )
   )
 )
 
