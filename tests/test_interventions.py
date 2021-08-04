@@ -2749,10 +2749,7 @@ class TestClass(object):
         n_no_response = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_NO_PROTECTION.value ] )
         n_response    = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_PROTECTED_FULLY.value ] )
         
-        if full_efficacy > 0 :
-            n_waned = len( df_vac[ df_vac[ "current_status" ] == EVENT_TYPES.SUSCEPTIBLE.value ] )
-        else :
-            n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED_SYMPTOMS.value ] )
+        n_waned = len( df_vac[ df_vac[ "vaccine_status" ] == VaccineStatusEnum.VACCINE_WANED.value ] )
             
         np.testing.assert_equal( n_response, 0, "people still covered by the vaccine (with protection)")
         np.testing.assert_equal( n_no_response, 0, "people still covered by the vaccine (without protection)")
