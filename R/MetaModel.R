@@ -13,6 +13,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .map_data      = NULL,
     .xrange        = NULL,
     .yrange        = NULL,
+    .migration_matrix = NULL,
+    .migration_factor = NULL,
 
     .staticReturn = function( val, name )
     {
@@ -220,6 +222,33 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
+    .setMigrationMatrix = function( migration_matrix, migration_factor )
+    {
+      if( !is.null( migration_matrix ) )
+      {
+        reqCols = c( "n_region", "n_region_to", "transfer" )
+
+        error_msg <- paste( "migration_matrix must be a data.table columns [", paste( reqCols, collapse = ", " ), "]" )
+
+        if( !is.data.table( migration_matrix ) || length( setdiff( reqCols, names( migration_matrix)) ) )
+          stop( error_msg )
+
+        if( length( setdiff( seq( 1, self$n_regions ), migration_matrix[ , unique( n_region ) ] ) ) )
+          stop( "column n_region of migration_matrix must have an entries for 1..n_region")
+
+        if( length( setdiff( seq( 1, self$n_regions ), migration_matrix[ , unique( n_region_to ) ] ) ) )
+          stop( "column n_region_to of migration_matrix must have an entries for 1..n_region")
+
+        if( !is.numeric( migration_factor ) || migration_factor < 0 || migration_factor > 1 )
+          stop( "migration_factor must be between 0 and 1" )
+
+        migration_matrix[ , transfer_used := transfer * migration_factor ]
+
+        private$.migration_matrix = migration_matrix
+        private$.migration_factor = migration_factor
+      }
+    },
+
     .get_range = function( range, pad )
     {
       diff <- range[ 2 ] - range[ 1 ]
@@ -239,7 +268,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       n_nodes = parallel::detectCores(),
       base_params  = list(),
       meta_data = NULL,
-      map_data  = NULL
+      map_data  = NULL,
+      migration_matrix = NULL,
+      migration_factor = 0.1
     )
     {
       # clean destroyed models
@@ -253,6 +284,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setBaseParams( base_params )
       private$.setMetaData( meta_data )
       private$.setMapData( map_data )
+      private$.setMigrationMatrix( migration_matrix, migration_factor )
       private$.initializeSubModels()
       private$.n_strains = 1
     },
@@ -615,7 +647,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
     network_names = function( val = NULL ) private$.staticReturn( val, "network_names" ),
     meta_data    = function( val = NULL ) private$.staticReturn( val, "meta_data" ),
-    map_data    = function( val = NULL ) private$.staticReturn( val, "map_data" )
+    map_data     = function( val = NULL ) private$.staticReturn( val, "map_data" ),
+    migration_matrix = function( val = NULL ) private$.staticReturn( val, "migration_matrix" ),
+    migration_factor = function( val = NULL ) private$.staticReturn( val, "migration_factor" )
   )
 )
 
