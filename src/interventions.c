@@ -782,7 +782,7 @@ void intervention_vaccine_wane( model *model, individual *indiv, void* info )
 	}
 	if( vaccine->is_symptoms )
 	{
-		model->n_vaccinated_symptoms++;
+		model->n_vaccinated_symptoms--;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
 	}
 
