@@ -290,6 +290,31 @@ short seed_infect_by_idx(
 }
 
 /*****************************************************************************************
+*  Name:		seed_infect_n_people
+*  Description: infects multiple people from an external source
+*  Returns:		void
+******************************************************************************************/
+long seed_infect_n_people(
+	model *model,
+	long n_to_infect,
+	int strain_idx,
+	int network_id
+)
+{
+	long n_infected, idx, pdx, n_total;
+	n_infected = 0;
+	n_total    = model->params->n_total;
+
+	for( idx = 0; idx < n_to_infect; idx++ )
+	{
+		pdx = gsl_rng_uniform_int( rng, n_total );
+		n_infected += seed_infect_by_idx( model, pdx, strain_idx, network_id );
+	}
+
+	return( n_infected );
+}
+
+/*****************************************************************************************
 *  Name:		new_infection
 *  Description: infects a new individual from another individual
 *  Returns:		void

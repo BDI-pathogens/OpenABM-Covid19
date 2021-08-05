@@ -25,6 +25,7 @@ SWIG_add_new_strain <- add_new_strain
 SWIG_destroy_model <- destroy_model
 SWIG_set_cross_immunity_probability <- set_cross_immunity_probability
 SWIG_free_gsl_rng <- free_gsl_rng
+SWIG_seed_infect_n_people <- seed_infect_n_people
 
 #' R6Class Model
 #'
@@ -630,6 +631,42 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
           private$.total_infected[ private$.time + 1, strain_idx + 1 ] + 1
 
       return(as.logical(res))
+    },
+
+    #' @description Infects n people randomly (if a person is immune then
+    #' they will not be infected)
+    #' @param n_people The number of people to try and infect
+    #' @param strain_idx The idx of the strain the person is infected with
+    #' @param network_id The network ID.
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    seed_infect_n_people = function(n_people, strain_idx = 0, strain = NULL, network_id = -1 )
+    {
+      if( n_people == 0 )
+        return( 0 )
+
+      n_total <- private$c_params$n_total
+      if (n_people < 1 || n_people >= n_total) {
+        stop("n_people out of range (0<=n_people<n_total)")
+      }
+
+      if( !is.null( strain ) )
+      {
+        if (!is.R6(strain) || !('Strain' %in% class(strain)))
+          stop("argument strain must be an object of type Strain")
+
+        strain_idx = strain$idx()
+      }
+
+      n_strains = self$c_model$n_initialised_strains;
+      if( strain_idx < 0  || strain_idx >= n_strains )
+        stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
+
+      res <- SWIG_seed_infect_n_people(self$c_model, n_people, strain_idx, network_id)
+
+      private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
+      private$.total_infected[ private$.time + 1, strain_idx + 1 ] + res
+
+      return(res)
     },
 
     #' @description Adds a new strain (variant)
