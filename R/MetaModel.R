@@ -451,16 +451,18 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       {
         n_infections <- data$n_infect
         n_steps      <- data$n_steps
-        n_strains    <- ncol( n_infections )
+        n_strains    <- abms[[ 1 ]]$n_strains
         results      <- matrix( 0, ncol = n_strains, nrow = n_node_list )
 
         for( nidx in 1:n_node_list )
         {
           # migration infections
-          for( strain_idx in 1:n_strains )
-            abms[[ nidx ]]$seed_infect_n_people(  n_infections[ nidx, strain_idx ], strain_idx = strain_idx - 1 )
+          if( !is.null( n_infections ) ) {
+            for( strain_idx in 1:n_strains )
+              abms[[ nidx ]]$seed_infect_n_people( n_infections[ nidx, strain_idx ], strain_idx = strain_idx - 1 )
+          }
 
-          # run steps
+          # run steps( )
           for( strain_idx in 1:n_strains )
             results[ nidx, strain_idx ] <- strains[[ nidx ]][[ strain_idx ]]$total_infected() * -1
           abms[[ nidx ]]$run( n_steps, verbose = FALSE)
@@ -472,12 +474,16 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
 
       # build input data
-
-      infections_list <- private$.prepare_n_infections( n_infections )
-      infections_list <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
-
-      res_list  <- clusterApply( private$.cluster(), infections_list, infect_func )
       node_list <- private$.node_list
+      if( !is.null( n_infections ) ) {
+        infections_list <- private$.prepare_n_infections( n_infections )
+        data <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
+      } else {
+        data <- lapply( node_list, function( ndxs ) list( n_infect = NULL, n_steps = n_steps ) )
+
+      }
+
+      res_list  <- clusterApply( private$.cluster(), data, infect_func )
       n_strains <- self$n_strains;
       results   <- matrix( 0, nrow = self$n_regions, ncol = n_strains )
 
@@ -555,33 +561,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     run = function( n_steps = NULL )
     {
-      run_func = function( n_steps  )
-      {
-        function( data  )
-        {
-          n_strains <- length( strains[[ 1 ]] )
-          results   <- matrix( 0, ncol = n_strains, nrow = n_node_list )
-          for( nidx in 1:n_node_list )
-          {
-            for( strain_idx in 1:n_strains )
-              results[ nidx, strain_idx ] <- strains[[ nidx ]][[ strain_idx ]]$total_infected() * -1
-            abms[[ nidx ]]$run( n_steps, verbose = FALSE)
-            for( strain_idx in 1:n_strains )
-              results[ nidx, strain_idx ] <- results[ nidx, strain_idx ] + strains[[ nidx ]][[ strain_idx ]]$total_infected()
-          }
-          return( results )
-        }
-      }
+      n_infections <- NULL
+    #  if( !is.null( self$migration_matrix ) )
 
-      node_list <- private$.node_list
-      res_list  <- clusterApply( private$.cluster(), node_list, run_func( n_steps ) )
-      n_strains <- self$n_strains;
-      results   <- matrix( 0, nrow = self$n_regions, ncol = n_strains )
-
-      for( ndx in 1:length( node_list ) )
-        results[ node_list[[ ndx ]], ] <- res_list[[ ndx ]]
-
-      return(results )
+     return( self$combine_run( n_infections, n_steps ) )
     },
 
     plot = function( time = NULL, height = 800 )
