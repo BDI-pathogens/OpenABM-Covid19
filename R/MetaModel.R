@@ -15,6 +15,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .yrange        = NULL,
     .migration_matrix = NULL,
     .migration_factor = NULL,
+    .migration_frequency = NULL,
 
     .staticReturn = function( val, name )
     {
@@ -222,11 +223,11 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
-    .setMigrationMatrix = function( migration_matrix, migration_factor )
+    .setMigrationMatrix = function( migration_matrix, migration_factor, migration_frequency )
     {
       if( !is.null( migration_matrix ) )
       {
-        reqCols = c( "n_region", "n_region_to", "transfer" )
+        reqCols <- c( "n_region", "n_region_to", "transfer" )
 
         error_msg <- paste( "migration_matrix must be a data.table columns [", paste( reqCols, collapse = ", " ), "]" )
 
@@ -244,8 +245,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         migration_matrix[ , transfer_used := transfer * migration_factor ]
 
-        private$.migration_matrix = migration_matrix
-        private$.migration_factor = migration_factor
+        private$.migration_matrix    <- migration_matrix
+        private$.migration_factor    <- migration_factor
+        private$.migration_frequency <- migration_frequency
       }
     },
 
@@ -270,7 +272,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       meta_data = NULL,
       map_data  = NULL,
       migration_matrix = NULL,
-      migration_factor = 0.1
+      migration_factor = 0.1,
+      migration_frequency = 1
     )
     {
       # clean destroyed models
@@ -284,7 +287,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setBaseParams( base_params )
       private$.setMetaData( meta_data )
       private$.setMapData( map_data )
-      private$.setMigrationMatrix( migration_matrix, migration_factor )
+      private$.setMigrationMatrix( migration_matrix, migration_factor, migration_frequency )
       private$.initializeSubModels()
       private$.n_strains = 1
     },
@@ -364,12 +367,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         for( nidx in 1:n_node_list )
         {
           for( strain_idx in 1:n_strains )
-            if( n_infections[ nidx, strain_idx ] > 0 )
-            {
-              p_infect = floor( runif( n_infections[ nidx, strain_idx ] ) * params[[ nidx ]]$n_total )
-               for( pdx in p_infect )
-                 abms[[ nidx ]]$seed_infect_by_idx( pdx, strain_idx = strain_idx - 1 )
-            }
+            abms[[ nidx ]]$seed_infect_n_people(  n_infections[ nidx, strain_idx ], strain_idx = strain_idx - 1 )
         }
         return()
       }
@@ -460,12 +458,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         {
           # migration infections
           for( strain_idx in 1:n_strains )
-            if( n_infections[ nidx, strain_idx ] > 0 )
-            {
-              p_infect = floor( runif( n_infections[ nidx, strain_idx ] ) * params[[ nidx ]]$n_total )
-              for( pdx in p_infect )
-                abms[[ nidx ]]$seed_infect_by_idx( pdx, strain_idx = strain_idx - 1 )
-            }
+            abms[[ nidx ]]$seed_infect_n_people(  n_infections[ nidx, strain_idx ], strain_idx = strain_idx - 1 )
 
           # run steps
           for( strain_idx in 1:n_strains )
@@ -648,8 +641,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     network_names = function( val = NULL ) private$.staticReturn( val, "network_names" ),
     meta_data    = function( val = NULL ) private$.staticReturn( val, "meta_data" ),
     map_data     = function( val = NULL ) private$.staticReturn( val, "map_data" ),
-    migration_matrix = function( val = NULL ) private$.staticReturn( val, "migration_matrix" ),
-    migration_factor = function( val = NULL ) private$.staticReturn( val, "migration_factor" )
+    migration_matrix    = function( val = NULL ) private$.staticReturn( val, "migration_matrix" ),
+    migration_factor    = function( val = NULL ) private$.staticReturn( val, "migration_factor" ),
+    migration_frequency = function( val = NULL ) private$.staticReturn( val, "migration_frequency" )
   )
 )
 
