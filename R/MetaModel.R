@@ -16,6 +16,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .migration_matrix = NULL,
     .migration_factor = NULL,
     .migration_frequency = NULL,
+    .total_infected      = NULL,
+    .time                = 0,
 
     .staticReturn = function( val, name )
     {
@@ -318,30 +320,6 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( t )
     },
 
-    total_infected = function()
-    {
-      results_func = function( data  )
-      {
-        results <- vector( mode = "list", length = n_node_list )
-        for( nidx in 1:n_node_list )
-          results[[ nidx ]] <- abms[[ nidx ]]$total_infected
-        return( results )
-      }
-
-      t <- clusterApply( private$.cluster(), private$.node_list, results_func )
-      max_time <- nrow( t[[ 1]][[1]] )
-      t <- rbindlist(lapply( t, function( r ) rbindlist( lapply( r, as.data.table ), use.names = TRUE )), use.names = TRUE )
-      setnames( t, sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) ) )
-
-      if( t[,.N] != max_time * self$n_regions )
-        stop( "the wrong number of results from sub-popualtions")
-
-      t[ , n_region := rep( unlist( private$.node_list), each = max_time ) ]
-      t[ , time := rep( 0:(max_time-1), self$n_regions )]
-
-      return( t )
-    },
-
     one_time_step_results = function()
     {
       results_func = function( data  )
@@ -449,10 +427,11 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     {
       infect_func = function( data )
       {
-        n_infections <- data$n_infect
-        n_steps      <- data$n_steps
-        n_strains    <- abms[[ 1 ]]$n_strains
-        results      <- matrix( 0, ncol = n_strains, nrow = n_node_list )
+        n_infections   <- data$n_infect
+        n_steps        <- data$n_steps
+        n_strains      <- abms[[ 1 ]]$n_strains
+        total_infected <- vector( mode = "list", length = n_node_list )
+        start_time     <- abms[[ 1 ]]$time
 
         for( nidx in 1:n_node_list )
         {
@@ -463,14 +442,12 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           }
 
           # run steps( )
-          for( strain_idx in 1:n_strains )
-            results[ nidx, strain_idx ] <- strains[[ nidx ]][[ strain_idx ]]$total_infected() * -1
           abms[[ nidx ]]$run( n_steps, verbose = FALSE)
-          for( strain_idx in 1:n_strains )
-            results[ nidx, strain_idx ] <- results[ nidx, strain_idx ] + strains[[ nidx ]][[ strain_idx ]]$total_infected()
-
+          end_time <- abms[[ nidx ]]$time
+          total_infected[[ nidx ]] <- abms[[ nidx ]]$total_infected[ (start_time + 2 ):( end_time + 1 ), ]
         }
-        return( results )
+
+        return( list( total_infected = total_infected, time = end_time) )
       }
 
       # build input data
@@ -483,34 +460,31 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       }
 
-      res_list  <- clusterApply( private$.cluster(), data, infect_func )
-      n_strains <- self$n_strains;
-      results   <- matrix( 0, nrow = self$n_regions, ncol = n_strains )
+      # run results
+      start_time    <- self$time
+      results       <- clusterApply( private$.cluster(), data, infect_func )
+      private$.time <- results[[ 1 ]]$time
+      end_time      <- self$time
 
-      for( ndx in 1:length( node_list ) )
-        results[ node_list[[ ndx ]], ] <- res_list[[ ndx ]]
+      # update total infected
+      infected_cols  <- sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) )
+      total_infected <- lapply( results, function( nd ) lapply( nd$total_infected, function( nnd ) as.data.table( nnd ) ) )
+      total_infected <- rbindlist( unlist( total_infected, recursive = FALSE ), use.names = TRUE )
+      setnames( total_infected, infected_cols )
 
-      return(results )
+      total_infected[ , time     := rep( (start_time + 1):end_time, n_regions )]
+      total_infected[ , n_region := rep( unlist( private$.node_list), each = end_time - start_time ) ]
+
+      private$.total_infected <- rbindlist( list( private$.total_infected, total_infected ), use.names = TRUE )
+
+      total_infected <- self$total_infected
+      new_infected   <- total_infected[ time == end_time][ order( n_region )][ , .SD, .SDcols = infected_cols ]
+      if( start_time > 0 )
+       new_infected <- new_infected - total_infected[ time == start_time ][ order( n_region )][, .SD, .SDcols = infected_cols ]
+
+      return( new_infected )
     },
 
-    time = function()
-    {
-      results_func = function( data  )
-      {
-        results <- vector( mode = "numeric", length = n_node_list )
-        for( nidx in 1:n_node_list ) {
-          results[ nidx ] <- abms[[ nidx ]]$c_model$time
-        }
-        return( results )
-      }
-
-      t <- clusterApply( private$.cluster(), private$.node_list, results_func )
-      t <- unique( unlist( t ) )
-      if( length( t ) != 1 )
-        stop( "underlying ABMs are out of synch" )
-
-      return( t )
-    },
 
     add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
@@ -621,7 +595,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_regions   = function( val = NULL ) private$.staticReturn( val, "n_regions" ),
     base_params = function( val = NULL ) private$.staticReturn( val, "base_params" ),
     n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
-    network_names = function( val = NULL ) private$.staticReturn( val, "network_names" ),
+    time        = function( val = NULL ) private$.staticReturn( val, "time" ),
+    total_infected = function( val = NULL ) private$.staticReturn( val, "total_infected" ),
+    network_names  = function( val = NULL ) private$.staticReturn( val, "network_names" ),
     meta_data    = function( val = NULL ) private$.staticReturn( val, "meta_data" ),
     map_data     = function( val = NULL ) private$.staticReturn( val, "map_data" ),
     migration_matrix    = function( val = NULL ) private$.staticReturn( val, "migration_matrix" ),
