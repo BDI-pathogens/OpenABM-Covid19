@@ -1,6 +1,6 @@
 .random_round = function( x )
 {
-  return( floor( x ) + floor( x) + rbinom( length( x ), 1, x - floor( x )) )
+  return( floor( x) + rbinom( length( x ), 1, x - floor( x )) )
 }
 
 
