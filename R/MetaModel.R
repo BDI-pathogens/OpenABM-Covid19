@@ -15,7 +15,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .yrange        = NULL,
     .migration_matrix = NULL,
     .migration_factor = NULL,
-    .migration_frequency = NULL,
+    .migration_delay  = NULL,
     .total_infected      = NULL,
     .time                = 0,
 
@@ -40,7 +40,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       n_nodes   <- self$n_nodes
       n_regions <- self$n_regions
 
-      node_list <- vector(mode = "list", length = n_nodes )
+      node_list <- vector( mode = "list", length = n_nodes )
       for( region in 1:n_regions )
       {
         node <- ( ( region -1 ) %% n_nodes ) + 1
@@ -61,6 +61,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     {
       default_params = list(
         rng_seed = 0,
+        end_time             = 100,
         n_total              = 1e4,
         days_of_interactions = 1,
         quarantine_days      = 1,
@@ -115,7 +116,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         for( nidx in 1:n_node_list )
         {
-          params[[ nidx ]] <<- base_params[[ nidx ]]
+          params[[ nidx ]] <<- base_params[[ nodes[ nidx ] ]]
           abms[[ nidx ]]   <<- Model.new(params = params[[ nidx ]] )
           params[[ nidx ]][[ "n_total" ]] <<- abms[[ nidx ]]$get_param( "n_total" )
           strains[[ nidx ]][[ 1 ]] <<- Strain$new( abms[[ nidx]], 0 )
@@ -137,6 +138,15 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     .prepare_n_infections = function( n_infections )
     {
+      if( is.list( n_infections ) )
+      {
+        infections_list = vector( mode = "list", length = length( n_infections ) )
+        for( idx in 1:length( n_infections ) )
+          infections_list[[ idx ]] = private$.prepare_n_infections( n_infections[[ idx ]] )
+        infections_list = split( simplify2array( infections_list ), 1:length( infections_list[[ 1 ]] ) )
+        return( infections_list )
+      }
+
       if( length( n_infections ) == 1 )
         n_infections <- rep( n_infections, self$n_regions )
 
@@ -144,7 +154,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       {
         if( ncol( n_infections) > self$n_strains )
           stop( "n_infections has more columns than strains in the model" )
-        infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs, ] )
+        infections_list <- lapply( private$.node_list, function( ndxs) n_infections[ ndxs,, drop = FALSE ] )
       } else
         infections_list <- lapply( private$.node_list, function( ndxs) matrix( n_infections[ ndxs ], ncol = 1 ) )
 
@@ -225,7 +235,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
-    .setMigrationMatrix = function( migration_matrix, migration_factor, migration_frequency )
+    .setMigrationMatrix = function( migration_matrix, migration_factor, migration_delay )
     {
       if( !is.null( migration_matrix ) )
       {
@@ -249,7 +259,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         private$.migration_matrix    <- migration_matrix
         private$.migration_factor    <- migration_factor
-        private$.migration_frequency <- migration_frequency
+        private$.migration_delay <- migration_delay
       }
     },
 
@@ -259,6 +269,11 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       range[1] <- range[ 1 ] - diff * pad
       range[2] <- range[ 2 ] + diff * pad
       return( range )
+    },
+
+    .total_infected_cols = function()
+    {
+      return( sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) ) )
     },
 
     xrange = function( pad = 0.05 ) private$.get_range( private$.xrange, pad ),
@@ -275,7 +290,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       map_data  = NULL,
       migration_matrix = NULL,
       migration_factor = 0.1,
-      migration_frequency = 1
+      migration_delay  = 5
     )
     {
       # clean destroyed models
@@ -289,7 +304,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setBaseParams( base_params )
       private$.setMetaData( meta_data )
       private$.setMapData( map_data )
-      private$.setMigrationMatrix( migration_matrix, migration_factor, migration_frequency )
+      private$.setMigrationMatrix( migration_matrix, migration_factor, migration_delay )
       private$.initializeSubModels()
       private$.n_strains = 1
     },
@@ -428,6 +443,15 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       infect_func = function( data )
       {
         n_infections   <- data$n_infect
+
+        if( is.null( n_infections ) ) {
+          n_inf_steps <- 0
+        } else if( is.matrix( n_infections ) ) {
+          n_infections <- list( n_infections )
+          n_inf_steps  <- 1
+        } else
+          n_inf_steps <- length( n_infections )
+
         n_steps        <- data$n_steps
         n_strains      <- abms[[ 1 ]]$n_strains
         total_infected <- vector( mode = "list", length = n_node_list )
@@ -435,16 +459,21 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         for( nidx in 1:n_node_list )
         {
-          # migration infections
-          if( !is.null( n_infections ) ) {
-            for( strain_idx in 1:n_strains )
-              abms[[ nidx ]]$seed_infect_n_people( n_infections[ nidx, strain_idx ], strain_idx = strain_idx - 1 )
+          for( step in 1:n_steps )
+          {
+            # migration infections
+            if( step <= n_inf_steps ) {
+              for( strain_idx in 1:n_strains )
+                abms[[ nidx ]]$seed_infect_n_people( n_infections[[ step ]][ nidx, strain_idx ], strain_idx = strain_idx - 1 )
+            }
+
+            # run step
+            abms[[ nidx ]]$run( 1, verbose = FALSE)
           }
 
-          # run steps( )
-          abms[[ nidx ]]$run( n_steps, verbose = FALSE)
+          # collect results
           end_time <- abms[[ nidx ]]$time
-          total_infected[[ nidx ]] <- abms[[ nidx ]]$total_infected[ (start_time + 2 ):( end_time + 1 ), ]
+          total_infected[[ nidx ]] <- abms[[ nidx ]]$total_infected[ (start_time + 2 ):( end_time + 1 ),, drop = FALSE ]
         }
 
         return( list( total_infected = total_infected, time = end_time) )
@@ -457,7 +486,6 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         data <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
       } else {
         data <- lapply( node_list, function( ndxs ) list( n_infect = NULL, n_steps = n_steps ) )
-
       }
 
       # run results
@@ -467,7 +495,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       end_time      <- self$time
 
       # update total infected
-      infected_cols  <- sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) )
+      infected_cols  <- private$.total_infected_cols()
       total_infected <- lapply( results, function( nd ) lapply( nd$total_infected, function( nnd ) as.data.table( nnd ) ) )
       total_infected <- rbindlist( unlist( total_infected, recursive = FALSE ), use.names = TRUE )
       setnames( total_infected, infected_cols )
@@ -535,10 +563,71 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     run = function( n_steps = NULL )
     {
-      n_infections <- NULL
-    #  if( !is.null( self$migration_matrix ) )
+      if( is.null( self$migration_matrix ) )
+        return( self$combine_run( n_infections, n_steps ) )
 
-     return( self$combine_run( n_infections, n_steps ) )
+      if( is.null( n_steps ) )
+        n_steps <- self$base_params[[ 1 ]][[ "end_time" ]] - self$time
+
+      migration_matrix <- self$migration_matrix
+      migration_delay  <- self$migration_delay
+      n_regions        <- self$n_regions
+      regions          <- 1:n_regions
+
+      time  <- self$time
+      steps <- 0
+
+      if( time < migration_delay ) {
+        steps <- min( n_steps, migration_delay - time )
+        self$combine_run( NULL, steps )
+      }
+
+      inf_cols  <- private$.total_infected_cols()
+      n_strains <- length( inf_cols )
+      while( steps < n_steps )
+      {
+        t      <- self$time
+        dstep  <- min( migration_delay, n_steps - steps )
+        steps  <- steps + dstep
+
+        total_infected <- self$total_infected
+        total_infected <- total_infected[ time >= t - migration_delay ][ order( time, n_region ) ]
+
+        new_infected = vector( mode = "list", length = dstep)
+        for( sdx in 1:dstep )
+          new_infected[[ sdx ]] <- total_infected[ time == ( t - migration_delay + sdx ) ][ , .SD, .SDcols = inf_cols ]
+
+        if( dstep > 1 )
+          for( sdx in dstep:2 )
+          {
+            new_infected[[ sdx ]] <- new_infected[[ sdx ]] - new_infected[[ sdx -1 ]]
+            new_infected[[ sdx ]][ , n_region := regions ]
+          }
+
+        if( t > migration_delay )
+        {
+          t0 <- total_infected[ time == ( t - migration_delay ) ][ , .SD, .SDcols = inf_cols ]
+          new_infected[[ 1 ]] <- new_infected[[ 1 ]] - t0
+        }
+        new_infected[[ 1 ]][ , n_region := regions ]
+
+        for( sdx in 1:dstep  )
+        {
+          dt <- new_infected[[ sdx ]][ migration_matrix, on = "n_region" ]
+          dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
+
+          # FIXME need random rounding
+          dt <- dt[ , lapply( .SD, function( x) ceiling( sum( x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
+
+          indices = dt[ , n_region_to ]
+          vals    = as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
+
+          new_infected[[ sdx ]] <- matrix( 0, nrow = n_regions, ncol = n_strains )
+          new_infected[[ sdx ]][ indices, ] <- vals
+        }
+
+        self$combine_run( new_infected, dstep )
+      }
     },
 
     plot = function( time = NULL, height = 800 )
@@ -602,7 +691,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     map_data     = function( val = NULL ) private$.staticReturn( val, "map_data" ),
     migration_matrix    = function( val = NULL ) private$.staticReturn( val, "migration_matrix" ),
     migration_factor    = function( val = NULL ) private$.staticReturn( val, "migration_factor" ),
-    migration_frequency = function( val = NULL ) private$.staticReturn( val, "migration_frequency" )
+    migration_delay = function( val = NULL ) private$.staticReturn( val, "migration_delay" )
   )
 )
 

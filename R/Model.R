@@ -286,7 +286,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     total_infected = function( val = NULL )
     {
       t_inf <- private$.staticReturn( val, "total_infected" )
-      return( t_inf[ 1:(self$time + 1), ] )
+      return( t_inf[ 1:(self$time + 1),, drop = F ] )
     },
 
     #' @field A lost of all strains in the model
