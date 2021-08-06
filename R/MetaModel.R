@@ -1,3 +1,8 @@
+.random_round = function( x )
+{
+  return( floor( x) + rbinom( length( x ), 1, x - floor( x )) )
+}
+
 
 MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
@@ -615,9 +620,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         {
           dt <- new_infected[[ sdx ]][ migration_matrix, on = "n_region" ]
           dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
-
-          # FIXME need random rounding
-          dt <- dt[ , lapply( .SD, function( x) ceiling( sum( x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
+          dt <- dt[ , lapply( .SD, function( x) .random_round( sum( x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
 
           indices = dt[ , n_region_to ]
           vals    = as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
@@ -630,7 +633,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
-    plot = function( time = NULL, height = 800 )
+    plot = function(
+      time = NULL,
+      height = 800,
+      marker.size = 10 )
     {
       if( !is.null( time ) )
         stop( "single time not implemented" )
@@ -649,11 +655,13 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
                                            total_infected ) ]
       results[ , percent_infections := new_infections / n_total * 100 ]
 
-
       xrange <- private$xrange()
       yrange <- private$yrange()
+      width  <- round( height * diff( xrange ) / diff( yrange ) )
 
-      width  = round( height * diff( xrange ) / diff( yrange ) )
+      map_data <- self$map_data
+      if( !is.null( map_data ) )
+        map_data <- map_data[ , plotly_rect ]
 
       p = plot_ly(
         results,
@@ -666,10 +674,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         mode = "markers",
         height = height,
         width = width,
-        marker = list(size = 10)
+        marker = list(size = marker.size )
       ) %>%
         layout(
-          shapes = self$map_data[ , plotly_rect ],
+          shapes = map_data,
           xaxis  = list( range = xrange, title = "", visible = F),
           yaxis  = list( range = yrange, title = "", visible = F)
         )%>%
