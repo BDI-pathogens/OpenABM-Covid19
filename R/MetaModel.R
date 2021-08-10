@@ -309,7 +309,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     )
     {
       # clean destroyed models
-      gc()
+      gc( verbose = FALSE )
 
       n_nodes <- min( n_nodes, n_regions ) # no point making unused nodes
       private$.n_regions <- n_regions
@@ -508,6 +508,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       results       <- clusterApply( private$.cluster(), data, infect_func )
       private$.time <- results[[ 1 ]]$time
       end_time      <- self$time
+      n_regions     <- self$n_regions
 
       # update total infected
       infected_cols  <- private$.total_infected_cols()
@@ -727,4 +728,81 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
   )
 )
 
+MetaModel.England = function(
+  base_params       = list(),
+  population_factor = 0.1,
+  migration_factor  = 0.1,
+  migration_delay   = 5,
+  min_population    = 1e4,
+  n_nodes           = 4,
+  data_dir          = system.file( "MetaModel_data/England", package = "OpenABMCovid19")
+)
+{
 
+  # load the meta data and get the population sizes
+  meta_data <- fread( sprintf( "%s/meta_data.csv", data_dir ) )
+  n_regions <- meta_data[ ,.N ]
+  n_total   <- meta_data[ , ceiling( pmax( population * population_factor, min_population) ) ]
+
+  # add map data
+  map_data <- fread( sprintf( "%s/map_data.csv", data_dir ) )
+
+  # add migration data
+  migration_matrix <- fread( sprintf( "%s/migration_matrix.csv", data_dir ) )
+
+  base_params[[ "n_total" ]] <- n_total
+
+  abm <- MetaModel$new(
+    n_nodes     = n_nodes,
+    n_regions   = n_regions,
+    base_params = base_params,
+    meta_data   = meta_data,
+    map_data    = map_data,
+    migration_matrix = migration_matrix,
+    migration_factor = migration_factor,
+    migration_delay =  migration_delay
+  )
+  return( abm )
+}
+
+MetaModel.rectangle = function(
+  x_points  = 10,
+  y_points  = 10,
+  x_migrate = TRUE,
+  y_migrate = TRUE,
+  base_params       = list(),
+  migration_factor  = 0.1,
+  migration_delay   = 5,
+  n_nodes           = 4
+)
+{
+  n_regions <- x_points * y_points
+
+  # build migration matrix (nearest neighbour transmission only)
+  adj_mat   = data.table( x = rep( 1:x_points,  y_points), y = rep( 1:y_points, each = x_points), n_region = 1:n_regions, dummy = 1 )
+  meta_data = adj_mat[ , .( x, y, n_region, name = as.character( n_region ) ) ]
+
+  adj_mat = adj_mat[ adj_mat[ , .( x2 = x, y2 = y, n_region_to = n_region, dummy) ], on = "dummy", allow.cartesian = TRUE]
+  adj_mat = adj_mat[ ( x != x2  ) | ( y != y2 )]
+
+  adj_mat = adj_mat[ abs( x - x2 ) <= x_migrate & abs( y - y2 ) <= y_migrate ]
+  adj_mat = adj_mat[ abs( x - x2 ) == 0 | abs( y - y2 ) == 0 ]
+  migration_matrix = adj_mat[ , .( n_region, n_region_to, transfer = 1 ) ]
+
+  default_params = list( n_total = 1e4 )
+  for( name in names( base_params ) )
+    default_params[[ name ]] <- base_params[[ name ]]
+  meta_data[ , population := rep( default_params[[ "n_total"]], n_regions )]
+
+  abm = MetaModel$new(
+    n_regions   = n_regions,
+    base_params = default_params,
+    migration_matrix = migration_matrix,
+    migration_factor = migration_factor,
+    migration_delay  = 5,
+    n_nodes          = n_nodes,
+    meta_data        = meta_data
+  )
+
+  return( abm )
+}
