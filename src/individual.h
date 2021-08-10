@@ -37,6 +37,7 @@ struct individual{
 	short status;
 	float *hazard;
 	float infectiousness_multiplier;
+	float compliance_factor;
 	event *current_disease_event;
 	event *next_disease_event;
 	infection_event *infection_events;

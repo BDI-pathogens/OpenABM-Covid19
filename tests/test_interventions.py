@@ -870,40 +870,46 @@ class TestClass(object):
             dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
+                    end_time=30,
+                    infectious_rate=6,
                     self_quarantine_fraction=1.0,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 1,
                     test_result_wait = 1,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1,  
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 1         
                 )
             ),
              dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
-                    self_quarantine_fraction=1.0,
+                    end_time=30,
+                    infectious_rate=6,
+                    self_quarantine_fraction=0,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 2,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1, 
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 1                        
                 )
             ),
               dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
-                    self_quarantine_fraction=1.0,
+                    end_time=20,
+                    infectious_rate=6,
+                    self_quarantine_fraction=0.5,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 0,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1, 
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 0.5                                       
                 )
             ),
         ],
@@ -2543,6 +2549,9 @@ class TestClass(object):
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
         df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
         
+        symp_tot = 0
+        test_tot = 0
+        
         for time in range( test_params[ "end_time" ] - total_delay ):
             if time >= total_delay: 
                 symp = df_trans[ df_trans["time_symptomatic" ] == time + 1 ]
@@ -2550,8 +2559,22 @@ class TestClass(object):
                     symp = symp.iloc[ 0,1 ]
                 else :
                     symp = 0
-                np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
+                    
+                if test_params[ "test_on_symptoms_compliance"] == 1 :
+                    np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
+                else :
+                    symp_tot += symp
+                    test_tot += n_tests[time + total_delay ]
 
+        if test_params[ "test_on_symptoms_compliance"] != 1 :
+            
+            expected_test = symp_tot * test_params[ "test_on_symptoms_compliance"]
+            sd_test  = sqrt( expected_test * ( 1 - test_params[ "test_on_symptoms_compliance"] ) )
+            tol_sd   = 3
+            
+            np.testing.assert_allclose(test_tot, expected_test, atol = sd_test * tol_sd, err_msg = "Number of tests incorrect given compliance rates on symptoms")
+     
+        
     def test_tests_completed(self, test_params ):
         """
         Check that all tests have been processed by the model at the end 

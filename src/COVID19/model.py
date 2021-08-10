@@ -42,6 +42,8 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_result_wait",
     "test_result_wait_priority",
     "self_quarantine_fraction",
+    "test_on_symptoms_compliance",
+    "test_on_traced_compliance",
     "lockdown_on",
     "lockdown_elderly_on",
     "app_turned_on",
