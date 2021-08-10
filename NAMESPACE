@@ -14,6 +14,7 @@ import("data.table")
 importFrom( "plotly", "plot_ly" )
 importFrom( "plotly", "layout" )
 importFrom( "plotly", "animation_opts" )
+importFrom( "plotly", "colorbar" )
 importFrom( "plotly", "%>%" )
 importFrom( "stringr", "str_replace_all")
 
@@ -42,6 +43,10 @@ export("Model.run")
 export("Model.get_param")
 export("Model.update_running_params")
 export("Model.get_transmissions")
+
+# MetaModel
+export( "MetaModel.rectangle")
+export( "MetaModel.England")
 
 # Enums
 export("AgeGroupEnum")
