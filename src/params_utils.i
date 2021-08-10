@@ -446,6 +446,22 @@ double get_param_self_quarantine_fraction(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:        get_param_test_on_symptoms_compliance
+******************************************************************************************/
+double get_param_test_on_symptoms_compliance(parameters *params)
+{
+    return params->test_on_symptoms_compliance;
+}
+
+/*****************************************************************************************
+*  Name:        get_param_test_on_traced_compliance
+******************************************************************************************/
+double get_param_test_on_traced_compliance(parameters *params)
+{
+    return params->test_on_traced_compliance;
+}
+
+/*****************************************************************************************
 *  Name:        get_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -1325,6 +1341,26 @@ int set_param_quarantine_days(parameters *params, int value)
 int set_param_self_quarantine_fraction(parameters *params, double value)
 {
     params->self_quarantine_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_test_on_symptoms_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_on_symptoms_compliance(parameters *params, double value)
+{
+    params->test_on_symptoms_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_test_on_traced_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_on_traced_compliance(parameters *params, double value)
+{
+    params->test_on_traced_compliance = value;
     return TRUE;
 }
 

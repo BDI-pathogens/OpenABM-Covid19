@@ -383,6 +383,24 @@ double get_model_param_self_quarantine_fraction(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_test_on_symptoms_compliance
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_test_on_symptoms_compliance(model *model)
+{
+    return model->params->test_on_symptoms_compliance;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_on_traced_compliance
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_test_on_traced_compliance(model *model)
+{
+    return model->params->test_on_traced_compliance;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -727,6 +745,26 @@ int set_model_param_quarantine_days(model *model, int value )
 int set_model_param_self_quarantine_fraction(model *model, double value)
 {
     model->params->self_quarantine_fraction = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_test_on_symptoms_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_on_symptoms_compliance(model *model, double value)
+{
+    model->params->test_on_symptoms_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_test_on_traced_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_on_traced_compliance(model *model, double value)
+{
+    model->params->test_on_traced_compliance = value;
     return TRUE;
 }
 

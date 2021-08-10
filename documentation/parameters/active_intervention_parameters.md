@@ -43,3 +43,5 @@
 | `app_users_fraction_60_69` | 0.7 | - | Maximum fraction of the population with smartphones aged 60-69 | OFCOM 55+ year olds |
 | `app_users_fraction_70_79` | 0.48 | - | Maximum fraction of the population with smartphones aged 70-79 | OFCOM 55+ year olds |
 | `app_users_fraction_80` | 0.32 | - | Maximum fraction of the population with smartphones aged 80+ | OFCOM 55+ year olds |
+| `test_on_symptoms_compliance` | 0.8 | - | Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE | - |
+| `test_on_traced_compliance` | 0.8 | - | Fraction of individuals who get tested on traced if test_on_compliance=TRUE | - |
