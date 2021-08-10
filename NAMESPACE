@@ -15,6 +15,7 @@ importFrom( "plotly", "plot_ly" )
 importFrom( "plotly", "layout" )
 importFrom( "plotly", "animation_opts" )
 importFrom( "plotly", "%>%" )
+importFrom( "stringr", "str_replace_all")
 
 # R6 Classes
 export("Parameters")
@@ -48,5 +49,10 @@ export("SAFE_UPDATE_PARAMS")
 export("NETWORK_CONSTRUCTIONS")
 export("VACCINE_TYPES")
 export("VACCINE_STATUS")
+
+# constants
+export("plot.value.total_infected")
+export("plot.value.new_infected")
+export("plot.values")
 
 useDynLib(OpenABMCovid19, .registration = TRUE)
