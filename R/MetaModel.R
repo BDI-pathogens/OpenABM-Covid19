@@ -3,6 +3,16 @@
   return( floor( x) + rbinom( length( x ), 1, x - floor( x )) )
 }
 
+plot.value.total_infected <- "total_infected"
+plot.value.new_infected   <- "new_infected"
+plot.values <- c(
+  plot.value.total_infected,
+  plot.value.new_infected
+)
+
+lockBinding( "plot.value.total_infected", environment() )
+lockBinding( "plot.value.new_infected", environment() )
+lockBinding( "plot.values", environment() )
 
 MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
@@ -566,7 +576,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
-    run = function( n_steps = NULL )
+    run = function( n_steps = NULL, verbose = TRUE )
     {
       if( is.null( self$migration_matrix ) )
         return( self$combine_run( n_infections, n_steps ) )
@@ -591,6 +601,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       n_strains <- length( inf_cols )
       while( steps < n_steps )
       {
+        if( verbose )
+          cat( sprintf( "\rStep %d of %d", steps, n_steps ) )
+
         t      <- self$time
         dstep  <- min( migration_delay, n_steps - steps )
         steps  <- steps + dstep
@@ -636,7 +649,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     plot = function(
       time = NULL,
       height = 800,
-      marker.size = 10 )
+      marker.size = 10,
+      value = plot.value.new_infected
+    )
     {
       if( !is.null( time ) )
         stop( "single time not implemented" )
@@ -644,17 +659,20 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       if( is.null( self$meta_data ) )
         stop( "plot requires meta_data to be specified")
 
+      if( !( value %in% plot.values ) )
+        stop( "can only plot values in plot.values" )
+
       results   <- self$results()
       meta_data <- self$meta_data
 
       results <- results[ ,.( time, n_region, total_infected ) ]
       results <- meta_data[ results, on = "n_region" ]
       results = results[ order( n_region, time ) ]
-      results[ , new_infections := ifelse( n_region == shift( n_region, fill = 1 ),
+      results[ , new_infected := ifelse( n_region == shift( n_region, fill = 1 ),
                                            total_infected - shift( total_infected, fill = 0 ),
                                            total_infected ) ]
-      results[ , percent_infections := new_infections / n_total * 100 ]
-
+      results[ , new_infected := new_infected / n_total * 100 ]
+      results[ , total_infected := total_infected / n_total * 100 ]
       xrange <- private$xrange()
       yrange <- private$yrange()
       width  <- round( height * diff( xrange ) / diff( yrange ) )
@@ -667,21 +685,27 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         results,
         x = ~x,
         y = ~y,
+        color = ~get( value ),
         frame = ~time,
-        color = ~percent_infections,
         text = ~name,
         type = "scatter",
         mode = "markers",
         height = height,
         width = width,
-        marker = list(size = marker.size )
+        marker = list(
+          size = marker.size
+        )
       ) %>%
-        layout(
-          shapes = map_data,
-          xaxis  = list( range = xrange, title = "", visible = F),
-          yaxis  = list( range = yrange, title = "", visible = F)
-        )%>%
-        animation_opts( 100, easing = "linear")
+      layout(
+        shapes = map_data,
+        xaxis  = list( range = xrange, title = "", visible = F),
+        yaxis  = list( range = yrange, title = "", visible = F)
+      ) %>%
+      animation_opts( 100, easing = "linear") %>%
+      colorbar( title = list(
+       text = sprintf( "<b>%s (%%)</b>", tools::toTitleCase( str_replace_all( value, "_", " ") ) ),
+       side = "right")
+      )
 
       return( p )
     }
