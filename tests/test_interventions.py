@@ -343,7 +343,9 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0,
                     quarantine_compliance_traced_symptoms = 0.5,
                     quarantine_compliance_traced_positive = 0.9,
-                    mean_time_to_hospital = 30
+                    mean_time_to_hospital = 30,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
                 tol_sd = 3
             ),
@@ -371,7 +373,9 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0,
                     quarantine_compliance_traced_symptoms = 0.0,
                     quarantine_compliance_traced_positive = 1.0,
-                    mean_time_to_hospital = 30
+                    mean_time_to_hospital = 30,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
                 tol_sd = 3
             )
@@ -424,7 +428,7 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0.0,
                     quarantine_dropout_positive = 0.0,
                     test_order_wait  = 2,
-                    test_result_wait = 1,
+                    test_result_wait = 2,
                     test_order_wait_priority = 0,
                     test_result_wait_priority = 1,
                     daily_non_cov_symptoms_rate = 0,
@@ -434,6 +438,7 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -466,6 +471,8 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -498,6 +505,8 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -740,7 +749,8 @@ class TestClass(object):
                     manual_traceable_fraction_household = 1,
                     manual_traceable_fraction_random = 1,
                     manual_trace_n_workers = 2e3,
-                    manual_trace_on_hospitalization = 0
+                    manual_trace_on_hospitalization = 0,
+                    test_on_symptoms_compliance = 1,         
                 ),
                 delay = delay,
             ) for delay in [0, 1, 2, 3]
@@ -798,6 +808,8 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
             )
         ],
@@ -832,6 +844,8 @@ class TestClass(object):
                     test_sensitivity = 1,
                     allow_clinical_diagnosis = False,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
             )
         ],
@@ -863,6 +877,8 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_compliance = 1,
                 ),
             )
         ],
@@ -2346,7 +2362,7 @@ class TestClass(object):
    
         # all those directly traced should now be asking for a test
         df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 300, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( len( df ) > 150, True, "In-sufficient traced from index symptomatic at symptomatic time" )
         np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
     
         # now look at at everyone who is traced directly from a positive index case and only traced once

@@ -1335,7 +1335,7 @@ void intervention_on_traced(
 		}
 	}
 
-	if( params->test_on_traced && ( indiv->compliance_factor <  params->test_on_traced_compliance ) )
+	if( params->test_on_traced && ( indiv->compliance_factor <  params->test_on_traced_compliance ) && index_token->index_status == POSITIVE_TEST )
 	{
 		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
 		intervention_test_order( model, indiv, time_test );
