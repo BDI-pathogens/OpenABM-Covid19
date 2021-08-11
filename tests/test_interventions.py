@@ -1168,9 +1168,45 @@ class TestClass(object):
                     test_sensitivity            = 1,
                     test_specificity            = 1,   
                     daily_non_cov_symptoms_rate = 0,    
-                    quarantine_dropout_positive = 0,           
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 1        
                 ),
-               
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 1,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 0.8         
+                ),
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 0.8,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 0.6         
+                ),
             )
         ],
                                           
@@ -3106,9 +3142,12 @@ class TestClass(object):
         Check that:
         1. the number of people who order a test is inline with the compliance factor
         2. nobody isolates prior on symptoms
-        3. people isolate on receipt of a positive test      
+        3. people isolate on receipt of a positive test inline with the compliance factor     
         """ 
-                        
+         
+        # number of random standard deviations before an error is called   
+        sd_tol = 3
+                      
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )
@@ -3117,6 +3156,9 @@ class TestClass(object):
         time_test = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ]
         time_symp = test_params[ "end_time"] - time_test
         test_comp = test_params[ "test_on_symptoms_compliance"]
+        
+        # note individuals have a single compliance factor - quar_comp is the conditional probability of quarantining given taking a test
+        quar_comp = min( test_params[ "quarantine_compliance_positive"] / test_params[ "test_on_symptoms_compliance"], 1 )
         
         # run to the time we are going to test people who are symptomatic at
         model.run( n_steps = time_symp, verbose = False )
@@ -3130,10 +3172,10 @@ class TestClass(object):
         
         # make sure we have sufficient to test
         np.testing.assert_( n_symp * test_comp > 20, "insufficient people to check test compliance " )
-        np.testing.assert_( n_symp * ( 1 - test_comp ) > 20, "insufficient people to check test compliance " )
+        if test_comp < 1 :
+            np.testing.assert_( n_symp * ( 1 - test_comp ) > 20, "insufficient people to check test compliance " )
      
         # check the number taking tests is within tolerance
-        sd_tol = 3
         n_test    = sum( df_symp[ "test_status" ] == constant.TEST_ORDERED )
         n_no_test = sum( df_symp[ "test_status" ] == constant.NO_TEST )
         atol   = sqrt( n_symp * test_comp * ( 1 - test_comp ) ) * sd_tol 
@@ -3153,8 +3195,15 @@ class TestClass(object):
         df_indiv = df_indiv.loc[:,{"ID","quarantined","current_status"}].rename(columns={"quarantined":"quarantined_after_test"})    
         df_symp  = pd.merge( df_symp[ (df_symp["test_status"] == constant.TEST_ORDERED)], df_indiv, on = 'ID')
         
-        n_test_not_hospital = sum( df_symp[ "current_status"] != constant.EVENT_TYPES.HOSPITALISED.value ) 
-        n_quarantined       = sum( df_symp[ "quarantined_after_test"] == 1 )  
-        np.testing.assert_equal( n_quarantined, n_test_not_hospital, "not everybody quarantined on receipt of a positive test")
+        # filter hospitalised people who don't quarantine
+        df_symp = df_symp[ df_symp[ "current_status"] != constant.EVENT_TYPES.HOSPITALISED.value ] 
         
+        # check the correct number who test positive quarantine
+        n_test_not_hospital = len( df_symp[ "current_status"] ) 
+        n_quarantined       = sum( df_symp[ "quarantined_after_test"] == 1 )  
+        n_not_quarantined   = sum( df_symp[ "quarantined_after_test"] != 1 )  
+        
+        atol                = sqrt( n_test_not_hospital * quar_comp * ( 1 - quar_comp ) ) * sd_tol
+        np.testing.assert_allclose(n_quarantined, n_test_not_hospital * quar_comp, atol = atol, err_msg = "incorrect number of people quarantined following positive test")
+        np.testing.assert_allclose(n_not_quarantined, n_test_not_hospital * ( 1 - quar_comp ), atol = atol, err_msg = "incorrect number of people didn't quarantined following positive test")        
         

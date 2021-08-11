@@ -215,4 +215,5 @@ max_n_strains,1,,Maximum number of stains allowed (note memory hit by allowing m
 test_on_symptoms_compliance,0.8,,"Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE",,Active intervention parameters
 test_on_traced_symptoms_compliance,0.0,,"Fraction of individuals who get tested on traced from a symptomatic individual if test_on_traced=TRUE",,Active intervention parameters
 test_on_traced_positive_compliance,0.8,,"Fraction of individuals who get tested on traced from a positive case if test_on_traced=TRUE",,Active intervention parameters
+quarantine_compliance_positive,1,,Fraction of individuals who initially comply with a quarantine notification after they have tested positive,,Active intervention parameters
 

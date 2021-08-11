@@ -410,6 +410,15 @@ double get_model_param_test_on_traced_positive_compliance(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_quarantine_compliance_positive
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_quarantine_compliance_positive(model *model)
+{
+    return model->params->quarantine_compliance_positive;
+}
+
+/*****************************************************************************************
 *  Name:		get_model_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -784,6 +793,16 @@ int set_model_param_test_on_traced_symptoms_compliance(model *model, double valu
 int set_model_param_test_on_traced_positive_compliance(model *model, double value)
 {
     model->params->test_on_traced_positive_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_quarantine_compliance_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_quarantine_compliance_positive(model *model, double value)
+{
+    model->params->quarantine_compliance_positive = value;
     return TRUE;
 }
 

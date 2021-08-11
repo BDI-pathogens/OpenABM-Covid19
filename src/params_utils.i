@@ -470,6 +470,14 @@ double get_param_test_on_traced_positive_compliance(parameters *params)
 }
 
 /*****************************************************************************************
+*  Name:        get_param_quarantine_compliance_positive
+******************************************************************************************/
+double get_param_quarantine_compliance_positive(parameters *params)
+{
+    return params->quarantine_compliance_positive;
+}
+
+/*****************************************************************************************
 *  Name:        get_param_trace_on_symptoms
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
@@ -1379,6 +1387,16 @@ int set_param_test_on_traced_symptoms_compliance(parameters *params, double valu
 int set_param_test_on_traced_positive_compliance(parameters *params, double value)
 {
     params->test_on_traced_positive_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_quarantine_compliance_positive
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_quarantine_compliance_positive(parameters *params, double value)
+{
+    params->quarantine_compliance_positive = value;
     return TRUE;
 }
 

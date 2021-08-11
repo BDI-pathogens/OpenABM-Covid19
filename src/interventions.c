@@ -1229,14 +1229,14 @@ void intervention_on_positive_result( model *model, individual *indiv )
 	index_token->index_status = POSITIVE_TEST;
 	int release_time = index_token->contact_time + params->quarantine_length_traced_positive;
 
-	if( !is_in_hospital( indiv ) )
+	if( !is_in_hospital( indiv ) && (indiv->compliance_factor < params->quarantine_compliance_positive ) )
 	{
 		time_event = index_token->contact_time + sample_transition_time( model, TEST_RESULT_QUARANTINE );
 		intervention_quarantine_until( model, indiv, NULL, time_event, TRUE, NULL, model->time, 1 );
 	}
 	indiv->traced_on_this_trace = TRUE;
 
-	if( params->quarantine_household_on_positive )
+	if( params->quarantine_household_on_positive && ( indiv->quarantined || is_in_hospital( indiv ) ) )
 		intervention_quarantine_household( model, indiv, time_event, params->quarantine_household_contacts_on_positive, index_token, model->time );
 
 	if( params->trace_on_positive &&

@@ -45,6 +45,7 @@ PYTHON_SAFE_UPDATE_PARAMS = [
     "test_on_symptoms_compliance",
     "test_on_traced_symptoms_compliance",
     "test_on_traced_positive_compliance",
+    "quarantine_compliance_positive",
     "lockdown_on",
     "lockdown_elderly_on",
     "app_turned_on",
