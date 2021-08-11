@@ -1152,8 +1152,28 @@ class TestClass(object):
                 n_inter     = 10,     
                 transmission_multiplier = 10
             )
-        ]
-                                            
+        ],
+        "test_isolate_only_on_positive_test" : [
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 0.8,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,           
+                ),
+               
+            )
+        ],
+                                          
     }
 
     """
@@ -3076,4 +3096,62 @@ class TestClass(object):
   
         np.testing.assert_equal( n_ids, n_inf_age_group_post + n_inf_age_group_pre, "not everyone in age group of super spreading net work is infected" )
         np.testing.assert_( n_inf_age_group_post_custom / n_inf_age_group_post > 0.9, "insufficient proportion of transmissionson the super spreading network" )
-               
+             
+    def test_isolate_only_on_positive_test(self, test_params ):  
+        
+        """
+        Check that:
+        1. the number of people who order a test is inline with the compliance factor
+        2. nobody isolates prior on symptoms
+        3. people isolate on receipt of a positive test      
+        """ 
+                        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        time_test = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ]
+        time_symp = test_params[ "end_time"] - time_test
+        test_comp = test_params[ "test_on_symptoms_compliance"]
+        
+        # run to the time we are going to test people who are symptomatic at
+        model.run( n_steps = time_symp, verbose = False )
+        
+        model.write_individual_file()
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
+        df_trans = model.get_transmissions()
+        df_symp  = df_trans[ df_trans[ "time_symptomatic" ] == time_symp ].loc[:,{"ID_recipient"}].rename( columns = { "ID_recipient":"ID" } )
+        df_symp  = pd.merge(df_symp, df_indiv.loc[:,{"ID","test_status","quarantined"}],on = "ID", how = "left")
+        n_symp   = len( df_symp )
+        
+        # make sure we have sufficient to test
+        np.testing.assert_( n_symp * test_comp > 20, "insufficient people to check test compliance " )
+        np.testing.assert_( n_symp * ( 1 - test_comp ) > 20, "insufficient people to check test compliance " )
+     
+        # check the number taking tests is within tolerance
+        sd_tol = 3
+        n_test    = sum( df_symp[ "test_status" ] == constant.TEST_ORDERED )
+        n_no_test = sum( df_symp[ "test_status" ] == constant.NO_TEST )
+        atol   = sqrt( n_symp * test_comp * ( 1 - test_comp ) ) * sd_tol 
+        np.testing.assert_allclose(n_test, n_symp * test_comp, atol = atol, err_msg = "incorrect number of people took tests")
+        np.testing.assert_allclose(n_no_test, n_symp * ( 1 - test_comp ), atol = atol, err_msg = "incorrect number of people didn't take tests")
+        
+        # check nobody has quarantined
+        n_quarantine = sum( df_symp[ "quarantined"] == 1 )
+        np.testing.assert_equal(n_quarantine, 0, "some people are quarantining before a positive test")
+
+        # now step until we have the test results back and look at quarantine status
+        model.run( n_steps = time_test, verbose = False )
+        model.write_individual_file()
+        
+        # get updated quarantine status
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )   
+        df_indiv = df_indiv.loc[:,{"ID","quarantined","current_status"}].rename(columns={"quarantined":"quarantined_after_test"})    
+        df_symp  = pd.merge( df_symp[ (df_symp["test_status"] == constant.TEST_ORDERED)], df_indiv, on = 'ID')
+        
+        n_test_not_hospital = sum( df_symp[ "current_status"] != constant.EVENT_TYPES.HOSPITALISED.value ) 
+        n_quarantined       = sum( df_symp[ "quarantined_after_test"] == 1 )  
+        np.testing.assert_equal( n_quarantined, n_test_not_hospital, "not everybody quarantined on receipt of a positive test")
+        
+        
