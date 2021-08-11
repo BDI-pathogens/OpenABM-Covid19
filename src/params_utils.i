@@ -454,11 +454,19 @@ double get_param_test_on_symptoms_compliance(parameters *params)
 }
 
 /*****************************************************************************************
-*  Name:        get_param_test_on_traced_compliance
+*  Name:        get_param_test_on_traced_symptoms_compliance
 ******************************************************************************************/
-double get_param_test_on_traced_compliance(parameters *params)
+double get_param_test_on_traced_symptoms_compliance(parameters *params)
 {
-    return params->test_on_traced_compliance;
+    return params->test_on_traced_symptoms_compliance;
+}
+
+/*****************************************************************************************
+*  Name:        get_param_test_on_traced_positive_compliance
+******************************************************************************************/
+double get_param_test_on_traced_positive_compliance(parameters *params)
+{
+    return params->test_on_traced_positive_compliance;
 }
 
 /*****************************************************************************************
@@ -1355,12 +1363,22 @@ int set_param_test_on_symptoms_compliance(parameters *params, double value)
 }
 
 /*****************************************************************************************
-*  Name:        set_param_test_on_traced_compliance
+*  Name:        set_param_test_on_traced_symptoms_compliance
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_param_test_on_traced_compliance(parameters *params, double value)
+int set_param_test_on_traced_symptoms_compliance(parameters *params, double value)
 {
-    params->test_on_traced_compliance = value;
+    params->test_on_traced_symptoms_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_param_test_on_traced_positive_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_param_test_on_traced_positive_compliance(parameters *params, double value)
+{
+    params->test_on_traced_positive_compliance = value;
     return TRUE;
 }
 

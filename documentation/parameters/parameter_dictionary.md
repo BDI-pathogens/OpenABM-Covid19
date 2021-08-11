@@ -215,4 +215,5 @@
 | `rebuild_networks` | 1 | - | Should net works be rebuilt every time step or just on parameter changes | - |
 | `max_n_strains` | 1 | - | Maximum number of stains allowed (note memory hit by allowing more than one) | - |
 | `test_on_symptoms_compliance` | 0.8 | - | Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE | - |
-| `test_on_traced_compliance` | 0.8 | - | Fraction of individuals who get tested on traced if test_on_compliance=TRUE | - |
+| `test_on_traced_symptoms_compliance` | 0.0 | - | Fraction of individuals who get tested on traced from a symptomatic individual if test_on_traced=TRUE | - |
+| `test_on_traced_positive_compliance` | 0.8 | - | Fraction of individuals who get tested on traced from a positive case if test_on_traced=TRUE | - |

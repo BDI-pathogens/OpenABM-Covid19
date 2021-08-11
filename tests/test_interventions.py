@@ -345,7 +345,8 @@ class TestClass(object):
                     quarantine_compliance_traced_positive = 0.9,
                     mean_time_to_hospital = 30,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,
                 ),
                 tol_sd = 3
             ),
@@ -375,7 +376,8 @@ class TestClass(object):
                     quarantine_compliance_traced_positive = 1.0,
                     mean_time_to_hospital = 30,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 tol_sd = 3
             )
@@ -472,7 +474,8 @@ class TestClass(object):
                     test_sensitivity = 1,
                     test_specificity = 1,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -506,7 +509,8 @@ class TestClass(object):
                     test_sensitivity = 1,
                     test_specificity = 1,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -809,7 +813,8 @@ class TestClass(object):
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -845,7 +850,8 @@ class TestClass(object):
                     allow_clinical_diagnosis = False,
                     daily_non_cov_symptoms_rate =0.00,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -878,7 +884,8 @@ class TestClass(object):
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
                     test_on_symptoms_compliance = 1,
-                    test_on_traced_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -956,7 +963,7 @@ class TestClass(object):
                     n_seed_infection = 0,
                     infectious_rate  = 7
                 ),
-                n_to_vaccinate = 100,
+                n_to_vaccinate = 500,
                 n_to_seed = 100,
                 full_efficacy = 1.0,
                 symptoms_efficacy = 0.0,
@@ -970,7 +977,7 @@ class TestClass(object):
                     n_seed_infection = 0,
                     infectious_rate  = 7
                 ),
-                n_to_vaccinate = 100,
+                n_to_vaccinate = 500,
                 n_to_seed = 100,
                 full_efficacy = 0.0,
                 symptoms_efficacy = 1.0,
@@ -2665,7 +2672,7 @@ class TestClass(object):
         n_infected_pre  = len( df_trans_pre.index )
         n_infected_post = len( df_trans_post.index )
         
-        # make sure sufficient people have been infected to check that the vaccine is effecive
+        # make sure sufficient people have been infected to check that the vaccine is effecive    
         np.testing.assert_( n_infected_post * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
         np.testing.assert_( n_infected_pre * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
 
