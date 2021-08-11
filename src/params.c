@@ -392,12 +392,21 @@ double get_model_param_test_on_symptoms_compliance(model *model)
 }
 
 /*****************************************************************************************
-*  Name:		get_model_param_test_on_traced_compliance
+*  Name:		get_model_param_test_on_traced_symptoms_compliance
 *  Description: Gets the value of an int parameter
 ******************************************************************************************/
-double get_model_param_test_on_traced_compliance(model *model)
+double get_model_param_test_on_traced_symptoms_compliance(model *model)
 {
-    return model->params->test_on_traced_compliance;
+    return model->params->test_on_traced_symptoms_compliance;
+}
+
+/*****************************************************************************************
+*  Name:		get_model_param_test_on_traced_positive_compliance
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+double get_model_param_test_on_traced_positive_compliance(model *model)
+{
+    return model->params->test_on_traced_positive_compliance;
 }
 
 /*****************************************************************************************
@@ -759,12 +768,22 @@ int set_model_param_test_on_symptoms_compliance(model *model, double value)
 }
 
 /*****************************************************************************************
-*  Name:        set_model_param_test_on_traced_compliance
+*  Name:        set_model_param_test_on_traced_symptoms_compliance
 *  Description: Sets the value of parameter
 ******************************************************************************************/
-int set_model_param_test_on_traced_compliance(model *model, double value)
+int set_model_param_test_on_traced_symptoms_compliance(model *model, double value)
 {
-    model->params->test_on_traced_compliance = value;
+    model->params->test_on_traced_symptoms_compliance = value;
+    return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:        set_model_param_test_on_traced_positive_compliance
+*  Description: Sets the value of parameter
+******************************************************************************************/
+int set_model_param_test_on_traced_positive_compliance(model *model, double value)
+{
+    model->params->test_on_traced_positive_compliance = value;
     return TRUE;
 }
 

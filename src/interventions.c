@@ -1335,10 +1335,20 @@ void intervention_on_traced(
 		}
 	}
 
-	if( params->test_on_traced && ( indiv->compliance_factor <  params->test_on_traced_compliance ) && index_token->index_status == POSITIVE_TEST )
+	if( params->test_on_traced )
 	{
-		int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
-		intervention_test_order( model, indiv, time_test );
+		double compliance_level;
+
+		if( index_token->index_status == POSITIVE_TEST ) {
+			compliance_level =  params->test_on_traced_positive_compliance;
+		} else {
+			compliance_level =  params->test_on_traced_symptoms_compliance; }
+
+		if( indiv->compliance_factor < compliance_level )
+		{
+			int time_test = max( model->time + params->test_order_wait, contact_time + params->test_insensitive_period );
+			intervention_test_order( model, indiv, time_test );
+		}
 	}
 
 	if( recursion_level != NOT_RECURSIVE && recursion_level < params->tracing_network_depth )

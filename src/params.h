@@ -142,8 +142,9 @@ typedef struct{
 	int test_order_wait_priority;			// minimum number of days to wait for a priority test to be taken
 	int test_release_on_negative;			// release on a negative test result
 
-	double test_on_symptoms_compliance;      // Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE
-	double test_on_traced_compliance;        // Fraction of individuals who get tested on traced if test_on_compliance=TRUE
+	double test_on_symptoms_compliance;        // Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE
+	double test_on_traced_symptoms_compliance; // Fraction of individuals who get tested on traced from symptomatic case if test_on_compliance=TRUE
+	double test_on_traced_positive_compliance; // Fraction of individuals who get tested on traced from positive case if test_on_compliance=TRUE
 
 	int priority_test_contacts[N_AGE_GROUPS];      // number of contacts that triggers priority test
 
@@ -214,7 +215,8 @@ double get_model_param_daily_fraction_work_used(model *pmodel, int idx);
 int get_model_param_quarantine_days(model *pmodel);
 double get_model_param_self_quarantine_fraction(model *pmodel);
 double get_model_param_test_on_symptoms_compliance(model *pmodel);
-double get_model_param_test_on_traced_compliance(model *pmodel);
+double get_model_param_test_on_traced_symptoms_compliance(model *pmodel);
+double get_model_param_test_on_traced_positive_compliance(model *pmodel);
 int get_model_param_trace_on_symptoms(model *pmodel);
 int get_model_param_trace_on_positive(model *pmodel);
 int get_model_param_quarantine_on_traced(model *pmodel);
@@ -258,7 +260,8 @@ double get_model_param_fatality_fraction( model *pmodel, int age_group );
 int set_model_param_quarantine_days(model *pmodel, int value);
 int set_model_param_self_quarantine_fraction(model *pmodel, double value);
 int set_model_param_test_on_symptoms_compliance(model *pmodel, double value);
-int set_model_param_test_on_traced_compliance(model *pmodel, double value);
+int set_model_param_test_on_traced_symptoms_compliance(model *pmodel, double value);
+int set_model_param_test_on_traced_positive_compliance(model *pmodel, double value);
 int set_model_param_trace_on_symptoms(model *pmodel, int value);
 int set_model_param_trace_on_positive(model *pmodel, int value);
 int set_model_param_quarantine_on_traced(model *pmodel, int value);

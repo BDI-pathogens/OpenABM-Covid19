@@ -507,8 +507,11 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->test_on_symptoms_compliance));
 	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms_compliance\n"); };
 
-	check = fscanf(parameter_file, " %lf ,", &(params->test_on_traced_compliance));
-	if( check < 1){ print_exit("Failed to read parameter test_on_traced_compliance\n"); };
+	check = fscanf(parameter_file, " %lf ,", &(params->test_on_traced_symptoms_compliance));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced_symptoms_compliance\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->test_on_traced_positive_compliance));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced_positive_compliance\n"); }
 
 	fclose(parameter_file);
 }
