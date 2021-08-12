@@ -120,7 +120,7 @@ class TestClass(object):
                 sd_random_interactions_adult     = 7,
                 mean_random_interactions_elderly = 6,
                 sd_random_interactions_elderly   = 6,
-                n_total                          = 10000
+                n_total                          = 30000
 
             ),
         ],
@@ -508,6 +508,7 @@ class TestClass(object):
       
         # absoluta tolerance
         tolerance = 0.03
+        sd_tolerance = 0.06
         
         # note when counting connections we count each end
         ageTypeMap = pd.DataFrame( data={
@@ -551,20 +552,21 @@ class TestClass(object):
         # check mean and 
         mean = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].std()    
+        np.testing.assert_allclose( mean, mean_random_interactions_child, rtol = tolerance )
         if mean_random_interactions_child > 0:
-            np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = tolerance )
+            np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = sd_tolerance )
         
         mean = df_int[df_int["age_type"] == constant.ADULT].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.ADULT].loc[:,"connections"].std()        
         np.testing.assert_allclose( mean, mean_random_interactions_adult, rtol = tolerance )
         if mean_random_interactions_adult > 0:
-            np.testing.assert_allclose( sd,   sd_random_interactions_adult, rtol = tolerance )
+            np.testing.assert_allclose( sd,   sd_random_interactions_adult, rtol = sd_tolerance )
         
         mean = df_int[df_int["age_type"] == constant.ELDERLY].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.ELDERLY].loc[:,"connections"].std()        
         np.testing.assert_allclose( mean, mean_random_interactions_elderly, rtol = tolerance )
         if mean_random_interactions_elderly > 0:
-            np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
+            np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = sd_tolerance )
   
     def test_occupation_network( 
             self,
