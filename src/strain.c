@@ -28,6 +28,7 @@ short add_new_strain(
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
+	strain_ptr->total_infected = 0;
 
 	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
 		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];

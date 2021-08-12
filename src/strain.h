@@ -25,6 +25,7 @@ struct strain{
 	long idx;
 	float transmission_multiplier;
 	double hospitalised_fraction[N_AGE_GROUPS];
+	long total_infected;
 };
 
 /************************************************************************/
