@@ -159,8 +159,13 @@ class HOSPITAL_WARD_TYPES(Enum):
     COVID_GENERAL = 0
     COVID_ICU = 1
 
+# test statuses
+NO_TEST = -2
+TEST_ORDERED = -1
+
 # Construct the executable command
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
+
 
 command = join(IBM_DIR_TEST, EXE)

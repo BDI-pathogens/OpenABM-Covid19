@@ -43,3 +43,7 @@
 | `app_users_fraction_60_69` | 0.7 | - | Maximum fraction of the population with smartphones aged 60-69 | OFCOM 55+ year olds |
 | `app_users_fraction_70_79` | 0.48 | - | Maximum fraction of the population with smartphones aged 70-79 | OFCOM 55+ year olds |
 | `app_users_fraction_80` | 0.32 | - | Maximum fraction of the population with smartphones aged 80+ | OFCOM 55+ year olds |
+| `test_on_symptoms_compliance` | 0.8 | - | Fraction of individuals who get tested on symptoms if test_on_symptoms=TRUE | - |
+| `test_on_traced_symptoms_compliance` | 0.0 | - | Fraction of individuals who get tested on traced from a symptomatic individual if test_on_traced=TRUE | - |
+| `test_on_traced_positive_compliance` | 0.8 | - | Fraction of individuals who get tested on traced from a positive case if test_on_traced=TRUE | - |
+| `quarantine_compliance_positive` | 1 | - | Fraction of individuals who initially comply with a quarantine notification after they have tested positive | - |

@@ -495,14 +495,26 @@ void read_param_file( parameters *params)
 	check = fscanf(parameter_file, " %lf ,", &(params->manual_traceable_fraction[RANDOM]));
 	if( check < 1){ print_exit("Failed to read parameter manual_traceable_fraction_random\n"); };
 
+	check = fscanf(parameter_file, " %i ,", &(params->relative_susceptibility_by_interaction));
 	if( check < 1){ print_exit("Failed to read parameter relative_susceptibility_by_interaction\n"); };
-		check = fscanf(parameter_file, " %i ,", &(params->relative_susceptibility_by_interaction));
 
+	check = fscanf(parameter_file, " %i ,", &(params->rebuild_networks));
 	if( check < 1){ print_exit("Failed to read parameter rebuild_networks\n"); };
-		check = fscanf(parameter_file, " %i ,", &(params->rebuild_networks));
 
+	check = fscanf(parameter_file, " %i ,", &(params->max_n_strains));
 	if( check < 1){ print_exit("Failed to read parameter max_n_strains\n"); };
-		check = fscanf(parameter_file, " %i ,", &(params->max_n_strains));
+
+	check = fscanf(parameter_file, " %lf ,", &(params->test_on_symptoms_compliance));
+	if( check < 1){ print_exit("Failed to read parameter test_on_symptoms_compliance\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->test_on_traced_symptoms_compliance));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced_symptoms_compliance\n"); };
+
+	check = fscanf(parameter_file, " %lf ,", &(params->test_on_traced_positive_compliance));
+	if( check < 1){ print_exit("Failed to read parameter test_on_traced_positive_compliance\n"); }
+
+	check = fscanf(parameter_file, " %lf ,", &(params->quarantine_compliance_positive));
+	if( check < 1){ print_exit("Failed to read parameter quarantine_compliance_positive\n"); }
 
 	fclose(parameter_file);
 }

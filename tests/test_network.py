@@ -120,7 +120,7 @@ class TestClass(object):
                 sd_random_interactions_adult     = 7,
                 mean_random_interactions_elderly = 6,
                 sd_random_interactions_elderly   = 6,
-                n_total                          = 10000
+                n_total                          = 30000
 
             ),
         ],
@@ -237,7 +237,7 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 10000,
-                    end_time = 15,
+                    end_time = 5,
                     mean_work_interactions_child   = 12,
                     mean_work_interactions_adult   = 5,
                     mean_work_interactions_elderly = 4,
@@ -248,7 +248,7 @@ class TestClass(object):
             dict(
                 test_params = dict(
                     n_total = 10000,
-                    end_time = 15,
+                    end_time = 5,
                     mean_work_interactions_child   = 10,
                     mean_work_interactions_adult   = 7,
                     mean_work_interactions_elderly = 3,
@@ -324,7 +324,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_total = 80,
+                    n_total = 300,
                     end_time = 15,
                     mean_work_interactions_child   = 6,
                     mean_work_interactions_adult   = 12,
@@ -335,7 +335,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_total = 50,
+                    n_total = 200,
                     end_time = 15,
                     mean_work_interactions_child   = 6,
                     mean_work_interactions_adult   = 12,
@@ -346,7 +346,7 @@ class TestClass(object):
             ),
             dict(
                 test_params = dict(
-                    n_total = 30,
+                    n_total = 150,
                     end_time = 15,
                     mean_work_interactions_child   = 6,
                     mean_work_interactions_adult   = 12,
@@ -508,6 +508,7 @@ class TestClass(object):
       
         # absoluta tolerance
         tolerance = 0.03
+        sd_tolerance = 0.06
         
         # note when counting connections we count each end
         ageTypeMap = pd.DataFrame( data={
@@ -551,20 +552,21 @@ class TestClass(object):
         # check mean and 
         mean = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.CHILD].loc[:,"connections"].std()    
+        np.testing.assert_allclose( mean, mean_random_interactions_child, rtol = tolerance )
         if mean_random_interactions_child > 0:
-            np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = tolerance )
+            np.testing.assert_allclose( sd,     sd_random_interactions_child, rtol = sd_tolerance )
         
         mean = df_int[df_int["age_type"] == constant.ADULT].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.ADULT].loc[:,"connections"].std()        
         np.testing.assert_allclose( mean, mean_random_interactions_adult, rtol = tolerance )
         if mean_random_interactions_adult > 0:
-            np.testing.assert_allclose( sd,   sd_random_interactions_adult, rtol = tolerance )
+            np.testing.assert_allclose( sd,   sd_random_interactions_adult, rtol = sd_tolerance )
         
         mean = df_int[df_int["age_type"] == constant.ELDERLY].loc[:,"connections"].mean()
         sd   = df_int[df_int["age_type"] == constant.ELDERLY].loc[:,"connections"].std()        
         np.testing.assert_allclose( mean, mean_random_interactions_elderly, rtol = tolerance )
         if mean_random_interactions_elderly > 0:
-            np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = tolerance )
+            np.testing.assert_allclose( sd,   sd_random_interactions_elderly, rtol = sd_tolerance )
   
     def test_occupation_network( 
             self,

@@ -547,7 +547,7 @@ class TestClass(object):
         # fraction_1 and fraction_2 proportion of the population being infected
         fraction_1 = 0.02
         fraction_2 = 0.05
-        tolerance  = 0.05
+        tolerance  = 0.06
         
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_homogeneous_random_network_only(params,n_connections,end_time)

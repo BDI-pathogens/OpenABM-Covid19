@@ -87,6 +87,7 @@ void initialize_individual(
 	}
 
 	indiv->vaccine_status = NO_VACCINE;
+	indiv->compliance_factor = gsl_rng_uniform( rng );
 }
 
 /*****************************************************************************************

@@ -343,7 +343,10 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0,
                     quarantine_compliance_traced_symptoms = 0.5,
                     quarantine_compliance_traced_positive = 0.9,
-                    mean_time_to_hospital = 30
+                    mean_time_to_hospital = 30,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,
                 ),
                 tol_sd = 3
             ),
@@ -371,7 +374,10 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0,
                     quarantine_compliance_traced_symptoms = 0.0,
                     quarantine_compliance_traced_positive = 1.0,
-                    mean_time_to_hospital = 30
+                    mean_time_to_hospital = 30,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 tol_sd = 3
             )
@@ -424,7 +430,7 @@ class TestClass(object):
                     quarantine_dropout_traced_positive = 0.0,
                     quarantine_dropout_positive = 0.0,
                     test_order_wait  = 2,
-                    test_result_wait = 1,
+                    test_result_wait = 2,
                     test_order_wait_priority = 0,
                     test_result_wait_priority = 1,
                     daily_non_cov_symptoms_rate = 0,
@@ -434,6 +440,7 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -466,6 +473,9 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -498,6 +508,9 @@ class TestClass(object):
                     test_insensitive_period = 0,
                     test_sensitivity = 1,
                     test_specificity = 1,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
                 app_users_fraction    = 1.0,
                 priority_test_contacts = 30
@@ -740,7 +753,8 @@ class TestClass(object):
                     manual_traceable_fraction_household = 1,
                     manual_traceable_fraction_random = 1,
                     manual_trace_n_workers = 2e3,
-                    manual_trace_on_hospitalization = 0
+                    manual_trace_on_hospitalization = 0,
+                    test_on_symptoms_compliance = 1,         
                 ),
                 delay = delay,
             ) for delay in [0, 1, 2, 3]
@@ -798,6 +812,9 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -832,6 +849,9 @@ class TestClass(object):
                     test_sensitivity = 1,
                     allow_clinical_diagnosis = False,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -863,6 +883,9 @@ class TestClass(object):
                     app_turn_on_time = 0,
                     test_sensitivity = 1,
                     daily_non_cov_symptoms_rate =0.00,
+                    test_on_symptoms_compliance = 1,
+                    test_on_traced_positive_compliance = 1,
+                    test_on_traced_symptoms_compliance = 0,                
                 ),
             )
         ],
@@ -870,40 +893,46 @@ class TestClass(object):
             dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
+                    end_time=30,
+                    infectious_rate=6,
                     self_quarantine_fraction=1.0,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 1,
                     test_result_wait = 1,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1,  
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 1         
                 )
             ),
              dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
-                    self_quarantine_fraction=1.0,
+                    end_time=30,
+                    infectious_rate=6,
+                    self_quarantine_fraction=0,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 2,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1, 
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 1                        
                 )
             ),
               dict(
                 test_params=dict(
                     n_total=50000,
-                    end_time=25,
-                    infectious_rate=4,
-                    self_quarantine_fraction=1.0,
+                    end_time=20,
+                    infectious_rate=6,
+                    self_quarantine_fraction=0.5,
                     test_on_symptoms  = True,
                     daily_non_cov_symptoms_rate=0.0,
                     test_order_wait  = 0,
                     test_result_wait = 0,  
-                    test_sensitivity = 1,                
+                    test_sensitivity = 1, 
+                    n_seed_infection = 100,
+                    test_on_symptoms_compliance = 0.5                                       
                 )
             ),
         ],
@@ -934,7 +963,7 @@ class TestClass(object):
                     n_seed_infection = 0,
                     infectious_rate  = 7
                 ),
-                n_to_vaccinate = 100,
+                n_to_vaccinate = 500,
                 n_to_seed = 100,
                 full_efficacy = 1.0,
                 symptoms_efficacy = 0.0,
@@ -948,7 +977,7 @@ class TestClass(object):
                     n_seed_infection = 0,
                     infectious_rate  = 7
                 ),
-                n_to_vaccinate = 100,
+                n_to_vaccinate = 500,
                 n_to_seed = 100,
                 full_efficacy = 0.0,
                 symptoms_efficacy = 1.0,
@@ -1123,8 +1152,64 @@ class TestClass(object):
                 n_inter     = 10,     
                 transmission_multiplier = 10
             )
-        ]
-                                            
+        ],
+        "test_isolate_only_on_positive_test" : [
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 0.8,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 1        
+                ),
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 1,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 0.8         
+                ),
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    test_on_symptoms_compliance = 0.8,
+                    self_quarantine_fraction    = 0,
+                    test_on_symptoms            = 1,
+                    test_order_wait             = 1,
+                    test_result_wait            = 1,
+                    test_insensitive_period     = 0,
+                    test_sensitivity            = 1,
+                    test_specificity            = 1,   
+                    daily_non_cov_symptoms_rate = 0,    
+                    quarantine_dropout_positive = 0,  
+                    quarantine_compliance_positive = 0.6         
+                ),
+            )
+        ],
+                                          
     }
 
     """
@@ -2340,7 +2425,7 @@ class TestClass(object):
    
         # all those directly traced should now be asking for a test
         df = pd.merge( df_trace_symp, df_indiv, left_on = [ "traced_ID"], right_on = ["ID"], how = "left")
-        np.testing.assert_equal( len( df ) > 300, True, "In-sufficient traced from index symptomatic at symptomatic time" )
+        np.testing.assert_equal( len( df ) > 150, True, "In-sufficient traced from index symptomatic at symptomatic time" )
         np.testing.assert_equal( sum( ( df[ "test_status"] != -1 ) ), 0, "Traced people not getting a test after a symptomatic gets a positive test" )   
     
         # now look at at everyone who is traced directly from a positive index case and only traced once
@@ -2543,6 +2628,9 @@ class TestClass(object):
         df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
         df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
         
+        symp_tot = 0
+        test_tot = 0
+        
         for time in range( test_params[ "end_time" ] - total_delay ):
             if time >= total_delay: 
                 symp = df_trans[ df_trans["time_symptomatic" ] == time + 1 ]
@@ -2550,8 +2638,22 @@ class TestClass(object):
                     symp = symp.iloc[ 0,1 ]
                 else :
                     symp = 0
-                np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
+                    
+                if test_params[ "test_on_symptoms_compliance"] == 1 :
+                    np.testing.assert_equal( symp,  n_tests[time + total_delay ], "Number of test results not what expected given prior number of new symptomatic infections")
+                else :
+                    symp_tot += symp
+                    test_tot += n_tests[time + total_delay ]
 
+        if test_params[ "test_on_symptoms_compliance"] != 1 :
+            
+            expected_test = symp_tot * test_params[ "test_on_symptoms_compliance"]
+            sd_test  = sqrt( expected_test * ( 1 - test_params[ "test_on_symptoms_compliance"] ) )
+            tol_sd   = 3
+            
+            np.testing.assert_allclose(test_tot, expected_test, atol = sd_test * tol_sd, err_msg = "Number of tests incorrect given compliance rates on symptoms")
+     
+        
     def test_tests_completed(self, test_params ):
         """
         Check that all tests have been processed by the model at the end 
@@ -2626,7 +2728,7 @@ class TestClass(object):
         n_infected_pre  = len( df_trans_pre.index )
         n_infected_post = len( df_trans_post.index )
         
-        # make sure sufficient people have been infected to check that the vaccine is effecive
+        # make sure sufficient people have been infected to check that the vaccine is effecive    
         np.testing.assert_( n_infected_post * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
         np.testing.assert_( n_infected_pre * n_to_vaccinate / n_total > 10, "insufficient people infected to check efficacy of the vaccine")
 
@@ -3030,4 +3132,75 @@ class TestClass(object):
   
         np.testing.assert_equal( n_ids, n_inf_age_group_post + n_inf_age_group_pre, "not everyone in age group of super spreading net work is infected" )
         np.testing.assert_( n_inf_age_group_post_custom / n_inf_age_group_post > 0.9, "insufficient proportion of transmissionson the super spreading network" )
-               
+             
+    def test_isolate_only_on_positive_test(self, test_params ):  
+        
+        """
+        Check that:
+        1. the number of people who order a test is inline with the compliance factor
+        2. nobody isolates prior on symptoms
+        3. people isolate on receipt of a positive test inline with the compliance factor     
+        """ 
+         
+        # number of random standard deviations before an error is called   
+        sd_tol = 3
+                      
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        
+        time_test = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ]
+        time_symp = test_params[ "end_time"] - time_test
+        test_comp = test_params[ "test_on_symptoms_compliance"]
+        
+        # note individuals have a single compliance factor - quar_comp is the conditional probability of quarantining given taking a test
+        quar_comp = min( test_params[ "quarantine_compliance_positive"] / test_params[ "test_on_symptoms_compliance"], 1 )
+        
+        # run to the time we are going to test people who are symptomatic at
+        model.run( n_steps = time_symp, verbose = False )
+        
+        model.write_individual_file()
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
+        df_trans = model.get_transmissions()
+        df_symp  = df_trans[ df_trans[ "time_symptomatic" ] == time_symp ].loc[:,{"ID_recipient"}].rename( columns = { "ID_recipient":"ID" } )
+        df_symp  = pd.merge(df_symp, df_indiv.loc[:,{"ID","test_status","quarantined"}],on = "ID", how = "left")
+        n_symp   = len( df_symp )
+        
+        # make sure we have sufficient to test
+        np.testing.assert_( n_symp * test_comp > 20, "insufficient people to check test compliance " )
+        if test_comp < 1 :
+            np.testing.assert_( n_symp * ( 1 - test_comp ) > 20, "insufficient people to check test compliance " )
+     
+        # check the number taking tests is within tolerance
+        n_test    = sum( df_symp[ "test_status" ] == constant.TEST_ORDERED )
+        n_no_test = sum( df_symp[ "test_status" ] == constant.NO_TEST )
+        atol   = sqrt( n_symp * test_comp * ( 1 - test_comp ) ) * sd_tol 
+        np.testing.assert_allclose(n_test, n_symp * test_comp, atol = atol, err_msg = "incorrect number of people took tests")
+        np.testing.assert_allclose(n_no_test, n_symp * ( 1 - test_comp ), atol = atol, err_msg = "incorrect number of people didn't take tests")
+        
+        # check nobody has quarantined
+        n_quarantine = sum( df_symp[ "quarantined"] == 1 )
+        np.testing.assert_equal(n_quarantine, 0, "some people are quarantining before a positive test")
+
+        # now step until we have the test results back and look at quarantine status
+        model.run( n_steps = time_test, verbose = False )
+        model.write_individual_file()
+        
+        # get updated quarantine status
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )   
+        df_indiv = df_indiv.loc[:,{"ID","quarantined","current_status"}].rename(columns={"quarantined":"quarantined_after_test"})    
+        df_symp  = pd.merge( df_symp[ (df_symp["test_status"] == constant.TEST_ORDERED)], df_indiv, on = 'ID')
+        
+        # filter hospitalised people who don't quarantine
+        df_symp = df_symp[ df_symp[ "current_status"] != constant.EVENT_TYPES.HOSPITALISED.value ] 
+        
+        # check the correct number who test positive quarantine
+        n_test_not_hospital = len( df_symp[ "current_status"] ) 
+        n_quarantined       = sum( df_symp[ "quarantined_after_test"] == 1 )  
+        n_not_quarantined   = sum( df_symp[ "quarantined_after_test"] != 1 )  
+        
+        atol                = sqrt( n_test_not_hospital * quar_comp * ( 1 - quar_comp ) ) * sd_tol
+        np.testing.assert_allclose(n_quarantined, n_test_not_hospital * quar_comp, atol = atol, err_msg = "incorrect number of people quarantined following positive test")
+        np.testing.assert_allclose(n_not_quarantined, n_test_not_hospital * ( 1 - quar_comp ), atol = atol, err_msg = "incorrect number of people didn't quarantined following positive test")        
+        
