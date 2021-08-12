@@ -222,6 +222,9 @@ class TestClass(object):
     
     def test_copy_array(self):
         N = 100
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         array = np.random.uniform(1, N, N)
         array_from = create_c_array(array, ctype = "double")
         array_to = covid19.doubleArray(N)
