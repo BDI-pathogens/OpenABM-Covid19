@@ -1187,6 +1187,9 @@ class TestClass(object):
         """
         Test that checks the hospitalised fraction for the correct strain is realised
         """
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         sd_tol = 3
   
         hospitalised_fraction_strain_0 = [ 

@@ -1360,7 +1360,9 @@ class TestClass(object):
         """
            Check that we can add extra infections and they infect others
         """
-     
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )  
@@ -1404,7 +1406,9 @@ class TestClass(object):
     def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, transmission_multiplier ):
         """
            Check that if a second more transmissible strain is introduced that it will dominate over time
-        """
+        """      
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
      
         params = utils.get_params_swig()
         for param, value in test_params.items():
@@ -1448,6 +1452,8 @@ class TestClass(object):
         """
            Check that if there are multiple equivalent strains then the spread is equally as quick
         """
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
         
         # run with a single strain
         params = utils.get_params_swig()
@@ -1500,6 +1506,9 @@ class TestClass(object):
                1. if cross_immunity = 0 then a new wave of the same size
                2. if cross_immunity = 1 then no second wave
         """ 
+        
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
                     
         # add 2 multiple equivalent strains
         params = utils.get_params_swig()

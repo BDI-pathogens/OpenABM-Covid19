@@ -2681,6 +2681,9 @@ class TestClass(object):
         vaccinated individsuals would be infected if not vaccinated.
         """
         
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         vaccine_protection_period = test_params[ "end_time" ] + 1;
         
         params = utils.get_params_swig()
@@ -2748,6 +2751,8 @@ class TestClass(object):
         Make sure the correct proportion of people gain protection and that when the epidemic is
         allowed to grow out of control those vaccinated without effect can be infected     
         """
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
         
         vaccine_protection_period = test_params[ "end_time" ] + 1
         
@@ -2810,6 +2815,9 @@ class TestClass(object):
         Check the vaccine wanes over time
         Make sure that people are protected before it wanes but can be infected after it wanes
         """
+        
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
         
         efficacy = 1.0
         time_to_protect = 1
@@ -2882,6 +2890,9 @@ class TestClass(object):
         """
         Check that a schedule of people can be vaccinated
         """
+        
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
              
         params = utils.get_params_swig()
         for param, value in test_params.items():
@@ -2998,6 +3009,9 @@ class TestClass(object):
         then it will only protect from that strain and not the other
         """
         
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         if ( full_efficacy > 0.0 ) & ( symptoms_efficacy > 0.0 ) :
             raise "can only test full or symptoms only"
         
@@ -3095,6 +3109,9 @@ class TestClass(object):
         Check that a large transmission_multipler change applied to a single custom network 
         that it contains huge number of transmission and everyone in that age group is infected
         """ 
+        
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
                         
         params = utils.get_params_swig()
         for param, value in test_params.items():

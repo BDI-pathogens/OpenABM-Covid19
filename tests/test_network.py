@@ -1025,6 +1025,9 @@ class TestClass(object):
             mean_conn - mean number of connections for someone on the network
         """
         
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         # set up test model
         params = utils.get_params_swig()
         for param, value in test_params.items():
