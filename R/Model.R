@@ -91,6 +91,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     .strains        = NA,
     .time           = 0,
     .total_infected = NA,
+    .vaccine_schedule = -1,
 
     utils_n_guess = function(key, ...) {
       if (startsWith(key, 'total_')) {
@@ -856,12 +857,23 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     #' @description Schedule an age-group vaccionation
     #' Wrapper for C API \code{intervention_vaccinate_age_group}.
-    #' @param schedule An instance of \code{\link{VaccineSchedule}}.
+    #' @param schedule An instance of \code{\link{VaccineSchedule}} or a list if recurring.
+    #' @param recurring Repeat on all time-steps until switched off (call with NULL for schedule)
     #' @return The total number of people vaccinated.
-    vaccinate_schedule = function(schedule)
+    vaccinate_schedule = function(schedule, recurring = FALSE)
     {
+      if( is.null( schedule ) ) {
+        private$.vaccine_schedule = -1
+        return( 0 )
+      }
+
+      if( recurring ) {
+        private$.vaccine_schedule = schedule
+        return( 0 )
+      }
+
       if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
-        stop("argument VaccineSchedule must be an object of type VaccineSchedule")
+        stop("argument VaccineSchedule must be an object of type VaccineSchedule (or list if recurring=TRUE)")
       }
 
       vaccine = schedule$vaccine
@@ -950,6 +962,17 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{one_time_step}.
     one_time_step = function()
     {
+      vaccine_schedule = private$.vaccine_schedule
+      if( is.R6( vaccine_schedule ) || is.list( vaccine_schedule ) ) {
+        if( !is.list( vaccine_schedule ) ) {
+          self$vaccinate_schedule( vaccine_schedule )
+        } else {
+          time = private$.time + 1
+          if( time <= length( vaccine_schedule ) && !is.null( vaccine_schedule[[ time ]] ) )
+            self$vaccinate_schedule( vaccine_schedule[[ time ]] )
+        }
+      }
+
       SWIG_one_time_step(self$c_model)
       private$.time    <- private$.time + 1
       private$.results <- append( private$.results,list(private$.one_time_step_results()))
