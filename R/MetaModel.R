@@ -804,6 +804,56 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
   )
 )
 
+.pool_transfers = function(
+  migration_matrix,
+  meta_data,
+  n_region_pool,
+  pool_factor
+)
+{
+  if( pool_factor == 0 )
+    return( migration_factor )
+
+  if( pool_factor >= 1 || pool_factor < 0 )
+    stop( "pool_factor must be between 0 and 1")
+
+  # recover the filter for minimum transfer
+  min_transfer <- migration_matrix[ , min( transfer ) ]
+
+  # split out the region to pool flows
+  mig_mat_ex_pool <- migration_matrix[ n_region != n_region_pool & n_region_to != n_region_pool ]
+  mig_mat_to_pool <- migration_matrix[ !( n_region != n_region_pool & n_region_to != n_region_pool ) ]
+
+  # add on population to turn in to total flows
+  mig_mat_pool <- meta_data[ ,.( n_region, population ) ][ mig_mat_west, on = "n_region" ]
+  mig_mat_pool[ , flow := transfer * population ]
+  mig_mat_pool[ , n_region := ifelse( n_region == n_region_pool, n_region_to, n_region  )]
+  total_flow <- mig_mat_pool[ , sum( flow )]
+
+  # calculate total flow by region and assume random mixing in pool regionm
+  flow_by_region <- mig_mat_pool[ , .( flow = sum( flow ), dummy = 1 ), by = "n_region" ]
+  mig_mat_pool   <- flow_by_region[ , .( flow_to = flow, n_region_to = n_region, dummy )][ flow_by_region, on = "dummy", allow.cartesian = TRUE ]
+  mig_mat_pool   <- mig_mat_pool[ , .( n_region, n_region_to, flow = flow * flow_to ) ]
+  total_pool_flow <- mig_mat_pool[ , sum( flow )]
+  mig_mat_pool[ , flow := flow / total_pool_flow * total_flow ]
+
+  # convert back to transfer and remove internal flows and add filter on small transfers
+  mig_mat_pool <- meta_data[ , .(n_region, population) ][ mig_mat_pool, on = "n_region" ]
+  mig_mat_pool[ , transfer := flow / population ]
+  mig_mat_pool <- mig_mat_pool[ n_region != n_region_to, .( n_region, n_region_to, transfer ) ]
+  mig_mat_pool <- mig_mat_pool[ transfer >= min_transfer ]
+
+  # multiply by pooling factors and join back
+  mig_mat_pool[ , transfer := transfer * pool_factor ]
+  mig_mat_to_pool[ , transfer := transfer * ( 1 - pool_factor ) ]
+
+  migration_matrix_pooled <- rbindlist( list( mig_mat_ex_pool, mig_mat_pool, mig_mat_to_pool ) )
+  migration_matrix_pooled <- migration_matrix_pooled[ , .( transfer = sum( transfer) ), by = c( "n_region", "n_region_to" ) ]
+
+  return( migration_matrix_pooled )
+}
+
+
 MetaModel.England = function(
   base_params       = list(),
   population_factor = 0.1,
@@ -811,10 +861,19 @@ MetaModel.England = function(
   migration_delay   = 5,
   min_population    = 1e4,
   n_nodes           = 4,
-  data_dir          = system.file( "MetaModel_data/England", package = "OpenABMCovid19")
+  data_dir          = system.file( "MetaModel_data/England", package = "OpenABMCovid19"),
+  pool_factors      = list(
+    "Westminster" = 0.9,
+    "Camden"      = 0.5,
+    "Kensington and Chelsea" = 0.5,
+    "Hammersmith and Fulham" = 0.5,
+    "Islington" = 0.5,
+    "Tower Hamlets" = 0.5,
+    "Lambeth"   = 0.5,
+    "Wandsworth" = 0.5
+  )
 )
 {
-
   # load the meta data and get the population sizes
   meta_data <- fread( sprintf( "%s/meta_data.csv", data_dir ) )
   n_regions <- meta_data[ ,.N ]
@@ -825,6 +884,16 @@ MetaModel.England = function(
 
   # add migration data
   migration_matrix <- fread( sprintf( "%s/migration_matrix.csv", data_dir ) )
+
+  # create direct transders in inner-London regions
+  for( idx in 1:length( pool_factors ) )
+  {
+    n_region <- meta_data[ name == names( pool_factors[ idx ] ), n_region ]
+    if( length( n_region ) != 1 )
+      stop( "pool factors must be the names of regions in the meta_data" )
+
+    migration_matrix <- .pool_transfers( migration_matrix, meta_data, n_region, pool_factors[[ idx ]])
+  }
 
   base_params[[ "n_total" ]] <- n_total
 
