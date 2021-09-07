@@ -23,6 +23,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .clusterObj  = NULL,
     .base_params = NULL,
     .n_strains   = NULL,
+    .strain_params = list(),
     .network_names = NULL,
     .meta_data     = NULL,
     .map_data      = NULL,
@@ -324,6 +325,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setMigrationMatrix( migration_matrix, migration_factor, migration_delay )
       private$.initializeSubModels()
       private$.n_strains = 1
+      private$.strain_params[[ 1 ]] <- list( transmission_multiplier = 1 )
     },
 
     finalize = function()
@@ -622,7 +624,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         data <- replicate( self$n_nodes, data, simplify = FALSE )
 
         t <- clusterApply( private$.cluster(), data, add_new_strain_func )
-        private$.n_strains = t[[ 1 ]] + 1
+        private$.n_strains <- t[[ 1 ]] + 1
+        private$.strain_params[[ private$.n_strains  ]] <- list( transmission_multiplier = transmission_multiplier )
 
         return( t[[ 1 ]]);
     },
@@ -664,6 +667,12 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       inf_cols  <- private$.total_infected_cols()
       n_strains <- length( inf_cols )
+
+      strain_multipliers <- rep( 1, n_strains )
+      strain_params      <- self$strain_params
+      for( idx in 1:self$n_strains )
+        strain_multipliers <- strain_params[[ idx ]][[ "transmission_multiplier" ]]
+
       while( steps < n_steps )
       {
         if( verbose )
@@ -700,8 +709,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
           dt <- dt[ , lapply( .SD, function( x) .random_round( sum( x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
 
-          indices = dt[ , n_region_to ]
-          vals    = as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
+          indices <- dt[ , n_region_to ]
+          vals    <- as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
+          vals    <- vals * rep( strain_multipliers, each = nrow( vals ) )
+
 
           new_infected[[ sdx ]] <- matrix( 0, nrow = n_regions, ncol = n_strains )
           new_infected[[ sdx ]][ indices, ] <- vals
@@ -781,6 +792,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_regions   = function( val = NULL ) private$.staticReturn( val, "n_regions" ),
     base_params = function( val = NULL ) private$.staticReturn( val, "base_params" ),
     n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
+    strain_params = function( val = NULL ) private$.staticReturn( val, "strain_params" ),
     time        = function( val = NULL ) private$.staticReturn( val, "time" ),
     total_infected = function( val = NULL ) private$.staticReturn( val, "total_infected" ),
     network_names  = function( val = NULL ) private$.staticReturn( val, "network_names" ),
