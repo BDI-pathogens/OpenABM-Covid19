@@ -128,6 +128,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         strains     <<- vector( mode = "list", length = length( nodes ))
         strains     <<- lapply( strains, function(x) vector( mode = "list", length = base_params[[ 1 ]]$max_n_strains ) )
         networks    <<- vector( mode = "list", length = length( nodes ) )
+        vaccines    <<- vector( mode = "list", length = length( nodes ))
+        vaccines    <<- lapply( vaccines, function(x) vector( mode = "list", length = 1 ) )
 
         for( nidx in 1:n_node_list )
         {
@@ -410,6 +412,68 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       clusterApply( private$.cluster(), params, update_func )
       return()
     },
+
+    add_vaccine = function(
+      full_efficacy     = 1.0,
+      symptoms_efficacy = 1.0,
+      severe_efficacy   = 1.0,
+      time_to_protect   = 14,
+      vaccine_protection_period = 1000
+    )
+    {
+      update_func = function( ps )
+      {
+        for( ndx in 1:n_node_list )
+        {
+          v <- abms[[ ndx ]]$add_vaccine( ps$full_efficacy, ps$symptoms_efficacy,
+                 ps$severe_efficacy, ps$time_to_protect, ps$vaccine_protection_period )
+          vaccines[[ ndx ]][[ v$idx() + 1 ]] <<- v
+        }
+        return( v$idx() )
+      }
+
+      params <- list()
+      params[[ "full_efficacy" ]] <- full_efficacy
+      params[[ "symptoms_efficacy" ]] <- symptoms_efficacy
+      params[[ "severe_efficacy" ]] <- severe_efficacy
+      params[[ "time_to_protect" ]] <- time_to_protect
+      params[[ "vaccine_protection_period" ]] <- vaccine_protection_period
+      params <- lapply( private$.node_list, function( ndxs) params )
+
+      idx = clusterApply( private$.cluster(), params, update_func )
+      idx = idx[[ 1 ]]
+
+      return( Vaccine$new( self, idx ) )
+    },
+
+    vaccinate_schedule = function( schedule, recurring = FALSE )
+    {
+      if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
+        stop("argument VaccineSchedule must be an object of type VaccineSchedule (or list if recurring=TRUE)")
+      }
+
+      update_func = function( params )
+      {
+        vaccine_idx <- params[[ "schedule" ]]$vaccine$idx()
+
+        for( ndx in 1:n_node_list )
+        {
+          sched <- params[[ "schedule" ]]$clone()
+          sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
+          abms[[ ndx ]]$vaccinate_schedule( sched, recurring = params[[ "recurring" ]] )
+        }
+        return()
+      }
+
+      params <- list()
+      params[[ "schedule" ]] <- schedule
+      params[[ "recurring" ]] <- recurring
+      params <- lapply( private$.node_list, function( ndxs) params )
+
+      clusterApply( private$.cluster(), params, update_func )
+      return()
+    },
+
 
     set_network_transmission_multiplier = function( multipliers )
     {
