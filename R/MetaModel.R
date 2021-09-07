@@ -450,27 +450,49 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
     vaccinate_schedule = function( schedule, recurring = FALSE )
     {
-      if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
-        stop("argument VaccineSchedule must be an object of type VaccineSchedule (or list if recurring=TRUE)")
+      if( is.R6( schedule ) ) {
+        if( !('VaccineSchedule' %in% class(schedule)))
+          stop("argument VaccineSchedule must be an object of type VaccineSchedule (or list)")
+
+        params <- list()
+        params[[ "schedule" ]] <- schedule
+        params[[ "recurring" ]] <- recurring
+        params <- lapply( private$.node_list, function( ndxs) params )
+      } else if( is.list( schedule ) ) {
+        if( length( schedule ) != self$n_regions )
+          stop("if schedule is a list there must be one for each region")
+
+        params <- lapply( private$.node_list, function( ndxs) lapply( ndxs, function( idx ) schedule[[ idx ]]) )
+        params <- lapply( params, function( sched ) list( schedule = sched, recurring = recurring ) )
       }
 
       update_func = function( params )
       {
-        vaccine_idx <- params[[ "schedule" ]]$vaccine$idx()
+        recurring <- params[[ "recurring" ]]
+        params    <- params[[ "schedule"]]
+
+        if( !is.list( params ) )
+          params <- rep( list( params ), n_node_list )
+
+        add_vaccine <- function( s )
+        {
+          vaccine_idx <- s$vaccine$idx()
+          sched <- s$clone()
+          sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
+          return( sched )
+        }
 
         for( ndx in 1:n_node_list )
         {
-          sched <- params[[ "schedule" ]]$clone()
-          sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
-          abms[[ ndx ]]$vaccinate_schedule( sched, recurring = params[[ "recurring" ]] )
+          if( !is.list( params[[ ndx ]] ))
+            sched <- add_vaccine( params[[ ndx ]] )
+          else
+            sched <- lapply( params[[ ndx ]], add_vaccine )
+
+          abms[[ ndx ]]$vaccinate_schedule( sched, recurring = recurring )
         }
         return()
       }
-
-      params <- list()
-      params[[ "schedule" ]] <- schedule
-      params[[ "recurring" ]] <- recurring
-      params <- lapply( private$.node_list, function( ndxs) params )
 
       clusterApply( private$.cluster(), params, update_func )
       return()
