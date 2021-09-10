@@ -5,13 +5,43 @@
 
 plot.value.total_infected <- "total_infected"
 plot.value.new_infected   <- "new_infected"
+plot.value.total_infected_strain_0 <- "total_infected_strain_0"
+plot.value.new_infected_strain_0   <- "new_infected_strain_0"
+plot.value.total_infected_strain_1 <- "total_infected_strain_1"
+plot.value.new_infected_strain_1   <- "new_infected_strain_1"
+plot.value.total_infected_strain_2 <- "total_infected_strain_2"
+plot.value.new_infected_strain_2   <- "new_infected_strain_2"
+plot.value.total_infected_strain_3 <- "total_infected_strain_3"
+plot.value.new_infected_strain_3   <- "new_infected_strain_3"
+plot.value.total_infected_strain_4 <- "total_infected_strain_4"
+plot.value.new_infected_strain_4   <- "new_infected_strain_4"
 plot.values <- c(
   plot.value.total_infected,
-  plot.value.new_infected
+  plot.value.new_infected,
+  plot.value.total_infected_strain_0,
+  plot.value.new_infected_strain_0,
+  plot.value.total_infected_strain_1,
+  plot.value.new_infected_strain_1,
+  plot.value.total_infected_strain_2,
+  plot.value.new_infected_strain_2,
+  plot.value.total_infected_strain_3,
+  plot.value.new_infected_strain_3,
+  plot.value.total_infected_strain_4,
+  plot.value.new_infected_strain_4
 )
 
 lockBinding( "plot.value.total_infected", environment() )
 lockBinding( "plot.value.new_infected", environment() )
+lockBinding( "plot.value.total_infected_strain_0", environment() )
+lockBinding( "plot.value.new_infected_strain_0", environment() )
+lockBinding( "plot.value.total_infected_strain_1", environment() )
+lockBinding( "plot.value.new_infected_strain_1", environment() )
+lockBinding( "plot.value.total_infected_strain_2", environment() )
+lockBinding( "plot.value.new_infected_strain_2", environment() )
+lockBinding( "plot.value.total_infected_strain_3", environment() )
+lockBinding( "plot.value.new_infected_strain_3", environment() )
+lockBinding( "plot.value.total_infected_strain_4", environment() )
+lockBinding( "plot.value.new_infected_strain_4", environment() )
 lockBinding( "plot.values", environment() )
 
 MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
@@ -742,13 +772,18 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         self$combine_run( new_infected, dstep )
       }
+      if( verbose )
+        cat( "\r                             " )
     },
 
     plot = function(
       time = NULL,
       height = 800,
       marker.size = 10,
-      value = plot.value.new_infected
+      frame_sample_rate = 1,
+      value = plot.value.new_infected,
+      value_denominator = NA,
+      base_date = NA
     )
     {
       if( !is.null( time ) )
@@ -761,16 +796,30 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         stop( "can only plot values in plot.values" )
 
       results   <- self$results()
+      total_inf <- self$total_infected
       meta_data <- self$meta_data
 
       results <- results[ ,.( time, n_region, total_infected ) ]
+      results <- total_inf[ results, on = c( "time", "n_region" ) ]
       results <- meta_data[ results, on = "n_region" ]
-      results = results[ order( n_region, time ) ]
-      results[ , new_infected := ifelse( n_region == shift( n_region, fill = 1 ),
-                                           total_infected - shift( total_infected, fill = 0 ),
-                                           total_infected ) ]
-      results[ , new_infected := new_infected / n_total * 100 ]
-      results[ , total_infected := total_infected / n_total * 100 ]
+      results <- results[ order( n_region, time ) ]
+
+      add_new_infection <- function( total_col, new_col )
+      {
+        setnames( results, total_col, "temp_total" )
+        results[ , temp_new := ifelse( TRUE,#n_region == shift( n_region, fill = 1 ),
+                                           temp_total - shift( temp_total, fill = 0 ),
+                                           temp_total ) ]
+        results[ , temp_new := temp_new / n_total * 100 ]
+        results[ , temp_total := temp_total / n_total * 100 ]
+        setnames( results, c( "temp_total", "temp_new" ), c( total_col, new_col ) )
+      }
+      add_new_infection( "total_infected", "new_infected" )
+      total_cols = sprintf( "total_infected_strain_%d", 0:( abm$n_strains - 1) )
+      new_cols   = sprintf( "new_infected_strain_%d", 0:( abm$n_strains - 1) )
+      for( idx in 1:length( total_cols ) )
+        add_new_infection( total_cols[ idx ], new_cols[ idx] )
+
       xrange <- private$xrange()
       yrange <- private$yrange()
       width  <- round( height * diff( xrange ) / diff( yrange ) )
@@ -779,12 +828,24 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       if( !is.null( map_data ) )
         map_data <- map_data[ , plotly_rect ]
 
+      if( frame_sample_rate > 1 )
+        results = results[ ( time %% frame_sample_rate ) == 0 ]
+
+      if( !is.na( value_denominator ) )
+        results[ , c( value ) :=  get( value ) / (  get( value_denominator ) + 1e-8 ) ]
+
+      time_value = "time"
+      if( !is.na( base_date ) ) {
+        results[ , date := base_date + time ]
+        time_value = "date"
+      }
+
       p = plot_ly(
         results,
         x = ~x,
         y = ~y,
         color = ~get( value ),
-        frame = ~time,
+        frame = ~get( time_value ),
         text = ~name,
         type = "scatter",
         mode = "markers",
@@ -816,7 +877,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     n_strains   = function( val = NULL ) private$.staticReturn( val, "n_strains" ),
     strain_params = function( val = NULL ) private$.staticReturn( val, "strain_params" ),
     time        = function( val = NULL ) private$.staticReturn( val, "time" ),
-    total_infected = function( val = NULL ) private$.staticReturn( val, "total_infected" ),
+    total_infected = function( val = NULL ) copy( private$.staticReturn( val, "total_infected" ) ),
     network_names  = function( val = NULL ) private$.staticReturn( val, "network_names" ),
     meta_data    = function( val = NULL ) private$.staticReturn( val, "meta_data" ),
     map_data     = function( val = NULL ) private$.staticReturn( val, "map_data" ),
@@ -847,7 +908,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
   mig_mat_to_pool <- migration_matrix[ !( n_region != n_region_pool & n_region_to != n_region_pool ) ]
 
   # add on population to turn in to total flows
-  mig_mat_pool <- meta_data[ ,.( n_region, population ) ][ mig_mat_west, on = "n_region" ]
+  mig_mat_pool <- meta_data[ ,.( n_region, population ) ][ mig_mat_to_pool, on = "n_region" ]
   mig_mat_pool[ , flow := transfer * population ]
   mig_mat_pool[ , n_region := ifelse( n_region == n_region_pool, n_region_to, n_region  )]
   total_flow <- mig_mat_pool[ , sum( flow )]
