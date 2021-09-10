@@ -627,10 +627,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
 
-      if( res )
-        private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
-          private$.total_infected[ private$.time + 1, strain_idx + 1 ] + 1
-
       return(as.logical(res))
     },
 
@@ -663,9 +659,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
 
       res <- SWIG_seed_infect_n_people(self$c_model, n_people, strain_idx, network_id)
-
-      private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
-      private$.total_infected[ private$.time + 1, strain_idx + 1 ] + res
 
       return(res)
     },
