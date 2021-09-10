@@ -303,7 +303,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         if( !is.numeric( migration_factor ) || migration_factor < 0 || migration_factor > 1 )
           stop( "migration_factor must be between 0 and 1" )
 
-        migration_matrix[ , transfer_used := transfer * migration_factor ]
+        migration_matrix[ , transfer_used := transfer ]
 
         private$.migration_matrix    <- migration_matrix
         private$.migration_factor    <- migration_factor
@@ -528,6 +528,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
+    set_migration_factor = function( factor )
+    {
+      private$.migration_factor = factor
+    },
 
     set_network_transmission_multiplier = function( multipliers )
     {
@@ -594,7 +598,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         {
           for( step in 1:n_steps )
           {
-            # migration infections
+             # migration infections
             if( step <= n_inf_steps ) {
               for( strain_idx in 1:n_strains )
                 abms[[ nidx ]]$seed_infect_n_people( n_infections[[ step ]][ nidx, strain_idx ], strain_idx = strain_idx - 1 )
@@ -706,6 +710,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       migration_matrix <- self$migration_matrix
       migration_delay  <- self$migration_delay
+      migration_factor <- self$migration_factor
       n_regions        <- self$n_regions
       regions          <- 1:n_regions
 
@@ -759,7 +764,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         {
           dt <- new_infected[[ sdx ]][ migration_matrix, on = "n_region" ]
           dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
-          dt <- dt[ , lapply( .SD, function( x) .random_round( sum( x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
+          dt <- dt[ , lapply( .SD, function( x) .random_round( sum( migration_factor * x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
 
           indices <- dt[ , n_region_to ]
           vals    <- as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
