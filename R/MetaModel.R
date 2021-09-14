@@ -506,6 +506,9 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         add_vaccine <- function( s )
         {
+          if( is.null( s ) )
+            return( NULL )
+
           vaccine_idx <- s$vaccine$idx()
           sched <- s$clone()
           sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
@@ -812,7 +815,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       add_new_infection <- function( total_col, new_col )
       {
         setnames( results, total_col, "temp_total" )
-        results[ , temp_new := ifelse( TRUE,#n_region == shift( n_region, fill = 1 ),
+        results[ , temp_new := ifelse( n_region == shift( n_region, fill = 1 ),
                                            temp_total - shift( temp_total, fill = 0 ),
                                            temp_total ) ]
         results[ , temp_new := temp_new / n_total * 100 ]
