@@ -536,6 +536,51 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.migration_factor = factor
     },
 
+    set_seeding_schedule = function( schedule )
+    {
+      update_func <- function( schedule  )
+      {
+        for( ndx in 1:n_node_list )
+          abms[[ ndx ]]$set_seeding_schedule( schedule[[ ndx ]] )
+        return()
+      }
+
+      error_msg = sprintf( "%s %s",
+                           "schedule is a matrix with the number of columns equal the number of strains and a row for each day",
+                           "or a list of length n_regions of matrix")
+      check_one_schedule <- function( schedule )
+      {
+        if( !is.matrix( schedule ) )
+          stop( error_msg )
+
+        if( ncol( schedule ) > self$n_strains )
+          stop( error_msg)
+      }
+
+      if( !is.list( schedule ) ) {
+        check_one_schedule( schedule )
+
+        # update the same for all
+        schedule <- rep( list( schedule ), self$n_regions )
+
+      } else {
+        if( length( schedule ) != self$n_regions )
+          stop( error_msg )
+        for( rdx in 1:self$n_regions )
+          check_one_schedule( schedule[[ rdx ]] )
+      }
+
+      # map on to node|_list
+      n_nodes   <- self$n_nodes
+      node_list <- private$.node_list
+      sched     <- vector( mode = "list", length = n_nodes )
+      for( ndx in 1:n_nodes )
+        sched[[ ndx ]] <- schedule[ node_list[[ ndx ]] ]
+
+      clusterApply( private$.cluster(), sched, update_func )
+      return()
+    },
+
     set_network_transmission_multiplier = function( multipliers )
     {
       update_func = function( mults  )
