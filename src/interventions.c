@@ -696,7 +696,7 @@ long intervention_vaccinate_age_group(
 	total_vaccinated  = 0;
 	for( age = 0; age < N_AGE_GROUPS; age++ )
 	{
-		n_to_vaccinate[ age ] = round( model->n_population_by_age[ age ] * fractions[ age ] );
+		n_to_vaccinate[ age ] = round_random( model->n_population_by_age[ age ] * fractions[ age ] );
 		n_vaccinated[ age ]   = 0;
 		total_to_vaccinate   += n_to_vaccinate[ age ];
 	}
