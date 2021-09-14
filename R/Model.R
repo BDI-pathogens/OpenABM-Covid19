@@ -92,6 +92,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     .time           = 0,
     .total_infected = NA,
     .vaccine_schedule = -1,
+    .seeding_schedule = -1,
 
     utils_n_guess = function(key, ...) {
       if (startsWith(key, 'total_')) {
@@ -600,6 +601,21 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(Network$new( self, network_id ))
     },
 
+    #' @description Sets a seeding schedule
+    #' @param schedule a matrix of numbers to seed with a row for each time
+    #' point and a column for each strain
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    set_seeding_schedule = function( schedule )
+    {
+      if( !is.matrix( schedule ) )
+        stop( "seeding schedule is a matrix with a column for each strain and a row for each time point")
+
+      if( ncol( schedule ) > self$n_strains )
+        stop( "number of columns must be less than the number of initialized strains ")
+
+      private$.seeding_schedule <- schedule
+    },
+
     #' @description Infects a new individual from an external source.
     #' Wrapper for C API \code{seed_infect_by_idx}.
     #' @param ID The ID of the individual.
@@ -955,14 +971,26 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{one_time_step}.
     one_time_step = function()
     {
-      vaccine_schedule = private$.vaccine_schedule
+      time <- private$.time + 1
+
+      vaccine_schedule <- private$.vaccine_schedule
       if( is.R6( vaccine_schedule ) || is.list( vaccine_schedule ) ) {
         if( !is.list( vaccine_schedule ) ) {
           self$vaccinate_schedule( vaccine_schedule )
         } else {
-          time = private$.time + 1
           if( time <= length( vaccine_schedule ) && !is.null( vaccine_schedule[[ time ]] ) )
             self$vaccinate_schedule( vaccine_schedule[[ time ]] )
+        }
+      }
+
+      seeding_schedule <- private$.seeding_schedule
+      if( is.matrix( seeding_schedule ) ) {
+        if( time <= nrow( seeding_schedule ) ) {
+          for( sdx in 1:ncol( seeding_schedule ) ) {
+            n_people <- seeding_schedule[ time, sdx ]
+            if( n_people > 0 )
+              self$seed_infect_n_people(n_people, strain_idx = sdx -1 )
+          }
         }
       }
 
