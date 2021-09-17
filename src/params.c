@@ -189,7 +189,8 @@ int get_app_user_by_index(
 *  				age_groups:				array of users age group
 *  				occupation_networks:	array of users occupation networks
 *  				house_ids:				array of users house id
-
+*				xcoords:				array of x coordinates
+*				ycoords:				array of y coordinates
 ******************************************************************************************/
 long get_individuals(
 	model *model,
@@ -199,7 +200,9 @@ long get_individuals(
 	int *occupation_networks,
 	long *house_ids,
 	int *infection_counts,
-	short *vaccine_statuses
+	short *vaccine_statuses,
+	double *xcoords,
+	double *ycoords
 )
 {
 	long n_total = model->params->n_total;
@@ -213,6 +216,8 @@ long get_individuals(
 		house_ids[ idx ] = model->population[ idx ].house_no;
 		infection_counts[ idx ] = count_infection_events( &(model->population[ idx ]) );
 		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
+		xcoords[ idx ] = model->population[ idx ].xcoord;
+		ycoords[ idx ] = model->population[ idx ].ycoord;
 	}
 	return idx;
 }

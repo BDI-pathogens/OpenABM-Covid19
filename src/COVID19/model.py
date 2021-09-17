@@ -1208,10 +1208,12 @@ class Model:
         house_ids = covid19.longArray(n_total)
         infection_counts = covid19.intArray(n_total)
         vaccine_statuses = covid19.shortArray(n_total)
+        xcoords = covid19.doubleArray(n_total)
+        ycoords = covid19.doubleArray(n_total)
         
         n_total = covid19.get_individuals(
             self.c_model, ids, statuses, age_groups, occupation_networks, 
-            house_ids, infection_counts, vaccine_statuses)
+            house_ids, infection_counts, vaccine_statuses, xcoords, ycoords)
         
         list_ids = [None]*n_total
         list_statuses = [None]*n_total
@@ -1220,6 +1222,8 @@ class Model:
         list_house_ids = [None]*n_total
         list_infection_counts = [None]*n_total
         list_vaccine_statuses = [None]*n_total
+        list_xcoords = [None]*n_total
+        list_ycoords = [None]*n_total
         
         for idx in range(n_total):
             list_ids[idx] = ids[idx]
@@ -1229,6 +1233,8 @@ class Model:
             list_house_ids[idx] = house_ids[idx]
             list_infection_counts[idx] = infection_counts[idx]
             list_vaccine_statuses[idx] = vaccine_statuses[idx]
+            list_xcoords[idx] = xcoords[idx]
+            list_ycoords[idx] = ycoords[idx]
         
         df_popn = pd.DataFrame( {
             'ID': list_ids, 
@@ -1237,10 +1243,30 @@ class Model:
             'occupation_network': list_occupation_networks,
             'house_no': list_house_ids,
             'infection_count' : list_infection_counts,
-            'vaccine_status' : list_vaccine_statuses
+            'vaccine_status' : list_vaccine_statuses,
+            'xcoords' : list_xcoords,
+            'ycoords' : list_ycoords,
         })
         
         return df_popn
+
+    def assign_coordinates_individuals(self, df_coords ):
+        """
+        Calls C function assign_coordinates_individuals.
+        Takes pandas Dataframe with required columns 'ID','xcoords', and 'ycoords'
+        """
+        n_total = len(df_coords["ID"])
+        ids = covid19.longArray(n_total)
+        xcoords = covid19.doubleArray(n_total)
+        ycoords = covid19.doubleArray(n_total)
+
+        for idx in range(n_total):
+            ids[idx] = df_coords["ID"][idx]
+            xcoords[idx] = df_coords["xcoords"][idx]
+            ycoords[idx] = df_coords["ycoords"][idx]
+
+        covid19.assign_coordinates_individuals(self.c_model, n_total,ids ,xcoords ,ycoords )
+
     
     def _create(self):
         """

@@ -88,6 +88,9 @@ void initialize_individual(
 
 	indiv->vaccine_status = NO_VACCINE;
 	indiv->compliance_factor = gsl_rng_uniform( rng );
+
+	indiv->xcoord = INITIAL_COORDINATE_X; // default co-ordinate at 0 origin.
+	indiv->ycoord = INITIAL_COORDINATE_Y; // set in constant.h
 }
 
 /*****************************************************************************************
@@ -430,6 +433,17 @@ void set_hospitalised( individual *indiv, parameters* params, int time )
 void set_house_no( individual *indiv, long number )
 {
 	indiv->house_no = number;
+}
+
+/*****************************************************************************************
+*  Name:		set_coordinates
+*  Description: sets a person's coordinates
+*  Returns:		void
+******************************************************************************************/
+void set_coordinates( individual *indiv, double x, double y )
+{
+	indiv->xcoord = x;
+	indiv->ycoord = y;
 }
 
 /*****************************************************************************************

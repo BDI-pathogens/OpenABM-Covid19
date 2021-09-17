@@ -464,6 +464,26 @@ void set_up_individual_hazard( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		assign_coordinates_individuals
+*  Description: assigns coordinates to individuals in indiv_ids list
+*  Returns:		void
+******************************************************************************************/
+void assign_coordinates_individuals(
+	model *model,
+	double n_indvs,
+	long *indiv_ids,
+	double *x,
+	double *y
+	)
+{
+	for( int idx = 0; idx < n_indvs; idx++ )
+	{
+		individual *indiv = &(model->population[indiv_ids[idx]]); // loop through the ids given
+		set_coordinates( indiv, x[idx], y[idx] );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		estimate_total_interactions
 *  Description: estimates the total number of interactions from the networks
 *  Returns:		void

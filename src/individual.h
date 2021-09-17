@@ -70,6 +70,9 @@ struct individual{
 	short *immune_full;
 	short *immune_to_symptoms;
 	short *immune_to_severe;
+
+	double xcoord;
+	double ycoord;
 };
 
 struct interaction{
@@ -126,6 +129,7 @@ void initialize_hazard( individual*, parameters*, int );
 void add_infection_event( individual*, individual*, short, strain*, short );
 void set_age_group( individual*, parameters*, int );
 void set_house_no( individual*, long );
+void set_coordinates( individual*, double, double );
 void set_quarantine_status( individual*, parameters*, int, int, model* );
 void set_recovered( individual*, parameters*, int , model *);
 void set_susceptible( individual*, parameters*, int );
