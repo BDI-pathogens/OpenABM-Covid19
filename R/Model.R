@@ -646,6 +646,40 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(as.logical(res))
     },
 
+    #' @description Infects new individuals from an external source.
+    #' Wrapper for C API \code{seed_infect_by_idx}.
+    #' @param IDs The IDs of the individual.
+    #' @param strain_idx The idx of the strain the person is infected with
+    #' @param network_id The network ID.
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    seed_infect_by_indices = function(IDs, strain_idx = 0, strain = NULL, network_id = -1 )
+    {
+      n_total   <- private$c_params$n_total
+      n_indices <- length( IDs )
+      if (min(IDs) < 0 || max(IDs) >= n_total) {
+        stop("ID out of range (0<=ID<n_total)")
+      }
+
+      if( !is.null( strain ) )
+      {
+        if (!is.R6(strain) || !('Strain' %in% class(strain)))
+          stop("argument strain must be an object of type Strain")
+
+        strain_idx = strain$idx()
+      }
+
+      n_strains = self$c_model$n_initialised_strains;
+      if( strain_idx < 0  || strain_idx >= n_strains )
+        stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
+
+      c_model_ptr <- private$c_model_ptr()
+      res <-.Call('R_seed_infect_by_indices',c_model_ptr, IDs, n_indices,
+                        strain_idx, network_id, PACKAGE='OpenABMCovid19');
+
+      return(res)
+    },
+
+
     #' @description Infects n people randomly (if a person is immune then
     #' they will not be infected)
     #' @param n_people The number of people to try and infect

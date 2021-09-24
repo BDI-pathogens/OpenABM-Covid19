@@ -9,6 +9,7 @@
 #include "params.h"
 #include "constant.h"
 #include "interventions.h"
+#include "disease.h"
 #pragma pop_macro("ERROR")
 
 SEXP R_get_app_users ( SEXP R_c_model, SEXP n_total )
@@ -540,4 +541,26 @@ SEXP R_set_hospital_input_param_file( SEXP R_c_params,
   strncpy( c_params->hospital_input_param_file, input_param_file, sizeof( c_params->hospital_input_param_file ) - 1 );
 
   return ScalarInteger( 1 );
+}
+
+SEXP R_seed_infect_by_indices( SEXP R_c_model, SEXP R_indices, SEXP R_n_indices,
+                        SEXP R_strain_idx, SEXP R_network_id )
+{
+  // get the point to the model from the R pointer object
+  model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
+
+  // convert R to C
+  short strain_idx = asInteger( R_strain_idx );
+  short network_id = asInteger( R_network_id );
+  long n_indices = asInteger( R_n_indices );
+  long idx, pdx;
+  long n_inf = 0;
+
+  for( idx = 0; idx < n_indices; idx++ )
+  {
+    pdx = INTEGER(R_indices)[ idx ];
+    n_inf += seed_infect_by_idx(c_model, pdx, strain_idx, network_id);
+  };
+
+  return ScalarInteger( n_inf );
 }
