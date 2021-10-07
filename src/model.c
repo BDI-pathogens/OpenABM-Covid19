@@ -472,8 +472,8 @@ void assign_coordinates_individuals(
 	model *model,
 	double n_indvs,
 	long *indiv_ids,
-	double *x,
-	double *y
+	float *x,
+	float *y
 	)
 {
 	for( int idx = 0; idx < n_indvs; idx++ )

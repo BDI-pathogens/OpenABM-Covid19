@@ -440,7 +440,7 @@ void set_house_no( individual *indiv, long number )
 *  Description: sets a person's coordinates
 *  Returns:		void
 ******************************************************************************************/
-void set_coordinates( individual *indiv, double x, double y )
+void set_coordinates( individual *indiv, float x, float y )
 {
 	indiv->xcoord = x;
 	indiv->ycoord = y;

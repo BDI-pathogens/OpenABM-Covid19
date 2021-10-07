@@ -1208,8 +1208,8 @@ class Model:
         house_ids = covid19.longArray(n_total)
         infection_counts = covid19.intArray(n_total)
         vaccine_statuses = covid19.shortArray(n_total)
-        xcoords = covid19.doubleArray(n_total)
-        ycoords = covid19.doubleArray(n_total)
+        xcoords = covid19.floatArray(n_total)
+        ycoords = covid19.floatArray(n_total)
         
         n_total = covid19.get_individuals(
             self.c_model, ids, statuses, age_groups, occupation_networks, 
@@ -1257,8 +1257,8 @@ class Model:
         """
         n_total = len(df_coords["ID"])
         ids = covid19.longArray(n_total)
-        xcoords = covid19.doubleArray(n_total)
-        ycoords = covid19.doubleArray(n_total)
+        xcoords = covid19.floatArray(n_total)
+        ycoords = covid19.floatArray(n_total)
 
         for idx in range(n_total):
             ids[idx] = df_coords["ID"][idx]

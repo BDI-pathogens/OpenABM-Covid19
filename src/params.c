@@ -201,8 +201,8 @@ long get_individuals(
 	long *house_ids,
 	int *infection_counts,
 	short *vaccine_statuses,
-	double *xcoords,
-	double *ycoords
+	float *xcoords,
+	float *ycoords
 )
 {
 	long n_total = model->params->n_total;

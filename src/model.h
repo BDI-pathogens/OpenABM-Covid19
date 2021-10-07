@@ -146,7 +146,7 @@ void set_up_counters( model* );
 void reset_counters( model* );
 void set_up_occupation_network( model* );
 void set_up_individual_hazard( model* );
-void assign_coordinates_individuals( model*, double, long*, double*, double* );
+void assign_coordinates_individuals( model*, double, long*, float*, float* );
 void destroy_model( model* );
 
 int one_time_step( model* );
