@@ -506,13 +506,13 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
         add_vaccine <- function( s )
         {
-          if( is.null( s ) )
-            return( NULL )
-
-          vaccine_idx <- s$vaccine$idx()
-          sched <- s$clone()
-          sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
-          return( sched )
+          if( !is.null( s ) )
+          {
+            vaccine_idx <- s$vaccine$idx()
+            sched <- s$clone()
+            sched$vaccine <- vaccines[[ ndx ]][[ vaccine_idx + 1 ]]
+            return( sched )
+          }
         }
 
         for( ndx in 1:n_node_list )
@@ -860,7 +860,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       add_new_infection <- function( total_col, new_col )
       {
         setnames( results, total_col, "temp_total" )
-        results[ , temp_new := ifelse( n_region == shift( n_region, fill = 1 ),
+        results[ , temp_new := ifelse(  n_region == shift( n_region, fill = 1 ),
                                            temp_total - shift( temp_total, fill = 0 ),
                                            temp_total ) ]
         results[ , temp_new := temp_new / n_total * 100 ]
@@ -1007,7 +1007,8 @@ MetaModel.England = function(
     "Tower Hamlets" = 0.5,
     "Lambeth"   = 0.5,
     "Wandsworth" = 0.5
-  )
+  ),
+  short_long_migration_matrix = 0.50
 )
 {
   # load the meta data and get the population sizes
@@ -1019,7 +1020,8 @@ MetaModel.England = function(
   map_data <- fread( sprintf( "%s/map_data.csv", data_dir ) )
 
   # add migration data
-  migration_matrix <- fread( sprintf( "%s/migration_matrix.csv", data_dir ) )
+  migration_matrix      <- fread( sprintf( "%s/migration_matrix.csv", data_dir ) )
+  migration_matrix_long <- fread( sprintf( "%s/migration_matrix_long.csv", data_dir ) )
 
   # create direct transders in inner-London regions
   for( idx in 1:length( pool_factors ) )
@@ -1030,6 +1032,13 @@ MetaModel.England = function(
 
     migration_matrix <- .pool_transfers( migration_matrix, meta_data, n_region, pool_factors[[ idx ]])
   }
+
+  # add the mix
+  migration_matrix = rbindlist( list(
+    migration_matrix[ ,.( n_region, n_region_to, transfer = transfer * short_long_migration_matrix ) ],
+    migration_matrix_long[ ,.( n_region, n_region_to, transfer = transfer * ( 1 - short_long_migration_matrix ) ) ]
+  ))
+  migration_matrix <- migration_matrix[ , .(  transfer = sum( transfer ) ), by = c( "n_region", "n_region_to")]
 
   base_params[[ "n_total" ]] <- n_total
 
