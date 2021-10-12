@@ -1008,7 +1008,9 @@ MetaModel.England = function(
     "Lambeth"   = 0.5,
     "Wandsworth" = 0.5
   ),
-  short_long_migration_matrix = 0.50
+  short_long_migration_matrix = 0.50,
+  regional_infectious_factors = list(),
+  seed_fraction = 5e-4
 )
 {
   # load the meta data and get the population sizes
@@ -1034,13 +1036,28 @@ MetaModel.England = function(
   }
 
   # add the mix
-  migration_matrix = rbindlist( list(
+  migration_matrix <- rbindlist( list(
     migration_matrix[ ,.( n_region, n_region_to, transfer = transfer * short_long_migration_matrix ) ],
     migration_matrix_long[ ,.( n_region, n_region_to, transfer = transfer * ( 1 - short_long_migration_matrix ) ) ]
   ))
   migration_matrix <- migration_matrix[ , .(  transfer = sum( transfer ) ), by = c( "n_region", "n_region_to")]
 
+  # add regional factors
+  if( is.null( base_params[[ "infectious_rate"]] ))
+    base_params[[ "infectious_rate"]] <- Parameters.default_param("infectious_rate")
+
+  if( length( regional_infectious_factors ) ) {
+    regional_factors = data.table(
+      region     = names( regional_infectious_factors ),
+      inf_factor = as.numeric( unlist( regional_infectious_factors) )
+    )
+    regional_factors <- regional_factors[ meta_data, on = "region"][ order( n_region ) ]
+    regional_factors[ , inf_factor := ifelse( is.na( inf_factor ), 1 , inf_factor ) ]
+    base_params[[ "infectious_rate" ]] <- base_params[[ "infectious_rate" ]] * regional_factors[ , inf_factor ]
+  }
+
   base_params[[ "n_total" ]] <- n_total
+  base_params[[ "n_seed_infection"]] <- n_total * seed_fraction
 
   abm <- MetaModel$new(
     n_nodes     = n_nodes,
