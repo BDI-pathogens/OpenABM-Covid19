@@ -311,6 +311,83 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
+    .combine_run = function( n_infections, n_steps )
+    {
+      infect_func = function( data )
+      {
+        n_infections   <- data$n_infect
+
+        if( is.null( n_infections ) ) {
+          n_inf_steps <- 0
+        } else if( is.matrix( n_infections ) ) {
+          n_infections <- list( n_infections )
+          n_inf_steps  <- 1
+        } else
+          n_inf_steps <- length( n_infections )
+
+        n_steps        <- data$n_steps
+        n_strains      <- abms[[ 1 ]]$n_strains
+        total_infected <- vector( mode = "list", length = n_node_list )
+        start_time     <- abms[[ 1 ]]$time
+
+        for( nidx in 1:n_node_list )
+        {
+          for( step in 1:n_steps )
+          {
+            # migration infections
+            if( step <= n_inf_steps ) {
+              for( strain_idx in 1:n_strains )
+                abms[[ nidx ]]$seed_infect_n_people( n_infections[[ step ]][ nidx, strain_idx ], strain_idx = strain_idx - 1 )
+            }
+
+            # run step
+            abms[[ nidx ]]$run( 1, verbose = FALSE)
+          }
+
+          # collect results
+          end_time <- abms[[ nidx ]]$time
+          total_infected[[ nidx ]] <- abms[[ nidx ]]$total_infected[ (start_time + 2 ):( end_time + 1 ),, drop = FALSE ]
+        }
+
+        return( list( total_infected = total_infected, time = end_time) )
+      }
+
+      # build input data
+      node_list <- private$.node_list
+      if( !is.null( n_infections ) ) {
+        infections_list <- private$.prepare_n_infections( n_infections )
+        data <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
+      } else {
+        data <- lapply( node_list, function( ndxs ) list( n_infect = NULL, n_steps = n_steps ) )
+      }
+
+      # run results
+      start_time    <- self$time
+      results       <- clusterApply( private$.cluster(), data, infect_func )
+      private$.time <- results[[ 1 ]]$time
+      end_time      <- self$time
+      n_regions     <- self$n_regions
+
+      # update total infected
+      infected_cols  <- private$.total_infected_cols()
+      total_infected <- lapply( results, function( nd ) lapply( nd$total_infected, function( nnd ) as.data.table( nnd ) ) )
+      total_infected <- rbindlist( unlist( total_infected, recursive = FALSE ), use.names = TRUE )
+      setnames( total_infected, infected_cols )
+
+      total_infected[ , time     := rep( (start_time + 1):end_time, n_regions )]
+      total_infected[ , n_region := rep( unlist( private$.node_list), each = end_time - start_time ) ]
+
+      private$.total_infected <- rbindlist( list( private$.total_infected, total_infected ), use.names = TRUE )
+
+      total_infected <- self$total_infected
+      new_infected   <- total_infected[ time == end_time][ order( n_region )][ , .SD, .SDcols = infected_cols ]
+      if( start_time > 0 )
+        new_infected <- new_infected - total_infected[ time == start_time ][ order( n_region )][, .SD, .SDcols = infected_cols ]
+
+      return( new_infected )
+    },
+
+
     .get_range = function( range, pad )
     {
       diff <- range[ 2 ] - range[ 1 ]
@@ -623,83 +700,6 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
-    combine_run = function( n_infections, n_steps )
-    {
-      infect_func = function( data )
-      {
-        n_infections   <- data$n_infect
-
-        if( is.null( n_infections ) ) {
-          n_inf_steps <- 0
-        } else if( is.matrix( n_infections ) ) {
-          n_infections <- list( n_infections )
-          n_inf_steps  <- 1
-        } else
-          n_inf_steps <- length( n_infections )
-
-        n_steps        <- data$n_steps
-        n_strains      <- abms[[ 1 ]]$n_strains
-        total_infected <- vector( mode = "list", length = n_node_list )
-        start_time     <- abms[[ 1 ]]$time
-
-        for( nidx in 1:n_node_list )
-        {
-          for( step in 1:n_steps )
-          {
-             # migration infections
-            if( step <= n_inf_steps ) {
-              for( strain_idx in 1:n_strains )
-                abms[[ nidx ]]$seed_infect_n_people( n_infections[[ step ]][ nidx, strain_idx ], strain_idx = strain_idx - 1 )
-            }
-
-            # run step
-            abms[[ nidx ]]$run( 1, verbose = FALSE)
-          }
-
-          # collect results
-          end_time <- abms[[ nidx ]]$time
-          total_infected[[ nidx ]] <- abms[[ nidx ]]$total_infected[ (start_time + 2 ):( end_time + 1 ),, drop = FALSE ]
-        }
-
-        return( list( total_infected = total_infected, time = end_time) )
-      }
-
-      # build input data
-      node_list <- private$.node_list
-      if( !is.null( n_infections ) ) {
-        infections_list <- private$.prepare_n_infections( n_infections )
-        data <- lapply( infections_list, function( v ) list( n_infect = v, n_steps = n_steps ) )
-      } else {
-        data <- lapply( node_list, function( ndxs ) list( n_infect = NULL, n_steps = n_steps ) )
-      }
-
-      # run results
-      start_time    <- self$time
-      results       <- clusterApply( private$.cluster(), data, infect_func )
-      private$.time <- results[[ 1 ]]$time
-      end_time      <- self$time
-      n_regions     <- self$n_regions
-
-      # update total infected
-      infected_cols  <- private$.total_infected_cols()
-      total_infected <- lapply( results, function( nd ) lapply( nd$total_infected, function( nnd ) as.data.table( nnd ) ) )
-      total_infected <- rbindlist( unlist( total_infected, recursive = FALSE ), use.names = TRUE )
-      setnames( total_infected, infected_cols )
-
-      total_infected[ , time     := rep( (start_time + 1):end_time, n_regions )]
-      total_infected[ , n_region := rep( unlist( private$.node_list), each = end_time - start_time ) ]
-
-      private$.total_infected <- rbindlist( list( private$.total_infected, total_infected ), use.names = TRUE )
-
-      total_infected <- self$total_infected
-      new_infected   <- total_infected[ time == end_time][ order( n_region )][ , .SD, .SDcols = infected_cols ]
-      if( start_time > 0 )
-       new_infected <- new_infected - total_infected[ time == start_time ][ order( n_region )][, .SD, .SDcols = infected_cols ]
-
-      return( new_infected )
-    },
-
-
     add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
     {
         if( self$n_strains == self$base_params[[ 1 ]][[ "max_n_strains" ]] )
@@ -751,7 +751,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     run = function( n_steps = NULL, verbose = TRUE )
     {
       if( is.null( self$migration_matrix ) )
-        return( self$combine_run( n_infections, n_steps ) )
+        return( private$.combine_run( n_infections, n_steps ) )
 
       if( is.null( n_steps ) )
         n_steps <- self$base_params[[ 1 ]][[ "end_time" ]] - self$time
@@ -767,7 +767,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       if( time < migration_delay ) {
         steps <- min( n_steps, migration_delay - time )
-        self$combine_run( NULL, steps )
+        private$.combine_run( NULL, steps )
       }
 
       inf_cols  <- private$.total_infected_cols()
@@ -823,7 +823,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           new_infected[[ sdx ]][ indices, ] <- vals
         }
 
-        self$combine_run( new_infected, dstep )
+        private$.combine_run( new_infected, dstep )
       }
       if( verbose )
         cat( "\r                             " )
