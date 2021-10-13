@@ -62,6 +62,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .migration_matrix = NULL,
     .migration_factor = NULL,
     .migration_delay  = NULL,
+    .migration_use_generation_kernel = NULL,
+    .migration_kernel = NULL,
     .total_infected      = NULL,
     .time                = 0,
 
@@ -283,10 +285,26 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       }
     },
 
-    .setMigrationMatrix = function( migration_matrix, migration_factor, migration_delay )
+    .setMigrationMatrix = function( migration_matrix, migration_factor, migration_delay, migration_use_generation_kernel )
     {
       if( !is.null( migration_matrix ) )
       {
+        if( migration_use_generation_kernel ) {
+          migration_delay = 1
+
+          gamma_mean  <- self$get_param( "mean_infectious_period" )
+          gamma_sd    <- self$get_param( "sd_infectious_period" )
+          gamma_scale <- gamma_sd * gamma_sd / gamma_mean
+          gamma_shape <- gamma_mean / gamma_scale
+          gamma_max   <- ceiling( gamma_mean + 4 * gamma_sd)
+
+          private$.migration_kernel <- data.table(
+            time_offset = 0:(gamma_max-1),
+            g           = pgamma( 1:gamma_max, gamma_shape, scale = gamma_scale) -
+                          pgamma( 0:(gamma_max-1), gamma_shape, scale = gamma_scale)
+          )
+        }
+
         reqCols <- c( "n_region", "n_region_to", "transfer" )
 
         error_msg <- paste( "migration_matrix must be a data.table columns [", paste( reqCols, collapse = ", " ), "]" )
@@ -308,6 +326,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         private$.migration_matrix    <- migration_matrix
         private$.migration_factor    <- migration_factor
         private$.migration_delay <- migration_delay
+        private$.migration_use_generation_kernel <- migration_use_generation_kernel
       }
     },
 
@@ -387,6 +406,145 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return( new_infected )
     },
 
+    .run_delay = function( n_steps, verbose )
+    {
+      migration_matrix <- self$migration_matrix
+      migration_delay  <- self$migration_delay
+      migration_factor <- self$migration_factor
+      n_regions        <- self$n_regions
+      regions          <- 1:n_regions
+
+      time  <- self$time
+      steps <- 0
+
+      if( time < migration_delay ) {
+        steps <- min( n_steps, migration_delay - time )
+        private$.combine_run( NULL, steps )
+      }
+
+      inf_cols  <- private$.total_infected_cols()
+      n_strains <- length( inf_cols )
+
+      strain_multipliers <- rep( 1, n_strains )
+      strain_params      <- self$strain_params
+      for( idx in 1:self$n_strains )
+        strain_multipliers[ idx ] <- strain_params[[ idx ]][[ "transmission_multiplier" ]]
+
+      while( steps < n_steps )
+      {
+        if( verbose )
+          cat( sprintf( "\rStep %d of %d", steps, n_steps ) )
+
+        t      <- self$time
+        dstep  <- min( migration_delay, n_steps - steps )
+        steps  <- steps + dstep
+
+        total_infected <- self$total_infected
+        total_infected <- total_infected[ time >= t - migration_delay ][ order( time, n_region ) ]
+
+        new_infected = vector( mode = "list", length = dstep)
+        for( sdx in 1:dstep )
+          new_infected[[ sdx ]] <- total_infected[ time == ( t - migration_delay + sdx ) ][ , .SD, .SDcols = inf_cols ]
+
+        if( dstep > 1 )
+          for( sdx in dstep:2 )
+          {
+            new_infected[[ sdx ]] <- new_infected[[ sdx ]] - new_infected[[ sdx -1 ]]
+            new_infected[[ sdx ]][ , n_region := regions ]
+          }
+
+        if( t > migration_delay )
+        {
+          t0 <- total_infected[ time == ( t - migration_delay ) ][ , .SD, .SDcols = inf_cols ]
+          new_infected[[ 1 ]] <- new_infected[[ 1 ]] - t0
+        }
+        new_infected[[ 1 ]][ , n_region := regions ]
+
+        for( sdx in 1:dstep  )
+        {
+          dt <- new_infected[[ sdx ]][ migration_matrix, on = "n_region" ]
+          dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
+          dt <- dt[ , lapply( .SD, function( x) .random_round( sum( migration_factor * x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
+
+          indices <- dt[ , n_region_to ]
+          vals    <- as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
+          vals    <- vals * rep( strain_multipliers, each = nrow( vals ) )
+
+
+          new_infected[[ sdx ]] <- matrix( 0, nrow = n_regions, ncol = n_strains )
+          new_infected[[ sdx ]][ indices, ] <- vals
+        }
+
+        private$.combine_run( new_infected, dstep )
+      }
+      if( verbose )
+        cat( "\r                             " )
+    },
+
+    .run_kernel = function( n_steps, verbose )
+    {
+      migration_matrix <- self$migration_matrix
+      migration_factor <- self$migration_factor
+      migration_kernel <- private$.migration_kernel
+      migration_kernel_max <- migration_kernel[, max( time_offset )]
+      n_regions        <- self$n_regions
+      regions          <- 1:n_regions
+
+      steps <- 0
+      if( self$time == 0 ) {
+        steps <- 1
+        private$.combine_run( NULL, 1 )
+      }
+
+      tot_inf_cols  <- private$.total_infected_cols()
+      new_inf_cols  <- private$.new_infected_cols()
+      n_strains     <- self$n_strains
+
+      strain_multipliers <- rep( 1, n_strains )
+      strain_params      <- self$strain_params
+      for( idx in 1:n_strains )
+        strain_multipliers[ idx ] <- strain_params[[ idx ]][[ "transmission_multiplier" ]]
+
+      while( steps < n_steps )
+      {
+        steps <- steps + 1
+        if( verbose )
+          cat( sprintf( "\rStep %d of %d", steps, n_steps ) )
+
+        min_time     <- self$time - migration_kernel_max -1
+        new_infected <- copy( self$total_infected[ time >= min_time ][ order( n_region, time ) ] )
+
+        # get the relevant new infections by strain
+        for( sdx in 1:n_strains ) {
+          ncol <- new_inf_cols[sdx]
+          tcol <- tot_inf_cols[sdx]
+          new_infected[ , c(ncol) := list(
+            ifelse( n_region == shift(n_region,fill= -1), get(tcol)-shift(get(tcol)), get(tcol) )) ]
+        }
+
+        # apply the generation time kernel
+        new_infected[ , time_offset := self$time - time, nomatch = 0  ]
+        new_infected <- migration_kernel[ new_infected, on = "time_offset", nomatch = 0]
+        new_infected <- new_infected[ , lapply( .SD, function( x ) sum( x * g ) ), by = "n_region", .SDcols = new_inf_cols ]
+
+        # apply the migration matrix and sum the flows
+        dt <- new_infected[ migration_matrix, on = "n_region" ]
+        dt <- dt[ , lapply( .SD, function( x ) sum( x * transfer_used ) ), by = "n_region_to", .SDcols = new_inf_cols ][ order( n_region_to)]
+
+        # apply the multipliers and random round
+        for( sdx in 1:n_strains ) {
+          col <- new_inf_cols[sdx]
+          dt[ , c( col ) := list( .random_round( get( col ) * strain_multipliers[ sdx ] * migration_factor ) ) ]
+        }
+
+        # put in to matrix form and step forward
+        seed_infect <- as.matrix( dt[ , .SD, .SDcols = new_inf_cols])
+        private$.combine_run( seed_infect, 1 )
+      }
+      if( verbose )
+        cat( "\r                             " )
+    },
+
 
     .get_range = function( range, pad )
     {
@@ -399,6 +557,11 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     .total_infected_cols = function()
     {
       return( sprintf( "total_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) ) )
+    },
+
+    .new_infected_cols = function()
+    {
+      return( sprintf( "new_infected_strain_%d", 0:(self$base_params[[ 1 ]][[ "max_n_strains"]] - 1 ) ) )
     },
 
     xrange = function( pad = 0.05 ) private$.get_range( private$.xrange, pad ),
@@ -415,7 +578,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       map_data  = NULL,
       migration_matrix = NULL,
       migration_factor = 0.1,
-      migration_delay  = 5
+      migration_delay  = 5,
+      migration_use_generation_kernel = FALSE
     )
     {
       # clean destroyed models
@@ -429,7 +593,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       private$.setBaseParams( base_params )
       private$.setMetaData( meta_data )
       private$.setMapData( map_data )
-      private$.setMigrationMatrix( migration_matrix, migration_factor, migration_delay )
+      private$.setMigrationMatrix( migration_matrix, migration_factor, migration_delay, migration_use_generation_kernel )
       private$.initializeSubModels()
       private$.n_strains = 1
       private$.strain_params[[ 1 ]] <- list( transmission_multiplier = 1 )
@@ -438,6 +602,16 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     finalize = function()
     {
       private$.stopCluster()
+    },
+
+    get_param = function( param )
+    {
+      base_param <- private$.base_param
+
+      if( param %in% names( base_param ) )
+        return( base_param[[ param ]] )
+
+      return( Parameters.default_param( param ) )
     },
 
     results = function()
@@ -756,77 +930,10 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       if( is.null( n_steps ) )
         n_steps <- self$base_params[[ 1 ]][[ "end_time" ]] - self$time
 
-      migration_matrix <- self$migration_matrix
-      migration_delay  <- self$migration_delay
-      migration_factor <- self$migration_factor
-      n_regions        <- self$n_regions
-      regions          <- 1:n_regions
-
-      time  <- self$time
-      steps <- 0
-
-      if( time < migration_delay ) {
-        steps <- min( n_steps, migration_delay - time )
-        private$.combine_run( NULL, steps )
-      }
-
-      inf_cols  <- private$.total_infected_cols()
-      n_strains <- length( inf_cols )
-
-      strain_multipliers <- rep( 1, n_strains )
-      strain_params      <- self$strain_params
-      for( idx in 1:self$n_strains )
-        strain_multipliers <- strain_params[[ idx ]][[ "transmission_multiplier" ]]
-
-      while( steps < n_steps )
-      {
-        if( verbose )
-          cat( sprintf( "\rStep %d of %d", steps, n_steps ) )
-
-        t      <- self$time
-        dstep  <- min( migration_delay, n_steps - steps )
-        steps  <- steps + dstep
-
-        total_infected <- self$total_infected
-        total_infected <- total_infected[ time >= t - migration_delay ][ order( time, n_region ) ]
-
-        new_infected = vector( mode = "list", length = dstep)
-        for( sdx in 1:dstep )
-          new_infected[[ sdx ]] <- total_infected[ time == ( t - migration_delay + sdx ) ][ , .SD, .SDcols = inf_cols ]
-
-        if( dstep > 1 )
-          for( sdx in dstep:2 )
-          {
-            new_infected[[ sdx ]] <- new_infected[[ sdx ]] - new_infected[[ sdx -1 ]]
-            new_infected[[ sdx ]][ , n_region := regions ]
-          }
-
-        if( t > migration_delay )
-        {
-          t0 <- total_infected[ time == ( t - migration_delay ) ][ , .SD, .SDcols = inf_cols ]
-          new_infected[[ 1 ]] <- new_infected[[ 1 ]] - t0
-        }
-        new_infected[[ 1 ]][ , n_region := regions ]
-
-        for( sdx in 1:dstep  )
-        {
-          dt <- new_infected[[ sdx ]][ migration_matrix, on = "n_region" ]
-          dt <- dt[ , c( list( n_region_to = n_region_to ), lapply( .SD, function( x )  x * transfer_used ) ), .SDcols = inf_cols ]
-          dt <- dt[ , lapply( .SD, function( x) .random_round( sum( migration_factor * x ) ) ), by = "n_region_to", .SDcols = inf_cols ][ order( n_region_to ) ]
-
-          indices <- dt[ , n_region_to ]
-          vals    <- as.matrix( dt[ , .SD, .SDcols = inf_cols ] )
-          vals    <- vals * rep( strain_multipliers, each = nrow( vals ) )
-
-
-          new_infected[[ sdx ]] <- matrix( 0, nrow = n_regions, ncol = n_strains )
-          new_infected[[ sdx ]][ indices, ] <- vals
-        }
-
-        private$.combine_run( new_infected, dstep )
-      }
-      if( verbose )
-        cat( "\r                             " )
+      if( private$.migration_use_generation_kernel )
+        private$.run_kernel( n_steps, verbose )
+      else
+        private$.run_delay( n_steps, verbose )
     },
 
     plot = function(
@@ -995,6 +1102,7 @@ MetaModel.England = function(
   population_factor = 0.1,
   migration_factor  = 0.1,
   migration_delay   = 5,
+  migration_use_generation_kernel = TRUE,
   min_population    = 1e4,
   n_nodes           = 4,
   data_dir          = system.file( "MetaModel_data/England", package = "OpenABMCovid19"),
@@ -1067,7 +1175,8 @@ MetaModel.England = function(
     map_data    = map_data,
     migration_matrix = migration_matrix,
     migration_factor = migration_factor,
-    migration_delay =  migration_delay
+    migration_delay =  migration_delay,
+    migration_use_generation_kernel = migration_use_generation_kernel
   )
   return( abm )
 }
