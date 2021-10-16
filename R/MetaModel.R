@@ -137,6 +137,7 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
 
       # convert to list of lists
       param_list = vector( mode = "list", length = n_regions )
+      param_list = lapply( param_list, function( x ) list() )
       f_convert = function( name, vals )
       {
         for( idx in 1:n_regions )
@@ -1189,6 +1190,7 @@ MetaModel.rectangle = function(
   base_params       = list(),
   migration_factor  = 0.1,
   migration_delay   = 5,
+  migration_use_generation_kernel = TRUE,
   n_nodes           = 4
 )
 {
@@ -1215,7 +1217,7 @@ MetaModel.rectangle = function(
     base_params = default_params,
     migration_matrix = migration_matrix,
     migration_factor = migration_factor,
-    migration_delay  = 5,
+    migration_delay  = migration_delay,
     n_nodes          = n_nodes,
     meta_data        = meta_data
   )
