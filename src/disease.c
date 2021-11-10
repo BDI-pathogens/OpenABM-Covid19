@@ -358,6 +358,52 @@ void new_infection(
 }
 
 /*****************************************************************************************
+*  Name:		new_infection_by_idx
+*  Description: infects a new individual from another individual
+*  Returns:		void
+******************************************************************************************/
+void new_infection_by_idx(
+	model *model,
+	long infected_idx,
+	long infector_idx,
+	int network_id,
+	short strain_idx
+)
+{
+	individual *infected = &(model->population[ infected_idx ]);
+	individual *infector = &(model->population[ infector_idx ]);
+	strain *strain = get_strain_by_id(model,strain_idx);
+
+	new_infection(model, infected, NULL, network_id, strain);
+
+}
+
+/*****************************************************************************************
+*  Name:		new_infection_by_idx
+*  Description: infects a new individual from another individual
+*  Returns:		void
+******************************************************************************************/
+int new_infection_by_idx_check_safe(
+	model *model,
+	long infected_idx,
+	long infector_idx,
+	int network_id,
+	short strain_idx
+)
+{
+	individual *infected = &(model->population[ infected_idx ]);
+
+	// Check that no other event within the time frame exists, before adding new
+	if (model->time > max_element(infected->infection_events->times,N_EVENT_TYPES))
+	{
+		new_infection_by_idx(model, infected_idx, infector_idx, network_id, strain_idx);
+	}
+
+	return max_element(infected->infection_events->times,N_EVENT_TYPES);
+
+}
+
+/*****************************************************************************************
 *  Name:		transition_one_disease_event
 *  Description: Generic function for updating an individual with their next
 *				event and adding the applicable events

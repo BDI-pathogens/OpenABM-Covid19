@@ -219,10 +219,43 @@ long get_individuals(
 		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
 		xcoords[ idx ] = model->population[ idx ].xcoord;
 		ycoords[ idx ] = model->population[ idx ].ycoord;
+		quarantined[ idx ] = model->population[ idx ].quarantined;
 	}
 	return idx;
 }
 
+/*****************************************************************************************
+*  Name: 		get_infection_event_by_idx
+*  Description: populate input X with the infectionl_event details of infected_idx
+*  Arguments:	model:					the model object
+*  				ids:					array of users IDs
+******************************************************************************************/
+int get_infection_event_by_idx(
+	model *model,
+	long *infected_idx,
+	long *infector_idx,
+	int *network_id,
+	long *strain_idx
+)
+{
+	individual *infected = &(model->population[ *infected_idx ]);
+	infection_event *infection_event = infected->infection_events;
+
+	//d Infector ID
+	individual *infector = infection_event->infector;
+	if (infector != NULL)
+	{
+		*infector_idx = infector->idx;
+	}
+	//d Network ID
+	*network_id = infection_event->network_id;
+	//d Strain ID
+	strain *strain = infection_event->strain;
+	if (strain != NULL)
+		*strain_idx = strain->idx;
+
+	return 0;
+}
 
 /*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property

@@ -10,6 +10,7 @@
 #include "constant.h"
 #include "utilities.h"
 #include "model.h"
+#include <math.h>
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -444,6 +445,31 @@ void set_coordinates( individual *indiv, float x, float y )
 {
 	indiv->xcoord = x;
 	indiv->ycoord = y;
+}
+
+/*****************************************************************************************
+*  Name:		distance_individuals
+*  Description: return euclidean distance between two individuals
+*  Returns:		float
+******************************************************************************************/
+
+float distance_individuals( individual *a, individual *b)
+{
+	float x = a->xcoord - b->xcoord;
+	float y = a->ycoord - b->ycoord;
+	float r = x*x + y*y;
+	return sqrt(r);
+}
+
+/*****************************************************************************************
+*  Name:		distance_individuals_by_idx
+*  Description: return euclidean distance between two individuals, from their index
+*  Returns:		float
+******************************************************************************************/
+
+float distance_individuals_by_idx(model *model, long a_idx, long b_idx)
+{
+	return distance_individuals(&(model->population[a_idx]),&(model->population[b_idx]));
 }
 
 /*****************************************************************************************

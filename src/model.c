@@ -674,6 +674,32 @@ event* add_individual_to_event_list(
 }
 
 /*****************************************************************************************
+*  Name:		add_indiv_to_event_list_by_idx
+*  Description: adds an individual to an event list at a particular time
+*
+*  Arguments:	list:	pointer to the event list //d this isn't an argument??
+*  				idx:	individual id
+*  				time:	time of the event (int)
+*  				model:	pointer to the model
+*  				info:   a pointer which can be passed to the transition function
+*
+*  Returns:		a pointer to the newly added event
+******************************************************************************************/
+event* add_individual_to_event_list_by_idx(
+	model *model,
+	int type,
+	int idx,
+	int time,
+	void *info
+)
+{
+	individual *indiv = &(model->population[ idx ]);
+	event *event = add_individual_to_event_list(model, type, indiv, time, info);
+	//d indiv->quarantine_event = event;
+	return event;
+}
+
+/*****************************************************************************************
 *  Name:		remove_event_from_event_list
 *  Description: removes an event from an list at a particular time
 *

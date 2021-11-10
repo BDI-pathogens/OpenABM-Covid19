@@ -1268,6 +1268,27 @@ class Model:
         
         return df_popn
 
+    def get_infection_event_by_idx(self,infected_idx):
+        """
+        Return dataframe of infection_event of individual with id idx
+        """
+
+        infector_idx   = covid19.longArray(1)
+        network_id   = covid19.intArray(1)
+        strain_idx   = covid19.longArray(1)
+        infected_idx_long = covid19.longArray(1)
+        infected_idx_long[0] = infected_idx
+        infector_idx[0] = -10
+        network_id[0] = -10
+        strain_idx[0] = -10
+        
+        covid19.get_infection_event_by_idx(self.c_model,infected_idx_long,infector_idx,network_id,strain_idx)
+        
+        return [infector_idx[0],network_id[0],strain_idx[0]]
+
+    def new_infection_by_idx(self, infected_idx, infector_idx, network_id, strain_idx=None):
+        return covid19.new_infection_by_idx_check_safe(self.c_model,infected_idx,infector_idx,network_id,strain_idx)
+
     def assign_coordinates_individuals(self, df_coords ):
         """
         Calls C function assign_coordinates_individuals.
@@ -1284,6 +1305,9 @@ class Model:
             ycoords[idx] = df_coords["ycoords"][idx]
 
         covid19.assign_coordinates_individuals(self.c_model, n_total,ids ,xcoords ,ycoords )
+
+    def distance_individuals_by_idx(self,a,b):
+        return covid19.distance_individuals_by_idx(self.c_model,a,b)
 
     
     def _create(self):
@@ -1508,3 +1532,6 @@ class Model:
 
     def print_individual(self, idx):
         covid19.print_individual(self.c_model, idx)
+
+    def add_individual_to_event_list_by_idx(self, type, idx, time, info=None):
+        covid19.add_individual_to_event_list_by_idx(self.c_model,type,idx,time,info)

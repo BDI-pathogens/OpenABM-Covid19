@@ -409,6 +409,24 @@ int n_unique_elements( long* array, int n )
 	return n_unique;
 }
 
+/*****************************************************************************************
+*  Name:		max_element
+*  Description: largest element in an array
+******************************************************************************************/
+short max_element( short* array, int n )
+{
+	short x = array[0];
+
+	for (int i = 1; i<n; i++)
+	{
+		if (array[i] > x)
+		{
+			x = array[i];
+		}
+	}
+
+	return x;
+}
 
 /*****************************************************************************************
 *  Name:		incomplete_gamma_p

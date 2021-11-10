@@ -318,6 +318,7 @@ int get_app_users( model*, long* );
 int get_app_user_by_index(model*, int);
 
 long get_individuals( model *, long *, int *, int *, int * , long *, int *, short *, float *, float *, int *);
+int get_infection_event_by_idx( model *, long *, long *, int *, long *);
 
 void update_work_intervention_state(model *pmodel, int value);
 void update_household_intervention_state(model *pmodel, int value);

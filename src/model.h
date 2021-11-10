@@ -154,6 +154,7 @@ void flu_infections( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( model*, int, individual*, int, void* );
+event* add_individual_to_event_list_by_idx( model*, int, int, int, void* );
 void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
