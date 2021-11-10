@@ -851,6 +851,19 @@ class Model:
             raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
        
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+
+    def intervention_quarantine_until_by_idx(self, ID, trace_from, time, maxof, index_token = None, contact_time = 0, risk_score = 1):
+        
+        return covid19.intervention_quarantine_until_by_idx(
+            self.c_model,
+            ID,
+            trace_from,
+            time,
+            maxof,
+            index_token,
+            contact_time,
+            risk_score
+        )
     
 
     def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
@@ -1210,10 +1223,12 @@ class Model:
         vaccine_statuses = covid19.shortArray(n_total)
         xcoords = covid19.floatArray(n_total)
         ycoords = covid19.floatArray(n_total)
+        quarantined = covid19.intArray(n_total)
         
         n_total = covid19.get_individuals(
             self.c_model, ids, statuses, age_groups, occupation_networks, 
-            house_ids, infection_counts, vaccine_statuses, xcoords, ycoords)
+            house_ids, infection_counts, vaccine_statuses, xcoords, ycoords,
+            quarantined)
         
         list_ids = [None]*n_total
         list_statuses = [None]*n_total
@@ -1224,6 +1239,7 @@ class Model:
         list_vaccine_statuses = [None]*n_total
         list_xcoords = [None]*n_total
         list_ycoords = [None]*n_total
+        list_quarantined = [None]*n_total
         
         for idx in range(n_total):
             list_ids[idx] = ids[idx]
@@ -1235,6 +1251,7 @@ class Model:
             list_vaccine_statuses[idx] = vaccine_statuses[idx]
             list_xcoords[idx] = xcoords[idx]
             list_ycoords[idx] = ycoords[idx]
+            list_quarantined[idx] = quarantined[idx]
         
         df_popn = pd.DataFrame( {
             'ID': list_ids, 
@@ -1246,6 +1263,7 @@ class Model:
             'vaccine_status' : list_vaccine_statuses,
             'xcoords' : list_xcoords,
             'ycoords' : list_ycoords,
+            'quarantined' : list_quarantined,
         })
         
         return df_popn

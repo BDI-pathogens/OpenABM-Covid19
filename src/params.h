@@ -317,7 +317,7 @@ int set_app_users( model*, long*, long, int );
 int get_app_users( model*, long* );
 int get_app_user_by_index(model*, int);
 
-long get_individuals( model *, long *, int *, int *, int * , long *, int *, short *, float *, float *);
+long get_individuals( model *, long *, int *, int *, int * , long *, int *, short *, float *, float *, int *);
 
 void update_work_intervention_state(model *pmodel, int value);
 void update_household_intervention_state(model *pmodel, int value);
