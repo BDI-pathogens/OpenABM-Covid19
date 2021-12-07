@@ -167,6 +167,7 @@ void return_interactions( model* );
 network* add_new_network( model*, long, int );
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );
+void build_random_spatial_network( model* );
 void build_random_network( model*, network*, long, long* );
 void build_random_network_default( model* );
 void build_random_network_user( model*, network* );
