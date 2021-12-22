@@ -10,14 +10,14 @@
 
 node* initialise_node( long data )
 {
-	node* node = malloc(sizeof(node));
+	node* n = (node*) malloc(sizeof(node));
 
-	if (!node) 
+	if (!n) 
 		return NULL;
 
-	node->data = data;
-	node->next = NULL;
-	return node;
+	n->data = data;
+	n->next = NULL;
+	return n;
 }
 
 void initialise_list( list *list )

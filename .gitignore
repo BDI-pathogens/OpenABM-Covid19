@@ -115,3 +115,7 @@ examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
 /Debug/
 /.pytest_cache/
+
+# Temporary ignores until dev finishes
+/stats
+/gcem

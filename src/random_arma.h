@@ -13,18 +13,23 @@
 /******************************* Includes *******************************/
 /************************************************************************/
 
-
 // TODO
+#include <random>
 // #include <armadillo>
+#include "stats.hpp"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /************************************************************************/
 /****************************** Structures  *****************************/
 /************************************************************************/
 
 struct generator{
-  // TODO
-  //arma::mat rng; // use mat::randu() et al
-  int rng;
+  // Use C++ std::mt19937_64 with seed of 0 by default (5489u)
+  std::mt19937_64 rng;
 };
 
 /************************************************************************/
@@ -32,5 +37,9 @@ struct generator{
 /************************************************************************/
 
 // ARMA specific definitions only (internal API, so likely none)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RANDOM_ARMA_H_ */

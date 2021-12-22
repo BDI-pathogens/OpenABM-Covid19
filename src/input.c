@@ -684,7 +684,7 @@ void write_quarantine_reasons(model *model, parameters *params)
 					index_token = index_token->last_index;
 
 				for(jdx = 0; jdx < n; jdx++){
-					if( index_token->individual->idx == members[jdx] ){
+					if( index_token->person->idx == members[jdx] ){
 						index_from_household = TRUE;
 					}
 				}
@@ -702,9 +702,9 @@ void write_quarantine_reasons(model *model, parameters *params)
 					if(index_token->index_status == POSITIVE_TEST)
 						quarantine_reasons[QR_TRACE_POSITIVE] = TRUE;
 				}
-				index_id = index_token->individual->idx;
-				index_true_status = index_token->individual->status;
-				index_house_no = index_token->individual->house_no;
+				index_id = index_token->person->idx;
+				index_true_status = index_token->person->status;
+				index_house_no = index_token->person->house_no;
 			}
 			
 			// Resolve multiple reasons for quarantine into one reason
@@ -855,7 +855,7 @@ void print_interactions_averages(model *model, int header)
 		inter = indiv->interactions[day_idx];
 		for( jdx = 0; jdx < n_int; jdx++ )
 		{
-			assort[ indiv->age_type][inter->individual->age_type]++;
+			assort[ indiv->age_type][inter->person->age_type]++;
 			inter = inter->next;
 		}
 
@@ -940,9 +940,9 @@ void read_household_demographics_file( parameters *params)
 
 void set_up_reference_household_memory(parameters *params){
 	long hdx;
-	params->REFERENCE_HOUSEHOLDS = calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
+	params->REFERENCE_HOUSEHOLDS = (int**) calloc(params->N_REFERENCE_HOUSEHOLDS, sizeof(int*));
 	for(hdx = 0; hdx < params->N_REFERENCE_HOUSEHOLDS; hdx++){
-		params->REFERENCE_HOUSEHOLDS[hdx] = calloc(N_AGE_GROUPS, sizeof(int));
+		params->REFERENCE_HOUSEHOLDS[hdx] = (int*) calloc(N_AGE_GROUPS, sizeof(int));
 	}
 }
 
@@ -992,11 +992,11 @@ void write_interactions( model *model )
 					indiv->occupation_network,
 					inter->type,
 					inter->network_id,
-					inter->individual->idx,
-					inter->individual->age_group,
-					inter->individual->worker_type,
-					inter->individual->house_no,
-					inter->individual->occupation_network,
+					inter->person->idx,
+					inter->person->age_group,
+					inter->person->worker_type,
+					inter->person->house_no,
+					inter->person->occupation_network,
 					inter->traceable,
 					inter->manual_traceable,
 					time
@@ -1154,8 +1154,8 @@ void get_transmissions(
 				time_recovered[ idx ] = infection_event->times[RECOVERED];
 				time_susceptible[ idx ] = infection_event->times[SUSCEPTIBLE];
 				is_case[ idx ] = infection_event->is_case;
-				strain_idx[ idx ] = infection_event->strain->idx;
-				transmission_multiplier[ idx ] = infection_event->strain->transmission_multiplier;
+				strain_idx[ idx ] = infection_event->with_strain->idx;
+				transmission_multiplier[ idx ] = infection_event->with_strain->transmission_multiplier;
 				expected_hospitalisation[ idx ] = infection_event->expected_hospitalisation;
 				idx++;
 			}
@@ -1293,8 +1293,8 @@ void write_transmissions( model *model )
 					infection_event->times[RECOVERED],
 					infection_event->times[SUSCEPTIBLE],
 					infection_event->is_case,
-					infection_event->strain->idx,
-					infection_event->strain->transmission_multiplier,
+					infection_event->with_strain->idx,
+					infection_event->with_strain->transmission_multiplier,
 					infection_event->expected_hospitalisation
 				);
 			infection_event = infection_event->next;
@@ -1339,7 +1339,7 @@ void write_trace_tokens( model *model )
 		{
 			event      = next_event;
 			next_event = event->next;
-			indiv      = event->individual;
+			indiv      = event->person;
 
 			token = indiv->index_trace_token;
 			if( token == NULL )
@@ -1357,10 +1357,10 @@ void write_trace_tokens( model *model )
 					indiv->status,
 					token->contact_time,
 					ifelse( token->traced_from != NULL, token->traced_from->idx, -1 ),
-					token->individual->idx,
-					token->individual->status,
-					ifelse( token->individual->status > 0, token->individual->infection_events->infector->idx, -1 ),
-					time_infected( token->individual )
+					token->person->idx,
+					token->person->status,
+					ifelse( token->person->status > 0, token->person->infection_events->infector->idx, -1 ),
+					time_infected( token->person )
 				);
 				token = token->next_index;
 			}
@@ -1413,7 +1413,7 @@ void write_trace_tokens_ts( model *model, int initialise )
 		{
 			event      = next_event;
 			next_event = event->next;
-			indiv      = event->individual;
+			indiv      = event->person;
 			time_index = model->time + day -  max_quarantine_length;
 
 			n_traced   = 0;
@@ -1428,7 +1428,7 @@ void write_trace_tokens_ts( model *model, int initialise )
 			token = token->next_index;
 			while( token != NULL )
 			{
-				contact = token->individual;
+				contact = token->person;
 				n_traced++;
 				if( contact->status > 0 )
 					n_infected++;
@@ -1674,12 +1674,12 @@ void write_hospital_interactions( model *model )
                                 indiv->hospital_state,
                                 indiv->status,
                                 inter->type,
-                                inter->individual->idx,
-                                inter->individual->worker_type,
-                                inter->individual->ward_type,
-                                inter->individual->ward_idx,
-                                inter->individual->hospital_state,
-                                inter->individual->status
+                                inter->person->idx,
+                                inter->person->worker_type,
+                                inter->person->ward_type,
+                                inter->person->ward_idx,
+                                inter->person->hospital_state,
+                                inter->person->status
                                 );
                         inter = inter->next;
                     }

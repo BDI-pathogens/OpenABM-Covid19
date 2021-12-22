@@ -33,7 +33,7 @@ model* new_model( parameters *params )
 	int type;
 
 	model *model_ptr = NULL;
-	model_ptr = calloc( 1, sizeof( model ) );
+	model_ptr = (model*) calloc( 1, sizeof( model ) );
 	if( model_ptr == NULL )
 	    print_exit("calloc to model failed\n");
 	
@@ -60,7 +60,7 @@ model* new_model( parameters *params )
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
-	model_ptr->event_lists = calloc( N_EVENT_TYPES, sizeof( event_list ) );
+	model_ptr->event_lists = (event_list*) calloc( N_EVENT_TYPES, sizeof( event_list ) );
 	for( type = 0; type < N_EVENT_TYPES;  type++ )
 		set_up_event_list( model_ptr, params, type );
 
@@ -120,7 +120,7 @@ void destroy_model( model *model )
 	}
 	free( model->interaction_blocks );
 
-    next_event_block = model->event_block;
+    next_event_block = model->evt_block;
 	while( next_event_block != NULL )
 	{
 		event_block = next_event_block;
@@ -160,7 +160,7 @@ void destroy_model( model *model )
     free( model->household_directory->n_jdx );
     free ( model-> household_directory );
 
-    next_trace_token_block = model->trace_token_block;
+    next_trace_token_block = model->tt_block;
 	while( next_trace_token_block != NULL )
 	{
 		trace_token_block = next_trace_token_block;
@@ -198,18 +198,18 @@ void set_up_event_list( model *model, parameters *params, int type )
 	event_list *list = &(model->event_lists[ type ]);
 	list->type       = type;
 
-	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
-	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
-	list->infectious_curve = calloc( N_INTERACTION_TYPES, sizeof(double*) );
-	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
-	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
-	list->events		   = calloc( MAX_TIME, sizeof(event*));
+	list->n_daily          = (long*) calloc( MAX_TIME, sizeof(long) );
+	list->n_daily_current  = (long*) calloc( MAX_TIME, sizeof(long) );
+	list->infectious_curve = (double**) calloc( N_INTERACTION_TYPES, sizeof(double*) );
+	list->n_total_by_age   = (long*) calloc( N_AGE_GROUPS, sizeof(long) );
+	list->n_daily_by_age   = (long**) calloc( MAX_TIME, sizeof(long*) );
+	list->events		   = (event**) calloc( MAX_TIME, sizeof(event*));
 
 	list->n_current = 0;
 	list->n_total   = 0;
 	for( day = 0; day < MAX_TIME; day++ )
 	{
-		list->n_daily_by_age[day] = calloc( N_AGE_GROUPS, sizeof(long) );
+		list->n_daily_by_age[day] = (long*) calloc( N_AGE_GROUPS, sizeof(long) );
 		for( age = 0; age < N_AGE_GROUPS; age++ )
 			list->n_daily_by_age[day][age] = 0;
 
@@ -217,7 +217,7 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily_current[day] = 0;
 	}
 	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
-		list->infectious_curve[idx] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+		list->infectious_curve[idx] = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
 
 /*****************************************************************************************
@@ -272,14 +272,14 @@ void set_up_networks( model *model )
 	double mean_interactions  = 0;
 
 	model->n_networks = 0;
-	model->all_networks = calloc( MAX_N_NETWORKS, sizeof(network*) );
+	model->all_networks = (network**) calloc( MAX_N_NETWORKS, sizeof(network*) );
 
 	for( idx = 0; idx < N_AGE_TYPES; idx++ )
 		mean_interactions = max( mean_interactions, model->params->mean_random_interactions[idx] );
 	n_random_interactions = (long) round( n_total * ( 1.0 + mean_interactions ) );
 
 	model->random_network        = add_new_network( model, n_total, RANDOM );
-	model->random_network->edges = calloc( n_random_interactions, sizeof( edge ) );
+	model->random_network->edges = (edge*) calloc( n_random_interactions, sizeof( edge ) );
 	model->random_network->skip_hospitalised = FALSE;
 	model->random_network->skip_quarantined  = FALSE;
 	model->random_network->construction      = NETWORK_CONSTRUCTION_RANDOM_DEFAULT;
@@ -359,11 +359,11 @@ void set_up_occupation_network( model *model )
 	double n_interactions;
 	parameters *params = model->params;
 
-    model->occupation_network = calloc( model->n_occupation_networks, sizeof( network* ) );
+    model->occupation_network = (network**) calloc( model->n_occupation_networks, sizeof( network* ) );
     for( int network = 0; network < model->n_occupation_networks; network++ )
     {
         n_people = 0;
-        people = calloc( params->n_total, sizeof(long) );
+        people = (long*) calloc( params->n_total, sizeof(long) );
         for ( idx = 0; idx < params->n_total; idx++ )
             if (model->population[idx].occupation_network == network)
                 people[n_people++] = idx;
@@ -403,7 +403,7 @@ void set_up_occupation_network( model *model )
 ******************************************************************************************/
 void set_up_events( model *model )
 {
-	model->event_block = NULL;
+	model->evt_block = NULL;
 	model->next_event  = NULL;
 	add_event_block( model, 1.0 );
 }
@@ -420,11 +420,11 @@ void add_event_block( model *model, float events_per_person )
 	event_block *block;
 
 	// add a new block
-	block = calloc( 1, sizeof( event_block ) );
-	block->next = model->event_block;
-	model->event_block = block;
+	block = (event_block*) calloc( 1, sizeof( event_block ) );
+	block->next = model->evt_block;
+	model->evt_block = block;
 
-	block->events     = calloc( n_events, sizeof( event ) );
+	block->events     = (event*) calloc( n_events, sizeof( event ) );
 	model->next_event = &(block->events[0]);
 	for( idx = 1; idx < n_events; idx++ )
 	{
@@ -445,7 +445,7 @@ void set_up_population( model *model )
 	parameters *params = model->params;
 	long idx;
 
-	model->population = calloc( params->n_total, sizeof( individual ) );
+	model->population = (individual*) calloc( params->n_total, sizeof( individual ) );
 	for( idx = 0; idx < params->n_total; idx++ )
 		initialize_individual( &(model->population[idx]), params, idx );
 }
@@ -501,8 +501,8 @@ void add_interaction_block( model *model, long n_interactions )
 
 	for( ddx = 0; ddx < model->params->days_of_interactions; ddx++ )
 	{
-		block = calloc( 1, sizeof( interaction_block ) );
-		block->interactions = calloc( n_interactions, sizeof( interaction ) );
+		block = (interaction_block*) calloc( 1, sizeof( interaction_block ) );
+		block->interactions = (interaction*) calloc( n_interactions, sizeof( interaction ) );
 		block->n_interactions = n_interactions;
 		block->idx = 0;
 
@@ -527,7 +527,7 @@ void set_up_interactions( model *model )
 
 	n_daily_interactions = (long) round( 2 * 1.1 * estimate_total_interactions( model ) );
 
-	model->interaction_blocks = calloc( params->days_of_interactions, sizeof( interaction_block* ) );
+	model->interaction_blocks = (interaction_block**) calloc( params->days_of_interactions, sizeof( interaction_block* ) );
 	add_interaction_block( model, n_daily_interactions );
 	model->interaction_day_idx   = 0;
 
@@ -536,7 +536,7 @@ void set_up_interactions( model *model )
 	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
 		n_random_interactions += model->population[ indiv_idx ].random_interactions;
 
-	model->possible_interactions = calloc( ceil( n_random_interactions * 1.1 ), sizeof( long ) );
+	model->possible_interactions = (long*) calloc( ceil( n_random_interactions * 1.1 ), sizeof( long ) );
 	idx = 0;
 	for( indiv_idx = 0; indiv_idx < params->n_total; indiv_idx++ )
 	{
@@ -626,7 +626,7 @@ event* add_individual_to_event_list(
 {
 	event_list *list    = &(model->event_lists[ type ]);
 	event *event        = new_event( model );
-	event->individual   = indiv;
+	event->person   = indiv;
 	event->type         = type;
 	event->time         = time;
 	event->info  = info;
@@ -726,14 +726,14 @@ void update_event_list_counters( model *model, int type )
 void set_up_strains( model *model )
 {
 	int max_n_strains = model->params->max_n_strains;
-	model->strains = calloc( max_n_strains, sizeof( strain ) );
+	model->strains = (strain*) calloc( max_n_strains, sizeof( strain ) );
 
 	float** cross_immunity;
 	int jdx;
-	cross_immunity = calloc( max_n_strains, sizeof(float *) );
+	cross_immunity = (float**) calloc( max_n_strains, sizeof(float *) );
 	for( int idx = 0; idx < max_n_strains; idx++)
 	{
-		cross_immunity[idx] 		= calloc( max_n_strains, sizeof(float) );
+		cross_immunity[idx] 		= (float*) calloc( max_n_strains, sizeof(float) );
 		for( jdx = 0; jdx < max_n_strains; jdx++)
 			cross_immunity[idx][jdx] 	= 1; // set complete cross-immunity
 		model->strains[idx].idx 	= -1; // if idx = -1, strain is uninitialised
@@ -752,7 +752,7 @@ void set_up_seed_infection( model *model )
 	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
-	double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *hospitalised_fraction = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
 
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
@@ -927,7 +927,7 @@ void add_interactions_from_network(
 		inter1->network_id = network->network_id;
 		inter1->traceable  = UNKNOWN;
 		inter1->manual_traceable  = UNKNOWN;
-		inter1->individual = indiv2;
+		inter1->person = indiv2;
 		inter1->next       = indiv1->interactions[ day ];
 		indiv1->interactions[ day ] = inter1;
 		indiv1->n_interactions[ day ]++;
@@ -936,7 +936,7 @@ void add_interactions_from_network(
 		inter2->network_id = network->network_id;
 		inter2->traceable  = UNKNOWN;
 		inter2->manual_traceable  = UNKNOWN;
-		inter2->individual = indiv1;
+		inter2->person = indiv1;
 		inter2->next       = indiv2->interactions[ day ];
 		indiv2->interactions[ day ] = inter2;
 		indiv2->n_interactions[ day ]++;
@@ -1022,7 +1022,7 @@ void transition_events(
 	{
 		event      = next_event;
 		next_event = event->next;
-		indiv      = event->individual;
+		indiv      = event->person;
 		transition_func( model_ptr, indiv );
 
 		if( remove_event )
@@ -1053,7 +1053,7 @@ void transition_events_info(
 	{
 		event      = next_event;
 		next_event = event->next;
-		indiv      = event->individual;
+		indiv      = event->person;
 		transition_func( model_ptr, indiv, event->info );
 
 		if( remove_event )
@@ -1075,7 +1075,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 	individual *indiv;
 
 	//Initialise hospitals.
-	model->hospitals = calloc( model->params->n_hospitals, sizeof(hospital) );
+	model->hospitals = (hospital*) calloc( model->params->n_hospitals, sizeof(hospital) );
 	for( idx = 0; idx < model->params->n_hospitals; idx++ )
 		initialise_hospital( &(model->hospitals[idx]), model->params, idx );
 
@@ -1156,7 +1156,7 @@ int add_user_network(
 	}
 
 	user_network = add_new_network( model, model->params->n_total, type );
-	user_network->edges = calloc(n_edges, sizeof(edge));
+	user_network->edges = (edge*) calloc(n_edges, sizeof(edge));
 	user_network->n_edges = n_edges;
 	user_network->skip_hospitalised = skip_hospitalised;
 	user_network->skip_quarantined  = skip_quarantined;
@@ -1237,8 +1237,8 @@ int add_user_network_random(
 
 	// set on the people and the number of interactions
 	user_network->opt_n_indiv   = n_indiv;
-	user_network->opt_pdx_array = calloc( n_indiv, sizeof(long));
-	user_network->opt_int_array = calloc( n_indiv, sizeof(int));
+	user_network->opt_pdx_array = (long*) calloc( n_indiv, sizeof(long));
+	user_network->opt_int_array = (int*) calloc( n_indiv, sizeof(int));
 	total_interactions = 0;
 	for( idx = 0; idx < n_indiv; idx++ )
 	{
@@ -1251,9 +1251,9 @@ int add_user_network_random(
 	n_edges = ceil( total_interactions * 0.5);
 	user_network->n_edges        = n_edges;
 	user_network->n_vertices     = n_indiv;
-	user_network->edges          = calloc( n_edges, sizeof( edge ) );
+	user_network->edges          = (edge*) calloc( n_edges, sizeof( edge ) );
 	user_network->opt_long       = total_interactions;
-	user_network->opt_long_array = calloc( total_interactions, sizeof( long ) );
+	user_network->opt_long_array = (long*) calloc( total_interactions, sizeof( long ) );
 
 	// add to lust of networks and allocate memory for the interactions
 	user_network->next_network = model->user_network;

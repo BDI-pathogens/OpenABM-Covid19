@@ -9,11 +9,19 @@
 #ifndef RANDOM_H_
 #define RANDOM_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // definitions - provided to implementations
 struct incomplete_gamma_p_params { long n; double percentile; };
 
 // FWD DECLS - filled out by implementations
 typedef struct generator generator;
+
+#ifdef __cplusplus
+}
+#endif
 
 /************************************************************************/
 /******************************* Includes *******************************/
@@ -23,6 +31,11 @@ typedef struct generator generator;
 #include "random_arma.h"
 #else
 #include "random_gsl.h"
+#endif
+
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /************************************************************************/
@@ -66,5 +79,9 @@ double sf_gamma_inc_P( double a, double x );
 // Utility functions abstracted away to random library
 double incomplete_gamma_p( double, void *params );
 double inv_incomplete_gamma_p( double, long );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RANDOM_H_ */

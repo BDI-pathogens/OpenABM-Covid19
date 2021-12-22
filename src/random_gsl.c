@@ -12,6 +12,11 @@ void rng_initialise() {
   gsl_rng_env_setup();
 }
 
+/*
+ * From here: https://www.gnu.org/software/gsl/doc/html/rng.html#c.gsl_rng_env_setup
+ * Note: "If you don’t specify a generator for GSL_RNG_TYPE then gsl_rng_mt19937 
+ * is used as the default. The initial value of gsl_rng_default_seed is zero."
+ */
 struct generator * rng_alloc() {
   struct generator * gen = (struct generator*)malloc( sizeof (struct generator ) );
   if (gen) {

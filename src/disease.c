@@ -33,9 +33,9 @@ void set_up_transition_times( model *model )
 	int idx;
 	int **transitions;
 
-	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+	model->transition_time_distributions = (int**) calloc( N_TRANSITION_TYPES, sizeof( int*) );
 	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		model->transition_time_distributions[idx] = calloc( N_DRAW_LIST, sizeof( int ) );
+		model->transition_time_distributions[idx] = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
 	transitions = model->transition_time_distributions;
 
 	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
@@ -192,7 +192,7 @@ void transmit_virus_by_type(
 		{
 			event      = next_event;
 			next_event = event->next;
-			infector   = event->individual;
+			infector   = event->person;
 
 			t_infect = model->time - time_infected_infection_event( infector->infection_events );
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
@@ -202,36 +202,36 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx 	  = infector->infection_events->strain->idx;
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->with_strain->transmission_multiplier;
+				strain_idx 	  = infector->infection_events->with_strain->idx;
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( !rebuild_networks )
 					{
-						if( infector->house_no != interaction->individual->house_no &&
-							( infector->quarantined || interaction->individual->quarantined ) )
+						if( infector->house_no != interaction->person->house_no &&
+							( infector->quarantined || interaction->person->quarantined ) )
 						{
 							interaction = interaction->next;
 							continue;
 						}
 					}
 
-					if( interaction->individual->status == SUSCEPTIBLE )
+					if( interaction->person->status == SUSCEPTIBLE )
 					{
-						if( immune_full( interaction->individual, strain_idx ) ) {
+						if( immune_full( interaction->person, strain_idx ) ) {
 							interaction = interaction->next;
 							continue;
 						}
 
 						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier;
 						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult * network_mult;
-						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
+						interaction->person->hazard[ strain_idx ] -= hazard_rate;
 
-						if( interaction->individual->hazard[ strain_idx ] < 0 )
+						if( interaction->person->hazard[ strain_idx ] < 0 )
 						{
-							new_infection( model, interaction->individual, infector, interaction->network_id, infector->infection_events->strain );
-							interaction->individual->infection_events->infector_network = interaction->type;
+							new_infection( model, interaction->person, infector, interaction->network_id, infector->infection_events->with_strain );
+							interaction->person->infection_events->infector_network = interaction->type;
 						}
 					}
 					interaction = interaction->next;
@@ -410,7 +410,7 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( immune_to_severe( indiv, strain->idx ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -534,7 +534,7 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-	int strain_idx = indiv->infection_events->strain->idx;
+	int strain_idx = indiv->infection_events->with_strain->idx;
 	int time_susceptible, complete_immunity;
 
 	if( model->params->hospital_on )
@@ -657,7 +657,7 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 	int day;
 	double expected_infections = 0;
 	long actual_infections     = n_newly_infected( model, time );
-	double *generation_dist    = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	double *generation_dist    = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 
 	gamma_rate_curve( generation_dist, MAX_INFECTIOUS_PERIOD, model->params->mean_infectious_period, model->params->sd_infectious_period, 1);
 

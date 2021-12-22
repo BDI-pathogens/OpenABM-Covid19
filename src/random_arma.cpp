@@ -2,6 +2,7 @@
 #include "random.h"
 
 // TODO
+#include "stats.hpp"
 // #include <armadillo>
 
 
@@ -10,40 +11,31 @@ void rng_initialise() {
 }
 
 struct generator * rng_alloc() {
-  struct generator * gen = (struct generator*)malloc( sizeof (struct generator ) );
-  if (gen) {
-    // TODO
-    gen->rng = NULL;
-  }
-  return gen;
+  return new generator; // C++ allocation
 }
 
 void rng_free( generator * gen ) {
   if (gen) {
-    // TODO
-    // gsl_rng_free( gen->rng );
-    free (gen);
+    delete (gen); // C++ deallocation
   }
 }
 
 void rng_set( generator * gen, long seed ) {
-  // TODO
+  gen->rng.seed(seed);
 }
 
 
 double rng_uniform( generator * gen) {
-  // TODO
-  return 0;
+  // TODO ensure 0.0 and 1.0 means <double,double>
+  return stats::runif( 0.0, 1.0, gen->rng );
 }
 
 int rng_uniform_int( generator * gen, long p ) {
-  // TODO
-  return 0;
+  return stats::runif( 0, 1, gen->rng );
 }
 
 unsigned int ran_bernoulli( generator * gen, double p ) {
-  // TODO
-  return 0;
+  return static_cast<unsigned int>(stats::rbern( p, gen->rng ));
 }
 
 double ran_gamma( generator * gen, double a, double b ) {

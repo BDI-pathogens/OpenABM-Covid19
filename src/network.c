@@ -20,7 +20,7 @@
 network* create_network( long n_total, int type )
 {	
 	network *network_ptr = NULL;
-	network_ptr = calloc( 1, sizeof( network ) );
+	network_ptr = (network*) calloc( 1, sizeof( network ) );
 	if( network_ptr == NULL )
     	print_exit("calloc to network failed\n");
 
@@ -69,13 +69,13 @@ void build_watts_strogatz_network(
 
 	// Allocate memory (needed for large N)
 	long** edge_mat;
-	edge_mat = calloc( N, sizeof(long *) );
+	edge_mat = (long**) calloc( N, sizeof(long *) );
 	for(i = 0; i < N; i++)
-		edge_mat[i] = calloc( ceil( k*10 ), sizeof(long) );
+		edge_mat[i] = (long*) calloc( ceil( k*10 ), sizeof(long) );
 	
 	// Degree for each individual (need to store a copy during the first step
-	long* n_edges_arr      = calloc( N, sizeof(long) );
-	long* n_edges_arr_init = calloc( N, sizeof(long) );
+	long* n_edges_arr      = (long*) calloc( N, sizeof(long) );
+	long* n_edges_arr_init = (long*) calloc( N, sizeof(long) );
 
 	// Step 1: Set up random lattice
 	// start by getting the correct number interactions but only mark only the connections to the right
@@ -138,10 +138,10 @@ void build_watts_strogatz_network(
 	network->n_edges = n_edges/2;
 	
 	// Form array of total edges (i.e. network->edges)
-	network->edges = calloc(n_edges, sizeof(edge));
+	network->edges = (edge*) calloc(n_edges, sizeof(edge));
 
 	// randomise the order nodes are put on the lattice if appropriate
-	long* node_list = calloc(N, sizeof(long));
+	long* node_list = (long*) calloc(N, sizeof(long));
 	for( i = 0; i < N; i++ )
 		node_list[i] = i;
 	if( randomise_nodes )
