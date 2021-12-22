@@ -1,6 +1,9 @@
 # Mac-related files
 .DS_Store
 
+# Visual studio code related files
+.vscode
+
 # File associated with configure
 config.log
 config.status
@@ -23,6 +26,7 @@ __pycache__
 .mypy_cache/
 **/*.egg-info
 *.pkl
+tests/*.pyc
 
 # Eclipse-related files
 .project

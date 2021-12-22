@@ -8,6 +8,7 @@
 #include "individual.h"
 #include "utilities.h"
 #include "constant.h"
+#include "random.h"
 #include "params.h"
 #include "network.h"
 #include "disease.h"
@@ -24,7 +25,7 @@
 *  Description: Builds a new model object from a parameters object and returns a
 *  				pointer to it.
 *  				 1. Creates memory for it
-*  				 2. Initialises the gsl random numbers generator
+*  				 2. Initialises the random numbers generator
 *  Returns:		pointer to model
 ******************************************************************************************/
 model* new_model( parameters *params )
@@ -53,9 +54,9 @@ model* new_model( parameters *params )
         model_ptr->n_occupation_networks = params->occupation_network_table->n_networks;
     }
 
-    gsl_rng_env_setup();
-    rng = gsl_rng_alloc ( gsl_rng_default);
-    gsl_rng_set( rng, params->rng_seed );
+    
+    rng = rng_alloc ();
+    rng_set( rng, params->rng_seed );
 
 	update_intervention_policy( model_ptr, model_ptr->time );
 
@@ -592,7 +593,7 @@ void flu_infections( model *model )
 
 	for( idx = 0; idx < n_infected; idx++ )
 	{
-		pdx   = gsl_rng_uniform_int( rng, model->params->n_total );
+		pdx   = rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
 		if( is_in_hospital( indiv ) || indiv->status == DEATH )
@@ -761,7 +762,7 @@ void set_up_seed_infection( model *model )
 
 	while( idx < params->n_seed_infection )
 	{
-		person = gsl_rng_uniform_int( rng, params->n_total );
+		person = rng_uniform_int( rng, params->n_total );
 		indiv  = &(model->population[ person ]);
 
 		if( time_infected( indiv ) != NO_EVENT )
@@ -787,7 +788,7 @@ void build_random_network( model *model, network *network, long n_pos, long* int
 	if( ( n_pos == 0 ) || ( network->daily_fraction < 1e-9 ) )
 		return;
 
-	gsl_ran_shuffle( rng, interactions, n_pos, sizeof(long) );
+	ran_shuffle( rng, interactions, n_pos, sizeof(long) );
 
 	network->n_edges = 0;
 	idx  = 0;
@@ -917,7 +918,7 @@ void add_interactions_from_network(
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
-		if( prob_drop > 0 && gsl_ran_bernoulli( rng, prob_drop ) )
+		if( prob_drop > 0 && ran_bernoulli( rng, prob_drop ) )
 			continue;
 
 		inter1 = &(inter_block->interactions[inter_idx++]);
@@ -1085,7 +1086,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 	n_total_doctors += model->params->n_hcw_per_ward[COVID_ICU][DOCTOR] * model->params->n_wards[COVID_ICU];
 	while( idx < n_total_doctors )
 	{
-		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+		pdx = rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
 		if( !individual_eligible_to_become_healthcare_worker( indiv ) )
@@ -1104,7 +1105,7 @@ void set_up_healthcare_workers_and_hospitals( model *model)
 	n_total_nurses += model->params->n_hcw_per_ward[COVID_ICU][NURSE] * model->params->n_wards[COVID_ICU];
 	while( idx < n_total_nurses )
 	{
-		pdx = gsl_rng_uniform_int( rng, model->params->n_total );
+		pdx = rng_uniform_int( rng, model->params->n_total );
 		indiv = &(model->population[pdx]);
 
 		if( !individual_eligible_to_become_healthcare_worker( indiv ) )

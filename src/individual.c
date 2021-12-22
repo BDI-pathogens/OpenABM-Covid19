@@ -68,7 +68,7 @@ void initialize_individual(
 	{
 		float b = sigma_x * sigma_x;
 		float a = 1 /b;
-		indiv->infectiousness_multiplier = gsl_ran_gamma( rng, a, b );
+		indiv->infectiousness_multiplier = ran_gamma( rng, a, b );
 	}
 	else
 	{
@@ -87,7 +87,7 @@ void initialize_individual(
 	}
 
 	indiv->vaccine_status = NO_VACCINE;
-	indiv->compliance_factor = gsl_rng_uniform( rng );
+	indiv->compliance_factor = rng_uniform( rng );
 }
 
 /*****************************************************************************************
@@ -154,7 +154,7 @@ void initialize_hazard(
 	for( int idx = 0; idx < params->max_n_strains; idx++ )
 		if( indiv->immune_full[ idx ] == current_time || current_time == 0 )
 		{
-			indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+			indiv->hazard[idx] = ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 			indiv->immune_full[ idx ] = NO_IMMUNITY;
 		}
 }

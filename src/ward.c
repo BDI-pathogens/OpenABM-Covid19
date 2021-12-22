@@ -148,7 +148,7 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
         }
 
         //shuffle list of all interactions
-        gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
+        ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
 
         idx = 0;
         hdx = 0;

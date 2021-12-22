@@ -81,7 +81,7 @@ void build_watts_strogatz_network(
 	// start by getting the correct number interactions but only mark only the connections to the right
 	for(i = 0; i < N; i++)
 	{
-		k_used = k_right + gsl_ran_bernoulli( rng, p_right );
+		k_used = k_right + ran_bernoulli( rng, p_right );
 		n_edges_arr[i]      = k_used;
 		n_edges_arr_init[i] = k_used;
 
@@ -104,16 +104,16 @@ void build_watts_strogatz_network(
 	for(i = 0; i < N; i++){
 		for(j = 0; j < n_edges_arr[i]; j++){
 
-			u = gsl_rng_uniform(rng);
+			u = rng_uniform(rng);
 			
 			if(u < p_rewire){
 				
 				// Draw a new contact (long between 0 and N-1)
-				new_contact =  gsl_rng_uniform_int(rng, N);
+				new_contact =  rng_uniform_int(rng, N);
 				
 				// Check if new_connection is already connected (or is self)
 				while(check_member_or_self(new_contact, i, edge_mat[i], n_edges_arr[i])){
-					new_contact = gsl_rng_uniform_int(rng, N);
+					new_contact = rng_uniform_int(rng, N);
 				}
 
 				// Remove contact between person "i" and the original contact
@@ -145,7 +145,7 @@ void build_watts_strogatz_network(
 	for( i = 0; i < N; i++ )
 		node_list[i] = i;
 	if( randomise_nodes )
-		gsl_ran_shuffle( rng, node_list, N, sizeof(long) );
+		ran_shuffle( rng, node_list, N, sizeof(long) );
 
 	long idx = 0;
 	for(i = 0; i < N; i++)

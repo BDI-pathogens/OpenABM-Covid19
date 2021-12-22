@@ -30,10 +30,21 @@ else
 	SED_I=sed -i
 endif
 
-OBJS = src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
+ifndef USE_ARMA
+	OBJS_SCILIB = src/random_gsl.o
+	LFLAGS_SCILIB = -lgsl -lgslcblas
+	LDFLAGS_SCILIB = $(shell gsl-config --libs)
+	CFLAGS_SCILIB = $(shell gsl-config --cflags) 
+else
+	OBJS_SCILIB = src/random_arma.o
+	LFLAGS_SCILIB = -larmadillo
+	LDFLAGS_SCILIB = 
+	CFLAGS_SCILIB = 
+endif
 
-GSLFLAGS= -lgsl -lgslcblas -lm -O3
-LFLAGS = $(GSLFLAGS)
+OBJS = $(OBJS_SCILIB) src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
+
+LFLAGS = $(LFLAGS_SCILIB) -lm -O3
 
 # Name of executable
 _EXE = src/covid19ibm.exe
@@ -43,8 +54,8 @@ INC = /usr/local/include
 LIB = /usr/local/lib
 
 # Compilation options and libraries to be used
-CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(shell gsl-config --cflags) -O0
-LDFLAGS = -L$(LIB) $(shell gsl-config --libs)
+CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O0
+LDFLAGS = -L$(LIB) $(LDFLAGS_SCILIB)
 
 # Swig's input
 SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h

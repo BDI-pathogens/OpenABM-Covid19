@@ -67,7 +67,7 @@ void set_up_app_users( model *model )
 		for( idx = 0; idx < max_user; idx++ )
 			users[ idx ] = 1;
 
-		gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
+		ran_shuffle( rng, users, not_users, sizeof( int ) );
 
 		jdx   = 0;
 		for( idx = 0; idx < model->params->n_total; idx++ )
@@ -405,7 +405,7 @@ int number_of_traceable_interactions(model *model, individual *indiv)
 				if( contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+						inter->traceable = ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
                         contacts[ traceable_inter++ ] = contact->idx;
 				}
@@ -733,7 +733,7 @@ long intervention_vaccinate_age_group(
 void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 {
 	vaccine *vaccine = info;
-	float r_unif = gsl_rng_uniform( rng );
+	float r_unif = rng_uniform( rng );
 	short n_strains = model->params->max_n_strains;
 	short strain_idx;
 
@@ -814,12 +814,12 @@ void intervention_test_take( model *model, individual *indiv )
 		int symptomatic = ( time_symptomatic( indiv ) <= model->time ) & ( time_symptomatic( indiv ) >= max( model->time - model->params->test_sensitive_period, 0 ) );
 
 		if( ( symptomatic || time_infected >= model->params->test_insensitive_period ) && time_infected < model->params->test_sensitive_period )
-			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, model->params->test_sensitivity );
+			indiv->quarantine_test_result = ran_bernoulli( rng, model->params->test_sensitivity );
 		else
-			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
+			indiv->quarantine_test_result = ran_bernoulli( rng, 1 - model->params->test_specificity );
 	}
 	else
-		indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
+		indiv->quarantine_test_result = ran_bernoulli( rng, 1 - model->params->test_specificity );
 
 
 	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time, NULL );
@@ -929,14 +929,14 @@ void intervention_notify_contacts(
 				if( trace_type == DIGITAL_TRACE && contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+						inter->traceable = ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable == 1 )
 						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
 				}
 				else if( trace_type == MANUAL_TRACE )
 				{
 					if( inter->manual_traceable == UNKNOWN )
-						inter->manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
+						inter->manual_traceable = ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
 					if( inter->manual_traceable && model->manual_trace_notification_quota > 0 )
 					{
 						model->manual_trace_notification_quota--;

@@ -8,13 +8,11 @@
 #ifndef CONSTANT_H_
 #define CONSTANT_H_
 
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
-
 #define FALSE 0
 #define TRUE 1
 #define ERROR -1
+
+#include "random.h"
 
 enum EVENT_TYPES{
 	SUSCEPTIBLE,
@@ -239,7 +237,7 @@ enum IMMUNE_TYPES{
 #define NO_IMMUNITY -1
 #define ALL_STRAINS -1
 
-extern gsl_rng * rng;
+extern generator * rng;
 
 #endif /* CONSTANT_H_ */
 

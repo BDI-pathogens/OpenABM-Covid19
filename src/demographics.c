@@ -266,7 +266,7 @@ void generate_household_distribution( model *model )
 	n_households = 0;
 	for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 	{
-		sample       = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
+		sample       = rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
 		households[n_households++] = sample;
 		add_reference_household( population_total, sample, model->params->REFERENCE_HOUSEHOLDS);
 		household_total[ REFERENCE_HOUSEHOLD_SIZE[sample]]++;
@@ -287,7 +287,7 @@ void generate_household_distribution( model *model )
 
 		for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 		{
-			trial_samples[idx] = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
+			trial_samples[idx] = rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
 			add_reference_household( population_trial, trial_samples[idx], model->params->REFERENCE_HOUSEHOLDS );
 			household_trial[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
 		}

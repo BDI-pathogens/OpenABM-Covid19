@@ -6,6 +6,7 @@
  */
 
 #include "constant.h"
+#include "random.h"
 
 const int AGE_OCCUPATION_MAP[N_AGE_GROUPS] = {
 	PRIMARY_NETWORK,
@@ -104,4 +105,4 @@ const int NEWLY_INFECTED_STATES[N_NEWLY_INFECTED_STATES] = {
 	ASYMPTOMATIC,
 };
 
-gsl_rng * rng;
+generator * rng;

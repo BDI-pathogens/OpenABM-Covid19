@@ -307,7 +307,7 @@ long seed_infect_n_people(
 
 	for( idx = 0; idx < n_to_infect; idx++ )
 	{
-		pdx = gsl_rng_uniform_int( rng, n_total );
+		pdx = rng_uniform_int( rng, n_total );
 		n_infected += seed_infect_by_idx( model, pdx, strain_idx, network_id );
 	}
 
@@ -327,7 +327,7 @@ void new_infection(
 	strain *strain
 )
 {
-	double draw       = gsl_rng_uniform( rng );
+	double draw       = rng_uniform( rng );
 	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = model->params->mild_fraction[infected->age_group];
 
@@ -416,7 +416,7 @@ void transition_to_symptomatic( model *model, individual *indiv )
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 	} else
 	{
-		if( gsl_ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 		else
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -462,9 +462,9 @@ void transition_to_hospitalised( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 
-		if( gsl_ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
 		{
-			if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
+			if( ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
 				transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 			else
 				transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
@@ -499,7 +499,7 @@ void transition_to_critical( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 
-		if( gsl_ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 		else
 			transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
@@ -576,7 +576,7 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 	short complete_immunity = TRUE;
 	short sdx;
 	float *cross_immunity = model->cross_immunity[ strain_idx ];
-	float r_unif = gsl_rng_uniform( rng );
+	float r_unif = rng_uniform( rng );
 
 	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
 	{
