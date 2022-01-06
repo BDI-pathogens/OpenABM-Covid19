@@ -374,7 +374,7 @@ void new_infection_by_idx(
 	individual *infector = &(model->population[ infector_idx ]);
 	strain *strain = get_strain_by_id(model,strain_idx);
 
-	new_infection(model, infected, NULL, network_id, strain);
+	new_infection(model, infected, infector, network_id, strain);
 
 }
 
