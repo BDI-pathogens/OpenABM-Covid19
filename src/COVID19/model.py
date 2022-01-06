@@ -851,6 +851,19 @@ class Model:
             raise ModelParameterException( f"strain_idx out of range (0 <= strain_idx < self.c_model.n_initialized_strains)" )
        
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
+
+    def intervention_quarantine_until_by_idx(self, ID, trace_from, time, maxof, index_token = None, contact_time = 0, risk_score = 1):
+        
+        return covid19.intervention_quarantine_until_by_idx(
+            self.c_model,
+            ID,
+            trace_from,
+            time,
+            maxof,
+            index_token,
+            contact_time,
+            risk_score
+        )
     
 
     def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
@@ -1208,10 +1221,14 @@ class Model:
         house_ids = covid19.longArray(n_total)
         infection_counts = covid19.intArray(n_total)
         vaccine_statuses = covid19.shortArray(n_total)
+        xcoords = covid19.floatArray(n_total)
+        ycoords = covid19.floatArray(n_total)
+        quarantined = covid19.intArray(n_total)
         
         n_total = covid19.get_individuals(
             self.c_model, ids, statuses, age_groups, occupation_networks, 
-            house_ids, infection_counts, vaccine_statuses)
+            house_ids, infection_counts, vaccine_statuses, xcoords, ycoords,
+            quarantined)
         
         list_ids = [None]*n_total
         list_statuses = [None]*n_total
@@ -1220,6 +1237,9 @@ class Model:
         list_house_ids = [None]*n_total
         list_infection_counts = [None]*n_total
         list_vaccine_statuses = [None]*n_total
+        list_xcoords = [None]*n_total
+        list_ycoords = [None]*n_total
+        list_quarantined = [None]*n_total
         
         for idx in range(n_total):
             list_ids[idx] = ids[idx]
@@ -1229,6 +1249,9 @@ class Model:
             list_house_ids[idx] = house_ids[idx]
             list_infection_counts[idx] = infection_counts[idx]
             list_vaccine_statuses[idx] = vaccine_statuses[idx]
+            list_xcoords[idx] = xcoords[idx]
+            list_ycoords[idx] = ycoords[idx]
+            list_quarantined[idx] = quarantined[idx]
         
         df_popn = pd.DataFrame( {
             'ID': list_ids, 
@@ -1237,10 +1260,55 @@ class Model:
             'occupation_network': list_occupation_networks,
             'house_no': list_house_ids,
             'infection_count' : list_infection_counts,
-            'vaccine_status' : list_vaccine_statuses
+            'vaccine_status' : list_vaccine_statuses,
+            'xcoords' : list_xcoords,
+            'ycoords' : list_ycoords,
+            'quarantined' : list_quarantined,
         })
         
         return df_popn
+
+    def get_infection_event_by_idx(self,infected_idx):
+        """
+        Return dataframe of infection_event of individual with id idx
+        """
+
+        infector_idx   = covid19.longArray(1)
+        network_id   = covid19.intArray(1)
+        strain_idx   = covid19.longArray(1)
+        infected_idx_long = covid19.longArray(1)
+        infected_idx_long[0] = infected_idx
+        infector_idx[0] = -10
+        network_id[0] = -10
+        strain_idx[0] = -10
+        
+        covid19.get_infection_event_by_idx(self.c_model,infected_idx_long,infector_idx,network_id,strain_idx)
+        
+        return [infector_idx[0],network_id[0],strain_idx[0]]
+
+    def new_infection_by_idx(self, infected_idx, infector_idx, network_id, strain_idx=None):
+        return covid19.new_infection_by_idx_check_safe(self.c_model,infected_idx,infector_idx,network_id,strain_idx)
+
+    def assign_coordinates_individuals(self, df_coords ):
+        """
+        Calls C function assign_coordinates_individuals.
+        Takes pandas Dataframe with required columns 'ID','xcoords', and 'ycoords'
+        """
+        n_total = len(df_coords["ID"])
+        ids = covid19.longArray(n_total)
+        xcoords = covid19.floatArray(n_total)
+        ycoords = covid19.floatArray(n_total)
+
+        for idx in range(n_total):
+            ids[idx] = df_coords["ID"][idx]
+            xcoords[idx] = df_coords["xcoords"][idx]
+            ycoords[idx] = df_coords["ycoords"][idx]
+
+        covid19.assign_coordinates_individuals(self.c_model, n_total,ids ,xcoords ,ycoords )
+
+    def distance_individuals_by_idx(self,a,b):
+        return covid19.distance_individuals_by_idx(self.c_model,a,b)
+
     
     def _create(self):
         """
@@ -1464,3 +1532,6 @@ class Model:
 
     def print_individual(self, idx):
         covid19.print_individual(self.c_model, idx)
+
+    def add_individual_to_event_list_by_idx(self, type, idx, time, info=None):
+        covid19.add_individual_to_event_list_by_idx(self.c_model,type,idx,time,info)

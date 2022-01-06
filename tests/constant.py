@@ -163,6 +163,10 @@ class HOSPITAL_WARD_TYPES(Enum):
 NO_TEST = -2
 TEST_ORDERED = -1
 
+# Spatial intial co-ordinates, found in src/constant.h
+INITIAL_COORDINATE_X = 0.0
+INITIAL_COORDINATE_Y = 0.0
+
 # Construct the executable command
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"

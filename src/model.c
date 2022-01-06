@@ -464,6 +464,26 @@ void set_up_individual_hazard( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		assign_coordinates_individuals
+*  Description: assigns coordinates to individuals in indiv_ids list
+*  Returns:		void
+******************************************************************************************/
+void assign_coordinates_individuals(
+	model *model,
+	double n_indvs,
+	long *indiv_ids,
+	float *x,
+	float *y
+	)
+{
+	for( int idx = 0; idx < n_indvs; idx++ )
+	{
+		individual *indiv = &(model->population[indiv_ids[idx]]); // loop through the ids given
+		set_coordinates( indiv, x[idx], y[idx] );
+	}
+}
+
+/*****************************************************************************************
 *  Name:		estimate_total_interactions
 *  Description: estimates the total number of interactions from the networks
 *  Returns:		void
@@ -650,6 +670,32 @@ event* add_individual_to_event_list(
 		list->n_total_by_age[indiv->age_group]++;
 	}
 
+	return event;
+}
+
+/*****************************************************************************************
+*  Name:		add_indiv_to_event_list_by_idx
+*  Description: adds an individual to an event list at a particular time
+*
+*  Arguments:	list:	pointer to the event list //d this isn't an argument??
+*  				idx:	individual id
+*  				time:	time of the event (int)
+*  				model:	pointer to the model
+*  				info:   a pointer which can be passed to the transition function
+*
+*  Returns:		a pointer to the newly added event
+******************************************************************************************/
+event* add_individual_to_event_list_by_idx(
+	model *model,
+	int type,
+	int idx,
+	int time,
+	void *info
+)
+{
+	individual *indiv = &(model->population[ idx ]);
+	event *event = add_individual_to_event_list(model, type, indiv, time, info);
+	//d indiv->quarantine_event = event;
 	return event;
 }
 
@@ -875,6 +921,37 @@ void build_random_network_default( model *model )
 }
 
 /*****************************************************************************************
+*  Name:		build_random_spatial_network
+*  Description: Builds a new random network, using a spatial kernel of 1/r^2
+******************************************************************************************/
+void build_random_spatial_network( model *model )
+{
+	long idx = 0;
+	model->random_network->n_edges = 0;
+	//d for each person in network
+	for( long person = 0; person < model->params->n_total; person++ )
+	{
+		int connections =  0;
+		int connection_required = model->population[person].random_interactions/2;
+		//d Add connections. Divided by 2 as this is an approximation (floored)
+		//d Add connections until individuals # conncections is satisfied
+		//d prob connect any indicviaul is prop to distance between, e.g. more likely to connect close
+		while( connections < connection_required ) 
+		{
+			long person_connection = gsl_rng_uniform_int( rng, model->params->n_total ); //d chosen at random
+			float r = distance_individuals_by_idx(model,person,person_connection); //d Euclidean distance
+			if( pow(2,-2048*1024*r) ) //d p(join a to b) = 2^(8*d(a,b))
+			{
+				connections++;
+				model->random_network->edges[model->random_network->n_edges].id1 = person;
+				model->random_network->edges[model->random_network->n_edges].id2 = person_connection;
+				model->random_network->n_edges++;
+			}
+		}
+	}
+}
+
+/*****************************************************************************************
 *  Name:		add_interactions_from_network
 *  Description: Adds the daily interactions to all individual from a network
 ******************************************************************************************/
@@ -971,7 +1048,7 @@ void build_daily_network( model *model )
 	for( idx = 0; idx < model->params->n_total; idx++ )
 		model->population[ idx ].n_interactions[ day ] = 0;
 
-	build_random_network_default( model );
+	build_random_spatial_network( model ); //d build_random_spatial_network
 	add_interactions_from_network( model, model->random_network );
 	add_interactions_from_network( model, model->household_network );
 
@@ -1396,6 +1473,10 @@ int one_time_step( model *model )
 		build_daily_network( model );
 		model->rebuild_networks = model->params->rebuild_networks;
 	}
+
+	// build_random_network_default( model );
+	// add_interactions_from_network( model, model->random_network );
+
 	transmit_virus( model );
 
 	transition_events( model, SYMPTOMATIC,       	   &transition_to_symptomatic,      		FALSE );

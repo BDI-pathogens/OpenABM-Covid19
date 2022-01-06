@@ -493,6 +493,28 @@ int intervention_quarantine_until(
 
 	return TRUE;
 }
+/*****************************************************************************************
+*  Name:		intervention_on_quarantine_until_by_idx
+*  Description: Quarantine an individual until a certain time
+*  				If they are already in quarantine then extend quarantine until that time
+*  Returns:		TRUE/FALSE - TRUE when quarantining for the first time on a trace
+*  							 FALSE when not quarantining
+******************************************************************************************/
+int intervention_quarantine_until_by_idx(
+	model *model,
+	long idx,
+	long idx_trace_from,
+	int time,
+	int maxof,
+	trace_token *index_token,
+	int contact_time,
+	double risk_score
+)
+{
+	individual *indiv = &(model->population[ idx ]);
+	individual *trace_from = &(model->population[ idx_trace_from ]);
+	return intervention_quarantine_until( model, indiv, trace_from, time, maxof, index_token, contact_time, risk_score );
+}
 
 /*****************************************************************************************
 *  Name:		intervention_quarantine_release

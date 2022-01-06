@@ -146,6 +146,7 @@ void set_up_counters( model* );
 void reset_counters( model* );
 void set_up_occupation_network( model* );
 void set_up_individual_hazard( model* );
+void assign_coordinates_individuals( model*, double, long*, float*, float* );
 void destroy_model( model* );
 
 int one_time_step( model* );
@@ -153,6 +154,7 @@ void flu_infections( model* );
 
 event* new_event( model* );
 event* add_individual_to_event_list( model*, int, individual*, int, void* );
+event* add_individual_to_event_list_by_idx( model*, int, int, int, void* );
 void set_up_event_list( model*, parameters*, int );
 void destroy_event_list( model*, int );
 void remove_event_from_event_list( model*, event* );
@@ -165,6 +167,7 @@ void return_interactions( model* );
 network* add_new_network( model*, long, int );
 void add_interactions_from_network( model*, network* );
 void build_daily_network( model* );
+void build_random_spatial_network( model* );
 void build_random_network( model*, network*, long, long* );
 void build_random_network_default( model* );
 void build_random_network_user( model*, network* );

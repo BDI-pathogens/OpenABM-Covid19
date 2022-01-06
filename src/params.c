@@ -189,7 +189,8 @@ int get_app_user_by_index(
 *  				age_groups:				array of users age group
 *  				occupation_networks:	array of users occupation networks
 *  				house_ids:				array of users house id
-
+*				xcoords:				array of x coordinates
+*				ycoords:				array of y coordinates
 ******************************************************************************************/
 long get_individuals(
 	model *model,
@@ -199,7 +200,10 @@ long get_individuals(
 	int *occupation_networks,
 	long *house_ids,
 	int *infection_counts,
-	short *vaccine_statuses
+	short *vaccine_statuses,
+	float *xcoords,
+	float *ycoords,
+	int *quarantined
 )
 {
 	long n_total = model->params->n_total;
@@ -213,10 +217,45 @@ long get_individuals(
 		house_ids[ idx ] = model->population[ idx ].house_no;
 		infection_counts[ idx ] = count_infection_events( &(model->population[ idx ]) );
 		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
+		xcoords[ idx ] = model->population[ idx ].xcoord;
+		ycoords[ idx ] = model->population[ idx ].ycoord;
+		quarantined[ idx ] = model->population[ idx ].quarantined;
 	}
 	return idx;
 }
 
+/*****************************************************************************************
+*  Name: 		get_infection_event_by_idx
+*  Description: populate input X with the infectionl_event details of infected_idx
+*  Arguments:	model:					the model object
+*  				ids:					array of users IDs
+******************************************************************************************/
+int get_infection_event_by_idx(
+	model *model,
+	long *infected_idx,
+	long *infector_idx,
+	int *network_id,
+	long *strain_idx
+)
+{
+	individual *infected = &(model->population[ *infected_idx ]);
+	infection_event *infection_event = infected->infection_events;
+
+	//d Infector ID
+	individual *infector = infection_event->infector;
+	if (infector != NULL)
+	{
+		*infector_idx = infector->idx;
+	}
+	//d Network ID
+	*network_id = infection_event->network_id;
+	//d Strain ID
+	strain *strain = infection_event->strain;
+	if (strain != NULL)
+		*strain_idx = strain->idx;
+
+	return 0;
+}
 
 /*****************************************************************************************
 *  Name: 		set_indiv_occupation_network_property

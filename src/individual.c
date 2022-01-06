@@ -10,6 +10,7 @@
 #include "constant.h"
 #include "utilities.h"
 #include "model.h"
+#include <math.h>
 
 /*****************************************************************************************
 *  Name:		initialize_individual
@@ -88,6 +89,9 @@ void initialize_individual(
 
 	indiv->vaccine_status = NO_VACCINE;
 	indiv->compliance_factor = gsl_rng_uniform( rng );
+
+	indiv->xcoord = INITIAL_COORDINATE_X; // default co-ordinate at 0 origin.
+	indiv->ycoord = INITIAL_COORDINATE_Y; // set in constant.h
 }
 
 /*****************************************************************************************
@@ -430,6 +434,42 @@ void set_hospitalised( individual *indiv, parameters* params, int time )
 void set_house_no( individual *indiv, long number )
 {
 	indiv->house_no = number;
+}
+
+/*****************************************************************************************
+*  Name:		set_coordinates
+*  Description: sets a person's coordinates
+*  Returns:		void
+******************************************************************************************/
+void set_coordinates( individual *indiv, float x, float y )
+{
+	indiv->xcoord = x;
+	indiv->ycoord = y;
+}
+
+/*****************************************************************************************
+*  Name:		distance_individuals
+*  Description: return euclidean distance between two individuals
+*  Returns:		float
+******************************************************************************************/
+
+float distance_individuals( individual *a, individual *b)
+{
+	float x = a->xcoord - b->xcoord;
+	float y = a->ycoord - b->ycoord;
+	float r = x*x + y*y;
+	return sqrt(r);
+}
+
+/*****************************************************************************************
+*  Name:		distance_individuals_by_idx
+*  Description: return euclidean distance between two individuals, from their index
+*  Returns:		float
+******************************************************************************************/
+
+float distance_individuals_by_idx(model *model, long a_idx, long b_idx)
+{
+	return distance_individuals(&(model->population[a_idx]),&(model->population[b_idx]));
 }
 
 /*****************************************************************************************
