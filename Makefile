@@ -2,7 +2,7 @@
 ifeq ($(compiler),icc)
     C = icc
 else
-	ifndef USE_ARMA
+	ifndef USE_STATS
     C = gcc
 	else
 		C = g++
@@ -34,23 +34,23 @@ else
 	SED_I=sed -i
 endif
 
-ifndef USE_ARMA
+ifndef USE_STATS
 	OBJS_SCILIB = src/random_gsl.o
 	LFLAGS_SCILIB = -lgsl -lgslcblas
 	LDFLAGS_SCILIB = $(shell gsl-config --libs)
 	CFLAGS_SCILIB = $(shell gsl-config --cflags) 
 	CPPFLAGS_SCILIB = 
 else
-	OBJS_SCILIB = src/random_arma.o
-	LFLAGS_SCILIB = -larmadillo
+	OBJS_SCILIB = src/random_stats.o
+	LFLAGS_SCILIB = 
 	LDFLAGS_SCILIB = 
-	CFLAGS_SCILIB = -DUSE_ARMA -Istats/include -Igcem/include
-	CPPFLAGS_SCILIB = -DUSE_ARMA -Istats/include -Igcem/include
+	CFLAGS_SCILIB = -fopenmp -DUSE_STATS -Istats/include -Igcem/include
+	CPPFLAGS_SCILIB = -fopenmp -DUSE_STATS -Istats/include -Igcem/include -std=c++17
 endif
 
 OBJS = $(OBJS_SCILIB) src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
 
-LFLAGS = $(LFLAGS_SCILIB) -lm -O3
+LFLAGS = $(LFLAGS_SCILIB) -lm -O2
 
 # Name of executable
 _EXE = src/covid19ibm.exe
@@ -60,8 +60,8 @@ INC = /usr/local/include
 LIB = /usr/local/lib
 
 # Compilation options and libraries to be used
-CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O0
-CPPFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O0
+CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O2
+CPPFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O2
 LDFLAGS = -L$(LIB) $(LDFLAGS_SCILIB)
 
 # Swig's input

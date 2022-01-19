@@ -3,21 +3,29 @@
  *
  *  Created on: 22 Dec 2021
  *      Author: adamfowleruk
- * Description: Armadillo (Apache-2.0) random implementation
+ * Description: Uses Keith O'Hara's (Apache-2.0) stats and gcem libraries
  */
 
-#ifndef RANDOM_ARMA_H_
-#define RANDOM_ARMA_H_
+#ifndef RANDOM_STATS_H_
+#define RANDOM_STATS_H_
 
 /************************************************************************/
 /******************************* Includes *******************************/
 /************************************************************************/
 
-// TODO
 #include <random>
-// #include <armadillo>
 #include "stats.hpp"
 
+namespace {
+
+template <typename ArrEl>
+void switchElements(ArrEl& i1, ArrEl& i2) {
+  ArrEl tmp = i1;
+  i1 = i2;
+  i2 = tmp;
+}
+
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,18 +36,33 @@ extern "C" {
 /************************************************************************/
 
 struct generator{
-  // Use C++ std::mt19937_64 with seed of 0 by default (5489u)
-  std::mt19937_64 rng;
+  // Use C++ std::mt19937 with seed of 0 by default (5489u)
+  std::mt19937 rng;
 };
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-// ARMA specific definitions only (internal API, so likely none)
+// STATS specific definitions only (internal API, so likely none)
+
+// fwd decl
+int rng_uniform_int( generator * gen, long p );
 
 #ifdef __cplusplus
 }
+
+
+template <typename ArrEl>
+void ran_shuffle( generator * gen, ArrEl* base, size_t n, size_t size) {
+  size_t i1 = n - 1;
+  size_t i2 = 0;
+  for ( ; i1 > 0; --i1 ) {
+    i2 = rng_uniform_int( gen, i1 + 1 );
+    switchElements( base[i1], base[i2] );
+  }
+}
+
 #endif
 
-#endif /* RANDOM_ARMA_H_ */
+#endif /* RANDOM_STATS_H_ */

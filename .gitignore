@@ -116,6 +116,25 @@ sandbox/.ipynb_checkpoints
 /Debug/
 /.pytest_cache/
 
-# Temporary ignores until dev finishes
+/src/build
+/*.exe
+
+# So we don't accidentally check in the stats and gcem modules, if used
 /stats
 /gcem
+
+# Example temporaries
+/examples/**/*.o
+/examples/**/*.csv
+/examples/**/*.png
+/examples/inv_inc_gamma_gsl/invgamma
+/examples/inv_inc_gamma_stats/invgamma
+/examples/random_data_gsl/randomdatagsl
+/examples/random_data_stats/randomdatastats
+
+# Profiling output
+gmon.out
+callgrind.out.*
+
+# Output performance files
+/results-*.txt

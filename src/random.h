@@ -27,8 +27,8 @@ typedef struct generator generator;
 /******************************* Includes *******************************/
 /************************************************************************/
 
-#ifdef USE_ARMA
-#include "random_arma.h"
+#ifdef USE_STATS
+#include "random_stats.h"
 #else
 #include "random_gsl.h"
 #endif
@@ -44,7 +44,7 @@ extern "C" {
 
 // DEFINED IN INLUDES or FWD DECL above
 
-// NOTE: Implementation is defined in random_arma.h or random_gsl.h
+// NOTE: Implementation is defined in random_stats.h or random_gsl.h
 
 /************************************************************************/
 /******************************  Functions  *****************************/
@@ -74,10 +74,7 @@ double cdf_gamma_P( double P, double a, double b );
 double cdf_gamma_Pinv( double P, double a, double b );
 double cdf_exponential_Pinv( double P, double mu );
 
-double sf_gamma_inc_P( double a, double x );
-
 // Utility functions abstracted away to random library
-double incomplete_gamma_p( double, void *params );
 double inv_incomplete_gamma_p( double, long );
 
 #ifdef __cplusplus
