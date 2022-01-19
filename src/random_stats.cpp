@@ -11,7 +11,9 @@ void rng_initialise() {
 
 struct generator * rng_alloc() {
   generator* newgen = new generator; // C++ allocation
+#ifdef GSL_COMPAT
   newgen->rng.seed(4357); // to seed the same as GSL's default
+#endif
   return newgen;
 }
 
@@ -28,24 +30,40 @@ void rng_set( generator * gen, long seed ) {
 
 // Works the same as GSL
 double rng_uniform( generator * gen) {
+#ifdef GSL_COMPAT
   return stats::runif( 0.0f, 1.0f, gen->rng );
+#else
+  return stats::runif( 0.0d, 1.0d, gen->rng );
+#endif
 }
 
 // Works the same as GSL
 int rng_uniform_int( generator * gen, long p ) {
+#ifdef GSL_COMPAT
   return stats::runif( 0.0f, (float)p, gen->rng );
+#else
+  return stats::runif( 0l, p, gen->rng );
+#endif
 }
 
 // Works the same as GSL
 unsigned int ran_bernoulli( generator * gen, double p ) {
+#ifdef GSL_COMPAT
   return static_cast<unsigned int>(stats::rbern( (float)p, gen->rng ));
+#else
+  return static_cast<unsigned int>(stats::rbern( p, gen->rng ));
+#endif
 }
 
 // Note: rgamma in stats is more accurate than GSL. It uses rnorm not a ziggurat approach,
 //       and uses log rather than an approximation in code. So slightly different results
 //       to GSL should be expected.
 double ran_gamma( generator * gen, double a, double b ) {
+#ifdef GSL_COMPAT
   return stats::rgamma((float)a, (float)b, gen->rng);
+#else
+  return stats::rgamma(a, b, gen->rng);
+#endif
 }
 
 // Works the same as GSL
@@ -60,8 +78,12 @@ double ran_exponential( generator * gen, double mu ) {
 //       This is a methodological difference which won't result in worse random generation
 //       but may cost in performance terms.
 unsigned int ran_negative_binomial( generator * gen, double p, double n ) {
-  double x = ran_gamma( gen, n, 1.0 );
+  double x = ran_gamma( gen, n, 1.0d );
+#ifdef GSL_COMPAT
   unsigned int k = stats::rpois( (float)(x*(1-p)/p), gen->rng );
+#else
+  unsigned int k = stats::rpois( (x*(1-p)/p), gen->rng );
+#endif
   return k;
 }
 

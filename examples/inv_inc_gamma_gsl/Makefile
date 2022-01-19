@@ -9,7 +9,7 @@ EXECUTABLE=invgamma
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -O3 $(LIBS) -o $@
+	$(CC) $(LDFLAGS) $(OBJECTS) -O2 $(LIBS) -o $@
 
 .c.o:
-	$(CC) $(CFLAGS) -O3 $< -o $@
+	$(CC) $(CFLAGS) -O2 $< -o $@

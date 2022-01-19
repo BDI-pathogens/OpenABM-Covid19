@@ -18,7 +18,7 @@ if [ $PROFILE == 2 ]
 then
 iprofiler -allocations -T 20s $EXE $PARAM_DIR 1 
 fi
-if [ $PROFILE == 0 ]
+if [ $PROFILE == 3 ]
 then
 valgrind --tool=callgrind $EXE $PARAM_DIR 1
 fi
