@@ -49,8 +49,8 @@ else
 	OBJS_SCILIB = src/random_stats.o
 	LFLAGS_SCILIB = 
 	LDFLAGS_SCILIB = 
-	CFLAGS_SCILIB = -fopenmp -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include
-	CPPFLAGS_SCILIB = -fopenmp -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
+	CFLAGS_SCILIB = -fopenmp -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include
+	CPPFLAGS_SCILIB = -fopenmp -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
 endif
 
 OBJS = $(OBJS_SCILIB) src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o

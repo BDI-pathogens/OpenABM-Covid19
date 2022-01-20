@@ -144,5 +144,3 @@ double inv_incomplete_gamma_p( double percentile, long n )
 
   return gcem::incomplete_gamma_inv(n, percentile);
 }
-
-// TODO check if any of the above can make use of a GPU/multiprocessing, and enable if so

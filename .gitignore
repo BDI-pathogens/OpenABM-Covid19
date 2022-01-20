@@ -135,6 +135,8 @@ sandbox/.ipynb_checkpoints
 # Profiling output
 gmon.out
 callgrind.out.*
+callgrid.out.*
+callgraph.dot*
 
 # Output performance files
 /results-*.txt

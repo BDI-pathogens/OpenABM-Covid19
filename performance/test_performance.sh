@@ -6,7 +6,7 @@
 
 PARAM_DIR="../tests/data/baseline_parameters.csv"
 EXE="../src/covid19ibm.exe"
-PROFILE=3 # 0=no profile; 1=time; 2=memory; 3=valgrind
+PROFILE=0 # 0=no profile; 1=time; 2=memory; 3=valgrind
 
 START=`date +%s`
 if [ $PROFILE == 1 ]
@@ -20,7 +20,7 @@ iprofiler -allocations -T 20s $EXE $PARAM_DIR 1
 fi
 if [ $PROFILE == 3 ]
 then
-valgrind --tool=callgrind $EXE $PARAM_DIR 1
+valgrind --tool=callgrind --simulate-cache=yes $EXE $PARAM_DIR 1
 fi
 if [ $PROFILE == 0 ]
 then

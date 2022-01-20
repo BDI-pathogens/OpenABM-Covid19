@@ -133,6 +133,19 @@
 	printf("%s,ran_discrete,,,,%12f\n",library,cpu_time_nsec);
 	rng_free(gen);
 
+	// Now do random shuffle, ten operations
+	gen = rng_alloc();
+	start = clock();
+	for (size_t i = 1;i <= 10; ++i) {
+		ran_shuffle(gen, P, K, sizeof(double));
+		printf("%s,ran_shuffle,%ld,,,%f\n",library,i,P[0]);
+	}
+	end = clock();
+	cpu_time_nsec = (((double)(end - start)) * 1000000) / CLOCKS_PER_SEC;
+	printf("%s,ran_shuffle,,,,%12f\n",library,cpu_time_nsec);
+	rng_free(gen);
+
+
 	// cdf gamma P, a=1-100 step 5,b=1-101 step 5, p=0.01-0.99 step 0.01
 	indbl2 = 0.0;
 	double p = 0.00;
