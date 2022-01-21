@@ -884,7 +884,6 @@ void add_interactions_from_network(
 	network *network
 )
 {
-	long idx     = 0;
 	long inter_idx, inter_max;
 	int day      = model->interaction_day_idx;
 	int skip_hospitalised = network->skip_hospitalised;
@@ -907,10 +906,15 @@ void add_interactions_from_network(
 	inter_idx = inter_block->idx;
 	inter_max = inter_block->n_interactions - 2;
 
-	while( idx < network->n_edges )
+	// STATS LIBRARY - OPEN MP TEST - pregenerate the bernoulli numbers
+	// Note: Uses libstdc++ library vectors for now. Not the fastest implementation, but allows openmp
+	// auto bernResults = stats::rbern<std::vector<unsigned int>>(network->n_edges,1,(float)prob_drop);
+
+	// idx definition here as this is potentially parallisable, with different OPEN MP sections within it
+	for(long idx = 0 ; idx < network->n_edges ; ++idx )
 	{
 		indiv1 = &(model->population[ network->edges[idx].id1 ] );
-		indiv2 = &(model->population[ network->edges[idx++].id2 ] );
+		indiv2 = &(model->population[ network->edges[idx].id2 ] );
 
 		if( indiv1->status == DEATH || indiv2 ->status == DEATH )
 			continue;
@@ -918,6 +922,8 @@ void add_interactions_from_network(
 			continue;
 		if( skip_quarantined && ( indiv1->quarantined || indiv2->quarantined ) )
 			continue;
+		// STATS LIBRARY - OPEN MP TEST - use pre-generated numbers
+		// if( prob_drop > 0 && bernResults[idx] )
 		if( prob_drop > 0 && ran_bernoulli( rng, prob_drop ) )
 			continue;
 

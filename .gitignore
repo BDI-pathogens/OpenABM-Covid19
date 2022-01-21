@@ -131,6 +131,7 @@ sandbox/.ipynb_checkpoints
 /examples/inv_inc_gamma_stats/invgamma
 /examples/random_data_gsl/randomdatagsl
 /examples/random_data_stats/randomdatastats
+/examples/stats_parallel_test/statsparalleltest
 
 # Profiling output
 gmon.out
