@@ -265,6 +265,7 @@ int set_model_param_test_on_symptoms_compliance(model *pmodel, double value);
 int set_model_param_test_on_traced_symptoms_compliance(model *pmodel, double value);
 int set_model_param_test_on_traced_positive_compliance(model *pmodel, double value);
 int set_model_param_quarantine_compliance_positive(model *pmodel, double value);
+int set_model_param_quarantine_compliance_traced_positive(model *pmodel, double value);
 int set_model_param_trace_on_symptoms(model *pmodel, int value);
 int set_model_param_trace_on_positive(model *pmodel, int value);
 int set_model_param_quarantine_on_traced(model *pmodel, int value);
@@ -317,7 +318,7 @@ int set_app_users( model*, long*, long, int );
 int get_app_users( model*, long* );
 int get_app_user_by_index(model*, int);
 
-long get_individuals( model *, long *, int *, int *, int * , long *, int *, short *);
+long get_individuals( model *, long *, int *, int *, int * , long *, int *, short *, short *);
 
 void update_work_intervention_state(model *pmodel, int value);
 void update_household_intervention_state(model *pmodel, int value);
