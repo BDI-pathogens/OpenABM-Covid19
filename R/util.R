@@ -91,7 +91,9 @@ SAFE_UPDATE_PARAMS <- c(
   "fatality_fraction_50_59",
   "fatality_fraction_60_69",
   "fatality_fraction_70_79",
-  "fatality_fraction_80"
+  "fatality_fraction_80",
+  "quarantine_compliance_traced_positive",
+  "quarantine_compliance_positive"
 )
 
 

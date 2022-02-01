@@ -457,3 +457,9 @@ Parameters.set_param = function(parameters,param,value) {
   return( parameters$set_param(param,value))
 }
 
+#' Gets the default parameter value
+#' @param param The name of the parameter
+Parameters.default_param = function( param ) {
+  return( read.csv( system.file("default_params", "baseline_parameters.csv", package = "OpenABMCovid19") )[[ param ]] )
+}
+

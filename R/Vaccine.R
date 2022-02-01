@@ -48,17 +48,21 @@ Vaccine <- R6Class( classname = 'Vaccine', cloneable = FALSE,
      #' @param stain_id The vaccine ID.
      initialize = function( model, vaccine_id )
      {
-       if( !is.R6(model) || !inherits( model, "Model"))
-         stop( "model must be a R6 class of type Model")
+         private$id <- vaccine_id
 
-       private$.c_vaccine <- get_vaccine_by_id( model$c_model, vaccine_id )
-       private$id         <- vaccine_id
+         if( !is.R6(model) )
+            stop( "model must be a R6 class of type Model or MetaModel")
+
+         if( inherits( model, "Model") ) {
+            private$.c_vaccine <- get_vaccine_by_id( model$c_model, vaccine_id )
+         } else if( !inherits( model, "MetaModel") )
+            stop( "model must be a R6 class of type Model or MetaModel")
      },
 
      #' @description Wrapper for C API \code{vaccine$idx()}.
      #' @return the index of the vaccine
      idx = function() {
-       return(vaccine_idx( self$c_vaccine ))
+       return( private$id )
      },
 
      #' @description Wrapper for C API \code{vaccine$n_strains()}.
