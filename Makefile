@@ -35,6 +35,7 @@ else
 endif
 
 ifndef USE_STATS
+	SRC_SCILIB = 
 	OBJS_SCILIB = src/random_gsl.o
 	LFLAGS_SCILIB = -lgsl -lgslcblas
 	LDFLAGS_SCILIB = $(shell gsl-config --libs)
@@ -46,6 +47,7 @@ else
 	else
 		COMPAT = -DGSL_COMPAT
 	endif
+	SRC_SCILIB = src/random_stats.h
 	OBJS_SCILIB = src/random_stats.o
 	LFLAGS_SCILIB = 
 	LDFLAGS_SCILIB = -fopenmp
@@ -70,7 +72,7 @@ CPPFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O2
 LDFLAGS = -L$(LIB) $(LDFLAGS_SCILIB)
 
 # Swig's input
-SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h
+SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h src/random.h $(SRC_SCILIB)
 
 # Swig's output
 SWIG_OUTPUT_PY = src/covid19_wrap.o src/covid19_wrap.c src/covid19.py src/_covid19.cpython-37m-darwin.so src/build src/covid19.egg-info
@@ -100,6 +102,7 @@ clean:
 	cd src && $(PYTHON) -m pip uninstall -y covid19
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT) $(ROXYGEN_OUTPUT)
 
+# TODO add check if [ ! -d "$(PWD)/stats" ]; then echo "Please check out the stats library with: git clone --depth 1 https://github.com/kthohr/stats"; exit 1; fi
 %.o : %.cpp
 	$(C) $(CPPFLAGS) -c $< -o $@
 

@@ -41,6 +41,7 @@ Compilation
 -----------
 
 OpenABM-Covid19 requires a C compiler (such as gcc) and the [GSL](https://www.gnu.org/software/gsl/) libraries installed.
+Using the optional Stats library instead of GSL requires a C++ compiler, such as g++ included with gcc.
 Python installation requires Python 3.7+
 
 ```bash

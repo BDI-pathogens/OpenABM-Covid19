@@ -34,10 +34,11 @@ covid19_module = Extension(
         "params.c",
         "strain.c",
         "utilities.c",
-        "ward.c"
+        "ward.c",
+        "random_gsl.c"
     ],
-    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O0"] + CFLAGS,
-    extra_link_args=["-lm", "-O3"] + LDFLAGS,
+    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O2"] + CFLAGS,
+    extra_link_args=["-lm", "-O2"] + LDFLAGS,
 )
 
 setup(
