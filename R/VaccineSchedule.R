@@ -10,7 +10,7 @@
 #'   frac_80    = 0.85,
 #'   vaccine    = Vaccine
 #' )
-VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = FALSE,
+VaccineSchedule <- R6Class( classname = 'VaccineSchedule', cloneable = TRUE,
 
   public = list(
     #' @field fraction_to_vaccinate Get the vaccination fractions per age-group.

@@ -91,6 +91,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     .strains        = NA,
     .time           = 0,
     .total_infected = NA,
+    .vaccine_schedule = -1,
+    .seeding_schedule = -1,
 
     utils_n_guess = function(key, ...) {
       if (startsWith(key, 'total_')) {
@@ -599,6 +601,21 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       return(Network$new( self, network_id ))
     },
 
+    #' @description Sets a seeding schedule
+    #' @param schedule a matrix of numbers to seed with a row for each time
+    #' point and a column for each strain
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    set_seeding_schedule = function( schedule )
+    {
+      if( !is.matrix( schedule ) )
+        stop( "seeding schedule is a matrix with a column for each strain and a row for each time point")
+
+      if( ncol( schedule ) > self$n_strains )
+        stop( "number of columns must be less than the number of initialized strains ")
+
+      private$.seeding_schedule <- schedule
+    },
+
     #' @description Infects a new individual from an external source.
     #' Wrapper for C API \code{seed_infect_by_idx}.
     #' @param ID The ID of the individual.
@@ -626,12 +643,42 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       res <- SWIG_seed_infect_by_idx(self$c_model, ID, strain_idx, network_id)
 
-      if( res )
-        private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
-          private$.total_infected[ private$.time + 1, strain_idx + 1 ] + 1
-
       return(as.logical(res))
     },
+
+    #' @description Infects new individuals from an external source.
+    #' Wrapper for C API \code{seed_infect_by_idx}.
+    #' @param IDs The IDs of the individual.
+    #' @param strain_idx The idx of the strain the person is infected with
+    #' @param network_id The network ID.
+    #' @return \code{TRUE} on success, \code{FALSE} otherwise.
+    seed_infect_by_indices = function(IDs, strain_idx = 0, strain = NULL, network_id = -1 )
+    {
+      n_total   <- private$c_params$n_total
+      n_indices <- length( IDs )
+      if (min(IDs) < 0 || max(IDs) >= n_total) {
+        stop("ID out of range (0<=ID<n_total)")
+      }
+
+      if( !is.null( strain ) )
+      {
+        if (!is.R6(strain) || !('Strain' %in% class(strain)))
+          stop("argument strain must be an object of type Strain")
+
+        strain_idx = strain$idx()
+      }
+
+      n_strains = self$c_model$n_initialised_strains;
+      if( strain_idx < 0  || strain_idx >= n_strains )
+        stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
+
+      c_model_ptr <- private$c_model_ptr()
+      res <-.Call('R_seed_infect_by_indices',c_model_ptr, IDs, n_indices,
+                        strain_idx, network_id, PACKAGE='OpenABMCovid19');
+
+      return(res)
+    },
+
 
     #' @description Infects n people randomly (if a person is immune then
     #' they will not be infected)
@@ -662,9 +709,6 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
         stop( "strain_idx out of range (0 <= strain_idx < self$c_model$n_initialized_strains)" )
 
       res <- SWIG_seed_infect_n_people(self$c_model, n_people, strain_idx, network_id)
-
-      private$.total_infected[ private$.time + 1, strain_idx + 1 ] <-
-      private$.total_infected[ private$.time + 1, strain_idx + 1 ] + res
 
       return(res)
     },
@@ -856,12 +900,23 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     #' @description Schedule an age-group vaccionation
     #' Wrapper for C API \code{intervention_vaccinate_age_group}.
-    #' @param schedule An instance of \code{\link{VaccineSchedule}}.
+    #' @param schedule An instance of \code{\link{VaccineSchedule}} or a list if recurring.
+    #' @param recurring Repeat on all time-steps until switched off (call with NULL for schedule)
     #' @return The total number of people vaccinated.
-    vaccinate_schedule = function(schedule)
+    vaccinate_schedule = function(schedule, recurring = FALSE)
     {
+      if( is.null( schedule ) ) {
+        private$.vaccine_schedule = -1
+        return( 0 )
+      }
+
+      if( recurring ) {
+        private$.vaccine_schedule = schedule
+        return( 0 )
+      }
+
       if (!is.R6(schedule) || !('VaccineSchedule' %in% class(schedule))) {
-        stop("argument VaccineSchedule must be an object of type VaccineSchedule")
+        stop("argument VaccineSchedule must be an object of type VaccineSchedule (or list if recurring=TRUE)")
       }
 
       vaccine = schedule$vaccine
@@ -950,6 +1005,29 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' Wrapper for C API \code{one_time_step}.
     one_time_step = function()
     {
+      time <- private$.time + 1
+
+      vaccine_schedule <- private$.vaccine_schedule
+      if( is.R6( vaccine_schedule ) || is.list( vaccine_schedule ) ) {
+        if( !is.list( vaccine_schedule ) ) {
+          self$vaccinate_schedule( vaccine_schedule )
+        } else {
+          if( time <= length( vaccine_schedule ) && !is.null( vaccine_schedule[[ time ]] ) )
+            self$vaccinate_schedule( vaccine_schedule[[ time ]] )
+        }
+      }
+
+      seeding_schedule <- private$.seeding_schedule
+      if( is.matrix( seeding_schedule ) ) {
+        if( time <= nrow( seeding_schedule ) ) {
+          for( sdx in 1:ncol( seeding_schedule ) ) {
+            n_people <- seeding_schedule[ time, sdx ]
+            if( n_people > 0 )
+              self$seed_infect_n_people(n_people, strain_idx = sdx -1 )
+          }
+        }
+      }
+
       SWIG_one_time_step(self$c_model)
       private$.time    <- private$.time + 1
       private$.results <- append( private$.results,list(private$.one_time_step_results()))

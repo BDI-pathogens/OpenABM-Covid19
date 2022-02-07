@@ -199,12 +199,13 @@ long get_individuals(
 	int *occupation_networks,
 	long *house_ids,
 	int *infection_counts,
-	short *vaccine_statuses
+	short *vaccine_statuses,
+  short *quarantine_statuses
 )
 {
 	long n_total = model->params->n_total;
 	long idx;
-	
+
 	for( idx = 0; idx < n_total; idx++ ){
 		ids[ idx ] = model->population[ idx ].idx;
 		statuses[ idx ] = model->population[ idx ].status;
@@ -213,6 +214,7 @@ long get_individuals(
 		house_ids[ idx ] = model->population[ idx ].house_no;
 		infection_counts[ idx ] = count_infection_events( &(model->population[ idx ]) );
 		vaccine_statuses[ idx ] = model->population[ idx ].vaccine_status;
+		quarantine_statuses[ idx ] = model->population[ idx ].quarantined;
 	}
 	return idx;
 }
@@ -804,6 +806,16 @@ int set_model_param_quarantine_compliance_positive(model *model, double value)
 {
     model->params->quarantine_compliance_positive = value;
     return TRUE;
+}
+
+/*****************************************************************************************
+ *  Name:        set_model_param_quarantine_compliance_traced_positive
+ *  Description: Sets the value of parameter
+ ******************************************************************************************/
+int set_model_param_quarantine_compliance_traced_positive(model *model, double value)
+{
+  model->params->quarantine_compliance_traced_positive = value;
+  return TRUE;
 }
 
 /*****************************************************************************************
