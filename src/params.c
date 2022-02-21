@@ -640,6 +640,15 @@ int get_model_param_lockdown_on(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_lockdown_elderly_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lockdown_elderly_on(model *model)
+{
+	return model->params->lockdown_elderly_on;
+}
+
+/*****************************************************************************************
 *  Name:        get_model_param_lockdown_house_interaction_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/

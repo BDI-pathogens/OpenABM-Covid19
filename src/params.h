@@ -243,6 +243,7 @@ int get_model_param_priority_test_contacts(model *pmodel, int idx);
 double get_model_param_app_users_fraction(model *pmodel);
 int get_model_param_app_turned_on(model *pmodel);
 int get_model_param_lockdown_on(model *pmodel);
+int get_model_param_lockdown_elderly_on(model *pmodel);
 double get_model_param_risk_score( model*, int, int, int );
 double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *pmodel);
