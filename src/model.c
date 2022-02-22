@@ -53,6 +53,9 @@ model* new_model( parameters *params )
         model_ptr->n_occupation_networks = params->occupation_network_table->n_networks;
     }
 
+	for( type = 0; type < N_INTERACTION_TYPES; type++ )
+		params->relative_transmission_used[type] = params->relative_transmission[type];
+
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
@@ -247,7 +250,7 @@ void destroy_event_list( model *model, int type )
 ******************************************************************************************/
 network* add_new_network( model *model, long n_total, int type )
 {
-	network *net = create_network( n_total, type );
+	network *net = create_network( n_total, type, model->params );
 
 	net->network_id = model->n_networks;
 

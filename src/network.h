@@ -40,6 +40,8 @@ struct network{
 	int network_id;				// unique network ID
 	char name[INPUT_CHAR_LEN]; 	// unique name of the network
 	float transmission_multiplier; // bespoke transmission multiplier for network
+	float transmission_multiplier_type;     // combined network type and bespoke network multiplier
+	float transmission_multiplier_combined; // combined network type and bespoke network multiplier
 
 	int construction;			// method used to construct the network
 	long opt_n_indiv;			// (OPTIONAL) number of distinct individuals on an network
@@ -55,7 +57,7 @@ struct network{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-network* create_network(long n_total, int type);
+network* create_network(long n_total, int type, parameters* );
 void build_watts_strogatz_network( network *, long, double, double, int );
 int check_member_or_self(long , long, long *, long );
 void remove_contact(long *, long , long *);
@@ -63,5 +65,7 @@ void add_contact(long *, long , long *);
 void relabel_network( network*, long*  );
 void destroy_network( network* );
 int update_daily_fraction( network*, double );
+int update_transmission_multiplier( network*, float );
+int update_transmission_multiplier_type( network*, float );
 
 #endif /* NETWORK_H_ */
