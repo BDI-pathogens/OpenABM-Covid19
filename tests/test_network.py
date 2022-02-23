@@ -425,6 +425,14 @@ class TestClass(object):
                 working_mult = 1.3,
                 primary_mult = 0.7,
                 house_mult  = 1.8   
+            ),
+            dict(
+                test_params = dict( n_total = 10000 ),
+                random_mult = 0.7,
+                occupation_mult =0.3,
+                working_mult = 3,
+                primary_mult = 0.3,
+                house_mult  = 0.8   
             )
         ]
     }
