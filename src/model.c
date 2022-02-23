@@ -180,7 +180,7 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
 
-    for( idx = 0; idx < model->params->max_n_strains; idx++ )
+    for( idx = 0; idx < model->n_initialised_strains; idx++ )
     	destroy_strain( &(model->strains[ idx ]) );
     free( model->strains );
     for( idx = 0; idx < model->params->max_n_strains; idx++ )
@@ -756,7 +756,7 @@ void set_up_seed_infection( model *model )
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction, UNKNOWN );
 
 	while( idx < params->n_seed_infection )
 	{

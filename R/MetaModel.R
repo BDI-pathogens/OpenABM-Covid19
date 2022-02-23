@@ -875,7 +875,12 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
-    add_new_strain = function( transmission_multiplier = 1, hospitalised_fraction = NA, hospitalised_fraction_multiplier = 1 )
+    add_new_strain = function( 
+    	transmission_multiplier = 1, 
+    	hospitalised_fraction = NA, 
+    	hospitalised_fraction_multiplier = 1,
+    	mean_infectious_period = NA
+    )
     {
         if( self$n_strains == self$base_params[[ 1 ]][[ "max_n_strains" ]] )
           stop( "max_n_strains strains have been added already" )
@@ -886,7 +891,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
             strain <- abms[[ nidx ]]$add_new_strain(
               transmission_multiplier = data$transmission_multiplier ,
               hospitalised_fraction   = data$hospitalised_fraction,
-              hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier
+              hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier,
+              mean_infectious_period = data$mean_infectious_period
             )
             strain_idx <- strain$idx()
             strains[[ nidx ]][[ strain_idx + 1 ]] <<- strain
@@ -898,13 +904,14 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
         data <- list(
           transmission_multiplier = transmission_multiplier ,
           hospitalised_fraction   = hospitalised_fraction,
-          hospitalised_fraction_multiplier = hospitalised_fraction_multiplier
+          hospitalised_fraction_multiplier = hospitalised_fraction_multiplier,
+          mean_infectious_period = mean_infectious_period
         )
-        data <- replicate( self$n_nodes, data, simplify = FALSE )
+        node_data <- replicate( self$n_nodes, data, simplify = FALSE )
 
-        t <- clusterApply( private$.cluster(), data, add_new_strain_func )
+        t <- clusterApply( private$.cluster(), node_data, add_new_strain_func )
         private$.n_strains <- t[[ 1 ]] + 1
-        private$.strain_params[[ private$.n_strains  ]] <- list( transmission_multiplier = transmission_multiplier )
+        private$.strain_params[[ private$.n_strains  ]] <- data
 
         return( t[[ 1 ]]);
     },

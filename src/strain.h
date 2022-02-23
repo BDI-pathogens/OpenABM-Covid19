@@ -33,7 +33,7 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-short add_new_strain( model*, float, double* );
+short add_new_strain( model*, float, double*, double );
 void destroy_strain( strain* );
 strain* get_strain_by_id( model*, short );
 
