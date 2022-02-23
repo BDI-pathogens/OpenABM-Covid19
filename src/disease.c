@@ -115,8 +115,8 @@ double estimate_mean_interactions_by_age( model *model, int age )
 void set_up_infectious_curves( model *model )
 {
 	parameters *params = model->params;
-	double infectious_rate, type_factor;
-	int type, group;
+	double infectious_rate;
+	int group;
 
 	infectious_rate = params->infectious_rate;
 	if( params->relative_susceptibility_by_interaction )
@@ -133,35 +133,31 @@ void set_up_infectious_curves( model *model )
 		for( group = 0; group < N_AGE_GROUPS; group++ )
 			params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions_by_age[AGE_TYPE_ADULT] / model->mean_interactions_by_age[AGE_TYPE_MAP[group]];
 	}
+	params->infectious_rate_adjusted = infectious_rate;
 
-	for( type = 0; type < N_INTERACTION_TYPES; type++ )
-	{
-		type_factor = params->relative_transmission_used[type];
+	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
 
-		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
+	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
 
-		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor  );
+	gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
 
-		gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->asymptomatic_infectious_factor);
+	gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
 
-		gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
+	gamma_rate_curve( model->event_lists[SYMPTOMATIC_MILD].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor );
 
-		gamma_rate_curve( model->event_lists[SYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor );
+	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
 
-		gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
+	gamma_rate_curve( model->event_lists[HOSPITALISED_RECOVERING].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate );
 
-		gamma_rate_curve( model->event_lists[HOSPITALISED_RECOVERING].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-							  params->sd_infectious_period, infectious_rate * type_factor );
-
-		gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
-	};
+	gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate  );
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
@@ -224,8 +220,8 @@ void transmit_virus_by_type(
 							continue;
 						}
 
-						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier;
-						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult * network_mult;
+						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier_combined;
+						hazard_rate   = list->infectious_curve[ t_infect - 1 ] * infector_mult * network_mult;
 						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )
