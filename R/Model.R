@@ -718,11 +718,11 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @param transmission_multiplier The relative transmission rate of the strain
     #' @param hospitalised_fraction the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)]
     #' @return \code{Strain} A Strain object representing this strain
-    add_new_strain = function( 
-    	transmission_multiplier = 1, 
-    	hospitalised_fraction = NA, 
+    add_new_strain = function(
+    	transmission_multiplier = 1,
+    	hospitalised_fraction = NA,
     	hospitalised_fraction_multiplier = 1,
-    	mean_infectious_rate = NA
+    	mean_infectious_period = NA
     )
     {
 
@@ -740,13 +740,13 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
             sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) ) *
             hospitalised_fraction_multiplier
       }
-      
-      if( is.na( mean_infectious_rate ) )
-      	mean_infectious_rate = UNKNOWN;
+
+      if( is.na( mean_infectious_period ) )
+      	mean_infectious_period = UNKNOWN;
 
       c_model_ptr <- private$c_model_ptr()
       strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,
-                        hospitalised_fraction, PACKAGE='OpenABMCovid19');
+                        hospitalised_fraction, mean_infectious_period, PACKAGE='OpenABMCovid19');
 
       private$.strains[[ strain_idx + 1 ]] <- Strain$new( self, strain_idx )
       return( private$.strains[[ strain_idx + 1 ]] )
