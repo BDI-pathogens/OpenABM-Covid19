@@ -17,7 +17,7 @@
 *  				 1. Creates memory for it
 *  Returns:		pointer to model
 ******************************************************************************************/
-network* create_network( long n_total, int type )
+network* create_network( long n_total, int type, parameters *params )
 {	
 	network *network_ptr = NULL;
 	network_ptr = calloc( 1, sizeof( network ) );
@@ -28,6 +28,7 @@ network* create_network( long n_total, int type )
 	network_ptr->n_vertices = n_total;
 	network_ptr->type       = type;
 	network_ptr->transmission_multiplier = 1;
+	update_transmission_multiplier_type( network_ptr, params->relative_transmission_used[type] );
 	
 	return network_ptr;
 }
@@ -267,6 +268,28 @@ int update_daily_fraction( network *network, double fraction )
 	}
 
 	network->daily_fraction = fraction;
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		update_transmission_multiplier
+*  Description: Updates the bespoke transmission_multiplier on the network
+******************************************************************************************/
+int update_transmission_multiplier( network *network, float multiplier )
+{
+	network->transmission_multiplier = multiplier;
+	network->transmission_multiplier_combined = network->transmission_multiplier * network->transmission_multiplier_type;
+	return TRUE;
+}
+
+/*****************************************************************************************
+*  Name:		update_transmission_multiplier_type
+*  Description: Updates the network type transmission_multiplier the network
+******************************************************************************************/
+int update_transmission_multiplier_type( network *network, float multiplier )
+{
+	network->transmission_multiplier_type = multiplier;
+	network->transmission_multiplier_combined = network->transmission_multiplier * network->transmission_multiplier_type;
 	return TRUE;
 }
 

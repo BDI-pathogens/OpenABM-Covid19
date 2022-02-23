@@ -322,17 +322,12 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 void update_intervention_policy( model *model, int time )
 {
 	parameters *params = model->params;
-	int type;
 
 	if( time == 0 )
 	{
 		params->app_turned_on       = FALSE;
 		params->lockdown_on	        = FALSE;
 		params->lockdown_elderly_on	= FALSE;
-
-		for( type = 0; type < N_INTERACTION_TYPES; type++ )
-			params->relative_transmission_used[type] = params->relative_transmission[type];
-
 		params->interventions_on = ( params->intervention_start_time == 0 );
 	}
 

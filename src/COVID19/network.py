@@ -50,6 +50,12 @@ class Network:
         
     def transmission_multiplier(self):
         return self.c_network.transmission_multiplier
+    
+    def transmission_multiplier_type(self):
+        return self.c_network.transmission_multiplier_type
+
+    def transmission_multiplier_combined(self):
+        return self.c_network.transmission_multiplier_combined
 
     def show(self):
         print( "network_id        = " + str( self.network_id() ) )
@@ -61,6 +67,8 @@ class Network:
         print( "type              = " + str( self.type() ) )
         print( "daily_fraction    = " + str( self.daily_fraction() ) )
         print( "transmission_mult = " + str( self.transmission_multiplier() ) )
+        print( "transmission_mult_type = " + str( self.transmission_multiplier_type() ) )
+        print( "transmission_mult_comb = " + str( self.transmission_multiplier_combined() ) )
     
     def get_network(self):
         """Return pandas.DataFrame of the network"""

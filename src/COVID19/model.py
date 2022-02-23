@@ -853,7 +853,12 @@ class Model:
         return covid19.seed_infect_by_idx( self.c_model, ID, strain_idx, network_id );
     
 
-    def add_new_strain(self, transmission_multiplier, hospitalised_fraction = None ):     
+    def add_new_strain(
+            self, 
+            transmission_multiplier = 1, 
+            hospitalised_fraction = None,  
+            mean_infectious_period = None,
+        ):     
         
         """
         Add a new strain, note the total number of strains that can be added is set by the initial 
@@ -861,7 +866,7 @@ class Model:
         
         transmission_multiplier - the relative transmissibility of the new strain
         hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
-        
+        mean_infectious_period - the mean infectious period (default: is no change)
         """  
 
         n_strains = self.c_model.n_initialised_strains;
@@ -876,8 +881,10 @@ class Model:
         else :
             for idx in range( len(AgeGroupEnum ) ) :
                 hospitalised_fraction_c[ idx ] = hospitalised_fraction[ idx ]
+        if mean_infectious_period == None :
+            mean_infectious_period = covid19.UNKNOWN
            
-        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c );
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c, mean_infectious_period );
 
         return Strain( self, idx )
 

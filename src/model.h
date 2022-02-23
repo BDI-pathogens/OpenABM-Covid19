@@ -33,7 +33,6 @@ struct event_list{
 	long n_total;
 	long *n_total_by_age;
 	long n_current;
-	double **infectious_curve;
 };
 
 struct directory{

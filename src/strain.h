@@ -26,13 +26,15 @@ struct strain{
 	float transmission_multiplier;
 	double hospitalised_fraction[N_AGE_GROUPS];
 	long total_infected;
+	double **infectious_curve;
 };
 
 /************************************************************************/
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-short add_new_strain( model*, float, double* );
+short add_new_strain( model*, float, double*, double );
+void destroy_strain( strain* );
 strain* get_strain_by_id( model*, short );
 
 #endif /* STRAIN_H_ */

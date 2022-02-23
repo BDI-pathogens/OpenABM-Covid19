@@ -53,6 +53,9 @@ model* new_model( parameters *params )
         model_ptr->n_occupation_networks = params->occupation_network_table->n_networks;
     }
 
+	for( type = 0; type < N_INTERACTION_TYPES; type++ )
+		params->relative_transmission_used[type] = params->relative_transmission[type];
+
     gsl_rng_env_setup();
     rng = gsl_rng_alloc ( gsl_rng_default);
     gsl_rng_set( rng, params->rng_seed );
@@ -177,6 +180,8 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
 
+    for( idx = 0; idx < model->n_initialised_strains; idx++ )
+    	destroy_strain( &(model->strains[ idx ]) );
     free( model->strains );
     for( idx = 0; idx < model->params->max_n_strains; idx++ )
 		free( model->cross_immunity[idx] );
@@ -193,13 +198,12 @@ void destroy_model( model *model )
 void set_up_event_list( model *model, parameters *params, int type )
 {
 
-	int day, age, idx;
+	int day, age;
 	event_list *list = &(model->event_lists[ type ]);
 	list->type       = type;
 
 	list->n_daily          = calloc( MAX_TIME, sizeof(long) );
 	list->n_daily_current  = calloc( MAX_TIME, sizeof(long) );
-	list->infectious_curve = calloc( N_INTERACTION_TYPES, sizeof(double*) );
 	list->n_total_by_age   = calloc( N_AGE_GROUPS, sizeof(long) );
 	list->n_daily_by_age   = calloc( MAX_TIME, sizeof(long*) );
 	list->events		   = calloc( MAX_TIME, sizeof(event*));
@@ -215,8 +219,6 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily[day] = 0;
 		list->n_daily_current[day] = 0;
 	}
-	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
-		list->infectious_curve[idx] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
 
 /*****************************************************************************************
@@ -225,16 +227,13 @@ void set_up_event_list( model *model, parameters *params, int type )
 ******************************************************************************************/
 void destroy_event_list( model *model, int type )
 {
-	int day, idx;
+	int day;
 	free( model->event_lists[type].n_daily );
 
 	for( day = 0; day < MAX_TIME; day++ )
 		free( model->event_lists[type].n_daily_by_age[day]);
-	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
-		free( model->event_lists[type].infectious_curve[idx] );
 
 	free( model->event_lists[type].n_daily_current );
-	free( model->event_lists[type].infectious_curve );
 	free( model->event_lists[type].n_total_by_age );
 	free( model->event_lists[type].n_daily_by_age );
 	free( model->event_lists[type].events );
@@ -247,7 +246,7 @@ void destroy_event_list( model *model, int type )
 ******************************************************************************************/
 network* add_new_network( model *model, long n_total, int type )
 {
-	network *net = create_network( n_total, type );
+	network *net = create_network( n_total, type, model->params );
 
 	net->network_id = model->n_networks;
 
@@ -757,7 +756,7 @@ void set_up_seed_infection( model *model )
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction, UNKNOWN );
 
 	while( idx < params->n_seed_infection )
 	{
