@@ -180,6 +180,8 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
 
+    for( idx = 0; idx < model->params->max_n_strains; idx++ )
+    	destroy_strain( &(model->strains[ idx ]) );
     free( model->strains );
     for( idx = 0; idx < model->params->max_n_strains; idx++ )
 		free( model->cross_immunity[idx] );
@@ -217,7 +219,6 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily[day] = 0;
 		list->n_daily_current[day] = 0;
 	}
-	list->infectious_curve = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
 
 /*****************************************************************************************
@@ -233,7 +234,6 @@ void destroy_event_list( model *model, int type )
 		free( model->event_lists[type].n_daily_by_age[day]);
 
 	free( model->event_lists[type].n_daily_current );
-	free( model->event_lists[type].infectious_curve );
 	free( model->event_lists[type].n_total_by_age );
 	free( model->event_lists[type].n_daily_by_age );
 	free( model->event_lists[type].events );

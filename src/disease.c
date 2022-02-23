@@ -134,30 +134,6 @@ void set_up_infectious_curves( model *model )
 			params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions_by_age[AGE_TYPE_ADULT] / model->mean_interactions_by_age[AGE_TYPE_MAP[group]];
 	}
 	params->infectious_rate_adjusted = infectious_rate;
-
-	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
-
-	gamma_rate_curve( model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
-
-	gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
-
-	gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
-
-	gamma_rate_curve( model->event_lists[SYMPTOMATIC_MILD].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor );
-
-	gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
-
-	gamma_rate_curve( model->event_lists[HOSPITALISED_RECOVERING].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate );
-
-	gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve, MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate  );
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
@@ -178,6 +154,7 @@ void transmit_virus_by_type(
 	interaction *interaction;
 	individual *infector;
 	int rebuild_networks = model->params->rebuild_networks;
+	double *infectious_curve;
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
@@ -200,6 +177,7 @@ void transmit_virus_by_type(
 				interaction   = infector->interactions[ model->interaction_day_idx ];
 				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
 				strain_idx 	  = infector->infection_events->strain->idx;
+				infectious_curve = infector->infection_events->strain->infectious_curve[type];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -221,7 +199,7 @@ void transmit_virus_by_type(
 						}
 
 						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier_combined;
-						hazard_rate   = list->infectious_curve[ t_infect - 1 ] * infector_mult * network_mult;
+						hazard_rate   = infectious_curve[ t_infect - 1 ] * infector_mult * network_mult;
 						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
 						if( interaction->individual->hazard[ strain_idx ] < 0 )

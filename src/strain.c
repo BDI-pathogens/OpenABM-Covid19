@@ -20,7 +20,9 @@ short add_new_strain(
 	double *hospitalised_fraction
 )
 {
+	double infectious_rate;
 	strain *strain_ptr;
+	parameters *params = model->params;
 
 	if( model->n_initialised_strains == model->params->max_n_strains )
 		return ERROR;
@@ -32,6 +34,41 @@ short add_new_strain(
 
 	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
 		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];
+
+	infectious_rate = params->infectious_rate_adjusted;
+	strain_ptr->infectious_curve = calloc( N_EVENT_TYPES, sizeof(double) );
+
+	strain_ptr->infectious_curve[PRESYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
+
+	strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
+
+	strain_ptr->infectious_curve[ASYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[ASYMPTOMATIC] , MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
+
+	strain_ptr->infectious_curve[SYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
+
+	strain_ptr->infectious_curve[SYMPTOMATIC_MILD] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor );
+
+	strain_ptr->infectious_curve[HOSPITALISED] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[HOSPITALISED], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate );
+
+	strain_ptr->infectious_curve[HOSPITALISED_RECOVERING] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[HOSPITALISED_RECOVERING], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+						  params->sd_infectious_period, infectious_rate );
+
+	strain_ptr->infectious_curve[CRITICAL] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	gamma_rate_curve( strain_ptr->infectious_curve[CRITICAL], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
+					  params->sd_infectious_period, infectious_rate  );
 
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );
@@ -48,4 +85,21 @@ strain* get_strain_by_id( model *model, short strain_idx )
 		print_exit( "strain not yet intialised " );
 
 	return &(model->strains[ strain_idx ]);
+}
+
+/*****************************************************************************************
+*  Name:		destroy_strain
+*  Description: Destroys an event list
+******************************************************************************************/
+void destroy_strain( strain *strain )
+{
+	free( strain->infectious_curve[PRESYMPTOMATIC] );
+	free( strain->infectious_curve[PRESYMPTOMATIC_MILD] );
+	free( strain->infectious_curve[ASYMPTOMATIC] );
+	free( strain->infectious_curve[SYMPTOMATIC] );
+	free( strain->infectious_curve[SYMPTOMATIC_MILD] );
+	free( strain->infectious_curve[HOSPITALISED] );
+	free( strain->infectious_curve[HOSPITALISED_RECOVERING] );
+	free( strain->infectious_curve[CRITICAL] );
+	free( strain->infectious_curve );
 }

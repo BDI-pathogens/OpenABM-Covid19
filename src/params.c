@@ -1089,7 +1089,6 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 			update_transmission_multiplier_type( network, model->params->relative_transmission_used[ type ] );
 	}
 
-	set_up_infectious_curves( model );
 	return TRUE;
 }
 
@@ -1274,7 +1273,6 @@ int set_model_param_lockdown_on( model *model, int value )
 		update_household_intervention_state(model, value);
 	}
 	params->lockdown_on = value;
-	set_up_infectious_curves( model );
 
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 		update_random_interactions( &(model->population[pdx]), params );
@@ -1334,7 +1332,6 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		return FALSE;
 	}
 	params->lockdown_elderly_on = value;
-	set_up_infectious_curves( model );
 
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 	{
