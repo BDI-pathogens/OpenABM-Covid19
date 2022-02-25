@@ -29,6 +29,7 @@ struct strain{
 	double hospitalised_fraction[N_AGE_GROUPS];
 	long total_infected;
 	double **infectious_curve;
+	int **transition_time_distributions;
 };
 
 /************************************************************************/

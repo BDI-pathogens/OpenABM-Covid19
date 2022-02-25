@@ -75,7 +75,6 @@ model* new_model( parameters *params )
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
-	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
@@ -132,9 +131,10 @@ void destroy_model( model *model )
 		free( event_block );
 	}
 
-
-	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		free( model->transition_time_distributions[ idx ] );
+	free( model->transition_time_distributions[SYMPTOMATIC_QUARANTINE] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_SYMPTOMS] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_POSITIVE] );
+	free( model->transition_time_distributions[TEST_RESULT_QUARANTINE] );
 	free( model->transition_time_distributions );
 
     destroy_network( model->random_network);

@@ -21,39 +21,6 @@
 #include <math.h>
 
 /*****************************************************************************************
-*  Name:		set_up_transition_times
-*  Description: sets up discrete distributions for the times it takes to
-*  				transition along edges of the disease model
-*
-*  Returns:		void
-******************************************************************************************/
-void set_up_transition_times( model *model )
-{
-	parameters *params = model->params;
-	int idx;
-	int **transitions;
-
-	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
-	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		model->transition_time_distributions[idx] = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions = model->transition_time_distributions;
-
-	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, params->mean_time_to_symptoms,params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
-	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	gamma_draw_list( transitions[CRITICAL_HOSPITALISED_RECOVERING], N_DRAW_LIST, params->mean_time_critical_survive, params->sd_time_critical_survive);
-	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
-	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
-	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, params->mean_time_to_susceptible_after_shift, params->time_to_susceptible_shift );
-
-}
-
-/*****************************************************************************************
 *  Name:		estimate_mean_interactions_by_age
 *  Description: estimates the weighted mean number of interactions by age
 *  				each interaction is weighted by the type factor
@@ -236,7 +203,6 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
-
 }
 
 /*****************************************************************************************
@@ -365,7 +331,7 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->strain, edge ) );
 		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
