@@ -722,7 +722,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     	transmission_multiplier = 1,
     	hospitalised_fraction = NA,
     	hospitalised_fraction_multiplier = 1,
-    	mean_infectious_period = NA
+    	mean_infectious_period = NA,
+    	sd_infectious_period = NA
     )
     {
 
@@ -743,10 +744,12 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       if( is.na( mean_infectious_period ) )
       	mean_infectious_period = UNKNOWN;
+      if( is.na( sd_infectious_period ) )
+      	sd_infectious_period = UNKNOWN;
 
       c_model_ptr <- private$c_model_ptr()
       strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,
-                        hospitalised_fraction, mean_infectious_period, PACKAGE='OpenABMCovid19');
+      	hospitalised_fraction, mean_infectious_period, sd_infectious_period, PACKAGE='OpenABMCovid19');
 
       private$.strains[[ strain_idx + 1 ]] <- Strain$new( self, strain_idx )
       return( private$.strains[[ strain_idx + 1 ]] )

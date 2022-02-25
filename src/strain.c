@@ -16,13 +16,16 @@
 *  				transmission_multiplier - strain specific transmission multiplier
 *  				hospitalised_fraction   - strain specific hospitalised fraction
 *  				mean_infectious_period  - strain specific mean_infectious_period (UNKOWN then use default)
+*  				sd_infectious_period    - strain specific sd_infectious_period (UNKOWN then use default)
+*
 *  Returns:		void
 ******************************************************************************************/
 short add_new_strain(
 	model *model,
 	float transmission_multiplier,
 	double *hospitalised_fraction,
-	double mean_infectious_period
+	double mean_infectious_period,
+	double sd_infectious_period
 )
 {
 	double infectious_rate;
@@ -35,10 +38,15 @@ short add_new_strain(
 	// if parameters are unspecified then use default values
 	if( mean_infectious_period == UNKNOWN )
 		mean_infectious_period = params->mean_infectious_period;
+	if( sd_infectious_period == UNKNOWN )
+		sd_infectious_period = params->sd_infectious_period;
+
 
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
+	strain_ptr->mean_infectious_period  = mean_infectious_period;
+	strain_ptr->sd_infectious_period    = sd_infectious_period;
 	strain_ptr->total_infected = 0;
 
 	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
@@ -49,35 +57,35 @@ short add_new_strain(
 
 	strain_ptr->infectious_curve[PRESYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
+					  sd_infectious_period, infectious_rate );
 
 	strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
+					  sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
 
 	strain_ptr->infectious_curve[ASYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[ASYMPTOMATIC] , MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
+					  sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
 
 	strain_ptr->infectious_curve[SYMPTOMATIC] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
+					  sd_infectious_period, infectious_rate );
 
 	strain_ptr->infectious_curve[SYMPTOMATIC_MILD] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate * params->mild_infectious_factor );
+					  sd_infectious_period, infectious_rate * params->mild_infectious_factor );
 
 	strain_ptr->infectious_curve[HOSPITALISED] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[HOSPITALISED], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate );
+					  sd_infectious_period, infectious_rate );
 
 	strain_ptr->infectious_curve[HOSPITALISED_RECOVERING] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[HOSPITALISED_RECOVERING], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate );
+					  sd_infectious_period, infectious_rate );
 
 	strain_ptr->infectious_curve[CRITICAL] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 	gamma_rate_curve( strain_ptr->infectious_curve[CRITICAL], MAX_INFECTIOUS_PERIOD, mean_infectious_period,
-					  params->sd_infectious_period, infectious_rate  );
+					  sd_infectious_period, infectious_rate  );
 
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );

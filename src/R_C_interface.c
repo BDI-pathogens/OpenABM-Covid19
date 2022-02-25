@@ -369,21 +369,27 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   return R_list;
 }
 
-SEXP R_add_new_strain ( SEXP R_c_model, SEXP R_transisition_multiplier,
-                        SEXP R_hospitalised_fraction, SEXP R_mean_infectious_period )
+SEXP R_add_new_strain (
+	SEXP R_c_model,
+	SEXP R_transisition_multiplier,
+	SEXP R_hospitalised_fraction,
+	SEXP R_mean_infectious_period,
+	SEXP R_sd_infectious_period
+)
 {
   // get the point to the model from the R pointer object
   model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
 
   // allocate memory to for the function call
-  float transition_multiplier = asReal( R_transisition_multiplier );
-  float mean_infectious_period = asReal( R_mean_infectious_period );
+  float transition_multiplier   = asReal( R_transisition_multiplier );
+  double mean_infectious_period = asReal( R_mean_infectious_period );
+  double sd_infectious_period   = asReal( R_sd_infectious_period );
   double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof(double) );
 
   for( int i = 0; i < N_AGE_GROUPS; i++ )
     hospitalised_fraction[ i ] = REAL(R_hospitalised_fraction )[ i ];
 
-  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction, mean_infectious_period);
+  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction, mean_infectious_period, sd_infectious_period);
 
   free( hospitalised_fraction );
 
