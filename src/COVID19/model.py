@@ -858,7 +858,8 @@ class Model:
             transmission_multiplier = 1, 
             hospitalised_fraction = None,  
             mean_infectious_period = None,
-            sd_infectious_period = None
+            sd_infectious_period = None,
+            mean_time_to_symptoms = None
         ):     
         
         """
@@ -869,6 +870,7 @@ class Model:
         hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
         mean_infectious_period - the mean infectious period (default: is no change)
         sd_infectious_period   - the sd infectious period (default: is no change)
+        mean_time_to_symptoms  - mean time to symptoms (default: is no change)
         """  
 
         n_strains = self.c_model.n_initialised_strains;
@@ -887,8 +889,10 @@ class Model:
             mean_infectious_period = covid19.UNKNOWN
         if sd_infectious_period == None :
             sd_infectious_period = covid19.UNKNOWN
+        if mean_time_to_symptoms == None :
+            mean_time_to_symptoms = covid19.UNKNOWN
            
-        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c, mean_infectious_period, sd_infectious_period );
+        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c, mean_infectious_period, sd_infectious_period, mean_time_to_symptoms );
 
         return Strain( self, idx )
 

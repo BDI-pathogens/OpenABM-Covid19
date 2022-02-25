@@ -880,7 +880,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
     	hospitalised_fraction = NA, 
     	hospitalised_fraction_multiplier = 1,
     	mean_infectious_period = NA,
-    	sd_infectious_period = NA
+    	sd_infectious_period = NA,
+    	mean_time_to_symptoms = NA
     )
     {
         if( self$n_strains == self$base_params[[ 1 ]][[ "max_n_strains" ]] )
@@ -894,7 +895,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
               hospitalised_fraction   = data$hospitalised_fraction,
               hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier,
               mean_infectious_period = data$mean_infectious_period,
-              sd_infectious_period   = data$sd_infectious_period
+              sd_infectious_period   = data$sd_infectious_period,
+              mean_time_to_symptoms  = data$mean_time_to_symptoms
             )
             strain_idx <- strain$idx()
             strains[[ nidx ]][[ strain_idx + 1 ]] <<- strain
@@ -908,7 +910,8 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           hospitalised_fraction   = hospitalised_fraction,
           hospitalised_fraction_multiplier = hospitalised_fraction_multiplier,
           mean_infectious_period = mean_infectious_period,
-          sd_infectious_period   = sd_infectious_period
+          sd_infectious_period   = sd_infectious_period,
+          mean_time_to_symptoms  = mean_time_to_symptoms
         )
         node_data <- replicate( self$n_nodes, data, simplify = FALSE )
 

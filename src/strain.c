@@ -83,10 +83,10 @@ void initialise_transition_time_distributions(
 	transitions[RECOVERED_SUSCEPTIBLE]                = calloc( N_DRAW_LIST, sizeof( int ) );
 
 	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, params->mean_time_to_symptoms,params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
-	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,         params->sd_time_to_symptoms );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,params->sd_time_to_symptoms );
+	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		     params->sd_time_to_recover );
+	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		     params->sd_time_to_recover );
 	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
 	gamma_draw_list( transitions[CRITICAL_HOSPITALISED_RECOVERING], N_DRAW_LIST, params->mean_time_critical_survive, params->sd_time_critical_survive);
 	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
@@ -104,6 +104,7 @@ void initialise_transition_time_distributions(
 *  				hospitalised_fraction   - strain specific hospitalised fraction
 *  				mean_infectious_period  - strain specific mean_infectious_period (UNKOWN then use default)
 *  				sd_infectious_period    - strain specific sd_infectious_period (UNKOWN then use default)
+*  				mean_time_to_symptoms   - strain specific mean_time_to_symptoms (UNKOWN then use default)
 *
 *  Returns:		void
 ******************************************************************************************/
@@ -112,7 +113,8 @@ short add_new_strain(
 	float transmission_multiplier,
 	double *hospitalised_fraction,
 	double mean_infectious_period,
-	double sd_infectious_period
+	double sd_infectious_period,
+	double mean_time_to_symptoms
 )
 {
 	strain *strain_ptr;
@@ -126,12 +128,15 @@ short add_new_strain(
 		mean_infectious_period = params->mean_infectious_period;
 	if( sd_infectious_period == UNKNOWN )
 		sd_infectious_period = params->sd_infectious_period;
+	if( mean_time_to_symptoms == UNKNOWN )
+		mean_time_to_symptoms = params->mean_time_to_symptoms;
 
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
 	strain_ptr->transmission_multiplier = transmission_multiplier;
 	strain_ptr->mean_infectious_period  = mean_infectious_period;
 	strain_ptr->sd_infectious_period    = sd_infectious_period;
+	strain_ptr->mean_time_to_symptoms   = mean_time_to_symptoms;
 	strain_ptr->total_infected = 0;
 
 	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )

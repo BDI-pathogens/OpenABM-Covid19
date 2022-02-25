@@ -374,7 +374,8 @@ SEXP R_add_new_strain (
 	SEXP R_transisition_multiplier,
 	SEXP R_hospitalised_fraction,
 	SEXP R_mean_infectious_period,
-	SEXP R_sd_infectious_period
+	SEXP R_sd_infectious_period,
+	SEXP R_mean_time_to_symptoms,
 )
 {
   // get the point to the model from the R pointer object
@@ -384,12 +385,13 @@ SEXP R_add_new_strain (
   float transition_multiplier   = asReal( R_transisition_multiplier );
   double mean_infectious_period = asReal( R_mean_infectious_period );
   double sd_infectious_period   = asReal( R_sd_infectious_period );
+  double mean_time_to_symptoms   = asReal( R_mean_time_to_symptoms );
   double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof(double) );
 
   for( int i = 0; i < N_AGE_GROUPS; i++ )
     hospitalised_fraction[ i ] = REAL(R_hospitalised_fraction )[ i ];
 
-  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction, mean_infectious_period, sd_infectious_period);
+  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction, mean_infectious_period, sd_infectious_period, mean_time_to_symptoms);
 
   free( hospitalised_fraction );
 

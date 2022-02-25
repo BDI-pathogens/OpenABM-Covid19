@@ -26,6 +26,7 @@ struct strain{
 	float transmission_multiplier;
 	float mean_infectious_period;
 	float sd_infectious_period;
+	float mean_time_to_symptoms;
 	double hospitalised_fraction[N_AGE_GROUPS];
 	long total_infected;
 	double **infectious_curve;
@@ -36,7 +37,7 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-short add_new_strain( model*, float, double*, double, double );
+short add_new_strain( model*, float, double*, double, double, double );
 void destroy_strain( strain* );
 strain* get_strain_by_id( model*, short );
 
