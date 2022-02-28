@@ -523,9 +523,10 @@ class TestClass(object):
         "test_multi_strain_disease_transition_times": [
             dict(
                 test_params = dict(
-                    n_total=50000,
+                    n_total=100000,
                     n_seed_infection=200,               
                     end_time=30,
+                    rebuild_networks=0,
                     infectious_rate=6.0,
                     max_n_strains=2,
                     mean_time_to_symptoms=4.0,
@@ -1317,6 +1318,9 @@ class TestClass(object):
         Test that the mean and standard deviation of the transition times between
         states agrees with the parameters for 2 strains
         """
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        
         std_error_limit = 4
         
         params = utils.get_params_swig()
