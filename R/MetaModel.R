@@ -875,13 +875,29 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
       return()
     },
 
-    add_new_strain = function( 
-    	transmission_multiplier = 1, 
-    	hospitalised_fraction = NA, 
+    add_new_strain = function(
+    	transmission_multiplier = 1,
+    	hospitalised_fraction = NA,
     	hospitalised_fraction_multiplier = 1,
     	mean_infectious_period = NA,
     	sd_infectious_period = NA,
-    	mean_time_to_symptoms = NA
+    	mean_time_to_symptoms = NA,
+    	sd_time_to_symptoms = NA,
+    	mean_asymptomatic_to_recovery = NA,
+    	sd_asymptomatic_to_recovery = NA,
+    	mean_time_to_recover = NA,
+    	sd_time_to_recover = NA,
+    	mean_time_hospitalised_recovery = NA,
+    	sd_time_hospitalised_recovery = NA,
+    	mean_time_critical_survive = NA,
+    	sd_time_critical_survive = NA,
+    	mean_time_to_death = NA,
+    	sd_time_to_death = NA,
+    	mean_time_to_hospital = NA,
+    	mean_time_to_critical = NA,
+    	sd_time_to_critical = NA,
+    	mean_time_to_susceptible_after_shift = NA,
+    	time_to_susceptible_shift = NA
     )
     {
         if( self$n_strains == self$base_params[[ 1 ]][[ "max_n_strains" ]] )
@@ -896,7 +912,23 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
               hospitalised_fraction_multiplier = data$hospitalised_fraction_multiplier,
               mean_infectious_period = data$mean_infectious_period,
               sd_infectious_period   = data$sd_infectious_period,
-              mean_time_to_symptoms  = data$mean_time_to_symptoms
+              mean_time_to_symptoms  = data$mean_time_to_symptoms,
+              sd_time_to_symptoms = data$sd_time_to_symptoms,
+              mean_asymptomatic_to_recovery = data$mean_asymptomatic_to_recovery,
+              sd_asymptomatic_to_recovery = data$sd_asymptomatic_to_recovery,
+              mean_time_to_recover = data$mean_time_to_recover,
+              sd_time_to_recover = data$sd_time_to_recover,
+              mean_time_hospitalised_recovery = data$mean_time_hospitalised_recovery,
+              sd_time_hospitalised_recovery = data$sd_time_hospitalised_recovery,
+              mean_time_critical_survive = data$mean_time_critical_survive,
+              sd_time_critical_survive = data$sd_time_critical_survive,
+              mean_time_to_death = data$mean_time_to_death,
+              sd_time_to_death = data$sd_time_to_death,
+              mean_time_to_hospital = data$mean_time_to_hospital,
+              mean_time_to_critical = data$mean_time_to_critical,
+              sd_time_to_critical = data$sd_time_to_critical,
+              mean_time_to_susceptible_after_shift = data$mean_time_to_susceptible_after_shift,
+              time_to_susceptible_shift = data$time_to_susceptible_shift
             )
             strain_idx <- strain$idx()
             strains[[ nidx ]][[ strain_idx + 1 ]] <<- strain
@@ -911,7 +943,23 @@ MetaModel <- R6Class( classname = 'MetaModel', cloneable = FALSE,
           hospitalised_fraction_multiplier = hospitalised_fraction_multiplier,
           mean_infectious_period = mean_infectious_period,
           sd_infectious_period   = sd_infectious_period,
-          mean_time_to_symptoms  = mean_time_to_symptoms
+          mean_time_to_symptoms  = mean_time_to_symptoms,
+          sd_time_to_symptoms = sd_time_to_symptoms,
+          mean_asymptomatic_to_recovery = mean_asymptomatic_to_recovery,
+          sd_asymptomatic_to_recovery = sd_asymptomatic_to_recovery,
+          mean_time_to_recover = mean_time_to_recover,
+          sd_time_to_recover = sd_time_to_recover,
+          mean_time_hospitalised_recovery = mean_time_hospitalised_recovery,
+          sd_time_hospitalised_recovery = sd_time_hospitalised_recovery,
+          mean_time_critical_survive = mean_time_critical_survive,
+          sd_time_critical_survive = sd_time_critical_survive,
+          mean_time_to_death = mean_time_to_death,
+          sd_time_to_death = sd_time_to_death,
+          mean_time_to_hospital = mean_time_to_hospital,
+          mean_time_to_critical = mean_time_to_critical,
+          sd_time_to_critical = sd_time_to_critical,
+          mean_time_to_susceptible_after_shift = mean_time_to_susceptible_after_shift,
+          time_to_susceptible_shift = time_to_susceptible_shift,
         )
         node_data <- replicate( self$n_nodes, data, simplify = FALSE )
 
