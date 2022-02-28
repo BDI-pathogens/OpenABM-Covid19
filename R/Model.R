@@ -724,12 +724,27 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     	hospitalised_fraction_multiplier = 1,
     	mean_infectious_period = NA,
     	sd_infectious_period = NA,
-    	mean_time_to_symptoms = NA
+    	mean_time_to_symptoms = NA,
+    	sd_time_to_symptoms = NA,
+        mean_asymptomatic_to_recovery = NA,
+        sd_asymptomatic_to_recovery = NA,
+        mean_time_to_recover = NA,
+        sd_time_to_recover = NA,
+        mean_time_hospitalised_recovery = NA,
+        sd_time_hospitalised_recovery = NA,
+        mean_time_critical_survive = NA,
+        sd_time_critical_survive = NA,
+        mean_time_to_death = NA,
+        sd_time_to_death = NA,
+        mean_time_to_hospital = NA,
+        mean_time_to_critical = NA,
+        sd_time_to_critical = NA,
+        mean_time_to_susceptible_after_shift = NA,
+        time_to_susceptible_shift = NA
     )
     {
-
-      max_n_strains = self$get_param( "max_n_strains" )
-      n_strains = self$c_model$n_initialised_strains;
+      max_n_strains <- self$get_param( "max_n_strains" )
+      n_strains     <- self$c_model$n_initialised_strains;
 
       if( n_strains == max_n_strains )
         stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
@@ -744,15 +759,51 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       }
 
       if( is.na( mean_infectious_period ) )
-      	mean_infectious_period = UNKNOWN;
+      	mean_infectious_period <- UNKNOWN;
       if( is.na( sd_infectious_period ) )
-      	sd_infectious_period = UNKNOWN;
+      	sd_infectious_period <- UNKNOWN;
       if( is.na( mean_time_to_symptoms ) )
-      	mean_time_to_symptoms = UNKNOWN;
+      	mean_time_to_symptoms <- UNKNOWN;
+      if( is.na( sd_time_to_symptoms ) )
+      	sd_time_to_symptoms <- UNKNOWN;
+	    if( is.na( mean_asymptomatic_to_recovery ) )
+      	mean_asymptomatic_to_recovery <- UNKNOWN;
+      if( is.na( sd_asymptomatic_to_recovery ) )
+      	sd_asymptomatic_to_recovery <- UNKNOWN;
+      if( is.na( mean_time_to_recover ) )
+      	mean_time_to_recover <- UNKNOWN;
+      if( is.na( sd_time_to_recover ) )
+      	sd_time_to_recover <- UNKNOWN;
+      if( is.na( mean_time_hospitalised_recovery ) )
+      	mean_time_hospitalised_recovery <- UNKNOWN;
+      if( is.na( sd_time_hospitalised_recovery ) )
+      	sd_time_hospitalised_recovery <- UNKNOWN;
+      if( is.na( mean_time_critical_survive ) )
+      	mean_time_critical_survive <- UNKNOWN;
+      if( is.na( sd_time_critical_survive ) )
+      	sd_time_critical_survive <- UNKNOWN;
+      if( is.na( mean_time_to_death ) )
+      	mean_time_to_death <- UNKNOWN;
+      if( is.na( sd_time_to_death ) )
+      	sd_time_to_death <- UNKNOWN;
+      if( is.na( mean_time_to_hospital ) )
+      	mean_time_to_hospital <- UNKNOWN;
+      if( is.na( mean_time_to_critical ) )
+      	mean_time_to_critical <- UNKNOWN;
+      if( is.na( sd_time_to_critical ) )
+      	sd_time_to_critical <- UNKNOWN;
+      if( is.na( mean_time_to_susceptible_after_shift ) )
+      	mean_time_to_susceptible_after_shift <- UNKNOWN;
+      if( is.na( time_to_susceptible_shift ) )
+      	time_to_susceptible_shift <- UNKNOWN;
 
       c_model_ptr <- private$c_model_ptr()
-      strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,hospitalised_fraction, 
-      	mean_infectious_period, sd_infectious_period, mean_time_to_symptoms, PACKAGE='OpenABMCovid19');
+      strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,hospitalised_fraction,
+      	mean_infectious_period, sd_infectious_period, mean_time_to_symptoms,  sd_time_to_symptoms, mean_asymptomatic_to_recovery,
+		    sd_asymptomatic_to_recovery, mean_time_to_recover, sd_time_to_recover, mean_time_hospitalised_recovery,
+		    sd_time_hospitalised_recovery, mean_time_critical_survive, sd_time_critical_survive, mean_time_to_death,
+		    sd_time_to_death, mean_time_to_hospital,mean_time_to_critical, sd_time_to_critical, mean_time_to_susceptible_after_shift,
+		    time_to_susceptible_shift, PACKAGE='OpenABMCovid19');
 
       private$.strains[[ strain_idx + 1 ]] <- Strain$new( self, strain_idx )
       return( private$.strains[[ strain_idx + 1 ]] )
