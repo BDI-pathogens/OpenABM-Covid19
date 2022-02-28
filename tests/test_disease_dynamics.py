@@ -542,22 +542,49 @@ class TestClass(object):
                     sd_time_hospitalised_recovery=3,
                     mean_time_critical_survive=4,
                     sd_time_critical_survive=2,
+                    hospitalised_fraction_0_9  =0.2,
+                    hospitalised_fraction_10_19=0.2,
+                    hospitalised_fraction_20_29=0.2,
+                    hospitalised_fraction_30_39=0.2,
+                    hospitalised_fraction_40_49=0.2,
+                    hospitalised_fraction_50_59=0.2,
+                    hospitalised_fraction_60_69=0.2,
+                    hospitalised_fraction_70_79=0.2,
+                    hospitalised_fraction_80   =0.2,
+                    critical_fraction_0_9  =0.50,
+                    critical_fraction_10_19=0.50,
+                    critical_fraction_20_29=0.50,
+                    critical_fraction_30_39=0.50,
+                    critical_fraction_40_49=0.50,
+                    critical_fraction_50_59=0.50,
+                    critical_fraction_60_69=0.50,
+                    critical_fraction_70_79=0.50,
+                    critical_fraction_80   =0.50,
+                    fatality_fraction_0_9  =0.50,
+                    fatality_fraction_10_19=0.50,
+                    fatality_fraction_20_29=0.50,
+                    fatality_fraction_30_39=0.50,
+                    fatality_fraction_40_49=0.50,
+                    fatality_fraction_50_59=0.50,
+                    fatality_fraction_60_69=0.50,
+                    fatality_fraction_70_79=0.50,
+                    fatality_fraction_80   =0.50,
                 ),
                 strain1_params = dict(    
                     mean_time_to_symptoms=6.0,
                     sd_time_to_symptoms=3.0,
                     mean_time_to_hospital=1.8,
-                    mean_time_to_critical=2.0,
+                    mean_time_to_critical=3.0,
                     mean_time_to_recover=12.0,
                     sd_time_to_recover=6.0,
-                    mean_time_to_death=18.0,
-                    sd_time_to_death=6,
-                    mean_asymptomatic_to_recovery=14.0,
-                    sd_asymptomatic_to_recovery=5.0,
-                    mean_time_hospitalised_recovery=8,
-                    sd_time_hospitalised_recovery=3,
-                    mean_time_critical_survive=6,
-                    sd_time_critical_survive=3,
+                    mean_time_to_death=24.0,
+                    sd_time_to_death=15,
+                    mean_asymptomatic_to_recovery=10.0,
+                    sd_asymptomatic_to_recovery=3.0,
+                    mean_time_hospitalised_recovery=10,
+                    sd_time_hospitalised_recovery=6,
+                    mean_time_critical_survive=8,
+                    sd_time_critical_survive=3.
                 )
             ),
         ],
@@ -1299,7 +1326,21 @@ class TestClass(object):
 
         # add a new strain and seed the infection
         new_strain = model.add_new_strain( 1, 
-            mean_time_to_symptoms = strain1_params[ "mean_time_to_symptoms" ] )
+            mean_time_to_symptoms = strain1_params[ "mean_time_to_symptoms" ],
+            sd_time_to_symptoms   = strain1_params[ "sd_time_to_symptoms" ],
+            mean_time_to_hospital = strain1_params[ "mean_time_to_hospital" ],
+            mean_time_to_critical = strain1_params[ "mean_time_to_critical" ],
+            mean_time_to_recover  = strain1_params[ "mean_time_to_recover" ],
+            sd_time_to_recover    = strain1_params[ "sd_time_to_recover" ],
+            mean_time_to_death    = strain1_params[ "mean_time_to_death" ],
+            sd_time_to_death      = strain1_params[ "sd_time_to_death" ],  
+            mean_asymptomatic_to_recovery   = strain1_params[ "mean_asymptomatic_to_recovery" ],
+            sd_asymptomatic_to_recovery     = strain1_params[ "sd_asymptomatic_to_recovery" ],
+            mean_time_hospitalised_recovery = strain1_params[ "mean_time_hospitalised_recovery" ],
+            sd_time_hospitalised_recovery   = strain1_params[ "sd_time_hospitalised_recovery" ],
+            mean_time_critical_survive      = strain1_params[ "mean_time_critical_survive" ],
+            sd_time_critical_survive        = strain1_params[ "sd_time_critical_survive" ],
+        )
         seeds      = np.random.choice( test_params["n_total"], test_params["n_seed_infection"], replace=False)
         for idx in range( test_params["n_seed_infection"] ) :
             model.seed_infect_by_idx( seeds[ idx ], strain = new_strain )
@@ -1316,45 +1357,72 @@ class TestClass(object):
         np.testing.assert_allclose(t_p_s.mean(),test_params[ "mean_time_to_symptoms" ], atol=std_error_limit * t_p_s.std() / sqrt(len(t_p_s)))
         np.testing.assert_allclose(t_p_s.std(), test_params[ "sd_time_to_symptoms" ],   atol=std_error_limit * t_p_s.std() / sqrt(len(t_p_s)))
         np.testing.assert_allclose(t_p_s_1.mean(),strain1_params[ "mean_time_to_symptoms" ], atol=std_error_limit * t_p_s_1.std() / sqrt(len(t_p_s_1)))
+        np.testing.assert_allclose(t_p_s_1.std(), strain1_params[ "sd_time_to_symptoms" ],   atol=std_error_limit * t_p_s_1.std() / sqrt(len(t_p_s_1)))
 
         # time showing symptoms until going to hospital
         df_trans["t_s_h"] = df_trans["time_hospitalised"] - df_trans["time_symptomatic"]
-        t_s_h = df_trans[(df_trans["time_hospitalised"] > 0)]["t_s_h"] 
-        np.testing.assert_allclose(t_s_h.mean(), test_params[ "mean_time_to_hospital" ], atol=std_error_limit * t_s_h.std() / sqrt(len(t_s_h)))
+        df_t_s_h = df_trans[(df_trans["time_hospitalised"] > 0)]
+        t_s_h    = df_t_s_h[ df_t_s_h["strain_idx"]==0]["t_s_h"] 
+        t_s_h_1  = df_t_s_h[ df_t_s_h["strain_idx"]==1]["t_s_h"] 
+        np.testing.assert_allclose(t_s_h.mean(),   test_params[ "mean_time_to_hospital" ],    atol=std_error_limit * t_s_h.std() / sqrt(len(t_s_h)))
+        np.testing.assert_allclose(t_s_h_1.mean(), strain1_params[ "mean_time_to_hospital" ], atol=std_error_limit * t_s_h_1.std() / sqrt(len(t_s_h_1)))
 
         # time hospitalised until moving to the ICU
         df_trans["t_h_c"] = df_trans["time_critical"] - df_trans["time_hospitalised"]
-        t_h_c = df_trans[(df_trans["time_critical"] > 0)]["t_h_c"];
-        np.testing.assert_allclose(t_h_c.mean(), test_params[ "mean_time_to_critical" ], atol=std_error_limit * t_h_c.std() / sqrt(len(t_h_c)))
+        df_t_h_c = df_trans[(df_trans["time_critical"] > 0)];
+        t_h_c   = df_t_h_c[df_t_h_c["strain_idx"]==0]["t_h_c"];
+        t_h_c_1 = df_t_h_c[df_t_h_c["strain_idx"]==1]["t_h_c"];
+        np.testing.assert_allclose(t_h_c.mean(),   test_params[ "mean_time_to_critical" ], atol=std_error_limit * t_h_c.std() / sqrt(len(t_h_c)))
+        np.testing.assert_allclose(t_h_c_1.mean(), strain1_params[ "mean_time_to_critical" ], atol=std_error_limit * t_h_c_1.std() / sqrt(len(t_h_c_1)))
 
         # time from symptoms to recover if not hospitalised
         df_trans["t_s_r"] = df_trans["time_recovered"] - df_trans["time_symptomatic"]
-        t_s_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_asymptomatic"] < 0) & (df_trans["time_hospitalised"] <  0)]["t_s_r"]
-        np.testing.assert_allclose(t_s_r.mean(),test_params[ "mean_time_to_recover" ],atol=std_error_limit * t_s_r.std() / sqrt(len(t_s_r)))
-        np.testing.assert_allclose(t_s_r.std(), test_params[ "sd_time_to_recover" ],  atol=std_error_limit * t_s_r.std() / sqrt(len(t_s_r)))
+        df_t_s_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_asymptomatic"] < 0) & (df_trans["time_hospitalised"] <  0)]
+        t_s_r   = df_t_s_r[df_t_s_r["strain_idx"]==0]["t_s_r"]
+        t_s_r_1 = df_t_s_r[df_t_s_r["strain_idx"]==1]["t_s_r"]
+        np.testing.assert_allclose(t_s_r.mean(),  test_params[ "mean_time_to_recover" ],   atol=std_error_limit * t_s_r.std() / sqrt(len(t_s_r)))
+        np.testing.assert_allclose(t_s_r.std(),   test_params[ "sd_time_to_recover" ],     atol=std_error_limit * t_s_r.std() / sqrt(len(t_s_r)))
+        np.testing.assert_allclose(t_s_r_1.mean(),strain1_params[ "mean_time_to_recover" ],atol=std_error_limit * t_s_r_1.std() / sqrt(len(t_s_r_1)))
+        np.testing.assert_allclose(t_s_r_1.std(), strain1_params[ "sd_time_to_recover" ],  atol=std_error_limit * t_s_r_1.std() / sqrt(len(t_s_r_1)))
 
         # time from hospitalised to recover if don't got to ICU
         df_trans["t_h_r"] = df_trans["time_recovered"] - df_trans["time_hospitalised"]
-        t_h_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_critical"] < 0) & (df_trans["time_hospitalised"] > 0)]["t_h_r"]     
-        np.testing.assert_allclose(t_h_r.mean(),test_params[ "mean_time_hospitalised_recovery" ],atol=std_error_limit * t_h_r.std() / sqrt(len(t_h_r)))
-        np.testing.assert_allclose(t_h_r.std(), test_params[ "sd_time_hospitalised_recovery" ],  atol=std_error_limit * t_h_r.std() / sqrt(len(t_h_r)))
+        df_t_h_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_critical"] < 0) & (df_trans["time_hospitalised"] > 0)]
+        t_h_r    = df_t_h_r[df_t_h_r["strain_idx"]==0]["t_h_r"]     
+        t_h_r_1  = df_t_h_r[df_t_h_r["strain_idx"]==1]["t_h_r"]     
+        np.testing.assert_allclose(t_h_r.mean(),  test_params[ "mean_time_hospitalised_recovery" ],   atol=std_error_limit * t_h_r.std() / sqrt(len(t_h_r)))
+        np.testing.assert_allclose(t_h_r.std(),   test_params[ "sd_time_hospitalised_recovery" ],     atol=std_error_limit * t_h_r.std() / sqrt(len(t_h_r)))
+        np.testing.assert_allclose(t_h_r_1.mean(),strain1_params[ "mean_time_hospitalised_recovery" ],atol=std_error_limit * t_h_r_1.std() / sqrt(len(t_h_r_1)))
+        np.testing.assert_allclose(t_h_r_1.std(), strain1_params[ "sd_time_hospitalised_recovery" ],  atol=std_error_limit * t_h_r_1.std() / sqrt(len(t_h_r_1)))
 
         # time in ICU
         df_trans["t_c_r"] = df_trans["time_hospitalised_recovering"] - df_trans["time_critical"]
-        t_c_r = df_trans[ (df_trans["time_hospitalised_recovering"] > 0) & (df_trans["time_critical"] > 0)]["t_c_r"]
-        np.testing.assert_allclose(t_c_r.mean(),test_params[ "mean_time_critical_survive" ],atol=std_error_limit * t_c_r.std() / sqrt(len(t_c_r)))
-        np.testing.assert_allclose(t_c_r.std(), test_params[ "sd_time_critical_survive" ],  atol=std_error_limit * t_c_r.std() / sqrt(len(t_c_r)))
+        df_t_c_r = df_trans[ (df_trans["time_hospitalised_recovering"] > 0) & (df_trans["time_critical"] > 0)]
+        t_c_r    = df_t_c_r[df_t_c_r["strain_idx"]==0]["t_c_r"]
+        t_c_r_1  = df_t_c_r[df_t_c_r["strain_idx"]==1]["t_c_r"]
+        np.testing.assert_allclose(t_c_r.mean(),  test_params[ "mean_time_critical_survive" ],   atol=std_error_limit * t_c_r.std() / sqrt(len(t_c_r)))
+        np.testing.assert_allclose(t_c_r.std(),   test_params[ "sd_time_critical_survive" ],     atol=std_error_limit * t_c_r.std() / sqrt(len(t_c_r)))
+        np.testing.assert_allclose(t_c_r_1.mean(),strain1_params[ "mean_time_critical_survive" ],atol=std_error_limit * t_c_r_1.std() / sqrt(len(t_c_r_1)))
+        np.testing.assert_allclose(t_c_r_1.std(), strain1_params[ "sd_time_critical_survive" ],  atol=std_error_limit * t_c_r_1.std() / sqrt(len(t_c_r_1)))
 
         # time from ICU to death
         df_trans["t_c_d"] = df_trans["time_death"] - df_trans["time_critical"]
-        t_c_d =  df_trans[(df_trans["time_death"] > 0) & (df_trans["time_critical"] > 0) ]["t_c_d"]
-        np.testing.assert_allclose(t_c_d.mean(),test_params[ "mean_time_to_death" ],atol=std_error_limit * t_c_d.std() / sqrt(len(t_c_d)))
-        np.testing.assert_allclose(t_c_d.std(), test_params[ "sd_time_to_death" ],  atol=std_error_limit * t_c_d.std() / sqrt(len(t_c_d)))
+        df_t_c_d =  df_trans[(df_trans["time_death"] > 0) & (df_trans["time_critical"] > 0) ]
+        t_c_d   = df_t_c_d[df_t_c_d["strain_idx"]==0]["t_c_d"]
+        t_c_d_1 = df_t_c_d[df_t_c_d["strain_idx"]==1]["t_c_d"]
+        np.testing.assert_allclose(t_c_d.mean(),  test_params[ "mean_time_to_death" ],   atol=std_error_limit * t_c_d.std() / sqrt(len(t_c_d)))
+        np.testing.assert_allclose(t_c_d.std(),   test_params[ "sd_time_to_death" ],     atol=std_error_limit * t_c_d.std() / sqrt(len(t_c_d)))
+        np.testing.assert_allclose(t_c_d_1.mean(),strain1_params[ "mean_time_to_death" ],atol=std_error_limit * t_c_d_1.std() / sqrt(len(t_c_d_1)))
+        np.testing.assert_allclose(t_c_d_1.std(), strain1_params[ "sd_time_to_death" ],  atol=std_error_limit * t_c_d_1.std() / sqrt(len(t_c_d_1)))
 
         # time from asymptomatic to recover
         df_trans["t_a_r"] = df_trans["time_recovered"] - df_trans["time_asymptomatic"]
-        t_a_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_asymptomatic"] > 0)]["t_a_r"]
-        np.testing.assert_allclose(t_a_r.mean(),test_params[ "mean_asymptomatic_to_recovery" ],atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))
-        np.testing.assert_allclose(t_a_r.std(), test_params[ "sd_asymptomatic_to_recovery" ],  atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))        
+        df_t_a_r = df_trans[(df_trans["time_recovered"] > 0) & (df_trans["time_asymptomatic"] > 0)]
+        t_a_r    = df_t_a_r[df_t_a_r["strain_idx"]==0]["t_a_r"]
+        t_a_r_1  = df_t_a_r[df_t_a_r["strain_idx"]==1]["t_a_r"]
+        np.testing.assert_allclose(t_a_r.mean(),  test_params[ "mean_asymptomatic_to_recovery" ],   atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))
+        np.testing.assert_allclose(t_a_r.std(),   test_params[ "sd_asymptomatic_to_recovery" ],     atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))        
+        np.testing.assert_allclose(t_a_r_1.mean(),strain1_params[ "mean_asymptomatic_to_recovery" ],atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))
+        np.testing.assert_allclose(t_a_r_1.std(), strain1_params[ "sd_asymptomatic_to_recovery" ],  atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))
             
         

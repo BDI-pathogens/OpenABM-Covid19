@@ -59,10 +59,7 @@ gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC], MAX_INFECTIOUS_P
 *  Name:		initialise_transition_time_distributions
 *  Returns:		void
 ******************************************************************************************/
-void initialise_transition_time_distributions(
-	strain *strain_ptr,
-	parameters *params
-)
+void initialise_transition_time_distributions( strain *strain_ptr )
 {
 	int **transitions;
 
@@ -82,18 +79,18 @@ void initialise_transition_time_distributions(
 	transitions[HOSPITALISED_CRITICAL]                = calloc( N_DRAW_LIST, sizeof( int ) );
 	transitions[RECOVERED_SUSCEPTIBLE]                = calloc( N_DRAW_LIST, sizeof( int ) );
 
-	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,         params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		     params->sd_time_to_recover );
-	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		     params->sd_time_to_recover );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	gamma_draw_list( transitions[CRITICAL_HOSPITALISED_RECOVERING], N_DRAW_LIST, params->mean_time_critical_survive, params->sd_time_critical_survive);
-	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
-	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],       N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
-	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, params->mean_time_to_susceptible_after_shift, params->time_to_susceptible_shift );
+	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, strain_ptr->mean_asymptomatic_to_recovery, strain_ptr->sd_asymptomatic_to_recovery );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,         strain_ptr->sd_time_to_symptoms );
+	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,strain_ptr->sd_time_to_symptoms );
+	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, strain_ptr->mean_time_to_recover,  		     strain_ptr->sd_time_to_recover );
+	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, strain_ptr->mean_time_to_recover,  		     strain_ptr->sd_time_to_recover );
+	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, strain_ptr->mean_time_hospitalised_recovery, strain_ptr->sd_time_hospitalised_recovery);
+	gamma_draw_list( transitions[CRITICAL_HOSPITALISED_RECOVERING], N_DRAW_LIST, strain_ptr->mean_time_critical_survive, strain_ptr->sd_time_critical_survive);
+	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, strain_ptr->mean_time_to_death,    		     strain_ptr->sd_time_to_death );
+	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, strain_ptr->mean_time_hospitalised_recovery, strain_ptr->sd_time_hospitalised_recovery);
+	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, strain_ptr->mean_time_to_hospital );
+	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],       N_DRAW_LIST, strain_ptr->mean_time_to_critical, strain_ptr->sd_time_to_critical );
+	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, strain_ptr->mean_time_to_susceptible_after_shift, strain_ptr->time_to_susceptible_shift );
 }
 
 /*****************************************************************************************
@@ -114,7 +111,23 @@ short add_new_strain(
 	double *hospitalised_fraction,
 	double mean_infectious_period,
 	double sd_infectious_period,
-	double mean_time_to_symptoms
+	double mean_time_to_symptoms,
+	double sd_time_to_symptoms,
+	double mean_asymptomatic_to_recovery,
+	double sd_asymptomatic_to_recovery,
+	double mean_time_to_recover,
+	double sd_time_to_recover,
+	double mean_time_hospitalised_recovery,
+	double sd_time_hospitalised_recovery,
+	double mean_time_critical_survive,
+	double sd_time_critical_survive,
+	double mean_time_to_death,
+	double sd_time_to_death,
+	double mean_time_to_hospital,
+	double mean_time_to_critical,
+	double sd_time_to_critical,
+	double mean_time_to_susceptible_after_shift,
+	double time_to_susceptible_shift
 )
 {
 	strain *strain_ptr;
@@ -130,6 +143,38 @@ short add_new_strain(
 		sd_infectious_period = params->sd_infectious_period;
 	if( mean_time_to_symptoms == UNKNOWN )
 		mean_time_to_symptoms = params->mean_time_to_symptoms;
+	if( sd_time_to_symptoms == UNKNOWN )
+		sd_time_to_symptoms = params->sd_time_to_symptoms;
+	if( mean_asymptomatic_to_recovery == UNKNOWN )
+		mean_asymptomatic_to_recovery = params->mean_asymptomatic_to_recovery;
+	if( sd_asymptomatic_to_recovery == UNKNOWN )
+		sd_asymptomatic_to_recovery	= params->sd_asymptomatic_to_recovery;
+	if( mean_time_to_recover == UNKNOWN )
+		mean_time_to_recover = params->mean_time_to_recover;
+	if( sd_time_to_recover == UNKNOWN )
+		sd_time_to_recover	= params->sd_time_to_recover;
+	if( mean_time_hospitalised_recovery == UNKNOWN )
+		mean_time_hospitalised_recovery	= params->mean_time_hospitalised_recovery;
+	if( sd_time_hospitalised_recovery == UNKNOWN )
+		sd_time_hospitalised_recovery = params->sd_time_hospitalised_recovery;
+	if( mean_time_critical_survive == UNKNOWN )
+		mean_time_critical_survive = params->mean_time_critical_survive;
+	if( sd_time_critical_survive == UNKNOWN )
+		sd_time_critical_survive = params->sd_time_critical_survive;
+	if( mean_time_to_death == UNKNOWN )
+		mean_time_to_death = params->mean_time_to_death;
+	if( sd_time_to_death == UNKNOWN )
+		sd_time_to_death = params->sd_time_to_death;
+	if( mean_time_to_hospital == UNKNOWN )
+		mean_time_to_hospital = params->mean_time_to_hospital;
+	if( mean_time_to_critical == UNKNOWN )
+		mean_time_to_critical = params->mean_time_to_critical;
+	if( sd_time_to_critical == UNKNOWN )
+		sd_time_to_critical = params->sd_time_to_critical;
+	if( mean_time_to_susceptible_after_shift == UNKNOWN )
+		mean_time_to_susceptible_after_shift = params->mean_time_to_susceptible_after_shift;
+	if( time_to_susceptible_shift== UNKNOWN )
+		time_to_susceptible_shift = params->time_to_susceptible_shift;
 
 	strain_ptr = &(model->strains[ model->n_initialised_strains ]);
 	strain_ptr->idx 					= model->n_initialised_strains;
@@ -137,13 +182,29 @@ short add_new_strain(
 	strain_ptr->mean_infectious_period  = mean_infectious_period;
 	strain_ptr->sd_infectious_period    = sd_infectious_period;
 	strain_ptr->mean_time_to_symptoms   = mean_time_to_symptoms;
+	strain_ptr->sd_time_to_symptoms				= sd_time_to_symptoms;
+	strain_ptr->mean_asymptomatic_to_recovery	= mean_asymptomatic_to_recovery;
+	strain_ptr->sd_asymptomatic_to_recovery		= sd_asymptomatic_to_recovery;
+	strain_ptr->mean_time_to_recover			= mean_time_to_recover;
+	strain_ptr->sd_time_to_recover				= sd_time_to_recover;
+	strain_ptr->mean_time_hospitalised_recovery = mean_time_hospitalised_recovery;
+	strain_ptr->sd_time_hospitalised_recovery	= sd_time_hospitalised_recovery;
+	strain_ptr->mean_time_critical_survive		= mean_time_critical_survive;
+	strain_ptr->sd_time_critical_survive		= sd_time_critical_survive;
+	strain_ptr->mean_time_to_death				= mean_time_to_death;
+	strain_ptr->sd_time_to_death				= sd_time_to_death;
+	strain_ptr->mean_time_to_hospital			= mean_time_to_hospital;
+	strain_ptr->mean_time_to_critical			= mean_time_to_critical;
+	strain_ptr->sd_time_to_critical				= sd_time_to_critical;
+	strain_ptr->mean_time_to_susceptible_after_shift = mean_time_to_susceptible_after_shift;
+	strain_ptr->time_to_susceptible_shift		= time_to_susceptible_shift;
 	strain_ptr->total_infected = 0;
 
 	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
 		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];
 
 	initialise_infectious_curves( strain_ptr, params );
-	initialise_transition_time_distributions( strain_ptr, params );
+	initialise_transition_time_distributions( strain_ptr );
 
 	model->n_initialised_strains++;
 	return(  model->n_initialised_strains - 1 );

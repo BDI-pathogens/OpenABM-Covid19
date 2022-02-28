@@ -859,7 +859,23 @@ class Model:
             hospitalised_fraction = None,  
             mean_infectious_period = None,
             sd_infectious_period = None,
-            mean_time_to_symptoms = None
+            mean_time_to_symptoms = None,
+            sd_time_to_symptoms = None,
+            mean_asymptomatic_to_recovery = None,
+            sd_asymptomatic_to_recovery = None,
+            mean_time_to_recover = None,
+            sd_time_to_recover = None,
+            mean_time_hospitalised_recovery = None,
+            sd_time_hospitalised_recovery = None,
+            mean_time_critical_survive = None,
+            sd_time_critical_survive = None,
+            mean_time_to_death = None,
+            sd_time_to_death = None,
+            mean_time_to_hospital = None,
+            mean_time_to_critical = None,
+            sd_time_to_critical = None,
+            mean_time_to_susceptible_after_shift = None,
+            time_to_susceptible_shift = None,
         ):     
         
         """
@@ -871,8 +887,24 @@ class Model:
         mean_infectious_period - the mean infectious period (default: is no change)
         sd_infectious_period   - the sd infectious period (default: is no change)
         mean_time_to_symptoms  - mean time to symptoms (default: is no change)
+        sd_time_to_symptoms
+        mean_asymptomatic_to_recovery
+        sd_asymptomatic_to_recovery
+        mean_time_to_recover
+        sd_time_to_recover
+        mean_time_hospitalised_recovery
+        sd_time_hospitalised_recovery
+        mean_time_critical_survive
+        sd_time_critical_survive
+        mean_time_to_death
+        sd_time_to_death
+        mean_time_to_hospital
+        mean_time_to_critical
+        sd_time_to_critical
+        mean_time_to_susceptible_after_shift
+        time_to_susceptible_shift
         """  
-
+    
         n_strains = self.c_model.n_initialised_strains;
         max_n_strains = self._params_obj.get_param("max_n_strains")
 
@@ -891,9 +923,46 @@ class Model:
             sd_infectious_period = covid19.UNKNOWN
         if mean_time_to_symptoms == None :
             mean_time_to_symptoms = covid19.UNKNOWN
+        if sd_time_to_symptoms == None :
+            sd_time_to_symptoms = covid19.UNKNOWN
+        if mean_asymptomatic_to_recovery == None :
+            mean_asymptomatic_to_recovery = covid19.UNKNOWN
+        if sd_asymptomatic_to_recovery == None :
+            sd_asymptomatic_to_recovery = covid19.UNKNOWN
+        if mean_time_to_recover == None :
+            mean_time_to_recover = covid19.UNKNOWN
+        if sd_time_to_recover == None :
+            sd_time_to_recover = covid19.UNKNOWN
+        if mean_time_hospitalised_recovery == None :
+            mean_time_hospitalised_recovery = covid19.UNKNOWN
+        if sd_time_hospitalised_recovery == None :
+            sd_time_hospitalised_recovery = covid19.UNKNOWN
+        if mean_time_critical_survive == None :
+            mean_time_critical_survive = covid19.UNKNOWN
+        if sd_time_critical_survive == None :
+            sd_time_critical_survive = covid19.UNKNOWN                             
+        if mean_time_to_death == None :
+            mean_time_to_death = covid19.UNKNOWN  
+        if sd_time_to_death == None :
+            sd_time_to_death = covid19.UNKNOWN
+        if mean_time_to_hospital == None :
+            mean_time_to_hospital = covid19.UNKNOWN
+        if mean_time_to_critical == None :
+            mean_time_to_critical = covid19.UNKNOWN
+        if sd_time_to_critical == None :
+            sd_time_to_critical = covid19.UNKNOWN
+        if mean_time_to_susceptible_after_shift == None :
+            mean_time_to_susceptible_after_shift = covid19.UNKNOWN
+        if time_to_susceptible_shift == None :
+            time_to_susceptible_shift = covid19.UNKNOWN
            
-        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c, mean_infectious_period, sd_infectious_period, mean_time_to_symptoms );
-
+        idx = covid19.add_new_strain( self.c_model, 
+                transmission_multiplier, hospitalised_fraction_c, mean_infectious_period, sd_infectious_period, mean_time_to_symptoms,
+                sd_time_to_symptoms, mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, mean_time_to_recover, 
+                sd_time_to_recover, mean_time_hospitalised_recovery, sd_time_hospitalised_recovery, mean_time_critical_survive, 
+                sd_time_critical_survive, mean_time_to_death, sd_time_to_death, mean_time_to_hospital, mean_time_to_critical, 
+                sd_time_to_critical, mean_time_to_susceptible_after_shift, time_to_susceptible_shift );              
+    
         return Strain( self, idx )
 
     def set_cross_immunity_matrix(self, cross_immunity ):

@@ -756,7 +756,9 @@ void set_up_seed_infection( model *model )
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, hospitalised_fraction, UNKNOWN, UNKNOWN, UNKNOWN );
+	strain_idx = add_new_strain( model, 1, hospitalised_fraction, UNKNOWN,
+	 UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,
+	 UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN );
 
 	while( idx < params->n_seed_infection )
 	{
