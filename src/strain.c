@@ -108,7 +108,12 @@ void initialise_transition_time_distributions( strain *strain_ptr )
 short add_new_strain(
 	model *model,
 	float transmission_multiplier,
+	double *fraction_asymptomatic,
+	double *mild_fraction,
 	double *hospitalised_fraction,
+	double *critical_fraction,
+	double *fatality_fraction,
+	double *location_death_icu,
 	double mean_infectious_period,
 	double sd_infectious_period,
 	double mean_time_to_symptoms,
@@ -200,8 +205,14 @@ short add_new_strain(
 	strain_ptr->time_to_susceptible_shift		= time_to_susceptible_shift;
 	strain_ptr->total_infected = 0;
 
-	for( int idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( int idx = 0; idx < N_AGE_GROUPS; idx++ ) {
 		strain_ptr->hospitalised_fraction[ idx ] = hospitalised_fraction[ idx ];
+		strain_ptr->fraction_asymptomatic[ idx ] = fraction_asymptomatic[ idx ];
+		strain_ptr->mild_fraction[ idx ]         = mild_fraction[ idx ];
+		strain_ptr->critical_fraction[ idx ]     = critical_fraction[ idx ];
+		strain_ptr->fatality_fraction[ idx ]     = fatality_fraction[ idx ];
+		strain_ptr->location_death_icu[ idx ]    = location_death_icu[ idx ];
+ 	}
 
 	initialise_infectious_curves( strain_ptr, params );
 	initialise_transition_time_distributions( strain_ptr );

@@ -17,11 +17,13 @@ import numpy as np, pandas as pd
 from math import sqrt
 
 sys.path.append("src/COVID19")
+
 from parameters import ParameterSet
 from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES, AgeGroupEnum
 from . import constant
 from . import utilities as utils
 import covid19
+import COVID19.model as abm
 
 def pytest_generate_tests(metafunc):
     # called once per each test function
@@ -589,6 +591,79 @@ class TestClass(object):
                 )
             ),
         ],
+        "test_multi_strain_disease_outcome_proportions": [
+            dict(
+                test_params = dict(
+                    n_total          = 100000,
+                    n_seed_infection = 200,               
+                    end_time         = 80,
+                    rebuild_networks = 0,
+                    infectious_rate  = 6.0,
+                    max_n_strains    = 2,
+                    population_0_9   = 10000,
+                    population_10_19 = 10000,
+                    population_20_29 = 10000,
+                    population_30_39 = 10000,
+                    population_40_49 = 10000,
+                    population_50_59 = 10000,
+                    population_60_69 = 10000,
+                    population_70_79 = 10000,
+                    population_80    = 10000,
+                    fraction_asymptomatic_0_9   = 0.10,
+                    fraction_asymptomatic_10_19 = 0.10,
+                    fraction_asymptomatic_20_29 = 0.10,
+                    fraction_asymptomatic_30_39 = 0.15,
+                    fraction_asymptomatic_40_49 = 0.15,
+                    fraction_asymptomatic_50_59 = 0.15,
+                    fraction_asymptomatic_60_69 = 0.20,
+                    fraction_asymptomatic_70_79 = 0.20,
+                    fraction_asymptomatic_80    = 0.20,
+                    mild_fraction_0_9           = 0.20,
+                    mild_fraction_10_19         = 0.20,
+                    mild_fraction_20_29         = 0.20,
+                    mild_fraction_30_39         = 0.15,
+                    mild_fraction_40_49         = 0.15,
+                    mild_fraction_50_59         = 0.15,
+                    mild_fraction_60_69         = 0.10,
+                    mild_fraction_70_79         = 0.10,
+                    mild_fraction_80            = 0.10,
+                    hospitalised_fraction_0_9  =0.40,
+                    hospitalised_fraction_10_19=0.40,
+                    hospitalised_fraction_20_29=0.40,
+                    hospitalised_fraction_30_39=0.60,
+                    hospitalised_fraction_40_49=0.60,
+                    hospitalised_fraction_50_59=0.60,
+                    hospitalised_fraction_60_69=0.80,
+                    hospitalised_fraction_70_79=0.80,
+                    hospitalised_fraction_80   =0.80,
+                    critical_fraction_0_9  =0.60,
+                    critical_fraction_10_19=0.60,
+                    critical_fraction_20_29=0.60,
+                    critical_fraction_30_39=0.70,
+                    critical_fraction_40_49=0.70,
+                    critical_fraction_50_59=0.70,
+                    critical_fraction_60_69=0.80,
+                    critical_fraction_70_79=0.80,
+                    critical_fraction_80   =0.80,
+                    fatality_fraction_0_9  =0.40,
+                    fatality_fraction_10_19=0.40,
+                    fatality_fraction_20_29=0.40,
+                    fatality_fraction_30_39=0.30,
+                    fatality_fraction_40_49=0.30,
+                    fatality_fraction_50_59=0.30,
+                    fatality_fraction_60_69=0.20,
+                    fatality_fraction_70_79=0.20,
+                    fatality_fraction_80   =0.20,
+                ),
+                strain1_params = dict(
+                    fraction_asymptomatic = [ 0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.15, 0.15, 0.15 ],
+                    mild_fraction         = [ 0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15 ],
+                    hospitalised_fraction = [ 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0.4, 0.4, 0.4 ],
+                    critical_fraction     = [ 0.8, 0.8, 0.8, 0.5, 0.5, 0.5, 0.6, 0.6, 0.6 ],
+                    fatality_fraction     = [ 0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8 ]
+                )
+            ),
+        ]
     }
     """
     Test class for checking
@@ -1320,15 +1395,11 @@ class TestClass(object):
         """
         # set the np seed so the results are reproducible
         np.random.seed(0)
-        
         std_error_limit = 4
         
-        params = utils.get_params_swig()
-        for param, value in test_params.items():
-            params.set_param( param, value )
-        model  = utils.get_model_swig( params )
 
         # add a new strain and seed the infection
+        model      = abm.Model( params = test_params )
         new_strain = model.add_new_strain( 1, 
             mean_time_to_symptoms = strain1_params[ "mean_time_to_symptoms" ],
             sd_time_to_symptoms   = strain1_params[ "sd_time_to_symptoms" ],
@@ -1430,3 +1501,149 @@ class TestClass(object):
         np.testing.assert_allclose(t_a_r_1.std(), strain1_params[ "sd_asymptomatic_to_recovery" ],  atol=std_error_limit * t_a_r.std() / sqrt(len(t_a_r)))
             
         
+    def test_multi_strain_disease_outcome_proportions( self, test_params, strain1_params ):
+        """
+        Test that the fraction of infected people following each path for
+        the progression of the disease agrees with the parameters
+        """
+        
+        # set the np seed so the results are reproducible
+        np.random.seed(0)      
+        std_error_limit = 3
+         
+        # create model and add the new strain
+        model = abm.Model( params = test_params )
+        new_strain = model.add_new_strain( 1, 
+            fraction_asymptomatic = strain1_params[ "fraction_asymptomatic" ],
+            mild_fraction         = strain1_params[ "mild_fraction" ],
+            hospitalised_fraction = strain1_params[ "hospitalised_fraction" ], 
+            critical_fraction     = strain1_params[ "critical_fraction" ], 
+            fatality_fraction     = strain1_params[ "fatality_fraction" ], 
+        )
+        seeds      = np.random.choice( test_params["n_total"], test_params["n_seed_infection"], replace=False)
+        for idx in range( test_params["n_seed_infection"] ) :
+            model.seed_infect_by_idx( seeds[ idx ], strain = new_strain )
+            
+        fraction_asymptomatic = [
+            test_params[ "fraction_asymptomatic_0_9" ],
+            test_params[ "fraction_asymptomatic_10_19" ],
+            test_params[ "fraction_asymptomatic_20_29" ],
+            test_params[ "fraction_asymptomatic_30_39" ],
+            test_params[ "fraction_asymptomatic_40_49" ],
+            test_params[ "fraction_asymptomatic_50_59" ],
+            test_params[ "fraction_asymptomatic_60_69" ],
+            test_params[ "fraction_asymptomatic_70_79" ],
+            test_params[ "fraction_asymptomatic_80" ],
+        ]
+        fraction_asymptomatic_1 = strain1_params[ "fraction_asymptomatic" ]
+        
+        mild_fraction = [
+            test_params[ "mild_fraction_0_9" ],
+            test_params[ "mild_fraction_10_19" ],
+            test_params[ "mild_fraction_20_29" ],
+            test_params[ "mild_fraction_30_39" ],
+            test_params[ "mild_fraction_40_49" ],
+            test_params[ "mild_fraction_50_59" ],
+            test_params[ "mild_fraction_60_69" ],
+            test_params[ "mild_fraction_70_79" ],
+            test_params[ "mild_fraction_80" ],
+        ]
+        mild_fraction_1 = strain1_params[ "mild_fraction" ]
+
+        hospitalised_fraction = [
+            test_params[ "hospitalised_fraction_0_9" ],
+            test_params[ "hospitalised_fraction_10_19" ],
+            test_params[ "hospitalised_fraction_20_29" ],
+            test_params[ "hospitalised_fraction_30_39" ],
+            test_params[ "hospitalised_fraction_40_49" ],
+            test_params[ "hospitalised_fraction_50_59" ],
+            test_params[ "hospitalised_fraction_60_69" ],
+            test_params[ "hospitalised_fraction_70_79" ],
+            test_params[ "hospitalised_fraction_80" ],
+        ]
+        hospitalised_fraction_1 = strain1_params[ "hospitalised_fraction"]
+
+        critical_fraction = [
+            test_params[ "critical_fraction_0_9" ],
+            test_params[ "critical_fraction_10_19" ],
+            test_params[ "critical_fraction_20_29" ],
+            test_params[ "critical_fraction_30_39" ],
+            test_params[ "critical_fraction_40_49" ],
+            test_params[ "critical_fraction_50_59" ],
+            test_params[ "critical_fraction_60_69" ],
+            test_params[ "critical_fraction_70_79" ],
+            test_params[ "critical_fraction_80" ],
+        ]
+        critical_fraction_1 = strain1_params[ "critical_fraction" ]
+
+        fatality_fraction = [
+            test_params[ "fatality_fraction_0_9" ],
+            test_params[ "fatality_fraction_10_19" ],
+            test_params[ "fatality_fraction_20_29" ],
+            test_params[ "fatality_fraction_30_39" ],
+            test_params[ "fatality_fraction_40_49" ],
+            test_params[ "fatality_fraction_50_59" ],
+            test_params[ "fatality_fraction_60_69" ],
+            test_params[ "fatality_fraction_70_79" ],
+            test_params[ "fatality_fraction_80" ],
+        ]
+        fatality_fraction_1 = strain1_params[ "fatality_fraction" ]
+
+        model.run( verbose = False )
+        df_trans = model.get_transmissions()
+        df_indiv = model.get_individuals()
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
+
+        # fraction asymptomatic vs mild+symptomatc
+        df_inf      = df_indiv[ df_indiv["time_infected"] > 0 ]
+        df_asym     = df_indiv[ df_indiv["time_asymptomatic"] > 0 ]
+        df_mild_p   = df_indiv[ df_indiv["time_presymptomatic_mild"] > 0 ]
+        df_sev_p    = df_indiv[ df_indiv["time_presymptomatic_severe"] > 0 ]
+        df_sev      = df_indiv[ df_indiv["time_symptomatic_severe"] > 0 ]
+        df_hosp     = df_indiv[ df_indiv["time_hospitalised"] > 0 ]
+        df_crit     = df_indiv[ ( (df_indiv["time_critical"] > 0) | (df_indiv["time_death"] > 0) ) ]
+        df_icu      = df_indiv[ ( (df_indiv["time_critical"] > 0) ) ]
+        df_dead_icu = df_indiv[ ( (df_indiv["time_critical"] > 0) ) & (df_indiv["time_death"] > 0) ]
+   
+        for idx in range( constant.N_AGE_GROUPS ):
+
+            N_inf        = len( df_inf[ ( df_inf["age_group"] == constant.AGES[idx] )       & ( df_inf["strain_idx"] == 0 ) ] )
+            N_inf_1      = len( df_inf[ ( df_inf["age_group"] == constant.AGES[idx] )       & ( df_inf["strain_idx"] == 1 ) ] )
+            N_asym       = len( df_asym[ ( df_asym["age_group"] == constant.AGES[idx] )     & ( df_asym["strain_idx"] == 0 ) ] )  
+            N_asym_1     = len( df_asym[ ( df_asym["age_group"] == constant.AGES[idx] )     & ( df_asym["strain_idx"] == 1 ) ] )  
+            N_sev_p      = len( df_sev_p[ ( df_sev_p["age_group"] == constant.AGES[idx] )   & ( df_sev_p["strain_idx"] == 0 ) ] )
+            N_sev_p_1    = len( df_sev_p[ ( df_sev_p["age_group"] == constant.AGES[idx] )   & ( df_sev_p["strain_idx"] == 1 ) ] )
+            N_mild_p     = len( df_mild_p[ ( df_mild_p["age_group"] == constant.AGES[idx] ) & ( df_mild_p["strain_idx"] == 0 ) ] )   
+            N_mild_p_1   = len( df_mild_p[ ( df_mild_p["age_group"] == constant.AGES[idx] ) & ( df_mild_p["strain_idx"] == 1 ) ] )   
+            N_sev        = len( df_sev[ ( df_sev["age_group"] == constant.AGES[idx] )       & ( df_sev["strain_idx"] == 0 ) ] )
+            N_sev_1      = len( df_sev[ ( df_sev["age_group"] == constant.AGES[idx] )       & ( df_sev["strain_idx"] == 1 ) ] )
+            N_hosp       = len( df_hosp[ ( df_hosp["age_group"] == constant.AGES[idx] )     & ( df_hosp["strain_idx"] == 0 ) ] )
+            N_hosp_1     = len( df_hosp[ ( df_hosp["age_group"] == constant.AGES[idx] )     & ( df_hosp["strain_idx"] == 1 ) ] )
+            N_crit       = len( df_crit[ ( df_crit["age_group"] == constant.AGES[idx] )     & ( df_crit["strain_idx"] == 0 ) ] )
+            N_crit_1     = len( df_crit[ ( df_crit["age_group"] == constant.AGES[idx] )     & ( df_crit["strain_idx"] == 1 ) ] )
+            N_icu        = len( df_icu[ ( df_icu["age_group"] == constant.AGES[idx] )       & ( df_icu["strain_idx"] == 0 ) ] )
+            N_icu_1      = len( df_icu[ ( df_icu["age_group"] == constant.AGES[idx] )       & ( df_icu["strain_idx"] == 1 ) ] )
+            N_dead_icu   = len( df_dead_icu[ ( df_dead_icu["age_group"] == constant.AGES[idx] ) & ( df_dead_icu["strain_idx"] == 0 ) ] )
+            N_dead_icu_1 = len( df_dead_icu[ ( df_dead_icu["age_group"] == constant.AGES[idx] ) & ( df_dead_icu["strain_idx"] == 1 ) ] )
+        
+            np.testing.assert_( N_inf   == ( N_sev_p + N_asym + N_mild_p ),       msg = "missing infected people" )
+            np.testing.assert_( N_inf_1 == ( N_sev_p_1 + N_asym_1 + N_mild_p_1 ), msg = "missing infected people" )
+            np.testing.assert_( N_asym > 50,     msg = "insufficient asymptomtatic to test" )
+            np.testing.assert_( N_asym_1 > 50,   msg = "insufficient asymptomtatic to test" )
+            np.testing.assert_( N_mild_p > 50,   msg = "insufficient mild to test" )
+            np.testing.assert_( N_mild_p_1 > 50, msg = "insufficient mild to test" )
+            np.testing.assert_( N_hosp   > 50,   msg = "insufficient hospitalised to test" )
+            np.testing.assert_( N_hosp_1 > 50,   msg = "insufficient hospitalised to test" )
+            np.testing.assert_( N_icu    > 50,   msg = "insufficient ICU to test" )
+            np.testing.assert_( N_icu_1  > 50,   msg = "insufficient ICU to test" )
+            np.testing.assert_allclose( N_asym,     N_inf * fraction_asymptomatic[idx],    atol=std_error_limit * sqrt( N_inf * fraction_asymptomatic[idx ] ),  err_msg = "incorrect asymptomatics" )
+            np.testing.assert_allclose( N_asym_1,   N_inf_1 * fraction_asymptomatic_1[idx],atol=std_error_limit * sqrt( N_inf_1 * fraction_asymptomatic_1[idx ] ),err_msg = "incorrect asymptomatics" )
+            np.testing.assert_allclose( N_mild_p,   N_inf * mild_fraction[idx],            atol=std_error_limit * sqrt( N_inf * mild_fraction[idx] ),           err_msg = "incorrect milds" )        
+            np.testing.assert_allclose( N_mild_p_1, N_inf_1 * mild_fraction_1[idx],        atol=std_error_limit * sqrt( N_inf_1 * mild_fraction_1[idx] ),         err_msg = "incorrect milds" )        
+            np.testing.assert_allclose( N_hosp,     N_sev * hospitalised_fraction[idx],    atol=std_error_limit * sqrt( N_sev * hospitalised_fraction[idx] ),   err_msg = "incorrect hospitalised" )        
+            np.testing.assert_allclose( N_hosp_1,   N_sev_1 * hospitalised_fraction_1[idx],atol=std_error_limit * sqrt( N_sev_1 * hospitalised_fraction_1[idx] ), err_msg = "incorrect hospitalised" )        
+            np.testing.assert_allclose( N_crit,     N_hosp * critical_fraction[idx],       atol=std_error_limit * sqrt( N_hosp * critical_fraction[idx] ),    err_msg = "incorrect critical" )        
+            np.testing.assert_allclose( N_crit_1,   N_hosp_1 * critical_fraction_1[idx],   atol=std_error_limit * sqrt( N_hosp_1 * critical_fraction_1[idx] ),    err_msg = "incorrect critical" )        
+            np.testing.assert_allclose( N_dead_icu, N_icu * fatality_fraction[idx],        atol=std_error_limit * sqrt( N_icu * fatality_fraction[idx] ),     err_msg = "incorrect fatalitiy" )        
+            np.testing.assert_allclose( N_dead_icu_1,N_icu_1 * fatality_fraction_1[idx],   atol=std_error_limit * sqrt( N_icu_1 * fatality_fraction_1[idx] ),     err_msg = "incorrect fatalitiy" )        
+    

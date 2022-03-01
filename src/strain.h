@@ -43,7 +43,12 @@ struct strain{
 	float sd_time_to_critical;
 	float mean_time_to_susceptible_after_shift;
 	float time_to_susceptible_shift;
-	double hospitalised_fraction[N_AGE_GROUPS];
+	float fraction_asymptomatic[N_AGE_GROUPS]; // fraction who are asymptomatic
+	float mild_fraction[N_AGE_GROUPS]; 	       // fraction who just have mild symptoms
+	float hospitalised_fraction[N_AGE_GROUPS]; // fraction of symptomatic patients requiring hospitalisation
+	float critical_fraction[N_AGE_GROUPS];     // fraction of hospitalised patients who require ICU treatment
+	float fatality_fraction[N_AGE_GROUPS];     // fraction of ICU patients who die
+	float location_death_icu[N_AGE_GROUPS];    // whether death occurs in the ICU or outside
 	long total_infected;
 	double **infectious_curve;
 	int **transition_time_distributions;
@@ -53,7 +58,7 @@ struct strain{
 /******************************  Functions  *****************************/
 /************************************************************************/
 
-short add_new_strain( model*, float, double*,
+short add_new_strain( model*, float, double*, double*, double*, double*, double*, double*,
 	double, double, double, double, double, double, double,
 	double, double, double, double, double, double, double,
 	double, double, double, double, double
