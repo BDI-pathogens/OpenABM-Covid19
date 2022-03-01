@@ -720,27 +720,36 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     #' @return \code{Strain} A Strain object representing this strain
     add_new_strain = function(
     	transmission_multiplier = 1,
+    	fraction_asymptomatic = NA,
+    	fraction_asymptomatic_multiplier = 1,
+    	mild_fraction = NA,
+    	mild_fraction_multiplier = 1,
     	hospitalised_fraction = NA,
     	hospitalised_fraction_multiplier = 1,
+    	critical_fraction = NA,
+    	critical_fraction_multiplier = 1,
+    	fatality_fraction = NA,
+    	fatality_fraction_multiplier = 1,
+    	location_death_icu = NA,
     	mean_infectious_period = NA,
     	sd_infectious_period = NA,
     	mean_time_to_symptoms = NA,
     	sd_time_to_symptoms = NA,
-        mean_asymptomatic_to_recovery = NA,
-        sd_asymptomatic_to_recovery = NA,
-        mean_time_to_recover = NA,
-        sd_time_to_recover = NA,
-        mean_time_hospitalised_recovery = NA,
-        sd_time_hospitalised_recovery = NA,
-        mean_time_critical_survive = NA,
-        sd_time_critical_survive = NA,
-        mean_time_to_death = NA,
-        sd_time_to_death = NA,
-        mean_time_to_hospital = NA,
-        mean_time_to_critical = NA,
-        sd_time_to_critical = NA,
-        mean_time_to_susceptible_after_shift = NA,
-        time_to_susceptible_shift = NA
+      mean_asymptomatic_to_recovery = NA,
+      sd_asymptomatic_to_recovery = NA,
+      mean_time_to_recover = NA,
+      sd_time_to_recover = NA,
+      mean_time_hospitalised_recovery = NA,
+      sd_time_hospitalised_recovery = NA,
+      mean_time_critical_survive = NA,
+      sd_time_critical_survive = NA,
+      mean_time_to_death = NA,
+      sd_time_to_death = NA,
+      mean_time_to_hospital = NA,
+      mean_time_to_critical = NA,
+      sd_time_to_critical = NA,
+      mean_time_to_susceptible_after_shift = NA,
+      time_to_susceptible_shift = NA
     )
     {
       max_n_strains <- self$get_param( "max_n_strains" )
@@ -749,13 +758,57 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       if( n_strains == max_n_strains )
         stop( "cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )
 
+      if( is.na( fraction_asymptomatic[ 1 ] ) )
+      {
+        fraction_asymptomatic <- c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          fraction_asymptomatic[ idx ] = self$get_param(
+            sprintf( "fraction_asymptomatic%s", names( AgeGroupEnum[idx])) ) *
+            fraction_asymptomatic_multiplier
+      }
+
+      if( is.na( mild_fraction[ 1 ] ) )
+      {
+        mild_fraction <- c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          mild_fraction[ idx ] = self$get_param(
+            sprintf( "mild_fraction%s", names( AgeGroupEnum[idx])) ) *
+            mild_fraction_multiplier
+      }
+
       if( is.na( hospitalised_fraction[ 1 ] ) )
       {
-        hospitalised_fraction = c()
+        hospitalised_fraction <- c()
         for( idx in 1:length( AgeGroupEnum ) )
           hospitalised_fraction[ idx ] = self$get_param(
             sprintf( "hospitalised_fraction%s", names( AgeGroupEnum[idx])) ) *
             hospitalised_fraction_multiplier
+      }
+
+      if( is.na( critical_fraction[ 1 ] ) )
+      {
+        critical_fraction <- c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          critical_fraction[ idx ] = self$get_param(
+            sprintf( "critical_fraction%s", names( AgeGroupEnum[idx])) ) *
+            critical_fraction_multiplier
+      }
+
+      if( is.na( fatality_fraction[ 1 ] ) )
+      {
+        fatality_fraction <- c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          fatality_fraction[ idx ] = self$get_param(
+            sprintf( "fatality_fraction%s", names( AgeGroupEnum[idx])) ) *
+            fatality_fraction_multiplier
+      }
+
+      if( is.na( location_death_icu[ 1 ] ) )
+      {
+        location_death_icu <- c()
+        for( idx in 1:length( AgeGroupEnum ) )
+          location_death_icu[ idx ] = self$get_param(
+            sprintf( "location_death_icu%s", names( AgeGroupEnum[idx])) )
       }
 
       if( is.na( mean_infectious_period ) )
@@ -798,7 +851,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       	time_to_susceptible_shift <- UNKNOWN;
 
       c_model_ptr <- private$c_model_ptr()
-      strain_idx<-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,hospitalised_fraction,
+      strain_idx <-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,fraction_asymptomatic, mild_fraction,
+        hospitalised_fraction, critical_fraction, fatality_fraction, location_death_icu,
       	mean_infectious_period, sd_infectious_period, mean_time_to_symptoms,  sd_time_to_symptoms, mean_asymptomatic_to_recovery,
 		    sd_asymptomatic_to_recovery, mean_time_to_recover, sd_time_to_recover, mean_time_hospitalised_recovery,
 		    sd_time_hospitalised_recovery, mean_time_critical_survive, sd_time_critical_survive, mean_time_to_death,

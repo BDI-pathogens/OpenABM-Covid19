@@ -1504,7 +1504,7 @@ class TestClass(object):
     def test_multi_strain_disease_outcome_proportions( self, test_params, strain1_params ):
         """
         Test that the fraction of infected people following each path for
-        the progression of the disease agrees with the parameters
+        the progression of the disease agrees with the parameters (multi-strain version)
         """
         
         # set the np seed so the results are reproducible

@@ -41,7 +41,6 @@ test_that("test_multiple_strain_generation_time", {
 
 test_that("test_multi_strain_disease_transition_times", {
 
-
   # Test that the mean and standard deviation of the transition times between
   # states agrees with the parameters for 2 strains
 
@@ -132,7 +131,7 @@ test_that("test_multi_strain_disease_transition_times", {
     )
 
   # seed infection in both strains
-  inf_id <- sample( 1:base_params[["n_total"]], base_params[["n_seed_infection"]], replace = FALSE)
+  inf_id <- sample( 0:(base_params[["n_total"]]-1), base_params[["n_seed_infection"]], replace = FALSE)
   for( idx in 1:base_params[["n_seed_infection"]] ) {
     abm$seed_infect_by_idx( inf_id[ idx  ], strain_idx = 1 )
   }
@@ -214,5 +213,225 @@ test_that("test_multi_strain_disease_transition_times", {
   expect_lt( abs( mean( t_a_r_1 ) - strain1_params[[ "mean_asymptomatic_to_recovery" ]] ), std_error_limit * sd( t_a_r_1 ) / sqrt( length( t_a_r_1 ) ) + eps )
   expect_lt( abs( sd( t_a_r_1 ) - strain1_params[[ "sd_asymptomatic_to_recovery" ]] ), std_error_limit * sd( t_a_r_1 ) / sqrt( length( t_a_r_1 ) ) + eps )
 
+} )
+
+test_that("test_multi_strain_disease_outcome_proportions", {
+
+  # Test that the fraction of infected people following each path for
+  # the progression of the disease agrees with the parameters (multi-strain version)
+  std_error_limit = 3
+
+  test_params = list(
+      n_total          = 150000,
+      n_seed_infection = 200,
+      end_time         = 80,
+      rebuild_networks = 0,
+      infectious_rate  = 6.0,
+      max_n_strains    = 2,
+      population_0_9   = 10000,
+      population_10_19 = 10000,
+      population_20_29 = 10000,
+      population_30_39 = 10000,
+      population_40_49 = 10000,
+      population_50_59 = 10000,
+      population_60_69 = 10000,
+      population_70_79 = 10000,
+      population_80    = 10000,
+      fraction_asymptomatic_0_9   = 0.10,
+      fraction_asymptomatic_10_19 = 0.10,
+      fraction_asymptomatic_20_29 = 0.10,
+      fraction_asymptomatic_30_39 = 0.15,
+      fraction_asymptomatic_40_49 = 0.15,
+      fraction_asymptomatic_50_59 = 0.15,
+      fraction_asymptomatic_60_69 = 0.20,
+      fraction_asymptomatic_70_79 = 0.20,
+      fraction_asymptomatic_80    = 0.20,
+      mild_fraction_0_9           = 0.20,
+      mild_fraction_10_19         = 0.20,
+      mild_fraction_20_29         = 0.20,
+      mild_fraction_30_39         = 0.15,
+      mild_fraction_40_49         = 0.15,
+      mild_fraction_50_59         = 0.15,
+      mild_fraction_60_69         = 0.10,
+      mild_fraction_70_79         = 0.10,
+      mild_fraction_80            = 0.10,
+      hospitalised_fraction_0_9  =0.40,
+      hospitalised_fraction_10_19=0.40,
+      hospitalised_fraction_20_29=0.40,
+      hospitalised_fraction_30_39=0.60,
+      hospitalised_fraction_40_49=0.60,
+      hospitalised_fraction_50_59=0.60,
+      hospitalised_fraction_60_69=0.80,
+      hospitalised_fraction_70_79=0.80,
+      hospitalised_fraction_80   =0.80,
+      critical_fraction_0_9  =0.60,
+      critical_fraction_10_19=0.60,
+      critical_fraction_20_29=0.60,
+      critical_fraction_30_39=0.70,
+      critical_fraction_40_49=0.70,
+      critical_fraction_50_59=0.70,
+      critical_fraction_60_69=0.80,
+      critical_fraction_70_79=0.80,
+      critical_fraction_80   =0.80,
+      fatality_fraction_0_9  =0.40,
+      fatality_fraction_10_19=0.40,
+      fatality_fraction_20_29=0.40,
+      fatality_fraction_30_39=0.30,
+      fatality_fraction_40_49=0.30,
+      fatality_fraction_50_59=0.30,
+      fatality_fraction_60_69=0.20,
+      fatality_fraction_70_79=0.20,
+      fatality_fraction_80   =0.20
+    )
+    strain1_params = list(
+      fraction_asymptomatic = c( 0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.15, 0.15, 0.15 ),
+      mild_fraction         = c( 0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.15, 0.15, 0.15 ),
+      hospitalised_fraction = c( 0.6, 0.6, 0.6, 0.8, 0.8, 0.8, 0.4, 0.4, 0.4 ),
+      critical_fraction     = c( 0.8, 0.8, 0.8, 0.5, 0.5, 0.5, 0.6, 0.6, 0.6 ),
+      fatality_fraction     = c( 0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8 )
+    )
+
+    fraction_asymptomatic = c(
+      test_params[[ "fraction_asymptomatic_0_9" ]],
+      test_params[[ "fraction_asymptomatic_10_19" ]],
+      test_params[[ "fraction_asymptomatic_20_29" ]],
+      test_params[[ "fraction_asymptomatic_30_39" ]],
+      test_params[[ "fraction_asymptomatic_40_49" ]],
+      test_params[[ "fraction_asymptomatic_50_59" ]],
+      test_params[[ "fraction_asymptomatic_60_69" ]],
+      test_params[[ "fraction_asymptomatic_70_79" ]],
+      test_params[[ "fraction_asymptomatic_80" ]]
+    )
+    fraction_asymptomatic_1 = strain1_params[[ "fraction_asymptomatic" ]]
+
+    mild_fraction = c(
+      test_params[[ "mild_fraction_0_9" ]],
+      test_params[[ "mild_fraction_10_19" ]],
+      test_params[[ "mild_fraction_20_29" ]],
+      test_params[[ "mild_fraction_30_39" ]],
+      test_params[[ "mild_fraction_40_49" ]],
+      test_params[[ "mild_fraction_50_59" ]],
+      test_params[[ "mild_fraction_60_69" ]],
+      test_params[[ "mild_fraction_70_79" ]],
+      test_params[[ "mild_fraction_80" ]]
+    )
+    mild_fraction_1 = strain1_params[[ "mild_fraction" ]]
+
+    hospitalised_fraction = c(
+      test_params[[ "hospitalised_fraction_0_9" ]],
+      test_params[[ "hospitalised_fraction_10_19" ]],
+      test_params[[ "hospitalised_fraction_20_29" ]],
+      test_params[[ "hospitalised_fraction_30_39" ]],
+      test_params[[ "hospitalised_fraction_40_49" ]],
+      test_params[[ "hospitalised_fraction_50_59" ]],
+      test_params[[ "hospitalised_fraction_60_69" ]],
+      test_params[[ "hospitalised_fraction_70_79" ]],
+      test_params[[ "hospitalised_fraction_80" ]]
+    )
+    hospitalised_fraction_1 = strain1_params[[ "hospitalised_fraction"]]
+
+    critical_fraction = c(
+      test_params[[ "critical_fraction_0_9" ]],
+      test_params[[ "critical_fraction_10_19" ]],
+      test_params[[ "critical_fraction_20_29" ]],
+      test_params[[ "critical_fraction_30_39" ]],
+      test_params[[ "critical_fraction_40_49" ]],
+      test_params[[ "critical_fraction_50_59" ]],
+      test_params[[ "critical_fraction_60_69" ]],
+      test_params[[ "critical_fraction_70_79" ]],
+      test_params[[ "critical_fraction_80" ]]
+    )
+    critical_fraction_1 = strain1_params[[ "critical_fraction" ]]
+
+    fatality_fraction = c(
+      test_params[[ "fatality_fraction_0_9" ]],
+      test_params[[ "fatality_fraction_10_19" ]],
+      test_params[[ "fatality_fraction_20_29" ]],
+      test_params[[ "fatality_fraction_30_39" ]],
+      test_params[[ "fatality_fraction_40_49" ]],
+      test_params[[ "fatality_fraction_50_59" ]],
+      test_params[[ "fatality_fraction_60_69" ]],
+      test_params[[ "fatality_fraction_70_79" ]],
+      test_params[[ "fatality_fraction_80" ]]
+    )
+    fatality_fraction_1 = strain1_params[[ "fatality_fraction" ]]
+
+    # create model and add the new strain
+    abm     <- Model.new( params = test_params)
+    strain1 <- abm$add_new_strain( 1,
+         fraction_asymptomatic = strain1_params[[ "fraction_asymptomatic" ]],
+         mild_fraction         = strain1_params[[ "mild_fraction" ]],
+         hospitalised_fraction = strain1_params[[ "hospitalised_fraction" ]],
+         critical_fraction     = strain1_params[[ "critical_fraction" ]],
+         fatality_fraction     = strain1_params[[ "fatality_fraction" ]],
+    )
+
+    # seed infection in both strains
+    inf_id <- sample( 0:(test_params[["n_total"]]-1), test_params[["n_seed_infection"]], replace = FALSE)
+    for( idx in 1:test_params[["n_seed_infection"]] ) {
+      abm$seed_infect_by_idx( inf_id[ idx  ], strain_idx = 1 )
+    }
+    abm$run( verbose = FALSE )
+
+    df_trans <- as.data.table( abm$get_transmissions() )
+    df_trans[ , ID := ID_recipient ]
+    df_indiv <- as.data.table( abm$get_individuals() )
+    df_indiv <- df_trans[ df_indiv, on = "ID" ]
+
+    # fraction asymptomatic vs mild+symptomatc
+    df_inf      <- df_indiv[ time_infected > 0 ]
+    df_asym     <- df_indiv[ time_asymptomatic > 0 ]
+    df_mild_p   <- df_indiv[ time_presymptomatic_mild > 0 ]
+    df_sev_p    <- df_indiv[ time_presymptomatic_severe > 0 ]
+    df_sev      <- df_indiv[ time_symptomatic_severe > 0 ]
+    df_hosp     <- df_indiv[ time_hospitalised > 0 ]
+    df_crit     <- df_indiv[ ( time_critical > 0 ) | ( time_death > 0 ) ]
+    df_icu      <- df_indiv[ time_critical > 0 ]
+    df_dead_icu <- df_indiv[ ( time_critical > 0 ) & ( time_death > 0 ) ]
+
+    for( idx in 1:length( AgeGroupEnum) ) {
+      age = idx -1 # internal OpenABM index for age groups is from 0 to 8
+
+      N_inf        <- df_inf[ age_group == age    & strain_idx == 0, .N ]
+      N_inf_1      <- df_inf[ age_group == age    & strain_idx == 1, .N ]
+      N_asym       <- df_asym[ age_group == age   & strain_idx == 0, .N ]
+      N_asym_1     <- df_asym[ age_group == age   & strain_idx == 1, .N ]
+      N_sev_p      <- df_sev_p[ age_group == age  & strain_idx == 0, .N ]
+      N_sev_p_1    <- df_sev_p[ age_group == age  & strain_idx == 1, .N ]
+      N_mild_p     <- df_mild_p[ age_group == age & strain_idx == 0, .N ]
+      N_mild_p_1   <- df_mild_p[ age_group == age & strain_idx == 1, .N ]
+      N_sev        <- df_sev[ age_group == age    & strain_idx == 0, .N ]
+      N_sev_1      <- df_sev[ age_group == age    & strain_idx == 1, .N ]
+      N_hosp       <- df_hosp[ age_group == age   & strain_idx == 0, .N ]
+      N_hosp_1     <- df_hosp[ age_group == age   & strain_idx == 1, .N ]
+      N_crit       <- df_crit[ age_group == age   & strain_idx == 0, .N ]
+      N_crit_1     <- df_crit[ age_group == age   & strain_idx == 1, .N ]
+      N_icu        <- df_icu[ age_group == age    & strain_idx == 0, .N ]
+      N_icu_1      <- df_icu[ age_group == age    & strain_idx == 1, .N ]
+      N_dead_icu   <- df_dead_icu[ age_group == age & strain_idx == 0, .N ]
+      N_dead_icu_1 <- df_dead_icu[ age_group == age & strain_idx == 1, .N ]
+
+      expect_equal( N_inf, ( N_sev_p + N_asym + N_mild_p ), info = "missing infected people" )
+      expect_equal( N_inf_1, ( N_sev_p_1 + N_asym_1 + N_mild_p_1 ), info = "missing infected people" )
+      expect_lt( 50, N_asym,     label = "insufficient asymptomtatic to test" )
+      expect_lt( 50, N_asym_1,   label = "insufficient asymptomtatic to test" )
+      expect_lt( 50, N_mild_p,   label = "insufficient mild to test" )
+      expect_lt( 50, N_mild_p_1, label = "insufficient mild to test" )
+      expect_lt( 50, N_hosp,     label = "insufficient hospitalised to test" )
+      expect_lt( 50, N_hosp_1,   label = "insufficient hospitalised to test" )
+      expect_lt( 40, N_icu,      label = "insufficient ICU to test" )
+      expect_lt( 40, N_icu_1,    label =" insufficient ICU to test" )
+
+      expect_lt( abs( N_asym - N_inf * fraction_asymptomatic[idx]),       std_error_limit * sqrt( N_inf * fraction_asymptomatic[idx ] ),     label = "incorrect asymptomatics" )
+      expect_lt( abs( N_asym_1 - N_inf_1 * fraction_asymptomatic_1[idx]), std_error_limit * sqrt( N_inf_1 * fraction_asymptomatic_1[idx ] ), label = "incorrect asymptomatics" )
+      expect_lt( abs( N_mild_p - N_inf * mild_fraction[idx]),             std_error_limit * sqrt( N_inf * mild_fraction[idx ] ),             label = "incorrect milds" )
+      expect_lt( abs( N_mild_p_1 - N_inf_1 * mild_fraction_1[idx]),       std_error_limit * sqrt( N_inf_1 * mild_fraction_1[idx ] ),         label = "incorrect milds" )
+      expect_lt( abs( N_hosp - N_sev * hospitalised_fraction[idx]),       std_error_limit * sqrt( N_sev * hospitalised_fraction[idx ] ),     label = "incorrect hospitalises" )
+      expect_lt( abs( N_hosp_1 - N_sev_1 * hospitalised_fraction_1[idx]), std_error_limit * sqrt( N_sev_1 * hospitalised_fraction_1[idx ] ), label = "incorrect hospitalises" )
+      expect_lt( abs( N_crit - N_hosp * critical_fraction[idx]),          std_error_limit * sqrt( N_hosp * critical_fraction[idx ] ),        label = "incorrect criticals" )
+      expect_lt( abs( N_crit_1 - N_hosp_1 * critical_fraction_1[idx]),    std_error_limit * sqrt( N_hosp_1 * critical_fraction_1[idx ] ),    label = "incorrect criticals" )
+      expect_lt( abs( N_dead_icu - N_icu * fatality_fraction[idx]),       std_error_limit * sqrt( N_icu * fatality_fraction[idx ] ),         label = "incorrect fatalaties" )
+      expect_lt( abs( N_dead_icu_1 - N_icu_1 * fatality_fraction_1[idx]), std_error_limit * sqrt( N_icu_1 * fatality_fraction_1[idx ] ),     label= "incorrect fatalaties" )
+    }
 } )
 
