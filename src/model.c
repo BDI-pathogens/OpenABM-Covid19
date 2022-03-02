@@ -768,7 +768,7 @@ void set_up_seed_infection( model *model )
 
 	idx = 0;
 	strain_idx = add_new_strain( model, 1, fraction_asymptomatic, mild_fraction, hospitalised_fraction,
-			critical_fraction, fatality_fraction, location_death_icu, UNKNOWN,
+			critical_fraction, fatality_fraction, location_death_icu, UNKNOWN, UNKNOWN,  UNKNOWN,
 			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,
 			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN );
 

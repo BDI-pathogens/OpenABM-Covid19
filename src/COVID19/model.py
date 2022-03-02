@@ -864,6 +864,8 @@ class Model:
             location_death_icu = None,
             mean_infectious_period = None,
             sd_infectious_period = None,
+            asymptomatic_infectious_factor = None,
+            mild_infectious_factor = None,
             mean_time_to_symptoms = None,
             sd_time_to_symptoms = None,
             mean_asymptomatic_to_recovery = None,
@@ -962,6 +964,10 @@ class Model:
             mean_time_to_symptoms = covid19.UNKNOWN
         if sd_time_to_symptoms == None :
             sd_time_to_symptoms = covid19.UNKNOWN
+        if asymptomatic_infectious_factor == None :
+            asymptomatic_infectious_factor = covid19.UNKNOWN
+        if mild_infectious_factor == None :
+            mild_infectious_factor = covid19.UNKNOWN
         if mean_asymptomatic_to_recovery == None :
             mean_asymptomatic_to_recovery = covid19.UNKNOWN
         if sd_asymptomatic_to_recovery == None :
@@ -995,8 +1001,8 @@ class Model:
            
         idx = covid19.add_new_strain( self.c_model, 
                 transmission_multiplier, fraction_asymptomatic_c, mild_fraction_c, hospitalised_fraction_c,
-                critical_fraction_c, fatality_fraction_c, location_death_icu_c,
-                mean_infectious_period, sd_infectious_period, mean_time_to_symptoms,
+                critical_fraction_c, fatality_fraction_c, location_death_icu_c, mean_infectious_period, 
+                sd_infectious_period, asymptomatic_infectious_factor, mild_infectious_factor, mean_time_to_symptoms,
                 sd_time_to_symptoms, mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, mean_time_to_recover, 
                 sd_time_to_recover, mean_time_hospitalised_recovery, sd_time_hospitalised_recovery, mean_time_critical_survive, 
                 sd_time_critical_survive, mean_time_to_death, sd_time_to_death, mean_time_to_hospital, mean_time_to_critical, 

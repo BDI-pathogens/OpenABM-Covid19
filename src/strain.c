@@ -34,16 +34,16 @@ gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC], MAX_INFECTIOUS_P
 					  strain_ptr->sd_infectious_period, infectious_rate );
 
 	gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
-					  strain_ptr->sd_infectious_period, infectious_rate * params->mild_infectious_factor  );
+					  strain_ptr->sd_infectious_period, infectious_rate * strain_ptr->mild_infectious_factor  );
 
 	gamma_rate_curve( strain_ptr->infectious_curve[ASYMPTOMATIC] , MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
-			          strain_ptr->sd_infectious_period, infectious_rate * params->asymptomatic_infectious_factor);
+			          strain_ptr->sd_infectious_period, infectious_rate * strain_ptr->asymptomatic_infectious_factor);
 
 	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC], MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
 			          strain_ptr->sd_infectious_period, infectious_rate );
 
 	gamma_rate_curve( strain_ptr->infectious_curve[SYMPTOMATIC_MILD], MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
-			          strain_ptr->sd_infectious_period, infectious_rate * params->mild_infectious_factor );
+			          strain_ptr->sd_infectious_period, infectious_rate * strain_ptr->mild_infectious_factor );
 
 	gamma_rate_curve( strain_ptr->infectious_curve[HOSPITALISED], MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
 			          strain_ptr->sd_infectious_period, infectious_rate );
@@ -116,6 +116,8 @@ short add_new_strain(
 	double *location_death_icu,
 	double mean_infectious_period,
 	double sd_infectious_period,
+	double asymptomatic_infectious_factor,
+	double mild_infectious_factor,
 	double mean_time_to_symptoms,
 	double sd_time_to_symptoms,
 	double mean_asymptomatic_to_recovery,
@@ -150,6 +152,10 @@ short add_new_strain(
 		mean_time_to_symptoms = params->mean_time_to_symptoms;
 	if( sd_time_to_symptoms == UNKNOWN )
 		sd_time_to_symptoms = params->sd_time_to_symptoms;
+	if( asymptomatic_infectious_factor == UNKNOWN )
+		asymptomatic_infectious_factor = params->asymptomatic_infectious_factor;
+	if( mild_infectious_factor == UNKNOWN )
+		mild_infectious_factor = params->mild_infectious_factor;
 	if( mean_asymptomatic_to_recovery == UNKNOWN )
 		mean_asymptomatic_to_recovery = params->mean_asymptomatic_to_recovery;
 	if( sd_asymptomatic_to_recovery == UNKNOWN )
@@ -186,7 +192,9 @@ short add_new_strain(
 	strain_ptr->transmission_multiplier = transmission_multiplier;
 	strain_ptr->mean_infectious_period  = mean_infectious_period;
 	strain_ptr->sd_infectious_period    = sd_infectious_period;
-	strain_ptr->mean_time_to_symptoms   = mean_time_to_symptoms;
+	strain_ptr->asymptomatic_infectious_factor  = asymptomatic_infectious_factor;
+	strain_ptr->mild_infectious_factor          = mild_infectious_factor;
+	strain_ptr->mean_time_to_symptoms           = mean_time_to_symptoms;
 	strain_ptr->sd_time_to_symptoms				= sd_time_to_symptoms;
 	strain_ptr->mean_asymptomatic_to_recovery	= mean_asymptomatic_to_recovery;
 	strain_ptr->sd_asymptomatic_to_recovery		= sd_asymptomatic_to_recovery;

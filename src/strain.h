@@ -49,6 +49,8 @@ struct strain{
 	float critical_fraction[N_AGE_GROUPS];     // fraction of hospitalised patients who require ICU treatment
 	float fatality_fraction[N_AGE_GROUPS];     // fraction of ICU patients who die
 	float location_death_icu[N_AGE_GROUPS];    // whether death occurs in the ICU or outside
+	float asymptomatic_infectious_factor;
+	float mild_infectious_factor;
 	long total_infected;
 	double **infectious_curve;
 	int **transition_time_distributions;
@@ -61,7 +63,7 @@ struct strain{
 short add_new_strain( model*, float, double*, double*, double*, double*, double*, double*,
 	double, double, double, double, double, double, double,
 	double, double, double, double, double, double, double,
-	double, double, double, double, double
+	double, double, double, double, double, double, double
 );
 void destroy_strain( strain* );
 strain* get_strain_by_id( model*, short );
