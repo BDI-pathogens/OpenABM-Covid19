@@ -5,7 +5,8 @@ library( data.table )
 
 test_that("test_multiple_strain_generation_time", {
 
-  sd_tol <- 3
+  set.seed(1)
+  sd_tol <- 4
 
   base_params <-list(
     n_total = 10000,
@@ -43,7 +44,7 @@ test_that("test_multi_strain_disease_transition_times", {
 
   # Test that the mean and standard deviation of the transition times between
   # states agrees with the parameters for 2 strains
-
+  set.seed(1)
   std_error_limit <- 4
   eps <- 1e-4
 
@@ -219,6 +220,7 @@ test_that("test_multi_strain_disease_outcome_proportions", {
 
   # Test that the fraction of infected people following each path for
   # the progression of the disease agrees with the parameters (multi-strain version)
+  set.seed(1)
   std_error_limit = 3
 
   test_params = list(
@@ -434,4 +436,72 @@ test_that("test_multi_strain_disease_outcome_proportions", {
       expect_lt( abs( N_dead_icu_1 - N_icu_1 * fatality_fraction_1[idx]), std_error_limit * sqrt( N_icu_1 * fatality_fraction_1[idx ] ),     label= "incorrect fatalaties" )
     }
 } )
+
+test_that("test_multi_strain_infectious_factor", {
+
+  # Test that the symptom type infectious factors for multiple strains
+  # Set the params so each strain can only be transmitted by sources with one of the 3 types
+  # and then check that only these transmissions take place
+  #
+    set.seed(1)
+    std_error_limit <- 4
+    eps <- 1e-6
+
+    test_params <- list(
+      n_total=100000,
+      n_seed_infection=200,
+      end_time=30,
+      rebuild_networks=0,
+      infectious_rate=18.0,
+      max_n_strains=3,
+      mild_infectious_factor = 0,
+      asymptomatic_infectious_factor = 0,
+      fraction_asymptomatic_0_9=0.33,
+      fraction_asymptomatic_10_19=0.33,
+      fraction_asymptomatic_20_29=0.33,
+      fraction_asymptomatic_30_39=0.33,
+      fraction_asymptomatic_40_49=0.33,
+      fraction_asymptomatic_50_59=0.33,
+      fraction_asymptomatic_60_69=0.33,
+      fraction_asymptomatic_70_79=0.33,
+      fraction_asymptomatic_80=0.33,
+      mild_fraction_0_9=0.33,
+      mild_fraction_10_19=0.33,
+      mild_fraction_20_29=0.33,
+      mild_fraction_30_39=0.33,
+      mild_fraction_40_49=0.33,
+      mild_fraction_50_59=0.33,
+      mild_fraction_60_69=0.33,
+      mild_fraction_70_79=0.33,
+      mild_fraction_80=0.33
+    )
+
+    # add a new strain and seed the infection
+    abm     <- Model.new( params = test_params)
+    strain1 <- abm$add_new_strain( transmission_multiplier = eps, mild_infectious_factor = 1 / eps )
+    strain2 <- abm$add_new_strain( transmission_multiplier = eps, asymptomatic_infectious_factor = 1 / eps )
+    # seed infection in both strains
+    inf_id <- sample( 0:(test_params[["n_total"]]-1), 2 * test_params[["n_seed_infection"]], replace = FALSE)
+    for( idx in 1:test_params[["n_seed_infection"]] ) {
+      abm$seed_infect_by_idx( inf_id[ idx ], strain_idx = 1 )
+      abm$seed_infect_by_idx( inf_id[ idx +test_params[["n_seed_infection" ]] ], strain_idx = 2 )
+    }
+
+    # run the model and look at the infections
+    abm$run( verbose = FALSE )
+    df_trans <- as.data.table( abm$get_transmissions() )
+    df_trans[ , symptom_type := ifelse( time_presymptomatic_mild >= 0, 1, ifelse( time_presymptomatic_severe >= 0, 2, 0) ) ]
+    df_trans <- df_trans[ ,.( ID_source = ID_recipient, symptom_type) ][ df_trans[ time_infected > 2, .( ID_source, strain_idx) ], on = "ID_source" ]
+
+    expect_equal( df_trans[ strain_idx == 0 & symptom_type == 0, .N ], 0,   label = "asymptomatic infector with strain 0" )
+    expect_equal( df_trans[ strain_idx == 0 & symptom_type == 1, .N ], 0,   label = "mild infector with strain 0" )
+    expect_gt(    df_trans[ strain_idx == 0 & symptom_type == 2, .N ], 1e3, label = "insufficent severe infectors with strain 0")
+    expect_equal( df_trans[ strain_idx == 1 & symptom_type == 0, .N ], 0,   label = "asymptomatic infector with strain 0" )
+    expect_gt(    df_trans[ strain_idx == 1 & symptom_type == 1, .N ], 1e3, label = "insufficient mild infector with strain 0" )
+    expect_equal( df_trans[ strain_idx == 1 & symptom_type == 2, .N ], 0,   label = "severe infectors with strain 0")
+    expect_gt(    df_trans[ strain_idx == 2 & symptom_type == 0, .N ], 1e3, label = "insufficient asymptomatic infector with strain 0" )
+    expect_equal( df_trans[ strain_idx == 2 & symptom_type == 1, .N ], 0,   label = "mild infector with strain 0" )
+    expect_equal( df_trans[ strain_idx == 2 & symptom_type == 2, .N ], 0,   label = "severe infectors with strain 0")
+} )
+
 

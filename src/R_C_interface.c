@@ -380,6 +380,8 @@ SEXP R_add_new_strain (
 	SEXP R_location_death_icu,
 	SEXP R_mean_infectious_period,
 	SEXP R_sd_infectious_period,
+	SEXP R_asymptomatic_infectious_factor,
+	SEXP R_mild_infectious_factor,
 	SEXP R_mean_time_to_symptoms,
 	SEXP R_sd_time_to_symptoms,
 	SEXP R_mean_asymptomatic_to_recovery,
@@ -406,6 +408,8 @@ SEXP R_add_new_strain (
   float transition_multiplier   = asReal( R_transisition_multiplier );
   double mean_infectious_period = asReal( R_mean_infectious_period );
   double sd_infectious_period   = asReal( R_sd_infectious_period );
+  double asymptomatic_infectious_factor = asReal( R_asymptomatic_infectious_factor );
+  double mild_infectious_factor = asReal( R_mild_infectious_factor );
   double mean_time_to_symptoms  = asReal( R_mean_time_to_symptoms );
   double sd_time_to_symptoms    = asReal( R_sd_time_to_symptoms );
   double *fraction_asymptomatic = calloc( N_AGE_GROUPS, sizeof(double) );
@@ -440,7 +444,7 @@ SEXP R_add_new_strain (
   }
 
   int n_strain = add_new_strain(c_model,transition_multiplier, fraction_asymptomatic, mild_fraction, hospitalised_fraction,
-		  critical_fraction, fatality_fraction, location_death_icu, mean_infectious_period, sd_infectious_period,
+		  critical_fraction, fatality_fraction, location_death_icu, mean_infectious_period, sd_infectious_period, asymptomatic_infectious_factor, mild_infectious_factor,
 		  mean_time_to_symptoms, sd_time_to_symptoms,  mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, mean_time_to_recover,
 		  sd_time_to_recover, mean_time_hospitalised_recovery, sd_time_hospitalised_recovery, mean_time_critical_survive, sd_time_critical_survive,
 		  mean_time_to_death, sd_time_to_death, mean_time_to_hospital, mean_time_to_critical, sd_time_to_critical, mean_time_to_susceptible_after_shift,

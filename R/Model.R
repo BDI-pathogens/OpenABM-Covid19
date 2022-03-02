@@ -733,6 +733,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
     	location_death_icu = NA,
     	mean_infectious_period = NA,
     	sd_infectious_period = NA,
+    	asymptomatic_infectious_factor = NA,
+    	mild_infectious_factor = NA,
     	mean_time_to_symptoms = NA,
     	sd_time_to_symptoms = NA,
       mean_asymptomatic_to_recovery = NA,
@@ -815,6 +817,10 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
       	mean_infectious_period <- UNKNOWN;
       if( is.na( sd_infectious_period ) )
       	sd_infectious_period <- UNKNOWN;
+      if( is.na( asymptomatic_infectious_factor ) )
+        asymptomatic_infectious_factor <- UNKNOWN
+      if( is.na( mild_infectious_factor ) )
+        mild_infectious_factor <- UNKNOWN
       if( is.na( mean_time_to_symptoms ) )
       	mean_time_to_symptoms <- UNKNOWN;
       if( is.na( sd_time_to_symptoms ) )
@@ -852,8 +858,8 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
       c_model_ptr <- private$c_model_ptr()
       strain_idx <-.Call('R_add_new_strain',c_model_ptr,transmission_multiplier,fraction_asymptomatic, mild_fraction,
-        hospitalised_fraction, critical_fraction, fatality_fraction, location_death_icu,
-      	mean_infectious_period, sd_infectious_period, mean_time_to_symptoms,  sd_time_to_symptoms, mean_asymptomatic_to_recovery,
+        hospitalised_fraction, critical_fraction, fatality_fraction, location_death_icu, mean_infectious_period,sd_infectious_period,
+        asymptomatic_infectious_factor, mild_infectious_factor, mean_time_to_symptoms,  sd_time_to_symptoms, mean_asymptomatic_to_recovery,
 		    sd_asymptomatic_to_recovery, mean_time_to_recover, sd_time_to_recover, mean_time_hospitalised_recovery,
 		    sd_time_hospitalised_recovery, mean_time_critical_survive, sd_time_critical_survive, mean_time_to_death,
 		    sd_time_to_death, mean_time_to_hospital,mean_time_to_critical, sd_time_to_critical, mean_time_to_susceptible_after_shift,
