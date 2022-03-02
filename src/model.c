@@ -75,7 +75,6 @@ model* new_model( parameters *params )
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
-	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
@@ -132,9 +131,10 @@ void destroy_model( model *model )
 		free( event_block );
 	}
 
-
-	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		free( model->transition_time_distributions[ idx ] );
+	free( model->transition_time_distributions[SYMPTOMATIC_QUARANTINE] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_SYMPTOMS] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_POSITIVE] );
+	free( model->transition_time_distributions[TEST_RESULT_QUARANTINE] );
 	free( model->transition_time_distributions );
 
     destroy_network( model->random_network);
@@ -750,13 +750,27 @@ void set_up_seed_infection( model *model )
 	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
+	double *fraction_asymptomatic = calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *mild_fraction         = calloc( N_AGE_GROUPS, sizeof( double  ) );
 	double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *critical_fraction     = calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *fatality_fraction     = calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *location_death_icu    = calloc( N_AGE_GROUPS, sizeof( double  ) );
 
-	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ ) {
+		fraction_asymptomatic[ idx ] = params->fraction_asymptomatic[ idx ];
+		mild_fraction[ idx ]         = params->mild_fraction[ idx ];
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
+		critical_fraction[ idx ]     = params->critical_fraction[ idx ];
+		fatality_fraction[ idx ]     = params->fatality_fraction[ idx ];
+		location_death_icu[ idx ]    = params->location_death_icu[ idx ];
+	}
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, hospitalised_fraction, UNKNOWN );
+	strain_idx = add_new_strain( model, 1, fraction_asymptomatic, mild_fraction, hospitalised_fraction,
+			critical_fraction, fatality_fraction, location_death_icu, UNKNOWN, UNKNOWN,  UNKNOWN,
+			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,
+			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN );
 
 	while( idx < params->n_seed_infection )
 	{

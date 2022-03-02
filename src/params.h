@@ -73,7 +73,7 @@ typedef struct{
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 
-	double fraction_asymptomatic[N_AGE_GROUPS]; // faction who are asymptomatic
+	double fraction_asymptomatic[N_AGE_GROUPS]; // fraction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
 
 	double mild_fraction[N_AGE_GROUPS]; 	// faction who just have mild symptoms

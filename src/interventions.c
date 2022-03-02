@@ -27,7 +27,14 @@
 void set_up_transition_times_intervention( model *model )
 {
 	parameters *params = model->params;
+	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+
 	int **transitions  = model->transition_time_distributions;
+
+	transitions[SYMPTOMATIC_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_SYMPTOMS] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_POSITIVE] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TEST_RESULT_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
 
 	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], 	  N_DRAW_LIST, params->quarantine_dropout_self,            params->quarantine_length_self );
 	geometric_max_draw_list( transitions[TRACED_QUARANTINE_SYMPTOMS], N_DRAW_LIST, params->quarantine_dropout_traced_symptoms, params->quarantine_length_traced_symptoms );

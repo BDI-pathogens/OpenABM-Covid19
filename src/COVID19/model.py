@@ -856,8 +856,33 @@ class Model:
     def add_new_strain(
             self, 
             transmission_multiplier = 1, 
+            fraction_asymptomatic = None,
+            mild_fraction = None,
             hospitalised_fraction = None,  
+            critical_fraction = None,
+            fatality_fraction = None,
+            location_death_icu = None,
             mean_infectious_period = None,
+            sd_infectious_period = None,
+            asymptomatic_infectious_factor = None,
+            mild_infectious_factor = None,
+            mean_time_to_symptoms = None,
+            sd_time_to_symptoms = None,
+            mean_asymptomatic_to_recovery = None,
+            sd_asymptomatic_to_recovery = None,
+            mean_time_to_recover = None,
+            sd_time_to_recover = None,
+            mean_time_hospitalised_recovery = None,
+            sd_time_hospitalised_recovery = None,
+            mean_time_critical_survive = None,
+            sd_time_critical_survive = None,
+            mean_time_to_death = None,
+            sd_time_to_death = None,
+            mean_time_to_hospital = None,
+            mean_time_to_critical = None,
+            sd_time_to_critical = None,
+            mean_time_to_susceptible_after_shift = None,
+            time_to_susceptible_shift = None,
         ):     
         
         """
@@ -867,25 +892,122 @@ class Model:
         transmission_multiplier - the relative transmissibility of the new strain
         hospitalised_fraction - the fraction of symptomatic (not mild) who progress to hospital [default: None is no change)
         mean_infectious_period - the mean infectious period (default: is no change)
+        sd_infectious_period   - the sd infectious period (default: is no change)
+        mean_time_to_symptoms  - mean time to symptoms (default: is no change)
+        sd_time_to_symptoms
+        mean_asymptomatic_to_recovery
+        sd_asymptomatic_to_recovery
+        mean_time_to_recover
+        sd_time_to_recover
+        mean_time_hospitalised_recovery
+        sd_time_hospitalised_recovery
+        mean_time_critical_survive
+        sd_time_critical_survive
+        mean_time_to_death
+        sd_time_to_death
+        mean_time_to_hospital
+        mean_time_to_critical
+        sd_time_to_critical
+        mean_time_to_susceptible_after_shift
+        time_to_susceptible_shift
         """  
-
+    
         n_strains = self.c_model.n_initialised_strains;
         max_n_strains = self._params_obj.get_param("max_n_strains")
 
         if n_strains == max_n_strains :
             raise ModelException( f"cannot add any more strains - increase the parameter max_n_strains at the initialisation of the model" )    
         
+        fraction_asymptomatic_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        mild_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
         hospitalised_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        critical_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        fatality_fraction_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        location_death_icu_c = covid19.doubleArray( len(AgeGroupEnum) ) 
+        
+        if fraction_asymptomatic == None :
+            covid19.get_param_array_fraction_asymptomatic(self.c_params, fraction_asymptomatic_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                fraction_asymptomatic_c[ idx ] = fraction_asymptomatic[ idx ]
+        if mild_fraction == None :
+            covid19.get_param_array_mild_fraction(self.c_params, mild_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                mild_fraction_c[ idx ] = mild_fraction[ idx ]
         if hospitalised_fraction == None :
             covid19.get_param_array_hospitalised_fraction(self.c_params, hospitalised_fraction_c)
         else :
             for idx in range( len(AgeGroupEnum ) ) :
                 hospitalised_fraction_c[ idx ] = hospitalised_fraction[ idx ]
+        if critical_fraction == None :
+            covid19.get_param_array_critical_fraction(self.c_params, critical_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                critical_fraction_c[ idx ] = critical_fraction[ idx ]
+        if fatality_fraction == None :
+            covid19.get_param_array_fatality_fraction(self.c_params, fatality_fraction_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                fatality_fraction_c[ idx ] = fatality_fraction[ idx ]
+        if location_death_icu == None :
+            covid19.get_param_array_location_death_icu(self.c_params, location_death_icu_c)
+        else :
+            for idx in range( len(AgeGroupEnum ) ) :
+                location_death_icu_c[ idx ] = location_death_icu[ idx ]               
+        
         if mean_infectious_period == None :
             mean_infectious_period = covid19.UNKNOWN
+        if sd_infectious_period == None :
+            sd_infectious_period = covid19.UNKNOWN
+        if mean_time_to_symptoms == None :
+            mean_time_to_symptoms = covid19.UNKNOWN
+        if sd_time_to_symptoms == None :
+            sd_time_to_symptoms = covid19.UNKNOWN
+        if asymptomatic_infectious_factor == None :
+            asymptomatic_infectious_factor = covid19.UNKNOWN
+        if mild_infectious_factor == None :
+            mild_infectious_factor = covid19.UNKNOWN
+        if mean_asymptomatic_to_recovery == None :
+            mean_asymptomatic_to_recovery = covid19.UNKNOWN
+        if sd_asymptomatic_to_recovery == None :
+            sd_asymptomatic_to_recovery = covid19.UNKNOWN
+        if mean_time_to_recover == None :
+            mean_time_to_recover = covid19.UNKNOWN
+        if sd_time_to_recover == None :
+            sd_time_to_recover = covid19.UNKNOWN
+        if mean_time_hospitalised_recovery == None :
+            mean_time_hospitalised_recovery = covid19.UNKNOWN
+        if sd_time_hospitalised_recovery == None :
+            sd_time_hospitalised_recovery = covid19.UNKNOWN
+        if mean_time_critical_survive == None :
+            mean_time_critical_survive = covid19.UNKNOWN
+        if sd_time_critical_survive == None :
+            sd_time_critical_survive = covid19.UNKNOWN                             
+        if mean_time_to_death == None :
+            mean_time_to_death = covid19.UNKNOWN  
+        if sd_time_to_death == None :
+            sd_time_to_death = covid19.UNKNOWN
+        if mean_time_to_hospital == None :
+            mean_time_to_hospital = covid19.UNKNOWN
+        if mean_time_to_critical == None :
+            mean_time_to_critical = covid19.UNKNOWN
+        if sd_time_to_critical == None :
+            sd_time_to_critical = covid19.UNKNOWN
+        if mean_time_to_susceptible_after_shift == None :
+            mean_time_to_susceptible_after_shift = covid19.UNKNOWN
+        if time_to_susceptible_shift == None :
+            time_to_susceptible_shift = covid19.UNKNOWN
            
-        idx = covid19.add_new_strain( self.c_model, transmission_multiplier, hospitalised_fraction_c, mean_infectious_period );
-
+        idx = covid19.add_new_strain( self.c_model, 
+                transmission_multiplier, fraction_asymptomatic_c, mild_fraction_c, hospitalised_fraction_c,
+                critical_fraction_c, fatality_fraction_c, location_death_icu_c, mean_infectious_period, 
+                sd_infectious_period, asymptomatic_infectious_factor, mild_infectious_factor, mean_time_to_symptoms,
+                sd_time_to_symptoms, mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, mean_time_to_recover, 
+                sd_time_to_recover, mean_time_hospitalised_recovery, sd_time_hospitalised_recovery, mean_time_critical_survive, 
+                sd_time_critical_survive, mean_time_to_death, sd_time_to_death, mean_time_to_hospital, mean_time_to_critical, 
+                sd_time_to_critical, mean_time_to_susceptible_after_shift, time_to_susceptible_shift );              
+    
         return Strain( self, idx )
 
     def set_cross_immunity_matrix(self, cross_immunity ):
