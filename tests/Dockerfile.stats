@@ -27,4 +27,4 @@ RUN git clone --depth 1 https://github.com/kthohr/gcem
 RUN make clean && make install
 
 WORKDIR /OpenABM-Covid19
-ENTRYPOINT ["/usr/local/bin/pytest", "-svv"]
+ENTRYPOINT ["/usr/local/bin/pytest", "-vv"]

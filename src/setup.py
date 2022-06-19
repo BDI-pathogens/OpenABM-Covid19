@@ -15,6 +15,12 @@ def usingStats():
         return True
     return False
 
+# This is recommended, but causes the GSL build to fail in Docker
+def python_config():
+    out = check_output(['python3-config','--ldflags']).decode('utf-8')
+    out = out.replace("\n",'') # cut trailing \n
+    return out.split(' ')
+
 def gsl_config(flag):
     if usingStats():
         statsRoot=".."
@@ -36,7 +42,7 @@ def gsl_config(flag):
     return out.split(' ')
 
 CFLAGS  = gsl_config('--cflags')
-LDFLAGS = gsl_config('--libs')
+LDFLAGS = gsl_config('--libs') #+ python_config()
 
 srcs = [
     "covid19_wrap.c",
@@ -69,8 +75,8 @@ if usingStats():
 covid19_module = Extension(
     "_covid19",
     srcs,
-    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O2"] + CFLAGS,
-    extra_link_args=["-lm", "-O2", "-fPIC", "-shared"] + LDFLAGS,
+    extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O2", "-fPIC"] + CFLAGS,
+    extra_link_args=["-lm", "-O2", "-fPIC"] + LDFLAGS,
     language=lang,
 )
 

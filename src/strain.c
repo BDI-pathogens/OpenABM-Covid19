@@ -19,16 +19,16 @@ void initialise_infectious_curves(
 )
 {
 	double infectious_rate = params->infectious_rate_adjusted;
-	strain_ptr->infectious_curve = calloc( N_EVENT_TYPES, sizeof(double) );
+	strain_ptr->infectious_curve = (double**) calloc( N_EVENT_TYPES, sizeof(double*) );
 
-	strain_ptr->infectious_curve[PRESYMPTOMATIC]          = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD]     = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[ASYMPTOMATIC]            = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[SYMPTOMATIC]             = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[SYMPTOMATIC_MILD]        = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[HOSPITALISED]            = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[HOSPITALISED_RECOVERING] = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
-	strain_ptr->infectious_curve[CRITICAL]                = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[PRESYMPTOMATIC]          = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[PRESYMPTOMATIC_MILD]     = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[ASYMPTOMATIC]            = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[SYMPTOMATIC]             = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[SYMPTOMATIC_MILD]        = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[HOSPITALISED]            = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[HOSPITALISED_RECOVERING] = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	strain_ptr->infectious_curve[CRITICAL]                = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 
 gamma_rate_curve( strain_ptr->infectious_curve[PRESYMPTOMATIC], MAX_INFECTIOUS_PERIOD, strain_ptr->mean_infectious_period,
 					  strain_ptr->sd_infectious_period, infectious_rate );
@@ -63,21 +63,21 @@ void initialise_transition_time_distributions( strain *strain_ptr )
 {
 	int **transitions;
 
-	strain_ptr->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+	strain_ptr->transition_time_distributions = (int**) calloc( N_TRANSITION_TYPES, sizeof( int*) );
 	transitions = strain_ptr->transition_time_distributions;
 
-	transitions[ASYMPTOMATIC_RECOVERED]               = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[PRESYMPTOMATIC_SYMPTOMATIC]           = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD] = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[SYMPTOMATIC_RECOVERED]                = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[SYMPTOMATIC_MILD_RECOVERED]           = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[HOSPITALISED_RECOVERED]               = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[CRITICAL_HOSPITALISED_RECOVERING]     = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[CRITICAL_DEATH]                       = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[HOSPITALISED_RECOVERING_RECOVERED]    = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[SYMPTOMATIC_HOSPITALISED]             = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[HOSPITALISED_CRITICAL]                = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[RECOVERED_SUSCEPTIBLE]                = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[ASYMPTOMATIC_RECOVERED]               = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[PRESYMPTOMATIC_SYMPTOMATIC]           = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD] = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[SYMPTOMATIC_RECOVERED]                = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[SYMPTOMATIC_MILD_RECOVERED]           = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[HOSPITALISED_RECOVERED]               = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[CRITICAL_HOSPITALISED_RECOVERING]     = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[CRITICAL_DEATH]                       = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[HOSPITALISED_RECOVERING_RECOVERED]    = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[SYMPTOMATIC_HOSPITALISED]             = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[HOSPITALISED_CRITICAL]                = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[RECOVERED_SUSCEPTIBLE]                = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
 
 	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, strain_ptr->mean_asymptomatic_to_recovery, strain_ptr->sd_asymptomatic_to_recovery );
 	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, strain_ptr->mean_time_to_symptoms,         strain_ptr->sd_time_to_symptoms );

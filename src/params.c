@@ -1069,7 +1069,7 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 {
 	double old = model->params->relative_transmission[ type ];
 	int n_networks, i;
-	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	int *network_ids = (int*) calloc( MAX_N_NETWORKS, sizeof(int) );
 	network *network;
 
 	// ignore very small changes
@@ -1233,7 +1233,7 @@ void update_work_intervention_state(model *model, int value)
 void update_household_intervention_state(model *model, int value)
 {
 	int n_networks, i;
-	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	int *network_ids = (int*) calloc( MAX_N_NETWORKS, sizeof(int) );
 	network *network;
 
 	if (value == TRUE)

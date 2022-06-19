@@ -10,7 +10,7 @@ Created: March 2020
 Author: p-robot
 """
 
-import pytest, sys, subprocess, shutil, os
+import pytest, sys, shutil, os
 import math
 import numpy as np, pandas as pd
 import random as rd
@@ -449,8 +449,14 @@ class TestClass(object):
         params.set_param("n_total",n_total)
         params.write_params(constant.TEST_DATA_FILE)        
       
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_interactions_file()
+
         df_int        = pd.read_csv(constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         
@@ -480,8 +486,14 @@ class TestClass(object):
         params.set_param("n_total",n_total)
         params.write_params(constant.TEST_DATA_FILE)        
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_interactions_file()
+        model.write_individual_file()
        
         # get the number of people in each house hold
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
@@ -545,8 +557,14 @@ class TestClass(object):
         params.set_param("hospital_on", 0)
         params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_interactions_file()
         
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
@@ -624,8 +642,14 @@ class TestClass(object):
         params.set_param( "hospital_on", 0)
         params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_interactions_file()
        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
@@ -721,8 +745,14 @@ class TestClass(object):
         params.set_param( "elderly_network_adults",   elderly_network_adults )
         params.write_params(constant.TEST_DATA_FILE)        
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        # model.write_interactions_file()
        
         # get all the people, need to hand case if people having zero connections
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )

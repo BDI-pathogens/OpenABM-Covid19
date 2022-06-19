@@ -11,7 +11,7 @@ Author: p-robot
 """
 
 import pytest
-import subprocess
+# import subprocess
 import sys
 import numpy as np, pandas as pd
 from math import sqrt
@@ -713,13 +713,13 @@ class TestClass(object):
 
         params.write_params(constant.TEST_DATA_FILE)
 
-        # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
 
-        np.testing.assert_array_equal(
-            df_output[["n_recovered"]].sum(),
+        np.testing.assert_equal(
+            df_output["n_recovered"].sum(),
             0)
 
     def test_zero_deaths(self):
@@ -732,9 +732,14 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
 
         np.testing.assert_equal(df_output["n_death"].sum(), 0)
 
@@ -744,13 +749,19 @@ class TestClass(object):
         """
         params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("infectious_rate", 0.0)
+        params.set_param("hospital_on", 0) # Can infect others in hospital otherwise
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
 
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=True)
+        df_output = model.results
 
         output = df_output["total_infected"].iloc[-1]
         expected_output = int(params.get_param("n_seed_infection"))
@@ -766,9 +777,14 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
 
         np.testing.assert_equal(df_output["total_infected"].sum(), 0)
 
@@ -789,12 +805,21 @@ class TestClass(object):
         params.set_param( test_params )
 
         params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        # df_indiv = pd.read_csv(
+        #     constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+        # )
 
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # df_indiv = pd.read_csv(
+        #     constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+        # )
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans,
@@ -814,10 +839,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_symptoms" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_symptoms" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_symptoms" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_symptoms" ], atol=std_error_limit * sd
         )
 
         # time showing symptoms until going to hospital
@@ -826,7 +851,7 @@ class TestClass(object):
         sd = df_indiv[(df_indiv["time_hospitalised"] > 0)]["t_s_h"].std()
         N = len(df_indiv[(df_indiv["time_hospitalised"] > 0)])
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_hospital" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_hospital" ], atol=std_error_limit * sd
         )
 
         # time hospitalised until moving to the ICU
@@ -835,7 +860,7 @@ class TestClass(object):
         sd = df_indiv[(df_indiv["time_critical"] > 0)]["t_h_c"].std()
         N = len(df_indiv[(df_indiv["time_critical"] > 0)])
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_critical" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_critical" ], atol=std_error_limit * sd
         )
 
         # time from symptoms to recover if not hospitalised
@@ -858,10 +883,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_recover" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_recover" ], atol=std_error_limit * sd
         )
 
         # time from hospitalised to recover if don't got to ICU
@@ -884,10 +909,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_hospitalised_recovery" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_hospitalised_recovery" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_hospitalised_recovery" ], atol=std_error_limit * sd
         )
 
         # time in ICU
@@ -902,10 +927,10 @@ class TestClass(object):
             df_indiv[(df_indiv["time_hospitalised_recovering"] > 0) & (df_indiv["time_critical"] > 0)]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_critical_survive" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_critical_survive" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_critical_survive" ], atol=std_error_limit * sd
         )
 
         # time from ICU to death
@@ -920,10 +945,10 @@ class TestClass(object):
             (df_indiv["time_death"] > 0) & (df_indiv["time_critical"] > 0)
         ] )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_time_to_death" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_time_to_death" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_time_to_death" ], atol=std_error_limit * sd
         )
 
         # time from asymptomatic to recover
@@ -940,10 +965,10 @@ class TestClass(object):
             ]
         )
         np.testing.assert_allclose(
-            mean, test_params[ "mean_asymptomatic_to_recovery" ], atol=std_error_limit * sd / sqrt(N)
+            mean, test_params[ "mean_asymptomatic_to_recovery" ], atol=std_error_limit * sd
         )
         np.testing.assert_allclose(
-            sd, test_params[ "sd_asymptomatic_to_recovery" ], atol=std_error_limit * sd / sqrt(N)
+            sd, test_params[ "sd_asymptomatic_to_recovery" ], atol=std_error_limit * sd
         )
 
     def test_disease_outcome_proportions( self, test_params ):
@@ -1025,11 +1050,16 @@ class TestClass(object):
         ]
 
         params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_transmissions()
+        # df_indiv = pd.read_csv(
+        #     constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+        # )
 
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
@@ -1056,7 +1086,7 @@ class TestClass(object):
         mean = N_asym / N
         sd = sqrt(mean * (1 - mean))
      #   np.testing.assert_allclose(
-     #       mean, fraction_asymptomatic, atol=std_error_limit * sd / sqrt(N)
+     #       mean, fraction_asymptomatic, atol=std_error_limit * sd
       #  )
 
         # asymptomatic fraction by age
@@ -1092,7 +1122,7 @@ class TestClass(object):
             np.testing.assert_allclose(
                 mean_asym,
                 fraction_asymptomatic[idx],
-                atol=std_error_limit * sd_asym / sqrt( N ),
+                atol=std_error_limit * sd_asym #/ sqrt( N ),
             )
 
             mean_mild = N_mild / N
@@ -1100,7 +1130,7 @@ class TestClass(object):
             np.testing.assert_allclose(
                 mean_mild,
                 mild_fraction[idx],
-                atol=std_error_limit * sd_mild / sqrt( N ),
+                atol=std_error_limit * sd_mild #/ sqrt( N ),
             )
 
             N_asymp_tot += N_asymp
@@ -1117,7 +1147,7 @@ class TestClass(object):
         np.testing.assert_allclose(
             mean_asym,
             asypmtomatic_fraction_weighted,
-            atol=std_error_limit * sd_asym / sqrt(N),
+            atol=std_error_limit * sd_asym #/ sqrt(N),
         )
 
         mean_mild = N_mild_tot / N
@@ -1126,7 +1156,7 @@ class TestClass(object):
         np.testing.assert_allclose(
             mean_mild,
             mild_fraction_weighted,
-            atol=std_error_limit * sd_mild / sqrt(N),
+            atol=std_error_limit * sd_mild #/ sqrt(N),
         )
 
         # hospitalised fraction by age
@@ -1152,7 +1182,7 @@ class TestClass(object):
             np.testing.assert_allclose(
                 mean,
                 hospitalised_fraction[idx],
-                atol=std_error_limit * sd / sqrt(N_symp),
+                atol=std_error_limit * sd #/ sqrt(N_symp),
             )
 
             N_hosp_tot += N_hosp
@@ -1166,7 +1196,7 @@ class TestClass(object):
         np.testing.assert_allclose(
             mean,
             hospitalised_fraction_weighted,
-            atol=std_error_limit * sd / sqrt(N_symp_tot),
+            atol=std_error_limit * sd #/ sqrt(N_symp_tot),
         )
 
         # critical fraction by age
@@ -1195,7 +1225,7 @@ class TestClass(object):
                     np.testing.assert_allclose(
                         mean,
                         critical_fraction[idx],
-                        atol=std_error_limit * sd / sqrt(N_hosp),
+                        atol=std_error_limit * sd #/ sqrt(N_hosp),
                     )
 
             N_crit_tot += N_crit
@@ -1209,7 +1239,7 @@ class TestClass(object):
         np.testing.assert_allclose(
             mean,
             critical_fraction_weighted,
-            atol=std_error_limit * sd / sqrt(N_hosp_tot),
+            atol=std_error_limit * sd #/ sqrt(N_hosp_tot),
         )
 
         # critical fraction who die by age go to the ICU
@@ -1239,7 +1269,7 @@ class TestClass(object):
                     np.testing.assert_allclose(
                         mean,
                         fatality_fraction[idx],
-                        atol=std_error_limit * sd / sqrt(N_crit),
+                        atol=std_error_limit * sd #/ sqrt(N_crit),
                     )
 
             N_dead_tot += N_dead
@@ -1252,7 +1282,7 @@ class TestClass(object):
         np.testing.assert_allclose(
             mean,
             fatality_fraction_weighted,
-            atol=std_error_limit * sd / sqrt(N_crit_tot),
+            atol=std_error_limit * sd #/ sqrt(N_crit_tot),
         )
     
     def test_recovered_susceptible_transition_time(self):

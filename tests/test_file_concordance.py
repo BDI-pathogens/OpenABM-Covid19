@@ -10,7 +10,7 @@ Created: April 2020
 Author: p-robot
 """
 
-import subprocess, os, sys
+import os, sys
 from os.path import join
 import numpy as np, pandas as pd
 import pytest
@@ -38,11 +38,18 @@ class TestClass(object):
         """
         
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_swig()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_timeseries = model.results
+        model.write_individual_file()
+        model.write_transmissions()
         
         # Import timeseries/transmission/individual files
-        df_timeseries = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # df_timeseries = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
@@ -64,9 +71,14 @@ class TestClass(object):
         """
         
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_swig()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
         
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
             "n_hospital", "n_death", "n_recovered", "n_critical", "n_hospitalised_recovering"]]
@@ -82,9 +94,14 @@ class TestClass(object):
         """
         
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_swig()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
         
         np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
     
@@ -95,8 +112,14 @@ class TestClass(object):
         """
         
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_swig()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_transmissions()
         
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
@@ -110,8 +133,14 @@ class TestClass(object):
         """
         
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_swig()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_transmissions()
         
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)

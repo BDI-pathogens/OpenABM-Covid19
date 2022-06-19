@@ -142,9 +142,9 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx 	  = infector->infection_events->strain->idx;
-				infectious_curve = infector->infection_events->strain->infectious_curve[type];
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->with_strain->transmission_multiplier;
+				strain_idx 	  = infector->infection_events->with_strain->idx;
+				infectious_curve = infector->infection_events->with_strain->infectious_curve[type];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -331,7 +331,7 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->strain, edge ) );
+		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->with_strain, edge ) );
 		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
@@ -390,7 +390,7 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( model->params->hospital_on )
 	{
@@ -427,7 +427,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( model->params->hospital_on )
 	{

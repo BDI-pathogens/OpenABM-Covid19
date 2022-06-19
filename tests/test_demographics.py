@@ -7,7 +7,7 @@ Usage:
 @author: anelnurtay
 """
 
-import subprocess
+# import subprocess
 import numpy as np, pandas as pd
 import pytest
 import random as rd

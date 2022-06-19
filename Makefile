@@ -32,10 +32,11 @@ D=$(shell pwd)
 # Note on Windows: install Rtools for 'sed'
 ifeq ($(shell uname),Darwin)
 	SED_I=sed -i ''
-#  PYTHONLIB="-undefined dynamic_lookup"
 	ifndef USE_STATS
     C = clang
+		UNSUPMAC = 1
 	else
+    PL = "-undefined dynamic_lookup"
 		C = clang++
 	endif
 else
@@ -75,8 +76,8 @@ INC = /usr/local/include
 LIB = /usr/local/lib
 
 # Compilation options and libraries to be used
-CFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O2
-CPPFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O2
+CFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O2 
+CPPFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O2 
 LDFLAGS = -L$(LIB) $(LDFLAGS_SCILIB)
 
 # Swig's input
@@ -97,8 +98,7 @@ ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd m
 # To compile
 install: $(OBJS)
 install: all;
-	cd src && swig -python covid19.i
-	cd src && CC=$(C) CXX=$(C) LDSHARED=$(C) D=$(D) $(PYTHON) -m pip install -v $(PIP_FLAGS) .
+	if [ "$(UNSUPMAC)" == "1" ]; then echo "Compilation of OpenABM-Covid19 R and Python bindings with GSL on Mac is unsupported at this time. Please use 'USE_STATS=1 make'"; else cd src && swig -python covid19.i && PYTHONLIB=$(PL) CC=$(C) CXX=$(C) LDSHARED=$(C) D=$(D) $(PYTHON) -m pip install -v $(PIP_FLAGS) . ;fi
 
 dev: PIP_FLAGS += -e
 dev: install;

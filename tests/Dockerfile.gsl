@@ -22,4 +22,4 @@ WORKDIR /OpenABM-Covid19
 RUN make clean && make install
 
 WORKDIR /OpenABM-Covid19
-ENTRYPOINT ["/usr/local/bin/pytest", "-svv"]
+ENTRYPOINT ["/usr/local/bin/pytest", "-vv"]
