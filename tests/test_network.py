@@ -416,6 +416,24 @@ class TestClass(object):
                     end_time = 20
                 )
             )
+        ],
+        "test_network_transmission_multipler_update": [
+            dict(
+                test_params = dict( n_total = 10000 ),
+                random_mult = 1.5,
+                occupation_mult = 1.2,
+                working_mult = 1.3,
+                primary_mult = 0.7,
+                house_mult  = 1.8   
+            ),
+            dict(
+                test_params = dict( n_total = 10000 ),
+                random_mult = 0.7,
+                occupation_mult =0.3,
+                working_mult = 3,
+                primary_mult = 0.3,
+                house_mult  = 0.8   
+            )
         ]
     }
     """
@@ -1149,4 +1167,86 @@ class TestClass(object):
         transmissions_inter = pd.merge( transmissions, inter_initial, on = [ "ID_1", "ID_2" ], how = "inner")
         np.testing.assert_( len( transmissions ) > 100, "insufficient interactions to test" )
         np.testing.assert_( len( transmissions ) == len( transmissions_inter ), "transmissions not on an initial interaction" )
-               
+    
+    def test_network_transmission_multipler_update(self, test_params, random_mult, occupation_mult, working_mult, primary_mult, house_mult ): 
+    
+        """
+        Test network transmission multiplier
+        
+        Check to see the network transmission multipliers can be updated correctly
+        """
+        
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model = utils.get_model_swig( params )
+        model.run( n_steps = 3, verbose = False )
+        
+        model.update_running_params( "relative_transmission_occupation", occupation_mult )
+        model.update_running_params( "relative_transmission_random", random_mult )
+        model.update_running_params( "relative_transmission_household", house_mult )
+        
+        # get the network objects
+        network_info = model.get_network_info().sort_values(["id"])
+        network_names = network_info[ "name"]
+        house_idx   = [i for i, s in enumerate(network_names) if 'Household' in s][0]
+        working_idx = [i for i, s in enumerate(network_names) if 'working' in s][0]
+        primary_idx = [i for i, s in enumerate(network_names) if 'primary' in s][0]
+        random_idx  = [i for i, s in enumerate(network_names) if 'Random' in s][0]
+        
+        house_network   = model.get_network_by_id( house_idx )
+        working_network = model.get_network_by_id( working_idx )
+        primary_network = model.get_network_by_id( primary_idx )
+        random_network  = model.get_network_by_id( random_idx )
+        
+        # update the multipliers
+        house_network.set_network_transmission_multiplier( house_mult )
+        working_network.set_network_transmission_multiplier( working_mult )
+        primary_network.set_network_transmission_multiplier( primary_mult )
+        random_network.set_network_transmission_multiplier( random_mult )
+        
+        np.testing.assert_approx_equal(house_network.transmission_multiplier(), house_mult,
+                                       err_msg = "household network transmission multiplier incorrectly set")  
+        np.testing.assert_approx_equal(working_network.transmission_multiplier(), working_mult,
+                                       err_msg = "working network transmission multiplier incorrectly set")  
+        np.testing.assert_approx_equal(primary_network.transmission_multiplier(), primary_mult,
+                                       err_msg = "primary network transmission multiplier incorrectly set")        
+        np.testing.assert_approx_equal(random_network.transmission_multiplier(), random_mult,
+                                       err_msg = "random network transmission multiplier incorrectly set")  
+         
+        np.testing.assert_approx_equal(house_network.transmission_multiplier_type(), house_mult,
+                                       err_msg = "household network transmission multiplier incorrectly set")    
+        np.testing.assert_approx_equal(working_network.transmission_multiplier_type(), occupation_mult,
+                                       err_msg = "working network transmission multiplier incorrectly set")  
+        np.testing.assert_approx_equal(primary_network.transmission_multiplier_type(), occupation_mult,
+                                       err_msg = "primary network transmission multiplier incorrectly set")        
+        np.testing.assert_approx_equal(random_network.transmission_multiplier_type(), random_mult,
+                                       err_msg = "random network transmission multiplier incorrectly set")  
+       
+        np.testing.assert_approx_equal(house_network.transmission_multiplier_combined(), house_mult * house_mult,
+                                       err_msg = "household network transmission multiplier incorrectly set")  
+        np.testing.assert_approx_equal(working_network.transmission_multiplier_combined(), occupation_mult * working_mult,
+                                       err_msg = "working network transmission multiplier incorrectly set")  
+        np.testing.assert_approx_equal(primary_network.transmission_multiplier_combined(), occupation_mult * primary_mult,
+                                       err_msg = "primary network transmission multiplier incorrectly set")        
+        np.testing.assert_approx_equal(random_network.transmission_multiplier_combined(), random_mult * random_mult,
+                                       err_msg = "random network transmission multiplier incorrectly set")  
+       
+        model.run( n_steps = 1, verbose = False )
+         
+        # turn on a lockdown and check the household multipler changes correctly
+        model.update_running_params( "lockdown_on", True )
+        lockdown_mult = params.get_param( "lockdown_house_interaction_multiplier" )
+        np.testing.assert_approx_equal(house_network.transmission_multiplier_combined(), house_mult * house_mult * lockdown_mult,
+                                       err_msg = "household network transmission multiplier incorrectly set")  
+        model.run( n_steps = 1, verbose = False )
+        
+        model.update_running_params( "lockdown_on", False )
+        np.testing.assert_approx_equal(house_network.transmission_multiplier_combined(), house_mult * house_mult,
+                                       err_msg = "household network transmission multiplier incorrectly set")  
+        
+        
+        
+        
+        
+                   

@@ -42,6 +42,7 @@ typedef struct{
 	double mean_infectious_period;  // mean period in days that people are infectious
 	double sd_infectious_period;	// sd of period in days that people are infectious
 	double infectious_rate;         // mean total number of people infected for a mean person
+	double infectious_rate_adjusted;// infectious rate adjusted for the default mean number of interactions
 	double sd_infectiousness_multiplier;         // sd of the lognormal used to vary the infectiousness of an individual
 
 	double relative_susceptibility[N_AGE_GROUPS]; // relative susceptibility of an age group
@@ -72,7 +73,7 @@ typedef struct{
 	double household_size[N_HOUSEHOLD_MAX];// ONS UK number of households with 1-6 person (in thousands)
 	double population[N_AGE_GROUPS];		// ONS stratification of population (in millions)
 
-	double fraction_asymptomatic[N_AGE_GROUPS]; // faction who are asymptomatic
+	double fraction_asymptomatic[N_AGE_GROUPS]; // fraction who are asymptomatic
 	double asymptomatic_infectious_factor;  // relative infectiousness of asymptomatics
 
 	double mild_fraction[N_AGE_GROUPS]; 	// faction who just have mild symptoms
@@ -243,6 +244,7 @@ int get_model_param_priority_test_contacts(model *pmodel, int idx);
 double get_model_param_app_users_fraction(model *pmodel);
 int get_model_param_app_turned_on(model *pmodel);
 int get_model_param_lockdown_on(model *pmodel);
+int get_model_param_lockdown_elderly_on(model *pmodel);
 double get_model_param_risk_score( model*, int, int, int );
 double get_model_param_risk_score_household( model*, int, int );
 double get_model_param_lockdown_house_interaction_multiplier(model *pmodel);

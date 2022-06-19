@@ -39,7 +39,16 @@ float network_transmission_multiplier( network *pnetwork ) {
 	return pnetwork->transmission_multiplier;
 } 
 
+float network_transmission_multiplier_type( network *pnetwork ) {
+	return pnetwork->transmission_multiplier_type;
+} 
+
+float network_transmission_multiplier_combined( network *pnetwork ) {
+	return pnetwork->transmission_multiplier_combined;
+} 
+
 void set_network_transmission_multiplier( network *pnetwork, float val ) {
+	update_transmission_multiplier( pnetwork, val );
 	pnetwork->transmission_multiplier = val;
 }
 

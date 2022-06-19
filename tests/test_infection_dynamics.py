@@ -457,6 +457,32 @@ class TestClass(object):
                 cross_immunity = [ 0, 0.2, 0.4, 0.6, 0.8, 1.0 ]
             )
         ],
+        "test_multiple_strain_generation_time": [
+            dict(
+                test_params = dict(
+                    n_total = 10000,
+                    mean_infectious_period = 5.5,
+                    infectious_rate = 3,
+                    end_time = 50,
+                    max_n_strains = 2,
+                    n_seed_infection = 0
+                ),
+                n_seed_infection = 200,
+                mean_infectious_period_1 = 3.5
+            ),
+            dict(
+                test_params = dict(
+                    n_total = 10000,
+                    mean_infectious_period = 4,
+                    infectious_rate = 3,
+                    end_time = 50,
+                    max_n_strains = 2,
+                    n_seed_infection = 0
+                ),
+                n_seed_infection = 200,
+                mean_infectious_period_1 = 7
+            )
+        ],
     }
     """
     Test class for checking 
@@ -1581,4 +1607,48 @@ class TestClass(object):
             np.testing.assert_( new_inf < last_inf, "new infections not declining monotonically with cross-immunity" )
             last_inf = new_inf
         
+    def test_multiple_strain_generation_time( self, test_params, n_seed_infection, mean_infectious_period_1 ):
+        """
+           Check the mean generation time of different strains
+        """      
+        # set the np seed so the results are reproducible
+        np.random.seed(0)
+        sd_tol = 3
+     
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params ) 
+   
+        strain = model.add_new_strain( mean_infectious_period = mean_infectious_period_1 ) 
+        np.testing.assert_equal( strain.idx(), 1, "failed to add new strain")
+        inf_id = np.random.choice( test_params["n_total"], n_seed_infection * 2, replace=False)
+        for idx in range(n_seed_infection ):
+            model.seed_infect_by_idx( inf_id[ idx ], strain_idx = 0 )
+            model.seed_infect_by_idx( inf_id[ idx + n_seed_infection ], strain = strain )
+        
+        model.run( verbose = False )
+        
+        # get the new infections for each time step for each strain  
+        df_trans = model.get_transmissions()
+        df_trans = df_trans[ ( df_trans[ "time_infected_source"] == 0 ) & ( df_trans[ "time_infected" ] > 0 )]
+        df_trans = df_trans.loc[:,["time_infected","strain_idx"]]
+        n_infections = len( df_trans )
+        np.testing.assert_( n_infections > 200, "insufficient new infections to test")
+       
+        df_generation_time =  df_trans.groupby("strain_idx").mean().reset_index() 
+        sample_sd = params.get_param("sd_infectious_period") / sqrt(n_infections / 2  )
+        
+        sim_generation_time_0 = df_generation_time.loc[0,["time_infected"]]
+        sim_generation_time_1 = df_generation_time.loc[1,["time_infected"]]
+        mod_generation_time_0 = params.get_param("mean_infectious_period")
+        mod_generation_time_1 = mean_infectious_period_1
+        
+        np.testing.assert_allclose(sim_generation_time_0, mod_generation_time_0, atol = sample_sd * sd_tol, 
+                                   err_msg = "incorrect generation time for strain 0") 
+          
+        np.testing.assert_allclose(sim_generation_time_1, mod_generation_time_1, atol = sample_sd * sd_tol, 
+                                   err_msg = "incorrect generation time for strain 1")   
+             
+       
         

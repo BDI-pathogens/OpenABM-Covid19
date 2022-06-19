@@ -52,7 +52,7 @@ SEXP R_get_individuals ( SEXP R_c_model, SEXP n_total )
   int *infection_counts    = calloc( n_tot, sizeof(int) );
   short *vaccine_statuses  = calloc( n_tot, sizeof(short) );
   int *occupation_networks = calloc( n_tot, sizeof(int) );
-  int *quarantine_status   = calloc( n_tot, sizeof(int) );
+  short *quarantine_status   = calloc( n_tot, sizeof(short) );
 
   get_individuals(c_model,ids,statuses,age_groups, occupation_networks,
                   house_ids, infection_counts, vaccine_statuses,
@@ -369,22 +369,93 @@ SEXP R_get_transmissions ( SEXP R_c_model )
   return R_list;
 }
 
-SEXP R_add_new_strain ( SEXP R_c_model, SEXP R_transisition_multiplier,
-                        SEXP R_hospitalised_fraction )
+SEXP R_add_new_strain (
+	SEXP R_c_model,
+	SEXP R_transisition_multiplier,
+	SEXP R_fraction_asymptomatic,
+	SEXP R_mild_fraction,
+	SEXP R_hospitalised_fraction,
+	SEXP R_critical_fraction,
+	SEXP R_fatality_fraction,
+	SEXP R_location_death_icu,
+	SEXP R_mean_infectious_period,
+	SEXP R_sd_infectious_period,
+	SEXP R_asymptomatic_infectious_factor,
+	SEXP R_mild_infectious_factor,
+	SEXP R_mean_time_to_symptoms,
+	SEXP R_sd_time_to_symptoms,
+	SEXP R_mean_asymptomatic_to_recovery,
+	SEXP R_sd_asymptomatic_to_recovery,
+	SEXP R_mean_time_to_recover,
+	SEXP R_sd_time_to_recover,
+	SEXP R_mean_time_hospitalised_recovery,
+	SEXP R_sd_time_hospitalised_recovery,
+	SEXP R_mean_time_critical_survive,
+	SEXP R_sd_time_critical_survive,
+	SEXP R_mean_time_to_death,
+	SEXP R_sd_time_to_death,
+	SEXP R_mean_time_to_hospital,
+	SEXP R_mean_time_to_critical,
+	SEXP R_sd_time_to_critical,
+	SEXP R_mean_time_to_susceptible_after_shift,
+	SEXP R_time_to_susceptible_shift
+)
 {
   // get the point to the model from the R pointer object
   model *c_model = (model *) R_ExternalPtrAddr(R_c_model);
 
   // allocate memory to for the function call
-  float transition_multiplier = asReal( R_transisition_multiplier );
+  float transition_multiplier   = asReal( R_transisition_multiplier );
+  double mean_infectious_period = asReal( R_mean_infectious_period );
+  double sd_infectious_period   = asReal( R_sd_infectious_period );
+  double asymptomatic_infectious_factor = asReal( R_asymptomatic_infectious_factor );
+  double mild_infectious_factor = asReal( R_mild_infectious_factor );
+  double mean_time_to_symptoms  = asReal( R_mean_time_to_symptoms );
+  double sd_time_to_symptoms    = asReal( R_sd_time_to_symptoms );
+  double *fraction_asymptomatic = calloc( N_AGE_GROUPS, sizeof(double) );
+  double *mild_fraction         = calloc( N_AGE_GROUPS, sizeof(double) );
   double *hospitalised_fraction = calloc( N_AGE_GROUPS, sizeof(double) );
+  double *critical_fraction     = calloc( N_AGE_GROUPS, sizeof(double) );
+  double *fatality_fraction     = calloc( N_AGE_GROUPS, sizeof(double) );
+  double *location_death_icu    = calloc( N_AGE_GROUPS, sizeof(double) );
+  double mean_asymptomatic_to_recovery = asReal( R_mean_asymptomatic_to_recovery );
+  double sd_asymptomatic_to_recovery   = asReal( R_sd_asymptomatic_to_recovery );
+  double mean_time_to_recover          = asReal( R_mean_time_to_recover );
+  double sd_time_to_recover            = asReal( R_sd_time_to_recover );
+  double mean_time_critical_survive    = asReal( R_mean_time_critical_survive );
+  double sd_time_critical_survive      = asReal( R_sd_time_critical_survive );
+  double mean_time_to_death            = asReal( R_mean_time_to_death );
+  double sd_time_to_death              = asReal( R_sd_time_to_death );
+  double mean_time_to_hospital         = asReal( R_mean_time_to_hospital );
+  double mean_time_to_critical         = asReal( R_mean_time_to_critical );
+  double sd_time_to_critical           = asReal( R_sd_time_to_critical );
+  double mean_time_hospitalised_recovery = asReal( R_mean_time_hospitalised_recovery );
+  double sd_time_hospitalised_recovery   = asReal( R_sd_time_hospitalised_recovery );
+  double mean_time_to_susceptible_after_shift = asReal( R_mean_time_to_susceptible_after_shift );
+  double time_to_susceptible_shift     = asReal( R_time_to_susceptible_shift );
 
-  for( int i = 0; i < N_AGE_GROUPS; i++ )
+  for( int i = 0; i < N_AGE_GROUPS; i++ ) {
+    fraction_asymptomatic[ i ] = REAL(R_fraction_asymptomatic )[ i ];
+    mild_fraction[ i ]         = REAL(R_mild_fraction )[ i ];
     hospitalised_fraction[ i ] = REAL(R_hospitalised_fraction )[ i ];
+    critical_fraction[ i ]     = REAL(R_critical_fraction )[ i ];
+    fatality_fraction[ i ]     = REAL(R_fatality_fraction )[ i ];
+    location_death_icu[ i ]    = REAL(R_location_death_icu )[ i ];
+  }
 
-  int n_strain = add_new_strain(c_model,transition_multiplier, hospitalised_fraction);
+  int n_strain = add_new_strain(c_model,transition_multiplier, fraction_asymptomatic, mild_fraction, hospitalised_fraction,
+		  critical_fraction, fatality_fraction, location_death_icu, mean_infectious_period, sd_infectious_period, asymptomatic_infectious_factor, mild_infectious_factor,
+		  mean_time_to_symptoms, sd_time_to_symptoms,  mean_asymptomatic_to_recovery, sd_asymptomatic_to_recovery, mean_time_to_recover,
+		  sd_time_to_recover, mean_time_hospitalised_recovery, sd_time_hospitalised_recovery, mean_time_critical_survive, sd_time_critical_survive,
+		  mean_time_to_death, sd_time_to_death, mean_time_to_hospital, mean_time_to_critical, sd_time_to_critical, mean_time_to_susceptible_after_shift,
+		  time_to_susceptible_shift );
 
+  free( fraction_asymptomatic );
+  free( mild_fraction );
   free( hospitalised_fraction );
+  free( critical_fraction );
+  free( fatality_fraction );
+  free( location_death_icu );
 
   return ScalarInteger( n_strain );
 }

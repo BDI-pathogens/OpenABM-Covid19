@@ -21,39 +21,6 @@
 #include <math.h>
 
 /*****************************************************************************************
-*  Name:		set_up_transition_times
-*  Description: sets up discrete distributions for the times it takes to
-*  				transition along edges of the disease model
-*
-*  Returns:		void
-******************************************************************************************/
-void set_up_transition_times( model *model )
-{
-	parameters *params = model->params;
-	int idx;
-	int **transitions;
-
-	model->transition_time_distributions = (int**) calloc( N_TRANSITION_TYPES, sizeof( int*) );
-	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		model->transition_time_distributions[idx] = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions = model->transition_time_distributions;
-
-	gamma_draw_list( transitions[ASYMPTOMATIC_RECOVERED], 	   N_DRAW_LIST, params->mean_asymptomatic_to_recovery, params->sd_asymptomatic_to_recovery );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_SYMPTOMATIC],  N_DRAW_LIST, params->mean_time_to_symptoms,         params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[PRESYMPTOMATIC_MILD_SYMPTOMATIC_MILD], N_DRAW_LIST, params->mean_time_to_symptoms,params->sd_time_to_symptoms );
-	gamma_draw_list( transitions[SYMPTOMATIC_RECOVERED],   	   N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
-	gamma_draw_list( transitions[SYMPTOMATIC_MILD_RECOVERED],  N_DRAW_LIST, params->mean_time_to_recover,  		   params->sd_time_to_recover );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERED],      N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	gamma_draw_list( transitions[CRITICAL_HOSPITALISED_RECOVERING], N_DRAW_LIST, params->mean_time_critical_survive, params->sd_time_critical_survive);
-	gamma_draw_list( transitions[CRITICAL_DEATH],              N_DRAW_LIST, params->mean_time_to_death,    		     params->sd_time_to_death );
-	gamma_draw_list( transitions[HOSPITALISED_RECOVERING_RECOVERED], N_DRAW_LIST, params->mean_time_hospitalised_recovery, params->sd_time_hospitalised_recovery);
-	bernoulli_draw_list( transitions[SYMPTOMATIC_HOSPITALISED],N_DRAW_LIST, params->mean_time_to_hospital );
-	gamma_draw_list( transitions[HOSPITALISED_CRITICAL],   N_DRAW_LIST, params->mean_time_to_critical, params->sd_time_to_critical );
-	shifted_geometric_draw_list( transitions[RECOVERED_SUSCEPTIBLE], N_DRAW_LIST, params->mean_time_to_susceptible_after_shift, params->time_to_susceptible_shift );
-
-}
-
-/*****************************************************************************************
 *  Name:		estimate_mean_interactions_by_age
 *  Description: estimates the weighted mean number of interactions by age
 *  				each interaction is weighted by the type factor
@@ -115,8 +82,8 @@ double estimate_mean_interactions_by_age( model *model, int age )
 void set_up_infectious_curves( model *model )
 {
 	parameters *params = model->params;
-	double infectious_rate, type_factor;
-	int type, group;
+	double infectious_rate;
+	int group;
 
 	infectious_rate = params->infectious_rate;
 	if( params->relative_susceptibility_by_interaction )
@@ -133,35 +100,7 @@ void set_up_infectious_curves( model *model )
 		for( group = 0; group < N_AGE_GROUPS; group++ )
 			params->adjusted_susceptibility[group] = params->relative_susceptibility[group] * model->mean_interactions_by_age[AGE_TYPE_ADULT] / model->mean_interactions_by_age[AGE_TYPE_MAP[group]];
 	}
-
-	for( type = 0; type < N_INTERACTION_TYPES; type++ )
-	{
-		type_factor = params->relative_transmission_used[type];
-
-		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
-
-		gamma_rate_curve( model->event_lists[PRESYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor  );
-
-		gamma_rate_curve( model->event_lists[ASYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->asymptomatic_infectious_factor);
-
-		gamma_rate_curve( model->event_lists[SYMPTOMATIC].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
-
-		gamma_rate_curve( model->event_lists[SYMPTOMATIC_MILD].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor * params->mild_infectious_factor );
-
-		gamma_rate_curve( model->event_lists[HOSPITALISED].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
-
-		gamma_rate_curve( model->event_lists[HOSPITALISED_RECOVERING].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-							  params->sd_infectious_period, infectious_rate * type_factor );
-
-		gamma_rate_curve( model->event_lists[CRITICAL].infectious_curve[type], MAX_INFECTIOUS_PERIOD, params->mean_infectious_period,
-						  params->sd_infectious_period, infectious_rate * type_factor );
-	};
+	params->infectious_rate_adjusted = infectious_rate;
 }
 /*****************************************************************************************
 *  Name:		transmit_virus_by_type
@@ -182,6 +121,7 @@ void transmit_virus_by_type(
 	interaction *interaction;
 	individual *infector;
 	int rebuild_networks = model->params->rebuild_networks;
+	double *infectious_curve;
 
 	for( day = model->time-1; day >= max( 0, model->time - MAX_INFECTIOUS_PERIOD ); day-- )
 	{
@@ -202,8 +142,9 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->with_strain->transmission_multiplier;
-				strain_idx 	  = infector->infection_events->with_strain->idx;
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
+				strain_idx 	  = infector->infection_events->strain->idx;
+				infectious_curve = infector->infection_events->strain->infectious_curve[type];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
@@ -224,9 +165,9 @@ void transmit_virus_by_type(
 							continue;
 						}
 
-						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier;
-						hazard_rate   = list->infectious_curve[interaction->type][ t_infect - 1 ] * infector_mult * network_mult;
+						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier_combined;
 						interaction->person->hazard[ strain_idx ] -= hazard_rate;
+						hazard_rate   = infectious_curve[ t_infect - 1 ] * infector_mult * network_mult;
 
 						if( interaction->person->hazard[ strain_idx ] < 0 )
 						{
@@ -262,7 +203,6 @@ void transmit_virus( model *model )
 	transmit_virus_by_type( model, HOSPITALISED );
 	transmit_virus_by_type( model, CRITICAL );
 	transmit_virus_by_type( model, HOSPITALISED_RECOVERING );
-
 }
 
 /*****************************************************************************************
@@ -328,8 +268,8 @@ void new_infection(
 )
 {
 	double draw       = rng_uniform( rng );
-	double asymp_frac = model->params->fraction_asymptomatic[infected->age_group];
-	double mild_frac  = model->params->mild_fraction[infected->age_group];
+	double asymp_frac = strain->fraction_asymptomatic[infected->age_group];
+	double mild_frac  = strain->mild_fraction[infected->age_group];
 
 	if( immune_to_symptoms( infected, strain->idx ) )
 		asymp_frac = 1;
@@ -391,7 +331,7 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( model, edge ) );
+		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->strain, edge ) );
 		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
@@ -450,7 +390,7 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
-
+ 	strain *strain = indiv->infection_events->strain;
 
 	if( model->params->hospital_on )
 	{
@@ -462,9 +402,9 @@ void transition_to_hospitalised( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 
-		if( ran_bernoulli( rng, model->params->critical_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->critical_fraction[ indiv->age_group ] ) )
 		{
-			if( ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
+			if( ran_bernoulli( rng, strain->location_death_icu[ indiv->age_group ] ) )
 				transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 			else
 				transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
@@ -487,7 +427,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
-
+ 	strain *strain = indiv->infection_events->strain;
 
 	if( model->params->hospital_on )
 	{
@@ -499,7 +439,7 @@ void transition_to_critical( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 
-		if( ran_bernoulli( rng, model->params->fatality_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->fatality_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 		else
 			transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );

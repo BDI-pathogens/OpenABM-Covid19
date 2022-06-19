@@ -27,7 +27,14 @@
 void set_up_transition_times_intervention( model *model )
 {
 	parameters *params = model->params;
+	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+
 	int **transitions  = model->transition_time_distributions;
+
+	transitions[SYMPTOMATIC_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_SYMPTOMS] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_POSITIVE] = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TEST_RESULT_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
 
 	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], 	  N_DRAW_LIST, params->quarantine_dropout_self,            params->quarantine_length_self );
 	geometric_max_draw_list( transitions[TRACED_QUARANTINE_SYMPTOMS], N_DRAW_LIST, params->quarantine_dropout_traced_symptoms, params->quarantine_length_traced_symptoms );
@@ -322,17 +329,12 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 void update_intervention_policy( model *model, int time )
 {
 	parameters *params = model->params;
-	int type;
 
 	if( time == 0 )
 	{
 		params->app_turned_on       = FALSE;
 		params->lockdown_on	        = FALSE;
 		params->lockdown_elderly_on	= FALSE;
-
-		for( type = 0; type < N_INTERACTION_TYPES; type++ )
-			params->relative_transmission_used[type] = params->relative_transmission[type];
-
 		params->interventions_on = ( params->intervention_start_time == 0 );
 	}
 

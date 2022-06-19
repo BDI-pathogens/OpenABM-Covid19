@@ -640,6 +640,15 @@ int get_model_param_lockdown_on(model *model)
 }
 
 /*****************************************************************************************
+*  Name:		get_model_param_lockdown_elderly_on
+*  Description: Gets the value of an int parameter
+******************************************************************************************/
+int get_model_param_lockdown_elderly_on(model *model)
+{
+	return model->params->lockdown_elderly_on;
+}
+
+/*****************************************************************************************
 *  Name:        get_model_param_lockdown_house_interaction_multiplier
 *  Description: Gets the value of a double parameter
 ******************************************************************************************/
@@ -1059,6 +1068,9 @@ int set_model_param_app_users_fraction( model *model, double value )
 int set_model_param_relative_transmission( model *model, double value, int type )
 {
 	double old = model->params->relative_transmission[ type ];
+	int n_networks, i;
+	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	network *network;
 
 	// ignore very small changes
 	if( fabs( old - value ) < 1e-8 )
@@ -1070,7 +1082,13 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 	if( type == HOUSEHOLD && model->params->lockdown_on )
 		model->params->relative_transmission_used[ type ] = value * model->params->lockdown_house_interaction_multiplier;
 
-	set_up_infectious_curves( model );
+	n_networks = get_network_ids( model, network_ids );
+	for( i = 0; i < n_networks; i++ ) {
+		network = get_network_by_id( model, network_ids[ i ] );
+		if( network->type == type )
+			update_transmission_multiplier_type( network, model->params->relative_transmission_used[ type ] );
+	}
+
 	return TRUE;
 }
 
@@ -1214,6 +1232,10 @@ void update_work_intervention_state(model *model, int value)
 ******************************************************************************************/
 void update_household_intervention_state(model *model, int value)
 {
+	int n_networks, i;
+	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	network *network;
+
 	if (value == TRUE)
 	{
 		// Turn household multipliers on
@@ -1224,6 +1246,13 @@ void update_household_intervention_state(model *model, int value)
 	{
 		//Set household transmission to non multiplied state
 		model->params->relative_transmission_used[HOUSEHOLD] = model->params->relative_transmission[HOUSEHOLD];
+	}
+
+	n_networks = get_network_ids( model, network_ids );
+	for( i = 0; i < n_networks; i++ ) {
+		network = get_network_by_id( model, network_ids[ i ] );
+		if( network->type == HOUSEHOLD )
+			update_transmission_multiplier_type( network, model->params->relative_transmission_used[ HOUSEHOLD ] );
 	}
 }
 
@@ -1244,7 +1273,6 @@ int set_model_param_lockdown_on( model *model, int value )
 		update_household_intervention_state(model, value);
 	}
 	params->lockdown_on = value;
-	set_up_infectious_curves( model );
 
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 		update_random_interactions( &(model->population[pdx]), params );
@@ -1304,7 +1332,6 @@ int set_model_param_lockdown_elderly_on( model *model, int value )
 		return FALSE;
 	}
 	params->lockdown_elderly_on = value;
-	set_up_infectious_curves( model );
 
 	for( pdx = 0; pdx < params->n_total; pdx++ )
 	{

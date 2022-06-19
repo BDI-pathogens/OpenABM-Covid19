@@ -54,7 +54,9 @@ model* new_model( parameters *params )
         model_ptr->n_occupation_networks = params->occupation_network_table->n_networks;
     }
 
-    
+	for( type = 0; type < N_INTERACTION_TYPES; type++ )
+		params->relative_transmission_used[type] = params->relative_transmission[type];
+
     rng = rng_alloc ();
     rng_set( rng, params->rng_seed );
 
@@ -73,7 +75,6 @@ model* new_model( parameters *params )
 	set_up_networks( model_ptr );
 	set_up_interactions( model_ptr );
 	set_up_events( model_ptr );
-	set_up_transition_times( model_ptr );
 	set_up_transition_times_intervention( model_ptr );
 	set_up_infectious_curves( model_ptr );
 	set_up_individual_hazard( model_ptr );
@@ -130,9 +131,10 @@ void destroy_model( model *model )
 		free( event_block );
 	}
 
-
-	for( idx = 0; idx < N_TRANSITION_TYPES; idx++ )
-		free( model->transition_time_distributions[ idx ] );
+	free( model->transition_time_distributions[SYMPTOMATIC_QUARANTINE] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_SYMPTOMS] );
+	free( model->transition_time_distributions[TRACED_QUARANTINE_POSITIVE] );
+	free( model->transition_time_distributions[TEST_RESULT_QUARANTINE] );
 	free( model->transition_time_distributions );
 
     destroy_network( model->random_network);
@@ -178,6 +180,8 @@ void destroy_model( model *model )
     }
     destroy_risk_scores( model );
 
+    for( idx = 0; idx < model->n_initialised_strains; idx++ )
+    	destroy_strain( &(model->strains[ idx ]) );
     free( model->strains );
     for( idx = 0; idx < model->params->max_n_strains; idx++ )
 		free( model->cross_immunity[idx] );
@@ -194,13 +198,12 @@ void destroy_model( model *model )
 void set_up_event_list( model *model, parameters *params, int type )
 {
 
-	int day, age, idx;
+	int day, age;
 	event_list *list = &(model->event_lists[ type ]);
 	list->type       = type;
 
 	list->n_daily          = (long*) calloc( MAX_TIME, sizeof(long) );
 	list->n_daily_current  = (long*) calloc( MAX_TIME, sizeof(long) );
-	list->infectious_curve = (double**) calloc( N_INTERACTION_TYPES, sizeof(double*) );
 	list->n_total_by_age   = (long*) calloc( N_AGE_GROUPS, sizeof(long) );
 	list->n_daily_by_age   = (long**) calloc( MAX_TIME, sizeof(long*) );
 	list->events		   = (event**) calloc( MAX_TIME, sizeof(event*));
@@ -216,8 +219,6 @@ void set_up_event_list( model *model, parameters *params, int type )
 		list->n_daily[day] = 0;
 		list->n_daily_current[day] = 0;
 	}
-	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
-		list->infectious_curve[idx] = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 }
 
 /*****************************************************************************************
@@ -226,16 +227,13 @@ void set_up_event_list( model *model, parameters *params, int type )
 ******************************************************************************************/
 void destroy_event_list( model *model, int type )
 {
-	int day, idx;
+	int day;
 	free( model->event_lists[type].n_daily );
 
 	for( day = 0; day < MAX_TIME; day++ )
 		free( model->event_lists[type].n_daily_by_age[day]);
-	for( idx = 0; idx < N_INTERACTION_TYPES; idx++ )
-		free( model->event_lists[type].infectious_curve[idx] );
 
 	free( model->event_lists[type].n_daily_current );
-	free( model->event_lists[type].infectious_curve );
 	free( model->event_lists[type].n_total_by_age );
 	free( model->event_lists[type].n_daily_by_age );
 	free( model->event_lists[type].events );
@@ -248,7 +246,7 @@ void destroy_event_list( model *model, int type )
 ******************************************************************************************/
 network* add_new_network( model *model, long n_total, int type )
 {
-	network *net = create_network( n_total, type );
+	network *net = create_network( n_total, type, model->params );
 
 	net->network_id = model->n_networks;
 
@@ -752,13 +750,27 @@ void set_up_seed_infection( model *model )
 	int idx, strain_idx;
 	unsigned long int person;
 	individual *indiv;
+	double *fraction_asymptomatic = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *mild_fraction         = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
 	double *hospitalised_fraction = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *critical_fraction     = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *fatality_fraction     = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
+	double *location_death_icu    = (double*) calloc( N_AGE_GROUPS, sizeof( double  ) );
 
-	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
+	for( idx = 0; idx < N_AGE_GROUPS; idx++ ) {
+		fraction_asymptomatic[ idx ] = params->fraction_asymptomatic[ idx ];
+		mild_fraction[ idx ]         = params->mild_fraction[ idx ];
 		hospitalised_fraction[ idx ] = params->hospitalised_fraction[ idx ];
+		critical_fraction[ idx ]     = params->critical_fraction[ idx ];
+		fatality_fraction[ idx ]     = params->fatality_fraction[ idx ];
+		location_death_icu[ idx ]    = params->location_death_icu[ idx ];
+	}
 
 	idx = 0;
-	strain_idx = add_new_strain( model, 1, hospitalised_fraction );
+	strain_idx = add_new_strain( model, 1, fraction_asymptomatic, mild_fraction, hospitalised_fraction,
+			critical_fraction, fatality_fraction, location_death_icu, UNKNOWN, UNKNOWN,  UNKNOWN,
+			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN,
+			UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN );
 
 	while( idx < params->n_seed_infection )
 	{

@@ -58,6 +58,7 @@ export("VACCINE_TYPES")
 export("VACCINE_STATUS")
 
 # constants
+export( "UNKNOWN" )
 export("plot.value.total_infected")
 export("plot.value.new_infected")
 export("plot.values")

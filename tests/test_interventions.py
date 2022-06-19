@@ -1209,7 +1209,29 @@ class TestClass(object):
                 ),
             )
         ],
-                                          
+        "test_lockdown_elderly_on" : [
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    lockdown_occupation_multiplier_elderly_network = 0.3,
+                    lockdown_occupation_multiplier_retired_network = 0.3,
+                    lockdown_random_network_multiplier = 0.4,
+                )
+            ),
+            dict(
+                test_params = dict( 
+                    n_total = 2e4, 
+                    n_seed_infection = 2000,
+                    end_time = 8,
+                    lockdown_occupation_multiplier_elderly_network = 0.7,
+                    lockdown_occupation_multiplier_retired_network = 0.7,
+                    lockdown_random_network_multiplier = 0.7,
+                )
+            )
+        ],
+                                       
     }
 
     """
@@ -3221,3 +3243,82 @@ class TestClass(object):
         np.testing.assert_allclose(n_quarantined, n_test_not_hospital * quar_comp, atol = atol, err_msg = "incorrect number of people quarantined following positive test")
         np.testing.assert_allclose(n_not_quarantined, n_test_not_hospital * ( 1 - quar_comp ), atol = atol, err_msg = "incorrect number of people didn't quarantined following positive test")        
         
+    def test_lockdown_elderly_on(self, test_params ):  
+        
+        """
+        Check that:
+        1. the elderly lockdown can be turned on and off
+        2. check to see only the correct interactions are changed (non-household elderly
+        """ 
+         
+        # number of   
+        sd_tol = 2.5
+                      
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )
+        model  = utils.get_model_swig( params )
+        model.run( n_steps = 1, verbose = False)
+
+        # get the early interactions
+        model.write_interactions_file()  
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_pre_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_pre")
+        
+        lockdown_on = model.get_param( "lockdown_elderly_on")
+        np.testing.assert_equal(lockdown_on, False, err_msg = "lockdown elderly on at start of simulation")
+        model.run( n_steps = 2, verbose = False)
+        
+        model.update_running_params( "lockdown_elderly_on", True)
+        lockdown_on = model.get_param( "lockdown_elderly_on")
+        np.testing.assert_equal(lockdown_on, True, err_msg = "lockdown elderly not turned on")
+        model.run( n_steps = 2, verbose = False)
+
+        # get the post lockdown interactions
+        model.write_interactions_file()  
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_post_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_post")
+
+        df_comp = pd.merge( df_pre_int_sum, df_post_int_sum, on = ["age_group_1", "type"])
+        df_comp.loc[ :,"diff" ] = abs( df_comp[ "n_post" ] - df_comp[ "n_pre" ])
+        df_comp.loc[ :,"tol" ]  = ( np.sqrt( df_comp["n_pre"]) + np.sqrt( df_comp["n_post"]) ) * sd_tol
+        
+        # test to see if young interactions are changes
+        df_ratio_non_elderly        = df_comp[ df_comp[ "age_group_1"] <= 6 ]
+        df_ratio_elderly_home       = df_comp[ ( df_comp[ "age_group_1"] > 6 ) & ( df_comp[ "type" ] == 0 )]
+        df_ratio_elderly_occupation = df_comp[ ( df_comp[ "age_group_1"] > 6 ) & ( df_comp[ "type" ] == 1 )]
+        df_ratio_elderly_occupation = df_ratio_elderly_occupation.assign( 
+            diff = abs( df_ratio_elderly_occupation[ "n_pre" ] * test_params[ "lockdown_occupation_multiplier_elderly_network" ] -
+                         df_ratio_elderly_occupation[ "n_post" ] ) )    
+        df_ratio_elderly_random = df_comp[ ( df_comp[ "age_group_1"] > 6 ) & ( df_comp[ "type" ] == 2 )]
+        df_ratio_elderly_random = df_ratio_elderly_random.assign( 
+            diff = abs( df_ratio_elderly_random[ "n_pre" ] * test_params["lockdown_random_network_multiplier" ] -
+                        df_ratio_elderly_random[ "n_post" ] ) )
+            
+        np.testing.assert_equal( len( df_ratio_non_elderly ), 21, err_msg = "incorrect number of types of non-elderly interactions")
+        np.testing.assert_array_less( df_ratio_non_elderly[ "diff"], df_ratio_non_elderly[ "tol"], err_msg = "non-elderly interactions changed")
+        np.testing.assert_equal( len( df_ratio_elderly_home ), 2, err_msg = "incorrect  number of types of elderly home interactions")
+        np.testing.assert_array_less( df_ratio_elderly_home[ "diff"], df_ratio_elderly_home[ "tol"], err_msg = "non-elderly interactions changed")
+        np.testing.assert_equal( len( df_ratio_elderly_occupation ), 2, err_msg = "incorrect number of types of elderly occupation interactions")
+        np.testing.assert_array_less( df_ratio_elderly_occupation[ "diff"], df_ratio_elderly_occupation[ "tol"], err_msg = "non-elderly occupation interactions changed")
+        np.testing.assert_equal( len( df_ratio_elderly_random ), 2, err_msg = "incorrect number of types of elderly random interactions")
+        np.testing.assert_array_less( df_ratio_elderly_random[ "diff"], df_ratio_elderly_random[ "tol"], err_msg = "non-elderly random interactions changed")
+            
+        # remove the lockdown
+        model.update_running_params( "lockdown_elderly_on", False)
+        lockdown_on = model.get_param( "lockdown_elderly_on")
+        np.testing.assert_equal(lockdown_on, False, err_msg = "lockdown elderly not turned off")
+        model.run( n_steps = 2, verbose = False)
+
+        # get the post lockdown removal interactions
+        model.write_interactions_file()  
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_post2_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_post")
+
+        df_comp = pd.merge( df_pre_int_sum, df_post2_int_sum, on = ["age_group_1", "type"])
+        df_comp.loc[ :,"diff" ] = abs( df_comp[ "n_post" ] - df_comp[ "n_pre" ])
+        df_comp.loc[ :,"tol" ]  = ( np.sqrt( df_comp["n_pre"]) + np.sqrt( df_comp["n_post"]) ) * sd_tol
+             
+        np.testing.assert_equal( len( df_comp ), 27, err_msg = "incorrect number of types of interactions")
+        np.testing.assert_array_less( df_comp[ "diff"], df_comp[ "tol"], err_msg = "number of interactions not reverted back to original")
+                  

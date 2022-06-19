@@ -26,7 +26,6 @@
 
 
 // set up distributions and infectious curves
-void set_up_transition_times( model* );
 void set_up_infectious_curves( model* );
 double estimate_mean_interactions_by_age( model *pmodel, int age );
 
