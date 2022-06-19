@@ -195,8 +195,20 @@ class TestClass(object):
                                   population_60_69, population_70_79, population_80 ]
        
         params.write_params(constant.TEST_DATA_FILE)        
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout=file_output,
+        #     stderr=file_output, shell=True)
+        # np.testing.assert_equal(completed_run.returncode, 0)
+
+        # get the model and run for the required time steps
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig( mparams )
+        for time in range( 1 ):
+            model.one_time_step()
+            
+        # get the individual file and check age and houses
+        model.write_individual_file()
+
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
 
@@ -235,10 +247,19 @@ class TestClass(object):
         sum(household_size_counts_weighted)
 
         # Run the simulation.
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output,
-            stderr=file_output, shell=True)
-        np.testing.assert_equal(completed_run.returncode, 0)
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout=file_output,
+        #     stderr=file_output, shell=True)
+        # np.testing.assert_equal(completed_run.returncode, 0)
+
+        # get the model and run for the required time steps
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig( mparams )
+        for time in range( 1 ):
+            model.one_time_step()
+            
+        # get the individual file and check age and houses
+        model.write_individual_file()
 
         # Find the number of people living in households of each different size
         # in the simulation output.

@@ -24,12 +24,20 @@ endif
 
 PIP_FLAGS := --upgrade
 
+D=$(shell pwd)
+
 # The 'in-place' flag is different on macOS (BSD) and Linux/minGW.
 # https://linux.die.net/man/1/sed
 # https://www.freebsd.org/cgi/man.cgi?query=sed&sektion=&n=1
 # Note on Windows: install Rtools for 'sed'
 ifeq ($(shell uname),Darwin)
 	SED_I=sed -i ''
+#  PYTHONLIB="-undefined dynamic_lookup"
+	ifndef USE_STATS
+    C = clang
+	else
+		C = clang++
+	endif
 else
 	SED_I=sed -i
 endif
@@ -50,9 +58,9 @@ else
 	SRC_SCILIB = src/random_stats.h
 	OBJS_SCILIB = src/random_stats.o
 	LFLAGS_SCILIB = 
-	LDFLAGS_SCILIB = -fopenmp
-	CFLAGS_SCILIB = -fopenmp -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
-	CPPFLAGS_SCILIB = -fopenmp -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
+	LDFLAGS_SCILIB = 
+	CFLAGS_SCILIB = -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
+	CPPFLAGS_SCILIB = -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
 endif
 
 OBJS = $(OBJS_SCILIB) src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
@@ -90,7 +98,7 @@ ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd m
 install: $(OBJS)
 install: all;
 	cd src && swig -python covid19.i
-	cd src && $(PYTHON) -m pip install $(PIP_FLAGS) .
+	cd src && CC=$(C) CXX=$(C) LDSHARED=$(C) D=$(D) $(PYTHON) -m pip install -v $(PIP_FLAGS) .
 
 dev: PIP_FLAGS += -e
 dev: install;

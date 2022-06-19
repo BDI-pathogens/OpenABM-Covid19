@@ -6,8 +6,31 @@ setup.py file for SWIG example
 
 from distutils.core import setup, Extension
 from subprocess import check_output
+import os
+
+def usingStats():
+    useStats = os.environ.get('USE_STATS')
+
+    if useStats is not None:
+        return True
+    return False
 
 def gsl_config(flag):
+    if usingStats():
+        statsRoot=".."
+        d = os.environ.get('D')
+        if d is not None:
+            statsRoot = d
+        
+        if '--cflags' == flag:
+            return ("-DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS -I" + d + "/stats/include -I" + d + "/gcem/include -std=c++17").split(' ')
+        else:
+            pythonLib = os.environ.get('PYTHONLIB')
+            if pythonLib is not None:
+                return pythonLib.split(' ')
+            else:
+                return []
+    
     out = check_output(['gsl-config'] + [flag]).decode('utf-8')
     out = out.replace("\n",'') # cut trailing \n
     return out.split(' ')
@@ -15,30 +38,40 @@ def gsl_config(flag):
 CFLAGS  = gsl_config('--cflags')
 LDFLAGS = gsl_config('--libs')
 
+srcs = [
+    "covid19_wrap.c",
+    "constant.c",
+    "demographics.c",
+    "disease.c",
+    "doctor.c",
+    "hospital.c",
+    "individual.c",
+    "input.c",
+    "interventions.c",
+    "list.c",
+    "model.c",
+    "network.c",
+    "nurse.c",
+    "params.c",
+    "strain.c",
+    "utilities.c",
+    "ward.c"
+]
+if not usingStats():
+  srcs.append("random_gsl.c")
+else:
+  srcs.append("random_stats.cpp")
+
+lang = "c"
+if usingStats():
+  lang = "c++"
+
 covid19_module = Extension(
     "_covid19",
-    sources=[
-        "covid19_wrap.c",
-        "constant.c",
-        "demographics.c",
-        "disease.c",
-        "doctor.c",
-        "hospital.c",
-        "individual.c",
-        "input.c",
-        "interventions.c",
-        "list.c",
-        "model.c",
-        "network.c",
-        "nurse.c",
-        "params.c",
-        "strain.c",
-        "utilities.c",
-        "ward.c",
-        "random_gsl.c"
-    ],
+    srcs,
     extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O2"] + CFLAGS,
-    extra_link_args=["-lm", "-O2"] + LDFLAGS,
+    extra_link_args=["-lm", "-O2", "-fPIC", "-shared"] + LDFLAGS,
+    language=lang,
 )
 
 setup(

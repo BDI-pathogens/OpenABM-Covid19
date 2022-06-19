@@ -10,8 +10,11 @@ RUN apt-get update -qqy && apt-get install -qqy \
   g++ \
   libgsl23 \
   libgsl-dev \
-  swig
+  swig \
+  git
 RUN python3.7 -m pip install numpy pandas scipy pytest
+
+ENV USE_STATS=1
 
 COPY tests/requirements.txt /requirements.txt
 RUN python3 -m pip install -r /requirements.txt
@@ -19,7 +22,9 @@ RUN python3 -m pip install -r /requirements.txt
 COPY . /OpenABM-Covid19
 
 WORKDIR /OpenABM-Covid19
+RUN git clone --depth 1 https://github.com/kthohr/stats
+RUN git clone --depth 1 https://github.com/kthohr/gcem
 RUN make clean && make install
 
 WORKDIR /OpenABM-Covid19
-ENTRYPOINT ["/usr/local/bin/pytest", "-s"]
+ENTRYPOINT ["/usr/local/bin/pytest", "-svv"]

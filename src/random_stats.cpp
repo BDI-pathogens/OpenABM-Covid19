@@ -31,16 +31,16 @@ void rng_set( generator * gen, long seed ) {
 // Works the same as GSL
 double rng_uniform( generator * gen) {
 #ifdef GSL_COMPAT
-  return stats::runif( 0.0f, 1.0f, gen->rng );
+  return stats::runif( 0.0, 1.0, gen->rng );
 #else
-  return stats::runif( 0.0d, 1.0d, gen->rng );
+  return stats::runif( 0.0, 1.0, gen->rng );
 #endif
 }
 
 // Works the same as GSL
 int rng_uniform_int( generator * gen, long p ) {
 #ifdef GSL_COMPAT
-  return stats::runif( 0.0f, (float)p, gen->rng );
+  return stats::runif( 0.0, (float)p, gen->rng );
 #else
   return stats::runif( 0l, p, gen->rng );
 #endif
@@ -78,7 +78,7 @@ double ran_exponential( generator * gen, double mu ) {
 //       This is a methodological difference which won't result in worse random generation
 //       but may cost in performance terms.
 unsigned int ran_negative_binomial( generator * gen, double p, double n ) {
-  double x = ran_gamma( gen, n, 1.0d );
+  double x = ran_gamma( gen, n, 1.0 );
 #ifdef GSL_COMPAT
   unsigned int k = stats::rpois( (float)(x*(1-p)/p), gen->rng );
 #else

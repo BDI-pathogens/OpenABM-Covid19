@@ -12,7 +12,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: build container
-      run:  docker build --tag test -f tests/Dockerfile .
-    - name: run tests
-      run: docker run test
+    - name: build container gsl
+      run:  docker build --tag testgsl -f tests/Dockerfile.gsl .
+    - name: run tests gsl
+      run: docker run testgsl
+    - name: build container stats
+      run:  docker build --tag teststats -f tests/Dockerfile.stats .
+    - name: run tests stats
+      run: docker run teststats
