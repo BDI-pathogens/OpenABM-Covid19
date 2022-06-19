@@ -76,7 +76,7 @@ covid19_module = Extension(
     "_covid19",
     srcs,
     extra_compile_args=["-g", "-Wall", "-fmessage-length=0", "-O2", "-fPIC"] + CFLAGS,
-    extra_link_args=["-lm", "-O2", "-fPIC"] + LDFLAGS,
+    extra_link_args=["-lm", "-O2", "-fPIC", "-shared"] + LDFLAGS,
     language=lang,
 )
 
