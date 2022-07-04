@@ -15,7 +15,7 @@ cd OpenABM-Covid19
 git remote add upstream https://github.com/BDI-pathogens/OpenABM-Covid19.git
 ```
 
-3. Sync upsteam with the master branch of your fork
+3. Sync upstream with the master branch of your fork
 
 ```bash
 git checkout master

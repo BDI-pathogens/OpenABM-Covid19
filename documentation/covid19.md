@@ -178,7 +178,7 @@ Immunity is assumed to be polarised, in that if the individual gains a certain t
 ## Multiple Strains
 
 The ABM also supports the option to model multiple variants of the virus. 
-Each strain of the virus can have different levels of transmisibility, modelled as a multipler which is applied to the overall infectious rate.
+Each strain of the virus can have different levels of transmissibility, modelled as a multiplier which is applied to the overall infectious rate.
 Additionally, the strains can have different virulence, which is modelled by modifying the fraction of people with moderate symptoms who are hospitalised (&#966;<sub>hosp</sub>(age) ).
 Multiple simultaneous infections are not allowed *i.e.* once somebody has been infected by a virus and enters the disease cascade, they are not able to contract another variant until they recover.
 Upon recovering from the an infection, cross-immunity to other strains can be conferred upon the individual according to a cross-immunity matrix. 
@@ -293,7 +293,7 @@ For every infection status we pre-calculate the transmission rate for someone wh
 At each time-step we go through all the interactions the infected person had for that day and calculate whether transmission has occurred.
 Instead of randomly drawing whether transmission has occurred for each interaction, we allocate each individual a quantity of *hazard* (from an exponential distribution) at the start of the simulation.
 Each interaction with an infected person reduces the persons *hazard* and when a person's *hazard* drops below 0 they become infected. 
-This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N*<sup>th</sup> interaction  *P*(infected *N*<sup>th</sup>), after exposured to interactions with hazard-rates &#955;<sub>1</sub>,..,&#955;<sub>N</sub> 
+This is mathematically equivalent to randomly drawing individual interactions, which can be seen by calculating the probability of  being infected by the *N*<sup>th</sup> interaction  *P*(infected *N*<sup>th</sup>), after exposure to interactions with hazard-rates &#955;<sub>1</sub>,..,&#955;<sub>N</sub> 
 
 <p><img src="eqn_hazard.png"  height="220"></p>
 
@@ -325,10 +325,10 @@ Duncan J Watts and Steven H Strogatz. Collective dynamics of ‘small-world’ n
 Luca Ferretti, Chris Wymant, Michelle Kendall, Lele Zhao, Anel Nurtay, Lucie Abeler-Dorner, Michael Parker, David Bonsall, and Christophe Fraser. Quantifying SARS-CoV-2 transmission suggests epidemic control  with  digital  contact tracing. Science, 2020.
 
 <a id="4">[4]</a> 
-Tapiwa Ganyani, Cecile Kremer, Dongxuan Chen, Andrea Torneri, Christel Faes, JaccoWallinga, and Niel Hens. Estimating the generation interval for COVID-19 based onsymptom onset data.medRxiv, 2020.
+Tapiwa Ganyani, Cecile Kremer, Dongxuan Chen, Andrea Torneri, Christel Faes, JaccoWallinga, and Niel Hens. Estimating the generation interval for COVID-19 based on symptom onset data.medRxiv, 2020.
 
 <a id="5">[5]</a> 
-Shujuan Ma, Jiayue Zhang, Minyan Zeng, Qingping Yun, Wei Guo, Yixiang Zheng, ShiZhao,  Maggie  H  Wang,  and  Zuyao  Yang.   Epidemiological  parameters  of  coronavirusdisease 2019: a pooled analysis of publicly reported individual data of 1155 cases fromseven countries. medRxiv, 2020.
+Shujuan Ma, Jiayue Zhang, Minyan Zeng, Qingping Yun, Wei Guo, Yixiang Zheng, ShiZhao,  Maggie  H  Wang,  and  Zuyao  Yang.   Epidemiological  parameters  of  coronavirus disease 2019: a pooled analysis of publicly reported individual data of 1155 cases from seven countries. medRxiv, 2020.
 
 <a id="6">[6]</a> 
 Lei Luo, Dan Liu, Xin-long Liao, Xian-bo Wu, Qin-long Jing, Jia-zhen Zheng, Fang-huaLiu, Shi-gui Yang, Bi Bi, Zhi-hao Li, Jian-ping Liu, Wei-qi Song, Wei Zhu,  Zheng-heWang, Xi-ru Zhang, Pei-liang Chen, Hua-min Liu, Xin Cheng, Miao-chun Cai, Qing-meiHuang, Pei Yang, Xin-fen Yang, Zhi-gang Huang, Jin-ling Tang, Yu Ma, and Chen Mao.Modes of contact and risk of transmission in covid-19 among close contacts. medRxiv, 2020.
@@ -337,7 +337,7 @@ Lei Luo, Dan Liu, Xin-long Liao, Xian-bo Wu, Qin-long Jing, Jia-zhen Zheng, Fang
 Yang Yang, Qingbin Lu, Mingjin Liu, Yixing Wang, Anran Zhang, Neda Jalali, NatalieDean, Ira Longini, M. Elizabeth Halloran, Bo Xu, Xiaoai Zhang, Liping Wang, Wei Liu,and Liqun Fang. Epidemiological and clinical features of the 2019 novel coronavirus outbreak in China. medRxiv, 2020.
 
 <a id="8">[8]</a> 
-Tiago Henrique de Souza, Jose Antonio Nadal, Roberto Jose Negrao Nogueira, Ricardo Mendes Pereira, and Marcelo Barciela Brandao. Clinical manifestations of childrenwith COVID-19: a systematic review. medRxiv, 2020.
+Tiago Henrique de Souza, Jose Antonio Nadal, Roberto Jose Negrao Nogueira, Ricardo Mendes Pereira, and Marcelo Barciela Brandao. Clinical manifestations of children with COVID-19: a systematic review. medRxiv, 2020.
 
 <a id="9">[9]</a> 
 Juanjuan Zhang, Maria Litvinova, Yuxia Liang, Yan Wang, Wei Wang, Shanlu Zhao,Qianhui Wu, Stefano Merler, Cecile Viboud, Alessandro Vespignani, Marco Ajelli, and Hongjie Yu. Age profile of susceptibility, mixing, and social distancing shape the dynamics of the novel coronavirus disease 2019 outbreak in china. medRxiv, 2020.

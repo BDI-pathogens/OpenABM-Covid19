@@ -32,4 +32,4 @@
 | `time_recovered` | Time at which the recipient recovered (-1 if never) |
 | `time_susceptible` | Time at which the recipient became susceptible again (if waning immunity is possible) |
 | `is_case` | Was the recipient identified as a case (positive test result) (1=Yes; 0=No) |
-| `strain_multiplier` | The relative transmisibility of the strain of the infector (1.0 = default transmisibility) |
+| `strain_multiplier` | The relative transmissibility of the strain of the infector (1.0 = default transmissibility) |
