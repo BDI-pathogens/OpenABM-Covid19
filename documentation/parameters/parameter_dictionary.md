@@ -55,7 +55,7 @@
 | `mild_fraction_60_69` | 0.571 | &#966;<sub>mild</sub>(60-69) | Fraction of infected individuals with mild symptoms, aged 60-69 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_70_79` | 0.523 | &#966;<sub>mild</sub>(70-79) | Fraction of infected individuals with mild symptoms, aged 70-79 | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
 | `mild_fraction_80` | 0.461 | &#966;<sub>mild</sub>(80) | Fraction of infected individuals with mild symptoms, aged 80+ | Calibration of Riccardo et al. 2020 & Spanish Serology Survey |
-| `mild_infectious_factor` | 0.72 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Personal communction, Sun |
+| `mild_infectious_factor` | 0.72 | *A<sub>mild</sub>* | Infectious rate of mildly symptomatic individuals relative to symptomatic individuals | Personal communication, Sun |
 | `mean_asymptomatic_to_recovery` | 15 | &#956;<sub>a,rec</sub> | Mean time from infection to recovery (and no longer infectious) for an asymptomatic individual (days) | Yang et al 2020 |
 | `sd_asymptomatic_to_recovery` | 5 | &#963;<sub>a,rec</sub> | Standard deviation from infection to recovery for an asymptomatic individual (days) | Yang et al 2020 |
 | `household_size_1` | 7452 | - | Number of UK households with 1 person (thousands) | ONS UK |

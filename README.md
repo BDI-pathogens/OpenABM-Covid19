@@ -142,7 +142,7 @@ If you have multiple versions of SWIG installed, you can set the `SWIG3` environ
 SWIG3=$(HOME)/swig-3.0.12/bin/swig make Rswig
 ```
 
-If this is succesful, the following files will be generated (ignored by git):
+If this is successful, the following files will be generated (ignored by git):
 
 - R/OpenABMCovid19.R
 - src/covid19_wrap_R.c
