@@ -2,7 +2,11 @@
 ifeq ($(compiler),icc)
     C = icc
 else
+	ifndef USE_STATS
     C = gcc
+	else
+		C = g++
+	endif
 endif
 
 ifeq (Windows_NT, $(OS))
@@ -20,20 +24,49 @@ endif
 
 PIP_FLAGS := --upgrade
 
+D=$(shell pwd)
+
 # The 'in-place' flag is different on macOS (BSD) and Linux/minGW.
 # https://linux.die.net/man/1/sed
 # https://www.freebsd.org/cgi/man.cgi?query=sed&sektion=&n=1
 # Note on Windows: install Rtools for 'sed'
 ifeq ($(shell uname),Darwin)
 	SED_I=sed -i ''
+	ifndef USE_STATS
+    C = clang
+		UNSUPMAC = 1
+	else
+    PL = "-undefined dynamic_lookup"
+		C = clang++
+	endif
 else
 	SED_I=sed -i
 endif
 
-OBJS = src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
+ifndef USE_STATS
+	SRC_SCILIB = 
+	OBJS_SCILIB = src/random_gsl.o
+	LFLAGS_SCILIB = -lgsl -lgslcblas
+	LDFLAGS_SCILIB = $(shell gsl-config --libs)
+	CFLAGS_SCILIB = $(shell gsl-config --cflags) 
+	CPPFLAGS_SCILIB = 
+else
+	ifndef GSL_COMPAT
+		COMPAT = 
+	else
+		COMPAT = -DGSL_COMPAT
+	endif
+	SRC_SCILIB = src/random_stats.h
+	OBJS_SCILIB = src/random_stats.o
+	LFLAGS_SCILIB = 
+	LDFLAGS_SCILIB = 
+	CFLAGS_SCILIB = -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
+	CPPFLAGS_SCILIB = -DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS $(COMPAT) -Istats/include -Igcem/include -std=c++17
+endif
 
-GSLFLAGS= -lgsl -lgslcblas -lm -O3
-LFLAGS = $(GSLFLAGS)
+OBJS = $(OBJS_SCILIB) src/utilities.o src/constant.o src/demographics.o src/params.o src/model.o src/individual.o src/main.o src/input.o src/network.o src/disease.o src/interventions.o src/hospital.o src/doctor.o src/nurse.o src/ward.o src/list.o src/strain.o
+
+LFLAGS = $(LFLAGS_SCILIB) -lm -O2
 
 # Name of executable
 _EXE = src/covid19ibm.exe
@@ -43,11 +76,12 @@ INC = /usr/local/include
 LIB = /usr/local/lib
 
 # Compilation options and libraries to be used
-CFLAGS = -g -Wall -fmessage-length=0 -I$(INC) $(shell gsl-config --cflags) -O0
-LDFLAGS = -L$(LIB) $(shell gsl-config --libs)
+CFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CFLAGS_SCILIB) -O2 
+CPPFLAGS = -Wall -fmessage-length=0 -I$(INC) $(CPPFLAGS_SCILIB) -O2 
+LDFLAGS = -L$(LIB) $(LDFLAGS_SCILIB)
 
 # Swig's input
-SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h
+SWIG_INPUT = src/disease.h src/ward.h src/nurse.h src/network_utils.i src/vaccine_utils.i src/strain_utils.i src/input.h src/individual.h src/hospital.h src/params.h src/structure.h src/constant.h src/doctor.h src/utilities.h src/model_utils.i src/covid19.i src/list.h src/network.h src/model.h src/interventions.h src/params_utils.i src/demographics.h src/strain.h src/random.h $(SRC_SCILIB)
 
 # Swig's output
 SWIG_OUTPUT_PY = src/covid19_wrap.o src/covid19_wrap.c src/covid19.py src/_covid19.cpython-37m-darwin.so src/build src/covid19.egg-info
@@ -64,8 +98,7 @@ ROXYGEN_OUTPUT= man/SAFE_UPDATE_PARAMS.Rd man/Parameters.Rd man/Environment.Rd m
 # To compile
 install: $(OBJS)
 install: all;
-	cd src && swig -python covid19.i
-	cd src && $(PYTHON) -m pip install $(PIP_FLAGS) .
+	if [ "$(UNSUPMAC)" == "1" ]; then echo "Compilation of OpenABM-Covid19 R and Python bindings with GSL on Mac is unsupported at this time. Please use 'USE_STATS=1 make'"; else cd src && swig -python covid19.i && PYTHONLIB=$(PL) CC=$(C) CXX=$(C) LDSHARED=$(C) D=$(D) $(PYTHON) -m pip install -v $(PIP_FLAGS) . ;fi
 
 dev: PIP_FLAGS += -e
 dev: install;
@@ -76,6 +109,10 @@ all: $(OBJS)
 clean:
 	cd src && $(PYTHON) -m pip uninstall -y covid19
 	rm -rf $(OBJS) $(EXE) $(SWIG_OUTPUT) $(ROXYGEN_OUTPUT)
+
+# TODO add check if [ ! -d "$(PWD)/stats" ]; then echo "Please check out the stats library with: git clone --depth 1 https://github.com/kthohr/stats"; exit 1; fi
+%.o : %.cpp
+	$(C) $(CPPFLAGS) -c $< -o $@
 
 .c.o:
 	$(C) $(CFLAGS) -c $< -o $@

@@ -10,7 +10,7 @@ Created: March 2020
 Author: p-robot
 """
 
-import pytest, sys, subprocess, shutil, os
+import pytest, sys, shutil, os
 import numpy as np, pandas as pd
 from scipy import optimize
 from math import exp, log, fabs, sqrt
@@ -515,11 +515,19 @@ class TestClass(object):
         params.set_param("mean_time_to_symptoms", mean_time_to_symptoms)
         params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        # df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
+        model.write_transmissions()
+
         df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
+
         # check to see that the number of entries in the transmission file is that in the time-series
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
@@ -603,9 +611,15 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)     
                 
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)      
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)      
+        # df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
+        
         df_ts         = df_output.loc[ :, ["time", "total_infected"]]
 
         # calculate the rate exponential rate of grwoth from the model
@@ -651,8 +665,15 @@ class TestClass(object):
         params.set_param( relative_transmission , rel_trans_value_current )
         params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        # df_output = model.results
+        model.write_transmissions()
+
         df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         
@@ -669,8 +690,15 @@ class TestClass(object):
             params.set_param(relative_transmission , relative_transmission_value )
             params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+            # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+
+            mparams = utils.get_params_custom()
+            model = utils.get_model_swig(mparams)
+            model.run(verbose=False)
+            df_output = model.results
+            model.write_transmissions()
+
             df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
                 comment = "#", sep = ",", skipinitialspace = True )
             
@@ -727,9 +755,14 @@ class TestClass(object):
         params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[0] )
         params.write_params(constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")        
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        # df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")     
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
         
         # calculate the sum of fraction_asymptomatic for different age groups
         fraction_asymptomatic_current = fraction_asymptomatic_0_9[0] + \
@@ -756,10 +789,15 @@ class TestClass(object):
             params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[idx] )
             params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], 
-                stdout = file_output, shell = True)     
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            # completed_run = subprocess.run([constant.command], 
+            #     stdout = file_output, shell = True)     
+            # df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+            mparams = utils.get_params_custom()
+            model = utils.get_model_swig(mparams)
+            model.run(verbose=False)
+            df_output_new = model.results
             
             fraction_asymptomatic_new = fraction_asymptomatic_0_9[idx] + \
                                         fraction_asymptomatic_10_19[idx] + \
@@ -804,9 +842,14 @@ class TestClass(object):
         params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[0] )
         params.write_params(constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        # df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
         
         # save the current asymptomatic_infectious_factor value
         asymptomatic_infectious_factor_current = asymptomatic_infectious_factor[0]
@@ -817,9 +860,14 @@ class TestClass(object):
             params.set_param("asymptomatic_infectious_factor", asymptomatic_infectious_factor[idx])
             params.write_params(constant.TEST_DATA_FILE)
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+            # df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+            mparams = utils.get_params_custom()
+            model = utils.get_model_swig(mparams)
+            model.run(verbose=False)
+            df_output_new = model.results
             
             asymptomatic_infectious_factor_new = asymptomatic_infectious_factor[idx]
             total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
@@ -875,8 +923,15 @@ class TestClass(object):
         params.write_params(constant.TEST_DATA_FILE)     
 
         # get the current output
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+        # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        df_output = model.results
+        model.write_transmissions()
+        
         df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         
         # calculate the proportion of infections in each age group
@@ -909,8 +964,15 @@ class TestClass(object):
             params.set_param( "relative_susceptibility_80", relative_susceptibility_80[idx] )
             params.write_params(constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+            # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+            # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+
+            mparams = utils.get_params_custom()
+            model = utils.get_model_swig(mparams)
+            model.run(verbose=False)
+            # df_output = model.results
+            model.write_transmissions()
+
             df_trans_new = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
             
             relative_susceptibility_new = [ relative_susceptibility_0_9[idx],
@@ -984,9 +1046,14 @@ class TestClass(object):
                 params.set_param('rng_seed', rng_seed)
                 params.write_params(constant.TEST_DATA_FILE)     
                 
-                file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-                completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-                df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+                # file_output   = open(constant.TEST_OUTPUT_FILE, "w")
+                # completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
+                # df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+
+                mparams = utils.get_params_custom()
+                model = utils.get_model_swig(mparams)
+                model.run(verbose=False)
+                df_output = model.results
             
                 total_infected_list.append(df_output[ "total_infected" ].iloc[-1])
             
@@ -1044,11 +1111,18 @@ class TestClass(object):
         params.set_param("n_seed_infection", n_seed_infection)
         params.set_param("end_time", end_time)
         params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        # file_output = open(constant.TEST_OUTPUT_FILE, "w")
+        # completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+
+        mparams = utils.get_params_custom()
+        model = utils.get_model_swig(mparams)
+        model.run(verbose=False)
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # df_indiv = pd.read_csv(
+        #     constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+        # )
         
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)

@@ -20,7 +20,7 @@ struct trace_token_block{
 };
 
 struct trace_token{
-	individual *individual;
+	individual *person;
 	individual *traced_from;
 	trace_token *next_index;
 	trace_token *last_index;

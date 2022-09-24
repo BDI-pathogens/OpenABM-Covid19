@@ -1,12 +1,12 @@
+#!/bin/bash
 ##########################################################################################                                                                               
 # File:        test_performance.sh
 # Description: Run model and profile speed of memory
 ##########################################################################################                                                                                                              
 
-#!/bin/bash       
 PARAM_DIR="../tests/data/baseline_parameters.csv"
 EXE="../src/covid19ibm.exe"
-PROFILE=1 # 0=no profile; 1=time; 2=memory
+PROFILE=0 # 0=no profile; 1=time; 2=memory; 3=valgrind
 
 START=`date +%s`
 if [ $PROFILE == 1 ]
@@ -17,6 +17,10 @@ fi
 if [ $PROFILE == 2 ]
 then
 iprofiler -allocations -T 20s $EXE $PARAM_DIR 1 
+fi
+if [ $PROFILE == 3 ]
+then
+valgrind --tool=callgrind --simulate-cache=yes $EXE $PARAM_DIR 1
 fi
 if [ $PROFILE == 0 ]
 then

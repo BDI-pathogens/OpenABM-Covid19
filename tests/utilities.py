@@ -240,6 +240,21 @@ def set_homogeneous_random_network_only(params,connections,end_time):
 
     return(params)
 
+def get_params_custom():
+    """
+    Gets the Custom test parameters object
+    """
+    return Parameters(
+        constant.TEST_DATA_FILE,
+        1,
+        constant.DATA_DIR_TEST,
+        constant.TEST_HOUSEHOLD_TEMPLATE,
+        constant.TEST_HOSPITAL_FILE,
+        1,
+        True,
+        True
+    )
+
 def get_params_swig():
     """
     Gets the Swig parameters object

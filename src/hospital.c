@@ -33,16 +33,16 @@ void initialise_hospital(
 
 	hospital->hospital_idx  = hdx;
 
-	hospital->wards = calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
+	hospital->wards = (ward**) calloc( N_HOSPITAL_WARD_TYPES, sizeof(ward*) );
 
 	//Initialise wards based on the size of the wards and their assigned healthcare workers.
 	for( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
 	{
 		hospital->n_wards[ward_type] = params->n_wards[ward_type];
-		hospital->wards[ward_type] = calloc( params->n_wards[ward_type], sizeof(ward) );
+		hospital->wards[ward_type] = (ward*) calloc( params->n_wards[ward_type], sizeof(ward) );
 
 		//Initialise ward waiting list for each ward type - i.e. general and ICU.
-		hospital->waiting_list[ward_type] = malloc( sizeof (list) );
+		hospital->waiting_list[ward_type] = (list*) malloc( sizeof (list) );
 		initialise_list( hospital->waiting_list[ward_type] );
 
 		for( hcw_type = 0; hcw_type < N_WORKER_TYPES; hcw_type++ )
@@ -73,7 +73,7 @@ void set_up_hospital_networks( model *model )
 		hospital = &model->hospitals[hospital_idx];
 		//Setup hospital workplace network.
 		n_healthcare_workers = 0;
-		healthcare_workers = calloc( hospital->n_workers[DOCTOR] + hospital->n_workers[NURSE], sizeof(long) );
+		healthcare_workers = (long*) calloc( hospital->n_workers[DOCTOR] + hospital->n_workers[NURSE], sizeof(long) );
 
 		//Setup HCW-patient networks for all wards.
 		for ( ward_type = 0; ward_type < N_HOSPITAL_WARD_TYPES; ward_type++ )
@@ -91,7 +91,7 @@ void set_up_hospital_networks( model *model )
 		}
 
 		//Setup HCW workplace network.
-		hospital->hospital_workplace_network = calloc( 1, sizeof( network ));
+		hospital->hospital_workplace_network = (network*) calloc( 1, sizeof( network ));
 		hospital->hospital_workplace_network = add_new_network( model, n_healthcare_workers, HOSPITAL_WORK );
 		hospital->hospital_workplace_network->skip_hospitalised = TRUE;
 		hospital->hospital_workplace_network->skip_quarantined  = TRUE;
@@ -404,8 +404,8 @@ void swap_waiting_general_and_icu_patients( model *model )
 	list *patient_general_list, *patient_icu_list;
 	int hospital_idx, ward_idx, patient_idx;
 
-	patient_general_list = malloc(sizeof(list));
-	patient_icu_list     = malloc(sizeof(list));
+	patient_general_list = (list*) malloc(sizeof(list));
+	patient_icu_list     = (list*) malloc(sizeof(list));
 
 	//For each hospital in the hospital`
 	for( hospital_idx = 0; hospital_idx < model->params->n_hospitals; hospital_idx++ )
@@ -474,9 +474,9 @@ void predict_patient_disease_progression( model *model, individual *indiv, doubl
 	{
 		if( type == COVID_GENERAL )
 		{
-			if( gsl_ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
+			if( ran_bernoulli( rng, min(model->params->critical_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 			{
-				if( gsl_ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
+				if( ran_bernoulli( rng, model->params->location_death_icu[ indiv->age_group ] ) )
 					transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 				else
 					transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
@@ -486,7 +486,7 @@ void predict_patient_disease_progression( model *model, individual *indiv, doubl
 		} 
 		else if( type == COVID_ICU )
 		{
-			if( gsl_ran_bernoulli( rng, min(model->params->fatality_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
+			if( ran_bernoulli( rng, min(model->params->fatality_fraction[ indiv->age_group ] * patient_waiting_modifier, 1) ) )
 				transition_one_disese_event(model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 			else
 				transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );

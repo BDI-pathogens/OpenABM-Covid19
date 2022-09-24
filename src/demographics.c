@@ -44,10 +44,10 @@ void assign_household_distribution( model *model, demographic_household_table *d
 	}
 
 	// now allocate people to households and set up the household directory
-	dir = calloc( 1, sizeof( directory ) );
+	dir = (directory*) calloc( 1, sizeof( directory ) );
 	dir->n_idx = demo_house->n_households;
-	dir->n_jdx = calloc( demo_house->n_households, sizeof( int ) );
-	dir->val   = calloc( demo_house->n_households, sizeof( long* ) );
+	dir->n_jdx = (int*) calloc( demo_house->n_households, sizeof( int ) );
+	dir->val   = (long**) calloc( demo_house->n_households, sizeof( long* ) );
 	model->household_directory = dir;
 
 	pdx = 0;
@@ -85,7 +85,7 @@ void assign_household_distribution( model *model, demographic_household_table *d
 
 		// update the household directory
 		dir->n_jdx[hdx] = housesize;
-		dir->val[hdx] = calloc( housesize, sizeof( long ) );
+		dir->val[hdx] = (long*) calloc( housesize, sizeof( long ) );
 		for( idx = 0; idx < housesize; idx++ )
 			dir->val[hdx][idx] = pdx - housesize + idx;
 
@@ -155,7 +155,7 @@ void set_up_allocate_default_work_places( model *model )
 	long pdx, n_adult;
 	long pop_net_raw[N_DEFAULT_OCCUPATION_NETWORKS];
 	double other;
-	double **prob = calloc( N_AGE_GROUPS, sizeof(double*));
+	double **prob = (double**) calloc( N_AGE_GROUPS, sizeof(double*));
 	double adult_prop[N_OCCUPATION_NETWORK_TYPES] = {
 		model->params->child_network_adults,
 		1.0,
@@ -178,7 +178,7 @@ void set_up_allocate_default_work_places( model *model )
 	for( adx = 0; adx < N_AGE_GROUPS; adx++ )
 	{
 		other = 0.0;
-		prob[adx] = calloc( N_DEFAULT_OCCUPATION_NETWORKS, sizeof(double));
+		prob[adx] = (double*) calloc( N_DEFAULT_OCCUPATION_NETWORKS, sizeof(double));
 		for( ndx = 0; ndx < N_DEFAULT_OCCUPATION_NETWORKS; ndx++ )
 		{
 			prob[adx][ndx] = 0;
@@ -238,16 +238,16 @@ void generate_household_distribution( model *model )
 	int idx, housesize, age;
 	long hdx, n_households, pdx, sample;
 	double error, last_error, acceptance;
-	demographic_household_table *demo_house = calloc( 1, sizeof( demographic_household_table ) );
-	double *population_target      = calloc( N_AGE_GROUPS, sizeof(double));
-	double *population_total       = calloc( N_AGE_GROUPS, sizeof(double));
-	double *population_trial       = calloc( N_AGE_GROUPS, sizeof(double));
-	double *household_target       = calloc( N_HOUSEHOLD_MAX, sizeof(double));
-	double *household_total        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
-	double *household_trial        = calloc( N_HOUSEHOLD_MAX, sizeof(double));
-	long *trial_samples		       = calloc( SAMPLE_BATCH, sizeof(long));
-	int *REFERENCE_HOUSEHOLD_SIZE  = calloc( model->params->N_REFERENCE_HOUSEHOLDS, sizeof(int));
-	long *households               = calloc( model->params->n_total, sizeof(long));
+	demographic_household_table *demo_house = (demographic_household_table *) calloc( 1, sizeof( demographic_household_table ) );
+	double *population_target      = (double*) calloc( N_AGE_GROUPS, sizeof(double));
+	double *population_total       = (double*) calloc( N_AGE_GROUPS, sizeof(double));
+	double *population_trial       = (double*) calloc( N_AGE_GROUPS, sizeof(double));
+	double *household_target       = (double*) calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	double *household_total        = (double*) calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	double *household_trial        = (double*) calloc( N_HOUSEHOLD_MAX, sizeof(double));
+	long *trial_samples		       = (long*) calloc( SAMPLE_BATCH, sizeof(long));
+	int *REFERENCE_HOUSEHOLD_SIZE  = (int*) calloc( model->params->N_REFERENCE_HOUSEHOLDS, sizeof(int));
+	long *households               = (long*) calloc( model->params->n_total, sizeof(long));
 
 	// assign targets
 	copy_normalize_array( population_target, model->params->population, N_AGE_GROUPS );
@@ -266,7 +266,7 @@ void generate_household_distribution( model *model )
 	n_households = 0;
 	for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 	{
-		sample       = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
+		sample       = rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
 		households[n_households++] = sample;
 		add_reference_household( population_total, sample, model->params->REFERENCE_HOUSEHOLDS);
 		household_total[ REFERENCE_HOUSEHOLD_SIZE[sample]]++;
@@ -287,7 +287,7 @@ void generate_household_distribution( model *model )
 
 		for( idx = 0; idx < SAMPLE_BATCH; idx++ )
 		{
-			trial_samples[idx] = gsl_rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
+			trial_samples[idx] = rng_uniform_int( rng, model->params->N_REFERENCE_HOUSEHOLDS );
 			add_reference_household( population_trial, trial_samples[idx], model->params->REFERENCE_HOUSEHOLDS );
 			household_trial[REFERENCE_HOUSEHOLD_SIZE[ trial_samples[idx]] ]++;
 		}
@@ -328,9 +328,9 @@ void generate_household_distribution( model *model )
 		print_exit( "Household rejection sampling failed to accurately converge" );
 
 	// now generate the demographic household table
-	demo_house->idx          = calloc( model->params->n_total, sizeof( long ) );
-	demo_house->age_group    = calloc( model->params->n_total, sizeof( int ) );
-	demo_house->house_no     = calloc( model->params->n_total, sizeof( long ) );
+	demo_house->idx          = (long*) calloc( model->params->n_total, sizeof( long ) );
+	demo_house->age_group    = (int*) calloc( model->params->n_total, sizeof( int ) );
+	demo_house->house_no     = (long*) calloc( model->params->n_total, sizeof( long ) );
 	demo_house->n_total      = model->params->n_total;
 
 	pdx = 0;
@@ -384,7 +384,7 @@ void build_household_network_from_directroy( network *network, directory *direct
 		h_size   = directory->n_jdx[hdx];
 		network->n_edges += h_size  * ( h_size - 1 ) / 2;
 	}
-	network->edges = calloc( network->n_edges, sizeof( edge ) );
+	network->edges = (edge*) calloc( network->n_edges, sizeof( edge ) );
 
 	edge_idx = 0;
 	for( hdx = 0; hdx < directory->n_idx; hdx++ )

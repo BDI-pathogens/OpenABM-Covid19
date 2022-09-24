@@ -20,7 +20,7 @@
 network* create_network( long n_total, int type, parameters *params )
 {	
 	network *network_ptr = NULL;
-	network_ptr = calloc( 1, sizeof( network ) );
+	network_ptr = (network*) calloc( 1, sizeof( network ) );
 	if( network_ptr == NULL )
     	print_exit("calloc to network failed\n");
 
@@ -70,19 +70,19 @@ void build_watts_strogatz_network(
 
 	// Allocate memory (needed for large N)
 	long** edge_mat;
-	edge_mat = calloc( N, sizeof(long *) );
+	edge_mat = (long**) calloc( N, sizeof(long *) );
 	for(i = 0; i < N; i++)
-		edge_mat[i] = calloc( ceil( k*10 ), sizeof(long) );
+		edge_mat[i] = (long*) calloc( ceil( k*10 ), sizeof(long) );
 	
 	// Degree for each individual (need to store a copy during the first step
-	long* n_edges_arr      = calloc( N, sizeof(long) );
-	long* n_edges_arr_init = calloc( N, sizeof(long) );
+	long* n_edges_arr      = (long*) calloc( N, sizeof(long) );
+	long* n_edges_arr_init = (long*) calloc( N, sizeof(long) );
 
 	// Step 1: Set up random lattice
 	// start by getting the correct number interactions but only mark only the connections to the right
 	for(i = 0; i < N; i++)
 	{
-		k_used = k_right + gsl_ran_bernoulli( rng, p_right );
+		k_used = k_right + ran_bernoulli( rng, p_right );
 		n_edges_arr[i]      = k_used;
 		n_edges_arr_init[i] = k_used;
 
@@ -105,16 +105,16 @@ void build_watts_strogatz_network(
 	for(i = 0; i < N; i++){
 		for(j = 0; j < n_edges_arr[i]; j++){
 
-			u = gsl_rng_uniform(rng);
+			u = rng_uniform(rng);
 			
 			if(u < p_rewire){
 				
 				// Draw a new contact (long between 0 and N-1)
-				new_contact =  gsl_rng_uniform_int(rng, N);
+				new_contact =  rng_uniform_int(rng, N);
 				
 				// Check if new_connection is already connected (or is self)
 				while(check_member_or_self(new_contact, i, edge_mat[i], n_edges_arr[i])){
-					new_contact = gsl_rng_uniform_int(rng, N);
+					new_contact = rng_uniform_int(rng, N);
 				}
 
 				// Remove contact between person "i" and the original contact
@@ -139,14 +139,14 @@ void build_watts_strogatz_network(
 	network->n_edges = n_edges/2;
 	
 	// Form array of total edges (i.e. network->edges)
-	network->edges = calloc(n_edges, sizeof(edge));
+	network->edges = (edge*) calloc(n_edges, sizeof(edge));
 
 	// randomise the order nodes are put on the lattice if appropriate
-	long* node_list = calloc(N, sizeof(long));
+	long* node_list = (long*) calloc(N, sizeof(long));
 	for( i = 0; i < N; i++ )
 		node_list[i] = i;
 	if( randomise_nodes )
-		gsl_ran_shuffle( rng, node_list, N, sizeof(long) );
+		ran_shuffle( rng, node_list, N, sizeof(long) );
 
 	long idx = 0;
 	for(i = 0; i < N; i++)

@@ -27,14 +27,14 @@
 void set_up_transition_times_intervention( model *model )
 {
 	parameters *params = model->params;
-	model->transition_time_distributions = calloc( N_TRANSITION_TYPES, sizeof( int*) );
+	model->transition_time_distributions = (int**) calloc( N_TRANSITION_TYPES, sizeof( int*) );
 
 	int **transitions  = model->transition_time_distributions;
 
-	transitions[SYMPTOMATIC_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[TRACED_QUARANTINE_SYMPTOMS] = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[TRACED_QUARANTINE_POSITIVE] = calloc( N_DRAW_LIST, sizeof( int ) );
-	transitions[TEST_RESULT_QUARANTINE]     = calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[SYMPTOMATIC_QUARANTINE]     = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_SYMPTOMS] = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TRACED_QUARANTINE_POSITIVE] = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
+	transitions[TEST_RESULT_QUARANTINE]     = (int*) calloc( N_DRAW_LIST, sizeof( int ) );
 
 	geometric_max_draw_list( transitions[SYMPTOMATIC_QUARANTINE], 	  N_DRAW_LIST, params->quarantine_dropout_self,            params->quarantine_length_self );
 	geometric_max_draw_list( transitions[TRACED_QUARANTINE_SYMPTOMS], N_DRAW_LIST, params->quarantine_dropout_traced_symptoms, params->quarantine_length_traced_symptoms );
@@ -69,12 +69,12 @@ void set_up_app_users( model *model )
 		if( max_user < 0 || max_user > not_users )
 			print_exit( "Bad target app_fraction_users" );
 
-		int *users = calloc( not_users, sizeof( int ) );
+		int *users = (int*) calloc( not_users, sizeof( int ) );
 
 		for( idx = 0; idx < max_user; idx++ )
 			users[ idx ] = 1;
 
-		gsl_ran_shuffle( rng, users, not_users, sizeof( int ) );
+		ran_shuffle( rng, users, not_users, sizeof( int ) );
 
 		jdx   = 0;
 		for( idx = 0; idx < model->params->n_total; idx++ )
@@ -95,22 +95,22 @@ void set_up_risk_scores( model *model )
 	parameters *params = model->params;
 	short max_days = params->days_of_interactions;
 
-	params->risk_score = calloc( max_days, sizeof( double** ) );
+	params->risk_score = (double***) calloc( max_days, sizeof( double** ) );
 	for( day = 0; day < max_days; day++ )
 	{
-		params->risk_score[ day] = calloc( N_AGE_GROUPS, sizeof( double* ) );
+		params->risk_score[ day] = (double**) calloc( N_AGE_GROUPS, sizeof( double* ) );
 		for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 		{
-			params->risk_score[ day ][ idx ] = calloc( N_AGE_GROUPS, sizeof( double ) );
+			params->risk_score[ day ][ idx ] = (double*) calloc( N_AGE_GROUPS, sizeof( double ) );
 			for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
 				params->risk_score[ day ][ idx ][ jdx ] = 1;
 		}
 	}
 
-	params->risk_score_household = calloc( N_AGE_GROUPS, sizeof( double* ) );
+	params->risk_score_household = (double**) calloc( N_AGE_GROUPS, sizeof( double* ) );
 	for( idx = 0; idx < N_AGE_GROUPS; idx++ )
 	{
-		params->risk_score_household[ idx ] = calloc( N_AGE_GROUPS, sizeof( double ) );
+		params->risk_score_household[ idx ] = (double*) calloc( N_AGE_GROUPS, sizeof( double ) );
 		for( jdx = 0; jdx < N_AGE_GROUPS; jdx++ )
 			params->risk_score_household[ idx ][ jdx ] = 1;
 	}
@@ -147,7 +147,7 @@ void destroy_risk_scores( model *model )
 ******************************************************************************************/
 void set_up_trace_tokens( model *model, float tokens_per_person )
 {
-	model->trace_token_block = NULL;
+	model->tt_block = NULL;
 	model->next_trace_token = NULL;
 	add_trace_tokens( model, tokens_per_person );
 }
@@ -163,11 +163,11 @@ void add_trace_tokens( model *model, float tokens_per_person )
 	long n_tokens = ceil(  model->params->n_total * tokens_per_person );
 	long idx;
 	trace_token_block *block;
-	block = calloc( 1, sizeof( trace_token_block ) );
+	block = (trace_token_block*) calloc( 1, sizeof( trace_token_block ) );
 
-	block->trace_tokens = calloc( n_tokens, sizeof( trace_token ) );
-	block->next = model->trace_token_block;
-	model->trace_token_block = block;
+	block->trace_tokens = (trace_token*) calloc( n_tokens, sizeof( trace_token ) );
+	block->next = model->tt_block;
+	model->tt_block = block;
 
 	block->trace_tokens[0].next_index = model->next_trace_token;
 	for( idx = 1; idx < n_tokens; idx++ )
@@ -191,7 +191,7 @@ trace_token* create_trace_token( model *model, individual *indiv, int contact_ti
 	token->next = NULL;
 	token->next_index = NULL;
 	token->last_index = NULL;
-	token->individual = indiv;
+	token->person = indiv;
 	token->traced_from = NULL;
 	token->contact_time = contact_time;
 	token->index_status = UNKNOWN;
@@ -228,7 +228,7 @@ trace_token* index_trace_token( model *model, individual *indiv )
 ******************************************************************************************/
 void remove_one_trace_token( model *model, trace_token *token )
 {
-	individual *indiv = token->individual;
+	individual *indiv = token->person;
 
 	if( indiv->trace_tokens == token )
 	{
@@ -286,7 +286,7 @@ void remove_traces_on_individual( model *model, individual *indiv )
 			if( token->traced_from->idx != indiv->idx )
 				continue;
 
-			contact = token->individual;
+			contact = token->person;
 			remove_one_trace_token( model, token );
 
 			if( (contact->trace_tokens == NULL) & (contact->index_trace_token == NULL) )
@@ -312,7 +312,7 @@ void remove_traced_on_this_trace( model *model, individual *indiv )
 	{
 		token      = next_token;
 		next_token = token->next_index;
-		contact    = token->individual;
+		contact    = token->person;
 
 		if( contact->traced_on_this_trace < 1 )
 			remove_one_trace_token( model, token );
@@ -392,7 +392,7 @@ int number_of_traceable_interactions(model *model, individual *indiv)
 	n_contacts = 0;
 	for( ddx = 0; ddx < params->days_of_interactions; ddx++ )
 		n_contacts += indiv->n_interactions[ddx];
-	long *contacts = calloc( n_contacts, sizeof( long ) );
+	long *contacts = (long*) calloc( n_contacts, sizeof( long ) );
 
 	day = model->interaction_day_idx;
 	for( ddx = 0; ddx < params->quarantine_days; ddx++ )
@@ -403,11 +403,11 @@ int number_of_traceable_interactions(model *model, individual *indiv)
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
-				contact = inter->individual;
+				contact = inter->person;
 				if( contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+						inter->traceable = ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable )
                         contacts[ traceable_inter++ ] = contact->idx;
 				}
@@ -568,7 +568,7 @@ short add_vaccine(
 	short vaccine_protection_period
 )
 {
-	vaccine *new_vaccine = calloc( 1, sizeof( vaccine ) );
+	vaccine *new_vaccine = (vaccine*) calloc( 1, sizeof( vaccine ) );
 	short n_strains      = model->params->max_n_strains;
 	short is_full 		 = FALSE;
 	short is_symptoms    = FALSE;
@@ -578,9 +578,9 @@ short add_vaccine(
 	if( model->vaccines != NULL )
 		new_vaccine->idx = model->vaccines->idx + 1;
 
-	new_vaccine->full_efficacy     = calloc( n_strains, sizeof( float ) );
-	new_vaccine->symptoms_efficacy = calloc( n_strains, sizeof( float ) );
-	new_vaccine->severe_efficacy   = calloc( n_strains, sizeof( float ) );
+	new_vaccine->full_efficacy     = (float*) calloc( n_strains, sizeof( float ) );
+	new_vaccine->symptoms_efficacy = (float*) calloc( n_strains, sizeof( float ) );
+	new_vaccine->severe_efficacy   = (float*) calloc( n_strains, sizeof( float ) );
 	new_vaccine->time_to_protect   = time_to_protect;
 	new_vaccine->vaccine_protection_period = vaccine_protection_period;
 
@@ -734,36 +734,36 @@ long intervention_vaccinate_age_group(
 ******************************************************************************************/
 void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 {
-	vaccine *vaccine = info;
-	float r_unif = gsl_rng_uniform( rng );
+	vaccine *vax = (vaccine*) info;
+	float r_unif = rng_uniform( rng );
 	short n_strains = model->params->max_n_strains;
 	short strain_idx;
 
-	if( vaccine->is_full )
+	if( vax->is_full )
 	{
 		model->n_vaccinated_fully++;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]++;
 	}
-	if( vaccine->is_symptoms )
+	if( vax->is_symptoms )
 	{
 		model->n_vaccinated_symptoms++;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]++;
 	}
 
-	short time_wane = model->time + vaccine->vaccine_protection_period - vaccine->time_to_protect;
+	short time_wane = model->time + vax->vaccine_protection_period - vax->time_to_protect;
 
 	for( strain_idx = 0; strain_idx < n_strains; strain_idx++ )
 	{
-		if( vaccine->full_efficacy[ strain_idx ] > r_unif )
+		if( vax->full_efficacy[ strain_idx ] > r_unif )
 			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_FULLY, model->time, time_wane );
 
-		if( vaccine->symptoms_efficacy[ strain_idx ] > r_unif )
+		if( vax->symptoms_efficacy[ strain_idx ] > r_unif )
 			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SYMPTOMS, model->time, time_wane );
 
-		if( vaccine->severe_efficacy[ strain_idx ] > r_unif )
+		if( vax->severe_efficacy[ strain_idx ] > r_unif )
 			set_vaccine_status( indiv, model->params, strain_idx, VACCINE_PROTECTED_SEVERE, model->time, time_wane );
 	}
-	add_individual_to_event_list( model, VACCINE_WANE, indiv, time_wane, vaccine );
+	add_individual_to_event_list( model, VACCINE_WANE, indiv, time_wane, vax );
 }
 
 
@@ -775,14 +775,14 @@ void intervention_vaccine_protect( model *model, individual *indiv, void* info )
 ******************************************************************************************/
 void intervention_vaccine_wane( model *model, individual *indiv, void* info )
 {
-	vaccine *vaccine = info;
+	vaccine *vax = (vaccine*) info;
 
-	if( vaccine->is_full )
+	if( vax->is_full )
 	{
 		model->n_vaccinated_fully--;
 		model->n_vaccinated_fully_by_age[ indiv->age_group ]--;
 	}
-	if( vaccine->is_symptoms )
+	if( vax->is_symptoms )
 	{
 		model->n_vaccinated_symptoms--;
 		model->n_vaccinated_symptoms_by_age[ indiv->age_group ]--;
@@ -816,12 +816,12 @@ void intervention_test_take( model *model, individual *indiv )
 		int symptomatic = ( time_symptomatic( indiv ) <= model->time ) & ( time_symptomatic( indiv ) >= max( model->time - model->params->test_sensitive_period, 0 ) );
 
 		if( ( symptomatic || time_infected >= model->params->test_insensitive_period ) && time_infected < model->params->test_sensitive_period )
-			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, model->params->test_sensitivity );
+			indiv->quarantine_test_result = ran_bernoulli( rng, model->params->test_sensitivity );
 		else
-			indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
+			indiv->quarantine_test_result = ran_bernoulli( rng, 1 - model->params->test_specificity );
 	}
 	else
-		indiv->quarantine_test_result = gsl_ran_bernoulli( rng, 1 - model->params->test_specificity );
+		indiv->quarantine_test_result = ran_bernoulli( rng, 1 - model->params->test_specificity );
 
 
 	add_individual_to_event_list( model, TEST_RESULT, indiv, result_time, NULL );
@@ -927,18 +927,18 @@ void intervention_notify_contacts(
 			inter = indiv->interactions[day];
 			for( idx = 0; idx < n_contacts; idx++ )
 			{
-				contact = inter->individual;
+				contact = inter->person;
 				if( trace_type == DIGITAL_TRACE && contact->app_user )
 				{
 					if( inter->traceable == UNKNOWN )
-						inter->traceable = gsl_ran_bernoulli( rng, params->traceable_interaction_fraction );
+						inter->traceable = ran_bernoulli( rng, params->traceable_interaction_fraction );
 					if( inter->traceable == 1 )
 						intervention_on_traced( model, contact, model->time - ddx, recursion_level, index_token, risk_scores[ contact->age_group ], trace_type );
 				}
 				else if( trace_type == MANUAL_TRACE )
 				{
 					if( inter->manual_traceable == UNKNOWN )
-						inter->manual_traceable = gsl_ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
+						inter->manual_traceable = ran_bernoulli( rng, params->manual_traceable_fraction[inter->type] );
 					if( inter->manual_traceable && model->manual_trace_notification_quota > 0 )
 					{
 						model->manual_trace_notification_quota--;
@@ -983,7 +983,7 @@ void intervention_trace_token_release( model *model, individual *indiv )
 		// get the next token on the list of this person trace_token
 		token      = next_token;
 		next_token = token->next_index;
-		contact    = token->individual;
+		contact    = token->person;
 		remove_one_trace_token( model, token );
 
 		if( (contact->trace_tokens == NULL) & (contact->index_trace_token == NULL) )
@@ -1054,12 +1054,12 @@ void intervention_quarantine_household_of_traced(
 	individual *contact;
 	int time_quarantine;
 	trace_token *token = index_token;
-	long house_no      = index_token->individual->house_no;
+	long house_no      = index_token->person->house_no;
 
 	while( token->next_index != NULL )
 	{
 		token   = token->next_index;
-		contact = token->individual;
+		contact = token->person;
 		contact->traced_on_this_trace = TRUE;
 		token->index_status = index_token->index_status;
 
@@ -1092,13 +1092,13 @@ void intervention_index_case_symptoms_to_positive(
 	int time_quarantine, time_test;
 	int trace_household = params->quarantine_household_on_traced_positive && !params->quarantine_household_on_traced_symptoms;
 	trace_token *token  = index_token;
-	long house_no       = index_token->individual->house_no;
+	long house_no       = index_token->person->house_no;
 	int contact_time;
 
 	while( token->next_index != NULL )
 	{
 		token	= token->next_index;
-		contact = token->individual;
+		contact = token->person;
 		token->index_status = index_token->index_status;
 
  		if( contact->traced_on_this_trace == FALSE )
@@ -1109,7 +1109,7 @@ void intervention_index_case_symptoms_to_positive(
 				if( contact->compliance_factor < params->quarantine_compliance_traced_positive )
 				{
 					time_quarantine = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
-					intervention_quarantine_until( model, contact, index_token->individual, time_quarantine, TRUE, NULL, contact_time, 1 );
+					intervention_quarantine_until( model, contact, index_token->person, time_quarantine, TRUE, NULL, contact_time, 1 );
 				}
 
 				if( ( contact->quarantine_release_event != NULL ) & ( params->test_on_traced == TRUE ) )
@@ -1327,7 +1327,7 @@ void intervention_on_traced(
 				time_event = contact_time + sample_transition_time( model, TRACED_QUARANTINE_POSITIVE );
 		}
 
-		quarantine = intervention_quarantine_until( model, indiv, index_token->individual, time_event, TRUE, index_token, contact_time, risk_score );
+		quarantine = intervention_quarantine_until( model, indiv, index_token->person, time_event, TRUE, index_token, contact_time, risk_score );
 
 		if( quarantine && recursion_level != NOT_RECURSIVE )
 		{
@@ -1386,7 +1386,7 @@ void intervention_smart_release( model *model )
 	{
 		event      = next_event;
 		next_event = event->next;
-		indiv      = event->individual;
+		indiv      = event->person;
 
 		n_symptoms = 0;
 
@@ -1400,7 +1400,7 @@ void intervention_smart_release( model *model )
 		token = token->next_index;
 		while( token != NULL )
 		{
-			contact = token->individual;
+			contact = token->person;
 
       if( time_symptomatic( contact ) >= time_index )
 			{

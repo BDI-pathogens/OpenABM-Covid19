@@ -33,10 +33,10 @@ void initialise_ward(
     ward->n_worker[NURSE]   = 0;
     ward->n_worker[DOCTOR]  = 0;
 
-    ward->doctors = calloc( n_max_doctors, sizeof(doctor) );
-    ward->nurses  = calloc( n_max_nurses, sizeof(nurse) );
+    ward->doctors = (doctor*) calloc( n_max_doctors, sizeof(doctor) );
+    ward->nurses  = (nurse*) calloc( n_max_nurses, sizeof(nurse) );
 
-    ward->patients = calloc( 1, sizeof (list) );
+    ward->patients = (list*) calloc( 1, sizeof (list) );
     initialise_list( ward->patients );
 }
 
@@ -50,7 +50,7 @@ void set_up_ward_networks( model* model, ward* ward, int max_hcw_daily_interacti
 
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_DOCTOR_PATIENT_GENERAL : HOSPITAL_DOCTOR_PATIENT_ICU;
     ward->doctor_patient_network = add_new_network( model, ward->n_worker[DOCTOR], interaction_type );
-    ward->doctor_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
+    ward->doctor_patient_network->edges = (edge*) calloc( max_hcw_daily_interactions * ward->n_worker[DOCTOR], sizeof(edge) );
     ward->doctor_patient_network->skip_hospitalised = FALSE;
     ward->doctor_patient_network->skip_quarantined  = TRUE;
     ward->doctor_patient_network->construction      = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
@@ -58,7 +58,7 @@ void set_up_ward_networks( model* model, ward* ward, int max_hcw_daily_interacti
 
     interaction_type = ( ward->type == COVID_GENERAL ) ? HOSPITAL_NURSE_PATIENT_GENERAL : HOSPITAL_NURSE_PATIENT_ICU;
     ward->nurse_patient_network = add_new_network( model, ward->n_worker[NURSE], interaction_type );
-    ward->nurse_patient_network->edges = calloc( max_hcw_daily_interactions * ward->n_worker[NURSE], sizeof(edge) );
+    ward->nurse_patient_network->edges = (edge*) calloc( max_hcw_daily_interactions * ward->n_worker[NURSE], sizeof(edge) );
     ward->nurse_patient_network->skip_hospitalised = FALSE;
     ward->nurse_patient_network->skip_quarantined  = TRUE;
     ward->nurse_patient_network->construction	   = NETWORK_CONSTRUCTION_WATTS_STROGATZ;
@@ -81,7 +81,7 @@ void build_ward_networks( model *model, ward* ward )
         long *hc_workers_doctors;
         long *hc_workers_nurse;
 
-        hc_workers_doctors = calloc(ward->n_worker[DOCTOR], sizeof (long) );
+        hc_workers_doctors = (long*) calloc(ward->n_worker[DOCTOR], sizeof (long) );
         n_hcw_working = 0;
 
         //get list of ward's working doctors
@@ -93,7 +93,7 @@ void build_ward_networks( model *model, ward* ward )
         if( n_hcw_working > 0 )
             build_hcw_patient_network( ward, ward->doctor_patient_network,  hc_workers_doctors, n_hcw_working, model->params->n_patient_required_interactions[ward->type][DOCTOR], model->params->max_hcw_daily_interactions );
         
-        hc_workers_nurse = calloc( ward->n_worker[NURSE], sizeof (long));
+        hc_workers_nurse = (long*) calloc( ward->n_worker[NURSE], sizeof (long));
         n_hcw_working = 0;
 
         //get list of ward's working nurses
@@ -132,8 +132,8 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
 
         n_total_interactions = round(patient_interactions_per_hcw * n_hcw_working);
 
-        all_required_interactions = calloc( n_patient_required_interactions * ward->patients->size, sizeof(long) );
-        capped_hcw_interactions   = calloc( n_total_interactions, sizeof(long) );
+        all_required_interactions = (long*) calloc( n_patient_required_interactions * ward->patients->size, sizeof(long) );
+        capped_hcw_interactions   = (long*) calloc( n_total_interactions, sizeof(long) );
 
         network->n_edges = 0;
         network->n_vertices       = n_hcw_working + ward->patients->size;
@@ -148,7 +148,7 @@ void build_hcw_patient_network( ward* ward, network *network, long *hc_workers, 
         }
 
         //shuffle list of all interactions
-        gsl_ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
+        ran_shuffle( rng, all_required_interactions, n_pos, sizeof(long) );
 
         idx = 0;
         hdx = 0;

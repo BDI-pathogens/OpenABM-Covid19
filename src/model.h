@@ -70,11 +70,11 @@ struct model{
 	long manual_trace_interview_quota;
 	long manual_trace_notification_quota;
 
-	event_block *event_block;
+	event_block *evt_block;
 	event *next_event;
 	event_list *event_lists;
 
-	trace_token_block *trace_token_block;
+	trace_token_block *tt_block;
 	trace_token *next_trace_token;
 	long n_trace_tokens_used;
 	long n_trace_tokens;
@@ -114,7 +114,7 @@ struct event_block{
 };
 
 struct event{
-	individual *individual;
+	individual *person; // Note: With g++ using 'individual' would change the global definition of individual
 	short type;
 	short time;
 	void *info;

@@ -54,7 +54,7 @@ int set_demographic_house_table(
 		free( params->demo_house->house_no );
 		free( params->demo_house );
 	}
-	params->demo_house = calloc( 1, sizeof( demographic_household_table ) );
+	params->demo_house = (demographic_household_table*) calloc( 1, sizeof( demographic_household_table ) );
 
 	if( n_total != params->n_total )
 	{
@@ -64,9 +64,9 @@ int set_demographic_house_table(
 
 	params->demo_house->n_total      = n_total;
 	params->demo_house->n_households = n_households;
-	params->demo_house->age_group    = calloc( n_total, sizeof( int ) );
-	params->demo_house->idx          = calloc( n_total, sizeof( long ) );
-	params->demo_house->house_no     = calloc( n_total, sizeof( long ) );
+	params->demo_house->age_group    = (int*) calloc( n_total, sizeof( int ) );
+	params->demo_house->idx          = (long*) calloc( n_total, sizeof( long ) );
+	params->demo_house->house_no     = (long*) calloc( n_total, sizeof( long ) );
 
 	for( pdx = 0; pdx < n_total; pdx++ )
 	{
@@ -262,16 +262,16 @@ int set_occupation_network_table(
 	if( params->occupation_network_table != NULL )
 		destroy_occupation_network_table( params );
 
-	params->occupation_network_table = calloc( 1, sizeof(demographic_occupation_network_table) );
+	params->occupation_network_table = (demographic_occupation_network_table*) calloc( 1, sizeof(demographic_occupation_network_table) );
 	params->occupation_network_table->n_networks = n_networks;
-	params->occupation_network_table->network_no = calloc( n_total, sizeof(long) );
-	params->occupation_network_table->age_type = calloc( n_networks, sizeof(int) );
-	params->occupation_network_table->mean_interactions = calloc( n_networks, sizeof(double) );
-	params->occupation_network_table->lockdown_occupation_multipliers = calloc( n_networks, sizeof(double) );
+	params->occupation_network_table->network_no = (long*) calloc( n_total, sizeof(long) );
+	params->occupation_network_table->age_type = (int*) calloc( n_networks, sizeof(int) );
+	params->occupation_network_table->mean_interactions = (double*) calloc( n_networks, sizeof(double) );
+	params->occupation_network_table->lockdown_occupation_multipliers = (double*) calloc( n_networks, sizeof(double) );
 
-	params->occupation_network_table->network_names = calloc( n_networks, sizeof(char *) );
+	params->occupation_network_table->network_names = (char**) calloc( n_networks, sizeof(char *) );
     for( int i = 0; i != n_networks; ++i )
-    	params->occupation_network_table->network_names[i] = calloc( 128, sizeof(char) );
+    	params->occupation_network_table->network_names[i] = (char*) calloc( 128, sizeof(char) );
 
     return TRUE;
 }
@@ -1069,7 +1069,7 @@ int set_model_param_relative_transmission( model *model, double value, int type 
 {
 	double old = model->params->relative_transmission[ type ];
 	int n_networks, i;
-	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	int *network_ids = (int*) calloc( MAX_N_NETWORKS, sizeof(int) );
 	network *network;
 
 	// ignore very small changes
@@ -1233,7 +1233,7 @@ void update_work_intervention_state(model *model, int value)
 void update_household_intervention_state(model *model, int value)
 {
 	int n_networks, i;
-	int *network_ids = calloc( MAX_N_NETWORKS, sizeof(long) );
+	int *network_ids = (int*) calloc( MAX_N_NETWORKS, sizeof(int) );
 	network *network;
 
 	if (value == TRUE)

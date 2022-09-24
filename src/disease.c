@@ -132,7 +132,7 @@ void transmit_virus_by_type(
 		{
 			event      = next_event;
 			next_event = event->next;
-			infector   = event->individual;
+			infector   = event->person;
 
 			t_infect = model->time - time_infected_infection_event( infector->infection_events );
 			if( t_infect >= MAX_INFECTIOUS_PERIOD )
@@ -142,37 +142,37 @@ void transmit_virus_by_type(
 			if( n_interaction > 0 )
 			{
 				interaction   = infector->interactions[ model->interaction_day_idx ];
-				infector_mult = infector->infectiousness_multiplier * infector->infection_events->strain->transmission_multiplier;
-				strain_idx 	  = infector->infection_events->strain->idx;
-				infectious_curve = infector->infection_events->strain->infectious_curve[type];
+				infector_mult = infector->infectiousness_multiplier * infector->infection_events->with_strain->transmission_multiplier;
+				strain_idx 	  = infector->infection_events->with_strain->idx;
+				infectious_curve = infector->infection_events->with_strain->infectious_curve[type];
 
 				for( jdx = 0; jdx < n_interaction; jdx++ )
 				{
 					if( !rebuild_networks )
 					{
-						if( infector->house_no != interaction->individual->house_no &&
-							( infector->quarantined || interaction->individual->quarantined ) )
+						if( infector->house_no != interaction->person->house_no &&
+							( infector->quarantined || interaction->person->quarantined ) )
 						{
 							interaction = interaction->next;
 							continue;
 						}
 					}
 
-					if( interaction->individual->status == SUSCEPTIBLE )
+					if( interaction->person->status == SUSCEPTIBLE )
 					{
-						if( immune_full( interaction->individual, strain_idx ) ) {
+						if( immune_full( interaction->person, strain_idx ) ) {
 							interaction = interaction->next;
 							continue;
 						}
 
 						network_mult  = model->all_networks[ interaction->network_id ]->transmission_multiplier_combined;
+						interaction->person->hazard[ strain_idx ] -= hazard_rate;
 						hazard_rate   = infectious_curve[ t_infect - 1 ] * infector_mult * network_mult;
-						interaction->individual->hazard[ strain_idx ] -= hazard_rate;
 
-						if( interaction->individual->hazard[ strain_idx ] < 0 )
+						if( interaction->person->hazard[ strain_idx ] < 0 )
 						{
-							new_infection( model, interaction->individual, infector, interaction->network_id, infector->infection_events->strain );
-							interaction->individual->infection_events->infector_network = interaction->type;
+							new_infection( model, interaction->person, infector, interaction->network_id, infector->infection_events->with_strain );
+							interaction->person->infection_events->infector_network = interaction->type;
 						}
 					}
 					interaction = interaction->next;
@@ -247,7 +247,7 @@ long seed_infect_n_people(
 
 	for( idx = 0; idx < n_to_infect; idx++ )
 	{
-		pdx = gsl_rng_uniform_int( rng, n_total );
+		pdx = rng_uniform_int( rng, n_total );
 		n_infected += seed_infect_by_idx( model, pdx, strain_idx, network_id );
 	}
 
@@ -267,7 +267,7 @@ void new_infection(
 	strain *strain
 )
 {
-	double draw       = gsl_rng_uniform( rng );
+	double draw       = rng_uniform( rng );
 	double asymp_frac = strain->fraction_asymptomatic[infected->age_group];
 	double mild_frac  = strain->mild_fraction[infected->age_group];
 
@@ -331,7 +331,7 @@ void transition_one_disese_event(
 
 	if( to != NO_EVENT )
 	{
-		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->strain, edge ) );
+		indiv->infection_events->times[to]     = model->time + ifelse( edge == NO_EDGE, 0, sample_transition_time( indiv->infection_events->with_strain, edge ) );
 		indiv->next_disease_event = add_individual_to_event_list( model, to, indiv, indiv->infection_events->times[to], NULL );
 	}
 }
@@ -350,13 +350,13 @@ void transition_one_disese_event(
 ******************************************************************************************/
 void transition_to_symptomatic( model *model, individual *indiv )
 {
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( immune_to_severe( indiv, strain->idx ) ) {
 		transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
 	} else
 	{
-		if( gsl_ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->hospitalised_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, HOSPITALISED, SYMPTOMATIC_HOSPITALISED );
 		else
 			transition_one_disese_event( model, indiv, SYMPTOMATIC, RECOVERED, SYMPTOMATIC_RECOVERED );
@@ -390,7 +390,7 @@ void transition_to_symptomatic_mild( model *model, individual *indiv )
 void transition_to_hospitalised( model *model, individual *indiv )
 {
 	set_hospitalised( indiv, model->params, model->time );
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( model->params->hospital_on )
 	{
@@ -402,9 +402,9 @@ void transition_to_hospitalised( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_HOSPITAL].n_total+=1;
 
-		if( gsl_ran_bernoulli( rng, strain->critical_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->critical_fraction[ indiv->age_group ] ) )
 		{
-			if( gsl_ran_bernoulli( rng, strain->location_death_icu[ indiv->age_group ] ) )
+			if( ran_bernoulli( rng, strain->location_death_icu[ indiv->age_group ] ) )
 				transition_one_disese_event( model, indiv, HOSPITALISED, CRITICAL, HOSPITALISED_CRITICAL );
 			else
 				transition_one_disese_event( model, indiv, HOSPITALISED, DEATH, HOSPITALISED_CRITICAL );
@@ -427,7 +427,7 @@ void transition_to_hospitalised( model *model, individual *indiv )
 void transition_to_critical( model *model, individual *indiv )
 {
 	set_critical( indiv, model->params, model->time );
- 	strain *strain = indiv->infection_events->strain;
+ 	strain *strain = indiv->infection_events->with_strain;
 
 	if( model->params->hospital_on )
 	{
@@ -439,7 +439,7 @@ void transition_to_critical( model *model, individual *indiv )
 		model->event_lists[TRANSITION_TO_CRITICAL].n_daily_current[model->time]+=1;
 		model->event_lists[TRANSITION_TO_CRITICAL].n_total+=1;
 
-		if( gsl_ran_bernoulli( rng, strain->fatality_fraction[ indiv->age_group ] ) )
+		if( ran_bernoulli( rng, strain->fatality_fraction[ indiv->age_group ] ) )
 			transition_one_disese_event( model, indiv, CRITICAL, DEATH, CRITICAL_DEATH );
 		else
 			transition_one_disese_event( model, indiv, CRITICAL, HOSPITALISED_RECOVERING, CRITICAL_HOSPITALISED_RECOVERING );
@@ -474,7 +474,7 @@ void transition_to_hospitalised_recovering( model *model, individual *indiv )
 ******************************************************************************************/
 void transition_to_recovered( model *model, individual *indiv )
 {
-	int strain_idx = indiv->infection_events->strain->idx;
+	int strain_idx = indiv->infection_events->with_strain->idx;
 	int time_susceptible, complete_immunity;
 
 	if( model->params->hospital_on )
@@ -516,7 +516,7 @@ short apply_cross_immunity( model *model, individual *indiv, short strain_idx, s
 	short complete_immunity = TRUE;
 	short sdx;
 	float *cross_immunity = model->cross_immunity[ strain_idx ];
-	float r_unif = gsl_rng_uniform( rng );
+	float r_unif = rng_uniform( rng );
 
 	for( sdx = 0; sdx < model->params->max_n_strains; sdx++ )
 	{
@@ -597,7 +597,7 @@ double calculate_R_instanteous( model *model, int time, double percentile )
 	int day;
 	double expected_infections = 0;
 	long actual_infections     = n_newly_infected( model, time );
-	double *generation_dist    = calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
+	double *generation_dist    = (double*) calloc( MAX_INFECTIOUS_PERIOD, sizeof(double) );
 
 	gamma_rate_curve( generation_dist, MAX_INFECTIOUS_PERIOD, model->params->mean_infectious_period, model->params->sd_infectious_period, 1);
 

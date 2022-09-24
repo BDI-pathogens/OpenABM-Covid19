@@ -77,7 +77,7 @@ struct interaction{
 	short network_id;
 	short traceable;
 	short manual_traceable;
-	individual *individual;
+	individual *person;
 	interaction *next;
 };
 
@@ -99,7 +99,7 @@ struct infection_event{
 	short is_case;
 	short network_id;
 	float expected_hospitalisation;
-	strain *strain;
+	strain *with_strain;
 };
 
 /************************************************************************/

@@ -32,8 +32,8 @@ void initialize_individual(
 	indiv->quarantined = FALSE;
 	indiv->app_user	   = FALSE;
 
-	indiv->n_interactions = calloc( params->days_of_interactions, sizeof( short ) );
-	indiv->interactions   = calloc( params->days_of_interactions, sizeof( interaction* ) );
+	indiv->n_interactions = (short*) calloc( params->days_of_interactions, sizeof( short ) );
+	indiv->interactions   = (interaction**) calloc( params->days_of_interactions, sizeof( interaction* ) );
 	for( day = 0; day < params->days_of_interactions; day++ )
 	{
 		indiv->n_interactions[ day ] = 0;
@@ -68,17 +68,17 @@ void initialize_individual(
 	{
 		float b = sigma_x * sigma_x;
 		float a = 1 /b;
-		indiv->infectiousness_multiplier = gsl_ran_gamma( rng, a, b );
+		indiv->infectiousness_multiplier = ran_gamma( rng, a, b );
 	}
 	else
 	{
 		indiv->infectiousness_multiplier = 1;
 	}
 
-	indiv->hazard             = calloc( params->max_n_strains, sizeof( float ) );
-	indiv->immune_full        = calloc( params->max_n_strains, sizeof( short ) );
-	indiv->immune_to_symptoms = calloc( params->max_n_strains, sizeof( short ) );
-	indiv->immune_to_severe   = calloc( params->max_n_strains, sizeof( short ) );
+	indiv->hazard             = (float*) calloc( params->max_n_strains, sizeof( float ) );
+	indiv->immune_full        = (short*) calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_symptoms = (short*) calloc( params->max_n_strains, sizeof( short ) );
+	indiv->immune_to_severe   = (short*) calloc( params->max_n_strains, sizeof( short ) );
 	for( int strain_idx = 0; strain_idx < params->max_n_strains; strain_idx++ )
 	{
 		indiv->immune_full[strain_idx]         = NO_IMMUNITY;
@@ -87,7 +87,7 @@ void initialize_individual(
 	}
 
 	indiv->vaccine_status = NO_VACCINE;
-	indiv->compliance_factor = gsl_rng_uniform( rng );
+	indiv->compliance_factor = rng_uniform( rng );
 }
 
 /*****************************************************************************************
@@ -108,8 +108,8 @@ void add_infection_event(
 
 	if( event == NULL || event->infector != NULL )
 	{
-		indiv->infection_events        = calloc( 1, sizeof( infection_event ) );
-		indiv->infection_events->times = calloc( N_EVENT_TYPES, sizeof( short ) );
+		indiv->infection_events        = (infection_event*) calloc( 1, sizeof( infection_event ) );
+		indiv->infection_events->times = (short*) calloc( N_EVENT_TYPES, sizeof( short ) );
 		for( int jdx = 0; jdx < N_EVENT_TYPES; jdx++ )
 			indiv->infection_events->times[jdx] = UNKNOWN;
 		indiv->infection_events->next = event;
@@ -118,7 +118,7 @@ void add_infection_event(
 
 	event->infector = infector;
 	event->network_id = network_id;
-	event->strain = strain;
+	event->with_strain = strain;
 	if( event->infector != NULL )
 	{
 		event->time_infected_infector  = time_infected_infection_event(infector->infection_events);
@@ -154,7 +154,7 @@ void initialize_hazard(
 	for( int idx = 0; idx < params->max_n_strains; idx++ )
 		if( indiv->immune_full[ idx ] == current_time || current_time == 0 )
 		{
-			indiv->hazard[idx] = gsl_ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
+			indiv->hazard[idx] = ran_exponential( rng, 1.0 ) / params->adjusted_susceptibility[indiv->age_group];
 			indiv->immune_full[ idx ] = NO_IMMUNITY;
 		}
 }

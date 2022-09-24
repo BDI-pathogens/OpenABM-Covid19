@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 {
     printf("# Starting simulation\n");
 
-    parameters *params = calloc( 1, sizeof( parameters ));
+    parameters *params = (parameters*) calloc( 1, sizeof( parameters ));
     initialize_params( params );
 
     struct timespec  tv;

@@ -1,6 +1,6 @@
 # content of conftest.py
 
-import pytest, subprocess, shutil, os, sys
+import pytest, subprocess, shutil, os, sys, errno
 from . import constant
 
 sys.path.append("src/COVID19")
@@ -54,7 +54,14 @@ def setup_covid_methods(request):
     """
     Called before each method is run; creates a new data dir, copies test datasets
     """
-    os.mkdir(constant.DATA_DIR_TEST)
+    # Don't fail here as we may run the tests multiple times on a dev's laptop
+    # and they may have ctrl+c'd and thus the fin() method may not be called.
+    try:
+        os.mkdir(constant.DATA_DIR_TEST)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        pass
     shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
     shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
     shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)

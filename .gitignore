@@ -1,6 +1,9 @@
 # Mac-related files
 .DS_Store
 
+# Visual studio code related files
+.vscode
+
 # File associated with configure
 config.log
 config.status
@@ -23,6 +26,7 @@ __pycache__
 .mypy_cache/
 **/*.egg-info
 *.pkl
+tests/*.pyc
 
 # Eclipse-related files
 .project
@@ -111,3 +115,34 @@ examples/.ipynb_checkpoints
 sandbox/.ipynb_checkpoints
 /Debug/
 /.pytest_cache/
+
+/src/build
+/*.exe
+
+# So we don't accidentally check in the stats and gcem modules, if used
+/stats
+/gcem
+
+# Example temporaries
+/examples/**/*.o
+/examples/**/*.csv
+/examples/**/*.png
+/examples/inv_inc_gamma_gsl/invgamma
+/examples/inv_inc_gamma_stats/invgamma
+/examples/random_data_gsl/randomdatagsl
+/examples/random_data_stats/randomdatastats
+/examples/stats_parallel_test/statsparalleltest
+
+# Profiling output
+gmon.out
+callgrind.out.*
+callgrid.out.*
+callgraph.dot*
+
+# Output performance files
+/results-*.txt
+gcem2/
+
+stats2/
+
+test-results.md
