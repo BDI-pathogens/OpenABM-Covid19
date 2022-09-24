@@ -141,3 +141,8 @@ callgraph.dot*
 
 # Output performance files
 /results-*.txt
+gcem2/
+
+stats2/
+
+test-results.md

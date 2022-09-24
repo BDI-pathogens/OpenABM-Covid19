@@ -29,7 +29,7 @@ def gsl_config(flag):
             statsRoot = d
         
         if '--cflags' == flag:
-            return ("-DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS -I" + d + "/stats/include -I" + d + "/gcem/include -std=c++17").split(' ')
+            return ("-DSTATS_ENABLE_STDVEC_WRAPPERS -DSTATS_GO_INLINE -DUSE_STATS -I" + statsRoot + "/stats/include -I" + statsRoot + "/gcem/include -std=c++17").split(' ')
         else:
             pythonLib = os.environ.get('PYTHONLIB')
             if pythonLib is not None:
