@@ -10,17 +10,11 @@ Created: April 2020
 Author: p-robot
 """
 
-import subprocess, os, sys
-from os.path import join
 import numpy as np, pandas as pd
 import pytest
 
-sys.path.append("src/COVID19")
-from COVID19.model import Model, Parameters
-
 from . import constant
 from . import utilities as utils
-
 
 class TestClass(object):
     """
@@ -38,15 +32,23 @@ class TestClass(object):
         """
         
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
         
+        # Call the model
+        model  = utils.get_model_swig( params )
+        
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
+
         # Import timeseries/transmission/individual files
-        df_timeseries = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_timeseries = model.results
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
-        df_indiv = pd.merge(df_indiv, df_trans, 
-            left_on = "ID", right_on = "ID_recipient", how = "left")
+        df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
         
         incidence_indiv = df_indiv[(df_indiv[indiv_var] > 0)].groupby([indiv_var]).size().reset_index(name="connections")
         incidence_indiv.rename( columns = { indiv_var:"time"}, inplace = True )
@@ -63,11 +65,17 @@ class TestClass(object):
         Test that total_infected is the sum of the other compartments
         """
         
-        # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
         
+        # Call the model
+        model  = utils.get_model_swig( params )
+        
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        df_output = model.results
+
         df_sub = df_output[["n_symptoms", "n_presymptom", "n_asymptom", \
             "n_hospital", "n_death", "n_recovered", "n_critical", "n_hospitalised_recovering"]]
         
@@ -81,10 +89,16 @@ class TestClass(object):
         Test that all columns of time series file are non-negative
         """
         
-        # Call the model using baseline parameters, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
+        
+        # Call the model
+        model  = utils.get_model_swig( params )
+        
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        df_output = model.results
         
         np.testing.assert_equal(np.all(df_output.total_infected >= 0), True)
     
@@ -94,10 +108,18 @@ class TestClass(object):
         events recorded in the transmission file.  
         """
         
-        # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
         
+        # Call the model
+        model  = utils.get_model_swig( params )
+        
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
+
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         
@@ -109,9 +131,17 @@ class TestClass(object):
         events recorded in the transmission file, when stratified by age
         """
         
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
+        
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        model  = utils.get_model_swig( params )
+        
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
         
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
@@ -175,11 +205,8 @@ class TestClass(object):
         """
         T = 100
         
-        params = Parameters(constant.TEST_DATA_TEMPLATE, 1, constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOSPITAL_FILE, 1, True, True)
-        
+        params = utils.get_params_swig()
         params.set_param( "n_total", 100000 )
-        
         model  = utils.get_model_swig( params )
         
         results = list()

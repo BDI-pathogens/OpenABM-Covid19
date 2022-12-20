@@ -7,7 +7,6 @@ Usage:
 @author: anelnurtay
 """
 
-import subprocess
 import numpy as np, pandas as pd
 import pytest
 import random as rd
@@ -176,16 +175,17 @@ class TestClass(object):
         """
         
         error_tolerance = 0.01
-        
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+
+        params = utils.get_params_swig()
+
         params.set_param("n_total", n_total)
         params.set_param("end_time", 1)
         params.set_param("population_0_9",population_0_9)
         params.set_param("population_10_19",population_10_19)
         params.set_param("population_20_29",population_20_29)
         params.set_param("population_30_39",population_30_39)
-        params.set_param("population_40_49",population_40_49)   
-        params.set_param("population_50_59",population_50_59)   
+        params.set_param("population_40_49",population_40_49)
+        params.set_param("population_50_59",population_50_59)
         params.set_param("population_60_69",population_60_69)
         params.set_param("population_70_79",population_70_79)
         params.set_param("population_80",population_80)
@@ -194,11 +194,15 @@ class TestClass(object):
                                   population_30_39, population_40_49, population_50_59,
                                   population_60_69, population_70_79, population_80 ]
        
-        params.write_params(constant.TEST_DATA_FILE)        
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
-            comment = "#", sep = ",", skipinitialspace = True )
+        model  = utils.get_model_swig( params )
+        
+        # step through the model and write the relevant files the end
+        for _ in range( params.get_param( "end_time") ):
+            model.one_time_step()
+        
+        model.write_individual_file()
+
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
 
         # population proportion by age
         N_tot = len( df_indiv )
@@ -213,7 +217,7 @@ class TestClass(object):
         """
 
         # Set the parameters we want for the simulation.
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = utils.get_params_swig()
         params.set_param("end_time", 1)
         params.set_param("n_total", n_total)
         params.set_param("household_size_1", household_size_1)
@@ -222,7 +226,6 @@ class TestClass(object):
         params.set_param("household_size_4", household_size_4)
         params.set_param("household_size_5", household_size_5)
         params.set_param("household_size_6", household_size_6)
-        params.write_params(constant.TEST_DATA_FILE)
 
         # Calculate the number of people expected to be living in households of
         # each different size, based on the parameter definitions.
@@ -234,16 +237,18 @@ class TestClass(object):
         household_size_counts_weighted *= float(n_total) / \
         sum(household_size_counts_weighted)
 
-        # Run the simulation.
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output,
-            stderr=file_output, shell=True)
-        np.testing.assert_equal(completed_run.returncode, 0)
+        # Run the simulation
+        model  = utils.get_model_swig( params )
+        
+        # step through the model and write the relevant files the end
+        for _ in range( params.get_param( "end_time") ):
+            model.one_time_step()
+        
+        model.write_individual_file()
 
         # Find the number of people living in households of each different size
         # in the simulation output.
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
-            comment="#", sep=",", skipinitialspace = True)
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         
         df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
         df_house = df_house.groupby(["size"]).size().reset_index(
