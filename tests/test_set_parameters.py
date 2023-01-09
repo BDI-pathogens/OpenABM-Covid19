@@ -1,4 +1,5 @@
 import pytest
+from . import constant
 import pandas as pd, numpy as np
 from . import utilities as utils
 from COVID19.model import Parameters, Model, OccupationNetworkEnum  
@@ -14,9 +15,15 @@ class TestSetObjects:
             param_line_number=1,
             hospital_input_param_file="tests/data/hospital_baseline_parameters.csv"
         )
+
+        
+        # pytest.set_trace()
+        # pytest.set_trace()
+
         for key in all_params:
             value = all_params[key][0]
-            assert pytest.approx(p.get_param(key), value), f"{key} was not set properly"
+            # assert pytest.approx(p.get_param(key), value), f"{key} was not set properly" #d this is not how approx works? Also why is it approx?
+            assert p.get_param(key) == value, f"{key} was not set properly" #d approx
 
     def test_set_params_from_python(self):
         all_params = pd.read_csv("tests/data/baseline_parameters.csv")
@@ -31,7 +38,7 @@ class TestSetObjects:
                 p.set_param(key, float(value))
             except TypeError:
                 p.set_param(key, int(value))
-            assert pytest.approx(p.get_param(key), value), f"{key} was not set properly"
+            assert p.get_param(key) == value, f"{key} was not set properly" #d used to be approx?
             p._read_household_demographics()
 
     def test_run_model_read_prama_file_false(self):
@@ -146,9 +153,9 @@ class TestSetObjects:
         model.update_running_params("manual_traceable_fraction_household", 0.4)
         assert model.get_param("manual_traceable_fraction_household") == 0.4
         
-    def test_set_app_users(self):
+    def test_set_app_users(self,tmp_path):
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         params.set_param( "n_total", 50000 )
         model  = utils.get_model_swig( params )
         

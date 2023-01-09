@@ -255,6 +255,20 @@ def get_params_swig():
         True
     )
 
+def get_params_swig_tmp(tmp_path):
+    """
+    Gets the Swig parameters object
+    """
+    return Parameters(
+        constant.TEST_DATA_TEMPLATE,
+        1,
+        str(tmp_path/constant.DATA_DIR_TEST),
+        constant.TEST_HOUSEHOLD_TEMPLATE,
+        constant.TEST_HOSPITAL_FILE,
+        1,
+        True,
+        True
+    )
 
 def get_model_swig( params ):
     """

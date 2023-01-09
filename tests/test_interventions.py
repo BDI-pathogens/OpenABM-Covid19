@@ -22,7 +22,7 @@ from random import randrange
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES, Parameters
 from . import constant
 from . import utilities as utils
 import covid19
@@ -1215,12 +1215,12 @@ class TestClass(object):
     """
     Test class for checking
     """
-    def test_zero_quarantine(self):
+    def test_zero_quarantine(self,tmp_path):
         """
         Test there are no individuals quarantined if all quarantine parameters are "turned off"
         """
      
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         params = utils.turn_off_quarantine(params)
         params.set_param("n_total",50000)
         params.set_param("end_time",40)
@@ -1242,22 +1242,22 @@ class TestClass(object):
         df_output = model.results
         np.testing.assert_equal(df_output["n_quarantine"].to_numpy().sum(), 0)
     
-    def test_hospitalised_zero(self):
+    def test_hospitalised_zero(self,tmp_path):
         """
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params = utils.set_hospitalisation_fraction_all(params, 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_output = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
     
-    def test_quarantine_interactions(self, test_params):
+    def test_quarantine_interactions(self, test_params, tmp_path):
         """
         Tests the number of interactions people have on the interaction network is as 
         described when they have been quarantined
@@ -1265,21 +1265,21 @@ class TestClass(object):
         tolerance = 0.01
         end_time = test_params["end_time"]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, end_time)
         params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, 
             sep = ",", comment = "#", skipinitialspace = True)
             
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, 
             sep = ",", comment = "#", skipinitialspace = True)
         
-        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, 
+        df_int = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True)
         
         # Merge columns from transmission file into individual file
@@ -1336,7 +1336,7 @@ class TestClass(object):
             rtol=tolerance,
         )
 
-    def test_quarantine_on_symptoms(self, test_params):
+    def test_quarantine_on_symptoms(self, test_params, tmp_path):
         """
         Tests the correct proportion of people are self-isolating on sypmtoms
         """
@@ -1345,19 +1345,19 @@ class TestClass(object):
         tol_sd = 4
         end_time = test_params["end_time"]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, end_time)
         params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
         
@@ -1406,14 +1406,14 @@ class TestClass(object):
                 True, False, "no test run due test_params not being testable"
             )
     
-    def test_quarantine_household_on_symptoms(self, test_params ):
+    def test_quarantine_household_on_symptoms(self, test_params, tmp_path):
         """
         Tests households are quarantine when somebody has symptoms
         """
         end_time = test_params[ "end_time" ]
 
         # set up model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1425,9 +1425,9 @@ class TestClass(object):
         model.write_interactions_file()  
         model.write_transmissions()  
 
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        df_int   = pd.read_csv( tmp_path/constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         
         # get everyone who is a case or just released from hospital as these will not be traced
         df_trans = df_trans.loc[:,["ID_recipient","is_case","time_recovered","time_hospitalised"]]
@@ -1460,7 +1460,7 @@ class TestClass(object):
         np.testing.assert_equal( n_household>100, True, "insufficient household members traced to test" )
         np.testing.assert_equal( n_no_trace, 0, "failed to trace someone in the household" )
 
-    def test_lockdown_transmission_rates(self, test_params):
+    def test_lockdown_transmission_rates(self, test_params, tmp_path):
         """
         Tests the change in transmission rates on lockdown are correct
         NOTE - this can only be done soon after a random seed and for small
@@ -1470,27 +1470,27 @@ class TestClass(object):
         sd_diff  = 3;
         end_time = test_params[ "end_time" ]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)        
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)        
         params = utils.turn_off_interventions(params, end_time)
         params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         
         # run without lockdown
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_without    = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
+        df_without    = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_without    = df_without[ df_without[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
 
         # lockdown on t-1
         params = utils.turn_off_interventions(params, end_time)
         params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         params.set_param( "lockdown_time_on", end_time - 1 );
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_with       = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
+        df_with       = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
         df_with       = df_with[ df_with[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
         
         # now check they are line
@@ -1508,7 +1508,7 @@ class TestClass(object):
                                     err_msg = "lockdown not changing random transmission as expected" )
       
 
-    def test_trace_on_symptoms(self, test_params, app_users_fraction ):
+    def test_trace_on_symptoms(self, test_params, app_users_fraction, tmp_path):
         """
         Tests that people who are traced on symptoms are
         real contacts
@@ -1516,7 +1516,7 @@ class TestClass(object):
         end_time = test_params[ "end_time" ]
 
         # set up model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1528,9 +1528,9 @@ class TestClass(object):
         model.write_interactions_file()  
         model.write_individual_file()  
 
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( tmp_path/constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # prepare the interaction data to get all interations
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
@@ -1562,7 +1562,7 @@ class TestClass(object):
         np.testing.assert_equal( len(no_inter), 0, "tracing someone without an interaction" )    
 
     
-    def test_app_users_fraction(self, test_params ):
+    def test_app_users_fraction(self, test_params, tmp_path):
         """
         Tests that the correct number of people are assigned
         use the app and that only app users start tracing 
@@ -1570,16 +1570,16 @@ class TestClass(object):
         """
         end_time = test_params[ "end_time" ]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
         
@@ -1598,7 +1598,7 @@ class TestClass(object):
                 users = app_users[ app_users[ "age_group"] == age ].iloc[0,1]
                 np.testing.assert_allclose( users / n, test_params[ app_params[ age ] ], atol = 0.01, err_msg = "wrong fraction of users have app in age group")
             
-        df_trace     = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace     = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
         index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
@@ -1613,13 +1613,13 @@ class TestClass(object):
         test = pd.merge( index_traced, df_indiv, on = "traced_ID", how = "left")
         np.testing.assert_equal( len( test[ test[ "app_user" ] != 1 ] ), 0, "non-app users being traced" )
     
-    def test_risk_score_household(self, test_params, min_age_inf, min_age_sus):
+    def test_risk_score_household(self, test_params, min_age_inf, min_age_sus, tmp_path):
         """
         Test that if risk score for household quarantining is set to 0 for the youngest
         as either the index or traced that they are not quarantined
         """
    
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         params.set_param("rng_seed", 1)      
@@ -1637,8 +1637,8 @@ class TestClass(object):
         model.write_individual_file()
         model.write_trace_tokens()
   
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
@@ -1662,13 +1662,13 @@ class TestClass(object):
        
         del( model )
 
-    def test_risk_score_age(self, test_params, min_age_inf, min_age_sus):
+    def test_risk_score_age(self, test_params, min_age_inf, min_age_sus, tmp_path):
         """
         Test that if risk score quarantining is set to 0 for the youngest
         as either the index or traced that they are not quarantined
         """
    
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1686,8 +1686,8 @@ class TestClass(object):
         model.write_individual_file()
         model.write_trace_tokens()
   
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # find the index case for the new time_step (remove index token)
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ]  ) ] 
@@ -1711,13 +1711,13 @@ class TestClass(object):
        
         del( model )
     
-    def test_risk_score_days_since_contact(self, test_params, days_since_contact):
+    def test_risk_score_days_since_contact(self, test_params, days_since_contact, tmp_path):
         """
         Test that if risk score quarantining is set to be 0 for days greater
         than days since contact
         """
    
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1734,7 +1734,7 @@ class TestClass(object):
             model.one_time_step();    
         model.write_trace_tokens()
   
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
 
 
@@ -1749,7 +1749,7 @@ class TestClass(object):
        
         del( model )
        
-    def test_risk_score_multiple_contact(self, test_params, days_since_contact, required_interactions):
+    def test_risk_score_multiple_contact(self, test_params, days_since_contact, required_interactions, tmp_path):
         """
         Test that if risk score quarantining is set to be 0 for days greater
         than days since contact and per_interaction_score for days less or equal,
@@ -1758,7 +1758,7 @@ class TestClass(object):
         
         per_interaction_score = 1 / required_interactions + 0.0001
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1780,7 +1780,7 @@ class TestClass(object):
         for time in range( days_since_contact + 1 ):
             model.one_time_step();
             model.write_interactions_file();
-            df_temp = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_temp = pd.read_csv( tmp_path/constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
             df_temp[ "days_since_symptoms" ] = days_since_contact - time
             df_inter.append(df_temp)
         df_inter = pd.concat( df_inter )
@@ -1789,8 +1789,8 @@ class TestClass(object):
         # get the individuals who have the app
         model.write_individual_file()
         model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")  
         app_users = df_indiv.loc[ :,["ID", "app_user"]]
         cases     = df_indiv.loc[ :,["ID", "is_case"]]
@@ -1807,7 +1807,7 @@ class TestClass(object):
      
         # now look at the number of people asked to quarnatine
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
@@ -1831,7 +1831,7 @@ class TestClass(object):
         
         del( model )
 
-    def test_quarantine_household_on_trace_positive_not_symptoms(self, test_params ):
+    def test_quarantine_household_on_trace_positive_not_symptoms(self, test_params, tmp_path):
         """
         Test that we quarantine people's household only on a positive test
         and on symptoms we don't ask them to quarantine
@@ -1851,7 +1851,7 @@ class TestClass(object):
         
         tol = 0.01
          
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1863,8 +1863,8 @@ class TestClass(object):
         # get the individuals who have the app
         model.write_individual_file()
         model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
                 
@@ -1879,7 +1879,7 @@ class TestClass(object):
       
         # now look at the number of people asked to quarantine
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # add on house_no and case status to the transmissions and count the number of traced per house
         df_trace = pd.merge( df_trace, house_no, on = "traced_ID", how = "left")
@@ -1916,7 +1916,7 @@ class TestClass(object):
                 
         
         
-    def test_traced_on_symptoms_quarantine_on_positive(self, test_params, tol_sd ):
+    def test_traced_on_symptoms_quarantine_on_positive(self, test_params, tol_sd, tmp_path):
         """
         Test that if people are sent an amber message on being traced by someone with 
         symptoms that they then quarantine when it is upgraded to a red message after 
@@ -1924,7 +1924,7 @@ class TestClass(object):
         """
         symptom_time = test_params['end_time']-test_params["test_order_wait"]-test_params["test_result_wait"]
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1934,16 +1934,16 @@ class TestClass(object):
             model.one_time_step();             
         model.write_trace_tokens()  
         model.write_individual_file()  
-        df_trace_symp = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv_symp = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace_symp = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv_symp = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         
         # now go forward and see who would have a positive test
         for time in range( test_params['end_time'] - symptom_time ):
             model.one_time_step();             
         model.write_trace_tokens()  
         model.write_individual_file()  
-        df_trace_pos  = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv_pos = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
+        df_trace_pos  = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv_pos = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
                   
          # find everyone who has a trace token who reported on symptom_time
         df_trace_symp_t = df_trace_symp[ (df_trace_symp["index_time"] == df_trace_symp["time"] ) & (df_trace_symp["index_reason"]==0)]
@@ -2000,12 +2000,12 @@ class TestClass(object):
         del( model )
 
 
-    def test_quarantined_have_trace_token(self, test_params, time_steps_test ):
+    def test_quarantined_have_trace_token(self, test_params, time_steps_test, tmp_path):
         """
         Test that everybody who is in quarantine has a trace token
         """
          
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -2021,8 +2021,8 @@ class TestClass(object):
             model.write_trace_tokens()  
             model.write_individual_file()  
        
-            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         
             quarantined = df_indiv[ df_indiv["quarantined"] == True ].loc[:,["ID"]]
             have_tokens = df_trace.groupby("traced_ID").size().reset_index(name="n_tokens")
@@ -2034,7 +2034,7 @@ class TestClass(object):
         del( model )
 
 
-    def test_priority_testing(self, test_params, app_users_fraction, priority_test_contacts ):
+    def test_priority_testing(self, test_params, app_users_fraction, priority_test_contacts, tmp_path):
         """
         Tests that people who had the most contacts had a priority test
         
@@ -2067,7 +2067,7 @@ class TestClass(object):
         time_non_prior_res  = test_params[ "end_time" ]
                    
         # set up model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         params.set_param( "app_turn_on_time", time_non_prior_symp )
@@ -2080,7 +2080,7 @@ class TestClass(object):
           model.one_time_step()
 
         model.write_individual_file()
-        non_prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        non_prior_symp_df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         non_prior_symp_df_indiv = non_prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
         non_prior_symp_df_indiv.rename( columns = { "test_status":"test_status_non_prior_symp"}, inplace = True )
 
@@ -2089,7 +2089,7 @@ class TestClass(object):
           model.one_time_step()
 
         model.write_individual_file()
-        prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        prior_symp_df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         prior_symp_df_indiv = prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
         prior_symp_df_indiv.rename( columns = { "test_status":"test_status_prior_symp"}, inplace = True )
 
@@ -2103,9 +2103,9 @@ class TestClass(object):
         model.write_transmissions()
 
         # read CSV's
-        test_df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        test_df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
-        test_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        test_df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        test_df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        test_df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         
         # determine who should get a priority test:
         # 1. get the people who developed symptoms on the last step and have the app  
@@ -2156,7 +2156,7 @@ class TestClass(object):
         model.write_trace_tokens()
 
         # count the number of people who are quarantined from each traced list
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_quar  = df_indiv.loc[:,["ID","quarantined"]]
         df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
         df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
@@ -2169,7 +2169,7 @@ class TestClass(object):
 
         if time_prior_res != time_non_prior_res :
             # get the people who have been uniquely traced by this index and see how many are quarantined
-            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
             df_trace = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
             df_trace = pd.merge( test_df_trace, df_trace, on = "traced_ID", how = "left" )
             df_trace = df_trace[ df_trace["n_traced"]==1]
@@ -2193,7 +2193,7 @@ class TestClass(object):
         model.write_individual_file()
 
         # count the number of people who are quarantined from each traced list
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_quar  = df_indiv.loc[:,["ID","quarantined"]]
         df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
         df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
@@ -2205,7 +2205,7 @@ class TestClass(object):
         
         del( model )   
         
-    def test_test_sensitivity(self, test_params ):
+    def test_test_sensitivity(self, test_params, tmp_path):
         """
         Test that the tests results have the required sensitivity and specificity
         Make sure there sufficient true/false pos/neg and then check they 
@@ -2218,7 +2218,7 @@ class TestClass(object):
         upper_CI  = ( 1 + max_CI ) / 2 
         lower_CI  = ( 1 - max_CI ) / 2 
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )
@@ -2231,8 +2231,8 @@ class TestClass(object):
         model.write_transmissions()
 
         # read CSV's
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
     
         # find everyone with a test result
         df_test = df_indiv.loc[:,["ID","test_status"]]
@@ -2276,7 +2276,7 @@ class TestClass(object):
 
         del( model )
         
-    def test_recursive_testing_indirect_release(self, test_params ):
+    def test_recursive_testing_indirect_release(self, test_params, tmp_path):
         """
         Test that when recursively tested people are released that 
         those indirectly traced through them are also released
@@ -2284,7 +2284,7 @@ class TestClass(object):
         end_time  = test_params[ "end_time" ]
         symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )
@@ -2295,7 +2295,7 @@ class TestClass(object):
         # write files
         model.write_trace_tokens()
       
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace = df_trace[ df_trace[ "index_time" ] == symp_time ]
         
         # get everyone directly traced by the index case
@@ -2314,11 +2314,11 @@ class TestClass(object):
 
         del( model )
 
-    def test_manual_trace_params(self, test_params, time_steps_test ):
+    def test_manual_trace_params(self, test_params, time_steps_test, tmp_path):
         """
         Tests that people are traced based on manual tracing.
         """
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2335,13 +2335,13 @@ class TestClass(object):
             model.one_time_step()
             model.write_interactions_file()
 
-            df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
             all_pos = all_pos.append(df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
         model.write_trace_tokens()
 
         np.testing.assert_equal( len( all_pos ) > 0, True, "expected manual traces do not exist" )
 
-    def test_recursive_testing(self, test_params ):
+    def test_recursive_testing(self, test_params, tmp_path):
         """
         Test checks that following a positive test for an index case we order a 
         test for all directly traced people
@@ -2352,7 +2352,7 @@ class TestClass(object):
         end_time  = test_params[ "end_time" ]
         symp_time = end_time - test_params[ "test_order_wait" ] - test_params[ "test_result_wait" ]
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )
@@ -2365,7 +2365,7 @@ class TestClass(object):
         model.write_individual_file()
         
         # remove those traced by more than one index and the index cases who have been traced
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
         df_trace_uniq = df_trace_uniq[df_trace_uniq["n_traced"] == 1 ]
         df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
@@ -2391,12 +2391,12 @@ class TestClass(object):
         model.write_trace_tokens()
         model.write_individual_file()
         model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv_1 = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv_1 = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv_1 = pd.merge(df_indiv_1, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end_1")
         df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
         df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end_1"] == 1 ]
@@ -2413,12 +2413,12 @@ class TestClass(object):
         model.write_trace_tokens()
         model.write_individual_file()
         model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end")
         df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
         df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end"] == 1 ]
@@ -2447,7 +2447,7 @@ class TestClass(object):
 
         del( model )
 
-    def test_recursive_testing_household_not_released(self, test_params ):
+    def test_recursive_testing_household_not_released(self, test_params, tmp_path):
         """
         Test that when recursively tested people that if a household 
         member of an index case tests negative they do not get released
@@ -2456,7 +2456,7 @@ class TestClass(object):
         end_time   = test_params[ "end_time" ]
         index_time = end_time - 2 * ( test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ] )
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )
@@ -2466,7 +2466,7 @@ class TestClass(object):
 
         # get the symptomatic index cases        
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_symp  = df_trace[ df_trace[ "index_time"] == index_time ]
         df_symp  = df_symp[ df_symp["index_reason"] == 0].groupby( ["index_time", "index_ID"]).size().reset_index( name ="n_traced_symp")
         
@@ -2476,11 +2476,11 @@ class TestClass(object):
         # get the test results
         model.write_individual_file()
         model.write_trace_tokens()
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = df_indiv.loc[:,["ID","test_status","house_no", "current_status", "quarantined"]]
 
         # first filter out all those who have been traced multiple times 
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_n_trace = df_trace.groupby( "traced_ID" ).size().reset_index(name="n_trace")
         df_n_trace.rename( columns={"traced_ID":"index_ID"}, inplace = True )
         df_trace = pd.merge( df_trace, df_n_trace, on = "index_ID" )
@@ -2508,9 +2508,9 @@ class TestClass(object):
         model.write_trace_tokens()
         model.write_individual_file()
         df_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
         df_trace[ "has_token"] = True
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = df_indiv.loc[:,["ID","quarantined"]]
         df_trace = pd.merge( df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left")
         df_neg = pd.merge( df_neg, df_trace, on = [ "index_ID", "traced_ID"], how = "left" )
@@ -2519,11 +2519,11 @@ class TestClass(object):
         np.testing.assert_equal( sum( df_neg["has_token"] != True ), 0, "Household members lose their token on a negative result despite positive household member" )
         np.testing.assert_equal( sum( df_neg["quarantined"]==0), 0, "Household members released from quarantine despite positive household member" )
 
-    def test_manual_trace_only_of_given_type(self, test_params, time_steps_test, interaction_type ):
+    def test_manual_trace_only_of_given_type(self, test_params, time_steps_test, interaction_type, tmp_path):
         """
         Tests that only the given interaction_type contains manual traces.
         """
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2539,13 +2539,13 @@ class TestClass(object):
             model.one_time_step()
             model.write_interactions_file()
 
-            df_inter = pd.read_csv( constant.TEST_INTERACTION_FILE )
+            df_inter = pd.read_csv( tmp_path/constant.TEST_INTERACTION_FILE )
             all_pos = all_pos.append( df_inter[ df_inter[ "manual_traceable" ] == 1 ] )
 
         np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] == interaction_type  ] ) > 0, True, "expected manual traces do not exist" )
         np.testing.assert_equal( len( all_pos[ all_pos[ "type" ] != interaction_type  ] ) == 0, True, "unexpected manual traces exist" )
 
-    def test_manual_trace_delay(self, test_params, delay ):
+    def test_manual_trace_delay(self, test_params, delay, tmp_path):
         """
         Tests that delays in traces are accounted for by the manual tracing delay.
         
@@ -2556,7 +2556,7 @@ class TestClass(object):
         Check that everyone who has been an an index for the sufficient time does
         manually trace someone (if they have an interaction with a susceptible)
         """
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2569,10 +2569,10 @@ class TestClass(object):
         model.write_transmissions()
         model.write_interactions_file()
         model.write_individual_file()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( tmp_path/constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
 
         # remove hospitalised since they get quicker tested 
         df_hosp = df_trans.loc[:,["time_hospitalised", "ID_recipient" ] ]
@@ -2602,7 +2602,7 @@ class TestClass(object):
         np.testing.assert_equal( len( df_manual_trace ) >50, True, "Insufficient index cases to test" )
         np.testing.assert_equal( sum( df_manual_trace[ "count" ] == 1 ), 0, "No manual tracing occurred from index case" )
 
-    def test_n_tests(self, test_params ):
+    def test_n_tests(self, test_params, tmp_path):
         """
         Tests that the reported number of tests is correct
         
@@ -2613,7 +2613,7 @@ class TestClass(object):
         
         total_delay = test_params[ "test_order_wait" ] + test_params[ "test_result_wait" ]
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2625,7 +2625,7 @@ class TestClass(object):
             n_tests.append( timeseries["n_tests"] )
                 
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
         df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
         
         symp_tot = 0
@@ -2654,14 +2654,14 @@ class TestClass(object):
             np.testing.assert_allclose(test_tot, expected_test, atol = sd_test * tol_sd, err_msg = "Number of tests incorrect given compliance rates on symptoms")
      
         
-    def test_tests_completed(self, test_params ):
+    def test_tests_completed(self, test_params, tmp_path):
         """
         Check that all tests have been processed by the model at the end 
         of each day (i.e. that immediate recursive testing is working)
         
         """
                 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2672,7 +2672,7 @@ class TestClass(object):
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.TEST_RESULT ), 0, "People still waiting for test results on day they should be processed" );
             np.testing.assert_equal( covid19.utils_n_current( model.c_model, covid19.MANUAL_CONTACT_TRACING ), 0, "People still waiting for manual contact tracing on day they should be processed" );      
         
-    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
+    def test_vaccinate_protection(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, tmp_path):
         """
         Check that vaccinated people are vaccinated and only get protection after the period
         in which the vaccine is not effective.
@@ -2686,7 +2686,7 @@ class TestClass(object):
         
         vaccine_protection_period = test_params[ "end_time" ] + 1;
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2710,7 +2710,7 @@ class TestClass(object):
         
         # check the output of the individual file    
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv = df_indiv.loc[:,["ID","vaccine_status"]]
         total_vaccinated = df_indiv["vaccine_status"].sum()
         np.testing.assert_equal(total_vaccinated, n_to_vaccinate, "incorrect number of people with correct vaccine_status" )
@@ -2724,7 +2724,7 @@ class TestClass(object):
             
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans      = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans      = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_trans_pre  = df_trans[ df_trans[ "time_infected"] < time_to_protect ]
         df_trans_post = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
         
@@ -2745,7 +2745,7 @@ class TestClass(object):
         df_vac_inf = pd.merge( df_vaccinated, df_trans_pre, left_on = "ID", right_on = "ID_recipient", how = "inner")
         np.testing.assert_( len( df_vac_inf.index ) > 0, "vaccined protected people prior to when it should have taken effect" )     
 
-    def test_vaccinate_efficacy(self, test_params, n_to_vaccinate, n_to_seed, efficacy, time_to_protect ):
+    def test_vaccinate_efficacy(self, test_params, n_to_vaccinate, n_to_seed, efficacy, time_to_protect, tmp_path):
         """
         Check the efficacy of the vaccine
         Make sure the correct proportion of people gain protection and that when the epidemic is
@@ -2756,7 +2756,7 @@ class TestClass(object):
         
         vaccine_protection_period = test_params[ "end_time" ] + 1
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2777,7 +2777,7 @@ class TestClass(object):
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
@@ -2793,12 +2793,12 @@ class TestClass(object):
         idx_seed = np.random.choice( n_total, n_to_seed, replace=False)
         for idx in idx_seed :
             model.seed_infect_by_idx( idx )    
-        for time in range( test_params[ "end_time" ] - time_to_protect ):
+        for time in range( test_params[ "end_time" ] - time_to_protect):
             model.one_time_step()
             
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
       
         df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
         df_vac_inf = df_vac_inf.loc[:,["vaccine_status"]]
@@ -2810,7 +2810,7 @@ class TestClass(object):
         np.testing.assert_( n_no_resp_inf != 0, "vaccinated people who didn't respond were not infected")
   
     
-    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, vaccine_protection_period ):
+    def test_vaccinate_wane(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, vaccine_protection_period, tmp_path):
         """
         Check the vaccine wanes over time
         Make sure that people are protected before it wanes but can be infected after it wanes
@@ -2822,7 +2822,7 @@ class TestClass(object):
         efficacy = 1.0
         time_to_protect = 1
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2852,7 +2852,7 @@ class TestClass(object):
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status", "current_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
@@ -2871,7 +2871,7 @@ class TestClass(object):
         
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
       
         df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
         df_vac_inf = df_vac_inf.loc[:,["time_infected", "time_asymptomatic"]]
@@ -2886,7 +2886,7 @@ class TestClass(object):
         np.testing.assert_equal( n_inf_protect, 0, "vaccinated people being infected before the vaccine has waned")
         np.testing.assert_( n_inf_wane > 0, "vaccinated people being infected before the vaccine has waned")
         
-    def test_vaccinate_schedule( self, test_params, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, fraction_to_vaccinate, days_to_vaccinate):
+    def test_vaccinate_schedule( self, test_params, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, fraction_to_vaccinate, days_to_vaccinate, tmp_path):
         """
         Check that a schedule of people can be vaccinated
         """
@@ -2894,7 +2894,7 @@ class TestClass(object):
         # set the np seed so the results are reproducible
         np.random.seed(0)
              
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -2941,7 +2941,7 @@ class TestClass(object):
         
         # check the required number of people are vaccinated
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status","age_group"]]
         
         n_group     = df_indiv[["age_group" ]].groupby("age_group").size().reset_index( name = "n_people" )
@@ -2959,12 +2959,12 @@ class TestClass(object):
                 sd = sqrt( expected * max( ( 1 - expected ) / n_age, 0.01 ) )
                 np.testing.assert_allclose(n_vac[0], expected, atol = 3 * sd, err_msg = "incorrect number vaccinated by age group" )
     
-    def test_add_vaccine(self, test_params, vaccine0, vaccine1 ):    
+    def test_add_vaccine(self, test_params, vaccine0, vaccine1, tmp_path):    
         """
         Check that a vaccine can be added and the correct properties are stored
         """
           
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -3003,7 +3003,7 @@ class TestClass(object):
         np.testing.assert_equal(v1.time_to_protect(),vaccine1["time_to_protect"], "incorrect time to protect (vaccine1)")
         np.testing.assert_equal(v1.vaccine_protection_period(),vaccine1["vaccine_protection_period"], "incorrect vaccine_protection_period (vaccine1)")
 
-    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect ):
+    def test_vaccinate_protection_multi_strain(self, test_params, n_to_vaccinate, n_to_seed, full_efficacy, symptoms_efficacy, severe_efficacy, time_to_protect, tmp_path):
         """
         Check that in a 2 strain model, if a vaccine is only effective against one of the strains
         then it will only protect from that strain and not the other
@@ -3020,7 +3020,7 @@ class TestClass(object):
         severe_efficacy   = [ severe_efficacy, 0.0 ];
         vaccine_protection_period = test_params[ "end_time" ] + 1;
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -3051,7 +3051,7 @@ class TestClass(object):
             
         # now get all those who have been infected after the vaccine takes effect
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_trans = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
                 
         # make sure sufficient people have been infected to check that the vaccine is effecive
@@ -3074,13 +3074,13 @@ class TestClass(object):
         np.testing.assert_( n_inf_strain_1 > 0, "no vaccinated people have been infected by strain that they should not be protected against")
        
 
-    def test_network_transmission_multiplier(self, test_params, time_off, networks_off ) :   
+    def test_network_transmission_multiplier(self, test_params, time_off, networks_off, tmp_path) :   
         """
         Check that a transmission_multipler change applied to a single network 
         is applied to (just) it 
         """
                     
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -3104,7 +3104,7 @@ class TestClass(object):
             n_net = len( df_trans[ df_trans[ "infector_network_id" ] == n_id ] )
             np.testing.assert_( n_net == 0, "not sufficient transmissions to test")
         
-    def test_custom_network_transmission_multiplier(self, test_params, time_add, age_group, n_inter, transmission_multiplier) :  
+    def test_custom_network_transmission_multiplier(self, test_params, time_add, age_group, n_inter, transmission_multiplier, tmp_path) :  
         """
         Check that a large transmission_multipler change applied to a single custom network 
         that it contains huge number of transmission and everyone in that age group is infected
@@ -3113,7 +3113,7 @@ class TestClass(object):
         # set the np seed so the results are reproducible
         np.random.seed(0)
                         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -3150,7 +3150,7 @@ class TestClass(object):
         np.testing.assert_equal( n_ids, n_inf_age_group_post + n_inf_age_group_pre, "not everyone in age group of super spreading net work is infected" )
         np.testing.assert_( n_inf_age_group_post_custom / n_inf_age_group_post > 0.9, "insufficient proportion of transmissionson the super spreading network" )
              
-    def test_isolate_only_on_positive_test(self, test_params ):  
+    def test_isolate_only_on_positive_test(self, test_params, tmp_path):  
         
         """
         Check that:
@@ -3162,7 +3162,7 @@ class TestClass(object):
         # number of random standard deviations before an error is called   
         sd_tol = 3
                       
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -3178,7 +3178,7 @@ class TestClass(object):
         model.run( n_steps = time_symp, verbose = False )
         
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
         df_trans = model.get_transmissions()
         df_symp  = df_trans[ df_trans[ "time_symptomatic" ] == time_symp ].loc[:,{"ID_recipient"}].rename( columns = { "ID_recipient":"ID" } )
         df_symp  = pd.merge(df_symp, df_indiv.loc[:,{"ID","test_status","quarantined"}],on = "ID", how = "left")
@@ -3205,7 +3205,7 @@ class TestClass(object):
         model.write_individual_file()
         
         # get updated quarantine status
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )   
+        df_indiv = pd.read_csv( tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )   
         df_indiv = df_indiv.loc[:,{"ID","quarantined","current_status"}].rename(columns={"quarantined":"quarantined_after_test"})    
         df_symp  = pd.merge( df_symp[ (df_symp["test_status"] == constant.TEST_ORDERED)], df_indiv, on = 'ID')
         

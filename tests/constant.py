@@ -171,5 +171,10 @@ INITIAL_COORDINATE_Y = 0.0
 EXE = f"covid19ibm.exe {TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
     f"{DATA_DIR_TEST} {TEST_HOUSEHOLD_FILE} {TEST_HOSPITAL_FILE}"
 
+def EXE_tmp(tmp_path):
+    return f"covid19ibm.exe {tmp_path/TEST_DATA_FILE} {PARAM_LINE_NUMBER} "+\
+    f"{tmp_path/DATA_DIR_TEST} {tmp_path/TEST_HOUSEHOLD_FILE} {tmp_path/TEST_HOSPITAL_FILE}"
 
 command = join(IBM_DIR_TEST, EXE)
+def command_tmp(tmp_path):
+    return join(IBM_DIR,EXE_tmp(tmp_path))

@@ -15,6 +15,7 @@ import random as rd
 import sys
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
+from model import Parameters
 
 from . import constant
 from . import utilities as utils
@@ -168,8 +169,8 @@ class TestClass(object):
             population_50_59,
             population_60_69,
             population_70_79,
-            population_80
-        ):
+            population_80,
+            tmp_path):
         """
         Test that the proportion of people in different age groups agrees with 
         the population
@@ -177,7 +178,7 @@ class TestClass(object):
         
         error_tolerance = 0.01
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("n_total", n_total)
         params.set_param("end_time", 1)
         params.set_param("population_0_9",population_0_9)
@@ -194,10 +195,10 @@ class TestClass(object):
                                   population_30_39, population_40_49, population_50_59,
                                   population_60_69, population_70_79, population_80 ]
        
-        params.write_params(constant.TEST_DATA_FILE)        
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)        
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
 
         # population proportion by age
@@ -207,13 +208,13 @@ class TestClass(object):
            np.testing.assert_allclose(N, population_fraction[idx], atol=N_tot * error_tolerance)
 
     def test_household_size(self, n_total, household_size_1, household_size_2,
-        household_size_3, household_size_4, household_size_5, household_size_6):
+        household_size_3, household_size_4, household_size_5, household_size_6,tmp_path):
         """
         Test to check the household size distribution
         """
 
         # Set the parameters we want for the simulation.
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params.set_param("end_time", 1)
         params.set_param("n_total", n_total)
         params.set_param("household_size_1", household_size_1)
@@ -222,7 +223,7 @@ class TestClass(object):
         params.set_param("household_size_4", household_size_4)
         params.set_param("household_size_5", household_size_5)
         params.set_param("household_size_6", household_size_6)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
         # Calculate the number of people expected to be living in households of
         # each different size, based on the parameter definitions.
@@ -235,14 +236,14 @@ class TestClass(object):
         sum(household_size_counts_weighted)
 
         # Run the simulation.
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output,
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output,
             stderr=file_output, shell=True)
         np.testing.assert_equal(completed_run.returncode, 0)
 
         # Find the number of people living in households of each different size
         # in the simulation output.
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, 
             comment="#", sep=",", skipinitialspace = True)
         
         df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
@@ -256,11 +257,10 @@ class TestClass(object):
                                    df_house["people_count_expected"], rtol=0.02) 
         
         
-    def test_user_demographics(self, test_params, n_houses):
+    def test_user_demographics(self, test_params, n_houses, tmp_path):
         """
             Adds in a user defined demographic and household structure
         """
- 
         n_houses     = int(n_houses)
         n_total      = int(test_params["n_total"])
         n_age_groups = int(constant.N_AGE_GROUPS)
@@ -277,10 +277,12 @@ class TestClass(object):
         df_demo = pd.DataFrame({'ID':np.array(IDs, dtype='int32'),'age_group':np.array(ages, dtype='int32'),'house_no':np.array(houses, dtype='int32')})
        
         # get the intial paramters and add user defined demographics 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
+        #pytest.set_trace()
         for param, value in test_params.items():
             params.set_param( param, value )  
         params.set_demographic_household_table(df_demo)
+        # params.output_file_dir = tmp_path/constant.DATA_DIR_TEST #d
         
         # get the model and run for the required time steps
         model = utils.get_model_swig( params )
@@ -289,7 +291,10 @@ class TestClass(object):
             
         # get the individual file and check age and houses
         model.write_individual_file()
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        print(tmp_path/constant.TEST_INDIVIDUAL_FILE)
+        #pytest.set_trace()
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
+        print(df_indiv)
         
         # now check the households ages are correct
         df = pd.merge(df_demo,df_indiv,on = ["ID"], how = "left")

@@ -18,6 +18,7 @@ from numpy.ma.testutils import assert_equal
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
+from model import Parameters
 
 from . import constant
 from . import utilities as utils
@@ -38,25 +39,25 @@ def pytest_generate_tests(metafunc):
 
 # Override setup_covid_methods() in conftest.py
 @pytest.fixture(scope = "function")
-def setup_covid_methods(request):
+def setup_covid_methods(request,tmp_path):
     """
     Called before each method is run; creates a new data dir, copies test datasets
     """
-    os.mkdir(constant.DATA_DIR_TEST)
-    shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
-    shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
-    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)
+    os.mkdir(tmp_path/constant.DATA_DIR_TEST)
+    shutil.copy(constant.TEST_DATA_TEMPLATE, tmp_path/constant.TEST_DATA_FILE)
+    shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, tmp_path/constant.TEST_HOUSEHOLD_FILE)
+    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, tmp_path/constant.TEST_HOSPITAL_FILE)
 
     # Adjust any parameters that need adjusting for all tests
-    params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+    params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
     params.set_param("n_total", 10000)
     params.set_param("end_time", 1)
-    params.write_params(constant.TEST_DATA_FILE)
+    params.write_params(tmp_path/constant.TEST_DATA_FILE)
     def fin():
         """
         At the end of each method (test), remove the directory of test input/output data
         """
-        shutil.rmtree(constant.DATA_DIR_TEST, ignore_errors=True)
+        shutil.rmtree(tmp_path, ignore_errors=True)
     request.addfinalizer(fin)
 
        
@@ -471,10 +472,11 @@ class TestClass(object):
         sd_infectious_period,
         mean_time_to_hospital,
         mean_time_to_critical,
-        mean_time_to_symptoms
+        mean_time_to_symptoms,
+        tmp_path
     ):
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions( params, end_time)
         params.set_param( "infectious_rate", infectious_rate )
         params.set_param( "n_total", n_total )
@@ -487,13 +489,14 @@ class TestClass(object):
         params.set_param("mean_time_to_hospital", mean_time_to_hospital)
         params.set_param("mean_time_to_critical", mean_time_to_critical)
         params.set_param("mean_time_to_symptoms", mean_time_to_symptoms)
-        params.write_params(constant.TEST_DATA_FILE)     
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_trans      = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
+        # pytest.set_trace()
         # check to see that the number of entries in the transmission file is that in the time-series
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
 
@@ -536,7 +539,8 @@ class TestClass(object):
             mean_infectious_period,
             sd_infectious_period,
             n_seed_infection,
-            n_total       
+            n_total,
+            tmp_path
         ):
         """
         Test that the exponential growth phase on a homogeneous random network
@@ -549,7 +553,7 @@ class TestClass(object):
         fraction_2 = 0.05
         tolerance  = 0.06
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_homogeneous_random_network_only(params,n_connections,end_time)
         params.set_param( "infectious_rate", infectious_rate )
         params.set_param( "mean_infectious_period", mean_infectious_period )
@@ -574,12 +578,12 @@ class TestClass(object):
         params.set_param("sd_time_to_recover", 0.5)
         params.set_param("sd_asymptomatic_to_recovery", 0.5)
 
-        params.write_params(constant.TEST_DATA_FILE)     
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)     
                 
         # Call the model using baseline parameters, pipe output to file, read output file
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)      
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)      
+        df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         df_ts         = df_output.loc[ :, ["time", "total_infected"]]
 
         # calculate the rate exponential rate of grwoth from the model
@@ -603,7 +607,8 @@ class TestClass(object):
             n_total,
             end_time,
             transmission_NETWORK,
-            relative_transmission_values
+            relative_transmission_values,
+            tmp_path
         ):
         """
         Test that monotonic change (increase, decrease, or equal) in relative_transmission_NETWORK values
@@ -616,18 +621,18 @@ class TestClass(object):
         # calculate the transmission proportions for the first entry in the relative_transmission_values
         rel_trans_value_current = relative_transmission_values[0]
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "n_total", n_total )
         params.set_param( "relative_transmission_household", 1 )
         params.set_param( "relative_transmission_occupation", 1 )
         params.set_param( "relative_transmission_random", 1 )
         params.set_param( relative_transmission , rel_trans_value_current )
-        params.write_params(constant.TEST_DATA_FILE)     
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_trans_current = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         
         # calculating the first ratio
@@ -641,11 +646,11 @@ class TestClass(object):
         # calculate the transmission proportion for the rest and compare with the current
         for relative_transmission_value in relative_transmission_values[1:]:
             params.set_param(relative_transmission , relative_transmission_value )
-            params.write_params(constant.TEST_DATA_FILE)     
+            params.write_params(tmp_path/constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-            df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
+            file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+            df_trans      = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, 
                 comment = "#", sep = ",", skipinitialspace = True )
             
             all_trans = len( df_trans[ df_trans[ "infector_network" ] == constant.HOUSEHOLD ] ) + \
@@ -678,7 +683,8 @@ class TestClass(object):
             fraction_asymptomatic_50_59,
             fraction_asymptomatic_60_69,
             fraction_asymptomatic_70_79,
-            fraction_asymptomatic_80
+            fraction_asymptomatic_80,
+            tmp_path
         ):
         """
         Test that monotonic change (increase, decrease, or equal) in fraction_asymptomatic values
@@ -687,7 +693,7 @@ class TestClass(object):
         """
         
         # calculate the total infections for the first entry in the fraction_asymptomatic values
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "n_total", n_total )
         params.set_param( "fraction_asymptomatic_0_9", fraction_asymptomatic_0_9[0] )
@@ -699,11 +705,11 @@ class TestClass(object):
         params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[0] )
         params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[0] )
         params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[0] )
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")        
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")        
         
         # calculate the sum of fraction_asymptomatic for different age groups
         fraction_asymptomatic_current = fraction_asymptomatic_0_9[0] + \
@@ -728,12 +734,12 @@ class TestClass(object):
             params.set_param( "fraction_asymptomatic_60_69", fraction_asymptomatic_60_69[idx] )
             params.set_param( "fraction_asymptomatic_70_79", fraction_asymptomatic_70_79[idx] )
             params.set_param( "fraction_asymptomatic_80", fraction_asymptomatic_80[idx] )
-            params.write_params(constant.TEST_DATA_FILE)     
+            params.write_params(tmp_path/constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], 
+            file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command_tmp(tmp_path)], 
                 stdout = file_output, shell = True)     
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            df_output_new     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
             
             fraction_asymptomatic_new = fraction_asymptomatic_0_9[idx] + \
                                         fraction_asymptomatic_10_19[idx] + \
@@ -763,7 +769,8 @@ class TestClass(object):
             self,
             n_total,
             end_time,
-            asymptomatic_infectious_factor
+            asymptomatic_infectious_factor,
+            tmp_path
         ):
         """
         Test that monotonic change (increase, decrease, or equal) in asymptomatic_infectious_factor values
@@ -772,15 +779,15 @@ class TestClass(object):
         """
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "n_total", n_total )
         params.set_param( "end_time", end_time )
         params.set_param( "asymptomatic_infectious_factor", asymptomatic_infectious_factor[0] )
-        params.write_params(constant.TEST_DATA_FILE)     
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)     
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
         
         # save the current asymptomatic_infectious_factor value
         asymptomatic_infectious_factor_current = asymptomatic_infectious_factor[0]
@@ -789,11 +796,11 @@ class TestClass(object):
         # calculate the total infections for the rest and compare with the current
         for idx in range(1, len(asymptomatic_infectious_factor)):
             params.set_param("asymptomatic_infectious_factor", asymptomatic_infectious_factor[idx])
-            params.write_params(constant.TEST_DATA_FILE)
+            params.write_params(tmp_path/constant.TEST_DATA_FILE)
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-            df_output_new     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+            file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+            df_output_new     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
             
             asymptomatic_infectious_factor_new = asymptomatic_infectious_factor[idx]
             total_infected_new = df_output_new[ "total_infected" ].iloc[-1]
@@ -824,7 +831,8 @@ class TestClass(object):
             relative_susceptibility_50_59,
             relative_susceptibility_60_69,
             relative_susceptibility_70_79,
-            relative_susceptibility_80
+            relative_susceptibility_80,
+            tmp_path
         ):
         """
         Test that monotonic change (increase or decrease) in relative_susceptibility 
@@ -834,7 +842,7 @@ class TestClass(object):
         """
         tolerance = 0.00001
         # set the first parameters
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "n_total", n_total )
         params.set_param( "relative_susceptibility_0_9", relative_susceptibility_0_9[0] )
@@ -846,12 +854,12 @@ class TestClass(object):
         params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[0] )
         params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[0] )
         params.set_param( "relative_susceptibility_80", relative_susceptibility_80[0] )
-        params.write_params(constant.TEST_DATA_FILE)     
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)     
 
         # get the current output
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_trans_current = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_trans_current = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         
         # calculate the proportion of infections in each age group
         inf_cur_zeros = pd.DataFrame([0]*9, columns=['zeros'], index=range(9))
@@ -881,11 +889,11 @@ class TestClass(object):
             params.set_param( "relative_susceptibility_60_69", relative_susceptibility_60_69[idx] )
             params.set_param( "relative_susceptibility_70_79", relative_susceptibility_70_79[idx] )
             params.set_param( "relative_susceptibility_80", relative_susceptibility_80[idx] )
-            params.write_params(constant.TEST_DATA_FILE)     
+            params.write_params(tmp_path/constant.TEST_DATA_FILE)     
     
-            file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-            completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-            df_trans_new = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+            file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+            completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+            df_trans_new = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
             
             relative_susceptibility_new = [ relative_susceptibility_0_9[idx],
                                             relative_susceptibility_10_19[idx],
@@ -938,7 +946,8 @@ class TestClass(object):
             mild_fraction_60_69,
             mild_fraction_70_79,
             mild_fraction_80,
-            mild_infectious_factor
+            mild_infectious_factor,
+            tmp_path
         ):
         """
         Test that monotonic change (increase, decrease, or equal) in mild_infectious_factor values
@@ -956,18 +965,18 @@ class TestClass(object):
             total_infected_list = []
             for rng_seed in rng_seed_range:
                 params.set_param('rng_seed', rng_seed)
-                params.write_params(constant.TEST_DATA_FILE)     
+                params.write_params(tmp_path/constant.TEST_DATA_FILE)     
                 
-                file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-                completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-                df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+                file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+                completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+                df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
             
                 total_infected_list.append(df_output[ "total_infected" ].iloc[-1])
             
             return np.mean(total_infected_list)
         
         # calculate the total infections for the first entry in the asymptomatic_infectious_factor values
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param( "end_time", end_time )
         params.set_param( "n_total", n_total )
         params.set_param( "mild_fraction_0_9", mild_fraction_0_9 )
@@ -1005,27 +1014,28 @@ class TestClass(object):
             self, 
             n_total,
             n_seed_infection,
-            end_time
+            end_time,
+            tmp_path
         ):
         """
         Test that ratio presymptomatic to symptomatic individuals is correct; currently must be 1.
         """
         tolerance = 1/n_total
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
 
         params.set_param("n_total", n_total)
         params.set_param("n_seed_infection", n_seed_infection)
         params.set_param("end_time", end_time)
-        params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
@@ -1093,7 +1103,7 @@ class TestClass(object):
             )
             
         
-    def test_relative_transmission_update(self, test_params, update_relative_transmission_household, update_relative_transmission_occupation, update_relative_transmission_random ):
+    def test_relative_transmission_update(self, test_params, update_relative_transmission_household, update_relative_transmission_occupation, update_relative_transmission_random, tmp_path):
         """
            Check to that if we change the relative transmission parameters after day 1 we get 
            the same result as if we started with the same values
@@ -1102,7 +1112,7 @@ class TestClass(object):
         max_time = test_params["end_time"]+1;
 
         # run the baseline parameters
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1110,7 +1120,7 @@ class TestClass(object):
         for time in range(max_time):
             model.one_time_step()
         model.write_transmissions()
-        df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        df_base = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         df_base = df_base[ df_base["time_infected"] == max_time ]
         df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
@@ -1118,7 +1128,7 @@ class TestClass(object):
         del params
             
         # run the baseline parameters then at base-line update one
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1130,7 +1140,7 @@ class TestClass(object):
         model.update_running_params( "relative_transmission_random",     update_relative_transmission_random )
         model.one_time_step()   
         model.write_transmissions()
-        df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_update = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_update = df_update[ df_update["time_infected"] == max_time ]
         df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
@@ -1152,20 +1162,20 @@ class TestClass(object):
        
     
          
-    def test_single_seed_infections( self, test_params ):
+    def test_single_seed_infections( self, test_params,tmp_path ):
         """
            Check that each person is only infected once in the seed infections
         """
      
         # run the baseline parameters
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
 
         model.one_time_step()
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_trans[ "n_inf_type" ] = (df_trans[ "time_asymptomatic" ] == 0 )*1 + ( df_trans[ "time_presymptomatic_mild" ] == 0 )*1 + ( df_trans[ "time_presymptomatic_severe" ] == 0 )*1
                                    
         np.testing.assert_equal( len( df_trans ), test_params["n_seed_infection"], "The number of seed infections is not equal to the size of the transmission file")
@@ -1178,13 +1188,14 @@ class TestClass(object):
             self, 
             n_total,
             n_seed_infection,
-            end_time
+            end_time,
+            tmp_path
         ):
         """
         Test that presymptomatic and symptomatic individuals transmit as expected
         """
         tolerance = 0.06
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params.set_param("self_quarantine_fraction", 0)
 
         params.set_param("hospitalised_fraction_0_9", 0)
@@ -1219,12 +1230,12 @@ class TestClass(object):
         params.set_param("n_seed_infection", n_seed_infection)
         params.set_param("end_time", end_time)
         
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)     
-        df_output     = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        df_trans      = pd.read_csv(constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)     
+        df_output     = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_trans      = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment = "#", sep = ",", skipinitialspace = True )
  
         # check to see that the number of entries in the transmission file is that in the time-series
         np.testing.assert_equal( len( df_trans ), df_output.loc[ :, "total_infected" ].max(), "length of transmission file is not the number of infected in the time-series" )
@@ -1259,7 +1270,7 @@ class TestClass(object):
         np.testing.assert_allclose( (N_presymptomatics_mild+N_presymptomatics), N_involved*0.5, atol = N_involved*tolerance) 
         np.testing.assert_allclose( (N_symptomatics_mild+N_symptomatics), N_involved*0.5, atol = N_involved*tolerance)   
 
-    def test_infectiousness_multiplier( self, test_params, sd_multipliers ):
+    def test_infectiousness_multiplier( self, test_params, sd_multipliers, tmp_path):
         """
            Check that the total infected stays the same up to 0.5 SD.
         """
@@ -1270,7 +1281,7 @@ class TestClass(object):
         for sd_multiplier in ordered_multipliers:
             total_infected = []
             for rng_seed in range(1,21):
-                params = utils.get_params_swig()
+                params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
                 for param, value in test_params.items():
                     params.set_param( param, value )  
                 params.set_param( "sd_infectiousness_multiplier", sd_multiplier )
@@ -1294,12 +1305,12 @@ class TestClass(object):
 
     
 
-    def test_infectiousness_multiplier_transmissions_increase_with_multiplier( self, test_params, n_bins ):
+    def test_infectiousness_multiplier_transmissions_increase_with_multiplier( self, test_params, n_bins, tmp_path):
         """
            Check that the mean number of infected increases across infectiousness bins.
         """
      
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1310,8 +1321,8 @@ class TestClass(object):
         model.write_transmissions()
         model.write_individual_file()
 
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
 
         df_indiv.rename( columns = { "ID":"ID_source"}, inplace = True )
 
@@ -1326,14 +1337,14 @@ class TestClass(object):
         np.testing.assert_equal( np.all(is_trans_cnt_increasing), True, "Infectiousness does not increase with multiplier" )
     
     
-    def test_waning_immunity_multiple_infections(self):
+    def test_waning_immunity_multiple_infections(self,tmp_path):
         """
         Test individuals have multiple infection events when transitions from recovered to
         susceptible decrease exponentially (with a mean time of 25 days) after 15 days of being
         fully immune.  
         """
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         params = utils.turn_off_interventions(params, int(params.get_param("end_time")))
         params.set_param("mean_time_to_susceptible_after_shift", 25)
         params.set_param("n_total", 50000)
@@ -1348,22 +1359,22 @@ class TestClass(object):
         model.write_transmissions()
         model.write_individual_file()
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
         np.testing.assert_equal(np.any(df_indiv.infection_count > 1), True)
 
      
-    def test_extra_infections( self, test_params, n_extra_infections, t_extra_infections ):
+    def test_extra_infections( self, test_params, n_extra_infections, t_extra_infections, tmp_path):
         """
            Check that we can add extra infections and they infect others
         """
         # set the np seed so the results are reproducible
         np.random.seed(0)
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1373,7 +1384,7 @@ class TestClass(object):
    
         # randomly infect susceptible individual
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ][['ID']].to_numpy()
         n_susc   = len( idxs )
         
@@ -1391,26 +1402,26 @@ class TestClass(object):
         
         # now check the seed infected indviduals are infected at the end
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         for id in inf_id :
             status = df_indiv[ df_indiv["ID"] == id ].loc[:,["current_status"]].to_numpy()[0,0];
             np.testing.assert_( status != constant.EVENT_TYPES.SUSCEPTIBLE.value, "seed infected person was not infected")
 
         # and check they have infected others      
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_seed  = pd.DataFrame( data = { 'ID_source':inf_id })
         df_seed  = pd.merge( df_seed, df_trans, on = "ID_source", how = "inner" )
         np.testing.assert_( len( df_seed ) > n_extra_infections, "seed infected people did not infect others")
         
-    def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, transmission_multiplier ):
+    def test_multiple_strain_domination( self, test_params, n_extra_infections, t_extra_infections, t_check_after, transmission_multiplier,tmp_path):
         """
            Check that if a second more transmissible strain is introduced that it will dominate over time
         """      
         # set the np seed so the results are reproducible
         np.random.seed(0)
      
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -1420,7 +1431,7 @@ class TestClass(object):
    
         # randomly infect susceptible individual
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
         idxs     = df_indiv[ df_indiv[ "current_status" ] == constant.EVENT_TYPES.SUSCEPTIBLE.value ]['ID'].to_numpy()
         n_susc   = len( idxs )
         
@@ -1435,7 +1446,7 @@ class TestClass(object):
         
         # get the new infections for each time step for each strain    
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         df_n_trans = df_trans.loc[:,["time_infected","strain_idx"]]
         df_n_trans = df_n_trans.pivot_table( index = ['time_infected'], columns = ["strain_idx"], aggfunc=len).fillna(0).reset_index() 
 
@@ -1448,7 +1459,7 @@ class TestClass(object):
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
         np.testing.assert_array_less( 0.90, n_new / ( n_new + n_base), "new strain is less than 90% of new cases")
 
-    def test_equivalent_strains( self, test_params, n_equivalent_strains ):
+    def test_equivalent_strains( self, test_params, n_equivalent_strains,tmp_path):
         """
            Check that if there are multiple equivalent strains then the spread is equally as quick
         """
@@ -1456,18 +1467,18 @@ class TestClass(object):
         np.random.seed(0)
         
         # run with a single strain
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
         
         model.run( verbose = False )
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         n_inf_1  = len( df_trans.index )
              
         # add n multiple equivalent strains
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         params.set_param( "n_seed_infection", 0 )
@@ -1490,7 +1501,7 @@ class TestClass(object):
         
         model.run( verbose = False )
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         n_inf_n   = len( df_trans.index )
         n_strains = len( df_trans.groupby(["strain_idx"]).size().reset_index(name="n_infections").index )
     
@@ -1499,7 +1510,7 @@ class TestClass(object):
                                     err_msg = "multiple equivalent strains have different numbers of infections")
         np.testing.assert_equal( n_strains, n_equivalent_strains, "not all strains found in infections")
         
-    def test_introduce_new_strain( self, test_params, cross_immunity ):
+    def test_introduce_new_strain( self, test_params, cross_immunity,tmp_path ):
         """
            Check that if a new strain (with equal transmisibility) is introduced on a population after 
            the first wave of one strain has swept through the population that:
@@ -1511,7 +1522,7 @@ class TestClass(object):
         np.random.seed(0)
                     
         # add 2 multiple equivalent strains
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value ) 
         params.set_param( "n_seed_infection", 0 )
@@ -1541,7 +1552,7 @@ class TestClass(object):
             model.one_time_step()      
             
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
         n_inf_1  = len( df_trans.index )
     
         # seed infect people with the second strain and run for the same period of time
@@ -1553,7 +1564,7 @@ class TestClass(object):
             model.one_time_step()      
             
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True ) 
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True ) 
         n_inf_2 = len( df_trans[ df_trans[ "strain_idx" ] == 1 ].index )
       
         if cross_immunity == 1 :
@@ -1568,7 +1579,7 @@ class TestClass(object):
       
         return [ n_inf_1, n_inf_2 ]
     
-    def test_monoton_introduce_new_strain_cross_immunity( self, test_params, cross_immunity ) :
+    def test_monoton_introduce_new_strain_cross_immunity( self, test_params, cross_immunity,tmp_path) :
         """
            Check that if a new strain (with equal transmisibility) is introduced on a population after 
            the first wave of one strain has swept through the population being reinfected decreases
@@ -1577,7 +1588,7 @@ class TestClass(object):
         
         last_inf = test_params[ "n_total"]
         for cross_im in cross_immunity :
-            new_inf = self.test_introduce_new_strain(test_params, cross_im)[1]
+            new_inf = self.test_introduce_new_strain(test_params, cross_im,tmp_path)[1]
             np.testing.assert_( new_inf < last_inf, "new infections not declining monotonically with cross-immunity" )
             last_inf = new_inf
         

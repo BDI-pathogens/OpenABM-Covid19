@@ -15,6 +15,7 @@ from scipy import optimize
 sys.path.append("src/COVID19")
 from tests import utilities as utils
 from parameters import ParameterSet
+from model import Parameters
 
 from tests import constant
 
@@ -36,17 +37,17 @@ class TestClass(object):
     Test class for checking
     """
 
-    def test_hcw_patient_networks(self):
+    def test_hcw_patient_networks(self,tmp_path):
         """
         Test that the correct number of interactions between healthcare workers and patients have
         occurred each timestep across both general / icu wards
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("hospital_on", 1)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
         end_time = int(params.get_param("end_time"))
 
-        hospital_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number=1)
+        hospital_params = ParameterSet(tmp_path/constant.TEST_HOSPITAL_FILE, line_number=1)
 
         patient_required_hcw_interaction = [
             [int(hospital_params.get_param("n_patient_doctor_required_interactions_covid_general")), int(hospital_params.get_param("n_patient_nurse_required_interactions_covid_general_ward"))],
@@ -56,11 +57,11 @@ class TestClass(object):
         max_hcw_interactions = int(hospital_params.get_param("max_hcw_daily_interactions"))
 
         # Call the model pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
 
-        df_time_step = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
-        df_interactions = pd.read_csv(constant.TEST_OUTPUT_FILE_HOSPITAL_INTERACTIONS)
+        df_time_step = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE_HOSPITAL_TIME_STEP)
+        df_interactions = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE_HOSPITAL_INTERACTIONS)
 
         for time_step in range(end_time):
             next_time_step = time_step + 1
@@ -90,7 +91,7 @@ class TestClass(object):
                             assert n_expected_interactions == n_actual_interactions, 'expected interactions does not match actual interactions! timestep: ' + str(next_time_step) + ' for ward: type ' + str(ward_type) + ', index ' + str(ward_index) + ', worker type ' + str(hcw_type)
 
 
-    def test_hcw_network( self ):
+    def test_hcw_network( self,tmp_path):
         """
         Test to check that healthcare work connections are on the correct network and
         that they have correct number on average. When counting connections we count each end
@@ -105,28 +106,28 @@ class TestClass(object):
         ageTypeMap2 = pd.DataFrame(
             data = { "age_group_2": constant.AGES, "age_type_2": constant.AGE_TYPES } );
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("n_total", 40000)
         params.set_param( "hospital_on", 1)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        hospital_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number = 1)
+        hospital_params = ParameterSet(tmp_path/constant.TEST_HOSPITAL_FILE, line_number = 1)
         hospital_params.set_param( "hcw_mean_work_interactions", 2)
-        hospital_params.write_params(constant.TEST_HOSPITAL_FILE)
+        hospital_params.write_params(tmp_path/constant.TEST_HOSPITAL_FILE)
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
 
         # get all the people, need to hand case if people having zero connections
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE,
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE,
                                comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ]
         df_indiv = pd.merge( df_indiv, ageTypeMap1,
                              left_on = "age_group", right_on = "age_group_1", how = "left" )
 
         # get all the work connections
-        df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE,
+        df_int  = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE,
                               comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == constant.HOSPITAL_WORK ]
         df_int = pd.merge( df_int, ageTypeMap1,  on = "age_group_1", how = "left" )
@@ -156,7 +157,7 @@ class TestClass(object):
         mean = df_n_int[ df_n_int[ "occupation_network" ] == constant.HOSPITAL_WORK_NETWORK ].loc[:,"connections"].mean()
         np.testing.assert_allclose( mean, 2, rtol = tolerance )
 
-    def test_hcw_network_recurrence( self ):
+    def test_hcw_network_recurrence( self,tmp_path):
         """
         Check to see that healthcare workers only meet with the same person
         once per day on the hospital worker network.
@@ -171,30 +172,34 @@ class TestClass(object):
 
         hcw_mean_work_interactions = 2
 
-        hospital_params = ParameterSet(constant.TEST_HOSPITAL_FILE, line_number = 1)
+        hospital_params = ParameterSet(tmp_path/constant.TEST_HOSPITAL_FILE, line_number = 1)
         hospital_params.set_param( "hcw_mean_work_interactions", 2)
-        hospital_params.write_params(constant.TEST_HOSPITAL_FILE)
+        hospital_params.write_params(tmp_path/constant.TEST_HOSPITAL_FILE)
 
-        params = utils.get_params_swig()
-        params.set_param("n_total", n_total)
-        params.set_param( "hospital_on", 1)
-        params.set_param( "end_time", end_time )
-        params.set_param( "work_network_rewire", work_network_rewire)
+        params = Parameters(hospital_input_param_file=str(tmp_path/constant.TEST_HOSPITAL_FILE),output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
+
+        #params.set_param("n_total", n_total)
+        params.set_param("hospital_on", 1)
+        # params.set_param( "end_time", end_time+1)
+        #params.set_param( "work_network_rewire", work_network_rewire)
         model  = utils.get_model_swig( params )
 
         # step through time until we need to start to save the interactions each day
         model.one_time_step();
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         df_inter[ "time" ] = 0
 
         # Go over total number of time steps
         for time in range( end_time ):
             model.one_time_step();
             model.write_interactions_file()
-            df = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
             df[ "time" ] = time + 1
             df_inter = df_inter.append( df )
+            # pytest.set_trace()
+        
+        pytest.set_trace()
 
         # Check if type is hospital work network type
         df_inter = df_inter[ df_inter[ "type" ] == constant.HOSPITAL_WORK ]

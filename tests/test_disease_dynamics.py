@@ -18,7 +18,7 @@ from math import sqrt
 
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
-from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES, AgeGroupEnum
+from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES, AgeGroupEnum, Parameters
 from . import constant
 from . import utilities as utils
 import covid19
@@ -524,103 +524,112 @@ class TestClass(object):
     """
     Test class for checking
     """
-    def test_zero_recovery(self):
+    def test_zero_recovery(self,tmp_path):
         """
         Setting recover times to be very large should avoid seeing any in recovered compartment
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
 
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
         params.set_param("mean_time_hospitalised_recovery", 200.0)
 
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_output = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
 
         np.testing.assert_array_equal(
             df_output[["n_recovered"]].sum(),
             0)
 
-    def test_zero_deaths(self):
+    def test_zero_deaths(self,tmp_path):
         """
         Set fatality ratio to zero, should have no deaths if always places in the ICU
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.set_fatality_fraction_all(params, 0.0)
         params = utils.set_location_death_icu_all(params, 1.0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_output = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
 
         np.testing.assert_equal(df_output["n_death"].sum(), 0)
 
-    def test_total_infectious_rate_zero(self):
+    def test_total_infectious_rate_zero(self,tmp_path):
         """
         Set infectious rate to zero results in only "n_seed_infection" as total_infected
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("infectious_rate", 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
 
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        df_output = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
 
         output = df_output["total_infected"].iloc[-1]
         expected_output = int(params.get_param("n_seed_infection"))
 
         np.testing.assert_equal(output, expected_output)
 
-    def test_zero_infected(self):
+    def test_zero_infected(self,tmp_path):
         """
         Set seed-cases to zero should result in zero sum of output column
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params.set_param("n_seed_infection", 0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
         # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_output = pd.read_csv(tmp_path/constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
 
         np.testing.assert_equal(df_output["total_infected"].sum(), 0)
 
-    def test_disease_transition_times( self, test_params ):
+    def test_disease_transition_times( self, test_params ,tmp_path):
         """
         Test that the mean and standard deviation of the transition times between
         states agrees with the parameters
         """
         std_error_limit = 4
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         params = utils.turn_off_interventions(params, 50)
         params.set_param("n_total", 50000)
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 30)
         params.set_param("infectious_rate", 6.0)
         params.set_param("hospital_on", 0) #turning off hospital as this affects disease transitions
-        params.set_param( test_params )
 
-        params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        #pytest.set_trace()
+
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+
+        #params.write_params(tmp_path/constant.TEST_DATA_FILE)
+        # parameterset = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
+        # parameterset = utils.turn_off_interventions(parameterset, 50)
+        # parameterset.set_param(params.return_param_object())
+        # parameterset.write_params(tmp_path/constant.TEST_DATA_FILE)
+
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
 
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans,
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
@@ -770,14 +779,14 @@ class TestClass(object):
             sd, test_params[ "sd_asymptomatic_to_recovery" ], atol=std_error_limit * sd / sqrt(N)
         )
 
-    def test_disease_outcome_proportions( self, test_params ):
+    def test_disease_outcome_proportions( self, test_params ,tmp_path):
         """
         Test that the fraction of infected people following each path for
         the progression of the disease agrees with the parameters
         """
         std_error_limit = 5
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
         params = utils.turn_off_interventions(params, 50)
 
         params.set_param("n_total", 20000)
@@ -848,15 +857,15 @@ class TestClass(object):
             test_params[ "fatality_fraction_80" ],
         ]
 
-        params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
+        file_output = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout=file_output, shell=True)
         df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
+            tmp_path/constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
         )
 
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans,
             left_on = "ID", right_on = "ID_recipient", how = "left")
 
@@ -1079,12 +1088,12 @@ class TestClass(object):
             atol=std_error_limit * sd / sqrt(N_crit_tot),
         )
     
-    def test_recovered_susceptible_transition_time(self):
+    def test_recovered_susceptible_transition_time(self,tmp_path):
         """
         Test that the recovered-susceptible transition times are as expected.  
         """
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         params.set_param("n_total", 40000)
         params.set_param("mean_time_to_susceptible_after_shift", 5)
         params.set_param("time_to_susceptible_shift", 1)
@@ -1098,7 +1107,7 @@ class TestClass(object):
         model.write_transmissions()
         model.write_individual_file()
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
         
         # Subset to those 1) ever recovered, 2) have transitioned from recovered->susceptible
         # at the end of the simulation.  
@@ -1121,7 +1130,7 @@ class TestClass(object):
         np.testing.assert_almost_equal(obs_recovered_suscept_time_mean, exp_recovered_suscept_time, 
             decimal = 1)
 
-    def test_get_individuals( self, test_params ):
+    def test_get_individuals( self, test_params, tmp_path ):
         """
         Test that a dataframe of individuals is concordance with the individual/trans files
         """
@@ -1129,7 +1138,7 @@ class TestClass(object):
         n_total = test_params["n_total"]
         end_time = test_params["end_time"]
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -1152,8 +1161,8 @@ class TestClass(object):
         model.write_transmissions()
         
         # Pull individual file and convert to numpy array
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans,
             left_on = "ID", right_on = "ID_recipient", how = "left")
         
@@ -1183,7 +1192,7 @@ class TestClass(object):
                 
                 np.testing.assert_array_equal(array_alive, array_alive_indiv)
                 
-    def test_multi_strain_disease_dynamics(self, test_params, hospitalised_fraction_strain_1 ) :
+    def test_multi_strain_disease_dynamics(self, test_params, hospitalised_fraction_strain_1,tmp_path):
         """
         Test that checks the hospitalised fraction for the correct strain is realised
         """
@@ -1204,7 +1213,7 @@ class TestClass(object):
             test_params[ "hospitalised_fraction_80" ],
         ]
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         model  = utils.get_model_swig( params )
@@ -1220,7 +1229,7 @@ class TestClass(object):
             
         model.run( verbose = False )
         model.write_transmissions()
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_trans = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE)
         df_trans[ "hospitalised" ] = ( df_trans[ "time_hospitalised" ] > 0 )
               
         for age in range( len( AgeGroupEnum) ) :

@@ -19,6 +19,7 @@ from scipy import optimize
 sys.path.append("src/COVID19")
 from parameters import ParameterSet
 import COVID19.model as abm
+from model import Parameters
 
 from . import constant
 from . import utilities as utils
@@ -38,25 +39,25 @@ def pytest_generate_tests(metafunc):
 
 # Override setup_covid_methods() in conftest.py
 @pytest.fixture(scope = "function")
-def setup_covid_methods(request):
+def setup_covid_methods(request,tmp_path):
     """
     Called before each method is run; creates a new data dir, copies test datasets
     """
-    os.mkdir(constant.DATA_DIR_TEST)
-    shutil.copy(constant.TEST_DATA_TEMPLATE, constant.TEST_DATA_FILE)
-    shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, constant.TEST_HOUSEHOLD_FILE)
-    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, constant.TEST_HOSPITAL_FILE)
+    os.mkdir(tmp_path/constant.DATA_DIR_TEST)
+    shutil.copy(constant.TEST_DATA_TEMPLATE, tmp_path/constant.TEST_DATA_FILE)
+    shutil.copy(constant.TEST_HOUSEHOLD_TEMPLATE, tmp_path/constant.TEST_HOUSEHOLD_FILE)
+    shutil.copy(constant.TEST_HOSPITAL_TEMPLATE, tmp_path/constant.TEST_HOSPITAL_FILE)
 
     # Adjust any parameters that need adjusting for all tests
-    params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+    params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number=1)
     params.set_param("n_total", 10000)
     params.set_param("end_time", 1)
-    params.write_params(constant.TEST_DATA_FILE)
+    params.write_params(tmp_path/constant.TEST_DATA_FILE)
     def fin():
         """
         At the end of each method (test), remove the directory of test input/output data
         """
-        shutil.rmtree(constant.DATA_DIR_TEST, ignore_errors=True)
+        shutil.rmtree(tmp_path, ignore_errors=True)
     request.addfinalizer(fin)
 
 
@@ -421,19 +422,19 @@ class TestClass(object):
     """
     Test class for checking 
     """
-    def test_network_connections_2way(self,n_total):
+    def test_network_connections_2way(self,n_total, tmp_path):
         """
         Test to check that for all connections in every persons interaction diary
         there is a corresponding connection in the other person's diary 
         """        
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)  
         params.set_param("n_total",n_total)
-        params.write_params(constant.TEST_DATA_FILE)        
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)        
       
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_int        = pd.read_csv(constant.TEST_INTERACTION_FILE, 
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
+        df_int        = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         
         left  = df_int.loc[ :, ['ID_1', 'ID_2'] ]        
@@ -449,7 +450,7 @@ class TestClass(object):
         
         np.testing.assert_equal( N_base, N_join )
     
-    def test_household_network(self,n_total):
+    def test_household_network(self,n_total, tmp_path):
         """
         Test to check that all interactions within a household are made
         """    
@@ -457,20 +458,20 @@ class TestClass(object):
         # note when counting connections we count each end
         expectedConnections = pd.DataFrame(data={'size': [1,2,3,4,5,6], 'expected': [0,2,6,12,20,30]})
             
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("n_total",n_total)
-        params.write_params(constant.TEST_DATA_FILE)        
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)        
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
        
         # get the number of people in each house hold
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_house = df_indiv.groupby(["house_no"]).size().reset_index(name="size")
      
         # get the number of interactions per person on the housegold n
-        df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int  = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == constant.HOUSEHOLD]
         np.testing.assert_array_equal( df_int.loc[:,"house_no_1"], df_int.loc[:,"house_no_2"] )
 
@@ -500,7 +501,7 @@ class TestClass(object):
             mean_random_interactions_elderly,
             sd_random_interactions_elderly,
             n_total
-        ):
+        , tmp_path):
         """
         Test to check that there are the correct number of interactions per
         individual on the random network
@@ -515,7 +516,7 @@ class TestClass(object):
             "age_group": constant.AGES, 
             "age_type": constant.AGE_TYPES } )
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("mean_random_interactions_child",  mean_random_interactions_child )
         params.set_param("sd_random_interactions_child",    sd_random_interactions_child )
@@ -525,18 +526,18 @@ class TestClass(object):
         params.set_param("sd_random_interactions_elderly",  sd_random_interactions_elderly )
         params.set_param("n_total",n_total)
         params.set_param("hospital_on", 0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
         
         # get all the people, need to hand case if people having zero connections
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,["ID","age_group"]] 
         df_indiv = pd.merge( df_indiv, ageTypeMap, on = "age_group", how = "left" )
 
         # get all the random connections
-        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_int = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_int = df_int[ df_int["type"] == constant.RANDOM ]
         
         # check the correlation is below a threshold
@@ -575,7 +576,7 @@ class TestClass(object):
             mean_work_interactions_adult,
             mean_work_interactions_elderly,
             daily_fraction_work
-        ):
+        , tmp_path):
         """
         Test to check that peoples work connections are on the correct network and
         that they have correct number on average
@@ -595,7 +596,7 @@ class TestClass(object):
             mean_work_interactions_adult, 
             mean_work_interactions_elderly ]
         
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("n_total",n_total)
         params.set_param( "mean_work_interactions_child",   mean_work_interactions_child )
@@ -604,20 +605,20 @@ class TestClass(object):
         params.set_param( "daily_fraction_work",            daily_fraction_work )
         params.set_param( "n_total",n_total)
         params.set_param( "hospital_on", 0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
        
         # get all the people, need to hand case if people having zero connections
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         df_indiv = pd.merge( df_indiv, ageTypeMap1, 
             left_on = "age_group", right_on = "age_group_1", how = "left" )
 
         # get all the work connections
-        df_int  = pd.read_csv(constant.TEST_INTERACTION_FILE, 
+        df_int  = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE, 
             comment = "#", sep = ",", skipinitialspace = True )
         df_int  = df_int[ df_int["type"] == constant.OCCUPATION ]
         df_int = pd.merge( df_int, ageTypeMap1,  on = "age_group_1", how = "left" )
@@ -687,8 +688,7 @@ class TestClass(object):
             n_total,
             child_network_adults,
             elderly_network_adults
-        ):
-
+        , tmp_path):
         """
         Test to check proportions of adults in work networks
         """  
@@ -696,18 +696,18 @@ class TestClass(object):
         # absolute tolerance
         tolerance = 0.02
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = ParameterSet(tmp_path/constant.TEST_DATA_FILE, line_number = 1)
         params = utils.turn_off_interventions(params,1)
         params.set_param("n_total",n_total)
         params.set_param( "child_network_adults",   child_network_adults )
         params.set_param( "elderly_network_adults",   elderly_network_adults )
-        params.write_params(constant.TEST_DATA_FILE)        
+        params.write_params(tmp_path/constant.TEST_DATA_FILE)        
 
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
+        file_output   = open(tmp_path/constant.TEST_OUTPUT_FILE, "w")
+        completed_run = subprocess.run([constant.command_tmp(tmp_path)], stdout = file_output, shell = True)
        
         # get all the people, need to hand case if people having zero connections
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
+        df_indiv = pd.read_csv(tmp_path/constant.TEST_INDIVIDUAL_FILE, comment = "#", sep = ",", skipinitialspace = True )
         df_indiv = df_indiv.loc[:,[ "ID", "age_group", "occupation_network" ] ] 
         
         num_children_in_children = len( df_indiv[ 
@@ -766,7 +766,7 @@ class TestClass(object):
         if ( total_elderly_network > 0 ) :
             np.testing.assert_allclose( num_adults_in_elderly / num_elderly_in_elderly, elderly_network_adults, atol = tolerance )
     
-    def test_occupation_network_recurrence(self, test_params ):
+    def test_occupation_network_recurrence(self, test_params , tmp_path):
         """
            Check to see that people only meet with the same person
            once per day on the occupational network
@@ -777,7 +777,7 @@ class TestClass(object):
         
         tol = 0.02
          
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model  = utils.get_model_swig( params )
@@ -785,13 +785,13 @@ class TestClass(object):
         # step through time until we need to start to save the interactions each day
         model.one_time_step()
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         df_inter[ "time" ] = 0
 
         for time in range( test_params[ "end_time" ] ):
             model.one_time_step()
             model.write_interactions_file()
-            df = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
             df[ "time" ] = time + 1
             df_inter = df_inter.append( df )
   
@@ -816,14 +816,14 @@ class TestClass(object):
             expected = mean_by_type[constant.NETWORK_TYPE_MAP[network]]/test_params["daily_fraction_work"]
             np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
            
-    def test_user_defined_network(self, test_params, new_connections):
+    def test_user_defined_network(self, test_params, new_connections, tmp_path):
         """
             Adds in a user defined network with random connections
         """
         
         new_connections = int(new_connections)
          
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model   = utils.get_model_swig( params )
@@ -850,7 +850,7 @@ class TestClass(object):
             
         # get the interaction file and check the connections are there
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         df_inter[ "in_interaction"] = True
         
         # now check that all the edges in the network are interactions in the model
@@ -859,7 +859,7 @@ class TestClass(object):
                 
         np.testing.assert_equal( n_miss, 0, err_msg = "interactions from user network are missing")
 
-    def test_custom_occupation_network( self, test_params ):
+    def test_custom_occupation_network( self, test_params , tmp_path):
         """
           For user defined occupational networks,
           check to see that people only meet with the same person
@@ -901,7 +901,7 @@ class TestClass(object):
             'lockdown_multiplier': lockdown_multiplier,
             'network_name': network_name})
 
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )
         # load custom occupation network table before constructing the model
@@ -919,13 +919,13 @@ class TestClass(object):
         model  = utils.get_model_swig( params )
         model.one_time_step()
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         df_inter[ "time" ] = 0
 
         for time in range( test_params[ "end_time" ] ):
             model.one_time_step()
             model.write_interactions_file()
-            df = pd.read_csv(constant.TEST_INTERACTION_FILE)
+            df = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
             df[ "time" ] = time + 1
             df_inter = df_inter.append( df )
 
@@ -962,13 +962,13 @@ class TestClass(object):
                 rtol = 0.02
                 np.testing.assert_allclose(actual,expected,rtol=rtol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
 
-    def test_delete_network( self, test_params, network_id ):
+    def test_delete_network( self, test_params, network_id , tmp_path):
         """
         Check to see whether after a network is deleted there are no interactions on it
         """
         
         # set up test model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )    
@@ -988,7 +988,7 @@ class TestClass(object):
         # get the interactions before deleting the network      
         model.one_time_step()
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
 
         # check there are interactions on the interaction network
         n_inter = len( df_inter[ df_inter[ "network_id"] == network_id ] )
@@ -1003,7 +1003,7 @@ class TestClass(object):
         # check there are no new interactions onthe network
         model.one_time_step()
         model.write_interactions_file()
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         n_inter = len( df_inter[ df_inter[ "network_id"] == network_id ] )
         np.testing.assert_equal( n_inter , 0, err_msg = "Interactions on the deleted network" )
         df_new = df_inter.groupby( "network_id").size().reset_index(name="n_new")
@@ -1016,8 +1016,7 @@ class TestClass(object):
         np.testing.assert_equal( df_comp[ "n_new"].isna().sum(), 0, err_msg = "Removed old network iteractions" )
         np.testing.assert_allclose( df_comp[ "n_old"], df_comp[ "n_new"], rtol = 0.1, err_msg = "Number of interactions onnetwork changed by too much")
                    
-    def test_user_random_network( self, test_params, p_network, mean_conn ):
-         
+    def test_user_random_network( self, test_params, p_network, mean_conn , tmp_path):
         """
         Check a user specificed random network is correct
         
@@ -1029,7 +1028,7 @@ class TestClass(object):
         np.random.seed(0)
         
         # set up test model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )    
@@ -1048,7 +1047,7 @@ class TestClass(object):
         # step forward one time step and get the connections
         model.one_time_step()
         model.write_interactions_file() 
-        df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         n_inter = df_inter[ df_inter[ "network_id"] == network_id ].groupby( "ID_1").size().reset_index(name="N_inter")
         n_inter.rename( columns =  {"ID_1":"ID"},inplace=True)
         
@@ -1061,7 +1060,7 @@ class TestClass(object):
         # step forward one time step and get the connections 
         model.one_time_step()
         model.write_interactions_file() 
-        df_inter2 = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        df_inter2 = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         n_inter2 = df_inter2[ df_inter2[ "network_id"] == network_id ].groupby( "ID_1").size().reset_index(name="N_inter2")
         n_inter2.rename( columns =  {"ID_1":"ID"},inplace=True)
         
@@ -1083,16 +1082,16 @@ class TestClass(object):
         n_tot  = len( inter )
         np.testing.assert_allclose( [ n_same / n_tot ], [ 0 ], atol = 0.05, err_msg = "Too many repeated random contacts" )
     
-    def test_get_network(self):
+    def test_get_network(self,tmp_path):
 
         # Set up test model
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         model = utils.get_model_swig( params )
         model.one_time_step()
         
         # Write network to file
         model.write_household_network()
-        df_network_written = pd.read_csv(constant.TEST_HOUSEHOLD_NETWORK_FILE)
+        df_network_written = pd.read_csv(tmp_path/constant.TEST_HOUSEHOLD_NETWORK_FILE)
 
         # get the network_id for the household table from the info
         network_info = model.get_network_info()
@@ -1107,7 +1106,7 @@ class TestClass(object):
             df_network_written.to_numpy() 
             )
         
-    def test_static_network(self, test_params ):
+    def test_static_network(self, test_params, tmp_path):
         
         """
         Tests static networks
@@ -1116,7 +1115,7 @@ class TestClass(object):
         Check that transmissions only occur amongst these intections
         """
         
-        params = utils.get_params_swig()
+        params = Parameters(output_file_dir=str(tmp_path/constant.DATA_DIR_TEST))
         for param, value in test_params.items():
             params.set_param( param, value )  
         model = utils.get_model_swig( params )
@@ -1124,14 +1123,14 @@ class TestClass(object):
         # get the intitial interactions
         model.one_time_step()
         model.write_interactions_file() 
-        inter_initial = pd.read_csv(constant.TEST_INTERACTION_FILE)
+        inter_initial = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
         
         # run to the end
         model.run( verbose = False )
         model.write_interactions_file() 
         model.write_transmissions()  
-        inter_final   = pd.read_csv(constant.TEST_INTERACTION_FILE)
-        transmissions = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        inter_final   = pd.read_csv(tmp_path/constant.TEST_INTERACTION_FILE)
+        transmissions = pd.read_csv(tmp_path/constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
         
         # first check that the interactions don't change during the simulation
         np.testing.assert_( len( inter_initial ) > 100000, "insufficient interactions formed" )

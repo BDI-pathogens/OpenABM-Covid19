@@ -81,7 +81,7 @@ class TestClass(object):
     """
 
 
-    def test_set_get_model_parameters(self):
+    def test_set_get_model_parameters(self,tmp_path):
         """
         Test the a parameter can be changed in between step runs
         """
@@ -89,8 +89,8 @@ class TestClass(object):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
             constant.HOSPITAL_PARAM_LINE_NUMBER
         )
@@ -167,14 +167,14 @@ class TestClass(object):
             with pytest.raises(ModelParameterException):
                 model.get_param("wrong_parameter")
 
-    def test_model_total_infected_by_age(self):
+    def test_model_total_infected_by_age(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-            constant.PARAM_LINE_NUMBER
+            constant.PARAM_LINE_NUMBER,
         )
         params.set_param( "n_total", 50000 )
         params.set_param( "app_users_fraction", 0.25)
@@ -186,12 +186,12 @@ class TestClass(object):
             assert res.get(f"total_infected{age.name}", None) is not None, f"Could not get total_infected{age.name}"
         assert res.get("total_infected") == sum([res.get(f"total_infected{age.name}") for age in AgeGroupEnum]), "Total infected does not equal sum of age groups"
 
-    def test_set_lockdown_multiplier_params(self):
+    def test_set_lockdown_multiplier_params(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
             constant.PARAM_LINE_NUMBER
         )
@@ -225,7 +225,7 @@ class TestClass(object):
 
         assert covid19.get_param_lockdown_on(model.c_params) == 1
 
-    def test_set_get_array_parameters(self):
+    def test_set_get_array_parameters(self,tmp_path):
         """
         Test that an array parameter inside the C parameters structure can be changed
         """
@@ -334,14 +334,14 @@ class TestClass(object):
             np.testing.assert_equal(set_age_groups[i], get_age_groups[i])
 
 
-    def test_hostpital_admissions(self):
+    def test_hostpital_admissions(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-        )
+)
         params.set_param( "n_total", 50000 )
         model = Model(params)
         daily_hospitalisations = []
@@ -352,14 +352,14 @@ class TestClass(object):
             assert sum(daily_hospitalisations) == model.one_time_step_results()["hospital_admissions_total"]
         assert sum(daily_hospitalisations) > 0
 
-    def test_icu_entry(self):
+    def test_icu_entry(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-        )
+)
         params.set_param( "n_total", 50000 )
         model = Model(params)
         daily_critical = []
@@ -370,14 +370,14 @@ class TestClass(object):
             assert sum(daily_critical) == model.one_time_step_results()["hospital_to_critical_total"]
         assert sum(daily_critical) > 0
 
-    def test_deaths(self):
+    def test_deaths(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-        )
+)
         params.set_param( "n_total", 50000);
         model = Model(params)
         daily_deaths = []
@@ -388,14 +388,14 @@ class TestClass(object):
             assert sum(daily_deaths) == model.one_time_step_results()["total_death"]
         assert sum(daily_deaths) > 0
 
-    def test_daily_deaths_by_age(self):
+    def test_daily_deaths_by_age(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-        )
+)
         params.set_param( "n_total", 50000 )
         model = Model(params)
                 
@@ -411,14 +411,14 @@ class TestClass(object):
 
 
 
-    def test_update_fatality_fraction(self):
+    def test_update_fatality_fraction(self,tmp_path):
         params = Parameters(
             constant.TEST_DATA_TEMPLATE,
             constant.PARAM_LINE_NUMBER,
-            constant.DATA_DIR_TEST,
-            constant.TEST_HOUSEHOLD_FILE,
+            str(tmp_path/constant.DATA_DIR_TEST),
+            str(tmp_path/constant.TEST_HOUSEHOLD_FILE),
             constant.TEST_HOSPITAL_FILE,
-        )
+)
         params.set_param( "n_total", 50000 )
         model = Model(params)
         assert model.get_param("fatality_fraction_80") == 1.0
