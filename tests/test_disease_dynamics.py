@@ -11,7 +11,6 @@ Author: p-robot
 """
 
 import pytest
-import subprocess
 import sys
 import numpy as np, pandas as pd
 from math import sqrt
@@ -702,75 +701,77 @@ class TestClass(object):
     """
     def test_zero_recovery(self):
         """
-        Setting recover times to be very large should avoid seeing any in recovered compartment
+        Setting recover times to be very large should avoid seeing any in cumulative recovered compartment ('n_recovered')
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
+        params.set_param("end_time", 100)
 
         # Make recovery very long
         params.set_param("mean_time_to_recover", 200.0)
         params.set_param("mean_asymptomatic_to_recovery", 200.0)
         params.set_param("mean_time_hospitalised_recovery", 200.0)
-
-        params.write_params(constant.TEST_DATA_FILE)
-
+        
         # Call the model
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-
-        np.testing.assert_array_equal(
-            df_output[["n_recovered"]].sum(),
+        model  = utils.get_model_swig( params )
+        for time in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        np.testing.assert_equal(
+            model.one_time_step_results()["n_recovered"],
             0)
 
     def test_zero_deaths(self):
         """
         Set fatality ratio to zero, should have no deaths if always places in the ICU
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
         params = utils.set_fatality_fraction_all(params, 0.0)
         params = utils.set_location_death_icu_all(params, 1.0)
-        params.write_params(constant.TEST_DATA_FILE)
+        
+        # Call the model
+        model  = utils.get_model_swig( params )
+        for time in range(params.get_param("end_time")):
+            model.one_time_step()
 
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-
-        np.testing.assert_equal(df_output["n_death"].sum(), 0)
+        np.testing.assert_equal(
+            model.one_time_step_results()["n_death"],
+            0)
 
     def test_total_infectious_rate_zero(self):
         """
         Set infectious rate to zero results in only "n_seed_infection" as total_infected
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.get_params_swig()
+        params.set_param("n_total", 10000)
         params.set_param("infectious_rate", 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
 
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-
-        output = df_output["total_infected"].iloc[-1]
-        expected_output = int(params.get_param("n_seed_infection"))
-
-        np.testing.assert_equal(output, expected_output)
+        # Call the model
+        model  = utils.get_model_swig( params )
+        for time in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        np.testing.assert_equal(
+            model.one_time_step_results()["total_infected"], 
+            int(params.get_param("n_seed_infection")))
 
     def test_zero_infected(self):
         """
         Set seed-cases to zero should result in zero sum of output column
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.get_params_swig()
         params.set_param("n_seed_infection", 0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.set_param("n_total", 10000)
+        params.set_param("end_time", 100)
 
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
+        # Call the model
+        model  = utils.get_model_swig( params )
+        
+        for _ in range(params.get_param("end_time")):
+            model.one_time_step()
 
-        np.testing.assert_equal(df_output["total_infected"].sum(), 0)
+        np.testing.assert_equal(model.one_time_step_results()["total_infected"], 0)
 
     def test_disease_transition_times( self, test_params ):
         """
@@ -779,21 +780,22 @@ class TestClass(object):
         """
         std_error_limit = 4
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, 50)
         params.set_param("n_total", 50000)
         params.set_param("n_seed_infection", 200)
         params.set_param("end_time", 30)
         params.set_param("infectious_rate", 6.0)
         params.set_param("hospital_on", 0) #turning off hospital as this affects disease transitions
-        params.set_param( test_params )
+        for param, value in test_params.items():
+            params.set_param( param, value )
 
-        params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        model  = utils.get_model_swig( params )
+        for _ in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
 
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
@@ -953,7 +955,7 @@ class TestClass(object):
         """
         std_error_limit = 5
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, 50)
 
         params.set_param("n_total", 20000)
@@ -962,7 +964,8 @@ class TestClass(object):
         params.set_param("infectious_rate", 4.0)
         params.set_param("mild_infectious_factor", 1.0)
         params.set_param("hospital_on", 0)
-        params.set_param( test_params )
+        for param, value in test_params.items():
+            params.set_param( param, value )
 
         fraction_asymptomatic = [
             test_params[ "fraction_asymptomatic_0_9" ],
@@ -1024,12 +1027,12 @@ class TestClass(object):
             test_params[ "fatality_fraction_80" ],
         ]
 
-        params.write_params(constant.TEST_DATA_FILE)
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        model  = utils.get_model_swig( params )
+        for _ in range(params.get_param("end_time")):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
 
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
@@ -1720,6 +1723,3 @@ class TestClass(object):
         np.testing.assert_( sum( ( df_trans["strain_idx"] == 2 ) & ( df_trans["symptom_type"] == 0 ) ) > 1000, msg = "insufficient asymptomatic infectors with strain 2")
         np.testing.assert_( sum( ( df_trans["strain_idx"] == 2 ) & ( df_trans["symptom_type"] == 1 ) ) == 0,   msg = "mild infector with strain 2")
         np.testing.assert_( sum( ( df_trans["strain_idx"] == 2 ) & ( df_trans["symptom_type"] == 2 ) ) == 0,   msg = "severe infectorswith strain 2")
-        
-        
-            

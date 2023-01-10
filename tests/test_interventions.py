@@ -11,7 +11,6 @@ Author: p-robot
 """
 
 import pytest
-import subprocess
 import sys
 import numpy as np, pandas as pd
 from scipy import optimize
@@ -20,8 +19,6 @@ from math import sqrt, ceil
 from numpy.core.numeric import NaN
 from random import randrange
 
-sys.path.append("src/COVID19")
-from parameters import ParameterSet
 from model import OccupationNetworkEnum, VaccineTypesEnum, VaccineStatusEnum, VaccineSchedule, EVENT_TYPES
 from . import constant
 from . import utilities as utils
@@ -1268,16 +1265,16 @@ class TestClass(object):
         """
         Test setting hospitalised fractions to zero (should be no hospitalised)
         """
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number = 1)
+        params = utils.get_params_swig()
         params = utils.set_hospitalisation_fraction_all(params, 0.0)
-        params.write_params(constant.TEST_DATA_FILE)
+        params.set_param("n_total", 10000)
+        model  = utils.get_model_swig( params )
+
+        # Call the model
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
         
-        # Call the model, pipe output to file, read output file
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout = file_output, shell = True)
-        df_output = pd.read_csv(constant.TEST_OUTPUT_FILE, comment = "#", sep = ",")
-        
-        np.testing.assert_equal(df_output["n_hospital"].sum(), 0)
+        np.testing.assert_equal(model.one_time_step_results()["n_hospital"], 0)
     
     def test_quarantine_interactions(self, test_params):
         """
@@ -1287,22 +1284,26 @@ class TestClass(object):
         tolerance = 0.01
         end_time = test_params["end_time"]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, end_time)
-        params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        for param, value in test_params.items():
+            params.set_param( param, value )
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
+        model  = utils.get_model_swig( params )
+
+        # Call the model
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
         
-        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE, 
-            sep = ",", comment = "#", skipinitialspace = True)
-            
-        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE, 
-            sep = ",", comment = "#", skipinitialspace = True)
-        
-        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE, 
-            comment = "#", sep = ",", skipinitialspace = True)
+        # Write output files
+        model.write_interactions_file()
+        model.write_individual_file()
+        model.write_transmissions()
+
+        # Read output files
+        df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
+        df_int = pd.read_csv(constant.TEST_INTERACTION_FILE)
         
         # Merge columns from transmission file into individual file
         df_indiv = pd.merge(df_indiv, df_trans, 
@@ -1367,17 +1368,23 @@ class TestClass(object):
         tol_sd = 4
         end_time = test_params["end_time"]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, end_time)
-        params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        for param, value in test_params.items():
+            params.set_param( param, value )
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv(
-            constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True
-        )
+        model  = utils.get_model_swig( params )
+
+        # Call the model
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
         
+        # Write output files
+        model.write_interactions_file()
+        model.write_individual_file()
+        model.write_transmissions()
+
+        df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
@@ -1437,19 +1444,19 @@ class TestClass(object):
         # set up model
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )  
+            params.set_param( param, value )
         model  = utils.get_model_swig( params )
         
         # step through time until we need to start to save the interactions each day
         for time in range( end_time ):
-            model.one_time_step();             
+            model.one_time_step()
         model.write_trace_tokens()  
         model.write_interactions_file()  
         model.write_transmissions()  
 
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         
         # get everyone who is a case or just released from hospital as these will not be traced
         df_trans = df_trans.loc[:,["ID_recipient","is_case","time_recovered","time_hospitalised"]]
@@ -1492,27 +1499,40 @@ class TestClass(object):
         sd_diff  = 3;
         end_time = test_params[ "end_time" ]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)        
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, end_time)
-        params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        for param, value in test_params.items():
+            params.set_param( param, value )
+
+        model  = utils.get_model_swig( params )
+
+        # Call the model
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
         
+        # Write output files
+        model.write_transmissions()
+
         # run without lockdown
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_without    = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_without    = pd.read_csv( constant.TEST_TRANSMISSION_FILE)
         df_without    = df_without[ df_without[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
 
         # lockdown on t-1
+        params = utils.get_params_swig()
         params = utils.turn_off_interventions(params, end_time)
-        params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        for param, value in test_params.items():
+            params.set_param( param, value )
         params.set_param( "lockdown_time_on", end_time - 1 );
-        params.write_params(constant.TEST_DATA_FILE)
         
-        file_output   = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_with       = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )
+        model  = utils.get_model_swig( params )
+
+        # Call the model
+        for _ in range( params.get_param("end_time") ):
+            model.one_time_step()
+        
+        # Write output files
+        model.write_transmissions()
+        df_with       = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         df_with       = df_with[ df_with[ "time_infected"] == end_time ].groupby( [ "infector_network"] ).size().reset_index(name="N")
         
         # now check they are line
@@ -1550,9 +1570,9 @@ class TestClass(object):
         model.write_interactions_file()  
         model.write_individual_file()  
 
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE)
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
 
         # prepare the interaction data to get all interations
         df_int.rename( columns = { "ID_1":"index_ID", "ID_2":"traced_ID"}, inplace = True )
@@ -1583,23 +1603,28 @@ class TestClass(object):
         np.testing.assert_equal( len(t)>100, True, "insufficient people traced to test" )    
         np.testing.assert_equal( len(no_inter), 0, "tracing someone without an interaction" )    
 
-    
     def test_app_users_fraction(self, test_params ):
         """
         Tests that the correct number of people are assigned
         use the app and that only app users start tracing 
         and can be traced if household options are not turned on
         """
-        end_time = test_params[ "end_time" ]
 
-        params = ParameterSet(constant.TEST_DATA_FILE, line_number=1)
-        params.set_param(test_params)
-        params.write_params(constant.TEST_DATA_FILE)
+        end_time = test_params["end_time"]
 
-        file_output = open(constant.TEST_OUTPUT_FILE, "w")
-        completed_run = subprocess.run([constant.command], stdout=file_output, shell=True)
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        params = utils.get_params_swig()
+        for param, value in test_params.items():
+            params.set_param( param, value )  
+        model  = utils.get_model_swig( params )
         
+        # step through the model and write the relevant files the end
+        for _ in range( params.get_param( "end_time") ):
+            model.one_time_step()
+        
+        model.write_transmissions()
+        model.write_individual_file()
+        model.write_trace_tokens()
+
         df_trans = pd.read_csv(constant.TEST_TRANSMISSION_FILE)
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = pd.merge(df_indiv, df_trans, 
@@ -1620,7 +1645,7 @@ class TestClass(object):
                 users = app_users[ app_users[ "age_group"] == age ].iloc[0,1]
                 np.testing.assert_allclose( users / n, test_params[ app_params[ age ] ], atol = 0.01, err_msg = "wrong fraction of users have app in age group")
             
-        df_trace     = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace     = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
         index_traced = df_trace[ ( df_trace[ "time" ] == end_time ) & ( df_trace[ "days_since_contact" ] == 0 ) ] 
         index_traced = index_traced.groupby( [ "index_ID", "traced_ID" ] ).size().reset_index(name="cons")    
@@ -1655,12 +1680,12 @@ class TestClass(object):
         
         # step through the model and write the relevant files the end
         for time in range( test_params[ "end_time" ]  ):
-            model.one_time_step();    
+            model.one_time_step()
         model.write_individual_file()
         model.write_trace_tokens()
   
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
@@ -1708,8 +1733,8 @@ class TestClass(object):
         model.write_individual_file()
         model.write_trace_tokens()
   
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
 
         # find the index case for the new time_step (remove index token)
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ]  ) ] 
@@ -1756,7 +1781,7 @@ class TestClass(object):
             model.one_time_step();    
         model.write_trace_tokens()
   
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace["days_since_contact"]=df_trace["index_time"]-df_trace["contact_time"]
 
 
@@ -1802,7 +1827,7 @@ class TestClass(object):
         for time in range( days_since_contact + 1 ):
             model.one_time_step();
             model.write_interactions_file();
-            df_temp = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_temp = pd.read_csv( constant.TEST_INTERACTION_FILE )
             df_temp[ "days_since_symptoms" ] = days_since_contact - time
             df_inter.append(df_temp)
         df_inter = pd.concat( df_inter )
@@ -1829,7 +1854,7 @@ class TestClass(object):
      
         # now look at the number of people asked to quarnatine
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
 
         # find the index case for the new time_step
         index_traced = df_trace[ ( df_trace[ "index_time" ] == test_params[ "end_time" ] ) ] 
@@ -1901,7 +1926,7 @@ class TestClass(object):
       
         # now look at the number of people asked to quarantine
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
 
         # add on house_no and case status to the transmissions and count the number of traced per house
         df_trace = pd.merge( df_trace, house_no, on = "traced_ID", how = "left")
@@ -1935,7 +1960,6 @@ class TestClass(object):
       
         np.testing.assert_equal( len( case ) > 50, 1, "less than 50 index cases, in-sufficient to test" )
         np.testing.assert_equal( sum( ( case[ "hh_not_q"] > 0 ) ), 0, "member of household of first-order contact not traced on positive" )
-                
         
         
     def test_traced_on_symptoms_quarantine_on_positive(self, test_params, tol_sd ):
@@ -1953,20 +1977,20 @@ class TestClass(object):
                 
         # step through time until we need to start to save the interactions each day
         for time in range( symptom_time ):
-            model.one_time_step();             
-        model.write_trace_tokens()  
-        model.write_individual_file()  
-        df_trace_symp = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv_symp = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+            model.one_time_step()
+        model.write_trace_tokens()
+        model.write_individual_file()
+        df_trace_symp = pd.read_csv( constant.TEST_TRACE_FILE )
+        df_indiv_symp = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         
         # now go forward and see who would have a positive test
         for time in range( test_params['end_time'] - symptom_time ):
             model.one_time_step();             
         model.write_trace_tokens()  
         model.write_individual_file()  
-        df_trace_pos  = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_indiv_pos = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
-                  
+        df_trace_pos  = pd.read_csv( constant.TEST_TRACE_FILE )
+        df_indiv_pos = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
+        
          # find everyone who has a trace token who reported on symptom_time
         df_trace_symp_t = df_trace_symp[ (df_trace_symp["index_time"] == df_trace_symp["time"] ) & (df_trace_symp["index_reason"]==0)]
         
@@ -2029,7 +2053,7 @@ class TestClass(object):
          
         params = utils.get_params_swig()
         for param, value in test_params.items():
-            params.set_param( param, value )  
+            params.set_param( param, value )
         model  = utils.get_model_swig( params )
                 
         # step through through the initial steps to get the epidemic going
@@ -2043,8 +2067,8 @@ class TestClass(object):
             model.write_trace_tokens()  
             model.write_individual_file()  
        
-            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
+            df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         
             quarantined = df_indiv[ df_indiv["quarantined"] == True ].loc[:,["ID"]]
             have_tokens = df_trace.groupby("traced_ID").size().reset_index(name="n_tokens")
@@ -2102,7 +2126,7 @@ class TestClass(object):
           model.one_time_step()
 
         model.write_individual_file()
-        non_prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        non_prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         non_prior_symp_df_indiv = non_prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
         non_prior_symp_df_indiv.rename( columns = { "test_status":"test_status_non_prior_symp"}, inplace = True )
 
@@ -2111,7 +2135,7 @@ class TestClass(object):
           model.one_time_step()
 
         model.write_individual_file()
-        prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        prior_symp_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         prior_symp_df_indiv = prior_symp_df_indiv.loc[:,["ID","test_status" ] ]
         prior_symp_df_indiv.rename( columns = { "test_status":"test_status_prior_symp"}, inplace = True )
 
@@ -2125,9 +2149,9 @@ class TestClass(object):
         model.write_transmissions()
 
         # read CSV's
-        test_df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        test_df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
-        test_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        test_df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
+        test_df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
+        test_df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         
         # determine who should get a priority test:
         # 1. get the people who developed symptoms on the last step and have the app  
@@ -2178,7 +2202,7 @@ class TestClass(object):
         model.write_trace_tokens()
 
         # count the number of people who are quarantined from each traced list
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_quar  = df_indiv.loc[:,["ID","quarantined"]]
         df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
         df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
@@ -2191,7 +2215,7 @@ class TestClass(object):
 
         if time_prior_res != time_non_prior_res :
             # get the people who have been uniquely traced by this index and see how many are quarantined
-            df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+            df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
             df_trace = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
             df_trace = pd.merge( test_df_trace, df_trace, on = "traced_ID", how = "left" )
             df_trace = df_trace[ df_trace["n_traced"]==1]
@@ -2215,7 +2239,7 @@ class TestClass(object):
         model.write_individual_file()
 
         # count the number of people who are quarantined from each traced list
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_quar  = df_indiv.loc[:,["ID","quarantined"]]
         df_quar  = pd.merge( test_df_trace, df_indiv, left_on = "traced_ID", right_on = "ID", how = "left" )
         df_quar  = df_quar[ df_quar["quarantined"] == True ].groupby("index_ID").size().reset_index(name="n_quar")
@@ -2253,8 +2277,8 @@ class TestClass(object):
         model.write_transmissions()
 
         # read CSV's
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
     
         # find everyone with a test result
         df_test = df_indiv.loc[:,["ID","test_status"]]
@@ -2317,7 +2341,7 @@ class TestClass(object):
         # write files
         model.write_trace_tokens()
       
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace = df_trace[ df_trace[ "index_time" ] == symp_time ]
         
         # get everyone directly traced by the index case
@@ -2387,7 +2411,7 @@ class TestClass(object):
         model.write_individual_file()
         
         # remove those traced by more than one index and the index cases who have been traced
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced")
         df_trace_uniq = df_trace_uniq[df_trace_uniq["n_traced"] == 1 ]
         df_trace = pd.merge( df_trace, df_trace_uniq, on = "traced_ID", how = "left" )
@@ -2418,7 +2442,7 @@ class TestClass(object):
         df_indiv_1 = pd.merge(df_indiv_1, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end_1")
         df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
         df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end_1"] == 1 ]
@@ -2440,7 +2464,7 @@ class TestClass(object):
         df_indiv = pd.merge(df_indiv, df_trans, left_on = "ID", right_on = "ID_recipient", how = "left")
 
         # remove those who have been traced multiple times from the original list
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace_uniq = df_trace.groupby("traced_ID").size().reset_index(name="n_traced_end")
         df_trace_symp = pd.merge( df_trace_symp, df_trace_uniq, on = "traced_ID", how = "left" )
         df_trace_symp = df_trace_symp[df_trace_symp["n_traced_end"] == 1 ]
@@ -2486,9 +2510,9 @@ class TestClass(object):
         for time in range( index_time ):
             model.one_time_step()
 
-        # get the symptomatic index cases        
+        # get the symptomatic index cases
         model.write_trace_tokens()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_symp  = df_trace[ df_trace[ "index_time"] == index_time ]
         df_symp  = df_symp[ df_symp["index_reason"] == 0].groupby( ["index_time", "index_ID"]).size().reset_index( name ="n_traced_symp")
         
@@ -2502,7 +2526,7 @@ class TestClass(object):
         df_indiv = df_indiv.loc[:,["ID","test_status","house_no", "current_status", "quarantined"]]
 
         # first filter out all those who have been traced multiple times 
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_n_trace = df_trace.groupby( "traced_ID" ).size().reset_index(name="n_trace")
         df_n_trace.rename( columns={"traced_ID":"index_ID"}, inplace = True )
         df_trace = pd.merge( df_trace, df_n_trace, on = "index_ID" )
@@ -2530,7 +2554,7 @@ class TestClass(object):
         model.write_trace_tokens()
         model.write_individual_file()
         df_trace = df_trace.loc[:,["index_ID", "traced_ID"]]
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
         df_trace[ "has_token"] = True
         df_indiv = pd.read_csv(constant.TEST_INDIVIDUAL_FILE)
         df_indiv = df_indiv.loc[:,["ID","quarantined"]]
@@ -2591,10 +2615,10 @@ class TestClass(object):
         model.write_transmissions()
         model.write_interactions_file()
         model.write_individual_file()
-        df_trace = pd.read_csv( constant.TEST_TRACE_FILE, comment="#", sep=",", skipinitialspace=True )
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )
+        df_trace = pd.read_csv( constant.TEST_TRACE_FILE )
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
 
         # remove hospitalised since they get quicker tested 
         df_hosp = df_trans.loc[:,["time_hospitalised", "ID_recipient" ] ]
@@ -2647,7 +2671,7 @@ class TestClass(object):
             n_tests.append( timeseries["n_tests"] )
                 
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, sep = ",", comment = "#", skipinitialspace = True )       
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         df_trans = df_trans[ df_trans[ "time_symptomatic" ] > 0 ].groupby( "time_symptomatic").size().reset_index( name = "n_symptoms")
         
         symp_tot = 0
@@ -2680,9 +2704,7 @@ class TestClass(object):
         """
         Check that all tests have been processed by the model at the end 
         of each day (i.e. that immediate recursive testing is working)
-        
         """
-                
         params = utils.get_params_swig()
         for param, value in test_params.items():
             params.set_param( param, value )
@@ -2732,7 +2754,7 @@ class TestClass(object):
         
         # check the output of the individual file    
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_indiv = df_indiv.loc[:,["ID","vaccine_status"]]
         total_vaccinated = df_indiv["vaccine_status"].sum()
         np.testing.assert_equal(total_vaccinated, n_to_vaccinate, "incorrect number of people with correct vaccine_status" )
@@ -2746,7 +2768,7 @@ class TestClass(object):
             
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans      = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans      = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         df_trans_pre  = df_trans[ df_trans[ "time_infected"] < time_to_protect ]
         df_trans_post = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
         
@@ -2799,7 +2821,7 @@ class TestClass(object):
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
@@ -2820,7 +2842,7 @@ class TestClass(object):
             
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
       
         df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
         df_vac_inf = df_vac_inf.loc[:,["vaccine_status"]]
@@ -2874,7 +2896,7 @@ class TestClass(object):
     
         # check the correct number of people have had a response to the vaccine
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status", "current_status"]]
         df_vac     = df_indiv[ df_indiv["vaccine_status"] != VaccineStatusEnum.NO_VACCINE.value ]
         
@@ -2893,7 +2915,7 @@ class TestClass(object):
         
         # now get all those who have been infected
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
       
         df_vac_inf = pd.merge( df_vac, df_trans, left_on = "ID", right_on = "ID_recipient", how = "inner")
         df_vac_inf = df_vac_inf.loc[:,["time_infected", "time_asymptomatic"]]
@@ -2963,7 +2985,7 @@ class TestClass(object):
         
         # check the required number of people are vaccinated
         model.write_individual_file()
-        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_indiv   = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_indiv   = df_indiv.loc[:,["ID","vaccine_status","age_group"]]
         
         n_group     = df_indiv[["age_group" ]].groupby("age_group").size().reset_index( name = "n_people" )
@@ -3073,7 +3095,7 @@ class TestClass(object):
             
         # now get all those who have been infected after the vaccine takes effect
         model.write_transmissions()
-        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
+        df_trans = pd.read_csv( constant.TEST_TRANSMISSION_FILE )
         df_trans = df_trans[ df_trans[ "time_infected"] > time_to_protect ]
                 
         # make sure sufficient people have been infected to check that the vaccine is effecive
@@ -3200,7 +3222,7 @@ class TestClass(object):
         model.run( n_steps = time_symp, verbose = False )
         
         model.write_individual_file()
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )       
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_trans = model.get_transmissions()
         df_symp  = df_trans[ df_trans[ "time_symptomatic" ] == time_symp ].loc[:,{"ID_recipient"}].rename( columns = { "ID_recipient":"ID" } )
         df_symp  = pd.merge(df_symp, df_indiv.loc[:,{"ID","test_status","quarantined"}],on = "ID", how = "left")
@@ -3227,7 +3249,7 @@ class TestClass(object):
         model.write_individual_file()
         
         # get updated quarantine status
-        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE, comment="#", sep=",", skipinitialspace=True )   
+        df_indiv = pd.read_csv( constant.TEST_INDIVIDUAL_FILE )
         df_indiv = df_indiv.loc[:,{"ID","quarantined","current_status"}].rename(columns={"quarantined":"quarantined_after_test"})    
         df_symp  = pd.merge( df_symp[ (df_symp["test_status"] == constant.TEST_ORDERED)], df_indiv, on = 'ID')
         
@@ -3262,7 +3284,7 @@ class TestClass(object):
 
         # get the early interactions
         model.write_interactions_file()  
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE )
         df_pre_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_pre")
         
         lockdown_on = model.get_param( "lockdown_elderly_on")
@@ -3276,7 +3298,7 @@ class TestClass(object):
 
         # get the post lockdown interactions
         model.write_interactions_file()  
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE )
         df_post_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_post")
 
         df_comp = pd.merge( df_pre_int_sum, df_post_int_sum, on = ["age_group_1", "type"])
@@ -3312,7 +3334,7 @@ class TestClass(object):
 
         # get the post lockdown removal interactions
         model.write_interactions_file()  
-        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE, comment="#", sep=",", skipinitialspace=True )
+        df_int   = pd.read_csv( constant.TEST_INTERACTION_FILE )
         df_post2_int_sum = df_int.groupby(["age_group_1","type"]).size().reset_index( name = "n_post")
 
         df_comp = pd.merge( df_pre_int_sum, df_post2_int_sum, on = ["age_group_1", "type"])
