@@ -1,0 +1,16 @@
+.md-footer {
+    --md-footer-bg-color: #062147;
+    /* --md-footer-bg-color: #32a3c0; */
+}
+.md-footer-meta {
+    --md-footer-bg-color--dark: #062147;
+    /* --md-footer-bg-color--dark: #32a3c0; */
+}
+
+.md-logo img {
+    max-height: 128px !important;
+    height: 128px !important;
+}
+.icon2 img {
+    max-height: 110px !important;
+}
