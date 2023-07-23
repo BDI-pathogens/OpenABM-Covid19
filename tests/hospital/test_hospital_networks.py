@@ -176,14 +176,14 @@ class TestClass(object):
         hospital_params.write_params(constant.TEST_HOSPITAL_FILE)
 
         params = utils.get_params_swig()
-        params.set_param("n_total", n_total)
-        params.set_param( "hospital_on", 1)
+        params.set_param( "n_total", n_total )
+        params.set_param( "hospital_on", 1 )
         params.set_param( "end_time", end_time )
-        params.set_param( "work_network_rewire", work_network_rewire)
+        params.set_param( "work_network_rewire", work_network_rewire )
         model  = utils.get_model_swig( params )
 
         # step through time until we need to start to save the interactions each day
-        model.one_time_step();
+        model.one_time_step()
         model.write_interactions_file()
         df_inter = pd.read_csv(constant.TEST_INTERACTION_FILE)
         df_inter[ "time" ] = 0
@@ -194,10 +194,10 @@ class TestClass(object):
             model.write_interactions_file()
             df = pd.read_csv(constant.TEST_INTERACTION_FILE)
             df[ "time" ] = time + 1
-            df_inter = df_inter.append( df )
+            df_inter = pd.concat([df_inter, df])
 
         # Check if type is hospital work network type
-        df_inter = df_inter[ df_inter[ "type" ] == constant.HOSPITAL_WORK ]
+        df_inter = df_inter[ list( df_inter[ "type" ] == constant.HOSPITAL_WORK ) ]
 
         # check to see there are sufficient daily connections and only one per set of contacts a day
         df_unique_daily = df_inter.groupby( ["time","ID_1","ID_2"]).size().reset_index(name="N");
@@ -211,6 +211,6 @@ class TestClass(object):
         df_unique = df_unique.groupby(["occupation_network_1","ID_1"]).size().reset_index(name="N_conn")
         df_unique = df_unique.groupby(["occupation_network_1"]).mean()
 
-        actual   = df_unique.loc[ constant.HOSPITAL_WORK_NETWORK, {"N_conn"}]["N_conn"]
+        actual   = df_unique.loc[ [constant.HOSPITAL_WORK_NETWORK] ]["N_conn"]
         expected = hcw_mean_work_interactions
         np.testing.assert_allclose(actual,expected,rtol=tol,err_msg="Expected mean unique occupational contacts over multiple days not as expected")
