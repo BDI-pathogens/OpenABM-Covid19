@@ -1137,7 +1137,7 @@ class TestClass(object):
             model.one_time_step()
         model.write_transmissions()
         df_base = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )        
-        df_base = df_base[ df_base["time_infected"] == max_time ]
+        df_base = df_base[ list( df_base["time_infected"] == max_time ) ]
         df_base = df_base.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
         del model
@@ -1157,23 +1157,23 @@ class TestClass(object):
         model.one_time_step()   
         model.write_transmissions()
         df_update = pd.read_csv( constant.TEST_TRANSMISSION_FILE, comment="#", sep=",", skipinitialspace=True )  
-        df_update = df_update[ df_update["time_infected"] == max_time ]
+        df_update = df_update[ list (df_update["time_infected"] == max_time ) ]
         df_update = df_update.groupby(["infector_network"]).size().reset_index(name="n_infections") 
         
         # check the change in values is in tolerance - wide tolerance bands due to saturation effects
-        base     = df_base.loc[0,{"n_infections"}]["n_infections"] 
+        base     = df_base.loc[0]["n_infections"] 
         expected = base * update_relative_transmission_household / test_params["relative_transmission_household"]
-        actual   = df_update.loc[0,{"n_infections"}]["n_infections"]
+        actual   = df_update.loc[0]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
                 
-        base     = df_base.loc[1,{"n_infections"}]["n_infections"] 
+        base     = df_base.loc[1]["n_infections"] 
         expected = base * update_relative_transmission_occupation / test_params["relative_transmission_occupation"]
-        actual   = df_update.loc[1,{"n_infections"}]["n_infections"]
+        actual   = df_update.loc[1]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
         
-        base     = df_base.loc[2,{"n_infections"}]["n_infections"] 
+        base     = df_base.loc[2]["n_infections"] 
         expected = base * update_relative_transmission_random / test_params["relative_transmission_random"]
-        actual   = df_update.loc[2,{"n_infections"}]["n_infections"]
+        actual   = df_update.loc[2]["n_infections"]
         np.testing.assert_allclose(actual, expected, atol = base * tol, err_msg = "Number of transmissions did not change by expected amount after updating parameter")
        
     
