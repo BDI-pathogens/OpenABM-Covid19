@@ -23,7 +23,7 @@ Strain <- R6Class( classname = 'Strain', cloneable = FALSE,
 
      #' check the C strain still exists
      c_strain_valid = function() {
-       return( !is_null_xptr( private$.c_strain@ref ))
+       return( !isnullptr( private$.c_strain@ref ))
      }
    ),
 

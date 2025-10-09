@@ -82,7 +82,7 @@ clean:
 
 # Generating swig3 source for R bindings (and post-processing)
 R/OpenABMCovid19.R: $(SWIG_INPUT)
-	$(SWIG3) -r -package OpenABMCovid19 -Isrc -o src/covid19_wrap_R.c -outdir R src/covid19.i
+	$(SWIG3) -r -Isrc -o src/covid19_wrap_R.c -outdir R src/covid19.i
 # edit generated C source to mute R check note.
 	$(SED_I) 's/R_registerRoutines/R_useDynamicSymbols(dll,0);R_registerRoutines/' src/covid19_wrap_R.c
 # edit generated src lines are cause R check warnings.

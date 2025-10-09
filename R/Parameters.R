@@ -111,7 +111,7 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
 
     #' check the C params still exists
     c_params_valid = function() {
-      return( !is_null_xptr( private$.c_params@ref ))
+      return( !isnullptr( private$.c_params@ref ))
     }
   ),
 
@@ -259,6 +259,10 @@ Parameters <- R6Class( classname = 'Parameters', cloneable = FALSE,
         getter <- get( paste0("parameters_", param, "_get") )
         result <- getter( self$c_params )
       }
+
+      if( typeof( result ) == "S4" )
+        result = result@ref
+
       return(result)
     },
 

@@ -1,5 +1,14 @@
 /* covid19.i */
-%module covid19
+%module OpenABMCovid19
+
+/* Tell SWIG to ignore/rename problematic macros/idents used in headers */
+%rename(_next) next;
+%rename(_TRUE) TRUE;
+%rename(_FALSE) FALSE;
+%ignore TRUE;
+%ignore FALSE;
+%ignore next;
+
 %{
 #define SWIG_FILE_WITH_INIT
 #define SWIG_PYTHON_CAST_MODE

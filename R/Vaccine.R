@@ -23,7 +23,7 @@ Vaccine <- R6Class( classname = 'Vaccine', cloneable = FALSE,
 
      #' check the C vaccine still exists
      c_vaccine_valid = function() {
-       return( !is_null_xptr( private$.c_vaccine@ref ))
+       return( !isnullptr( private$.c_vaccine@ref ))
      }
    ),
 

@@ -168,7 +168,7 @@ Model <- R6Class( classname = 'Model', cloneable = FALSE,
 
     #' check the C model still exists
     c_model_valid = function() {
-      return( !is_null_xptr( private$.c_model@ref ))
+      return( !isnullptr( private$.c_model@ref ))
     },
 
     #' @description Get the results from one-time step.

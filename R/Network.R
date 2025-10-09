@@ -23,7 +23,7 @@ Network <- R6Class( classname = 'Network', cloneable = FALSE,
 
     #' check the C network still exists
     c_network_valid = function() {
-      return( !is_null_xptr( private$.c_network@ref ))
+      return( !isnullptr( private$.c_network@ref ))
     }
   ),
 
