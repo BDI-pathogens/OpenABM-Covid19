@@ -1,4 +1,5 @@
-FROM python:3.7-buster
+ARG PYTHON_VERSION=3.8.17
+FROM python:${PYTHON_VERSION}-buster
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -11,7 +12,7 @@ RUN apt-get update -qqy && apt-get install -qqy \
   libgsl23 \
   libgsl-dev \
   swig
-RUN python3.7 -m pip install numpy pandas scipy pytest
+RUN python3 -m pip install numpy pandas scipy pytest
 
 COPY tests/requirements.txt /requirements.txt
 RUN python3 -m pip install -r /requirements.txt
@@ -22,4 +23,4 @@ WORKDIR /OpenABM-Covid19
 RUN make clean && make install
 
 WORKDIR /OpenABM-Covid19
-ENTRYPOINT ["/usr/local/bin/pytest", "-s"]
+ENTRYPOINT ["/usr/local/bin/pytest", "-vv"]

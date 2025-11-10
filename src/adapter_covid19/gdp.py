@@ -543,7 +543,7 @@ class CobbDouglasLPSetup:
             ],
             axis=1,
         ).T
-        self.xtilde_iot.index = M
+        self.xtilde_iot.index = [M.I, M.L, M.K]
         # x~[M.K, T] == 0, so we add a small epsilon
         self.xtilde_iot = np.maximum(self.xtilde_iot, 1e-6)
         self.ytilde_total_iot = self.ytilde_iot.sum(axis=1)
@@ -668,7 +668,7 @@ class CobbDouglasLPSetup:
         return self.objective_c, bounds.to_array(), self.lp_bounds
 
     def get_gdp(self, x):
-        return pd.Series([self.gdp_per_sector[s].dot(x) for s in Sector], index=Sector)
+        return pd.Series([self.gdp_per_sector[s].dot(x) for s in Sector], index=[s for s in Sector])
 
 
 class PiecewiseLinearCobbDouglasGdpModel(BaseGdpModel):

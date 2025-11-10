@@ -1707,10 +1707,10 @@ class TestClass(object):
         model.run(verbose=False)
         df_trans = model.get_transmissions()
         df_trans[ "symptom_type" ] = 0  + ( df_trans["time_presymptomatic_mild"] >= 0 ) + ( df_trans["time_presymptomatic_severe"] >= 0 ) * 2 
-        df_source = df_trans.loc[ :,{"ID_recipient", "symptom_type"}]
+        df_source = df_trans.loc[ :,list(["ID_recipient", "symptom_type"])]
         df_source.rename( columns = {"ID_recipient":"ID_source"}, inplace = True)
-        df_trans  = df_trans.loc[ :,{"ID_source", "strain_idx","time_infected"}] 
-        df_trans = df_trans[ df_trans[ "time_infected" ] > 1 ] # remove seeding events
+        df_trans  = df_trans.loc[ :,list(["ID_source", "strain_idx","time_infected"])] 
+        df_trans = df_trans[ list( df_trans[ "time_infected" ] > 1 ) ] # remove seeding events
         df_trans = pd.merge(df_trans, df_source, left_on="ID_source", right_on="ID_source", how="left")
         df_trans.symptom_type = df_trans.symptom_type.astype(int)
                 
