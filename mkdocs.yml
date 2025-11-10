@@ -1,0 +1,116 @@
+site_name: OpenABM-Covid19
+site_description: Documentation for OpenABM-Covid19
+org_name: Big Data Institute
+org_url: https://www.bdi.ox.ac.uk/
+repo_url: https://github.com/BDI-pathogens/OpenABM-Covid19/
+repo_name: OpenABM-Covid19
+theme:
+  name: material
+  custom_dir: docs-overrides
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    # - navigation.path # Sponsors only
+    - navigation.indexes
+    - navigation.sections
+    - navigation.instant
+    - navigation.tracking
+    - navigation.footer
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  logo: assets/pandemic-sciences-institute-logo.png
+  logo2: assets/ndm-oxford-logo.png
+  favicon: assets/favicon.ico
+  icon:
+    logo: material/virus-outline
+  palette:
+    # - media: "(prefers-color-scheme: light)"
+    #   scheme: default
+    #   primary: indigo
+    #   accent: indigo
+    #   toggle:
+    #     icon: material/toggle-switch-off-outline 
+    #     name: Switch to dark mode
+    # - media: "(prefers-color-scheme: dark)"
+    #   scheme: slate 
+    #   toggle:
+    #     icon: material/toggle-switch
+    #     name: Switch to light mode    
+    #   primary: indigo
+    #   accent: indigo
+    primary: white
+    accent: lightblue
+    # Note: For custom colours you can manually override the CSS classes: https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#custom-colors
+extra_css:
+  - stylesheets/extra.css
+# NOTE: The below plugin causes Search to not appear! Likely a python version support bug in mkdocs-material today: https://github.com/squidfunk/mkdocs-material/issues/5493
+# plugins:
+#   - git-revision-date-localized:
+#       enable_creation_date: true
+#   - social
+
+extra:
+  homepage: https://www.psi.ox.ac.uk/
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/BDI-Pathogens
+#     - icon: fontawesome/brands/twitter
+#       link: https://twitter.com/somehandle
+#     - icon: fontawesome/brands/linkedin
+#       link: https://www.linkedin.com/company/somehandle
+#     - icon: fontawesome/brands/youtube
+#       link: https://www.youtube.com/@somehandle
+
+# extra:
+#   consent:
+#     title: Cookie consent
+#     description: >- 
+#       We use cookies to recognize your repeated visits and preferences, as well
+#       as to measure the effectiveness of our documentation and whether users
+#       find what they're searching for. With your consent, you're helping us to
+#       make our documentation better.
+
+markdown_extensions:
+  - toc:
+      permalink: "#"
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+# Ignore any 'unresolved tag' errors in the above two lines
+
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+copyright: |
+  &copy; 2020-2023 University of Oxford
+
+nav:
+ - "Introduction": index.md
+ - "Users Guide":
+   - users-guide/index.md
+   - "Compilation": users-guide/compile.md
+ - "Developers Guide":
+   - dev-guide/index.md
